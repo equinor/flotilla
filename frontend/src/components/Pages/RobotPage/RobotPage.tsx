@@ -26,29 +26,90 @@ import { TaskType } from 'models/Task'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { ReturnHomeButton } from './ReturnHomeButton'
 
+const StyledRobotPage = styled(StyledPage)`
+    background-color: ${tokens.colors.ui.background__light.hex};
+    gap: 5px;
+`
 const StyledTextButton = styled(StyledButton)`
     text-align: left;
-    max-width: 12rem;
+    align-self: stretch;
 `
 const RobotInfo = styled.div`
     display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    gap: 3rem;
+    align-items: center;
+    gap: 32px;
+    align-self: stretch;
     width: calc(80vw);
     @media (max-width: 600px) {
         flex-direction: column;
     }
-    margin: 0rem 0rem 2rem 0rem;
 `
 const StatusContent = styled.div`
-    display: flex;
-    flex-direction: column;
-    align-items: start;
-    justify-content: flex-end;
-    gap: 2rem;
+    gap: 48px;
+    display: grid;
+    grid-template-columns: repeat(3, 150px);
+    align-self: start;
     @media (max-width: 600px) {
         align-items: flex-start;
+        grid-template-columns: repeat(1, 70vw);
+        flex-direction: column;
+        gap: 8px;
+    }
+`
+
+const StyledContainer = styled.div`
+    display: flex;
+    padding: 24px;
+    width: 910px;
+    @media (max-width: 600px) {
+        width: 80vw;
+    }
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    border-radius: 6px;
+    border: 1px solid ${tokens.colors.ui.background__medium.hex};
+    background: ${tokens.colors.ui.background__default.hex};
+`
+
+const StyledLeftContent = styled.div`
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 8px;
+    align-self: stretch;
+`
+
+const StyledStatusElement = styled.div`
+    display: flex;
+    padding: 2px 6px 4px 6px;
+    flex-direction: column;
+    align-items: flex-start;
+`
+
+const StyledSmallContainer = styled.div`
+    display: flex;
+    padding: 24px;
+    width: 420px;
+    flex-direction: column;
+    align-items: flex-start;
+    border-radius: 6px;
+    border: 1px solid ${tokens.colors.ui.background__medium.hex};
+    background: ${tokens.colors.ui.background__default.hex};
+    margin: 2rem 0rem;
+    @media (max-width: 600px) {
+        width: 80vw;
+    }
+`
+
+const StyledSmallContainers = styled.div`
+    display: flex;
+    flex-direction: row;
+    gap: 24px;
+    @media (max-width: 600px) {
+        flex-direction: column;
+        gap: 0px;
     }
 `
 
@@ -88,64 +149,81 @@ export const RobotPage = () => {
     return (
         <>
             <Header page={'robot'} />
-            <StyledPage>
+            <StyledRobotPage>
                 <BackButton />
                 {selectedRobot && (
                     <>
-                        <Typography variant="h1">
-                            {selectedRobot.name + ' (' + selectedRobot.model.type + ')'}
-                        </Typography>
-                        <RobotInfo>
-                            <RobotImage height="350px" robotType={selectedRobot.model.type} />
-                            <StatusContent>
-                                <RobotStatusChip
-                                    status={selectedRobot.status}
-                                    flotillaStatus={selectedRobot.flotillaStatus}
-                                    isarConnected={selectedRobot.isarConnected}
-                                    itemSize={32}
-                                />
-
-                                {selectedRobot.status !== RobotStatus.Offline && (
-                                    <>
-                                        <BatteryStatusDisplay
-                                            itemSize={32}
-                                            batteryLevel={selectedRobot.batteryLevel}
-                                            batteryState={selectedRobot.batteryState}
-                                            batteryWarningLimit={selectedRobot.model.batteryWarningThreshold}
+                        <StyledContainer>
+                            <Typography variant="h1">{selectedRobot.name}</Typography>
+                            <RobotInfo>
+                                <StyledLeftContent>
+                                    <RobotImage height="350px" robotType={selectedRobot.model.type} />
+                                    <StyledTextButton variant="contained" onClick={toggleSkipMissionDialog}>
+                                        <Icon
+                                            name={Icons.StopButton}
+                                            style={{ color: tokens.colors.interactive.icon_on_interactive_colors.rgba }}
+                                            size={24}
                                         />
-                                        {selectedRobot.pressureLevel !== null &&
-                                            selectedRobot.pressureLevel !== undefined && (
-                                                <PressureStatusDisplay
-                                                    itemSize={32}
-                                                    pressure={selectedRobot.pressureLevel}
-                                                    upperPressureWarningThreshold={
-                                                        selectedRobot.model.upperPressureWarningThreshold
-                                                    }
-                                                    lowerPressureWarningThreshold={
-                                                        selectedRobot.model.lowerPressureWarningThreshold
-                                                    }
-                                                />
-                                            )}
-                                    </>
-                                )}
-                            </StatusContent>
-                        </RobotInfo>
-                        {selectedRobot.model.type === RobotType.TaurobInspector && <PressureTable />}
-                        <Typography variant="h2">{TranslateText('Actions')}</Typography>
+                                        {TranslateText('Stop')} {selectedRobot.name}
+                                    </StyledTextButton>
+                                    {selectedRobot && <ReturnHomeButton robot={selectedRobot} />}
+                                </StyledLeftContent>
+                                <StatusContent>
+                                    <StyledStatusElement>
+                                        <Typography variant="caption">{TranslateText('Status')}</Typography>
+                                        <RobotStatusChip
+                                            status={selectedRobot.status}
+                                            flotillaStatus={selectedRobot.flotillaStatus}
+                                            isarConnected={selectedRobot.isarConnected}
+                                            itemSize={24}
+                                        />
+                                    </StyledStatusElement>
 
-                        <StyledTextButton
-                            variant="contained"
-                            onClick={() => {
-                                toggleSkipMissionDialog()
-                            }}
-                        >
-                            <Icon
-                                name={Icons.StopButton}
-                                style={{ color: tokens.colors.interactive.icon_on_interactive_colors.hex }}
-                                size={24}
-                            />
-                            {TranslateText('Stop')} {selectedRobot.name}
-                        </StyledTextButton>
+                                    {selectedRobot.status !== RobotStatus.Offline && (
+                                        <>
+                                            <StyledStatusElement>
+                                                <Typography variant="caption">{TranslateText('Battery')}</Typography>
+                                                <BatteryStatusDisplay
+                                                    itemSize={24}
+                                                    batteryLevel={selectedRobot.batteryLevel}
+                                                    batteryState={selectedRobot.batteryState}
+                                                    batteryWarningLimit={selectedRobot.model.batteryWarningThreshold}
+                                                />
+                                            </StyledStatusElement>
+                                            {selectedRobot.pressureLevel !== null &&
+                                                selectedRobot.pressureLevel !== undefined && (
+                                                    <StyledStatusElement>
+                                                        <Typography variant="caption">
+                                                            {TranslateText('Pressure')}
+                                                        </Typography>
+                                                        <PressureStatusDisplay
+                                                            itemSize={24}
+                                                            pressure={selectedRobot.pressureLevel}
+                                                            upperPressureWarningThreshold={
+                                                                selectedRobot.model.upperPressureWarningThreshold
+                                                            }
+                                                            lowerPressureWarningThreshold={
+                                                                selectedRobot.model.lowerPressureWarningThreshold
+                                                            }
+                                                        />
+                                                    </StyledStatusElement>
+                                                )}
+                                            {selectedRobot.model.type && (
+                                                <StyledStatusElement>
+                                                    <Typography variant="caption">
+                                                        {TranslateText('Robot Model')}
+                                                    </Typography>
+                                                    <Typography style={{ fontSize: '24px' }}>
+                                                        {selectedRobot.model.type}
+                                                    </Typography>
+                                                </StyledStatusElement>
+                                            )}
+                                        </>
+                                    )}
+                                </StatusContent>
+                            </RobotInfo>
+                        </StyledContainer>
+
                         <SkipMissionDialog
                             missionName={mission?.name}
                             robotId={selectedRobot.id}
@@ -153,11 +231,19 @@ export const RobotPage = () => {
                             isSkipMissionDialogOpen={isDialogOpen}
                             toggleDialog={toggleSkipMissionDialog}
                         />
-                        {selectedRobot && <ReturnHomeButton robot={selectedRobot} />}
+                        <StyledSmallContainers>
+                            {selectedRobot.model.type === RobotType.TaurobInspector && (
+                                <StyledSmallContainer>
+                                    <PressureTable />
+                                </StyledSmallContainer>
+                            )}
 
-                        {selectedRobot.model.type === RobotType.TaurobInspector && (
-                            <MoveRobotArmSection robot={selectedRobot} />
-                        )}
+                            {selectedRobot.model.type === RobotType.TaurobInspector && (
+                                <StyledSmallContainer>
+                                    <MoveRobotArmSection robot={selectedRobot} />
+                                </StyledSmallContainer>
+                            )}
+                        </StyledSmallContainers>
                         {selectedRobot.documentation && selectedRobot.documentation.length > 0 && (
                             <DocumentationSection documentation={selectedRobot.documentation} />
                         )}
@@ -168,7 +254,7 @@ export const RobotPage = () => {
                         </VideoStreamSection>
                     </>
                 )}
-            </StyledPage>
+            </StyledRobotPage>
         </>
     )
 }
