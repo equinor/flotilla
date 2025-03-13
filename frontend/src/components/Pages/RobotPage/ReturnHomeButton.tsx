@@ -10,7 +10,7 @@ import { useState } from 'react'
 
 const StyledTextButton = styled(StyledButton)`
     text-align: left;
-    max-width: 12rem;
+    align-self: stretch;
 `
 
 export const ReturnHomeButton = ({ robot }: { robot: Robot }) => {
