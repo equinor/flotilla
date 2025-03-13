@@ -33,6 +33,7 @@ const RobotArmMovementSection = styled.div`
     @media (max-width: 600px) {
         flex-direction: column;
     }
+    margin: 0.5rem 0rem;
 `
 
 export const MoveRobotArmSection = ({ robot }: { robot: Robot }) => {
@@ -40,7 +41,7 @@ export const MoveRobotArmSection = ({ robot }: { robot: Robot }) => {
 
     return (
         <>
-            <Typography variant="h4">{TranslateText('Set robot arm to ')}</Typography>
+            <Typography variant="h2">{TranslateText('Set robot arm to ')}</Typography>
             <RobotArmMovementSection>
                 <MoveRobotArm
                     robot={robot}
