@@ -32,7 +32,11 @@ const StyledMissionSection = styled.div`
 const StyledDialog = styled(Dialog)`
     display: flex;
     padding: 1rem;
-    width: 320px;
+    width: 580px;
+
+    @media (max-width: 600px) {
+        width: 80vw;
+    }
 `
 
 interface ScheduleDialogProps {
