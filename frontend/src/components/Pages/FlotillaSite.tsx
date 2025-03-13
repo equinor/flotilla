@@ -12,6 +12,7 @@ import {
     MissionControlPage,
     MissionHistoryPage,
     PredefinedMissionsPage,
+    RobotStatusPage,
 } from '../NavigationMenu/NavigationMenuPages'
 
 export const FlotillaSite = () => {
@@ -39,6 +40,7 @@ export const FlotillaSite = () => {
                             element={<PredefinedMissionsPage />}
                         />
                         <Route path={`${config.FRONTEND_BASE_ROUTE}/autoSchedule`} element={<AutoSchedulePage />} />
+                        <Route path={`${config.FRONTEND_BASE_ROUTE}/robots`} element={<RobotStatusPage />} />
                     </Routes>
                 </BrowserRouter>
             </APIUpdater>

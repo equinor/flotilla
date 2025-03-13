@@ -4,6 +4,7 @@ import { InspectionSection } from 'components/Pages/InspectionPage/InspectionSec
 import { InspectionOverviewSection } from 'components/Pages/InspectionPage/InspectionOverview'
 import { MissionHistoryView } from 'components/Pages/MissionHistory/MissionHistoryView'
 import { AutoScheduleSection } from 'components/Pages/FrontPage/AutoScheduleSection/AutoScheduleSection'
+import { RobotStatusSection } from 'components/Pages/RobotCards/RobotStatusSection'
 
 export const MissionControlPage = () => {
     return (
@@ -41,6 +42,14 @@ export const AutoSchedulePage = () => {
     return (
         <DefaultPage pageName="autoSchedule">
             <AutoScheduleSection />
+        </DefaultPage>
+    )
+}
+
+export const RobotStatusPage = () => {
+    return (
+        <DefaultPage pageName="robots">
+            <RobotStatusSection />
         </DefaultPage>
     )
 }

@@ -28,6 +28,7 @@ export const NavigationMenu = () => {
         { path: 'inspectionOverview', label: 'Deck Overview' },
         { path: 'predefinedMissions', label: 'Predefined Missions' },
         { path: 'autoSchedule', label: 'Auto Scheduling' },
+        { path: 'robots', label: 'Robots' },
     ]
 
     const navigate = useNavigate()
