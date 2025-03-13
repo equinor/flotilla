@@ -11,6 +11,7 @@ import { Tabs } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { InspectionSection } from '../InspectionPage/InspectionSection'
 import { MissionHistoryView } from '../MissionHistory/MissionHistoryView'
+import { RobotStatusSection } from '../RobotCards/RobotStatusSection'
 
 const StyledFrontPage = styled.div`
     display: flex;
@@ -43,6 +44,7 @@ export const FrontPage = () => {
                         <Tabs.Tab>{TranslateText('Predefined Missions')}</Tabs.Tab>
                         <Tabs.Tab>{TranslateText('Mission History')}</Tabs.Tab>
                         <Tabs.Tab>{TranslateText('Auto Scheduling')}</Tabs.Tab>
+                        <Tabs.Tab>{TranslateText('Robots')}</Tabs.Tab>
                     </Tabs.List>
                     <Tabs.Panels>
                         <Tabs.Panel>
@@ -59,6 +61,9 @@ export const FrontPage = () => {
                         </Tabs.Panel>
                         <Tabs.Panel>
                             <AutoScheduleSection />
+                        </Tabs.Panel>
+                        <Tabs.Panel>
+                            <RobotStatusSection />
                         </Tabs.Panel>
                     </Tabs.Panels>
                 </Tabs>
