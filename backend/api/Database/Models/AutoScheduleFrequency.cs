@@ -46,7 +46,7 @@ namespace Api.Database.Models
             DateTime nowLocal = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, tzi);
             TimeOnly nowLocalTimeOnly = TimeOnly.FromDateTime(nowLocal);
             TimeSpan timeTilUtcMidnight =
-                new TimeOnly(23, 59, 59) - TimeOnly.FromDateTime(DateTime.UtcNow);
+                new TimeOnly(0, 0, 0) - TimeOnly.FromDateTime(DateTime.UtcNow);
 
             var autoScheduleNext = new List<TimeSpan>();
 
