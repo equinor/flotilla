@@ -30,6 +30,11 @@ interface IScheduledProps {
 const StyledMissionDialog = styled.div`
     display: flex;
     justify-content: space-between;
+    width: 580px;
+
+    @media (max-width: 600px) {
+        width: 80vw;
+    }
 `
 const StyledMissionSection = styled.div`
     display: flex;
