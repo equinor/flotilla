@@ -60,12 +60,12 @@ const InspectionAreaCard = ({
     else if (isScheduleMissionsDisabled) queueMissionsTooltip = TranslateText('No robot available')
 
     return (
-        <StyledDict.InspectionAreaCard key={inspectionAreaData.inspectionArea.inspectionAreaName}>
+        <StyledDict.InspectionAreaCard key={inspectionAreaData.inspectionArea.name}>
             <StyledDict.Rectangle
                 style={{ background: `${getCardColorFromInspections(inspectionAreaData.inspections)}` }}
             />
             <StyledDict.Card
-                key={inspectionAreaData.inspectionArea.inspectionAreaName}
+                key={inspectionAreaData.inspectionArea.name}
                 onClick={
                     inspectionAreaData.inspections.length > 0
                         ? () => onClickInspectionArea(inspectionAreaData.inspectionArea)
@@ -80,7 +80,7 @@ const InspectionAreaCard = ({
                 <StyledDict.InspectionAreaText>
                     <StyledDict.TopInspectionAreaText>
                         <Typography variant={'body_short_bold'}>
-                            {inspectionAreaData.inspectionArea.inspectionAreaName.toString()}
+                            {inspectionAreaData.inspectionArea.name.toString()}
                         </Typography>
                         {inspectionAreaData.inspections
                             .filter((i) => ongoingMissions.find((m) => m.missionId === i.missionDefinition.id))
@@ -93,7 +93,7 @@ const InspectionAreaCard = ({
                     </StyledDict.TopInspectionAreaText>
                     {inspectionAreaData.inspections && (
                         <CardMissionInformation
-                            inspectionAreaName={inspectionAreaData.inspectionArea.inspectionAreaName}
+                            inspectionAreaName={inspectionAreaData.inspectionArea.name}
                             inspections={inspectionAreaData.inspections}
                         />
                     )}
@@ -110,7 +110,7 @@ const InspectionAreaCard = ({
                                 name={Icons.LibraryAdd}
                                 color={inspectionAreaData.inspections.length > 0 ? '' : 'grey'}
                             />
-                            <Typography color={tokens.colors.text.static_icons__secondary.rgba}>
+                            <Typography color={tokens.colors.text.static_icons__secondary.hex}>
                                 {TranslateText('Queue the missions')}
                             </Typography>
                         </Button>
@@ -135,7 +135,7 @@ export const InspectionAreaCards = ({
                 <StyledDict.InspectionAreaCards>
                     {inspectionAreaMissions.map((inspectionAreaMission) => (
                         <InspectionAreaCard
-                            key={'inspectionAreaCard' + inspectionAreaMission.inspectionArea.inspectionAreaName}
+                            key={'inspectionAreaCard' + inspectionAreaMission.inspectionArea.name}
                             inspectionAreaData={inspectionAreaMission}
                             onClickInspectionArea={onClickInspectionArea}
                             selectedInspectionArea={selectedInspectionArea}

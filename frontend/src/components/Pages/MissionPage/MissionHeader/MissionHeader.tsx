@@ -67,8 +67,8 @@ const StyledMissionHeader = styled(Card)`
     align-self: stretch;
     border-radius: 6px;
     max-height: fit-content;
-    border: 1px solid ${tokens.colors.ui.background__medium.rgba};
-    background: ${tokens.colors.ui.background__default.rgba};
+    border: 1px solid ${tokens.colors.ui.background__medium.hex};
+    background: ${tokens.colors.ui.background__default.hex};
 `
 
 const HeaderText = (title: string, text: string) => {

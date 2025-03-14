@@ -1,6 +1,9 @@
+import { Installation } from './Installation'
+import { PlantInfo } from './MissionDefinition'
+
 export interface InspectionArea {
     id: string
-    inspectionAreaName: string
-    plantName: string
-    installationCode: string
+    name: string
+    plant: PlantInfo
+    installation: Installation
 }

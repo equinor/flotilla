@@ -187,7 +187,7 @@ export const CardMissionInformation = ({ inspections }: ICardMissionInformationP
                 .map((color) => (
                     <StyledDict.MissionComponents key={color}>
                         <StyledDict.Circle style={{ background: color }} />
-                        <Typography color={tokens.colors.text.static_icons__secondary.rgba}>
+                        <Typography color={tokens.colors.text.static_icons__secondary.hex}>
                             {colorsCount[color].count > 1 &&
                                 colorsCount[color].count +
                                     ' ' +

@@ -141,7 +141,7 @@ export const RobotPage = () => {
                         >
                             <Icon
                                 name={Icons.StopButton}
-                                style={{ color: tokens.colors.interactive.icon_on_interactive_colors.rgba }}
+                                style={{ color: tokens.colors.interactive.icon_on_interactive_colors.hex }}
                                 size={24}
                             />
                             {TranslateText('Stop')} {selectedRobot.name}

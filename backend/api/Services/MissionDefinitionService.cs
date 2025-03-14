@@ -264,6 +264,8 @@ namespace Api.Services
                 .ThenInclude(area => area!.Installation)
                 .Include(missionDefinition => missionDefinition.Source)
                 .Include(missionDefinition => missionDefinition.LastSuccessfulRun)
+                .ThenInclude(missionRun => missionRun != null ? missionRun.Robot : null)
+                .Include(missionDefinition => missionDefinition.LastSuccessfulRun)
                 .ThenInclude(missionRun => missionRun != null ? missionRun.Tasks : null)!
                 .ThenInclude(missionTask => missionTask.Inspection)
                 .Include(missionDefinition => missionDefinition.InspectionArea)
