@@ -59,6 +59,6 @@
         "ts-unused-exports": "^11.0.1",
         "typescript": "^5.7.3",
         "typescript-eslint": "^8.22.0",
-        "vitest": "^2.1.8"
+        "vitest": "^2.1.9"
     }
 }
