@@ -22,16 +22,16 @@ export const StyledDict = {
         max-width: 1000px;
         min-width: 270px;
         gap: 10px 20px;
+
         @media (min-width: 800px) {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(2, 480px);
         }
     `,
 
     FormItem: styled.div`
         width: 100%;
         height: auto;
-        padding: 5px;
         word-break: break-word;
         hyphens: auto;
         min-height: 80px;

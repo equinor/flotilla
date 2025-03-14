@@ -16,10 +16,11 @@ const StyledTable = styled(Table)`
 `
 
 interface TaskTableProps {
-    tasks: Task[] | undefined
+    tasks: Task[]
+    missionDefinitionPage: boolean
 }
 
-export const TaskTable = ({ tasks }: TaskTableProps) => {
+export const TaskTable = ({ tasks, missionDefinitionPage }: TaskTableProps) => {
     const { TranslateText } = useLanguageContext()
 
     return (
@@ -29,20 +30,22 @@ export const TaskTable = ({ tasks }: TaskTableProps) => {
                     <Table.Cell>#</Table.Cell>
                     <Table.Cell>{TranslateText('Tag-ID')}</Table.Cell>
                     <Table.Cell>{TranslateText('Description')}</Table.Cell>
-                    <Table.Cell>{TranslateText('Inspection Types')}</Table.Cell>
-                    <Table.Cell>{TranslateText('Status')}</Table.Cell>
+                    {!missionDefinitionPage && (
+                        <>
+                            <Table.Cell>{TranslateText('Inspection Types')}</Table.Cell>
+                            <Table.Cell>{TranslateText('Status')}</Table.Cell>
+                        </>
+                    )}
                 </Table.Row>
             </Table.Head>
-            <Table.Body>{tasks && <TaskTableRows tasks={tasks} />}</Table.Body>
+            <Table.Body>
+                {tasks && <TaskTableRows tasks={tasks} missionDefinitionPage={missionDefinitionPage} />}
+            </Table.Body>
         </StyledTable>
     )
 }
 
-interface TaskTableRowsProps {
-    tasks: Task[]
-}
-
-const TaskTableRows = ({ tasks }: TaskTableRowsProps) => {
+const TaskTableRows = ({ tasks, missionDefinitionPage }: TaskTableProps) => {
     const rows = tasks.map((task) => {
         // Workaround for current bug in echo
         const order: number = task.taskOrder + 1
@@ -66,12 +69,16 @@ const TaskTableRows = ({ tasks }: TaskTableRowsProps) => {
                 <Table.Cell>
                     <DescriptionDisplay task={task} />
                 </Table.Cell>
-                <Table.Cell>
-                    <InspectionTypesDisplay task={task} />
-                </Table.Cell>
-                <Table.Cell>
-                    <TaskStatusDisplay status={task.status} />
-                </Table.Cell>
+                {!missionDefinitionPage && (
+                    <>
+                        <Table.Cell>
+                            <InspectionTypesDisplay task={task} />
+                        </Table.Cell>
+                        <Table.Cell>
+                            <TaskStatusDisplay status={task.status} />
+                        </Table.Cell>
+                    </>
+                )}
             </Table.Row>
         )
     })

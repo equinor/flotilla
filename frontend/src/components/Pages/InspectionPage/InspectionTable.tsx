@@ -216,7 +216,7 @@ const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialo
                             }}
                         >
                             <StyledIcon
-                                color={`${tokens.colors.interactive.focus.rgba}`}
+                                color={`${tokens.colors.interactive.focus.hex}`}
                                 name={Icons.AddOutlined}
                                 size={24}
                             />
@@ -276,7 +276,7 @@ export const InspectionTable = ({ inspectionArea, inspections, openDialog, setSe
                 <Table>
                     <Table.Caption>
                         <Typography variant="h3" style={{ marginBottom: '14px' }}>
-                            {inspectionArea.inspectionAreaName}
+                            {inspectionArea.name}
                         </Typography>
                         <SmallScreenInfoText />
                     </Table.Caption>

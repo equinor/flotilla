@@ -37,6 +37,7 @@ export const StyledPage = styled.div`
         padding: 0.7rem;
     }
     min-height: calc(100vh - 65px);
+    background-color: ${tokens.colors.ui.background__light.hex};
 `
 export const AttributeTitleTypography = styled(Typography)`
     variant: meta;

@@ -79,7 +79,7 @@ export const FailedMissionAlertListContent = ({ missions }: MissionsProps) => {
             icon={Icons.Failed}
             alertTitle={TranslateText(MissionStatus.Failed)}
             alertText={message}
-            iconColor={tokens.colors.interactive.danger__resting.rgba}
+            iconColor={tokens.colors.interactive.danger__resting.hex}
             mission={mission}
         />
     ) : (
@@ -87,7 +87,7 @@ export const FailedMissionAlertListContent = ({ missions }: MissionsProps) => {
             icon={Icons.Failed}
             alertTitle={TranslateText(MissionStatus.Failed)}
             alertText={message}
-            iconColor={tokens.colors.interactive.danger__resting.rgba}
+            iconColor={tokens.colors.interactive.danger__resting.hex}
         />
     )
 }
