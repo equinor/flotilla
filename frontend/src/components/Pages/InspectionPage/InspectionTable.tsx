@@ -216,7 +216,7 @@ const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialo
                             }}
                         >
                             <StyledIcon
-                                color={`${tokens.colors.interactive.focus.rgba}`}
+                                color={`${tokens.colors.interactive.focus.hex}`}
                                 name={Icons.AddOutlined}
                                 size={24}
                             />
