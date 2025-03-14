@@ -21,7 +21,7 @@ const Indent = styled.div`
 
 export const FailedAlertContent = ({ title, message }: { title: string; message: string }) => {
     const { TranslateText } = useLanguageContext()
-    const iconColor = tokens.colors.interactive.danger__resting.rgba
+    const iconColor = tokens.colors.interactive.danger__resting.hex
     const bannerColor = tokens.colors.ui.background__danger.hex
 
     return (
@@ -44,7 +44,7 @@ export const FailedAlertListContent = ({ title, message }: { title: string; mess
     return (
         <AlertListContents
             icon={Icons.Failed}
-            iconColor={tokens.colors.interactive.danger__resting.rgba}
+            iconColor={tokens.colors.interactive.danger__resting.hex}
             alertTitle={TranslateText(title)}
             alertText={TranslateText(message)}
         />
@@ -57,7 +57,7 @@ export const FailedAutoMissionAlertContent = ({
     autoScheduleFailedMissionDict: AutoScheduleFailedMissionDict
 }) => {
     const { TranslateText } = useLanguageContext()
-    const iconColor = tokens.colors.interactive.danger__resting.rgba
+    const iconColor = tokens.colors.interactive.danger__resting.hex
 
     return (
         <StyledDiv>

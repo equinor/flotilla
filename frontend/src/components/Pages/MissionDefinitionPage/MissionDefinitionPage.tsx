@@ -23,12 +23,36 @@ import {
     EditAutoScheduleDialogContent,
 } from 'components/Pages/MissionDefinitionPage/EditAutoScheduleDialogContent'
 import { AutoScheduleFrequency } from 'models/AutoScheduleFrequency'
+import { TaskTableAndMap } from '../MissionPage/TaskTableAndMap'
 
 const StyledDictCard = styled(StyledDict.Card)`
-    box-shadow: ${tokens.elevation.raised};
+    border-radius: 6px;
+    border: 1px solid ${tokens.colors.ui.background__medium.hex};
     height: auto;
     min-height: 100px;
     overflow-y: hidden;
+`
+const StyledTableAndMap = styled.div`
+    display: flex;
+    width: fit-content;
+`
+
+const StyledTopComponents = styled.div`
+    display: flex;
+    justify-content: left;
+    gap: 30px;
+`
+
+const StyledButton = styled(Button)`
+    width: 160px;
+    background-color: ${tokens.colors.ui.background__default.hex};
+`
+
+const StyledMissionDefinitionPageBody = styled.div`
+    display: flex;
+    flex-direction: column;
+    justify-items: stretch;
+    gap: 30px;
 `
 
 const MetadataItem = ({
@@ -46,7 +70,7 @@ const MetadataItem = ({
         <StyledDict.FormItem>
             <StyledDictCard>
                 <StyledDict.TitleComponent>
-                    <Typography variant="body_long_bold" color={tokens.colors.text.static_icons__secondary.rgba}>
+                    <Typography variant="body_long_bold" color={tokens.colors.text.static_icons__secondary.hex}>
                         {title}
                     </Typography>
                     {onEdit && (
@@ -63,7 +87,7 @@ const MetadataItem = ({
                 <Typography
                     variant="body_long"
                     group="paragraph"
-                    color={tokens.colors.text.static_icons__secondary.rgba}
+                    color={tokens.colors.text.static_icons__secondary.hex}
                 >
                     {content}
                 </Typography>
@@ -77,18 +101,6 @@ const MissionDefinitionPageBody = ({ missionDefinition }: { missionDefinition: M
     const { setAlert, setListAlert } = useAlertContext()
     const [isEditDialogOpen, setIsEditDialogOpen] = useState<boolean>(false)
     const [selectedField, setSelectedField] = useState<string>('')
-    const navigate = useNavigate()
-
-    const displayInspectionFrequency = (inspectionFrequency: string | undefined | null) => {
-        if (!inspectionFrequency) return TranslateText('No inspection frequency set')
-        const timeArray = inspectionFrequency.split(':')
-        const days: number = +timeArray[0] // [1] is hours and [2] is minutes
-        const returnStringArray: string[] = []
-        if (days > 0) returnStringArray.push(days + ' ' + TranslateText('days'))
-        if (returnStringArray.length === 0) return TranslateText('No inspection frequency set')
-
-        return TranslateText('Inspection required every') + ' ' + returnStringArray.join(', ')
-    }
 
     const onEdit = (editType: string) => {
         return () => {
@@ -100,7 +112,6 @@ const MissionDefinitionPageBody = ({ missionDefinition }: { missionDefinition: M
     const onDeleteAutoSchedule = () => {
         const defaultMissionDefinitionForm: MissionDefinitionUpdateForm = {
             comment: missionDefinition.comment,
-            inspectionFrequency: missionDefinition.inspectionFrequency,
             autoScheduleFrequency: undefined,
             name: missionDefinition.name,
             isDeprecated: false,
@@ -124,7 +135,7 @@ const MissionDefinitionPageBody = ({ missionDefinition }: { missionDefinition: M
     }
 
     return (
-        <>
+        <StyledMissionDefinitionPageBody>
             <StyledDict.FormContainer>
                 <MetadataItem title={TranslateText('Name')} content={missionDefinition.name} onEdit={onEdit('name')} />
                 <MetadataItem
@@ -132,20 +143,6 @@ const MissionDefinitionPageBody = ({ missionDefinition }: { missionDefinition: M
                     content={
                         missionDefinition.inspectionArea ? missionDefinition.inspectionArea.inspectionAreaName : ''
                     }
-                />
-                <MetadataItem
-                    title={TranslateText('Plant')}
-                    content={missionDefinition.inspectionArea ? missionDefinition.inspectionArea.plantName : ''}
-                />
-                <MetadataItem
-                    title={TranslateText('Installation')}
-                    content={missionDefinition.inspectionArea ? missionDefinition.inspectionArea.installationCode : ''}
-                />
-                <MetadataItem title={TranslateText('Mission source id')} content={missionDefinition.sourceId} />
-                <MetadataItem
-                    title={TranslateText('Inspection frequency')}
-                    content={displayInspectionFrequency(missionDefinition.inspectionFrequency)}
-                    onEdit={onEdit('inspectionFrequency')}
                 />
                 <MetadataItem
                     title={TranslateText('Automated scheduling')}
@@ -159,15 +156,7 @@ const MissionDefinitionPageBody = ({ missionDefinition }: { missionDefinition: M
                     onEdit={onEdit('comment')}
                 />
             </StyledDict.FormContainer>
-            <StyledDict.Button
-                disabled={!missionDefinition.lastSuccessfulRun}
-                onClick={() =>
-                    navigate(`${config.FRONTEND_BASE_ROUTE}/mission/${missionDefinition.lastSuccessfulRun!.id}`)
-                }
-            >
-                {TranslateText('View last run') +
-                    (missionDefinition.lastSuccessfulRun ? '' : ': ' + TranslateText('Not yet performed'))}
-            </StyledDict.Button>
+
             {isEditDialogOpen && (
                 <MissionDefinitionEditDialog
                     fieldName={selectedField}
@@ -175,7 +164,14 @@ const MissionDefinitionPageBody = ({ missionDefinition }: { missionDefinition: M
                     closeEditDialog={() => setIsEditDialogOpen(false)}
                 />
             )}
-        </>
+            <StyledTableAndMap>
+                {missionDefinition.lastSuccessfulRun &&
+                    missionDefinition.lastSuccessfulRun.tasks &&
+                    missionDefinition.lastSuccessfulRun.robot && (
+                        <TaskTableAndMap mission={missionDefinition.lastSuccessfulRun} missionDefinitionPage={true} />
+                    )}
+            </StyledTableAndMap>
+        </StyledMissionDefinitionPageBody>
     )
 }
 
@@ -192,7 +188,6 @@ const MissionDefinitionEditDialog = ({
 }: IMissionDefinitionEditDialogProps) => {
     const defaultMissionDefinitionForm: MissionDefinitionUpdateForm = {
         comment: missionDefinition.comment,
-        inspectionFrequency: missionDefinition.inspectionFrequency,
         autoScheduleFrequency: missionDefinition.autoScheduleFrequency,
         name: missionDefinition.name,
         isDeprecated: false,
@@ -202,29 +197,6 @@ const MissionDefinitionEditDialog = ({
     const navigate = useNavigate()
     const [form, setForm] = useState<MissionDefinitionUpdateForm>(defaultMissionDefinitionForm)
 
-    const updateInspectionFrequencyFormDays = (newDay: string) => {
-        if (!Number(newDay) && newDay !== '') return
-
-        const formatInspectionFrequency = (dayStr: string) => {
-            dayStr = dayStr === '' ? '0' : dayStr
-            if (!form.inspectionFrequency) return dayStr + '.00:00:00'
-
-            const inspectionArray = form.inspectionFrequency.split(':')
-            if (!inspectionArray || inspectionArray.length < 2) return dayStr + '.00:00:00'
-
-            return dayStr + '.00:' + inspectionArray[1] + ':00'
-        }
-
-        setForm({ ...form, inspectionFrequency: formatInspectionFrequency(newDay) })
-    }
-
-    const getDayAndHoursFromInspectionFrequency = (inspectionFrequency: string | undefined): [number, number] => {
-        if (!inspectionFrequency) return [0, 0]
-        const inspectionParts = form.inspectionFrequency?.split(':')
-        if (!inspectionParts || inspectionParts.length < 2) return [0, 0]
-        return [+inspectionParts[0], +inspectionParts[1]]
-    }
-
     const isUpdateButtonDisabled = () => {
         if (fieldName !== 'autoScheduleFrequency') return false
         if (form.autoScheduleFrequency?.daysOfWeek.length === 0) return true
@@ -233,8 +205,6 @@ const MissionDefinitionEditDialog = ({
     }
 
     const handleSubmit = () => {
-        const daysAndHours = getDayAndHoursFromInspectionFrequency(form.inspectionFrequency)
-        if (daysAndHours[0] === 0 && daysAndHours[1] === 0) form.inspectionFrequency = undefined
         BackendAPICaller.updateMissionDefinition(missionDefinition.id, form)
             .then((missionDefinition) => {
                 closeEditDialog()
@@ -254,31 +224,12 @@ const MissionDefinitionEditDialog = ({
             })
     }
 
-    const inspectionFrequency = getDayAndHoursFromInspectionFrequency(form.inspectionFrequency)
-    const inspectionFrequencyDays =
-        !inspectionFrequency[0] || inspectionFrequency[0] === 0 ? '' : String(inspectionFrequency[0])
-
     const changedAutoScheduleFrequency = (newAutoScheduleFrequency: AutoScheduleFrequency) => {
         setForm({ ...form, autoScheduleFrequency: newAutoScheduleFrequency })
     }
 
     const getFormItem = () => {
         switch (fieldName) {
-            case 'inspectionFrequency':
-                return (
-                    <StyledDict.InspectionFrequencyDiv>
-                        <TextField
-                            id="compact-textfield"
-                            label={TranslateText('Days between inspections')}
-                            unit={TranslateText('days')}
-                            value={inspectionFrequencyDays}
-                            onChange={(changes: ChangeEvent<HTMLInputElement>) => {
-                                if (!Number.isNaN(+changes.target.value))
-                                    updateInspectionFrequencyFormDays(changes.target.value)
-                            }}
-                        />
-                    </StyledDict.InspectionFrequencyDiv>
-                )
             case 'autoScheduleFrequency':
                 return (
                     <EditAutoScheduleDialogContent
@@ -342,6 +293,8 @@ const MissionDefinitionEditDialog = ({
 export const MissionDefinitionPage = () => {
     const { missionId } = useParams()
     const { missionDefinitions } = useMissionDefinitionsContext()
+    const { TranslateText } = useLanguageContext()
+    const navigate = useNavigate()
 
     const selectedMissionDefinition = missionDefinitions.find((m) => m.id === missionId)
 
@@ -351,7 +304,23 @@ export const MissionDefinitionPage = () => {
             {selectedMissionDefinition !== undefined && (
                 <StyledPage>
                     <BackButton />
-                    <MissionDefinitionHeader missionDefinition={selectedMissionDefinition} />
+                    <StyledTopComponents>
+                        <MissionDefinitionHeader missionDefinition={selectedMissionDefinition} />
+                        <StyledButton
+                            variant="outlined"
+                            disabled={!selectedMissionDefinition.lastSuccessfulRun}
+                            onClick={() =>
+                                navigate(
+                                    `${config.FRONTEND_BASE_ROUTE}/mission/${selectedMissionDefinition.lastSuccessfulRun!.id}`
+                                )
+                            }
+                        >
+                            {TranslateText('View last run') +
+                                (selectedMissionDefinition.lastSuccessfulRun
+                                    ? ''
+                                    : ': ' + TranslateText('Not yet performed'))}
+                        </StyledButton>
+                    </StyledTopComponents>
                     <MissionDefinitionPageBody missionDefinition={selectedMissionDefinition} />
                 </StyledPage>
             )}

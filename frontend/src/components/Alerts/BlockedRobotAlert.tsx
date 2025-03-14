@@ -27,7 +27,7 @@ export const BlockedRobotAlertContent = ({ robotNames }: AlertProps) => {
     return (
         <StyledDiv>
             <StyledAlertTitle>
-                <Icon name={Icons.Warning} style={{ color: tokens.colors.interactive.danger__resting.rgba }} />
+                <Icon name={Icons.Warning} style={{ color: tokens.colors.interactive.danger__resting.hex }} />
                 <Typography>{TranslateText('Robot is blocked')}</Typography>
             </StyledAlertTitle>
             <Indent>
@@ -52,7 +52,7 @@ export const BlockedRobotAlertListContent = ({ robotNames }: AlertProps) => {
     return (
         <AlertListContents
             icon={Icons.Warning}
-            iconColor={tokens.colors.interactive.danger__resting.rgba}
+            iconColor={tokens.colors.interactive.danger__resting.hex}
             alertTitle={TranslateText('Robot is blocked')}
             alertText={message}
         />

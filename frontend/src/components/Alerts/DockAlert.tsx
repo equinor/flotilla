@@ -55,19 +55,19 @@ export const DockAlertListContent = ({ alertType, alertCategory }: DockBannerPro
     let titleMessage = TranslateText('INFO')
     let message = TranslateText('Dock banner text')
     let icon = Icons.Warning
-    let iconColor = tokens.colors.interactive.danger__resting.rgba
+    let iconColor = tokens.colors.interactive.danger__resting.hex
     if (alertCategory === AlertCategory.WARNING) titleMessage = TranslateText('WARNING')
     if (alertCategory === AlertCategory.INFO && alertType === AlertType.DockSuccess)
         [message, icon, iconColor] = [
             TranslateText('Dock successful text'),
             Icons.Info,
-            tokens.colors.text.static_icons__default.rgba,
+            tokens.colors.text.static_icons__default.hex,
         ]
     if (alertCategory === AlertCategory.INFO && alertType === AlertType.DismissDock)
         [message, icon, iconColor] = [
             TranslateText('Dismiss dock banner text'),
             Icons.Info,
-            tokens.colors.text.static_icons__default.rgba,
+            tokens.colors.text.static_icons__default.hex,
         ]
 
     return <AlertListContents icon={icon} alertTitle={titleMessage} alertText={message} iconColor={iconColor} />

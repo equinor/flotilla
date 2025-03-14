@@ -1,4 +1,3 @@
-import { TaskTable } from 'components/Pages/MissionPage/TaskOverview/TaskTable'
 import { VideoStreamWindow } from 'components/Pages/MissionPage/VideoStream/VideoStreamWindow'
 import { Mission } from 'models/Mission'
 import { useEffect, useState } from 'react'
@@ -6,7 +5,6 @@ import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 import { MissionHeader } from './MissionHeader/MissionHeader'
 import { BackButton } from 'utils/BackButton'
-import { MissionMapView } from './MapPosition/MissionMapView'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { Header } from 'components/Header/Header'
 import { SignalREventLabels, useSignalRContext } from 'components/Contexts/SignalRContext'
@@ -15,39 +13,12 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { useMediaStreamContext } from 'components/Contexts/MediaStreamContext'
-import { tokens } from '@equinor/eds-tokens'
 import { StyledPage } from 'components/Styles/StyledComponents'
 import { InspectionDialogView } from '../InspectionReportPage/InspectionView'
 import { useInspectionsContext } from 'components/Contexts/InspectionsContext'
-import { Typography } from '@equinor/eds-core-react'
 import { InspectionOverviewSection } from '../InspectionReportPage/InspectionOverview'
+import { TaskTableAndMap } from './TaskTableAndMap'
 
-const StyledMissionPage = styled(StyledPage)`
-    background-color: ${tokens.colors.ui.background__light.hex};
-`
-const TaskAndMapSection = styled.div`
-    display: flex;
-    min-height: 60%;
-    padding: 24px;
-    @media (max-width: 600px) {
-        padding: 6px 8px 8px 6px;
-    }
-    flex-direction: column;
-    justify-content: center;
-    align-items: flex-start;
-    gap: 8px;
-    align-self: stretch;
-    border-radius: 6px;
-    border: 1px solid ${tokens.colors.ui.background__medium.rgba};
-    background: ${tokens.colors.ui.background__default.rgba};
-`
-
-const StyledTableAndMap = styled.div`
-    display: flex;
-    flex-wrap: wrap;
-    align-items: top;
-    gap: 30px;
-`
 const StyledMissionPageContent = styled.div`
     display: flex;
     flex-direction: column;
@@ -125,19 +96,13 @@ export const MissionPage = () => {
     return (
         <>
             <Header page={'mission'} />
-            <StyledMissionPage>
+            <StyledPage>
                 <BackButton />
                 {selectedMission !== undefined && (
                     <StyledMissionPageContent>
                         <StyledCardsWidth>
                             <MissionHeader mission={selectedMission} />
-                            <TaskAndMapSection>
-                                <Typography variant="h4">{TranslateText('Tasks')}</Typography>
-                                <StyledTableAndMap>
-                                    <TaskTable tasks={selectedMission?.tasks} />
-                                    {selectedMission.missionId && <MissionMapView mission={selectedMission} />}
-                                </StyledTableAndMap>
-                            </TaskAndMapSection>
+                            <TaskTableAndMap mission={selectedMission} missionDefinitionPage={false} />
                             <VideoStreamSection>
                                 {videoMediaStreams && videoMediaStreams.length > 0 && (
                                     <VideoStreamWindow videoStreams={videoMediaStreams} />
@@ -153,7 +118,7 @@ export const MissionPage = () => {
                         </StyledCardsWidth>
                     </StyledMissionPageContent>
                 )}
-            </StyledMissionPage>
+            </StyledPage>
         </>
     )
 }

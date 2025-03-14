@@ -23,7 +23,7 @@ export const FailedRequestAlertContent = ({ translatedMessage }: { translatedMes
     return (
         <StyledDiv>
             <StyledAlertTitle>
-                <Icon name={Icons.Failed} style={{ color: tokens.colors.interactive.danger__resting.rgba }} />
+                <Icon name={Icons.Failed} style={{ color: tokens.colors.interactive.danger__resting.hex }} />
                 <Typography>{TranslateText('Request error')}</Typography>
             </StyledAlertTitle>
             <StyledButton variant="ghost" color="secondary">
@@ -40,7 +40,7 @@ export const FailedRequestAlertListContent = ({ translatedMessage }: { translate
             icon={Icons.Failed}
             alertTitle={TranslateText('Request error')}
             alertText={translatedMessage}
-            iconColor={tokens.colors.interactive.danger__resting.rgba}
+            iconColor={tokens.colors.interactive.danger__resting.hex}
         />
     )
 }

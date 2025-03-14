@@ -110,7 +110,7 @@ const InspectionAreaCard = ({
                                 name={Icons.LibraryAdd}
                                 color={inspectionAreaData.inspections.length > 0 ? '' : 'grey'}
                             />
-                            <Typography color={tokens.colors.text.static_icons__secondary.rgba}>
+                            <Typography color={tokens.colors.text.static_icons__secondary.hex}>
                                 {TranslateText('Queue the missions')}
                             </Typography>
                         </Button>
