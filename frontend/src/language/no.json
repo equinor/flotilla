@@ -306,5 +306,6 @@
     "Failed to Auto Schedule Missions": "Kunne ikke planlegge automatisk start av oppdrag",
     "Menu": "Meny",
     "Robots": "Roboter",
-    "Robot Model": "Robottype"
+    "Robot Model": "Robottype",
+    "Ongoing missions": "Pågående oppdrag"
 }
