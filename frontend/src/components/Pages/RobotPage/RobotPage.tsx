@@ -47,7 +47,7 @@ const RobotInfo = styled.div`
 const StatusContent = styled.div`
     gap: 48px;
     display: grid;
-    grid-template-columns: repeat(3, 150px);
+    grid-template-columns: 160px 100px 160px;
     align-self: start;
     @media (max-width: 600px) {
         align-items: flex-start;

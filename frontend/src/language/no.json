@@ -305,5 +305,6 @@
     "These missions will be automatically scheduled at the specified time": "Disse oppdragene vil automatisk bli kjørt på de spesifiserte tidspunktene",
     "Failed to Auto Schedule Missions": "Kunne ikke planlegge automatisk start av oppdrag",
     "Menu": "Meny",
-    "Robots": "Roboter"
+    "Robots": "Roboter",
+    "Robot Model": "Robottype"
 }
