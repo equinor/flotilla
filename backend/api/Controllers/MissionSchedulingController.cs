@@ -368,12 +368,18 @@ namespace Api.Controllers
                     Map = new MapMetadata(),
                 };
 
-            if (scheduledMissionDefinition.InspectionArea == null)
+            if (
+                scheduledMissionDefinition.InspectionArea == null
+                || scheduledMissionDefinition.InspectionArea.Id != inspectionAreaForMission.Id
+            )
             {
                 logger.LogWarning(
-                    "Mission definition with ID {id} does not have an inspection area when scheduling",
-                    scheduledMissionDefinition.Id
+                    "Inspection area for mission definition {Id} was changed from {OldInspectionAreaId} to {NewInspectionAreaId}",
+                    scheduledMissionDefinition.Id,
+                    scheduledMissionDefinition.InspectionArea?.Id,
+                    inspectionAreaForMission.Id
                 );
+                scheduledMissionDefinition.InspectionArea = inspectionAreaForMission;
             }
 
             var missionRun = new MissionRun
