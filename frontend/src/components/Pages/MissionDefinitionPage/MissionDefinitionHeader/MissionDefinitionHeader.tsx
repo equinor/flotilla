@@ -1,16 +1,16 @@
 import { Typography } from '@equinor/eds-core-react'
 import { MissionDefinition } from 'models/MissionDefinition'
-import { StyledDict } from 'components/Pages/MissionDefinitionPage/MissionDefinitionStyledComponents'
+import { HeaderSection, TitleSection } from '../MissionDefinitionStyledComponents'
 interface MissionDefinitionHeaderProps {
     missionDefinition: MissionDefinition
 }
 
 export const MissionDefinitionHeader = ({ missionDefinition }: MissionDefinitionHeaderProps) => {
     return (
-        <StyledDict.HeaderSection>
-            <StyledDict.TitleSection style={{ wordBreak: 'break-word' }}>
+        <HeaderSection>
+            <TitleSection style={{ wordBreak: 'break-word' }}>
                 <Typography variant="h1">{missionDefinition.name}</Typography>
-            </StyledDict.TitleSection>
-        </StyledDict.HeaderSection>
+            </TitleSection>
+        </HeaderSection>
     )
 }
