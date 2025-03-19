@@ -17,9 +17,6 @@ export const ButtonSection = styled.div`
 
 export const FormContainer = styled.div`
     display: flex;
-    flex-wrap: wrap;
-    max-width: 1000px;
-    min-width: 270px;
     gap: 10px 20px;
 
     @media (min-width: 800px) {
@@ -47,7 +44,6 @@ export const StyledDialog = styled(Dialog)`
 export const TitleComponent = styled.div`
     display: flex;
     align-items: center;
-    height: 36px;
 `
 
 export const EditButton = styled(Button)`
