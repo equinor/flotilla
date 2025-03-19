@@ -11,11 +11,11 @@ import { useRobotContext } from 'components/Contexts/RobotContext'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { MissionDefinition } from 'models/MissionDefinition'
-import { StyledDict } from './InspectionUtilities'
 import { Icons } from 'utils/icons'
 import { StyledButton } from 'components/Styles/StyledComponents'
 import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
+import { Placeholder } from './InspectionUtilities'
 
 const StyledContent = styled.div`
     display: flex;
@@ -114,11 +114,11 @@ export const InspectionOverviewSection = () => {
                     <AllInspectionsTable inspections={allInspections} />
                 ) : (
                     <StyledPlaceholderContent>
-                        <StyledDict.Placeholder>
+                        <Placeholder>
                             <Typography variant="h4" color="disabled">
                                 {TranslateText('No predefined missions available')}
                             </Typography>
-                        </StyledDict.Placeholder>
+                        </Placeholder>
                     </StyledPlaceholderContent>
                 )}
             </StyledContent>

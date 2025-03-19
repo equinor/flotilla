@@ -5,13 +5,12 @@ import { BackButton } from 'utils/BackButton'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { Header } from 'components/Header/Header'
 import { MissionDefinition } from 'models/MissionDefinition'
-import { Button, Typography, TextField, Icon } from '@equinor/eds-core-react'
+import { Button, Typography, TextField, Icon, Card } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { MissionDefinitionUpdateForm } from 'models/MissionDefinitionUpdateForm'
 import { config } from 'config'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
-import { StyledDict } from 'components/Pages/MissionDefinitionPage/MissionDefinitionStyledComponents'
 import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
 import { StyledPage } from 'components/Styles/StyledComponents'
 import styled from 'styled-components'
@@ -25,12 +24,23 @@ import {
 import { AutoScheduleFrequency } from 'models/AutoScheduleFrequency'
 import { TaskTableAndMap } from '../MissionPage/TaskTableAndMap'
 import { useQuery } from '@tanstack/react-query'
+import {
+    ButtonSection,
+    EditButton,
+    FormCard,
+    FormContainer,
+    FormItem,
+    StyledDialog,
+    TitleComponent,
+} from './MissionDefinitionStyledComponents'
 
-const StyledDictCard = styled(StyledDict.Card)`
+const StyledCard = styled(Card)`
+    display: flex;
+    padding: 8px;
+    min-height: 100px;
+    height: auto
     border-radius: 6px;
     border: 1px solid ${tokens.colors.ui.background__medium.hex};
-    height: auto;
-    min-height: 100px;
     overflow-y: hidden;
 `
 const StyledTableAndMap = styled.div`
@@ -43,11 +53,9 @@ const StyledTopComponents = styled.div`
     justify-content: left;
     gap: 30px;
 `
-
 const StyledButton = styled(Button)`
     width: 160px;
 `
-
 const StyledMissionDefinitionPageBody = styled.div`
     display: flex;
     flex-direction: column;
@@ -67,23 +75,23 @@ const MetadataItem = ({
     onDelete?: () => void
 }) => {
     return (
-        <StyledDict.FormItem>
-            <StyledDictCard>
-                <StyledDict.TitleComponent>
+        <FormItem>
+            <StyledCard>
+                <TitleComponent>
                     <Typography variant="body_long_bold" color={tokens.colors.text.static_icons__secondary.hex}>
                         {title}
                     </Typography>
                     {onEdit && (
-                        <StyledDict.EditButton variant="ghost" onClick={onEdit}>
+                        <EditButton variant="ghost" onClick={onEdit}>
                             <Icon name={Icons.Edit} size={16} />
-                        </StyledDict.EditButton>
+                        </EditButton>
                     )}
                     {onDelete && (
-                        <StyledDict.EditButton variant="ghost" onClick={onDelete}>
+                        <EditButton variant="ghost" onClick={onDelete}>
                             <Icon name={Icons.Delete} size={16} />
-                        </StyledDict.EditButton>
+                        </EditButton>
                     )}
-                </StyledDict.TitleComponent>
+                </TitleComponent>
                 <Typography
                     variant="body_long"
                     group="paragraph"
@@ -91,8 +99,8 @@ const MetadataItem = ({
                 >
                     {content}
                 </Typography>
-            </StyledDictCard>
-        </StyledDict.FormItem>
+            </StyledCard>
+        </FormItem>
     )
 }
 
@@ -146,7 +154,7 @@ const MissionDefinitionPageBody = ({ missionDefinition }: { missionDefinition: M
 
     return (
         <StyledMissionDefinitionPageBody>
-            <StyledDict.FormContainer>
+            <FormContainer>
                 <MetadataItem title={TranslateText('Name')} content={missionDefinition.name} onEdit={onEdit('name')} />
                 <MetadataItem
                     title={TranslateText('Inspection area')}
@@ -165,7 +173,7 @@ const MissionDefinitionPageBody = ({ missionDefinition }: { missionDefinition: M
                     content={missionDefinition.comment}
                     onEdit={onEdit('comment')}
                 />
-            </StyledDict.FormContainer>
+            </FormContainer>
 
             {isEditDialogOpen && (
                 <MissionDefinitionEditDialog
@@ -274,11 +282,11 @@ const MissionDefinitionEditDialog = ({
     }
 
     return (
-        <StyledDict.Dialog open={true}>
-            <StyledDict.FormCard>
+        <StyledDialog open={true}>
+            <FormCard>
                 <Typography variant="h2">{TranslateText('Edit') + ' ' + TranslateText(fieldName)}</Typography>
                 {getFormItem()}
-                <StyledDict.ButtonSection>
+                <ButtonSection>
                     <Button onClick={() => closeEditDialog()} variant="outlined" color="primary">
                         {TranslateText('Cancel')}
                     </Button>
@@ -290,9 +298,9 @@ const MissionDefinitionEditDialog = ({
                     >
                         {TranslateText('Update')}
                     </Button>
-                </StyledDict.ButtonSection>
-            </StyledDict.FormCard>
-        </StyledDict.Dialog>
+                </ButtonSection>
+            </FormCard>
+        </StyledDialog>
     )
 }
 
