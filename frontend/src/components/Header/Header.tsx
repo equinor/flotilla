@@ -28,15 +28,13 @@ const IconStyle = styled.div`
     display: flex;
     align-items: center;
     flex-direction: row-reverse;
-    > * {
-        margin-left: 1rem;
-    }
+    gap: 0.8rem;
 `
 const HandPointer = styled.div`
     cursor: pointer;
 `
 const SelectLanguageWrapper = styled.div`
-    margin-left: 1.5rem;
+    margin-left: 1rem;
 `
 const StyledAlertList = styled.div`
     display: grid;
@@ -91,6 +89,14 @@ export const Header = ({ page }: { page: string }) => {
                             }}
                         >
                             <Icon name={Icons.Platform} size={24} title="Change Asset" />
+                        </Button>
+                        <Button
+                            variant="ghost_icon"
+                            onClick={() => {
+                                window.location.href = `${config.FRONTEND_BASE_ROUTE}/info`
+                            }}
+                        >
+                            <Icon name={Icons.Info} size={24} title="Info Page" />
                         </Button>
                     </IconStyle>
                     <SelectLanguageWrapper>{SelectLanguage()}</SelectLanguageWrapper>
