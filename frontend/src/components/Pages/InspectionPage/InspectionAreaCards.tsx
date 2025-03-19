@@ -2,9 +2,17 @@ import { InspectionArea } from 'models/InspectionArea'
 import { InspectionAreaInspectionTuple, Inspection } from './InspectionSection'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import {
+    CardComponent,
     CardMissionInformation,
+    Content,
     InspectionAreaCardColors,
-    StyledDict,
+    InspectionAreaText,
+    Placeholder,
+    Rectangle,
+    StyledCard,
+    StyledInspectionAreaCard,
+    StyledInspectionAreaCards,
+    TopInspectionAreaText,
     compareInspections,
     getDeadlineInspection,
 } from './InspectionUtilities'
@@ -60,11 +68,9 @@ const InspectionAreaCard = ({
     else if (isScheduleMissionsDisabled) queueMissionsTooltip = TranslateText('No robot available')
 
     return (
-        <StyledDict.InspectionAreaCard key={inspectionAreaData.inspectionArea.inspectionAreaName}>
-            <StyledDict.Rectangle
-                style={{ background: `${getCardColorFromInspections(inspectionAreaData.inspections)}` }}
-            />
-            <StyledDict.Card
+        <StyledInspectionAreaCard key={inspectionAreaData.inspectionArea.inspectionAreaName}>
+            <Rectangle style={{ background: `${getCardColorFromInspections(inspectionAreaData.inspections)}` }} />
+            <StyledCard
                 key={inspectionAreaData.inspectionArea.inspectionAreaName}
                 onClick={
                     inspectionAreaData.inspections.length > 0
@@ -77,28 +83,28 @@ const InspectionAreaCard = ({
                         : {}
                 }
             >
-                <StyledDict.InspectionAreaText>
-                    <StyledDict.TopInspectionAreaText>
+                <InspectionAreaText>
+                    <TopInspectionAreaText>
                         <Typography variant={'body_short_bold'}>
                             {inspectionAreaData.inspectionArea.inspectionAreaName.toString()}
                         </Typography>
                         {inspectionAreaData.inspections
                             .filter((i) => ongoingMissions.find((m) => m.missionId === i.missionDefinition.id))
                             .map((inspection) => (
-                                <StyledDict.Content key={inspection.missionDefinition.id}>
+                                <Content key={inspection.missionDefinition.id}>
                                     <Icon name={Icons.Ongoing} size={16} />
                                     {TranslateText('InProgress')}
-                                </StyledDict.Content>
+                                </Content>
                             ))}
-                    </StyledDict.TopInspectionAreaText>
+                    </TopInspectionAreaText>
                     {inspectionAreaData.inspections && (
                         <CardMissionInformation
                             inspectionAreaName={inspectionAreaData.inspectionArea.inspectionAreaName}
                             inspections={inspectionAreaData.inspections}
                         />
                     )}
-                </StyledDict.InspectionAreaText>
-                <StyledDict.CardComponent>
+                </InspectionAreaText>
+                <CardComponent>
                     <Tooltip placement="top" title={queueMissionsTooltip}>
                         <Button
                             disabled={isScheduleMissionsDisabled}
@@ -115,9 +121,9 @@ const InspectionAreaCard = ({
                             </Typography>
                         </Button>
                     </Tooltip>
-                </StyledDict.CardComponent>
-            </StyledDict.Card>
-        </StyledDict.InspectionAreaCard>
+                </CardComponent>
+            </StyledCard>
+        </StyledInspectionAreaCard>
     )
 }
 
@@ -132,7 +138,7 @@ export const InspectionAreaCards = ({
     return (
         <>
             {Object.keys(inspectionAreaMissions).length > 0 ? (
-                <StyledDict.InspectionAreaCards>
+                <StyledInspectionAreaCards>
                     {inspectionAreaMissions.map((inspectionAreaMission) => (
                         <InspectionAreaCard
                             key={'inspectionAreaCard' + inspectionAreaMission.inspectionArea.inspectionAreaName}
@@ -142,13 +148,13 @@ export const InspectionAreaCards = ({
                             handleScheduleAll={handleScheduleAll}
                         />
                     ))}
-                </StyledDict.InspectionAreaCards>
+                </StyledInspectionAreaCards>
             ) : (
-                <StyledDict.Placeholder>
+                <Placeholder>
                     <Typography variant="h4" color="disabled">
                         {TranslateText('No inspections available')}
                     </Typography>
-                </StyledDict.Placeholder>
+                </Placeholder>
             )}
         </>
     )
