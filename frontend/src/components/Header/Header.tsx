@@ -110,11 +110,7 @@ export const Header = ({ page }: { page: string }) => {
                                 </Typography>
                             </HandPointer>
                             <Typography variant="body_short" color="text-primary">
-                                |
-                            </Typography>
-                            <Typography variant="body_short" color="text-primary">
-                                {' '}
-                                {installationName}
+                                {`| ${installationName}`}
                             </Typography>
                         </StyledTopBarHeader>
                     </TopBar.Header>
