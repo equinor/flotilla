@@ -730,9 +730,34 @@ namespace Api.Services
                 return;
             }
 
+            MissionRun? lastSuccessfulRun;
+            try
+            {
+                lastSuccessfulRun = await missionRunService.ReadById(
+                    missionDefinition.LastSuccessfulRun.Id
+                );
+                if (lastSuccessfulRun == null)
+                {
+                    logger.LogError(
+                        "Last successful mission run with ID {MissionRunId} was null when scheduling mission from last successful mission run",
+                        missionDefinition.LastSuccessfulRun.Id
+                    );
+                    return;
+                }
+            }
+            catch (Exception e)
+            {
+                logger.LogError(
+                    e,
+                    "Last successful mission run with ID {MissionRunId} was not found when scheduling mission from last successful mission run",
+                    missionDefinition.LastSuccessfulRun.Id
+                );
+                return;
+            }
+
             var missionTasks = new List<MissionTask>();
 
-            foreach (var task in missionDefinition.LastSuccessfulRun.Tasks)
+            foreach (var task in lastSuccessfulRun.Tasks)
             {
                 missionTasks.Add(new MissionTask(task));
             }

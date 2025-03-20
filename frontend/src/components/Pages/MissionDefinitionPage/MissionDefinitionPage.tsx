@@ -24,6 +24,7 @@ import {
 } from 'components/Pages/MissionDefinitionPage/EditAutoScheduleDialogContent'
 import { AutoScheduleFrequency } from 'models/AutoScheduleFrequency'
 import { TaskTableAndMap } from '../MissionPage/TaskTableAndMap'
+import { useQuery } from '@tanstack/react-query'
 
 const StyledDictCard = styled(StyledDict.Card)`
     border-radius: 6px;
@@ -102,6 +103,16 @@ const MissionDefinitionPageBody = ({ missionDefinition }: { missionDefinition: M
     const [isEditDialogOpen, setIsEditDialogOpen] = useState<boolean>(false)
     const [selectedField, setSelectedField] = useState<string>('')
 
+    const lastMissionRun = useQuery({
+        queryKey: ['fetchMissionRun', missionDefinition.lastSuccessfulRun?.id],
+        queryFn: async () => {
+            return await BackendAPICaller.getMissionRunById(missionDefinition.lastSuccessfulRun!.id)
+        },
+        retry: 2,
+        retryDelay: 2000,
+        enabled: missionDefinition.lastSuccessfulRun?.id !== undefined,
+    }).data
+
     const onEdit = (editType: string) => {
         return () => {
             setIsEditDialogOpen(true)
@@ -165,11 +176,7 @@ const MissionDefinitionPageBody = ({ missionDefinition }: { missionDefinition: M
                 />
             )}
             <StyledTableAndMap>
-                {missionDefinition.lastSuccessfulRun &&
-                    missionDefinition.lastSuccessfulRun.tasks &&
-                    missionDefinition.lastSuccessfulRun.robot && (
-                        <TaskTableAndMap mission={missionDefinition.lastSuccessfulRun} missionDefinitionPage={true} />
-                    )}
+                {lastMissionRun && <TaskTableAndMap mission={lastMissionRun} missionDefinitionPage={true} />}
             </StyledTableAndMap>
         </StyledMissionDefinitionPageBody>
     )
