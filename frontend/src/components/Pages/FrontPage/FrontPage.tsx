@@ -14,6 +14,8 @@ import { MissionHistoryView } from '../MissionHistory/MissionHistoryView'
 import { RobotStatusSection } from '../RobotCards/RobotStatusSection'
 import { Icons } from 'utils/icons'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
+import { useNavigate } from 'react-router-dom'
+import { config } from 'config'
 
 const StyledFrontPage = styled.div`
     display: flex;
@@ -70,19 +72,39 @@ const OngoingMissionsInfo = ({ goToOngoingTab }: { goToOngoingTab: () => void })
     )
 }
 
-export const FrontPage = () => {
-    const [activeTab, setActiveTab] = useState(0)
+export enum TabNames {
+    MissionControl = 'MissionControl',
+    InspectionPlan = 'InspectionPlan',
+    PredefinedMissions = 'PredefinedMissions',
+    MissionHistory = 'MissionHistory',
+    AutoScheduling = 'AutoScheduling',
+    Robots = 'Robots',
+}
+
+export const FrontPage = ({ initialTab }: { initialTab: TabNames }) => {
+    const [activeTab, setActiveTab] = useState(initialTab)
     const { TranslateText } = useLanguageContext()
 
     redirectIfNoInstallationSelected()
 
-    const setActiveTabToMissionControl = () => setActiveTab(0)
+    const navigate = useNavigate()
+    const goToTab = (tabIndex: number) => {
+        const tabName = Object.values(TabNames)[tabIndex]
+        setActiveTab(tabName)
+        const path = `${config.FRONTEND_BASE_ROUTE}/FrontPage/${tabName}`
+        navigate(path)
+    }
+    const getIndexFromTabName = (tabName: TabNames) => {
+        return Object.values(TabNames).indexOf(tabName)
+    }
+
+    const setActiveTabToMissionControl = () => goToTab(getIndexFromTabName(TabNames.MissionControl))
 
     return (
         <>
             <Header page={'frontPage'} />
             <StyledFrontPage>
-                <Tabs activeTab={activeTab} onChange={setActiveTab}>
+                <Tabs activeTab={getIndexFromTabName(activeTab)} onChange={goToTab}>
                     <StyledTabHeader>
                         <Tabs.List>
                             <Tabs.Tab>{TranslateText('Mission Control')}</Tabs.Tab>

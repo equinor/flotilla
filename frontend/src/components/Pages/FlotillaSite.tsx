@@ -1,6 +1,6 @@
 import { config } from 'config'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
-import { FrontPage } from './FrontPage/FrontPage'
+import { FrontPage, TabNames } from './FrontPage/FrontPage'
 import { MissionPage } from './MissionPage/MissionPage'
 import { RobotPage } from './RobotPage/RobotPage'
 import { APIUpdater } from 'components/Contexts/APIUpdater'
@@ -16,13 +16,25 @@ import {
 } from '../NavigationMenu/NavigationMenuPages'
 
 export const FlotillaSite = () => {
+    const frontPageTabOptions = Object.values(TabNames)
+
     return (
         <>
             <APIUpdater>
                 <BrowserRouter>
                     <Routes>
                         <Route path={`${config.FRONTEND_BASE_ROUTE}/`} element={<AssetSelectionPage />} />
-                        <Route path={`${config.FRONTEND_BASE_ROUTE}/FrontPage`} element={<FrontPage />} />
+                        <Route
+                            path={`${config.FRONTEND_BASE_ROUTE}/FrontPage`}
+                            element={<FrontPage initialTab={frontPageTabOptions[0]} />}
+                        />
+                        {frontPageTabOptions.map((tab) => (
+                            <Route
+                                key={tab}
+                                path={`${config.FRONTEND_BASE_ROUTE}/FrontPage/${tab}`}
+                                element={<FrontPage initialTab={tab} />}
+                            />
+                        ))}
                         <Route path={`${config.FRONTEND_BASE_ROUTE}/mission/:missionId`} element={<MissionPage />} />
                         <Route
                             path={`${config.FRONTEND_BASE_ROUTE}/mission-definition/:missionId`}
