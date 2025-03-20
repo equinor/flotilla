@@ -24,4 +24,12 @@ namespace Api.Controllers.Models
         /// </summary>
         public AutoScheduleFrequency? AutoScheduleFrequency { get; set; }
     }
+
+    public struct SkipAutoMissionQuery
+    {
+        /// <summary>
+        /// The time of day to skip the mission
+        /// </summary>
+        public TimeOnly TimeOfDay { get; set; }
+    }
 }

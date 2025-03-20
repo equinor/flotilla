@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
 #pragma warning disable CS8618
@@ -14,6 +15,8 @@ namespace Api.Database.Models
 
         [Required]
         public IList<DayOfWeek> DaysOfWeek { get; set; } = new List<DayOfWeek>();
+
+        public string? AutoScheduledJobs { get; set; }
 
         public bool HasValidValue()
         {
@@ -37,7 +40,7 @@ namespace Api.Database.Models
             }
         }
 
-        public IList<TimeSpan>? GetSchedulingTimesUntilMidnight()
+        public IList<(TimeSpan, TimeOnly)>? GetSchedulingTimesUntilMidnight()
         {
             // NCS is always in CET
             TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById(
@@ -48,7 +51,7 @@ namespace Api.Database.Models
             TimeSpan timeTilUtcMidnight =
                 new TimeOnly(0, 0, 0) - TimeOnly.FromDateTime(DateTime.UtcNow);
 
-            var autoScheduleNext = new List<TimeSpan>();
+            var autoScheduleNext = new List<(TimeSpan, TimeOnly)>();
 
             if (DaysOfWeek.Contains(nowLocal.DayOfWeek))
             {
@@ -58,7 +61,7 @@ namespace Api.Database.Models
                             (time >= nowLocalTimeOnly)
                             && (time - nowLocalTimeOnly <= timeTilUtcMidnight)
                         )
-                        .Select(time => time - nowLocalTimeOnly)
+                        .Select(time => (time - nowLocalTimeOnly, time))
                 );
             }
             if (DaysOfWeek.Contains(nowLocal.AddDays(1).DayOfWeek))
@@ -69,7 +72,7 @@ namespace Api.Database.Models
                             (time < nowLocalTimeOnly)
                             && (time - nowLocalTimeOnly <= timeTilUtcMidnight)
                         )
-                        .Select(time => time - nowLocalTimeOnly)
+                        .Select(time => (time - nowLocalTimeOnly, time))
                 );
             }
 

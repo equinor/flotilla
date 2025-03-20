@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
+using Api.HostedServices;
 using Api.Services;
 using Api.Services.Models;
 using Api.Test.Mocks;
@@ -25,6 +26,7 @@ namespace Api.Test.Database
         private readonly RobotService _robotService;
         private readonly UserInfoService _userInfoService;
         private readonly SourceService _sourceService;
+        private readonly AutoScheduleService _autoScheduleService;
         private readonly string _testInstallationCode = "InstCode";
         private readonly string _testInstallationName = "Installation";
         private readonly string _testPlantCode = "PlantCode";
@@ -77,13 +79,18 @@ namespace Api.Test.Database
                 _userInfoService
             );
             _sourceService = new SourceService(context, new Mock<ILogger<SourceService>>().Object);
+            _autoScheduleService = new AutoScheduleService(
+                new Mock<ILogger<AutoScheduleService>>().Object,
+                new MockSignalRService()
+            );
             _missionDefinitionService = new MissionDefinitionService(
                 context,
                 new MockSignalRService(),
                 _accessRoleService,
                 new Mock<ILogger<MissionDefinitionService>>().Object,
                 _missionRunService,
-                _sourceService
+                _sourceService,
+                _autoScheduleService
             );
         }
 

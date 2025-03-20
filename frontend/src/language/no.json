@@ -320,5 +320,7 @@
     "Remove all": "Fjern alle",
     "Remove all missions": "Fjern alle oppdragene",
     "Remove all missions dialog text": "Vennligst bekreft at du ønsker å fjerne alle oppdragene fra køen.",
-    "New scheduled mission": "Ny planlagt kjøring"
+    "New scheduled mission": "Ny planlagt kjøring",
+    "SkipAutoMission": "Hopp over",
+    "Next Scheduled Auto Mission": "Neste Planlagte Automatisk Kjøring"
 }
