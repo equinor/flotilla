@@ -404,4 +404,12 @@ export class BackendAPICaller {
             .then((response) => response.content)
             .catch(BackendAPICaller.handleError('GET', path))
     }
+
+    static async skipAutoScheduledMission(missionId: string, timeOfDay: string): Promise<void> {
+        const path: string = `missions/definitions/${missionId}/skip-auto-mission`
+        const body = { timeOfDay: timeOfDay }
+
+        console.log('Skipping mission', missionId, 'at', timeOfDay)
+        await BackendAPICaller.PUT(path, body).catch(BackendAPICaller.handleError('POST', path))
+    }
 }
