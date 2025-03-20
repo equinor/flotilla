@@ -50,6 +50,7 @@ const StyledNoneImageBody = styled.div`
     flex-direction: column;
     align-items: flex-start;
     align-self: stretch;
+    justify-content: space-between;
 
     @media (min-width: 960px) {
         gap: 16px;
