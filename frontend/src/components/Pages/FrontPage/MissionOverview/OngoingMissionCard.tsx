@@ -23,6 +23,7 @@ const StyledLargeScreenMissionCard = styled.div`
     flex-direction: column;
     align-items: flex-start;
     align-self: stretch;
+    justify-content: space-between;
     padding: 16px;
     gap: 16px;
     flex: 1 0 0;
@@ -42,7 +43,7 @@ const StyledSmallScreenMissionCard = styled.div`
         display: none;
     }
 `
-const ControllButtonSpacing = styled.div`
+const ControlButtonSpacing = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -92,7 +93,7 @@ export const OngoingMissionCard = ({ mission }: MissionProps): JSX.Element => {
                     <Icon name={Icons.RightCheveron} size={24} />
                 </Button>
             </StyledHeader>
-            <ControllButtonSpacing>
+            <ControlButtonSpacing>
                 <Midcontent>
                     <MissionStatusDisplayWithHeader status={mission.status} />
                     <MissionProgressDisplay mission={mission} />
@@ -103,13 +104,13 @@ export const OngoingMissionCard = ({ mission }: MissionProps): JSX.Element => {
                     robotId={mission.robot.id}
                     missionStatus={mission.status}
                 />
-            </ControllButtonSpacing>
+            </ControlButtonSpacing>
         </StyledSmallScreenMissionCard>
     )
 
     const LargeScreenContent = (
         <StyledLargeScreenMissionCard>
-            <ControllButtonSpacing>
+            <ControlButtonSpacing>
                 <LeftSection>
                     <Typography variant="h5" style={{ color: tokens.colors.text.static_icons__default.hex }}>
                         {mission.name}
@@ -125,7 +126,7 @@ export const OngoingMissionCard = ({ mission }: MissionProps): JSX.Element => {
                     robotId={mission.robot.id}
                     missionStatus={mission.status}
                 />
-            </ControllButtonSpacing>
+            </ControlButtonSpacing>
             <StyledGhostButton variant="ghost" onClick={routeChange}>
                 {TranslateText('Open mission')}
                 <Icon name={Icons.RightCheveron} size={16} />
