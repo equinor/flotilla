@@ -36,12 +36,13 @@ const StyledTabHeader = styled.div`
 const StyledTabHeaderRightContent = styled.div`
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 24px;
     align-self: stretch;
 `
 const StyledOngoingMissionsInfo = styled.div`
     display: flex;
-    gap: 24px;
+    flex-direction: column;
+    align-items: flex-end;
     cursor: pointer;
 `
 const StyledNumberOfMissions = styled.div`

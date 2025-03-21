@@ -1,5 +1,5 @@
 import { DefaultPage } from 'components/Pages/DefaultPage/DefaultPage'
-import { MissionControlSection } from '../Pages/FrontPage/MissionOverview/MissionControlSection'
+import { MissionControlSection } from 'components/Pages/FrontPage/MissionOverview/MissionControlSection'
 import { InspectionSection } from 'components/Pages/InspectionPage/InspectionSection'
 import { InspectionOverviewSection } from 'components/Pages/InspectionPage/InspectionOverview'
 import { MissionHistoryView } from 'components/Pages/MissionHistory/MissionHistoryView'

@@ -14,6 +14,7 @@ import {
     PredefinedMissionsPage,
     RobotStatusPage,
 } from '../NavigationMenu/NavigationMenuPages'
+import { InfoPage } from './InfoPage'
 
 export const FlotillaSite = () => {
     const frontPageTabOptions = Object.values(TabNames)
@@ -53,6 +54,7 @@ export const FlotillaSite = () => {
                         />
                         <Route path={`${config.FRONTEND_BASE_ROUTE}/autoSchedule`} element={<AutoSchedulePage />} />
                         <Route path={`${config.FRONTEND_BASE_ROUTE}/robots`} element={<RobotStatusPage />} />
+                        <Route path={`${config.FRONTEND_BASE_ROUTE}/info`} element={<InfoPage />} />
                     </Routes>
                 </BrowserRouter>
             </APIUpdater>
