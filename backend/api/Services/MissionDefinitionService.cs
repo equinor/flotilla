@@ -222,7 +222,7 @@ namespace Api.Services
             }
 
             missionDefinition.IsDeprecated = true;
-            await ApplyDatabaseUpdate(missionDefinition.InspectionArea?.Installation);
+            await Update(missionDefinition);
 
             return missionDefinition;
         }
