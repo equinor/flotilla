@@ -1,4 +1,4 @@
-import { ChangeEvent, useState } from 'react'
+import { ChangeEvent, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { MissionDefinitionHeader } from './MissionDefinitionHeader/MissionDefinitionHeader'
 import { BackButton } from 'utils/BackButton'
@@ -24,6 +24,7 @@ import {
 } from 'components/Pages/MissionDefinitionPage/EditAutoScheduleDialogContent'
 import { AutoScheduleFrequency } from 'models/AutoScheduleFrequency'
 import { TaskTableAndMap } from '../MissionPage/TaskTableAndMap'
+import { Mission } from 'models/Mission'
 
 const StyledDictCard = styled(StyledDict.Card)`
     border-radius: 6px;
@@ -101,6 +102,32 @@ const MissionDefinitionPageBody = ({ missionDefinition }: { missionDefinition: M
     const { setAlert, setListAlert } = useAlertContext()
     const [isEditDialogOpen, setIsEditDialogOpen] = useState<boolean>(false)
     const [selectedField, setSelectedField] = useState<string>('')
+    const [lastMissionRun, setLastMissionRun] = useState<Mission>()
+
+    useEffect(() => {
+        if (missionDefinition.lastSuccessfulRun) {
+            BackendAPICaller.getMissionRunById(missionDefinition.lastSuccessfulRun.id)
+                .then((mission) => {
+                    setLastMissionRun(mission)
+                })
+                .catch(() => {
+                    setAlert(
+                        AlertType.RequestFail,
+                        <FailedRequestAlertContent
+                            translatedMessage={TranslateText('Failed to fetch last successful run')}
+                        />,
+                        AlertCategory.ERROR
+                    )
+                    setListAlert(
+                        AlertType.RequestFail,
+                        <FailedRequestAlertListContent
+                            translatedMessage={TranslateText('Failed to fetch last successful run')}
+                        />,
+                        AlertCategory.ERROR
+                    )
+                })
+        }
+    }, [missionDefinition.lastSuccessfulRun?.id])
 
     const onEdit = (editType: string) => {
         return () => {
@@ -165,11 +192,7 @@ const MissionDefinitionPageBody = ({ missionDefinition }: { missionDefinition: M
                 />
             )}
             <StyledTableAndMap>
-                {missionDefinition.lastSuccessfulRun &&
-                    missionDefinition.lastSuccessfulRun.tasks &&
-                    missionDefinition.lastSuccessfulRun.robot && (
-                        <TaskTableAndMap mission={missionDefinition.lastSuccessfulRun} missionDefinitionPage={true} />
-                    )}
+                {lastMissionRun && <TaskTableAndMap mission={lastMissionRun} missionDefinitionPage={true} />}
             </StyledTableAndMap>
         </StyledMissionDefinitionPageBody>
     )
