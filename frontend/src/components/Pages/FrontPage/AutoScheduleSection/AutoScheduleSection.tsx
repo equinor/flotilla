@@ -1,12 +1,13 @@
-import { Table, Typography } from '@equinor/eds-core-react'
+import { Button, Table, Typography } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
 import { StyledTableBody, StyledTableCell } from 'components/Styles/StyledComponents'
-import { DaysOfWeek } from 'models/AutoScheduleFrequency'
+import { DaysOfWeek, parseAutoScheduledJobIds } from 'models/AutoScheduleFrequency'
 import { config } from 'config'
-import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import { capitalizeFirstLetter } from 'utils/StringFormatting'
+import { BackendAPICaller } from 'api/ApiCaller'
+import { Link } from 'react-router-dom'
 
 const StyledSection = styled.div`
     display: flex;
@@ -15,9 +16,10 @@ const StyledSection = styled.div`
     gap: 1rem;
 `
 const StyledTableRow = styled.div`
-    display: flex;
-    flex-direction: row;
+    display: grid;
+    align-items: center;
     gap: 1rem;
+    grid-template-columns: 100px auto 300px 100px;
 `
 const StyledHeader = styled.div`
     gap: 0px;
@@ -30,7 +32,15 @@ const StyledDayOverview = styled.div`
 const AutoScheduleList = () => {
     const { TranslateText } = useLanguageContext()
     const { missionDefinitions } = useMissionDefinitionsContext()
-    const navigate = useNavigate()
+
+    const skipAutoScheduledMission = async (missionId: string, timeOfDay: string) => {
+        console.log(missionId, timeOfDay)
+        await BackendAPICaller.skipAutoScheduledMission(missionId, timeOfDay)
+    }
+
+    const HandleSkipButtonClick = (missionId: string, timeOfDay: string) => {
+        skipAutoScheduledMission(missionId, timeOfDay)
+    }
 
     const autoScheduleMissionDefinitions = missionDefinitions.filter((m) => m.autoScheduleFrequency)
 
@@ -43,6 +53,9 @@ const AutoScheduleList = () => {
         DaysOfWeek.Saturday,
         DaysOfWeek.Sunday,
     ]
+
+    const getDayIndexMondaySunday = (date: Date) => (date.getDay() === 0 ? 6 : date.getDay() - 1)
+    const currentDayOfTheWeek = allDays[getDayIndexMondaySunday(new Date())]
 
     const DayOverview = () =>
         allDays.map((day) => {
@@ -68,16 +81,36 @@ const AutoScheduleList = () => {
                     <StyledTableBody>
                         {timeMissionPairs.length > 0 ? (
                             timeMissionPairs.map(({ time, mission }) => (
-                                <Table.Row
-                                    key={mission.id + time}
-                                    onClick={() =>
-                                        navigate(`${config.FRONTEND_BASE_ROUTE}/mission-definition/${mission.id}`)
-                                    }
-                                >
+                                <Table.Row key={mission.id + time}>
                                     <Table.Cell>
                                         <StyledTableRow>
                                             <Typography>{`${time.substring(0, 5)}`}</Typography>
-                                            <Typography link>{mission.name}</Typography>
+                                            <Typography
+                                                as={Link}
+                                                to={`${config.FRONTEND_BASE_ROUTE}/mission-definition/${mission.id}`}
+                                                link
+                                            >
+                                                {mission.name}
+                                            </Typography>
+                                            {day === currentDayOfTheWeek &&
+                                                mission.autoScheduleFrequency &&
+                                                mission.autoScheduleFrequency.autoScheduledJobs &&
+                                                parseAutoScheduledJobIds(
+                                                    mission.autoScheduleFrequency.autoScheduledJobs
+                                                )[time] && (
+                                                    <>
+                                                        <Typography>
+                                                            {TranslateText('Auto mission successfully planned')}
+                                                        </Typography>
+
+                                                        <Button
+                                                            variant="ghost"
+                                                            onClick={() => HandleSkipButtonClick(mission.id, time)}
+                                                        >
+                                                            {TranslateText('SkipAutoMission')}
+                                                        </Button>
+                                                    </>
+                                                )}
                                         </StyledTableRow>
                                     </Table.Cell>
                                 </Table.Row>

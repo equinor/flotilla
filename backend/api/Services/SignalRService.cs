@@ -15,7 +15,8 @@ namespace Api.Services
         public void ReportDockFailureToSignalR(Robot robot, string message);
         public void ReportDockSuccessToSignalR(Robot robot, string message);
         public void ReportGeneralFailToSignalR(Robot robot, string title, string message);
-        public void ReportAutoScheduleFailToSignalR(
+        public void ReportAutoScheduleToSignalR(
+            string type,
             string title,
             string message,
             string installationCode
@@ -107,7 +108,8 @@ namespace Api.Services
             );
         }
 
-        public void ReportAutoScheduleFailToSignalR(
+        public void ReportAutoScheduleToSignalR(
+            string type,
             string missionDefinitionId,
             string message,
             string installationCode
@@ -116,13 +118,7 @@ namespace Api.Services
             _ = SendMessageAsync(
                 "Alert",
                 null,
-                new AlertResponse(
-                    "autoSchedule",
-                    missionDefinitionId,
-                    message,
-                    installationCode,
-                    null
-                )
+                new AlertResponse(type, missionDefinitionId, message, installationCode, null)
             );
         }
 

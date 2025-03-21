@@ -242,5 +242,41 @@ namespace Api.Controllers
             var missionDefinitionResponse = new MissionDefinitionResponse(missionDefinition);
             return Ok(missionDefinitionResponse);
         }
+
+        /// <summary>
+        ///     Skip auto mission run for the given mission definition at the given time of day
+        /// </summary>
+        [HttpPut]
+        [Authorize(Roles = Role.Admin)]
+        [Route("{id}/skip-auto-mission")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> SkipAutoMissionMissionRun(
+            [FromRoute] string id,
+            [FromBody] SkipAutoMissionQuery skipAutoMissionQuery
+        )
+        {
+            var missionDefinition = await missionDefinitionService.ReadById(id, readOnly: true);
+            if (missionDefinition == null)
+            {
+                return NotFound($"Could not find mission definition with id '{id}'");
+            }
+
+            try
+            {
+                await missionDefinitionService.SkipAutoMission(
+                    missionDefinition,
+                    skipAutoMissionQuery.TimeOfDay
+                );
+            }
+            catch (ArgumentException e)
+            {
+                return BadRequest(e.Message);
+            }
+            return NoContent();
+        }
     }
 }
