@@ -219,7 +219,7 @@ namespace Api.Controllers
         }
 
         /// <summary>
-        ///     Deletes the mission definition with the specified id from the database.
+        ///     Deprecates the mission definition with the specified id.
         /// </summary>
         [HttpDelete]
         [Authorize(Roles = Role.Admin)]
@@ -229,19 +229,17 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<MissionDefinitionResponse>> DeleteMissionDefinitionWithTasks(
+        public async Task<ActionResult<MissionDefinitionResponse>> DeleteMissionDefinition(
             [FromRoute] string id
         )
         {
+            logger.LogInformation("Deprecating mission definition with id '{Id}'", id);
             var missionDefinition = await missionDefinitionService.Delete(id);
             if (missionDefinition is null)
             {
                 return NotFound($"Mission definition with id {id} not found");
             }
-            var missionDefinitionResponse = new MissionDefinitionWithTasksResponse(
-                missionDefinitionService,
-                missionDefinition
-            );
+            var missionDefinitionResponse = new MissionDefinitionResponse(missionDefinition);
             return Ok(missionDefinitionResponse);
         }
     }
