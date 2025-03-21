@@ -5,7 +5,7 @@ import { MissionDefinition } from 'models/MissionDefinition'
 import { ScheduleMissionDialog } from './ScheduleMissionDialogs'
 import { getInspectionDeadline } from 'utils/StringFormatting'
 import { InspectionTable } from './InspectionTable'
-import { StyledDict, compareInspections } from './InspectionUtilities'
+import { compareInspections, InspectionAreaOverview } from './InspectionUtilities'
 import { InspectionAreaCards } from './InspectionAreaCards'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
@@ -93,19 +93,19 @@ export const InspectionSection = () => {
             : inspectionAreaInspections.find((d) => d.inspectionArea === inspectionArea)?.inspections
 
     const InspectionAreaSelection = () => (
-        <StyledDict.InspectionAreaOverview>
+        <InspectionAreaOverview>
             <InspectionAreaCards
                 inspectionAreaMissions={inspectionAreaInspections}
                 onClickInspectionArea={onClickInspectionArea}
                 selectedInspectionArea={selectedInspectionArea}
                 handleScheduleAll={handleScheduleAll}
             />
-        </StyledDict.InspectionAreaOverview>
+        </InspectionAreaOverview>
     )
 
     return (
         <>
-            <StyledDict.InspectionAreaOverview>
+            <InspectionAreaOverview>
                 {installationInspectionAreas.length !== 1 && <InspectionAreaSelection />}
                 {inspectionArea && inspections && (
                     <InspectionTable
@@ -116,7 +116,7 @@ export const InspectionSection = () => {
                         inspections={inspections}
                     />
                 )}
-            </StyledDict.InspectionAreaOverview>
+            </InspectionAreaOverview>
             {isDialogOpen && (
                 <ScheduleMissionDialog
                     selectedMissions={selectedMissions!}

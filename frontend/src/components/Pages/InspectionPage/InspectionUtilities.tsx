@@ -5,95 +5,87 @@ import { getDeadlineInDays } from 'utils/StringFormatting'
 import { tokens } from '@equinor/eds-tokens'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 
-export const StyledDict = {
-    Card: styled(Card)`
-        display: flex;
-        min-height: 150px;
-        padding: 16px;
-        flex-direction: column;
-        justify-content: space-between;
-        flex: 1 0 0;
-        cursor: pointer;
-        border-radius: 0px 4px 4px 0px;
-    `,
-    CardComponent: styled.div`
-        display: flex;
-        padding-right: 16px;
-        justify-content: flex-end;
-        gap: 10px;
-        width: 100%;
-    `,
-    InspectionAreaCards: styled.div`
-        display: grid;
-        grid-template-columns: repeat(auto-fill, 450px);
-        grid-auto-rows: 1fr;
-        gap: 24px;
-    `,
-    InspectionAreaText: styled.div`
-        display: grid;
-        grid-template-rows: 25px 35px;
-        align-self: stretch;
-    `,
-    TopInspectionAreaText: styled.div`
-        display: flex;
-        justify-content: space-between;
-        margin-right: 5px;
-    `,
-    Rectangle: styled.div`
-        display: flex-start;
-        width: 24px;
-        height: 100%;
-        border-radius: 6px 0px 0px 6px;
-    `,
-    InspectionAreaCard: styled.div`
-        display: flex;
-        @media (max-width: 800px) {
-            max-width: calc(100vw - 30px);
-        }
-        max-width: 450px;
-        border-radius: 6px;
-        box-shadow:
-            0px 3px 4px 0px rgba(0, 0, 0, 0.12),
-            0px 2px 4px 0px rgba(0, 0, 0, 0.14);
-    `,
-    Circle: styled.div`
-        width: 13px;
-        height: 13px;
-        border-radius: 50px;
-    `,
-    MissionComponents: styled.div`
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 4px;
-    `,
-    InspectionAreaOverview: styled.div`
-        display: flex;
-        flex-direction: column;
-        gap: 25px;
-    `,
-    MissionInspections: styled.div`
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-    `,
-    Placeholder: styled.div`
-        padding: 24px;
-        border: 1px solid #dcdcdc;
-        border-radius: 4px;
-    `,
-    Content: styled.div`
-        display: flex;
-        align-items: centre;
-        gap: 5px;
-    `,
-    Buttons: styled.div`
-        display: flex;
-        flex-direction: row;
-        gap: 8px;
-        padding-bottom: 30px;
-    `,
-}
+export const StyledCard = styled(Card)`
+    display: flex;
+    min-height: 150px;
+    padding: 16px;
+    flex-direction: column;
+    justify-content: space-between;
+    flex: 1 0 0;
+    cursor: pointer;
+    border-radius: 0px 4px 4px 0px;
+`
+export const CardComponent = styled.div`
+    display: flex;
+    padding-right: 16px;
+    justify-content: flex-end;
+    gap: 10px;
+    width: 100%;
+`
+export const StyledInspectionAreaCards = styled.div`
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 450px);
+    grid-auto-rows: 1fr;
+    gap: 24px;
+`
+export const InspectionAreaText = styled.div`
+    display: grid;
+    grid-template-rows: 25px 35px;
+    align-self: stretch;
+`
+export const TopInspectionAreaText = styled.div`
+    display: flex;
+    justify-content: space-between;
+    margin-right: 5px;
+`
+export const Rectangle = styled.div`
+    display: flex-start;
+    width: 24px;
+    height: 100%;
+    border-radius: 6px 0px 0px 6px;
+`
+export const StyledInspectionAreaCard = styled.div`
+    display: flex;
+    @media (max-width: 800px) {
+        max-width: calc(100vw - 30px);
+    }
+    max-width: 450px;
+    border-radius: 6px;
+    box-shadow:
+        0px 3px 4px 0px rgba(0, 0, 0, 0.12),
+        0px 2px 4px 0px rgba(0, 0, 0, 0.14);
+`
+const Circle = styled.div`
+    width: 13px;
+    height: 13px;
+    border-radius: 50px;
+`
+const MissionComponents = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+`
+export const InspectionAreaOverview = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+`
+const MissionInspections = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+`
+export const Placeholder = styled.div`
+    padding: 24px;
+    border: 1px solid #dcdcdc;
+    border-radius: 4px;
+`
+export const Content = styled.div`
+    display: flex;
+    align-items: centre;
+    gap: 5px;
+`
 
 export enum InspectionAreaCardColors {
     Gray = 'gray',
@@ -181,12 +173,12 @@ export const CardMissionInformation = ({ inspections }: ICardMissionInformationP
     })
 
     return (
-        <StyledDict.MissionInspections>
+        <MissionInspections>
             {Object.keys(colorsCount)
                 .filter((color) => colorsCount[color].count > 0)
                 .map((color) => (
-                    <StyledDict.MissionComponents key={color}>
-                        <StyledDict.Circle style={{ background: color }} />
+                    <MissionComponents key={color}>
+                        <Circle style={{ background: color }} />
                         <Typography color={tokens.colors.text.static_icons__secondary.hex}>
                             {colorsCount[color].count > 1 &&
                                 colorsCount[color].count +
@@ -201,8 +193,8 @@ export const CardMissionInformation = ({ inspections }: ICardMissionInformationP
                                     ' ' +
                                     TranslateText(colorsCount[color].message).toLowerCase()}
                         </Typography>
-                    </StyledDict.MissionComponents>
+                    </MissionComponents>
                 ))}
-        </StyledDict.MissionInspections>
+        </MissionInspections>
     )
 }
