@@ -659,7 +659,7 @@ namespace Api.Services
             {
                 robot = await robotService.GetRobotWithSchedulingPreCheck(robotId);
             }
-            catch (Exception e) when (e is RobotNotFoundException)
+            catch (RobotNotFoundException)
             {
                 logger.LogError(
                     "Robot with ID {RobotId} was not found when scheduling mission run",
@@ -667,7 +667,7 @@ namespace Api.Services
                 );
                 return;
             }
-            catch (Exception e) when (e is RobotPreCheckFailedException)
+            catch (RobotPreCheckFailedException)
             {
                 logger.LogError(
                     "Robot with ID {RobotId} failed pre-check when scheduling mission run",
