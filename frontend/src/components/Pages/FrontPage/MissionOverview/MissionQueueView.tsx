@@ -9,8 +9,9 @@ import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'compon
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { Robot } from 'models/Robot'
 import { tokens } from '@equinor/eds-tokens'
-import { useEffect } from 'react'
-import { Typography } from '@equinor/eds-core-react'
+import { useEffect, useState } from 'react'
+import { Button, Dialog, Typography } from '@equinor/eds-core-react'
+import { StyledDialog } from 'components/Styles/StyledComponents'
 
 const StyledMissionView = styled.div`
     display: flex;
@@ -20,11 +21,23 @@ const StyledMissionView = styled.div`
     align-self: stretch;
     border-top: 1px solid ${tokens.colors.ui.background__medium.hex};
 `
+const StyledTitleAndButton = styled.div`
+    display: flex;
+    flex-directon: row;
+    justify-content: space-between;
+    align-items: center;
+`
+
+const StyledWrapper = styled.div`
+    display: flex;
+    gap: 8px;
+`
 
 export const RobotMissionQueueView = ({ robot }: { robot: Robot }) => {
     const { TranslateText } = useLanguageContext()
     const { missionQueue, ongoingMissions, loadingRobotMissionSet, setLoadingRobotMissionSet } = useMissionsContext()
     const { setAlert, setListAlert } = useAlertContext()
+    const [isdialogOpen, setIsDialogOpen] = useState(false)
 
     const robotMissionQueue = missionQueue.filter((mission) => mission.robot.id === robot.id)
     const robotOngoingMissions = ongoingMissions.filter((mission) => mission.robot.id === robot.id)
@@ -47,6 +60,29 @@ export const RobotMissionQueueView = ({ robot }: { robot: Robot }) => {
                 AlertCategory.ERROR
             )
         })
+
+    const onDeleteAllMissions = () =>
+        BackendAPICaller.deleteAllMissions().catch(() => {
+            setAlert(
+                AlertType.RequestFail,
+                <FailedRequestAlertContent
+                    translatedMessage={TranslateText('Failed to delete all missions from queue')}
+                />,
+                AlertCategory.ERROR
+            )
+            setListAlert(
+                AlertType.RequestFail,
+                <FailedRequestAlertListContent
+                    translatedMessage={TranslateText('Failed to delete all missions from queue')}
+                />,
+                AlertCategory.ERROR
+            )
+        })
+
+    const handleButton = () => {
+        onDeleteAllMissions()
+        setIsDialogOpen(false)
+    }
 
     useEffect(() => {
         setLoadingRobotMissionSet((currentLoadingNames) => {
@@ -74,7 +110,32 @@ export const RobotMissionQueueView = ({ robot }: { robot: Robot }) => {
         <>
             {(robotMissionQueue.length > 0 || robotLoadingMissions.length > 0) && (
                 <StyledMissionView>
-                    <Typography variant="h5">{TranslateText('Queued Missions')}</Typography>
+                    <StyledTitleAndButton>
+                        <Typography variant="h5">{TranslateText('Queued Missions')}</Typography>
+                        <Button variant="ghost" aria-haspopup="dialog" onClick={() => setIsDialogOpen(true)}>
+                            <Typography variant="caption">{TranslateText('Remove all')}</Typography>
+                        </Button>
+                        <StyledDialog open={isdialogOpen} onClose={() => setIsDialogOpen(false)} isDismissable={true}>
+                            <Dialog.Header>
+                                <Dialog.Title>
+                                    <Typography variant="h3">{TranslateText('Remove all missions')}</Typography>
+                                </Dialog.Title>
+                            </Dialog.Header>
+                            <Dialog.CustomContent>
+                                <Typography variant="body_short">
+                                    {TranslateText('Remove all missions dialog text')}
+                                </Typography>
+                            </Dialog.CustomContent>
+                            <Dialog.Actions>
+                                <StyledWrapper>
+                                    <Button variant="outlined" onClick={() => setIsDialogOpen(false)}>
+                                        {TranslateText('Cancel')}
+                                    </Button>
+                                    <Button onClick={handleButton}>{TranslateText('Remove all missions')}</Button>
+                                </StyledWrapper>
+                            </Dialog.Actions>
+                        </StyledDialog>
+                    </StyledTitleAndButton>
                     {missionQueueDisplay}
                     {robotLoadingMissions.length > 0 && loadingQueueDisplay}
                 </StyledMissionView>
