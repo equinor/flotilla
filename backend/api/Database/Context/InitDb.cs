@@ -8,9 +8,9 @@ namespace Api.Database.Context
     {
         private static readonly List<Inspection> inspections = GetInspections();
         private static readonly List<Installation> installations = GetInstallations();
-        private static readonly List<Robot> robots = GetRobots();
         private static readonly List<Plant> plants = GetPlants();
         private static readonly List<InspectionArea> inspectionAreas = GetInspectionAreas();
+        private static readonly List<Robot> robots = GetRobots();
         private static readonly List<Source> sources = GetSources();
         private static readonly List<MissionTask> tasks = GetMissionTasks();
         private static readonly List<MissionDefinition> missionDefinitions =
@@ -193,7 +193,21 @@ namespace Api.Database.Context
                 Pose = new Pose(),
             };
 
-            return new List<Robot>([robot1, robot2, robot3]);
+            var robot4 = new Robot
+            {
+                Name = "Placebot",
+                IsarId = "00000000-0000-0000-0000-000000000000",
+                SerialNumber = "Placebot1",
+                Status = RobotStatus.Available,
+                Host = "localhost",
+                Port = 3000,
+                CurrentInstallation = installations[0],
+                CurrentInspectionArea = inspectionAreas[0],
+                Documentation = [],
+                Pose = new Pose(),
+            };
+
+            return new List<Robot>([robot1, robot2, robot3, robot4]);
         }
 
         private static List<MissionDefinition> GetMissionDefinitions()
@@ -503,6 +517,7 @@ namespace Api.Database.Context
             robots[0].Model = models.Find(model => model.Type == RobotType.TaurobInspector)!;
             robots[1].Model = models.Find(model => model.Type == RobotType.ExR2)!;
             robots[2].Model = models.Find(model => model.Type == RobotType.AnymalX)!;
+            robots[3].Model = models.Find(model => model.Type == RobotType.Robot)!;
 
             context.AddRange(robots);
             context.AddRange(plants);
