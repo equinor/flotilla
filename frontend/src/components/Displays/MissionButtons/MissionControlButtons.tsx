@@ -86,12 +86,14 @@ const OngoingMissionButton = ({ missionName, robotId, missionTaskType }: Mission
 
     return (
         <ButtonStyle>
-            <ButtonText onClick={() => updateRobotMissionState(MissionStatusRequest.Pause, robotId)}>
-                <ButtonIcon variant="contained_icon">
-                    <Icon name={Icons.PauseStandard} size={24} />
-                </ButtonIcon>
-                <Typography variant="caption">{TranslateText('Pause')}</Typography>
-            </ButtonText>
+            {missionTaskType !== TaskType.ReturnHome && (
+                <ButtonText onClick={() => updateRobotMissionState(MissionStatusRequest.Pause, robotId)}>
+                    <ButtonIcon variant="contained_icon">
+                        <Icon name={Icons.PauseStandard} size={24} />
+                    </ButtonIcon>
+                    <Typography variant="caption">{TranslateText('Pause')}</Typography>
+                </ButtonText>
+            )}
             <ButtonText onClick={toggleSkipMissionDialog}>
                 <ButtonIcon variant="contained_icon">
                     <Icon name={Icons.Next} size={24} />
@@ -119,12 +121,14 @@ const PausedMissionButton = ({ missionName, robotId, missionTaskType }: MissionP
 
     return (
         <ButtonStyle>
-            <ButtonText onClick={() => updateRobotMissionState(MissionStatusRequest.Resume, robotId)}>
-                <ButtonIcon variant="contained_icon">
-                    <Icon name={Icons.PlayStandard} size={24} />
-                </ButtonIcon>
-                <Typography variant="caption">{TranslateText('Start')}</Typography>
-            </ButtonText>
+            {missionTaskType !== TaskType.ReturnHome && (
+                <ButtonText onClick={() => updateRobotMissionState(MissionStatusRequest.Resume, robotId)}>
+                    <ButtonIcon variant="contained_icon">
+                        <Icon name={Icons.PlayStandard} size={24} />
+                    </ButtonIcon>
+                    <Typography variant="caption">{TranslateText('Start')}</Typography>
+                </ButtonText>
+            )}
             <ButtonText onClick={toggleSkipMissionDialog}>
                 <ButtonIcon variant="contained_icon">
                     <Icon name={Icons.Next} size={24} />
