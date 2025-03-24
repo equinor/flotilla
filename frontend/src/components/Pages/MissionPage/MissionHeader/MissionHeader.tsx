@@ -1,4 +1,4 @@
-import { Card, Typography } from '@equinor/eds-core-react'
+import { Button, Card, Typography } from '@equinor/eds-core-react'
 import { MissionControlButtons } from 'components/Displays/MissionButtons/MissionControlButtons'
 import { MissionStatusDisplay } from 'components/Displays/MissionDisplays/MissionStatusDisplay'
 import { differenceInMinutes } from 'date-fns'
@@ -11,6 +11,8 @@ import { MissionRestartButton } from 'components/Displays/MissionButtons/Mission
 import { TaskStatus, TaskType } from 'models/Task'
 import { convertUTCDateToLocalDate, formatDateTime } from 'utils/StringFormatting'
 import { calculateRemaindingTimeInMinutes } from 'utils/CalculateRemaingingTime'
+import { useNavigate } from 'react-router-dom'
+import { config } from 'config'
 
 const HeaderSection = styled(Card)`
     width: 100%;
@@ -136,6 +138,7 @@ const getStartUsedAndRemainingTime = (
 
 export const MissionHeader = ({ mission }: { mission: Mission }) => {
     const { TranslateText } = useLanguageContext()
+    const navigate = useNavigate()
     const barToMillibar = 1000
     const isMissionCompleted = mission.endTime ? true : false
 
@@ -185,6 +188,14 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
                             smallButton={false}
                         />
                     )}
+                    <Button
+                        variant="outlined"
+                        onClick={() =>
+                            navigate(`${config.FRONTEND_BASE_ROUTE}/mission-definition/${mission.missionId}`)
+                        }
+                    >
+                        {TranslateText('View mission definition')}
+                    </Button>
                 </TitleSection>
                 <Typography
                     variant="body_long"
