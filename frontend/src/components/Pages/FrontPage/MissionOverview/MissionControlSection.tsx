@@ -3,9 +3,9 @@ import styled from 'styled-components'
 import { RobotCard, RobotCardPlaceholder } from './RobotCard'
 import { useRobotContext } from 'components/Contexts/RobotContext'
 import { tokens } from '@equinor/eds-tokens'
-import { OngoingMissionCard, OngoingMissionPlaceholderCard } from './OngoingMissionCard'
+import { OngoingMissionCard, OngoingMissionPlaceholderCard, OngoingReturnHomeMissionCard } from './OngoingMissionCard'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
-import { Robot } from 'models/Robot'
+import { Robot, RobotStatus } from 'models/Robot'
 import { RobotMissionQueueView } from './MissionQueueView'
 import { FrontPageSectionId } from 'models/FrontPageSectionId'
 
@@ -77,6 +77,8 @@ const MissionControlCard = ({ robot }: { robot: Robot }) => {
                 <RobotCard robot={robot} />
                 {ongoingMission ? (
                     <OngoingMissionCard mission={ongoingMission} />
+                ) : robot.status === RobotStatus.ReturningHome ? (
+                    <OngoingReturnHomeMissionCard robot={robot} />
                 ) : (
                     <OngoingMissionPlaceholderCard robot={robot} />
                 )}

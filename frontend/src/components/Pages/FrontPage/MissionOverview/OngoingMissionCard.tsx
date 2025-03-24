@@ -1,7 +1,7 @@
 import { Button, Icon, Typography } from '@equinor/eds-core-react'
 import { config } from 'config'
 import { tokens } from '@equinor/eds-tokens'
-import { Mission } from 'models/Mission'
+import { Mission, MissionStatus } from 'models/Mission'
 import styled from 'styled-components'
 import { MissionProgressDisplay } from 'components/Displays/MissionDisplays/MissionProgressDisplay'
 import { MissionStatusDisplayWithHeader } from 'components/Displays/MissionDisplays/MissionStatusDisplay'
@@ -80,9 +80,6 @@ export const OngoingMissionCard = ({ mission }: MissionProps) => {
         navigate(path)
     }
 
-    let missionTaskType = TaskType.Inspection
-    if (mission.tasks.every((task) => task.type === TaskType.ReturnHome)) missionTaskType = TaskType.ReturnHome
-
     const SmallScreenContent = (
         <StyledSmallScreenMissionCard>
             <StyledHeader onClick={routeChange}>
@@ -100,7 +97,7 @@ export const OngoingMissionCard = ({ mission }: MissionProps) => {
                 </Midcontent>
                 <MissionControlButtons
                     missionName={mission.name}
-                    missionTaskType={missionTaskType}
+                    missionTaskType={TaskType.Inspection}
                     robotId={mission.robot.id}
                     missionStatus={mission.status}
                 />
@@ -122,7 +119,7 @@ export const OngoingMissionCard = ({ mission }: MissionProps) => {
                 </LeftSection>
                 <MissionControlButtons
                     missionName={mission.name}
-                    missionTaskType={missionTaskType}
+                    missionTaskType={TaskType.Inspection}
                     robotId={mission.robot.id}
                     missionStatus={mission.status}
                 />
@@ -131,6 +128,60 @@ export const OngoingMissionCard = ({ mission }: MissionProps) => {
                 {TranslateText('Open mission')}
                 <Icon name={Icons.RightCheveron} size={16} />
             </StyledGhostButton>
+        </StyledLargeScreenMissionCard>
+    )
+
+    return (
+        <>
+            {SmallScreenContent}
+            {LargeScreenContent}
+        </>
+    )
+}
+
+export const OngoingReturnHomeMissionCard = ({ robot }: { robot: Robot }) => {
+    const { TranslateText } = useLanguageContext()
+    const missionName = TranslateText('Return robot to home')
+
+    const SmallScreenContent = (
+        <StyledSmallScreenMissionCard>
+            <StyledHeader>
+                <Typography variant="h5" style={{ color: tokens.colors.text.static_icons__default.hex }}>
+                    {missionName}
+                </Typography>
+            </StyledHeader>
+            <ControlButtonSpacing>
+                <Midcontent>
+                    <MissionStatusDisplayWithHeader status={MissionStatus.Ongoing} />
+                </Midcontent>
+                <MissionControlButtons
+                    missionName={missionName}
+                    missionTaskType={TaskType.ReturnHome}
+                    robotId={robot.id}
+                    missionStatus={MissionStatus.Ongoing}
+                />
+            </ControlButtonSpacing>
+        </StyledSmallScreenMissionCard>
+    )
+
+    const LargeScreenContent = (
+        <StyledLargeScreenMissionCard>
+            <ControlButtonSpacing>
+                <LeftSection>
+                    <Typography variant="h5" style={{ color: tokens.colors.text.static_icons__default.hex }}>
+                        {missionName}
+                    </Typography>
+                    <Midcontent>
+                        <MissionStatusDisplayWithHeader status={MissionStatus.Ongoing} />
+                    </Midcontent>
+                </LeftSection>
+                <MissionControlButtons
+                    missionName={missionName}
+                    missionTaskType={TaskType.ReturnHome}
+                    robotId={robot.id}
+                    missionStatus={MissionStatus.Ongoing}
+                />
+            </ControlButtonSpacing>
         </StyledLargeScreenMissionCard>
     )
 

@@ -202,6 +202,7 @@
     "No robot available": "No robot available",
     "Failed to schedule mission": "Failed to schedule mission",
     "Return robot to home": "Return robot to home",
+    "ReturningHome": "Returning home",
     "Dock failure": "Dock failure",
     "Failure to schedule": "Failure to schedule",
     "WARNING": "WARNING",
