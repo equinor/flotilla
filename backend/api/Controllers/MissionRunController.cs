@@ -122,5 +122,42 @@ namespace Api.Controllers
             var missionRunResponse = new MissionRunResponse(missionRun);
             return Ok(missionRunResponse);
         }
+
+        /// <summary>
+        ///     Deletes all pending mission runs from the database.
+        /// </summary>
+        [HttpDelete]
+        [Authorize(Roles = Role.User)]
+        [Route("")]
+        [ProducesResponseType(typeof(IList<MissionRunResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<IList<MissionRunResponse>>> DeleteAllMissionRuns()
+        {
+            var pendingMissionRuns = await missionRunService.ReadAll(
+                new MissionRunQueryStringParameters
+                {
+                    Statuses = [MissionStatus.Pending],
+                    MissionRunType = MissionRunType.Normal,
+                }
+            );
+
+            var missionRunResponse = new List<MissionRunResponse>();
+
+            foreach (var missionRun in pendingMissionRuns)
+            {
+                var deletedMissionRun = await missionRunService.Delete(missionRun.Id);
+                if (deletedMissionRun is null)
+                {
+                    return NotFound($"Mission run with id {missionRun.Id} not found");
+                }
+
+                missionRunResponse.Add(new MissionRunResponse(missionRun));
+            }
+
+            return Ok(missionRunResponse);
+        }
     }
 }
