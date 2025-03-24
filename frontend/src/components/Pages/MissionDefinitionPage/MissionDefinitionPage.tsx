@@ -46,7 +46,6 @@ const StyledTopComponents = styled.div`
 
 const StyledButton = styled(Button)`
     width: 160px;
-    background-color: ${tokens.colors.ui.background__default.hex};
 `
 
 const StyledMissionDefinitionPageBody = styled.div`
