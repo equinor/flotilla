@@ -51,11 +51,11 @@ namespace Api.Controllers
                     readOnly: true
                 );
             }
-            catch (Exception e) when (e is RobotNotFoundException)
+            catch (RobotNotFoundException e)
             {
                 return NotFound(e.Message);
             }
-            catch (Exception e) when (e is RobotPreCheckFailedException)
+            catch (RobotPreCheckFailedException e)
             {
                 return BadRequest(e.Message);
             }
@@ -144,11 +144,11 @@ namespace Api.Controllers
                     readOnly: true
                 );
             }
-            catch (Exception e) when (e is RobotNotFoundException)
+            catch (RobotNotFoundException e)
             {
                 return NotFound(e.Message);
             }
-            catch (Exception e) when (e is RobotPreCheckFailedException)
+            catch (RobotPreCheckFailedException e)
             {
                 return BadRequest(e.Message);
             }
@@ -264,11 +264,11 @@ namespace Api.Controllers
                     readOnly: true
                 );
             }
-            catch (Exception e) when (e is RobotNotFoundException)
+            catch (RobotNotFoundException e)
             {
                 return NotFound(e.Message);
             }
-            catch (Exception e) when (e is RobotPreCheckFailedException)
+            catch (RobotPreCheckFailedException e)
             {
                 return BadRequest(e.Message);
             }
@@ -451,11 +451,11 @@ namespace Api.Controllers
                     readOnly: true
                 );
             }
-            catch (Exception e) when (e is RobotNotFoundException)
+            catch (RobotNotFoundException e)
             {
                 return NotFound(e.Message);
             }
-            catch (Exception e) when (e is RobotPreCheckFailedException)
+            catch (RobotPreCheckFailedException e)
             {
                 return BadRequest(e.Message);
             }
@@ -596,19 +596,15 @@ namespace Api.Controllers
 
                 newMissionRun = await missionRunService.Create(scheduledMission);
             }
-            catch (Exception e) when (e is UnsupportedRobotCapabilityException)
-            {
-                return BadRequest(e.Message);
-            }
-            catch (Exception e) when (e is MissionNotFoundException)
+            catch (MissionNotFoundException e)
             {
                 return NotFound(e.Message);
             }
-            catch (Exception e) when (e is RobotNotFoundException)
+            catch (RobotNotFoundException e)
             {
                 return NotFound(e.Message);
             }
-            catch (Exception e) when (e is UnsupportedRobotCapabilityException)
+            catch (UnsupportedRobotCapabilityException)
             {
                 return BadRequest(
                     $"The robot {robot.Name} does not have the necessary sensors to run the mission."
