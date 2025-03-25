@@ -148,7 +148,7 @@ namespace Api.EventHandlers
                 robot.CurrentInspectionArea?.Name
             );
 
-            if (isarStatus.Status == RobotStatus.Available)
+            if (robot.HasStatusThatCanReceiveMissions())
             {
                 try
                 {

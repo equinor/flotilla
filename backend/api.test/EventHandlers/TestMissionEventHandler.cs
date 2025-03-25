@@ -251,7 +251,7 @@ namespace Api.Test.EventHandlers
         }
 
         [Fact]
-        public async Task QueuedMissionsAreNotAbortedWhenRobotAvailableHappensAtTheSameTimeAsOnIsarMissionCompleted()
+        public async Task QueuedMissionsAreNotAbortedWhenRobotStatusThatCanReceiveMissionHappensAtTheSameTimeAsOnIsarMissionCompleted()
         {
             // Arrange
             var installation = await DatabaseUtilities.NewInstallation();
@@ -299,15 +299,16 @@ namespace Api.Test.EventHandlers
                 }
             );
 
-            var robotAvailableEventArgs = new RobotAvailableEventArgs(robot);
+            var RobotStatusThatCanReceiveMissionEventArgs =
+                new RobotStatusThatCanReceiveMissionEventArgs(robot);
 
             MqttService.RaiseEvent(
                 nameof(MqttService.MqttIsarMissionReceived),
                 mqttIsarMissionEventArgs
             );
             MissionSchedulingService.RaiseEvent(
-                nameof(Api.Services.MissionSchedulingService.RobotAvailable),
-                robotAvailableEventArgs
+                nameof(Api.Services.MissionSchedulingService.RobotStatusThatCanReceiveMission),
+                RobotStatusThatCanReceiveMissionEventArgs
             );
 
             Thread.Sleep(100);

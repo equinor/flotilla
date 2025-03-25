@@ -123,6 +123,17 @@ namespace Api.Database.Models
             return !IsRobotPressureTooHigh() && !IsRobotPressureTooLow();
         }
 
+        public bool HasStatusThatCanReceiveMissions()
+        {
+            var RobotStatusesWhereRobotCanStartMission = new[]
+            {
+                RobotStatus.Available,
+                RobotStatus.Home,
+                RobotStatus.ReturningHome,
+            };
+            return RobotStatusesWhereRobotCanStartMission.Contains(Status);
+        }
+
         public IList<DocumentInfo> Documentation { get; set; }
 
         [Required]
