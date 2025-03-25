@@ -172,7 +172,8 @@ export const displayAutoScheduleFrequency = (
     autoScheduleFrequency: AutoScheduleFrequency | undefined,
     translateText: (str: string, args?: string[]) => string
 ) => {
-    if (!autoScheduleFrequency || !autoScheduleFrequency.timesOfDay) return translateText('No automated scheduling set')
+    if (!autoScheduleFrequency || !autoScheduleFrequency.timesOfDayCET)
+        return translateText('No automated scheduling set')
 
     const formatListToSentence = (list: string[]) => {
         if (list.length === 1) return list[0]
@@ -192,7 +193,7 @@ export const displayAutoScheduleFrequency = (
         )
     }
 
-    const timesOfDay = formatListToSentence(autoScheduleFrequency.timesOfDay.map((time) => time.substring(0, 5)))
+    const timesOfDay = formatListToSentence(autoScheduleFrequency.timesOfDayCET.map((time) => time.substring(0, 5)))
 
     return translateText('Scheduled every {0} at {1}', [formattedDays, timesOfDay])
 }
@@ -206,13 +207,13 @@ export const EditAutoScheduleDialogContent = ({
         currentAutoScheduleFrequency?.daysOfWeek ?? []
     )
     const [currentAutoSetTimes, setCurrentAutoSetTimes] = useState<string[]>(
-        currentAutoScheduleFrequency?.timesOfDay ?? []
+        currentAutoScheduleFrequency?.timesOfDayCET ?? []
     )
 
     useEffect(() => {
         changedAutoScheduleFrequency({
             daysOfWeek: currentAutoSetDays,
-            timesOfDay: currentAutoSetTimes,
+            timesOfDayCET: currentAutoSetTimes,
         })
     }, [currentAutoSetDays, currentAutoSetTimes])
 
@@ -240,7 +241,7 @@ export const EditAutoScheduleDialogContent = ({
                 {currentAutoSetDays.length > 0 && currentAutoSetTimes.length > 0 && (
                     <Typography>
                         {displayAutoScheduleFrequency(
-                            { daysOfWeek: currentAutoSetDays, timesOfDay: currentAutoSetTimes },
+                            { daysOfWeek: currentAutoSetDays, timesOfDayCET: currentAutoSetTimes },
                             TranslateText
                         )}
                     </Typography>
