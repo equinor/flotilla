@@ -39,7 +39,8 @@ namespace Api.EventHandlers
         public override void Subscribe()
         {
             MissionRunService.MissionRunCreated += OnMissionRunCreated;
-            MissionSchedulingService.RobotAvailable += OnRobotAvailable;
+            MissionSchedulingService.RobotStatusThatCanReceiveMission +=
+                OnRobotStatusThatCanReceiveMission;
             EmergencyActionService.SendRobotToDockTriggered += OnSendRobotToDockTriggered;
             EmergencyActionService.ReleaseRobotFromDockTriggered += OnReleaseRobotFromDockTriggered;
         }
@@ -47,7 +48,8 @@ namespace Api.EventHandlers
         public override void Unsubscribe()
         {
             MissionRunService.MissionRunCreated -= OnMissionRunCreated;
-            MissionSchedulingService.RobotAvailable -= OnRobotAvailable;
+            MissionSchedulingService.RobotStatusThatCanReceiveMission -=
+                OnRobotStatusThatCanReceiveMission;
             EmergencyActionService.SendRobotToDockTriggered -= OnSendRobotToDockTriggered;
             EmergencyActionService.ReleaseRobotFromDockTriggered -= OnReleaseRobotFromDockTriggered;
         }
@@ -82,19 +84,15 @@ namespace Api.EventHandlers
             }
         }
 
-        private async void OnRobotAvailable(object? sender, RobotAvailableEventArgs e)
+        private async void OnRobotStatusThatCanReceiveMission(
+            object? sender,
+            RobotStatusThatCanReceiveMissionEventArgs e
+        )
         {
-            if (
-                !(
-                    e.Robot.Status
-                    is RobotStatus.Available
-                        or RobotStatus.Home
-                        or RobotStatus.ReturningHome
-                )
-            )
+            if (!e.Robot.HasStatusThatCanReceiveMissions())
             {
                 _logger.LogWarning(
-                    "OnRobotAvailable was triggered while robot was {robotStatus}",
+                    "OnRobotStatusThatCanReceiveMission was triggered while robot was {robotStatus}",
                     e.Robot.Status
                 );
                 return;

@@ -26,7 +26,9 @@ namespace Api.Services
 
         public bool MissionRunQueueIsEmpty(IList<MissionRun> missionRunQueue);
 
-        public void TriggerRobotAvailable(RobotAvailableEventArgs e);
+        public void TriggerRobotStatusThatCanReceiveMission(
+            RobotStatusThatCanReceiveMissionEventArgs e
+        );
 
         public Task ScheduleMissionRunFromMissionDefinitionLastSuccessfullRun(
             string missionDefinitionId,
@@ -436,9 +438,11 @@ namespace Api.Services
             return !missionRunQueue.Any();
         }
 
-        public void TriggerRobotAvailable(RobotAvailableEventArgs e)
+        public void TriggerRobotStatusThatCanReceiveMission(
+            RobotStatusThatCanReceiveMissionEventArgs e
+        )
         {
-            OnRobotAvailable(e);
+            OnRobotStatusThatCanReceiveMission(e);
         }
 
         private async Task<MissionRun?> SelectNextMissionRun(Robot robot)
@@ -589,12 +593,14 @@ namespace Api.Services
             return ongoingMissions;
         }
 
-        protected virtual void OnRobotAvailable(RobotAvailableEventArgs e)
+        protected virtual void OnRobotStatusThatCanReceiveMission(
+            RobotStatusThatCanReceiveMissionEventArgs e
+        )
         {
-            RobotAvailable?.Invoke(this, e);
+            RobotStatusThatCanReceiveMission?.Invoke(this, e);
         }
 
-        public static event EventHandler<RobotAvailableEventArgs>? RobotAvailable;
+        public static event EventHandler<RobotStatusThatCanReceiveMissionEventArgs>? RobotStatusThatCanReceiveMission;
 
         public async Task ScheduleMissionRunFromMissionDefinitionLastSuccessfullRun(
             string missionDefinitionId,
