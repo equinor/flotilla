@@ -1,5 +1,5 @@
 export interface AutoScheduleFrequency {
-    timesOfDay: string[] // Format HH:mm:ss
+    timesOfDayCET: string[] // Format HH:mm:ss
     daysOfWeek: DaysOfWeek[]
 }
 

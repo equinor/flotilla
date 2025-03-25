@@ -9,20 +9,20 @@ namespace Api.Database.Models
     public class AutoScheduleFrequency
     {
         [Required]
-        // In local time
-        public IList<TimeOnly> TimesOfDay { get; set; } = new List<TimeOnly>();
+        // In Central European Time
+        public IList<TimeOnly> TimesOfDayCET { get; set; } = new List<TimeOnly>();
 
         [Required]
         public IList<DayOfWeek> DaysOfWeek { get; set; } = new List<DayOfWeek>();
 
         public bool HasValidValue()
         {
-            return TimesOfDay.Count != 0 && DaysOfWeek.Count != 0;
+            return TimesOfDayCET.Count != 0 && DaysOfWeek.Count != 0;
         }
 
         public void ValidateAutoScheduleFrequency()
         {
-            if (TimesOfDay.Count == 0)
+            if (TimesOfDayCET.Count == 0)
             {
                 throw new ArgumentException(
                     "AutoScheduleFrequency must have at least one time of day"
@@ -53,7 +53,7 @@ namespace Api.Database.Models
             if (DaysOfWeek.Contains(nowLocal.DayOfWeek))
             {
                 autoScheduleNext.AddRange(
-                    TimesOfDay
+                    TimesOfDayCET
                         .Where(time =>
                             (time >= nowLocalTimeOnly)
                             && (time - nowLocalTimeOnly <= timeTilUtcMidnight)
@@ -64,7 +64,7 @@ namespace Api.Database.Models
             if (DaysOfWeek.Contains(nowLocal.AddDays(1).DayOfWeek))
             {
                 autoScheduleNext.AddRange(
-                    TimesOfDay
+                    TimesOfDayCET
                         .Where(time =>
                             (time < nowLocalTimeOnly)
                             && (time - nowLocalTimeOnly <= timeTilUtcMidnight)

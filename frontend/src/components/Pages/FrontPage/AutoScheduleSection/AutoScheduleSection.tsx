@@ -51,7 +51,7 @@ const AutoScheduleList = () => {
             )
             const timeMissionPairs = missionDefinitions
                 .map((mission) =>
-                    mission.autoScheduleFrequency!.timesOfDay.map((time) => {
+                    mission.autoScheduleFrequency!.timesOfDayCET.map((time) => {
                         return { time, mission }
                     })
                 )

@@ -214,7 +214,7 @@ const MissionDefinitionEditDialog = ({
     const isUpdateButtonDisabled = () => {
         if (fieldName !== 'autoScheduleFrequency') return false
         if (form.autoScheduleFrequency?.daysOfWeek.length === 0) return true
-        if (form.autoScheduleFrequency?.timesOfDay.length === 0) return true
+        if (form.autoScheduleFrequency?.timesOfDayCET.length === 0) return true
         return false
     }
 
