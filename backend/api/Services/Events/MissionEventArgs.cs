@@ -7,7 +7,7 @@ namespace Api.Services.Events
         public MissionRun MissionRun { get; } = missionRun;
     }
 
-    public class RobotStatusThatCanReceiveMissionEventArgs(Robot robot) : EventArgs
+    public class RobotReadyForMissionsEventArgs(Robot robot) : EventArgs
     {
         public Robot Robot { get; } = robot;
     }
