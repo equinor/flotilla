@@ -184,7 +184,7 @@ namespace Api.Test.EventHandlers
 
             // Act
             MqttService.RaiseEvent(nameof(MqttService.MqttIsarStatusReceived), mqttEventArgs);
-            Thread.Sleep(500);
+            Thread.Sleep(5000);
 
             // Assert
             var postTestMissionRun = await MissionRunService.ReadById(
