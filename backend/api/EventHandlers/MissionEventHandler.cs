@@ -33,6 +33,9 @@ namespace Api.EventHandlers
                 .CreateScope()
                 .ServiceProvider.GetRequiredService<IMissionSchedulingService>();
 
+        private IIsarService IsarService =>
+            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IIsarService>();
+
         private ISignalRService SignalRService =>
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ISignalRService>();
 
@@ -147,24 +150,6 @@ namespace Api.EventHandlers
 
             try
             {
-                await MissionScheduling.ScheduleMissionToDriveToDockPosition(robot.Id);
-            }
-            catch (Exception ex) when (ex is DockException || ex is InspectionAreaNotFoundException)
-            {
-                _logger.LogWarning(
-                    ex,
-                    "Failed to schedule return to dock mission on robot {RobotName} because: {ErrorMessage}",
-                    robot.Name,
-                    ex.Message
-                );
-                SignalRService.ReportDockFailureToSignalR(
-                    robot,
-                    $"Failed to send {robot.Name} to a dock"
-                );
-            }
-
-            try
-            {
                 await MissionScheduling.StopCurrentMissionRun(robot.Id);
             }
             catch (RobotNotFoundException)
@@ -205,18 +190,19 @@ namespace Api.EventHandlers
                 return;
             }
 
-            _startMissionSemaphore.WaitOne();
             try
             {
-                await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(robot);
+                await IsarService.ReturnHome(robot);
             }
-            catch (MissionRunNotFoundException)
+            catch (Exception ex)
             {
+                _logger.LogError(
+                    ex,
+                    "Failed to send robot {RobotId} to dock because: {ErrorMessage}",
+                    robot.Id,
+                    ex.Message
+                );
                 return;
-            }
-            finally
-            {
-                _startMissionSemaphore.Release();
             }
         }
 

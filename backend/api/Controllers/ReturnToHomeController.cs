@@ -26,9 +26,7 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<IsarMission>> ScheduleReturnToHomeMission(
-            [FromRoute] string robotId
-        )
+        public async Task<ActionResult> ScheduleReturnToHomeMission([FromRoute] string robotId)
         {
             var robot = await robotService.ReadById(robotId, readOnly: true);
             if (robot is null)
