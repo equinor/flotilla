@@ -86,9 +86,11 @@ namespace Api.Test.Database
             MissionRunType missionRunType = MissionRunType.Normal,
             MissionStatus missionStatus = MissionStatus.Pending,
             string isarMissionId = "",
-            Api.Database.Models.TaskStatus taskStatus = Api.Database.Models.TaskStatus.Successful
+            MissionTask[] tasks = null!
         )
         {
+            tasks ??= [];
+
             if (string.IsNullOrEmpty(isarMissionId))
                 isarMissionId = Guid.NewGuid().ToString();
             var missionRun = new MissionRun
@@ -101,7 +103,7 @@ namespace Api.Test.Database
                 Status = missionStatus,
                 DesiredStartTime = DateTime.UtcNow,
                 InspectionArea = inspectionArea,
-                Tasks = [],
+                Tasks = tasks,
                 InstallationCode = installationCode,
             };
 

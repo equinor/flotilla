@@ -123,28 +123,30 @@ namespace Api.Services
             )
             {
                 logger.LogError(
-                    "Robot {RobotNAme} with Id {RobotId} is not on the same inspection area as the mission run with Id {MissionRunId}. Aborting all mission runs",
+                    "Robot {RobotNAme} with Id {RobotId} is not on the same inspection area as the mission run with Id {MissionRunId}. Aborting this mission run",
                     robot.Name,
                     robot.Id,
                     missionRun.Id
                 );
                 try
                 {
-                    await AbortAllScheduledNormalMissions(
-                        robot.Id,
-                        $"All missions aborted: Robot {robot.Name} is on inspection area {robot.CurrentInspectionArea?.Name} "
-                            + $"and mission run was on inspection area {missionRun.InspectionArea?.Name}"
+                    await AbortMissionRun(
+                        missionRun,
+                        $"Mission run {missionRun.Id} aborted: Robot {robot.Name} is on inspection area {robot.CurrentInspectionArea?.Name} "
+                            + $"and mission run is on inspection area {missionRun.InspectionArea?.Name}"
                     );
                 }
                 catch (RobotNotFoundException)
                 {
                     logger.LogError(
-                        "Failed to abort all scheduled missions for robot {RobotName} with Id {RobotId}",
+                        "Failed to abort scheduled mission {missionRun.Id} for robot {RobotName} with Id {RobotId}",
+                        missionRun.Id,
                         robot.Name,
                         robot.Id
                     );
                 }
 
+                await StartNextMissionRunIfSystemIsAvailable(robot);
                 return;
             }
 
@@ -339,6 +341,20 @@ namespace Api.Services
                 await robotService.UpdateCurrentMissionId(robotId, null);
             }
             catch (RobotNotFoundException) { }
+        }
+
+        public async Task AbortMissionRun(MissionRun missionRun, string abortReason)
+        {
+            await missionRunService.UpdateMissionRunProperty(
+                missionRun.Id,
+                "Status",
+                MissionStatus.Aborted
+            );
+            await missionRunService.UpdateMissionRunProperty(
+                missionRun.Id,
+                "StatusReason",
+                abortReason
+            );
         }
 
         public async Task AbortAllScheduledNormalMissions(string robotId, string? abortReason)
