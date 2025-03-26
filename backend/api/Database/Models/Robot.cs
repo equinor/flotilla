@@ -208,8 +208,6 @@ namespace Api.Database.Models
         take_thermal_video,
         take_gas_measurement,
         record_audio,
-        auto_return_to_home,
-        return_to_home,
     }
 
     public enum BatteryState
