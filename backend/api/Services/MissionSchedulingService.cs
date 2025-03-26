@@ -20,8 +20,6 @@ namespace Api.Services
 
         public Task AbortAllScheduledNormalMissions(string robotId, string? abortReason = null);
 
-        public Task ScheduleMissionToDriveToDockPosition(string robotId);
-
         public Task UnfreezeMissionRunQueueForRobot(string robotId);
 
         public bool MissionRunQueueIsEmpty(IList<MissionRun> missionRunQueue);
@@ -373,60 +371,6 @@ namespace Api.Services
                     pendingMissionRun.Id,
                     "StatusReason",
                     abortReason
-                );
-            }
-        }
-
-        public async Task ScheduleMissionToDriveToDockPosition(string robotId)
-        {
-            var robot = await robotService.ReadById(robotId, readOnly: true);
-            if (robot == null)
-            {
-                logger.LogError("Robot with ID: {RobotId} was not found in the database", robotId);
-                return;
-            }
-
-            Pose robotPose;
-
-            if (robot.CurrentInspectionArea != null)
-            {
-                robotPose = new Pose();
-            }
-            else
-            {
-                string errorMessage =
-                    $"Robot with ID {robotId} could not return home as it did not have an inspection area";
-                logger.LogError("{Message}", errorMessage);
-                throw new InspectionAreaNotFoundException(errorMessage);
-            }
-
-            // Cloning to avoid tracking same object
-            var clonedPose = ObjectCopier.Clone(robotPose);
-            var customTaskQuery = new CustomTaskQuery { RobotPose = clonedPose, TaskOrder = 0 };
-
-            var missionRun = new MissionRun
-            {
-                Name = "Return home",
-                Robot = robot,
-                MissionRunType = MissionRunType.Emergency,
-                InstallationCode = robot.CurrentInstallation.InstallationCode,
-                InspectionArea = robot.CurrentInspectionArea!,
-                Status = MissionStatus.Pending,
-                DesiredStartTime = DateTime.UtcNow,
-                Tasks = new List<MissionTask>([new MissionTask(customTaskQuery)]),
-            };
-
-            try
-            {
-                await missionRunService.Create(
-                    missionRun: missionRun,
-                    triggerCreatedMissionRunEvent: false
-                );
-            }
-            catch (UnsupportedRobotCapabilityException)
-            {
-                logger.LogError(
-                    $"Unsupported robot capability detected when driving to dock for robot {missionRun.Robot.Name}. This should not happen."
                 );
             }
         }
