@@ -230,11 +230,7 @@ namespace Api.Test.Database
                 Host = "localhost",
                 Port = 3000,
                 Status = status,
-                RobotCapabilities =
-                [
-                    RobotCapabilitiesEnum.take_image,
-                    RobotCapabilitiesEnum.return_to_home,
-                ],
+                RobotCapabilities = [RobotCapabilitiesEnum.take_image],
             };
 
             var robotModel = await _robotModelService.ReadByRobotType(
