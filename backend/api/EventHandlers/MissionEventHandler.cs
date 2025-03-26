@@ -39,8 +39,7 @@ namespace Api.EventHandlers
         public override void Subscribe()
         {
             MissionRunService.MissionRunCreated += OnMissionRunCreated;
-            MissionSchedulingService.RobotStatusThatCanReceiveMission +=
-                OnRobotStatusThatCanReceiveMission;
+            MissionSchedulingService.RobotReadyForMissions += OnRobotReadyForMissions;
             EmergencyActionService.SendRobotToDockTriggered += OnSendRobotToDockTriggered;
             EmergencyActionService.ReleaseRobotFromDockTriggered += OnReleaseRobotFromDockTriggered;
         }
@@ -48,8 +47,7 @@ namespace Api.EventHandlers
         public override void Unsubscribe()
         {
             MissionRunService.MissionRunCreated -= OnMissionRunCreated;
-            MissionSchedulingService.RobotStatusThatCanReceiveMission -=
-                OnRobotStatusThatCanReceiveMission;
+            MissionSchedulingService.RobotReadyForMissions -= OnRobotReadyForMissions;
             EmergencyActionService.SendRobotToDockTriggered -= OnSendRobotToDockTriggered;
             EmergencyActionService.ReleaseRobotFromDockTriggered -= OnReleaseRobotFromDockTriggered;
         }
@@ -84,17 +82,11 @@ namespace Api.EventHandlers
             }
         }
 
-        private async void OnRobotStatusThatCanReceiveMission(
-            object? sender,
-            RobotStatusThatCanReceiveMissionEventArgs e
-        )
+        private async void OnRobotReadyForMissions(object? sender, RobotReadyForMissionsEventArgs e)
         {
-            if (!e.Robot.HasStatusThatCanReceiveMissions())
+            if (!e.Robot.IsRobotReadyToStartMissions())
             {
-                _logger.LogWarning(
-                    "OnRobotStatusThatCanReceiveMission was triggered while robot was {robotStatus}",
-                    e.Robot.Status
-                );
+                _logger.LogWarning("OnRobotReadyForMissions was not ready to start the mission");
                 return;
             }
             _startMissionSemaphore.WaitOne();

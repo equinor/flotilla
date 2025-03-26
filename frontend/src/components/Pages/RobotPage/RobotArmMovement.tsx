@@ -10,7 +10,7 @@ import { StyledButton, StyledDialog } from 'components/Styles/StyledComponents'
 interface RobotProps {
     robot: Robot
     armPosition: string
-    isRobotStatusThatCanReceiveMission: boolean
+    isRobotReadyForMission: boolean
 }
 
 const StyledCloseButton = styled.div`
@@ -46,33 +46,33 @@ export const MoveRobotArmSection = ({ robot }: { robot: Robot }) => {
                 <MoveRobotArm
                     robot={robot}
                     armPosition="battery_change"
-                    isRobotStatusThatCanReceiveMission={robot.status === RobotStatus.Available}
+                    isRobotReadyForMission={robot.status === RobotStatus.Available}
                 />
                 <MoveRobotArm
                     robot={robot}
                     armPosition="transport"
-                    isRobotStatusThatCanReceiveMission={robot.status === RobotStatus.Available}
+                    isRobotReadyForMission={robot.status === RobotStatus.Available}
                 />
                 <MoveRobotArm
                     robot={robot}
                     armPosition="lookout"
-                    isRobotStatusThatCanReceiveMission={robot.status === RobotStatus.Available}
+                    isRobotReadyForMission={robot.status === RobotStatus.Available}
                 />
             </RobotArmMovementSection>
         </>
     )
 }
 
-const MoveRobotArm = ({ robot, armPosition, isRobotStatusThatCanReceiveMission }: RobotProps) => {
+const MoveRobotArm = ({ robot, armPosition, isRobotReadyForMission }: RobotProps) => {
     const { TranslateText } = useLanguageContext()
     const [feedback, setFeedback] = useState('')
-    const [usable, setUsable] = useState(!!isRobotStatusThatCanReceiveMission)
+    const [usable, setUsable] = useState(!!isRobotReadyForMission)
     const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false)
     const anchorRef = useRef<HTMLButtonElement>(null)
 
     useEffect(() => {
-        setUsable(isRobotStatusThatCanReceiveMission)
-    }, [isRobotStatusThatCanReceiveMission])
+        setUsable(isRobotReadyForMission)
+    }, [isRobotReadyForMission])
 
     const moveArmButtonStyle = () => {
         if (!usable)

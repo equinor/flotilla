@@ -427,8 +427,8 @@ namespace Api.Controllers
                 var robotResponse = new RobotResponse(robot);
 
                 if (robotStatus == RobotStatus.Available)
-                    missionSchedulingService.TriggerRobotStatusThatCanReceiveMission(
-                        new RobotStatusThatCanReceiveMissionEventArgs(robot)
+                    missionSchedulingService.TriggerRobotReadyForMissions(
+                        new RobotReadyForMissionsEventArgs(robot)
                     );
 
                 return Ok(robotResponse);
