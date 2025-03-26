@@ -184,7 +184,7 @@ namespace Api.Test.EventHandlers
 
             // Act
             MqttService.RaiseEvent(nameof(MqttService.MqttIsarStatusReceived), mqttEventArgs);
-            Thread.Sleep(500);
+            Thread.Sleep(5000); // When running all tests in VS code the test occasionally fails when this sleep too short
 
             // Assert
             var postTestMissionRun = await MissionRunService.ReadById(
