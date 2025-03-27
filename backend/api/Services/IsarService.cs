@@ -11,6 +11,8 @@ namespace Api.Services
     {
         public Task<IsarMission> StartMission(Robot robot, MissionRun missionRun);
 
+        public Task ReturnHome(Robot robot);
+
         public Task<IsarControlMissionResponse> StopMission(Robot robot);
 
         public Task<IsarControlMissionResponse> PauseMission(Robot robot);
@@ -97,6 +99,34 @@ namespace Api.Services
                 robot.Id
             );
             return isarMission;
+        }
+
+        public async Task ReturnHome(Robot robot)
+        {
+            HttpResponseMessage? response;
+            try
+            {
+                response = await CallApi(HttpMethod.Post, robot.IsarUri, "schedule/return-home");
+            }
+            catch (Exception e)
+            {
+                logger.LogError(
+                    "Encountered an exception when making an API call to ISAR: {Message}",
+                    e.Message
+                );
+                throw new IsarCommunicationException(e.Message);
+            }
+
+            if (!response.IsSuccessStatusCode)
+            {
+                if (response.StatusCode == HttpStatusCode.Conflict)
+                    throw new RobotBusyException("Robot was not available when starting mission");
+
+                (string message, int statusCode) = GetErrorDescriptionFoFailedIsarRequest(response);
+                string errorResponse = await response.Content.ReadAsStringAsync();
+                logger.LogError("{Message}: {ErrorResponse}", message, errorResponse);
+                throw new MissionException(message, statusCode);
+            }
         }
 
         public async Task<IsarControlMissionResponse> StopMission(Robot robot)

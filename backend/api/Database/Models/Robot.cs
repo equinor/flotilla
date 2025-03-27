@@ -123,6 +123,17 @@ namespace Api.Database.Models
             return !IsRobotPressureTooHigh() && !IsRobotPressureTooLow();
         }
 
+        public bool HasStatusThatCanReceiveMissions()
+        {
+            var RobotStatusesWhereRobotCanStartMission = new[]
+            {
+                RobotStatus.Available,
+                RobotStatus.Home,
+                RobotStatus.ReturningHome,
+            };
+            return RobotStatusesWhereRobotCanStartMission.Contains(Status);
+        }
+
         public IList<DocumentInfo> Documentation { get; set; }
 
         [Required]
@@ -174,15 +185,18 @@ namespace Api.Database.Models
     {
         Available,
         Busy,
+        Home,
         Offline,
         Blocked,
         BlockedProtectiveStop,
+        ReturningHome,
+        UnkownStatus,
     }
 
     public enum RobotFlotillaStatus
     {
         Normal,
-        Docked,
+        Home,
         Recharging,
     }
 
@@ -194,8 +208,6 @@ namespace Api.Database.Models
         take_thermal_video,
         take_gas_measurement,
         record_audio,
-        auto_return_to_home,
-        return_to_home,
     }
 
     public enum BatteryState

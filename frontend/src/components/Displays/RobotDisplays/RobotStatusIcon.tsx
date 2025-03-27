@@ -33,11 +33,14 @@ export const RobotStatusChip = ({ status, flotillaStatus, isarConnected, itemSiz
     let iconColor = tokens.colors.text.static_icons__default.hex
     let statusIcon = Icons.CloudOff
     switch (status) {
+        case RobotStatus.Home:
+        case RobotStatus.ReturningHome:
         case RobotStatus.Available: {
             statusIcon = Icons.Successful
             iconColor = tokens.colors.interactive.success__resting.hex
             break
         }
+        case RobotStatus.UnkownStatus:
         case RobotStatus.Busy: {
             statusIcon = Icons.Ongoing
             iconColor = tokens.colors.text.static_icons__default.hex
@@ -61,10 +64,10 @@ export const RobotStatusChip = ({ status, flotillaStatus, isarConnected, itemSiz
         iconColor = tokens.colors.interactive.disabled__text.hex
         statusIcon = Icons.Info
         status = RobotStatus.ConnectionIssues
-    } else if (flotillaStatus && status === RobotStatus.Available && flotillaStatus === RobotFlotillaStatus.Docked) {
+    } else if (flotillaStatus && status === RobotStatus.Available && flotillaStatus === RobotFlotillaStatus.Home) {
         iconColor = tokens.colors.interactive.danger__resting.hex
         statusIcon = Icons.Warning
-        status = RobotStatus.Docked
+        status = RobotStatus.Home
     } else if (
         flotillaStatus &&
         status === RobotStatus.Available &&
