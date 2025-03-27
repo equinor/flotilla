@@ -9,20 +9,18 @@ import { AlertCategory } from './AlertsBanner'
 
 const StyledListContainer = styled.div`
     isplay: flex;
-    width: 300px;
+    width: 320px;
     height: auto;
     justify-content: space-between;
     align-items: center;
-    padding: 3px 10px 2px 10px;
 `
 const outline = styled.div`
-    outline: solid;
-    outline-width: 1px;
-    outline-color: lightgray;
-    padding: 6px 10px 6px 10px;
+    border: 1px solid lightgray;
 `
 const StyledListHeading = styled(outline)`
     display: flex;
+    height: 40px;
+    align-items: center;
     justify-content: space-between;
     padding: 6px 5px 6px 5px;
     border-radius: 3px 3px 0px 0px;
@@ -33,8 +31,10 @@ const StyledListItem = styled(outline)`
     align-items: left;
     row-gap: 10px;
     border-radius: 0px 0px 3px 3px;
+    border-top: none;
+    padding: 5px;
 `
-const VerticalContent = styled.div`
+const HorizontalContent = styled.div`
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -58,11 +58,12 @@ const Right = styled.div`
     align-content: center;
 `
 const StyledButton = styled(Button)`
-    margin-top: 6px;
-    right: 30px;
+    margin-top: 15px;
+    right: 26px;
     position: absolute;
     height: 30px;
     width: 30px;
+    color: black;
 `
 
 interface AlertListInfo {
@@ -88,13 +89,13 @@ export const AlertListContents = ({ icon, iconColor, alertTitle, alertText, miss
     return (
         <StyledListContainer>
             <StyledListHeading>
-                <VerticalContent>
+                <HorizontalContent>
                     <StyledIcon name={icon} style={{ color: iconColor }} />
                     <Typography variant="h6">{alertTitle}</Typography>
-                </VerticalContent>
+                </HorizontalContent>
             </StyledListHeading>
             <StyledListItem>
-                <Typography variant="caption">{alertText}</Typography>
+                <Typography variant="body_short">{alertText}</Typography>
                 <Right>
                     {mission !== undefined && mission.tasks[0]?.type !== TaskType.ReturnHome && (
                         <MissionRestartButton

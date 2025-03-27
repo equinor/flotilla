@@ -64,13 +64,13 @@ export const AlertIcon = () => {
             <Popover
                 onClose={onAlertClose}
                 open={isAlertDialogOpen}
-                placement={'bottom'}
+                placement={'bottom-end'}
                 anchorEl={referenceElementNotifications.current}
             >
                 <StyledAlertPopoverHeader>
                     <StyledAlertPopoverTitle>
                         <Typography variant="h6">{TranslateText('Alerts')}</Typography>
-                        <Button variant={'ghost_icon'} onClick={onAlertClose}>
+                        <Button variant={'ghost_icon'} style={{ color: 'black' }} onClick={onAlertClose}>
                             <Icon name="close" size={24} />
                         </Button>
                     </StyledAlertPopoverTitle>
