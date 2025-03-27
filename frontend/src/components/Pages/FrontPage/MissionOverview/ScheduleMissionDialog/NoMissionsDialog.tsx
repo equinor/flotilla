@@ -2,7 +2,7 @@ import { Button, Typography } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { StyledDialog } from 'components/Styles/StyledComponents'
 
-export const NoMissionsDialog = ({ closeDialog }: { closeDialog: () => void }): JSX.Element => {
+export const NoMissionsDialog = ({ closeDialog }: { closeDialog: () => void }) => {
     const { TranslateText } = useLanguageContext()
     return (
         <StyledDialog open={true} isDismissable>

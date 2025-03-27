@@ -54,7 +54,7 @@ const StyledDangerContent = styled.div`
     gap: 2px;
 `
 
-export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
+export const ScheduleMissionDialog = (props: IProps) => {
     const { TranslateText } = useLanguageContext()
     const { enabledRobots } = useRobotContext()
     const { setLoadingRobotMissionSet } = useMissionsContext()
@@ -204,7 +204,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
     )
 }
 
-export const AlreadyScheduledMissionDialog = (props: IScheduledProps): JSX.Element => {
+export const AlreadyScheduledMissionDialog = (props: IScheduledProps) => {
     const { TranslateText } = useLanguageContext()
 
     return (

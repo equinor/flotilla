@@ -92,7 +92,7 @@ export const SkipMissionDialog = ({
     missionTaskType,
     isSkipMissionDialogOpen,
     toggleDialog,
-}: MissionProps & { isSkipMissionDialogOpen: boolean; toggleDialog: () => void }): JSX.Element => {
+}: MissionProps & { isSkipMissionDialogOpen: boolean; toggleDialog: () => void }) => {
     const { TranslateText } = useLanguageContext()
     const { updateRobotMissionState } = useMissionControlContext()
 
@@ -127,7 +127,7 @@ export const SkipMissionDialog = ({
     )
 }
 
-export const StopRobotDialog = (): JSX.Element => {
+export const StopRobotDialog = () => {
     const [isStopRobotDialogOpen, setIsStopRobotDialogOpen] = useState<boolean>(false)
     const { enabledRobots } = useRobotContext()
     const { TranslateText } = useLanguageContext()

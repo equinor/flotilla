@@ -24,7 +24,7 @@ export const PressureStatusDisplay = ({
     itemSize,
     upperPressureWarningThreshold,
     lowerPressureWarningThreshold,
-}: PressureStatusDisplayProps): JSX.Element => {
+}: PressureStatusDisplayProps) => {
     const barToMillibar = 1000
     const pressureInMilliBar = `${Math.round(pressure * barToMillibar)}mBar`
     let icon_color: string = tokens.colors.text.static_icons__default.hex
