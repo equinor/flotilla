@@ -310,6 +310,7 @@
     "Ongoing missions": "Pågående oppdrag",
     "View mission definition": "Se oppdragsdefinisjon",
     "Flotilla Info Page": "Flotilla informasjonsside",
+    "About Flotilla": "Om Flotilla",
     "Info: Flotilla is..": "Flotilla er en nettside som gir operatører tilgang til å samhandle med flere roboter i flere anlegg. Det gir en sanntidsoversikt over robotene og lar operatører administrere oppdrag og roboter.",
     "Automatic scheduling of missions": "Automatisk kjøring av oppdrag",
     "Info: Autoscheduling..": "Automatisk kjøring av oppdrag er en funksjonalitet som lar operatører planlegge oppdrag på forhånd. Dette gjør at robotene kan kjøre oppdrag uten daglig bruk av Flotilla. Gå til 'Automatisk kjøring' siden for å se hvilke oppdrag som vil bli kjørt og for å redigere når oppdragene skal kjøre.",
