@@ -22,7 +22,7 @@ interface DockBannerProps {
     alertCategory: AlertCategory
 }
 
-export const DockAlertContent = ({ alertType, alertCategory }: DockBannerProps): JSX.Element => {
+export const DockAlertContent = ({ alertType, alertCategory }: DockBannerProps) => {
     const { TranslateText } = useLanguageContext()
     const buttonBackgroundColor =
         alertCategory === AlertCategory.WARNING
@@ -50,7 +50,7 @@ export const DockAlertContent = ({ alertType, alertCategory }: DockBannerProps):
     )
 }
 
-export const DockAlertListContent = ({ alertType, alertCategory }: DockBannerProps): JSX.Element => {
+export const DockAlertListContent = ({ alertType, alertCategory }: DockBannerProps) => {
     const { TranslateText } = useLanguageContext()
     let titleMessage = TranslateText('INFO')
     let message = TranslateText('Dock banner text')

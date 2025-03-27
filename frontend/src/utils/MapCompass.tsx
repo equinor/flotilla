@@ -6,6 +6,6 @@ const StyledCompass = styled.img<{ $height?: string }>`
     padding: 0px 10px;
 `
 
-export const MapCompass = (): JSX.Element => {
+export const MapCompass = () => {
     return <StyledCompass src={compass} />
 }

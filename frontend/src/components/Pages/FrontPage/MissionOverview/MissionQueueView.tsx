@@ -21,7 +21,7 @@ const StyledMissionView = styled.div`
     border-top: 1px solid ${tokens.colors.ui.background__medium.hex};
 `
 
-export const RobotMissionQueueView = ({ robot }: { robot: Robot }): JSX.Element => {
+export const RobotMissionQueueView = ({ robot }: { robot: Robot }) => {
     const { TranslateText } = useLanguageContext()
     const { missionQueue, ongoingMissions, loadingRobotMissionSet, setLoadingRobotMissionSet } = useMissionsContext()
     const { setAlert, setListAlert } = useAlertContext()

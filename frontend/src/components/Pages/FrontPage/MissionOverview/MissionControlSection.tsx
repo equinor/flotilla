@@ -48,7 +48,7 @@ const OngoingMissionControlCardStyle = styled.div`
     }
 `
 
-export const MissionControlSection = (): JSX.Element => {
+export const MissionControlSection = () => {
     const { enabledRobots } = useRobotContext()
 
     const missionControlCards = enabledRobots.map((robot, index) => {

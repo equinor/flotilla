@@ -11,7 +11,7 @@ export const ScheduleMissionDialog = ({
     onClose: () => void
     missions: MissionDefinition[]
     isFetchingMissions: boolean
-}): JSX.Element => {
+}) => {
     const isEmptyMissionsDialogOpen = !isFetchingMissions && missions.length === 0
     const isScheduleMissionDialogOpen = !isFetchingMissions && missions.length !== 0
 

@@ -64,7 +64,7 @@ const StyledButton = styled(Button)`
     height: auto;
 `
 
-export const MissionQueueCard = ({ order, mission, onDeleteMission }: MissionQueueCardProps): JSX.Element => {
+export const MissionQueueCard = ({ order, mission, onDeleteMission }: MissionQueueCardProps) => {
     const navigate = useNavigate()
     const routeChange = () => {
         const path = `${config.FRONTEND_BASE_ROUTE}/mission/${mission.id}`

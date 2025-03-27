@@ -44,7 +44,7 @@ interface ScheduleDialogProps {
     closeDialog: () => void
 }
 
-export const SelectMissionsToScheduleDialog = ({ missionsList, closeDialog }: ScheduleDialogProps): JSX.Element => {
+export const SelectMissionsToScheduleDialog = ({ missionsList, closeDialog }: ScheduleDialogProps) => {
     const { TranslateText } = useLanguageContext()
     const { installationCode } = useInstallationContext()
     const { setAlert, setListAlert } = useAlertContext()

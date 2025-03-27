@@ -32,7 +32,7 @@ const StyledDialog = styled(Dialog)`
     width: 320px;
 `
 
-export const FetchingMissionsDialog = ({ closeDialog }: { closeDialog: () => void }): JSX.Element => {
+export const FetchingMissionsDialog = ({ closeDialog }: { closeDialog: () => void }) => {
     const { TranslateText } = useLanguageContext()
     return (
         <StyledMissionDialog>

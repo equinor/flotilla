@@ -26,7 +26,7 @@ export const ScheduleMissionWithInspectionAreaVerification = ({
     missionInspectionAreaNames,
     scheduleMissions,
     closeDialog,
-}: IProps): JSX.Element => {
+}: IProps) => {
     const { enabledRobots } = useRobotContext()
     const [dialogToOpen, setDialogToOpen] = useState<DialogTypes>(DialogTypes.unknown)
     const [selectedRobot, setSelectedRobot] = useState<Robot>()

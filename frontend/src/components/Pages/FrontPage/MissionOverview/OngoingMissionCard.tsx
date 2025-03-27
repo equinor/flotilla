@@ -71,7 +71,7 @@ const StyledGhostButton = styled(StyledButton)`
     padding: 0;
 `
 
-export const OngoingMissionCard = ({ mission }: MissionProps): JSX.Element => {
+export const OngoingMissionCard = ({ mission }: MissionProps) => {
     const { TranslateText } = useLanguageContext()
 
     const navigate = useNavigate()
@@ -142,7 +142,7 @@ export const OngoingMissionCard = ({ mission }: MissionProps): JSX.Element => {
     )
 }
 
-export const OngoingMissionPlaceholderCard = ({ robot }: { robot?: Robot }): JSX.Element => {
+export const OngoingMissionPlaceholderCard = ({ robot }: { robot?: Robot }) => {
     const { TranslateText } = useLanguageContext()
 
     return (

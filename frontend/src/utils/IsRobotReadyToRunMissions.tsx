@@ -29,7 +29,7 @@ const isRobotPressureTooLow = (robot: Robot): boolean => {
     return false
 }
 
-export const NoMissionReason = ({ robot }: { robot: Robot }): JSX.Element => {
+export const NoMissionReason = ({ robot }: { robot: Robot }) => {
     const { TranslateText } = useLanguageContext()
     let message = undefined
     if (isBatteryTooLow(robot)) {
