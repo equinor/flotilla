@@ -11,6 +11,7 @@ import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'compon
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { useRobotContext } from 'components/Contexts/RobotContext'
 import { RobotFlotillaStatus } from 'models/Robot'
+import { StyledButton } from 'components/Styles/StyledComponents'
 
 const StyledDisplayButtons = styled.div`
     display: flex;
@@ -30,7 +31,7 @@ const StyledText = styled.div`
     gird-template-rows: auto, auto;
     gap: 1rem;
 `
-const StyledButton = styled(Button)`
+const StyledDockButton = styled(StyledButton)`
     background-color: white;
 `
 const ContainButton = styled.div`
@@ -182,13 +183,13 @@ export const StopRobotDialog = () => {
     return (
         <>
             <ContainButton>
-                <StyledButton color="danger" variant="outlined" onClick={openDialog}>
+                <StyledDockButton color="danger" variant="outlined" onClick={openDialog}>
                     {!dockActivated ? (
                         <>{TranslateText('Send robots to dock')}</>
                     ) : (
                         <>{TranslateText('Dismiss robots from dock')}</>
                     )}
-                </StyledButton>
+                </StyledDockButton>
             </ContainButton>
             <StyledDialog open={isStopRobotDialogOpen} isDismissable>
                 <Dialog.Header>
