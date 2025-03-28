@@ -47,7 +47,12 @@ const StyledOngoingMissionsInfo = styled.div`
 `
 const StyledNumberOfMissions = styled.div`
     display: flex;
+    text-wrap: nowrap;
     flex-direction: row;
+`
+const StyledTabsList = styled(Tabs.List)`
+    display: flex;
+    flex-wrap: wrap;
 `
 
 const OngoingMissionsInfo = ({ goToOngoingTab }: { goToOngoingTab: () => void }) => {
@@ -107,14 +112,14 @@ export const FrontPage = ({ initialTab }: { initialTab: TabNames }) => {
             <StyledFrontPage>
                 <Tabs activeTab={getIndexFromTabName(activeTab)} onChange={goToTab}>
                     <StyledTabHeader>
-                        <Tabs.List>
+                        <StyledTabsList>
                             <Tabs.Tab>{TranslateText('Mission Control')}</Tabs.Tab>
                             <Tabs.Tab>{TranslateText('Deck Overview')}</Tabs.Tab>
                             <Tabs.Tab>{TranslateText('Predefined Missions')}</Tabs.Tab>
                             <Tabs.Tab>{TranslateText('Mission History')}</Tabs.Tab>
                             <Tabs.Tab>{TranslateText('Auto Scheduling')}</Tabs.Tab>
                             <Tabs.Tab>{TranslateText('Robots')}</Tabs.Tab>
-                        </Tabs.List>
+                        </StyledTabsList>
                         <StyledTabHeaderRightContent>
                             <OngoingMissionsInfo goToOngoingTab={setActiveTabToMissionControl} />
                             <StopRobotDialog />
