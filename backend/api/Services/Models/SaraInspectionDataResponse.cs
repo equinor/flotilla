@@ -2,7 +2,7 @@
 
 namespace Api.Services.Models
 {
-    public class IDAInspectionDataResponse
+    public class SaraInspectionDataResponse
     {
         [JsonPropertyName("storageAccount")]
         public required string StorageAccount { get; set; }

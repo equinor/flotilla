@@ -3,7 +3,7 @@
 namespace Api.Mqtt.MessageModels
 {
 #nullable disable
-    public class IdaInspectionResultMessage : MqttMessage
+    public class SaraInspectionResultMessage : MqttMessage
     {
         [JsonPropertyName("inspection_id")]
         public string InspectionId { get; set; }

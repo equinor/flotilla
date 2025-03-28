@@ -85,7 +85,7 @@ namespace Api.Mqtt
         public static event EventHandler<MqttReceivedArgs>? MqttIsarPressureReceived;
         public static event EventHandler<MqttReceivedArgs>? MqttIsarPoseReceived;
         public static event EventHandler<MqttReceivedArgs>? MqttIsarCloudHealthReceived;
-        public static event EventHandler<MqttReceivedArgs>? MqttIdaInspectionResultReceived;
+        public static event EventHandler<MqttReceivedArgs>? MqttSaraInspectionResultReceived;
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -144,8 +144,8 @@ namespace Api.Mqtt
                 case Type type when type == typeof(IsarCloudHealthMessage):
                     OnIsarTopicReceived<IsarCloudHealthMessage>(content);
                     break;
-                case Type type when type == typeof(IdaInspectionResultMessage):
-                    OnIdaTopicReceived<IdaInspectionResultMessage>(content);
+                case Type type when type == typeof(SaraInspectionResultMessage):
+                    OnSaraTopicReceived<SaraInspectionResultMessage>(content);
                     break;
                 default:
                     _logger.LogWarning(
@@ -308,7 +308,7 @@ namespace Api.Mqtt
             }
         }
 
-        private void OnIdaTopicReceived<T>(string content)
+        private void OnSaraTopicReceived<T>(string content)
             where T : MqttMessage
         {
             T? message;
@@ -336,8 +336,8 @@ namespace Api.Mqtt
             {
                 var raiseEvent = type switch
                 {
-                    _ when type == typeof(IdaInspectionResultMessage) =>
-                        MqttIdaInspectionResultReceived,
+                    _ when type == typeof(SaraInspectionResultMessage) =>
+                        MqttSaraInspectionResultReceived,
                     _ => throw new NotImplementedException(
                         $"No event defined for message type '{typeof(T).Name}'"
                     ),
