@@ -1,7 +1,7 @@
 import { createContext, FC, useContext, useEffect, useState } from 'react'
 import { Task } from 'models/Task'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
-import { IdaInspectionVisualizationReady } from 'models/Inspection'
+import { SaraInspectionVisualizationReady } from 'models/Inspection'
 import { useQuery } from '@tanstack/react-query'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { queryClient } from '../../App'
@@ -31,7 +31,7 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
     useEffect(() => {
         if (connectionReady) {
             registerEvent(SignalREventLabels.inspectionVisualizationReady, (username: string, message: string) => {
-                const inspectionVisualizationData: IdaInspectionVisualizationReady = JSON.parse(message)
+                const inspectionVisualizationData: SaraInspectionVisualizationReady = JSON.parse(message)
                 queryClient.invalidateQueries({
                     queryKey: ['fetchInspectionData', inspectionVisualizationData.inspectionId],
                 })

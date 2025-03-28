@@ -36,7 +36,7 @@ export const ValidInspectionReportInspectionTypes: InspectionType[] = [
     InspectionType.ThermalImage,
 ]
 
-export interface IdaInspectionVisualizationReady {
+export interface SaraInspectionVisualizationReady {
     inspectionId: string
     storageAccount: string
     blobContainer: string
