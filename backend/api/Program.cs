@@ -132,7 +132,7 @@ builder
     .EnableTokenAcquisitionToCallDownstreamApi()
     .AddInMemoryTokenCaches()
     .AddDownstreamApi(EchoService.ServiceName, builder.Configuration.GetSection("Echo"))
-    .AddDownstreamApi(InspectionService.ServiceName, builder.Configuration.GetSection("IDA"))
+    .AddDownstreamApi(InspectionService.ServiceName, builder.Configuration.GetSection("SARA"))
     .AddDownstreamApi(IsarService.ServiceName, builder.Configuration.GetSection("Isar"));
 
 builder

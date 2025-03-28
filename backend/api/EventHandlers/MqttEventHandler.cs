@@ -77,7 +77,7 @@ namespace Api.EventHandlers
             MqttService.MqttIsarPressureReceived += OnIsarPressureUpdate;
             MqttService.MqttIsarPoseReceived += OnIsarPoseUpdate;
             MqttService.MqttIsarCloudHealthReceived += OnIsarCloudHealthUpdate;
-            MqttService.MqttIdaInspectionResultReceived += OnIdaInspectionResultUpdate;
+            MqttService.MqttSaraInspectionResultReceived += OnSaraInspectionResultUpdate;
         }
 
         public override void Unsubscribe()
@@ -90,7 +90,7 @@ namespace Api.EventHandlers
             MqttService.MqttIsarPressureReceived -= OnIsarPressureUpdate;
             MqttService.MqttIsarPoseReceived -= OnIsarPoseUpdate;
             MqttService.MqttIsarCloudHealthReceived -= OnIsarCloudHealthUpdate;
-            MqttService.MqttIdaInspectionResultReceived -= OnIdaInspectionResultUpdate;
+            MqttService.MqttSaraInspectionResultReceived -= OnSaraInspectionResultUpdate;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -673,9 +673,9 @@ namespace Api.EventHandlers
             TeamsMessageService.TriggerTeamsMessageReceived(new TeamsMessageEventArgs(message));
         }
 
-        private async void OnIdaInspectionResultUpdate(object? sender, MqttReceivedArgs mqttArgs)
+        private async void OnSaraInspectionResultUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
-            var inspectionResult = (IdaInspectionResultMessage)mqttArgs.Message;
+            var inspectionResult = (SaraInspectionResultMessage)mqttArgs.Message;
 
             var inspectionResultMessage = new InspectionResultMessage
             {
@@ -693,7 +693,7 @@ namespace Api.EventHandlers
             if (installation == null)
             {
                 _logger.LogError(
-                    "Installation with code {Code} not found when processing IDA inspection result update",
+                    "Installation with code {Code} not found when processing SARA inspection result update",
                     inspectionResult.BlobContainer
                 );
                 return;
