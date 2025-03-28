@@ -308,6 +308,11 @@ export class BackendAPICaller {
         return await BackendAPICaller.DELETE(path, '').catch(BackendAPICaller.handleError('DELETE', path))
     }
 
+    static async deleteAllMissions() {
+        const path: string = 'missions/runs/'
+        return await BackendAPICaller.DELETE(path, '').catch(BackendAPICaller.handleError('DELETE', path))
+    }
+
     static async pauseMission(robotId: string): Promise<void> {
         const path: string = 'robots/' + robotId + '/pause'
         return BackendAPICaller.postControlMissionRequest(path, robotId).catch(
