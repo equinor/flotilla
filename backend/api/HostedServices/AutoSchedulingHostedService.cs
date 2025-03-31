@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
@@ -50,17 +51,27 @@ namespace Api.HostedServices
                 DateTime.UtcNow.Date.AddDays(1) - DateTime.UtcNow
             ).TotalSeconds;
             _timer = new Timer(
-                DoWork,
+                PrivateDoWork,
                 null,
                 TimeSpan.FromSeconds(timeUntilMidnight),
                 TimeSpan.FromDays(1)
             );
 
-            DoWork(null);
+            PrivateDoWork(null);
             return Task.CompletedTask;
         }
 
-        private async void DoWork(object? state)
+        private async void PrivateDoWork(object? state)
+        {
+            await DoWork();
+        }
+
+        public async Task<IList<TimeSpan>?> TestableDoWork()
+        {
+            return await DoWork(false);
+        }
+
+        private async Task<IList<TimeSpan>?> DoWork(bool? scheduleJobs = true)
         {
             var missionQuery = new MissionDefinitionQueryStringParameters();
 
@@ -73,13 +84,13 @@ namespace Api.HostedServices
             catch (InvalidDataException e)
             {
                 _logger.LogError(e, "{ErrorMessage}", e.Message);
-                return;
+                return null;
             }
 
             if (missionDefinitions == null)
             {
                 _logger.LogInformation("No mission definitions with auto scheduling found.");
-                return;
+                return null;
             }
 
             var selectedMissionDefinitions = missionDefinitions.Where(m =>
@@ -92,9 +103,10 @@ namespace Api.HostedServices
                 _logger.LogInformation(
                     "No mission definitions with auto scheduling found that are due for inspection today."
                 );
-                return;
+                return null;
             }
 
+            var jobDelays = new List<TimeSpan>();
             foreach (var missionDefinition in selectedMissionDefinitions)
             {
                 if (missionDefinition.LastSuccessfulRun == null)
@@ -109,8 +121,9 @@ namespace Api.HostedServices
                     continue;
                 }
 
-                var jobDelays =
-                    missionDefinition.AutoScheduleFrequency!.GetSchedulingTimesUntilMidnight();
+                jobDelays = missionDefinition
+                    .AutoScheduleFrequency!.GetSchedulingTimesUntilMidnight()
+                    ?.ToList();
 
                 if (jobDelays == null)
                 {
@@ -118,7 +131,12 @@ namespace Api.HostedServices
                         "No job schedules found for mission definition {MissionDefinitionId}.",
                         missionDefinition.Id
                     );
-                    return;
+                    return null;
+                }
+
+                if (scheduleJobs == false)
+                {
+                    continue;
                 }
 
                 foreach (var jobDelay in jobDelays)
@@ -134,9 +152,11 @@ namespace Api.HostedServices
                     );
                 }
             }
+
+            return jobDelays;
         }
 
-        public async Task AutomaticScheduleMissionRun(MissionDefinition missionDefinition)
+        private async Task AutomaticScheduleMissionRun(MissionDefinition missionDefinition)
         {
             _logger.LogInformation(
                 "Scheduling mission run for mission definition {MissionDefinitionId}.",

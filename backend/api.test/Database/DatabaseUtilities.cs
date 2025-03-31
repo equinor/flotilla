@@ -4,9 +4,11 @@ using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
 using Api.Services;
+using Api.Services.MissionLoaders;
 using Api.Services.Models;
 using Api.Test.Mocks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Logging;
 using Moq;
 
@@ -19,6 +21,7 @@ namespace Api.Test.Database
         private readonly InspectionAreaService _inspectionAreaService;
         private readonly InstallationService _installationService;
         private readonly MissionRunService _missionRunService;
+        private readonly MissionDefinitionService _missionDefinitionService;
         private readonly PlantService _plantService;
         private readonly RobotModelService _robotModelService;
         private readonly RobotService _robotService;
@@ -76,6 +79,15 @@ namespace Api.Test.Database
                 _userInfoService
             );
             _sourceService = new SourceService(context, new Mock<ILogger<SourceService>>().Object);
+            _missionDefinitionService = new MissionDefinitionService(
+                context,
+                new MockMissionLoader(),
+                new MockSignalRService(),
+                _accessRoleService,
+                new Mock<ILogger<MissionDefinitionService>>().Object,
+                _missionRunService,
+                _sourceService
+            );
         }
 
         public async Task<MissionRun> NewMissionRun(
@@ -118,6 +130,44 @@ namespace Api.Test.Database
                 return await _missionRunService.Create(missionRun, false);
             }
             return missionRun;
+        }
+
+        public async Task<MissionDefinition> NewMissionDefinition(
+            string? id,
+            string installationCode,
+            InspectionArea inspectionArea,
+            MissionRun? lastSuccessfulRun = null,
+            bool writeToDatabase = false
+        )
+        {
+            var dateNow = DateTime.UtcNow;
+            var timeOfDay = TimeOnly.FromDateTime(dateNow).Add(new TimeSpan(3, 0, 0));
+
+            if (string.IsNullOrEmpty(id))
+                id = Guid.NewGuid().ToString();
+
+            var source = await _sourceService.Create(new Source { SourceId = $"{id}" });
+            var missionDefinition = new MissionDefinition
+            {
+                Id = id,
+                Name = "testMissionDefinition",
+                InspectionArea = inspectionArea,
+                InstallationCode = installationCode,
+                Source = source,
+                InspectionFrequency = new DateTime().AddDays(7) - new DateTime(),
+                LastSuccessfulRun = lastSuccessfulRun,
+                AutoScheduleFrequency = new AutoScheduleFrequency
+                {
+                    TimesOfDayCET = [timeOfDay],
+                    DaysOfWeek = [dateNow.DayOfWeek],
+                },
+            };
+
+            if (writeToDatabase)
+            {
+                return await _missionDefinitionService.Create(missionDefinition);
+            }
+            return missionDefinition;
         }
 
         public async Task<Installation> NewInstallation(string installationCode = "")
