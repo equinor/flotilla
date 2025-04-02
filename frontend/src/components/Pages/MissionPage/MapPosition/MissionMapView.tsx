@@ -48,7 +48,7 @@ export const MissionMapView = ({ mission }: MissionProps) => {
 
     const fetchMapInfo = (mission: Mission) => {
         const map = useQuery({
-            queryKey: [mission.missionId],
+            queryKey: ['fetchMapInfo', mission.missionId],
             queryFn: async () => {
                 const missionDefinition = await BackendAPICaller.getMissionDefinitionById(mission.missionId!)
                 return missionDefinition.map
@@ -83,42 +83,41 @@ export const MissionMapView = ({ mission }: MissionProps) => {
         [mission.tasks]
     )
 
-    useEffect(() => {
-        if (mapInfo?.mapName) {
-            BackendAPICaller.getMap(mission.installationCode!, mapInfo.mapName)
-                .then((imageBlob) => {
-                    imageObjectURL.current = URL.createObjectURL(imageBlob)
-                })
-                .catch(() => {
-                    imageObjectURL.current = NoMap
-                })
-                .then(() => {
-                    getMeta(imageObjectURL.current)
-                        .then((img) => {
-                            const mapCanvas = document.getElementById('mapCanvas') as HTMLCanvasElement
-                            if (mapCanvas) {
-                                mapCanvas.width = img.width
-                                mapCanvas.height = img.height
-                                const context = mapCanvas?.getContext('2d')
-                                if (context) {
-                                    setMapContext(context)
-                                    context.drawImage(img, 0, 0)
-                                }
-                                setMapCanvas(mapCanvas)
-                            }
-                            setMapImage(img)
-                        })
-                        .catch((error) => {
-                            console.error('Failed to get image metadata:', error)
-                        })
-                })
-                .catch((error) => {
-                    console.error('Failed to process map image:', error)
-                })
-        } else {
-            imageObjectURL.current = NoMap
+    const populateMap = async () => {
+        const { data, isError, error } = useQuery({
+            queryKey: ['fetchMap', mission.installationCode, mission.id, mapInfo?.mapName],
+            queryFn: () => BackendAPICaller.getMap(mission.installationCode!, mapInfo!.mapName),
+            enabled: mapInfo !== undefined && mapInfo.mapName !== undefined,
+            staleTime: Infinity,
+            retry: 1,
+        })
+        if (data && imageObjectURL.current === '') {
+            imageObjectURL.current = URL.createObjectURL(data)
+            const img = getMeta(imageObjectURL.current)
+            img.then((img) => {
+                const mapCanvas = document.getElementById('mapCanvas') as HTMLCanvasElement
+                if (mapCanvas) {
+                    mapCanvas.width = img.width
+                    mapCanvas.height = img.height
+                    const context = mapCanvas?.getContext('2d')
+                    if (context) {
+                        setMapContext(context)
+                        context.drawImage(img, 0, 0)
+                    }
+                    setMapCanvas(mapCanvas)
+                }
+                setMapImage(img)
+            }).catch((error) => {
+                console.error('Failed to get image metadata:', error)
+            })
         }
-    }, [mission.installationCode, mission.id, mapInfo?.mapName])
+        if (isError) {
+            imageObjectURL.current = NoMap
+            console.error('Failed to process map image:', error)
+        }
+    }
+
+    populateMap()
 
     useEffect(() => {
         if (mission.isCompleted) {
