@@ -30,7 +30,7 @@ namespace Api.Services
 
         public Task<List<MissionTask>?> GetTasksFromSource(Source source);
 
-        public Task<List<MissionDefinition>> ReadBySourceId(string sourceId, bool readOnly = true);
+        public Task<MissionDefinition?> ReadBySourceId(string sourceId, bool readOnly = true);
 
         public Task<MissionDefinition> UpdateLastSuccessfulMissionRun(
             string missionRunId,
@@ -133,18 +133,11 @@ namespace Api.Services
                 .ToListAsync();
         }
 
-        public async Task<List<MissionDefinition>> ReadBySourceId(
-            string sourceId,
-            bool readOnly = true
-        )
+        public async Task<MissionDefinition?> ReadBySourceId(string sourceId, bool readOnly = true)
         {
             return await GetMissionDefinitionsWithSubModels(readOnly: readOnly)
-                .Where(m =>
-                    m.IsDeprecated == false
-                    && m.Source.SourceId != null
-                    && m.Source.SourceId == sourceId
-                )
-                .ToListAsync();
+                .Where(m => m.IsDeprecated == false)
+                .FirstOrDefaultAsync(m => m.Source.SourceId.Equals(sourceId));
         }
 
         public async Task<List<MissionDefinition>?> ReadByHasAutoScheduleFrequency(
