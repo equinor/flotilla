@@ -350,7 +350,7 @@ namespace Api.Controllers
             }
             else
             {
-                var missionDefinitions = await missionDefinitionService.ReadBySourceId(
+                existingMissionDefinition = await missionDefinitionService.ReadBySourceId(
                     source.SourceId,
                     readOnly: true
                 );
