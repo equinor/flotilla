@@ -156,7 +156,7 @@ namespace Api.HostedServices
             return jobDelays;
         }
 
-        private async Task AutomaticScheduleMissionRun(MissionDefinition missionDefinition)
+        public async Task AutomaticScheduleMissionRun(MissionDefinition missionDefinition)
         {
             _logger.LogInformation(
                 "Scheduling mission run for mission definition {MissionDefinitionId}.",
