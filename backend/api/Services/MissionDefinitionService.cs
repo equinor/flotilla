@@ -20,6 +20,11 @@ namespace Api.Services
             bool readOnly = true
         );
 
+        public Task<IQueryable<MissionDefinition>> ReadByInstallationCode(
+            string installationCode,
+            bool readOnly = true
+        );
+
         public Task<List<MissionDefinition>> ReadByInspectionAreaId(
             string inspectionAreaId,
             bool readOnly = true
@@ -113,6 +118,17 @@ namespace Api.Services
                 parameters.PageNumber,
                 parameters.PageSize
             );
+        }
+
+        public async Task<IQueryable<MissionDefinition>> ReadByInstallationCode(
+            string installationCode,
+            bool readOnly = true
+        )
+        {
+            var missionDefinitions = await GetMissionDefinitionsWithSubModels(readOnly: readOnly)
+                .Where(m => m.IsDeprecated == false && m.InstallationCode == installationCode)
+                .ToListAsync();
+            return missionDefinitions.AsQueryable();
         }
 
         public async Task<List<MissionDefinition>> ReadByInspectionAreaId(
