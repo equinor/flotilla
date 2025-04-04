@@ -69,7 +69,7 @@ namespace Api.Controllers.Models
     }
 
     public class MissionDefinitionWithTasksResponse(
-        IMissionDefinitionService service,
+        IMissionDefinitionTaskService service,
         MissionDefinition missionDefinition
     )
     {
