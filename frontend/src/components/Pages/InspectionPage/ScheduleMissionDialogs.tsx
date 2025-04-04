@@ -64,6 +64,8 @@ export const ScheduleMissionDialog = (props: IProps) => {
     const filteredRobots = enabledRobots.filter(
         (r) =>
             (r.status === RobotStatus.Available ||
+                r.status === RobotStatus.Home ||
+                r.status === RobotStatus.ReturningHome ||
                 r.status === RobotStatus.Busy ||
                 r.status === RobotStatus.Recharging) &&
             r.isarConnected

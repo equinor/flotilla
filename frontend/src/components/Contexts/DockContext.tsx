@@ -27,7 +27,7 @@ export const DockProvider: FC<Props> = ({ children }) => {
 
     useEffect(() => {
         const missionQueueFozenStatus = enabledRobots.filter(
-            (robot) => robot.flotillaStatus === RobotFlotillaStatus.Docked
+            (robot) => robot.flotillaStatus === RobotFlotillaStatus.Home
         )
 
         if (missionQueueFozenStatus.length > 0 && DockStatus === false) {

@@ -33,13 +33,16 @@ namespace Api.EventHandlers
                 .CreateScope()
                 .ServiceProvider.GetRequiredService<IMissionSchedulingService>();
 
+        private IIsarService IsarService =>
+            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IIsarService>();
+
         private ISignalRService SignalRService =>
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ISignalRService>();
 
         public override void Subscribe()
         {
             MissionRunService.MissionRunCreated += OnMissionRunCreated;
-            MissionSchedulingService.RobotAvailable += OnRobotAvailable;
+            MissionSchedulingService.RobotReadyForMissions += OnRobotReadyForMissions;
             EmergencyActionService.SendRobotToDockTriggered += OnSendRobotToDockTriggered;
             EmergencyActionService.ReleaseRobotFromDockTriggered += OnReleaseRobotFromDockTriggered;
         }
@@ -47,7 +50,7 @@ namespace Api.EventHandlers
         public override void Unsubscribe()
         {
             MissionRunService.MissionRunCreated -= OnMissionRunCreated;
-            MissionSchedulingService.RobotAvailable -= OnRobotAvailable;
+            MissionSchedulingService.RobotReadyForMissions -= OnRobotReadyForMissions;
             EmergencyActionService.SendRobotToDockTriggered -= OnSendRobotToDockTriggered;
             EmergencyActionService.ReleaseRobotFromDockTriggered -= OnReleaseRobotFromDockTriggered;
         }
@@ -68,11 +71,6 @@ namespace Api.EventHandlers
 
             _startMissionSemaphore.WaitOne();
 
-            if (missionRun.MissionRunType != MissionRunType.ReturnHome)
-            {
-                await MissionScheduling.AbortActiveReturnToHomeMission(missionRun.Robot.Id);
-            }
-
             try
             {
                 await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(missionRun.Robot);
@@ -87,14 +85,11 @@ namespace Api.EventHandlers
             }
         }
 
-        private async void OnRobotAvailable(object? sender, RobotAvailableEventArgs e)
+        private async void OnRobotReadyForMissions(object? sender, RobotReadyForMissionsEventArgs e)
         {
-            if (e.Robot.Status != RobotStatus.Available)
+            if (!e.Robot.IsRobotReadyToStartMissions())
             {
-                _logger.LogWarning(
-                    "OnRobotAvailable was triggered while robot was {robotStatus}",
-                    e.Robot.Status
-                );
+                _logger.LogWarning("OnRobotReadyForMissions was not ready to start the mission");
                 return;
             }
             _startMissionSemaphore.WaitOne();
@@ -155,24 +150,6 @@ namespace Api.EventHandlers
 
             try
             {
-                await MissionScheduling.ScheduleMissionToDriveToDockPosition(robot.Id);
-            }
-            catch (Exception ex) when (ex is DockException || ex is InspectionAreaNotFoundException)
-            {
-                _logger.LogWarning(
-                    ex,
-                    "Failed to schedule return to dock mission on robot {RobotName} because: {ErrorMessage}",
-                    robot.Name,
-                    ex.Message
-                );
-                SignalRService.ReportDockFailureToSignalR(
-                    robot,
-                    $"Failed to send {robot.Name} to a dock"
-                );
-            }
-
-            try
-            {
                 await MissionScheduling.StopCurrentMissionRun(robot.Id);
             }
             catch (RobotNotFoundException)
@@ -213,18 +190,19 @@ namespace Api.EventHandlers
                 return;
             }
 
-            _startMissionSemaphore.WaitOne();
             try
             {
-                await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(robot);
+                await IsarService.ReturnHome(robot);
             }
-            catch (MissionRunNotFoundException)
+            catch (Exception ex)
             {
+                _logger.LogError(
+                    ex,
+                    "Failed to send robot {RobotId} to dock because: {ErrorMessage}",
+                    robot.Id,
+                    ex.Message
+                );
                 return;
-            }
-            finally
-            {
-                _startMissionSemaphore.Release();
             }
         }
 

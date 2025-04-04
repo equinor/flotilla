@@ -11,14 +11,16 @@ export enum RobotStatus {
     Offline = 'Offline',
     Blocked = 'Blocked',
     BlockedProtectiveStop = 'BlockedProtectiveStop',
-    Docked = 'Docked',
+    Home = 'Home',
     Recharging = 'Recharging',
+    ReturningHome = 'ReturningHome',
     ConnectionIssues = 'Connection Issues',
+    UnkownStatus = 'UnknownStatus',
 }
 
 export enum RobotFlotillaStatus {
     Normal = 'Normal',
-    Docked = 'Docked',
+    Home = 'Home',
     Recharging = 'Recharging',
 }
 

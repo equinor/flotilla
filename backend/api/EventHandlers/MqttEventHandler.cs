@@ -148,7 +148,7 @@ namespace Api.EventHandlers
                 robot.CurrentInspectionArea?.Name
             );
 
-            if (isarStatus.Status == RobotStatus.Available)
+            if (robot.IsRobotReadyToStartMissions())
             {
                 try
                 {
@@ -170,7 +170,9 @@ namespace Api.EventHandlers
                     _updateRobotSemaphore.Release();
                     _logger.LogDebug("Semaphore released after updating robot current mission id");
                 }
-                await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(robot);
+                MissionScheduling.TriggerRobotReadyForMissions(
+                    new RobotReadyForMissionsEventArgs(robot)
+                );
             }
         }
 
