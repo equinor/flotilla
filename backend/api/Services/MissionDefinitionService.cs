@@ -4,7 +4,6 @@ using System.Linq.Expressions;
 using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
-using Api.Services.MissionLoaders;
 using Api.Utilities;
 using Microsoft.EntityFrameworkCore;
 
@@ -27,8 +26,6 @@ namespace Api.Services
         );
 
         public Task<List<MissionDefinition>?> ReadByHasAutoScheduleFrequency(bool readOnly = true);
-
-        public Task<List<MissionTask>?> GetTasksFromSource(Source source);
 
         public Task<MissionDefinition?> ReadBySourceId(string sourceId, bool readOnly = true);
 
@@ -56,7 +53,6 @@ namespace Api.Services
     )]
     public class MissionDefinitionService(
         FlotillaDbContext context,
-        IMissionLoader missionLoader,
         ISignalRService signalRService,
         IAccessRoleService accessRoleService,
         ILogger<IMissionDefinitionService> logger,
@@ -218,11 +214,6 @@ namespace Api.Services
             await Update(missionDefinition);
 
             return missionDefinition;
-        }
-
-        public async Task<List<MissionTask>?> GetTasksFromSource(Source source)
-        {
-            return await missionLoader.GetTasksForMission(source.SourceId);
         }
 
         private async Task ApplyDatabaseUpdate(Installation? installation)

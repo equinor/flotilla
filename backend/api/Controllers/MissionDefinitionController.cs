@@ -13,6 +13,7 @@ namespace Api.Controllers
     public class MissionDefinitionController(
         ILogger<MissionDefinitionController> logger,
         IMissionDefinitionService missionDefinitionService,
+        IMissionDefinitionTaskService missionDefinitionTaskService,
         IMissionRunService missionRunService
     ) : ControllerBase
     {
@@ -89,7 +90,7 @@ namespace Api.Controllers
                 return NotFound($"Could not find mission definition with id {id}");
             }
             var missionDefinitionResponse = new MissionDefinitionWithTasksResponse(
-                missionDefinitionService,
+                missionDefinitionTaskService,
                 missionDefinition
             );
             return Ok(missionDefinitionResponse);

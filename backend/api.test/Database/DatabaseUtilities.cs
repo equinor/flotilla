@@ -4,11 +4,9 @@ using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
 using Api.Services;
-using Api.Services.MissionLoaders;
 using Api.Services.Models;
 using Api.Test.Mocks;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Logging;
 using Moq;
 
@@ -81,7 +79,6 @@ namespace Api.Test.Database
             _sourceService = new SourceService(context, new Mock<ILogger<SourceService>>().Object);
             _missionDefinitionService = new MissionDefinitionService(
                 context,
-                new MockMissionLoader(),
                 new MockSignalRService(),
                 _accessRoleService,
                 new Mock<ILogger<MissionDefinitionService>>().Object,
