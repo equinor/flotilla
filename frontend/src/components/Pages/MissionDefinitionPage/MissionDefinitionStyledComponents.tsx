@@ -6,7 +6,7 @@ export const FormCard = styled(Card)`
     justify-content: center;
     padding: 8px;
     gap: 25px;
-    max-width: 340px;
+    box-shadow: none;
 `
 
 export const ButtonSection = styled.div`

@@ -319,5 +319,6 @@
     "Info: Updating mission tasks..": "Oppdatering av oppdragets oppgaver foregår i 'Echo Mission planner'. Hvis det brukes inspeksjonspunkt fra STID, vil verdien bli hentet fra STID når oppdraget er satt til 'Ready'. Hvis posisjonen i STID blir oppdatert, vil oppdraget ikke bruke den oppdaterte verdien med mindre oppdraget i oppdragsplanleggeren blir satt til 'Ready' igjen.",
     "Remove all": "Fjern alle",
     "Remove all missions": "Fjern alle oppdragene",
-    "Remove all missions dialog text": "Vennligst bekreft at du ønsker å fjerne alle oppdragene fra køen."
+    "Remove all missions dialog text": "Vennligst bekreft at du ønsker å fjerne alle oppdragene fra køen.",
+    "New scheduled mission": "Ny planlagt kjøring"
 }

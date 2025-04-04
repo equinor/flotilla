@@ -319,5 +319,6 @@
     "Info: Updating mission tasks..": "Updating of mission tasks occur in 'Echo Mission planner'. If using inspection target from STID, the value will be fetched from STID when the mission is set to ready. If the position in STID is updated, the mission will not use the updated value unless the mission in the mission planner gets set to ready again.",
     "Remove all": "Remove all",
     "Remove all missions": "Remove all missions",
-    "Remove all missions dialog text": "Please confirm that you want to remove all the missions from the queue."
+    "Remove all missions dialog text": "Please confirm that you want to remove all the missions from the queue.",
+    "New scheduled mission": "New scheduled mission"
 }

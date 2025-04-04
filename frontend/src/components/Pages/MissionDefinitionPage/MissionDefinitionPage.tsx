@@ -34,6 +34,10 @@ import {
     TitleComponent,
 } from './MissionDefinitionStyledComponents'
 
+const StyledFormCard = styled(FormCard)`
+    max-width: 340px;
+`
+
 const StyledCard = styled(Card)`
     display: flex;
     padding: 8px;
@@ -195,7 +199,7 @@ interface IMissionDefinitionEditDialogProps {
     closeEditDialog: () => void
 }
 
-const MissionDefinitionEditDialog = ({
+export const MissionDefinitionEditDialogContent = ({
     missionDefinition,
     fieldName,
     closeEditDialog,
@@ -282,24 +286,37 @@ const MissionDefinitionEditDialog = ({
     }
 
     return (
+        <>
+            {getFormItem()}
+            <ButtonSection>
+                <Button onClick={closeEditDialog} variant="outlined" color="primary">
+                    {TranslateText('Cancel')}
+                </Button>
+                <Button onClick={handleSubmit} disabled={isUpdateButtonDisabled()} variant="contained" color="primary">
+                    {TranslateText('Update')}
+                </Button>
+            </ButtonSection>
+        </>
+    )
+}
+
+const MissionDefinitionEditDialog = ({
+    missionDefinition,
+    fieldName,
+    closeEditDialog,
+}: IMissionDefinitionEditDialogProps) => {
+    const { TranslateText } = useLanguageContext()
+
+    return (
         <StyledDialog open={true}>
-            <FormCard>
+            <StyledFormCard>
                 <Typography variant="h2">{TranslateText('Edit') + ' ' + TranslateText(fieldName)}</Typography>
-                {getFormItem()}
-                <ButtonSection>
-                    <Button onClick={() => closeEditDialog()} variant="outlined" color="primary">
-                        {TranslateText('Cancel')}
-                    </Button>
-                    <Button
-                        onClick={handleSubmit}
-                        disabled={isUpdateButtonDisabled()}
-                        variant="contained"
-                        color="primary"
-                    >
-                        {TranslateText('Update')}
-                    </Button>
-                </ButtonSection>
-            </FormCard>
+                <MissionDefinitionEditDialogContent
+                    missionDefinition={missionDefinition}
+                    fieldName={fieldName}
+                    closeEditDialog={closeEditDialog}
+                />
+            </StyledFormCard>
         </StyledDialog>
     )
 }
