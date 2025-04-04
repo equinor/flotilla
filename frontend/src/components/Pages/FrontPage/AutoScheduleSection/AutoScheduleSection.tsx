@@ -1,12 +1,19 @@
-import { Table, Typography } from '@equinor/eds-core-react'
+import { Button, Table, Typography } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
-import { StyledTableBody, StyledTableCell } from 'components/Styles/StyledComponents'
+import { StyledDialog, StyledTableBody, StyledTableCell } from 'components/Styles/StyledComponents'
 import { DaysOfWeek } from 'models/AutoScheduleFrequency'
 import { config } from 'config'
 import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import { capitalizeFirstLetter } from 'utils/StringFormatting'
+import { StyledIcon } from 'components/Pages/InspectionPage/InspectionTable'
+import { Icons } from 'utils/icons'
+import { useState } from 'react'
+import { FormCard } from 'components/Pages/MissionDefinitionPage/MissionDefinitionStyledComponents'
+import { MissionDefinitionEditDialogContent } from 'components/Pages/MissionDefinitionPage/MissionDefinitionPage'
+import { MissionDefinition } from 'models/MissionDefinition'
+import { SelectMissionsComponent } from '../MissionOverview/ScheduleMissionDialog/SelectMissionsToScheduleDialog'
 
 const StyledSection = styled.div`
     display: flex;
@@ -26,13 +33,45 @@ const StyledDayOverview = styled.div`
     display: grid;
     gap: 0px;
 `
+const StyledButtonSection = styled.div`
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+    gap: 8px;
+    align-self: stretch;
+
+    @media (max-width: 600px) {
+        justify-content: flex-start;
+    }
+`
+const StyledButton = styled(Button)`
+    display: flex;
+    padding: 0px 16px;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+`
+
+const StyledFormCard = styled(FormCard)`
+    margin-top: 2px;
+`
 
 const AutoScheduleList = () => {
     const { TranslateText } = useLanguageContext()
     const { missionDefinitions } = useMissionDefinitionsContext()
+    const [dialogOpen, setDialogOpen] = useState<boolean>(false)
+    const [selectedMissions, setSelectedMissions] = useState<MissionDefinition[]>([])
     const navigate = useNavigate()
 
     const autoScheduleMissionDefinitions = missionDefinitions.filter((m) => m.autoScheduleFrequency)
+
+    const openDialog = () => {
+        setDialogOpen(true)
+    }
+    const closeDialog = () => {
+        setDialogOpen(false)
+        setSelectedMissions([])
+    }
 
     const allDays = [
         DaysOfWeek.Monday,
@@ -96,6 +135,12 @@ const AutoScheduleList = () => {
 
     return (
         <>
+            <StyledButtonSection>
+                <StyledButton onClick={openDialog}>
+                    <StyledIcon name={Icons.Add} size={24} />
+                    {TranslateText('New scheduled mission')}
+                </StyledButton>
+            </StyledButtonSection>
             {autoScheduleMissionDefinitions.length > 0 && (
                 <StyledSection>
                     <StyledHeader>
@@ -106,12 +151,37 @@ const AutoScheduleList = () => {
                     <StyledDayOverview>
                         <DayOverview />
                     </StyledDayOverview>
+                    {dialogOpen && (
+                        <StyledDialog open={true}>
+                            <StyledDialog.Header>
+                                <StyledDialog.Title>
+                                    <Typography variant="h3">{TranslateText('New scheduled mission')}</Typography>
+                                </StyledDialog.Title>
+                            </StyledDialog.Header>
+                            <StyledDialog.CustomContent>
+                                <SelectMissionsComponent
+                                    missions={missionDefinitions}
+                                    selectedMissions={selectedMissions}
+                                    setSelectedMissions={setSelectedMissions}
+                                    multiple={false}
+                                />
+                                {dialogOpen && selectedMissions.length === 1 && (
+                                    <StyledFormCard>
+                                        <MissionDefinitionEditDialogContent
+                                            missionDefinition={selectedMissions[0]}
+                                            fieldName="autoScheduleFrequency"
+                                            closeEditDialog={closeDialog}
+                                        />
+                                    </StyledFormCard>
+                                )}
+                            </StyledDialog.CustomContent>
+                        </StyledDialog>
+                    )}
                 </StyledSection>
             )}
         </>
     )
 }
-
 export const AutoScheduleSection = () => {
     return AutoScheduleList()
 }

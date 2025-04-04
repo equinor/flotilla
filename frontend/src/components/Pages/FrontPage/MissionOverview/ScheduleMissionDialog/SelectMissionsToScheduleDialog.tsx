@@ -122,15 +122,17 @@ export const SelectMissionsToScheduleDialog = ({ missionsList, closeDialog }: Sc
     )
 }
 
-const SelectMissionsComponent = memo(
+export const SelectMissionsComponent = memo(
     ({
         missions,
         selectedMissions,
         setSelectedMissions,
+        multiple = true,
     }: {
         missions: MissionDefinition[]
         selectedMissions: MissionDefinition[]
         setSelectedMissions: (missions: MissionDefinition[]) => void
+        multiple?: boolean
     }) => {
         const { TranslateText } = useLanguageContext()
 
@@ -141,7 +143,7 @@ const SelectMissionsComponent = memo(
                 options={missions}
                 onOptionsChange={(changes) => setSelectedMissions(changes.selectedItems)}
                 label={TranslateText('Select missions')}
-                multiple
+                multiple={multiple}
                 selectedOptions={selectedMissions}
                 placeholder={`${selectedMissions.length}/${missions.length} ${TranslateText('selected')}`}
                 autoWidth
