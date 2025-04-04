@@ -9,7 +9,7 @@ namespace Api.Services
 {
     public interface IInstallationService
     {
-        public abstract Task<IEnumerable<Installation>> ReadAll(bool readOnly = true);
+        public abstract Task<IList<Installation>> ReadAll(bool readOnly = true);
 
         public abstract Task<Installation?> ReadById(string id, bool readOnly = true);
 
@@ -48,7 +48,7 @@ namespace Api.Services
         ILogger<InstallationService> logger
     ) : IInstallationService
     {
-        public async Task<IEnumerable<Installation>> ReadAll(bool readOnly = true)
+        public async Task<IList<Installation>> ReadAll(bool readOnly = true)
         {
             return await GetInstallations(readOnly: readOnly).ToListAsync();
         }
