@@ -9,7 +9,7 @@ namespace Api.Services.MissionLoaders
 
         public Task<IQueryable<MissionDefinition>> GetAvailableMissions(string? installationCode);
 
-        public Task<List<MissionTask>> GetTasksForMission(string sourceMissionId);
+        public Task<List<MissionTask>?> GetTasksForMission(string sourceMissionId);
 
         public Task<List<PlantInfo>> GetPlantInfos();
     }

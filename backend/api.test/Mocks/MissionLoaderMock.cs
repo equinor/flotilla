@@ -99,7 +99,7 @@ namespace Api.Test.Mocks
             return new List<MissionDefinition>([_mockMissionDefinition]).AsQueryable();
         }
 
-        public async Task<List<MissionTask>> GetTasksForMission(string sourceMissionId)
+        public async Task<List<MissionTask>?> GetTasksForMission(string sourceMissionId)
         {
             await Task.Run(() => Thread.Sleep(1));
             return _mockMissionTasks;

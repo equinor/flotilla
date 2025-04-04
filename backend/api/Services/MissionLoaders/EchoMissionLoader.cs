@@ -17,7 +17,7 @@ namespace Api.Services.MissionLoaders
             return await echoService.GetMissionById(sourceMissionId);
         }
 
-        public async Task<List<MissionTask>> GetTasksForMission(string missionSourceId)
+        public async Task<List<MissionTask>?> GetTasksForMission(string missionSourceId)
         {
             return await echoService.GetTasksForMission(missionSourceId);
         }

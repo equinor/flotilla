@@ -350,7 +350,7 @@ namespace Api.Controllers
             }
             else
             {
-                var missionDefinitions = await missionDefinitionService.ReadBySourceId(
+                existingMissionDefinition = await missionDefinitionService.ReadBySourceId(
                     source.SourceId,
                     readOnly: true
                 );
@@ -443,6 +443,8 @@ namespace Api.Controllers
             [FromBody] CustomMissionQuery customMissionQuery
         )
         {
+            customMissionQuery.InstallationCode = customMissionQuery.InstallationCode.ToUpper();
+
             Robot robot;
             try
             {
@@ -509,13 +511,13 @@ namespace Api.Controllers
                 }
                 else
                 {
-                    var missionDefinitions = await missionDefinitionService.ReadBySourceId(
+                    var missionDefinition = await missionDefinitionService.ReadBySourceId(
                         source.SourceId,
                         readOnly: true
                     );
-                    if (missionDefinitions.Count > 0)
+                    if (missionDefinition != null)
                     {
-                        existingMissionDefinition = missionDefinitions.First();
+                        existingMissionDefinition = missionDefinition;
                     }
                 }
 

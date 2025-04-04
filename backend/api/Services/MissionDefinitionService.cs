@@ -4,7 +4,6 @@ using System.Linq.Expressions;
 using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
-using Api.Services.MissionLoaders;
 using Api.Utilities;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,6 +20,11 @@ namespace Api.Services
             bool readOnly = true
         );
 
+        public Task<IQueryable<MissionDefinition>> ReadByInstallationCode(
+            string installationCode,
+            bool readOnly = true
+        );
+
         public Task<List<MissionDefinition>> ReadByInspectionAreaId(
             string inspectionAreaId,
             bool readOnly = true
@@ -28,9 +32,7 @@ namespace Api.Services
 
         public Task<List<MissionDefinition>?> ReadByHasAutoScheduleFrequency(bool readOnly = true);
 
-        public Task<List<MissionTask>?> GetTasksFromSource(Source source);
-
-        public Task<List<MissionDefinition>> ReadBySourceId(string sourceId, bool readOnly = true);
+        public Task<MissionDefinition?> ReadBySourceId(string sourceId, bool readOnly = true);
 
         public Task<MissionDefinition> UpdateLastSuccessfulMissionRun(
             string missionRunId,
@@ -56,7 +58,6 @@ namespace Api.Services
     )]
     public class MissionDefinitionService(
         FlotillaDbContext context,
-        IMissionLoader missionLoader,
         ISignalRService signalRService,
         IAccessRoleService accessRoleService,
         ILogger<IMissionDefinitionService> logger,
@@ -119,6 +120,17 @@ namespace Api.Services
             );
         }
 
+        public async Task<IQueryable<MissionDefinition>> ReadByInstallationCode(
+            string installationCode,
+            bool readOnly = true
+        )
+        {
+            var missionDefinitions = await GetMissionDefinitionsWithSubModels(readOnly: readOnly)
+                .Where(m => m.IsDeprecated == false && m.InstallationCode == installationCode)
+                .ToListAsync();
+            return missionDefinitions.AsQueryable();
+        }
+
         public async Task<List<MissionDefinition>> ReadByInspectionAreaId(
             string inspectionAreaId,
             bool readOnly = true
@@ -133,18 +145,11 @@ namespace Api.Services
                 .ToListAsync();
         }
 
-        public async Task<List<MissionDefinition>> ReadBySourceId(
-            string sourceId,
-            bool readOnly = true
-        )
+        public async Task<MissionDefinition?> ReadBySourceId(string sourceId, bool readOnly = true)
         {
             return await GetMissionDefinitionsWithSubModels(readOnly: readOnly)
-                .Where(m =>
-                    m.IsDeprecated == false
-                    && m.Source.SourceId != null
-                    && m.Source.SourceId == sourceId
-                )
-                .ToListAsync();
+                .Where(m => m.IsDeprecated == false)
+                .FirstOrDefaultAsync(m => m.Source.SourceId.Equals(sourceId));
         }
 
         public async Task<List<MissionDefinition>?> ReadByHasAutoScheduleFrequency(
@@ -225,11 +230,6 @@ namespace Api.Services
             await Update(missionDefinition);
 
             return missionDefinition;
-        }
-
-        public async Task<List<MissionTask>?> GetTasksFromSource(Source source)
-        {
-            return await missionLoader.GetTasksForMission(source.SourceId);
         }
 
         private async Task ApplyDatabaseUpdate(Installation? installation)
