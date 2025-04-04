@@ -17,7 +17,7 @@ import { useRobotContext } from 'components/Contexts/RobotContext'
 import { FrontPageSectionId } from 'models/FrontPageSectionId'
 import { SmallScreenInfoText } from 'utils/InfoText'
 
-const StyledIcon = styled(Icon)`
+export const StyledIcon = styled(Icon)`
     display: flex;
     justify-content: center;
     height: 1.3rem;
