@@ -443,6 +443,8 @@ namespace Api.Controllers
             [FromBody] CustomMissionQuery customMissionQuery
         )
         {
+            customMissionQuery.InstallationCode = customMissionQuery.InstallationCode.ToUpper();
+
             Robot robot;
             try
             {
