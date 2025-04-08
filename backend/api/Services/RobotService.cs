@@ -3,6 +3,7 @@ using System.Globalization;
 using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
+using Api.Services.Models;
 using Api.Utilities;
 using Microsoft.EntityFrameworkCore;
 
@@ -142,29 +143,110 @@ namespace Api.Services
             return robot;
         }
 
+        private async Task SendToSingalROnPropertyUpdate(
+            string robotId,
+            string propertyName,
+            object? propertyValue
+        )
+        {
+            await signalRService.SendMessageAsync(
+                "Robot property updated",
+                null,
+                new UpdateRobotPropertyMessage
+                {
+                    RobotId = robotId,
+                    PropertyName = propertyName,
+                    PropertyValue = propertyValue,
+                }
+            );
+        }
+
         public async Task UpdateRobotStatus(string robotId, RobotStatus status)
         {
-            await UpdateRobotProperty(robotId, "Status", status);
+            logger.LogInformation(
+                "Setting status on robot with id {robotId} to {NewValue}",
+                robotId,
+                status
+            );
+
+            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
+            await context
+                .Robots.Where(r =>
+                    r.Id == robotId
+                    && accessibleInstallationCodes.Result.Contains(
+                        r.CurrentInstallation.InstallationCode.ToUpper()
+                    )
+                )
+                .ExecuteUpdateAsync(setters => setters.SetProperty(r => r.Status, status));
+
+            await SendToSingalROnPropertyUpdate(robotId, "status", status);
         }
 
         public async Task UpdateRobotBatteryLevel(string robotId, float batteryLevel)
         {
-            await UpdateRobotProperty(robotId, "BatteryLevel", batteryLevel, isLogLevelDebug: true);
+            logger.LogDebug(
+                "Setting batteryLevel on robot with id {robotId} to {NewValue}",
+                robotId,
+                batteryLevel
+            );
+
+            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
+            await context
+                .Robots.Where(r =>
+                    r.Id == robotId
+                    && accessibleInstallationCodes.Result.Contains(
+                        r.CurrentInstallation.InstallationCode.ToUpper()
+                    )
+                )
+                .ExecuteUpdateAsync(setters =>
+                    setters.SetProperty(r => r.BatteryLevel, batteryLevel)
+                );
+
+            await SendToSingalROnPropertyUpdate(robotId, "batteryLevel", batteryLevel);
         }
 
         public async Task UpdateRobotBatteryState(string robotId, BatteryState? batteryState)
         {
-            await UpdateRobotProperty(robotId, "BatteryState", batteryState, isLogLevelDebug: true);
+            logger.LogInformation(
+                "Setting batteryState on robot with id {robotId} to {NewValue}",
+                robotId,
+                batteryState
+            );
+
+            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
+            await context
+                .Robots.Where(r =>
+                    r.Id == robotId
+                    && accessibleInstallationCodes.Result.Contains(
+                        r.CurrentInstallation.InstallationCode.ToUpper()
+                    )
+                )
+                .ExecuteUpdateAsync(setters =>
+                    setters.SetProperty(r => r.BatteryState, batteryState)
+                );
+
+            await SendToSingalROnPropertyUpdate(robotId, "batteryState", batteryState);
         }
 
         public async Task UpdateRobotPressureLevel(string robotId, float? pressureLevel)
         {
-            await UpdateRobotProperty(
+            logger.LogDebug(
+                "Setting pressureLevel on robot with id {robotId} to {NewValue}",
                 robotId,
-                "PressureLevel",
-                pressureLevel,
-                isLogLevelDebug: true
+                pressureLevel
             );
+
+            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
+            await context
+                .Robots.Where(r =>
+                    r.Id == robotId
+                    && accessibleInstallationCodes.Result.Contains(
+                        r.CurrentInstallation.InstallationCode.ToUpper()
+                    )
+                )
+                .ExecuteUpdateAsync(setters =>
+                    setters.SetProperty(r => r.PressureLevel, pressureLevel)
+                );
         }
 
         private void ThrowIfRobotIsNull(Robot? robot, string robotId)
@@ -202,17 +284,51 @@ namespace Api.Services
             robot = await robotQuery.FirstOrDefaultAsync();
             ThrowIfRobotIsNull(robot, robotId);
             NotifySignalROfUpdatedRobot(robot!, robot!.CurrentInstallation!);
-            DetachTracking(context, robot);
         }
 
         public async Task UpdateRobotIsarConnected(string robotId, bool isarConnected)
         {
-            await UpdateRobotProperty(robotId, "IsarConnected", isarConnected);
+            logger.LogInformation(
+                "Setting isarConnected on robot with id {robotId} to {NewValue}",
+                robotId,
+                isarConnected
+            );
+            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
+            await context
+                .Robots.Where(r =>
+                    r.Id == robotId
+                    && accessibleInstallationCodes.Result.Contains(
+                        r.CurrentInstallation.InstallationCode.ToUpper()
+                    )
+                )
+                .ExecuteUpdateAsync(setters =>
+                    setters.SetProperty(r => r.IsarConnected, isarConnected)
+                );
+
+            await SendToSingalROnPropertyUpdate(robotId, "isarConnected", isarConnected);
         }
 
         public async Task UpdateCurrentMissionId(string robotId, string? currentMissionId)
         {
-            await UpdateRobotProperty(robotId, "CurrentMissionId", currentMissionId);
+            logger.LogInformation(
+                "Setting currentMissionId on robot with id {robotId} to {NewValue}",
+                robotId,
+                currentMissionId
+            );
+
+            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
+            await context
+                .Robots.Where(r =>
+                    r.Id == robotId
+                    && accessibleInstallationCodes.Result.Contains(
+                        r.CurrentInstallation.InstallationCode.ToUpper()
+                    )
+                )
+                .ExecuteUpdateAsync(setters =>
+                    setters.SetProperty(r => r.CurrentMissionId, currentMissionId)
+                );
+
+            await SendToSingalROnPropertyUpdate(robotId, "currentMissionId", currentMissionId);
         }
 
         public async Task UpdateCurrentInspectionAreaId(string robotId, string? inspectionAreaId)
@@ -222,44 +338,106 @@ namespace Api.Services
                 robotId,
                 inspectionAreaId
             );
-            if (inspectionAreaId is null)
+
+            if (inspectionAreaId is not null)
             {
-                await UpdateRobotProperty(robotId, "CurrentInspectionAreaId", null);
-                return;
+                var inspectionArea = await inspectionAreaService.ReadById(
+                    inspectionAreaId,
+                    readOnly: true
+                );
+                if (inspectionArea is null)
+                {
+                    logger.LogError(
+                        "Could not find inspection area with id '{InspectionAreaId}'. Setting inspection area to null for robot with id '{IsarId}'",
+                        inspectionAreaId,
+                        robotId
+                    );
+                    inspectionAreaId = null;
+                }
             }
 
-            var inspectionArea = await inspectionAreaService.ReadById(
-                inspectionAreaId,
-                readOnly: true
-            );
-            if (inspectionArea is null)
-            {
-                logger.LogError(
-                    "Could not find inspection area with id '{InspectionAreaId}'. Setting inspection area to null for robot with id '{IsarId}'",
-                    inspectionAreaId,
-                    robotId
+            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
+            await context
+                .Robots.Where(r =>
+                    r.Id == robotId
+                    && accessibleInstallationCodes.Result.Contains(
+                        r.CurrentInstallation.InstallationCode.ToUpper()
+                    )
+                )
+                .ExecuteUpdateAsync(setters =>
+                    setters.SetProperty(r => r.CurrentInspectionAreaId, inspectionAreaId)
                 );
-                await UpdateRobotProperty(robotId, "CurrentInspectionAreaId", null);
-            }
-            else
-            {
-                await UpdateRobotProperty(robotId, "CurrentInspectionAreaId", inspectionAreaId);
-            }
+
+            await SendToSingalROnPropertyUpdate(
+                robotId,
+                "currentInspectionAreaId",
+                inspectionAreaId
+            );
         }
 
         public async Task UpdateDeprecated(string robotId, bool deprecated)
         {
-            await UpdateRobotProperty(robotId, "Deprecated", deprecated);
+            logger.LogInformation(
+                "Setting deprecated on robot with id {robotId} to {NewValue}",
+                robotId,
+                deprecated
+            );
+
+            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
+            await context
+                .Robots.Where(r =>
+                    r.Id == robotId
+                    && accessibleInstallationCodes.Result.Contains(
+                        r.CurrentInstallation.InstallationCode.ToUpper()
+                    )
+                )
+                .ExecuteUpdateAsync(setters => setters.SetProperty(r => r.Deprecated, deprecated));
+
+            await SendToSingalROnPropertyUpdate(robotId, "deprecated", deprecated);
         }
 
         public async Task UpdateMissionQueueFrozen(string robotId, bool missionQueueFrozen)
         {
-            await UpdateRobotProperty(robotId, "MissionQueueFrozen", missionQueueFrozen);
+            logger.LogInformation(
+                "Setting missionQueueFrozen on robot with id {robotId} to {NewValue}",
+                robotId,
+                missionQueueFrozen
+            );
+
+            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
+            await context
+                .Robots.Where(r =>
+                    r.Id == robotId
+                    && accessibleInstallationCodes.Result.Contains(
+                        r.CurrentInstallation.InstallationCode.ToUpper()
+                    )
+                )
+                .ExecuteUpdateAsync(setters =>
+                    setters.SetProperty(r => r.MissionQueueFrozen, missionQueueFrozen)
+                );
+
+            await SendToSingalROnPropertyUpdate(robotId, "missionQueueFrozen", missionQueueFrozen);
         }
 
         public async Task UpdateFlotillaStatus(string robotId, RobotFlotillaStatus status)
         {
-            await UpdateRobotProperty(robotId, "FlotillaStatus", status);
+            logger.LogInformation(
+                "Setting flotillaStatus on robot with id {robotId} to {NewValue}",
+                robotId,
+                status
+            );
+
+            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
+            await context
+                .Robots.Where(r =>
+                    r.Id == robotId
+                    && accessibleInstallationCodes.Result.Contains(
+                        r.CurrentInstallation.InstallationCode.ToUpper()
+                    )
+                )
+                .ExecuteUpdateAsync(setters => setters.SetProperty(r => r.FlotillaStatus, status));
+
+            await SendToSingalROnPropertyUpdate(robotId, "flotillaStatus", status);
         }
 
         public async Task<IEnumerable<Robot>> ReadAll(bool readOnly = true)
@@ -355,57 +533,6 @@ namespace Api.Services
                 );
 #pragma warning restore CA1304
             return readOnly ? query.AsNoTracking() : query.AsTracking();
-        }
-
-        private async Task UpdateRobotProperty(
-            string robotId,
-            string propertyName,
-            object? value,
-            bool isLogLevelDebug = false
-        )
-        {
-            var robot = await ReadById(robotId, readOnly: true);
-            if (robot is null)
-            {
-                string errorMessage = $"Robot with ID {robotId} was not found in the database";
-                logger.LogError("{Message}", errorMessage);
-                throw new RobotNotFoundException(errorMessage);
-            }
-
-            foreach (var property in typeof(Robot).GetProperties())
-            {
-                if (property.Name == propertyName)
-                {
-                    if (isLogLevelDebug)
-                        logger.LogDebug(
-                            "Setting {robotName} field {propertyName} from {oldValue} to {NewValue}",
-                            robot.Name,
-                            propertyName,
-                            property.GetValue(robot),
-                            value
-                        );
-                    else
-                        logger.LogInformation(
-                            "Setting {robotName} field {propertyName} from {oldValue} to {NewValue}",
-                            robot.Name,
-                            propertyName,
-                            property.GetValue(robot),
-                            value
-                        );
-                    property.SetValue(robot, value);
-                }
-            }
-
-            try
-            {
-                await Update(robot);
-            }
-            catch (InvalidOperationException e)
-            {
-                logger.LogError(e, "Failed to update {robotName}", robot.Name);
-            }
-            ;
-            DetachTracking(context, robot);
         }
 
         private async Task ApplyDatabaseUpdate(Installation? installation)

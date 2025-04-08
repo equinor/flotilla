@@ -8,11 +8,11 @@ import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'compon
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { useInstallationContext } from './InstallationContext'
 
-const upsertRobotList = (list: Robot[], mission: Robot) => {
+const upsertRobotList = (list: Robot[], robot: Robot) => {
     const newList = [...list]
-    const i = newList.findIndex((e) => e.id === mission.id)
-    if (i > -1) newList[i] = mission
-    else newList.push(mission)
+    const i = newList.findIndex((e) => e.id === robot.id)
+    if (i > -1) newList[i] = robot
+    else newList.push(robot)
     return newList
 }
 
@@ -26,6 +26,12 @@ interface IRobotContext {
 
 const defaultRobotState = {
     enabledRobots: [],
+}
+
+interface RobotPropertyUpdate {
+    robotId: string
+    propertyName: string
+    propertyValue: any
 }
 
 const RobotContext = createContext<IRobotContext>(defaultRobotState)
@@ -57,6 +63,23 @@ export const RobotProvider: FC<Props> = ({ children }) => {
                 setEnabledRobots((oldRobotList) => {
                     let oldRobotListCopy = [...oldRobotList]
                     oldRobotListCopy = upsertRobotList(oldRobotListCopy, updatedRobot)
+                    return [...oldRobotListCopy]
+                })
+            })
+            registerEvent(SignalREventLabels.robotPropertyUpdated, (username: string, message: string) => {
+                const robotPropertyUpdate: RobotPropertyUpdate = JSON.parse(message)
+                setEnabledRobots((oldRobotList) => {
+                    const oldRobotListCopy = [...oldRobotList]
+                    const index = oldRobotListCopy.findIndex((r) => r.id === robotPropertyUpdate.robotId)
+                    if (index > -1) {
+                        const robot = oldRobotListCopy[index]
+                        if (robotPropertyUpdate.propertyName in robot) {
+                            ;(robot as any)[robotPropertyUpdate.propertyName] = robotPropertyUpdate.propertyValue
+                            oldRobotListCopy[index] = robot
+                        } else {
+                            console.warn(`Property ${robotPropertyUpdate.propertyName} does not exist on Robot`)
+                        }
+                    }
                     return [...oldRobotListCopy]
                 })
             })
