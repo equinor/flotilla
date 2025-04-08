@@ -104,7 +104,6 @@ namespace Api.Test.Controllers
 
             var inspection = new CustomInspectionQuery
             {
-                AnalysisType = AnalysisType.CarSeal,
                 InspectionTarget = new Position(),
                 InspectionType = InspectionType.Image,
             };
@@ -234,7 +233,6 @@ namespace Api.Test.Controllers
 
             var inspection = new CustomInspectionQuery
             {
-                AnalysisType = AnalysisType.CarSeal,
                 InspectionTarget = new Position(),
                 InspectionType = InspectionType.Image,
             };
