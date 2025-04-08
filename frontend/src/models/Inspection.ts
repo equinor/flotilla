@@ -9,7 +9,6 @@ export interface Inspection {
     inspectionType: InspectionType
     inspectionTarget: Position
     videoDuration?: number
-    analysisType?: string
     inspectionUrl?: string
     startTime?: Date
     endTime?: Date

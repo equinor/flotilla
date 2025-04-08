@@ -21,15 +21,13 @@ namespace Api.Database.Models
             float? videoDuration,
             Position inspectionTarget,
             string? inspectionTargetName,
-            InspectionStatus status = InspectionStatus.NotStarted,
-            AnalysisType? analysisType = null
+            InspectionStatus status = InspectionStatus.NotStarted
         )
         {
             InspectionType = inspectionType;
             VideoDuration = videoDuration;
             InspectionTarget = inspectionTarget;
             InspectionTargetName = inspectionTargetName;
-            AnalysisType = analysisType;
             Status = status;
         }
 
@@ -38,7 +36,6 @@ namespace Api.Database.Models
             InspectionType = inspectionQuery.InspectionType;
             InspectionTarget = inspectionQuery.InspectionTarget;
             VideoDuration = inspectionQuery.VideoDuration;
-            AnalysisType = inspectionQuery.AnalysisType;
             Status = InspectionStatus.NotStarted;
         }
 
@@ -55,7 +52,6 @@ namespace Api.Database.Models
             Status = inspectionStatus ?? copy.Status;
             InspectionType = copy.InspectionType;
             VideoDuration = copy.VideoDuration;
-            AnalysisType = copy.AnalysisType;
             InspectionUrl = copy.InspectionUrl;
             InspectionTarget = new Position(copy.InspectionTarget);
         }
@@ -107,8 +103,6 @@ namespace Api.Database.Models
         public InspectionType InspectionType { get; set; }
 
         public float? VideoDuration { get; set; }
-
-        public AnalysisType? AnalysisType { get; set; }
 
         [MaxLength(250)]
         public string? InspectionUrl { get; set; }
@@ -193,11 +187,5 @@ namespace Api.Database.Models
         ThermalVideo,
         Audio,
         CO2Measurement,
-    }
-
-    public enum AnalysisType
-    {
-        CarSeal,
-        RtjFlange,
     }
 }
