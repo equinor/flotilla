@@ -22,7 +22,7 @@ jobs:
 
       - name: Get changed files in the migrations folder
         id: changed_files
-        uses: tj-actions/changed-files@v44.5.1
+        uses: tj-actions/changed-files@v45.0.8
         with:
           files: backend/api/Migrations/**
           sha: ${{ github.event.pull_request.head.sha }}
