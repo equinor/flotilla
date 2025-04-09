@@ -100,7 +100,7 @@ namespace Api.Services
             if (missionRun.InspectionArea == null)
             {
                 logger.LogWarning(
-                    "Mission {MissionRunId} cannot be started as it does not have an inspection area",
+                    "Mission {MissionRunId} does not have an inspection area, but will be started anyways.",
                     missionRun.Id
                 );
             }
