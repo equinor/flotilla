@@ -182,8 +182,9 @@ namespace Api.Test.Controllers
 
             var content = new StringContent(jsonString, null, "application/json");
 
-            var expecedJsonString = await content.ReadAsStringAsync();
-            expecedJsonString = expecedJsonString.Replace("\n", "").Replace(" ", "");
+            var expectedJsonString = await content.ReadAsStringAsync();
+            expectedJsonString = expectedJsonString.Replace("\n", "").Replace(" ", "");
+            expectedJsonString = expectedJsonString.Replace("\r", "").Replace(" ", "");
 
             // Act
             var response = await Client.PatchAsync(
@@ -196,7 +197,7 @@ namespace Api.Test.Controllers
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            Assert.Equal(expecedJsonString, inspectionAreaResponse!.AreaPolygonJson!);
+            Assert.Equal(expectedJsonString, inspectionAreaResponse!.AreaPolygonJson!);
         }
 
         [Fact]
