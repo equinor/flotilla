@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Text.Json.Serialization;
 using Api.Database.Models;
@@ -23,12 +24,10 @@ namespace Api.Services.Models
             Tasks = tasks;
         }
 
-        public IsarMissionDefinition(MissionRun missionRun, string? mapName = null)
+        public IsarMissionDefinition(MissionRun missionRun)
         {
             Name = missionRun.Name;
-            Tasks = missionRun
-                .Tasks.Select(task => new IsarTaskDefinition(task, missionRun, mapName))
-                .ToList();
+            Tasks = [.. missionRun.Tasks.Select(task => new IsarTaskDefinition(task))];
         }
     }
 
@@ -52,11 +51,7 @@ namespace Api.Services.Models
         [JsonPropertyName("zoom")]
         public IsarZoomDescription? Zoom { get; set; }
 
-        public IsarTaskDefinition(
-            MissionTask missionTask,
-            MissionRun missionRun,
-            string? mapName = null
-        )
+        public IsarTaskDefinition(MissionTask missionTask)
         {
             Id = missionTask.IsarTaskId;
             Type = MissionTask.ConvertMissionTaskTypeToIsarTaskType(missionTask.Type);
@@ -65,11 +60,7 @@ namespace Api.Services.Models
             Zoom = missionTask.IsarZoomDescription;
 
             if (missionTask.Inspection != null)
-                Inspection = new IsarInspectionDefinition(
-                    missionTask.Inspection,
-                    missionRun,
-                    mapName
-                );
+                Inspection = new IsarInspectionDefinition(missionTask);
         }
     }
 
@@ -81,18 +72,15 @@ namespace Api.Services.Models
         [JsonPropertyName("inspection_target")]
         public IsarPosition? InspectionTarget { get; set; }
 
+        [JsonPropertyName("inspection_description")]
+        public string? InspectionDescription { get; set; }
+
         [JsonPropertyName("duration")]
         public float? Duration { get; set; }
 
-        [JsonPropertyName("metadata")]
-        public Dictionary<string, string?>? Metadata { get; set; }
-
-        public IsarInspectionDefinition(
-            Inspection inspection,
-            MissionRun missionRun,
-            string? mapName = null
-        )
+        public IsarInspectionDefinition(MissionTask missionTask)
         {
+            var inspection = missionTask.Inspection!;
             Type = inspection.InspectionType.ToString();
             InspectionTarget =
                 inspection.InspectionTarget != null
@@ -103,16 +91,8 @@ namespace Api.Services.Models
                         "asset"
                     )
                     : null;
+            InspectionDescription = missionTask.Description;
             Duration = inspection.VideoDuration;
-            Metadata = new Dictionary<string, string?>
-            {
-                { "map", mapName },
-                { "description", missionRun.Description },
-                { "asset_code", missionRun.InstallationCode },
-                { "mission_name", missionRun.Name },
-                { "status_reason", missionRun.StatusReason },
-                { "analysis_type", inspection.AnalysisType?.ToString() },
-            };
         }
     }
 
