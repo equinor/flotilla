@@ -8,13 +8,13 @@ user flotilla
 topic read isar/#
 
 user flotilla
-topic read ida/#
+topic read sara/#
 
 user analytics
 topic read isar/+/inspection_result
 
-user ida
+user sara
 topic read isar/+/inspection_result
 
-user ida
-topic write ida/visualization_available
+user sara
+topic write sara/visualization_available

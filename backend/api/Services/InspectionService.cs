@@ -30,12 +30,12 @@ namespace Api.Services
     public class InspectionService(
         FlotillaDbContext context,
         ILogger<InspectionService> logger,
-        IDownstreamApi idaApi,
+        IDownstreamApi saraApi,
         IAccessRoleService accessRoleService,
         IBlobService blobService
     ) : IInspectionService
     {
-        public const string ServiceName = "IDA";
+        public const string ServiceName = "SARA";
 
         public async Task<byte[]?> FetchInspectionImageFromIsarInspectionId(string isarInspectionId)
         {
@@ -126,14 +126,16 @@ namespace Api.Services
                 );
         }
 
-        private async Task<IDAInspectionDataResponse?> GetInspectionStorageInfo(string inspectionId)
+        private async Task<SaraInspectionDataResponse?> GetInspectionStorageInfo(
+            string inspectionId
+        )
         {
             string relativePath = $"InspectionData/{inspectionId}/inspection-data-storage-location";
 
             HttpResponseMessage response;
             try
             {
-                response = await idaApi.CallApiForAppAsync(
+                response = await saraApi.CallApiForAppAsync(
                     ServiceName,
                     options =>
                     {
@@ -151,8 +153,8 @@ namespace Api.Services
             if (response.StatusCode == HttpStatusCode.OK)
             {
                 var inspectionData =
-                    await response.Content.ReadFromJsonAsync<IDAInspectionDataResponse>()
-                    ?? throw new JsonException("Failed to deserialize inspection data from IDA.");
+                    await response.Content.ReadFromJsonAsync<SaraInspectionDataResponse>()
+                    ?? throw new JsonException("Failed to deserialize inspection data from SARA.");
                 return inspectionData;
             }
 
