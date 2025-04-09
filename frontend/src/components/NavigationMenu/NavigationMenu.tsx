@@ -1,4 +1,5 @@
 import { Button, Icon, Menu } from '@equinor/eds-core-react'
+import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { config } from 'config'
 import { useState } from 'react'
@@ -13,6 +14,7 @@ const StyledButton = styled(Button)`
 
 export const NavigationMenu = () => {
     const { TranslateText } = useLanguageContext()
+    const { installationInspectionAreas } = useInstallationContext()
     const [isOpen, setIsOpen] = useState(false)
     const [anchorEl, setAnchorEl] = useState(null)
     const openMenu = () => {
@@ -22,14 +24,23 @@ export const NavigationMenu = () => {
         setIsOpen(false)
     }
 
-    const paths = [
-        { path: 'missionControl', label: 'Mission Control' },
-        { path: 'history', label: 'Mission History' },
-        { path: 'inspectionOverview', label: 'Deck Overview' },
-        { path: 'predefinedMissions', label: 'Predefined Missions' },
-        { path: 'autoSchedule', label: 'Auto Scheduling' },
-        { path: 'robots', label: 'Robots' },
-    ]
+    const paths =
+        installationInspectionAreas.length > 1
+            ? [
+                  { path: 'missionControl', label: 'Mission Control' },
+                  { path: 'history', label: 'Mission History' },
+                  { path: 'inspectionOverview', label: 'Deck Overview' },
+                  { path: 'predefinedMissions', label: 'Predefined Missions' },
+                  { path: 'autoSchedule', label: 'Auto Scheduling' },
+                  { path: 'robots', label: 'Robots' },
+              ]
+            : [
+                  { path: 'missionControl', label: 'Mission Control' },
+                  { path: 'history', label: 'Mission History' },
+                  { path: 'predefinedMissions', label: 'Predefined Missions' },
+                  { path: 'autoSchedule', label: 'Auto Scheduling' },
+                  { path: 'robots', label: 'Robots' },
+              ]
 
     const navigate = useNavigate()
     const routeChange = (routePath: string) => {

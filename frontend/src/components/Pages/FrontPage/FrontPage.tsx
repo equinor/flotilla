@@ -16,6 +16,7 @@ import { Icons } from 'utils/icons'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { useNavigate } from 'react-router-dom'
 import { config } from 'config'
+import { useInstallationContext } from 'components/Contexts/InstallationContext'
 
 const StyledFrontPage = styled.div`
     display: flex;
@@ -90,6 +91,7 @@ export enum TabNames {
 export const FrontPage = ({ initialTab }: { initialTab: TabNames }) => {
     const [activeTab, setActiveTab] = useState(initialTab)
     const { TranslateText } = useLanguageContext()
+    const { installationInspectionAreas } = useInstallationContext()
 
     redirectIfNoInstallationSelected()
 
@@ -114,7 +116,11 @@ export const FrontPage = ({ initialTab }: { initialTab: TabNames }) => {
                     <StyledTabHeader>
                         <StyledTabsList>
                             <Tabs.Tab>{TranslateText('Mission Control')}</Tabs.Tab>
-                            <Tabs.Tab>{TranslateText('Deck Overview')}</Tabs.Tab>
+                            {installationInspectionAreas.length > 1 ? (
+                                <Tabs.Tab>{TranslateText('Deck Overview')}</Tabs.Tab>
+                            ) : (
+                                <></>
+                            )}
                             <Tabs.Tab>{TranslateText('Predefined Missions')}</Tabs.Tab>
                             <Tabs.Tab>{TranslateText('Mission History')}</Tabs.Tab>
                             <Tabs.Tab>{TranslateText('Auto Scheduling')}</Tabs.Tab>
