@@ -10,7 +10,7 @@ import { StyledButton, StyledDialog } from 'components/Styles/StyledComponents'
 interface RobotProps {
     robot: Robot
     armPosition: string
-    isRobotAvailable: boolean
+    isRobotReadyForMission: boolean
 }
 
 const StyledCloseButton = styled.div`
@@ -46,33 +46,33 @@ export const MoveRobotArmSection = ({ robot }: { robot: Robot }) => {
                 <MoveRobotArm
                     robot={robot}
                     armPosition="battery_change"
-                    isRobotAvailable={robot.status === RobotStatus.Available}
+                    isRobotReadyForMission={robot.status === RobotStatus.Available}
                 />
                 <MoveRobotArm
                     robot={robot}
                     armPosition="transport"
-                    isRobotAvailable={robot.status === RobotStatus.Available}
+                    isRobotReadyForMission={robot.status === RobotStatus.Available}
                 />
                 <MoveRobotArm
                     robot={robot}
                     armPosition="lookout"
-                    isRobotAvailable={robot.status === RobotStatus.Available}
+                    isRobotReadyForMission={robot.status === RobotStatus.Available}
                 />
             </RobotArmMovementSection>
         </>
     )
 }
 
-const MoveRobotArm = ({ robot, armPosition, isRobotAvailable }: RobotProps) => {
+const MoveRobotArm = ({ robot, armPosition, isRobotReadyForMission }: RobotProps) => {
     const { TranslateText } = useLanguageContext()
     const [feedback, setFeedback] = useState('')
-    const [usable, setUsable] = useState(!!isRobotAvailable)
+    const [usable, setUsable] = useState(!!isRobotReadyForMission)
     const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false)
     const anchorRef = useRef<HTMLButtonElement>(null)
 
     useEffect(() => {
-        setUsable(isRobotAvailable)
-    }, [isRobotAvailable])
+        setUsable(isRobotReadyForMission)
+    }, [isRobotReadyForMission])
 
     const moveArmButtonStyle = () => {
         if (!usable)

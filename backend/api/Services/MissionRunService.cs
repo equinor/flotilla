@@ -56,8 +56,6 @@ namespace Api.Services
             bool readOnly = true
         );
 
-        public Task<bool> PendingOrOngoingReturnToHomeMissionRunExists(string robotId);
-
         public bool IncludesUnsupportedInspectionType(MissionRun missionRun);
 
         public Task<MissionRun> UpdateMissionRunType(
@@ -263,22 +261,6 @@ namespace Api.Services
                 .Where(m => m.EndTime != null)
                 .OrderByDescending(m => m.EndTime)
                 .FirstOrDefaultAsync();
-        }
-
-        public async Task<bool> PendingOrOngoingReturnToHomeMissionRunExists(string robotId)
-        {
-            var pendingAndOngoingMissionRuns = await GetMissionRunsWithSubModels(readOnly: true)
-                .Where(missionRun =>
-                    missionRun.Robot.Id == robotId
-                    && (
-                        missionRun.Status == MissionStatus.Ongoing
-                        || missionRun.Status == MissionStatus.Paused
-                        || missionRun.Status == MissionStatus.Pending
-                    )
-                )
-                .OrderBy(missionRun => missionRun.DesiredStartTime)
-                .ToListAsync();
-            return pendingAndOngoingMissionRuns.Any((m) => m.IsReturnHomeMission());
         }
 
         public bool IncludesUnsupportedInspectionType(MissionRun missionRun)

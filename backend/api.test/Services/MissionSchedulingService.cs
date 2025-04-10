@@ -35,45 +35,5 @@ namespace Api.Test.Services
         }
 
         public Task DisposeAsync() => Task.CompletedTask;
-
-        [Fact]
-        public async Task CheckThatReturnHomeIsCreatedWhenRunningMission()
-        {
-            // Arrange
-            var installation = await DatabaseUtilities.NewInstallation();
-            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
-            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
-                installation.InstallationCode,
-                plant.PlantCode
-            );
-            var robot = await DatabaseUtilities.NewRobot(
-                RobotStatus.Available,
-                installation,
-                inspectionArea
-            );
-            await DatabaseUtilities.NewMissionRun(
-                installation.InstallationCode,
-                robot,
-                inspectionArea,
-                writeToDatabase: true
-            );
-
-            var reportsBefore = await MissionRunService.ReadAll(
-                new MissionRunQueryStringParameters()
-            );
-            int nReportsBefore = reportsBefore.Count;
-
-            // Act
-            await MissionSchedulingService.StartNextMissionRunIfSystemIsAvailable(robot);
-
-            // Assert
-            var reportsAfter = await MissionRunService.ReadAll(
-                new MissionRunQueryStringParameters()
-            );
-            int nReportsAfter = reportsAfter.Count;
-
-            // We expect two new missions since a return home mission will also be scheduled
-            Assert.Equal(nReportsBefore + 1, nReportsAfter);
-        }
     }
 }

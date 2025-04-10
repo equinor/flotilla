@@ -184,7 +184,7 @@ namespace Api.Test.EventHandlers
 
             // Act
             MqttService.RaiseEvent(nameof(MqttService.MqttIsarStatusReceived), mqttEventArgs);
-            Thread.Sleep(500);
+            Thread.Sleep(5000);
 
             // Assert
             var postTestMissionRun = await MissionRunService.ReadById(
@@ -192,51 +192,6 @@ namespace Api.Test.EventHandlers
                 readOnly: true
             );
             Assert.Equal(MissionStatus.Ongoing, postTestMissionRun!.Status);
-        }
-
-        [Fact]
-        public async Task ReturnToHomeMissionIsNotStartedIfReturnToHomeIsNotSupported()
-        {
-            // Arrange
-            var installation = await DatabaseUtilities.NewInstallation();
-            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
-            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
-                installation.InstallationCode,
-                plant.PlantCode
-            );
-            var robot = await DatabaseUtilities.NewRobot(
-                RobotStatus.Busy,
-                installation,
-                inspectionArea
-            );
-            robot.RobotCapabilities!.Remove(RobotCapabilitiesEnum.return_to_home);
-            await RobotService.Update(robot);
-
-            var mqttEventArgs = new MqttReceivedArgs(
-                new IsarStatusMessage
-                {
-                    RobotName = robot.Name,
-                    IsarId = robot.IsarId,
-                    Status = RobotStatus.Available,
-                    Timestamp = DateTime.UtcNow,
-                }
-            );
-
-            // Act
-            MqttService.RaiseEvent(nameof(MqttService.MqttIsarStatusReceived), mqttEventArgs);
-
-            // Assert
-            Thread.Sleep(1000);
-            var ongoingMission = await MissionRunService.ReadAll(
-                new MissionRunQueryStringParameters
-                {
-                    Statuses = [MissionStatus.Ongoing],
-                    OrderBy = "DesiredStartTime",
-                    PageSize = 100,
-                },
-                readOnly: true
-            );
-            Assert.False(ongoingMission.Any());
         }
 
         [Fact]
@@ -296,7 +251,7 @@ namespace Api.Test.EventHandlers
         }
 
         [Fact]
-        public async Task QueuedMissionsAreNotAbortedWhenRobotAvailableHappensAtTheSameTimeAsOnIsarMissionCompleted()
+        public async Task QueuedMissionsAreNotAbortedWhenRobotReadyForMissionsHappensAtTheSameTimeAsOnIsarMissionCompleted()
         {
             // Arrange
             var installation = await DatabaseUtilities.NewInstallation();
@@ -344,15 +299,15 @@ namespace Api.Test.EventHandlers
                 }
             );
 
-            var robotAvailableEventArgs = new RobotAvailableEventArgs(robot);
+            var RobotReadyForMissionsEventArgs = new RobotReadyForMissionsEventArgs(robot);
 
             MqttService.RaiseEvent(
                 nameof(MqttService.MqttIsarMissionReceived),
                 mqttIsarMissionEventArgs
             );
             MissionSchedulingService.RaiseEvent(
-                nameof(Api.Services.MissionSchedulingService.RobotAvailable),
-                robotAvailableEventArgs
+                nameof(Api.Services.MissionSchedulingService.RobotReadyForMissions),
+                RobotReadyForMissionsEventArgs
             );
 
             Thread.Sleep(100);
@@ -457,93 +412,6 @@ namespace Api.Test.EventHandlers
                 readOnly: true
             );
             Assert.Equal(MissionStatus.Ongoing, postTestMissionRun2!.Status);
-        }
-
-        [Fact]
-        public async Task ReturnHomeMissionAbortedIfNewMissionScheduled()
-        {
-            // Arrange
-            var installation = await DatabaseUtilities.NewInstallation();
-            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
-            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
-                installation.InstallationCode,
-                plant.PlantCode
-            );
-            var robot = await DatabaseUtilities.NewRobot(
-                RobotStatus.Busy,
-                installation,
-                inspectionArea
-            );
-            var returnToHomeMission = await DatabaseUtilities.NewMissionRun(
-                installation.InstallationCode,
-                robot,
-                inspectionArea,
-                true,
-                MissionRunType.ReturnHome,
-                MissionStatus.Ongoing,
-                Guid.NewGuid().ToString()
-            );
-            var missionRun = await DatabaseUtilities.NewMissionRun(
-                installation.InstallationCode,
-                robot,
-                inspectionArea,
-                true,
-                MissionRunType.Normal,
-                MissionStatus.Pending,
-                Guid.NewGuid().ToString()
-            );
-
-            Thread.Sleep(100);
-
-            // Act
-            var eventArgs = new MissionRunCreatedEventArgs(missionRun);
-            MissionRunService.RaiseEvent(
-                nameof(Api.Services.MissionRunService.MissionRunCreated),
-                eventArgs
-            );
-            Thread.Sleep(500);
-
-            // Assert
-            var updatedReturnHomeMission = await MissionRunService.ReadById(
-                returnToHomeMission.Id,
-                readOnly: true
-            );
-            Assert.True(updatedReturnHomeMission?.Status.Equals(MissionStatus.Aborted));
-
-            // Act
-            var mqttIsarMissionEventArgs = new MqttReceivedArgs(
-                new IsarMissionMessage
-                {
-                    RobotName = robot.Name,
-                    IsarId = robot.IsarId,
-                    MissionId = returnToHomeMission.IsarMissionId,
-                    Status = "cancelled",
-                    Timestamp = DateTime.UtcNow,
-                }
-            );
-
-            var mqttIsarStatusEventArgs = new MqttReceivedArgs(
-                new IsarStatusMessage
-                {
-                    RobotName = robot.Name,
-                    IsarId = robot.IsarId,
-                    Status = RobotStatus.Available,
-                    Timestamp = DateTime.UtcNow,
-                }
-            );
-
-            MqttService.RaiseEvent(
-                nameof(MqttService.MqttIsarMissionReceived),
-                mqttIsarMissionEventArgs
-            );
-            MqttService.RaiseEvent(
-                nameof(MqttService.MqttIsarStatusReceived),
-                mqttIsarStatusEventArgs
-            );
-            Thread.Sleep(500);
-
-            var updatedMissionRun = await MissionRunService.ReadById(missionRun.Id, readOnly: true);
-            Assert.True(updatedMissionRun?.Status.Equals(MissionStatus.Ongoing));
         }
     }
 }

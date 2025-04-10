@@ -20,15 +20,11 @@ namespace Api.Services
 
         public Task AbortAllScheduledNormalMissions(string robotId, string? abortReason = null);
 
-        public Task ScheduleMissionToDriveToDockPosition(string robotId);
-
         public Task UnfreezeMissionRunQueueForRobot(string robotId);
 
         public bool MissionRunQueueIsEmpty(IList<MissionRun> missionRunQueue);
 
-        public void TriggerRobotAvailable(RobotAvailableEventArgs e);
-
-        public Task AbortActiveReturnToHomeMission(string robotId);
+        public void TriggerRobotReadyForMissions(RobotReadyForMissionsEventArgs e);
 
         public Task ScheduleMissionRunFromMissionDefinitionLastSuccessfullRun(
             string missionDefinitionId,
@@ -43,7 +39,6 @@ namespace Api.Services
         IMapService mapService,
         IRobotService robotService,
         IIsarService isarService,
-        IReturnToHomeService returnToHomeService,
         ISignalRService signalRService,
         IErrorHandlingService errorHandlingService,
         IInspectionAreaService inspectionAreaService,
@@ -194,25 +189,6 @@ namespace Api.Services
             catch (RobotBusyException)
             {
                 return;
-            }
-
-            try
-            {
-                await returnToHomeService.ScheduleReturnToHomeMissionRunIfNotAlreadyScheduled(
-                    robot
-                );
-            }
-            catch (ReturnToHomeMissionFailedToScheduleException)
-            {
-                signalRService.ReportGeneralFailToSignalR(
-                    robot,
-                    $"Failed to schedule return home for robot {robot.Name}",
-                    ""
-                );
-                logger.LogWarning(
-                    "Failed to schedule a return home mission for robot {RobotId}",
-                    robot.Id
-                );
             }
         }
 
@@ -383,68 +359,14 @@ namespace Api.Services
             }
         }
 
-        public async Task ScheduleMissionToDriveToDockPosition(string robotId)
-        {
-            var robot = await robotService.ReadById(robotId, readOnly: true);
-            if (robot == null)
-            {
-                logger.LogError("Robot with ID: {RobotId} was not found in the database", robotId);
-                return;
-            }
-
-            Pose robotPose;
-
-            if (robot.CurrentInspectionArea != null)
-            {
-                robotPose = new Pose();
-            }
-            else
-            {
-                string errorMessage =
-                    $"Robot with ID {robotId} could not return home as it did not have an inspection area";
-                logger.LogError("{Message}", errorMessage);
-                throw new InspectionAreaNotFoundException(errorMessage);
-            }
-
-            // Cloning to avoid tracking same object
-            var clonedPose = ObjectCopier.Clone(robotPose);
-            var customTaskQuery = new CustomTaskQuery { RobotPose = clonedPose, TaskOrder = 0 };
-
-            var missionRun = new MissionRun
-            {
-                Name = "Return home",
-                Robot = robot,
-                MissionRunType = MissionRunType.Emergency,
-                InstallationCode = robot.CurrentInstallation.InstallationCode,
-                InspectionArea = robot.CurrentInspectionArea!,
-                Status = MissionStatus.Pending,
-                DesiredStartTime = DateTime.UtcNow,
-                Tasks = new List<MissionTask>([new MissionTask(customTaskQuery)]),
-            };
-
-            try
-            {
-                await missionRunService.Create(
-                    missionRun: missionRun,
-                    triggerCreatedMissionRunEvent: false
-                );
-            }
-            catch (UnsupportedRobotCapabilityException)
-            {
-                logger.LogError(
-                    $"Unsupported robot capability detected when driving to dock for robot {missionRun.Robot.Name}. This should not happen."
-                );
-            }
-        }
-
         public bool MissionRunQueueIsEmpty(IList<MissionRun> missionRunQueue)
         {
             return !missionRunQueue.Any();
         }
 
-        public void TriggerRobotAvailable(RobotAvailableEventArgs e)
+        public void TriggerRobotReadyForMissions(RobotReadyForMissionsEventArgs e)
         {
-            OnRobotAvailable(e);
+            OnRobotReadyForMissions(e);
         }
 
         private async Task<MissionRun?> SelectNextMissionRun(Robot robot)
@@ -595,53 +517,12 @@ namespace Api.Services
             return ongoingMissions;
         }
 
-        public async Task AbortActiveReturnToHomeMission(string robotId)
+        protected virtual void OnRobotReadyForMissions(RobotReadyForMissionsEventArgs e)
         {
-            var activeReturnToHomeMission =
-                await returnToHomeService.GetActiveReturnToHomeMissionRun(robotId, readOnly: true);
-
-            if (activeReturnToHomeMission == null)
-            {
-                logger.LogWarning(
-                    "Attempted to abort active Return home mission for robot with Id {RobotId} but none was found",
-                    robotId
-                );
-                return;
-            }
-
-            try
-            {
-                await missionRunService.UpdateMissionRunProperty(
-                    activeReturnToHomeMission.Id,
-                    "Status",
-                    MissionStatus.Aborted
-                );
-            }
-            catch (MissionRunNotFoundException)
-            {
-                return;
-            }
-
-            try
-            {
-                await StopCurrentMissionRun(activeReturnToHomeMission.Robot.Id);
-            }
-            catch (RobotNotFoundException)
-            {
-                return;
-            }
-            catch (MissionRunNotFoundException)
-            {
-                return;
-            }
+            RobotReadyForMissions?.Invoke(this, e);
         }
 
-        protected virtual void OnRobotAvailable(RobotAvailableEventArgs e)
-        {
-            RobotAvailable?.Invoke(this, e);
-        }
-
-        public static event EventHandler<RobotAvailableEventArgs>? RobotAvailable;
+        public static event EventHandler<RobotReadyForMissionsEventArgs>? RobotReadyForMissions;
 
         public async Task ScheduleMissionRunFromMissionDefinitionLastSuccessfullRun(
             string missionDefinitionId,
