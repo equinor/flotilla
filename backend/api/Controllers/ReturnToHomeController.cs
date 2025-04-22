@@ -48,6 +48,11 @@ namespace Api.Controllers
                 logger.LogError(e, "{Message}", errorMessage);
                 return StatusCode(StatusCodes.Status409Conflict);
             }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to send robot {RobotId} home", robot.Id);
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
 
             return NoContent();
         }
