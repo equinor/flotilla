@@ -196,12 +196,7 @@ namespace Api.EventHandlers
             }
             catch (Exception ex)
             {
-                _logger.LogError(
-                    ex,
-                    "Failed to send robot {RobotId} to dock because: {ErrorMessage}",
-                    robot.Id,
-                    ex.Message
-                );
+                _logger.LogError(ex, "Failed to send robot {RobotId} to dock", robot.Id);
                 return;
             }
         }
