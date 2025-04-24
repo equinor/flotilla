@@ -85,11 +85,11 @@ export const OngoingMissionCard = ({ mission }: MissionProps) => {
 
     const SmallScreenContent = (
         <StyledSmallScreenMissionCard>
-            <StyledHeader>
+            <StyledHeader onClick={routeChange}>
                 <Typography variant="h5" style={{ color: tokens.colors.text.static_icons__default.hex }}>
                     {mission.name}
                 </Typography>
-                <Button variant="ghost_icon" onClick={routeChange}>
+                <Button variant="ghost_icon">
                     <Icon name={Icons.RightCheveron} size={24} />
                 </Button>
             </StyledHeader>
