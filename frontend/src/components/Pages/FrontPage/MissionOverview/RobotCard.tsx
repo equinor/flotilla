@@ -117,7 +117,7 @@ export const RobotCard = ({ robot }: { robot: Robot }) => {
             </HiddenOnSmallScreen>
             <StyledNoneImageBody>
                 <StyledMainBody>
-                    <StyledHeader>
+                    <StyledHeader onClick={goToRobot}>
                         <LongTypography variant="h5">
                             {robot.name}
                             {' ('}
@@ -125,7 +125,7 @@ export const RobotCard = ({ robot }: { robot: Robot }) => {
                             {')'}
                         </LongTypography>
                         <HiddenOnLargeScreen>
-                            <Button variant="ghost_icon" onClick={goToRobot}>
+                            <Button variant="ghost_icon">
                                 <Icon name={Icons.RightCheveron} size={24} />
                             </Button>
                         </HiddenOnLargeScreen>

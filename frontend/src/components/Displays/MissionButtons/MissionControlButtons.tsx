@@ -86,17 +86,14 @@ const OngoingMissionButton = ({ missionName, robotId, missionTaskType }: Mission
 
     return (
         <ButtonStyle>
-            <ButtonText>
-                <ButtonIcon
-                    variant="contained_icon"
-                    onClick={() => updateRobotMissionState(MissionStatusRequest.Pause, robotId)}
-                >
+            <ButtonText onClick={() => updateRobotMissionState(MissionStatusRequest.Pause, robotId)}>
+                <ButtonIcon variant="contained_icon">
                     <Icon name={Icons.PauseStandard} size={24} />
                 </ButtonIcon>
                 <Typography variant="caption">{TranslateText('Pause')}</Typography>
             </ButtonText>
-            <ButtonText>
-                <ButtonIcon variant="contained_icon" onClick={toggleSkipMissionDialog}>
+            <ButtonText onClick={toggleSkipMissionDialog}>
+                <ButtonIcon variant="contained_icon">
                     <Icon name={Icons.Next} size={24} />
                 </ButtonIcon>
                 <Typography variant="caption">{TranslateText('Skip')}</Typography>
@@ -122,17 +119,14 @@ const PausedMissionButton = ({ missionName, robotId, missionTaskType }: MissionP
 
     return (
         <ButtonStyle>
-            <ButtonText>
-                <ButtonIcon
-                    variant="contained_icon"
-                    onClick={() => updateRobotMissionState(MissionStatusRequest.Resume, robotId)}
-                >
+            <ButtonText onClick={() => updateRobotMissionState(MissionStatusRequest.Resume, robotId)}>
+                <ButtonIcon variant="contained_icon">
                     <Icon name={Icons.PlayStandard} size={24} />
                 </ButtonIcon>
                 <Typography variant="caption">{TranslateText('Start')}</Typography>
             </ButtonText>
-            <ButtonText>
-                <ButtonIcon variant="contained_icon" onClick={toggleSkipMissionDialog}>
+            <ButtonText onClick={toggleSkipMissionDialog}>
+                <ButtonIcon variant="contained_icon">
                     <Icon name={Icons.Next} size={24} />
                 </ButtonIcon>
                 <Typography variant="caption">{TranslateText('Skip')}</Typography>
