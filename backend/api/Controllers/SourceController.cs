@@ -33,7 +33,7 @@ public class SourceController(ISourceService sourceService, ILogger<SourceContro
         }
         catch (InvalidDataException e)
         {
-            logger.LogError(e.Message);
+            logger.LogError(e, "{Message}", e.Message);
             return BadRequest(e.Message);
         }
 
