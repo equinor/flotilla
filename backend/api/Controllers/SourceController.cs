@@ -55,7 +55,7 @@ public class SourceController(ISourceService sourceService, ILogger<SourceContro
     {
         var source = await sourceService.ReadById(id);
         if (source == null)
-            return NotFound($"Could not find mission definition with id {id}");
+            return NotFound($"Could not find source with id {id}");
         return Ok(source);
     }
 }
