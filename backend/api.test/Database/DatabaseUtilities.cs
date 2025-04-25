@@ -241,7 +241,7 @@ namespace Api.Test.Database
             return await _robotService.Create(robot);
         }
 
-        public async Task<Source> NewSource(string sourceId)
+        public async Task<Source> NewSource(string sourceId = "TestId")
         {
             return await _sourceService.Create(new Source { SourceId = sourceId });
         }
