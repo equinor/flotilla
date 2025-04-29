@@ -201,7 +201,7 @@ namespace Api.HostedServices
             }
 
             var robot = robots.FirstOrDefault(r =>
-                r.CurrentInspectionArea?.Id == missionDefinition.InspectionArea.Id
+                r.CurrentInspectionAreaId == missionDefinition.InspectionArea.Id
             );
             if (robot == null)
             {

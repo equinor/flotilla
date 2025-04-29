@@ -29,7 +29,7 @@ namespace Api.Services
         public Task UpdateRobotPose(string robotId, Pose pose);
         public Task UpdateRobotIsarConnected(string robotId, bool isarConnected);
         public Task UpdateCurrentMissionId(string robotId, string? missionId);
-        public Task UpdateCurrentInspectionArea(string robotId, string? inspectionAreaId);
+        public Task UpdateCurrentInspectionAreaId(string robotId, string? inspectionAreaId);
         public Task UpdateDeprecated(string robotId, bool deprecated);
         public Task UpdateMissionQueueFrozen(string robotId, bool missionQueueFrozen);
         public Task UpdateFlotillaStatus(string robotId, RobotFlotillaStatus status);
@@ -56,8 +56,6 @@ namespace Api.Services
         {
             if (newRobot.CurrentInstallation != null)
                 context.Entry(newRobot.CurrentInstallation).State = EntityState.Unchanged;
-            if (newRobot.CurrentInspectionArea != null)
-                context.Entry(newRobot.CurrentInspectionArea).State = EntityState.Unchanged;
             if (newRobot.Model != null)
                 context.Entry(newRobot.Model).State = EntityState.Unchanged;
 
@@ -217,7 +215,7 @@ namespace Api.Services
             await UpdateRobotProperty(robotId, "CurrentMissionId", currentMissionId);
         }
 
-        public async Task UpdateCurrentInspectionArea(string robotId, string? inspectionAreaId)
+        public async Task UpdateCurrentInspectionAreaId(string robotId, string? inspectionAreaId)
         {
             logger.LogInformation(
                 "Updating current inspection area for robot with Id {robotId} to inspection area with Id {areaId}",
@@ -226,7 +224,7 @@ namespace Api.Services
             );
             if (inspectionAreaId is null)
             {
-                await UpdateRobotProperty(robotId, "CurrentInspectionArea", null);
+                await UpdateRobotProperty(robotId, "CurrentInspectionAreaId", null);
                 return;
             }
 
@@ -237,15 +235,15 @@ namespace Api.Services
             if (inspectionArea is null)
             {
                 logger.LogError(
-                    "Could not find inspection area '{InspectionAreaId}' setting robot '{IsarId}' inspection area to null",
+                    "Could not find inspection area with id '{InspectionAreaId}'. Setting inspection area to null for robot with id '{IsarId}'",
                     inspectionAreaId,
                     robotId
                 );
-                await UpdateRobotProperty(robotId, "CurrentInspectionArea", null);
+                await UpdateRobotProperty(robotId, "CurrentInspectionAreaId", null);
             }
             else
             {
-                await UpdateRobotProperty(robotId, "CurrentInspectionArea", inspectionArea);
+                await UpdateRobotProperty(robotId, "CurrentInspectionAreaId", inspectionAreaId);
             }
         }
 
@@ -291,8 +289,6 @@ namespace Api.Services
 
         public async Task Update(Robot robot)
         {
-            if (robot.CurrentInspectionArea is not null)
-                context.Entry(robot.CurrentInspectionArea).State = EntityState.Unchanged;
             context.Entry(robot.Model).State = EntityState.Unchanged;
 
             context.Update(robot);
@@ -345,10 +341,6 @@ namespace Api.Services
                 .Robots.Include(r => r.Documentation)
                 .Include(r => r.Model)
                 .Include(r => r.CurrentInstallation)
-                .Include(r => r.CurrentInspectionArea)
-                .ThenInclude(area => area != null ? area.Plant : null)
-                .Include(r => r.CurrentInspectionArea)
-                .ThenInclude(area => area != null ? area.Installation : null)
 #pragma warning disable CA1304
                 .Where(
                     (r) =>
@@ -467,11 +459,6 @@ namespace Api.Services
                 && context.Entry(robot.CurrentInstallation).State != EntityState.Detached
             )
                 installationService.DetachTracking(context, robot.CurrentInstallation);
-            if (
-                robot.CurrentInspectionArea != null
-                && context.Entry(robot.CurrentInspectionArea).State != EntityState.Detached
-            )
-                inspectionAreaService.DetachTracking(context, robot.CurrentInspectionArea);
             if (robot.Model != null && context.Entry(robot.Model).State != EntityState.Detached)
                 robotModelService.DetachTracking(context, robot.Model);
         }

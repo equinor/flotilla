@@ -89,7 +89,7 @@ namespace Api.Test.HostedServices
             var robot = await DatabaseUtilities.NewRobot(
                 RobotStatus.Available,
                 installation,
-                inspectionArea
+                inspectionArea.Id
             );
             var missionRun = await DatabaseUtilities.NewMissionRun(
                 installation.InstallationCode,

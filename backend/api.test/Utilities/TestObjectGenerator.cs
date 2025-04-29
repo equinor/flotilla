@@ -54,7 +54,7 @@ public static class TestObjectGenerator
 
     public static Robot NewRobot(
         Installation currentInstallation,
-        InspectionArea currentInspectionArea,
+        string currentInspectionAreaId,
         RobotModel? robotModel = null,
         RobotStatus robotStatus = RobotStatus.Available,
         string name = "Test Robot",
@@ -83,7 +83,7 @@ public static class TestObjectGenerator
             Model = robotModel ?? new RobotModel(),
             SerialNumber = serialNumber,
             CurrentInstallation = currentInstallation,
-            CurrentInspectionArea = currentInspectionArea,
+            CurrentInspectionAreaId = currentInspectionAreaId,
             BatteryLevel = batteryLevel,
             BatteryState = batteryState,
             PressureLevel = pressureLevel,

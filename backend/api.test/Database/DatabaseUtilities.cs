@@ -216,7 +216,7 @@ namespace Api.Test.Database
         public async Task<Robot> NewRobot(
             RobotStatus status,
             Installation installation,
-            InspectionArea? inspectionArea = null
+            string? inspectionAreaId = null
         )
         {
             var createRobotQuery = new CreateRobotQuery
@@ -237,7 +237,7 @@ namespace Api.Test.Database
                 createRobotQuery.RobotType,
                 readOnly: true
             );
-            var robot = new Robot(createRobotQuery, installation, robotModel!, inspectionArea);
+            var robot = new Robot(createRobotQuery, installation, robotModel!, inspectionAreaId);
             return await _robotService.Create(robot);
         }
 

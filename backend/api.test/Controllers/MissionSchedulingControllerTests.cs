@@ -61,7 +61,7 @@ namespace Api.Test.Controllers
             var robot = await DatabaseUtilities.NewRobot(
                 RobotStatus.Busy,
                 installation,
-                inspectionArea
+                inspectionArea.Id
             );
             string missionsUrl = "/missions";
 
@@ -103,7 +103,7 @@ namespace Api.Test.Controllers
             var robot = await DatabaseUtilities.NewRobot(
                 RobotStatus.Busy,
                 installation,
-                inspectionArea
+                inspectionArea.Id
             );
 
             // Act
@@ -182,7 +182,7 @@ namespace Api.Test.Controllers
             var robot = await DatabaseUtilities.NewRobot(
                 RobotStatus.Busy,
                 installation,
-                inspectionArea
+                inspectionArea.Id
             );
 
             var query = CreateDefaultCustomMissionQuery(robot.Id, installation.InstallationCode);
@@ -226,7 +226,7 @@ namespace Api.Test.Controllers
             var robot = await DatabaseUtilities.NewRobot(
                 RobotStatus.Available,
                 installation,
-                inspectionArea
+                inspectionArea.Id
             );
 
             var query = CreateDefaultCustomMissionQuery(robot.Id, installation.InstallationCode);
@@ -321,7 +321,7 @@ namespace Api.Test.Controllers
             var robot = await DatabaseUtilities.NewRobot(
                 RobotStatus.Available,
                 otherInstallation,
-                inspectionArea
+                inspectionArea.Id
             );
 
             var query = CreateDefaultCustomMissionQuery(robot.Id, installation.InstallationCode);
@@ -386,7 +386,7 @@ namespace Api.Test.Controllers
             var robot = await DatabaseUtilities.NewRobot(
                 RobotStatus.Available,
                 installation,
-                inspectionAreaRobot
+                inspectionAreaRobot.Id
             );
 
             var query = CreateDefaultCustomMissionQuery(robot.Id, installation.InstallationCode);

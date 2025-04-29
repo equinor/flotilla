@@ -202,7 +202,7 @@ namespace Api.Database.Context
                 Host = "localhost",
                 Port = 3000,
                 CurrentInstallation = installations[0],
-                CurrentInspectionArea = inspectionAreas[0],
+                CurrentInspectionAreaId = inspectionAreas[0].Id,
                 Documentation = [],
                 Pose = new Pose(),
             };

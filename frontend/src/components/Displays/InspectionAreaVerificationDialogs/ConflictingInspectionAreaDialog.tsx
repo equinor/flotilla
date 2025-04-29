@@ -1,10 +1,12 @@
 import { Button, Dialog, List, Typography } from '@equinor/eds-core-react'
 import { StyledDialog, VerticalContent } from './ScheduleMissionStyles'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { useEffect, useState } from 'react'
+import { BackendAPICaller } from 'api/ApiCaller'
 
 interface ConflictingRobotInspectionAreaDialogProps {
     closeDialog: () => void
-    robotInspectionAreaName: string
+    robotInspectionAreaId: string
     desiredInspectionAreaName: string
 }
 
@@ -15,10 +17,19 @@ interface ConflictingMissionInspectionAreasDialogProps {
 
 export const ConflictingRobotInspectionAreaDialog = ({
     closeDialog,
-    robotInspectionAreaName,
+    robotInspectionAreaId,
     desiredInspectionAreaName,
 }: ConflictingRobotInspectionAreaDialogProps) => {
     const { TranslateText } = useLanguageContext()
+    const [robotInspectionAreaName, setRobotInspectionAreaName] = useState<string>('...')
+
+    useEffect(() => {
+        BackendAPICaller.getInspectionAreaById(robotInspectionAreaId).then((inspectionArea) => {
+            if (inspectionArea) {
+                setRobotInspectionAreaName(inspectionArea.inspectionAreaName)
+            }
+        })
+    }, [robotInspectionAreaId])
 
     return (
         <StyledDialog open={true} onClose={closeDialog}>

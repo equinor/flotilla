@@ -357,6 +357,15 @@ export class BackendAPICaller {
         return result.content
     }
 
+    static async getInspectionAreaById(id: string): Promise<InspectionArea> {
+        const path: string = 'inspectionAreas/' + id
+        const result = await this.GET<InspectionArea>(path).catch((e) => {
+            console.error(`Failed to GET /${path}: ` + e)
+            throw e
+        })
+        return result.content
+    }
+
     static async reRunMission(missionId: string, failedTasksOnly: boolean = false): Promise<Mission> {
         const mission = await BackendAPICaller.getMissionRunById(missionId)
 

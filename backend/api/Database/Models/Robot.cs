@@ -24,7 +24,7 @@ namespace Api.Database.Models
             CreateRobotQuery createQuery,
             Installation installation,
             RobotModel model,
-            InspectionArea? inspectionArea = null
+            string? inspectionAreaId = null
         )
         {
             var documentation = new List<DocumentInfo>();
@@ -42,7 +42,7 @@ namespace Api.Database.Models
             Name = createQuery.Name;
             SerialNumber = createQuery.SerialNumber;
             CurrentInstallation = installation;
-            CurrentInspectionArea = inspectionArea;
+            CurrentInspectionAreaId = inspectionAreaId;
             Documentation = documentation;
             Host = createQuery.Host;
             Port = createQuery.Port;
@@ -76,7 +76,7 @@ namespace Api.Database.Models
         [Required]
         public Installation CurrentInstallation { get; set; }
 
-        public InspectionArea? CurrentInspectionArea { get; set; }
+        public string? CurrentInspectionAreaId { get; set; }
 
         public float BatteryLevel { get; set; }
 
