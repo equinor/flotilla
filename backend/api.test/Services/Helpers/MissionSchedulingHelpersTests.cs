@@ -49,7 +49,7 @@ public class MissionSchedulingHelpersTests : IAsyncLifetime
 
         var robot = TestObjectGenerator.NewRobot(
             currentInstallation: installation,
-            currentInspectionArea: inspectionArea,
+            currentInspectionAreaId: inspectionArea.Id,
             robotStatus: robotStatus,
             isarConnected: isIsarConnected,
             deprecated: isRobotDeprecated,

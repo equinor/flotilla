@@ -84,7 +84,7 @@ namespace Api.Test.EventHandlers
             var robot = await DatabaseUtilities.NewRobot(
                 RobotStatus.Available,
                 installation,
-                inspectionArea
+                inspectionArea.Id
             );
             var missionRun = await DatabaseUtilities.NewMissionRun(
                 installation.InstallationCode,
@@ -117,7 +117,7 @@ namespace Api.Test.EventHandlers
             var robot = await DatabaseUtilities.NewRobot(
                 RobotStatus.Available,
                 installation,
-                inspectionArea
+                inspectionArea.Id
             );
             var missionRunOne = await DatabaseUtilities.NewMissionRun(
                 installation.InstallationCode,
@@ -161,7 +161,7 @@ namespace Api.Test.EventHandlers
             var robot = await DatabaseUtilities.NewRobot(
                 RobotStatus.Busy,
                 installation,
-                inspectionArea
+                inspectionArea.Id
             );
             var missionRun = await DatabaseUtilities.NewMissionRun(
                 installation.InstallationCode,
@@ -207,12 +207,12 @@ namespace Api.Test.EventHandlers
             var robotOne = await DatabaseUtilities.NewRobot(
                 RobotStatus.Available,
                 installation,
-                inspectionArea
+                inspectionArea.Id
             );
             var robotTwo = await DatabaseUtilities.NewRobot(
                 RobotStatus.Available,
                 installation,
-                inspectionArea
+                inspectionArea.Id
             );
             var missionRunOne = await DatabaseUtilities.NewMissionRun(
                 installation.InstallationCode,
@@ -340,7 +340,7 @@ namespace Api.Test.EventHandlers
             var robot = await DatabaseUtilities.NewRobot(
                 RobotStatus.Available,
                 installation,
-                inspectionArea
+                inspectionArea.Id
             );
             var missionRun1 = await DatabaseUtilities.NewMissionRun(
                 installation.InstallationCode,

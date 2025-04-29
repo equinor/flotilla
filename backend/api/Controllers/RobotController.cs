@@ -346,8 +346,8 @@ namespace Api.Controllers
                         $"No inspection area with ID {currentInspectionAreaId} was found"
                     );
 
-                await robotService.UpdateCurrentInspectionArea(id, inspectionArea.Id);
-                robot.CurrentInspectionArea = inspectionArea;
+                await robotService.UpdateCurrentInspectionAreaId(id, inspectionArea.Id);
+                robot.CurrentInspectionAreaId = inspectionArea.Id;
 
                 var robotResponse = new RobotResponse(robot);
                 logger.LogInformation("Successful updated current inspection area on robot");

@@ -99,7 +99,7 @@ namespace Api.Test.Controllers
             var robot = await DatabaseUtilities.NewRobot(
                 RobotStatus.Available,
                 installation,
-                inspectionArea
+                inspectionArea.Id
             );
 
             var inspection = new CustomInspectionQuery

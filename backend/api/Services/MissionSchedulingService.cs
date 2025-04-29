@@ -48,10 +48,10 @@ namespace Api.Services
         public async Task StartNextMissionRunIfSystemIsAvailable(Robot robot)
         {
             logger.LogInformation(
-                "Robot {robotName} has status {robotStatus} and current inspection area {areaName}",
+                "Robot {robotName} has status {robotStatus} and current inspection area id {areaId}",
                 robot.Name,
                 robot.Status,
-                robot.CurrentInspectionArea?.Name
+                robot.CurrentInspectionAreaId
             );
 
             MissionRun? missionRun;
@@ -100,7 +100,7 @@ namespace Api.Services
                 );
             }
 
-            if (robot.CurrentInspectionArea == null)
+            if (robot.CurrentInspectionAreaId == null)
             {
                 logger.LogError(
                     "Robot {RobotName} with Id {RobotId} is not on an inspection area.",
@@ -109,11 +109,27 @@ namespace Api.Services
                 );
                 return;
             }
-            else if (
+
+            var currentInspectionArea = await inspectionAreaService.ReadById(
+                robot.CurrentInspectionAreaId,
+                readOnly: true
+            );
+
+            if (currentInspectionArea == null)
+            {
+                logger.LogError(
+                    "Robot {RobotName} with Id {RobotId} is not on a valid inspection area.",
+                    robot.Name,
+                    robot.Id
+                );
+                return;
+            }
+
+            if (
                 !missionRun.IsReturnHomeOrEmergencyMission()
                 && !inspectionAreaService.MissionTasksAreInsideInspectionAreaPolygon(
                     (List<MissionTask>)missionRun.Tasks,
-                    robot.CurrentInspectionArea
+                    currentInspectionArea
                 )
             )
             {
@@ -127,7 +143,7 @@ namespace Api.Services
                 {
                     await AbortMissionRun(
                         missionRun,
-                        $"Mission run {missionRun.Id} aborted: Robot {robot.Name} is on inspection area {robot.CurrentInspectionArea?.Name} "
+                        $"Mission run {missionRun.Id} aborted: Robot {robot.Name} is on inspection area {currentInspectionArea.Name} "
                             + $"and mission run is on inspection area {missionRun.InspectionArea?.Name}"
                     );
                 }

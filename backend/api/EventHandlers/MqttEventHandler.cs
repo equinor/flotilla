@@ -120,10 +120,10 @@ namespace Api.EventHandlers
             }
 
             _logger.LogInformation(
-                "OnIsarStatus: Robot {robotName} has status {robotStatus} and current inspection area {areaName}",
+                "OnIsarStatus: Robot {robotName} has status {robotStatus} and current inspection area id {areaId}",
                 robot.Name,
                 robot.Status,
-                robot.CurrentInspectionArea?.Name
+                robot.CurrentInspectionAreaId
             );
 
             _updateRobotSemaphore.WaitOne();
@@ -142,10 +142,10 @@ namespace Api.EventHandlers
             );
 
             _logger.LogInformation(
-                "OnIsarStatus: Robot {robotName} has status {robotStatus} and current inspection area {areaName}",
+                "OnIsarStatus: Robot {robotName} has status {robotStatus} and current inspection area id {areaId}",
                 robot.Name,
                 robot.Status,
-                robot.CurrentInspectionArea?.Name
+                robot.CurrentInspectionAreaId
             );
 
             if (robot.IsRobotReadyToStartMissions())

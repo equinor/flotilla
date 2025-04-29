@@ -6,12 +6,13 @@ import {
 } from './ConflictingInspectionAreaDialog'
 import { UnknownInspectionAreaDialog } from './UnknownInspectionAreaDialog'
 import { useRobotContext } from 'components/Contexts/RobotContext'
+import { InspectionArea } from 'models/InspectionArea'
 
 interface IProps {
     scheduleMissions: () => void
     closeDialog: () => void
     robotId: string
-    missionInspectionAreaNames: string[]
+    missionInspectionAreas: (InspectionArea | undefined)[]
 }
 
 enum DialogTypes {
@@ -23,7 +24,7 @@ enum DialogTypes {
 
 export const ScheduleMissionWithInspectionAreaVerification = ({
     robotId,
-    missionInspectionAreaNames,
+    missionInspectionAreas,
     scheduleMissions,
     closeDialog,
 }: IProps) => {
@@ -31,9 +32,8 @@ export const ScheduleMissionWithInspectionAreaVerification = ({
     const [dialogToOpen, setDialogToOpen] = useState<DialogTypes>(DialogTypes.unknown)
     const [selectedRobot, setSelectedRobot] = useState<Robot>()
 
-    const unikMissionInspectionAreaNames = missionInspectionAreaNames.filter(
-        (inspectionAreaName, index) =>
-            inspectionAreaName !== '' && missionInspectionAreaNames.indexOf(inspectionAreaName) === index
+    const unikMissionInspectionAreas = missionInspectionAreas.filter(
+        (inspectionArea, index, self) => inspectionArea && self.findIndex((i) => i?.id === inspectionArea.id) === index
     )
 
     useEffect(() => {
@@ -43,43 +43,43 @@ export const ScheduleMissionWithInspectionAreaVerification = ({
     useEffect(() => {
         if (!selectedRobot) return
 
-        if (unikMissionInspectionAreaNames.length > 1) {
+        if (unikMissionInspectionAreas.length > 1) {
             setDialogToOpen(DialogTypes.conflictingMissionInspectionAreas)
             return
         }
 
-        if (unikMissionInspectionAreaNames.length === 0) {
+        if (unikMissionInspectionAreas.length === 0) {
             setDialogToOpen(DialogTypes.unknownNewInspectionArea)
             return
         }
-
         if (
-            selectedRobot.currentInspectionArea?.inspectionAreaName &&
-            unikMissionInspectionAreaNames[0] !== selectedRobot.currentInspectionArea?.inspectionAreaName
+            selectedRobot.currentInspectionAreaId &&
+            unikMissionInspectionAreas[0]?.id !== selectedRobot.currentInspectionAreaId
         ) {
             setDialogToOpen(DialogTypes.conflictingRobotInspectionArea)
             return
         }
 
         scheduleMissions()
-    }, [unikMissionInspectionAreaNames, selectedRobot?.currentInspectionArea?.inspectionAreaName])
+    }, [unikMissionInspectionAreas, selectedRobot])
+
+    const unikMissionInspectionAreaNames = unikMissionInspectionAreas.map((area) => area?.inspectionAreaName ?? '')
 
     return (
         <>
             {dialogToOpen === DialogTypes.conflictingMissionInspectionAreas && (
                 <ConflictingMissionInspectionAreasDialog
                     closeDialog={closeDialog}
-                    missionInspectionAreaNames={unikMissionInspectionAreaNames!}
+                    missionInspectionAreaNames={unikMissionInspectionAreaNames}
                 />
             )}
-            {dialogToOpen === DialogTypes.conflictingRobotInspectionArea &&
-                selectedRobot?.currentInspectionArea?.inspectionAreaName && (
-                    <ConflictingRobotInspectionAreaDialog
-                        closeDialog={closeDialog}
-                        robotInspectionAreaName={selectedRobot?.currentInspectionArea?.inspectionAreaName}
-                        desiredInspectionAreaName={unikMissionInspectionAreaNames![0]}
-                    />
-                )}
+            {dialogToOpen === DialogTypes.conflictingRobotInspectionArea && selectedRobot?.currentInspectionAreaId && (
+                <ConflictingRobotInspectionAreaDialog
+                    closeDialog={closeDialog}
+                    robotInspectionAreaId={selectedRobot?.currentInspectionAreaId}
+                    desiredInspectionAreaName={unikMissionInspectionAreaNames![0]}
+                />
+            )}
             {dialogToOpen === DialogTypes.unknownNewInspectionArea && (
                 <UnknownInspectionAreaDialog closeDialog={closeDialog} />
             )}

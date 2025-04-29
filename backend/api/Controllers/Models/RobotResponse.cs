@@ -17,7 +17,7 @@ namespace Api.Controllers.Models
 
         public Installation CurrentInstallation { get; }
 
-        public InspectionAreaResponse? CurrentInspectionArea { get; set; }
+        public string? CurrentInspectionAreaId { get; set; }
 
         public float BatteryLevel { get; set; }
 
@@ -61,10 +61,7 @@ namespace Api.Controllers.Models
             Model = robot.Model;
             SerialNumber = robot.SerialNumber;
             CurrentInstallation = robot.CurrentInstallation;
-            CurrentInspectionArea =
-                robot.CurrentInspectionArea != null
-                    ? new InspectionAreaResponse(robot.CurrentInspectionArea)
-                    : null;
+            CurrentInspectionAreaId = robot.CurrentInspectionAreaId;
             BatteryLevel = robot.BatteryLevel;
             BatteryState = robot.BatteryState;
             PressureLevel = robot.PressureLevel;

@@ -326,12 +326,12 @@ namespace Api.Controllers
                 return BadRequest("No inspection area found for the mission tasks");
             }
 
-            if (robot.CurrentInspectionArea == null)
+            if (robot.CurrentInspectionAreaId == null)
             {
                 return BadRequest("Robot does not have an inspection area");
             }
 
-            if (inspectionAreaForMission.Id != robot.CurrentInspectionArea.Id)
+            if (inspectionAreaForMission.Id != robot.CurrentInspectionAreaId)
             {
                 return BadRequest(
                     $"The tasks of the mission are not inside the inspection area of the robot"
@@ -490,12 +490,12 @@ namespace Api.Controllers
                     return BadRequest("No inspection area found for the mission tasks");
                 }
 
-                if (robot.CurrentInspectionArea == null)
+                if (robot.CurrentInspectionAreaId == null)
                 {
                     return BadRequest("Robot does not have an inspection area");
                 }
 
-                if (inspectionAreaForMission.Id != robot.CurrentInspectionArea.Id)
+                if (inspectionAreaForMission.Id != robot.CurrentInspectionAreaId)
                 {
                     return BadRequest(
                         $"The tasks of the mission are not inside the inspection area of the robot"
