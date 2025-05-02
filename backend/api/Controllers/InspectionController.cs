@@ -84,9 +84,8 @@ namespace Api.Controllers
 
                 return File(inspectionStream, "image/png");
             }
-            catch (InspectionNotFoundException e)
+            catch (InspectionNotFoundException)
             {
-                logger.LogError(e, "{ErrorMessage}", e.Message);
                 return NotFound(
                     $"Could not find inspection image with ISAR Inspection ID {isarInspectionId}"
                 );
