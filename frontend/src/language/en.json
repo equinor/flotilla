@@ -96,7 +96,6 @@
     "selected": "selected",
     "This button is disabled because the robot is not available. Check that the robot is on, and are not doing any other activities.": "This button is disabled because the robot is not available. Check that the robot is on, and are not doing any other activities.",
     "Close": "Close",
-    "excludeReturnToHome": "Only inspection missions",
     "statuses": "Statuses",
     "tagId": "Tag ID",
     "robotName": "Robot name",

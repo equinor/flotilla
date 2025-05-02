@@ -11,7 +11,6 @@ interface IMissionFilterContext {
     filterError: string
     clearFilterError: () => void
     filterState: {
-        excludeReturnToHome: boolean | undefined
         missionName: string | undefined
         statuses: MissionStatusFilterOptions[] | undefined
         robotName: string | undefined
@@ -23,7 +22,6 @@ interface IMissionFilterContext {
         maxEndTime: number | undefined
     }
     filterFunctions: {
-        switchExcludeReturnToHome: (newExcludeReturnToHome: boolean | undefined) => void
         switchMissionName: (newMissionName: string | undefined) => void
         switchStatuses: (newStatuses: MissionStatusFilterOptions[]) => void
         switchRobotName: (newRobotName: string | undefined) => void
@@ -60,7 +58,6 @@ const defaultMissionFilterInterface: IMissionFilterContext = {
     filterError: '',
     clearFilterError: () => {},
     filterState: {
-        excludeReturnToHome: true,
         missionName: undefined,
         statuses: [],
         robotName: undefined,
@@ -72,7 +69,6 @@ const defaultMissionFilterInterface: IMissionFilterContext = {
         maxEndTime: undefined,
     },
     filterFunctions: {
-        switchExcludeReturnToHome: () => {},
         switchMissionName: () => {},
         switchStatuses: () => {},
         switchRobotName: () => {},
@@ -117,10 +113,6 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
 
     const filterFunctions = useMemo(
         () => ({
-            switchExcludeReturnToHome: (newExcludeReturnToHome: boolean | undefined) => {
-                setFilterIsSet(true)
-                setFilterState({ ...filterState, excludeReturnToHome: newExcludeReturnToHome })
-            },
             switchMissionName: (newMissionName: string | undefined) => {
                 setFilterIsSet(true)
                 setFilterState({ ...filterState, missionName: newMissionName })

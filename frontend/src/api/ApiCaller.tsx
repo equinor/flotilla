@@ -172,7 +172,6 @@ export class BackendAPICaller {
         if (parameters.nameSearch) path = path + 'NameSearch=' + parameters.nameSearch + '&'
         if (parameters.robotNameSearch) path = path + 'RobotNameSearch=' + parameters.robotNameSearch + '&'
         if (parameters.tagSearch) path = path + 'TagSearch=' + parameters.tagSearch + '&'
-        if (parameters.excludeReturnToHome) path = path + 'ExcludeReturnToHome=' + parameters.excludeReturnToHome + '&'
         if (parameters.minStartTime) path = path + 'MinStartTime=' + parameters.minStartTime + '&'
         if (parameters.maxStartTime) path = path + 'MaxStartTime=' + parameters.maxStartTime + '&'
         if (parameters.minEndTime) path = path + 'MinEndTime=' + parameters.minEndTime + '&'
