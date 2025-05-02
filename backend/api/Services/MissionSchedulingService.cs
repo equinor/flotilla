@@ -16,7 +16,7 @@ namespace Api.Services
 
         public Task FreezeMissionRunQueueForRobot(string robotId);
 
-        public Task StopCurrentMissionRun(string robotId);
+        public Task StopCurrentMissionRun(string robotId, string? stopReason = null);
 
         public Task AbortAllScheduledNormalMissions(string robotId, string? abortReason = null);
 
@@ -275,7 +275,7 @@ namespace Api.Services
             );
         }
 
-        public async Task StopCurrentMissionRun(string robotId)
+        public async Task StopCurrentMissionRun(string robotId, string? stopReason = null)
         {
             var robot = await robotService.ReadById(robotId, readOnly: true);
             if (robot == null)
@@ -301,6 +301,17 @@ namespace Api.Services
             try
             {
                 await isarService.StopMission(robot);
+                if (stopReason is not null)
+                {
+                    foreach (var ongoingMissionRunId in ongoingMissionRunIds)
+                    {
+                        await missionRunService.UpdateMissionRunProperty(
+                            ongoingMissionRunId,
+                            "StatusReason",
+                            stopReason
+                        );
+                    }
+                }
             }
             catch (HttpRequestException e)
             {
