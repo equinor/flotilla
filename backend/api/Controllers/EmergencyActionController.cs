@@ -42,7 +42,11 @@ namespace Api.Controllers
             foreach (var robot in robots)
             {
                 emergencyActionService.SendRobotToDock(
-                    new RobotEmergencyEventArgs(robot, Database.Models.RobotFlotillaStatus.Home)
+                    new RobotEmergencyEventArgs(
+                        robot,
+                        Database.Models.RobotFlotillaStatus.Home,
+                        "Robot couldn't complete mission as 'Send robots to dock'-button was clicked"
+                    )
                 );
             }
 

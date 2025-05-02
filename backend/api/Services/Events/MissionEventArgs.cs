@@ -12,11 +12,15 @@ namespace Api.Services.Events
         public Robot Robot { get; } = robot;
     }
 
-    public class RobotEmergencyEventArgs(Robot robot, RobotFlotillaStatus robotFlotillaStatus)
-        : EventArgs
+    public class RobotEmergencyEventArgs(
+        Robot robot,
+        RobotFlotillaStatus robotFlotillaStatus,
+        string? message = null
+    ) : EventArgs
     {
         public Robot Robot { get; } = robot;
         public RobotFlotillaStatus RobotFlotillaStatus { get; } = robotFlotillaStatus;
+        public string? Message { get; } = message;
     }
 
     public class TeamsMessageEventArgs(string teamsMessage) : EventArgs

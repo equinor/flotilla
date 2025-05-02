@@ -574,7 +574,11 @@ namespace Api.EventHandlers
                     robot.Name
                 );
                 EmergencyActionService.SendRobotToDock(
-                    new RobotEmergencyEventArgs(robot, RobotFlotillaStatus.Recharging)
+                    new RobotEmergencyEventArgs(
+                        robot,
+                        RobotFlotillaStatus.Recharging,
+                        "Robot battery level too low to complete mission"
+                    )
                 );
             }
             else if (
@@ -621,7 +625,11 @@ namespace Api.EventHandlers
                     robot.Name
                 );
                 EmergencyActionService.SendRobotToDock(
-                    new RobotEmergencyEventArgs(robot, RobotFlotillaStatus.Recharging)
+                    new RobotEmergencyEventArgs(
+                        robot,
+                        RobotFlotillaStatus.Recharging,
+                        "Robot couldn't complete mission as pressure level were outside acceptable range"
+                    )
                 );
             }
             else if (
