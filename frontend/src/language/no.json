@@ -96,7 +96,6 @@
     "selected": "valgte",
     "This button is disabled because the robot is not available. Check that the robot is on, and are not doing any other activities.": "Denne knappen er deaktivert fordi roboten ikke er tilgjengelig. Sjekk at roboten er på og ikke gjør noen andre aktiviteter.",
     "Close": "Lukk",
-    "excludeReturnToHome": "Kun inspections oppdrag",
     "statuses": "Statuser",
     "tagId": "Tag ID",
     "robotName": "Robotnavn",

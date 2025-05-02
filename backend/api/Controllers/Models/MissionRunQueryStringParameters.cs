@@ -65,11 +65,6 @@ namespace Api.Controllers.Models
         /// </summary>
         public MissionRunType? MissionRunType { get; set; }
 
-        /// <summary>
-        /// Filter for whether the result should exclude return home missions. The default is false
-        /// </summary>
-        public bool ExcludeReturnToHome { get; set; }
-
         #region Time Filters
 
         /// <summary>
