@@ -4,11 +4,11 @@ namespace Api.Utilities
 {
     public static class HttpContextExtensions
     {
-        public static string GetRequestToken(this HttpContext client)
+        public static string? GetRequestToken(this HttpContext client)
         {
             if (!client.Request.Headers.TryGetValue("Authorization", out var value))
             {
-                throw new HttpRequestException("Not a protected endpoint!");
+                return null;
             }
 
             return value.ToString().Replace("Bearer ", "", StringComparison.CurrentCulture);
@@ -35,13 +35,17 @@ namespace Api.Utilities
 
         public static List<System.Security.Claims.Claim> GetRequestedClaims(this HttpContext client)
         {
-            string accessTokenBase64 = client.GetRequestToken();
+            string? accessTokenBase64 = client.GetRequestToken();
+            if (string.IsNullOrEmpty(accessTokenBase64))
+            {
+                return [];
+            }
             var handler = new JwtSecurityTokenHandler();
             var jwtSecurityToken = handler.ReadJwtToken(accessTokenBase64);
-            return jwtSecurityToken.Claims.ToList();
+            return [.. jwtSecurityToken.Claims];
         }
 
-        public static string? GetUserObjectId(this HttpContext client)
+        public static string? GetUserObjectId(this HttpContext client, ILogger? logger = null)
         {
             var claims = client.GetRequestedClaims();
             var objectIdClaim = claims.FirstOrDefault(c => c.Type == "oid");

@@ -126,19 +126,36 @@ builder
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.ConfigureSwagger(builder.Configuration);
 
-builder
-    .Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"))
-    .EnableTokenAcquisitionToCallDownstreamApi()
-    .AddInMemoryTokenCaches()
-    .AddDownstreamApi(EchoService.ServiceName, builder.Configuration.GetSection("Echo"))
-    .AddDownstreamApi(InspectionService.ServiceName, builder.Configuration.GetSection("IDA"))
-    .AddDownstreamApi(IsarService.ServiceName, builder.Configuration.GetSection("Isar"));
+bool disableAuth = builder.Configuration.GetValue<bool>("DisableAuth");
 
-builder
-    .Services.AddAuthorizationBuilder()
-    .AddFallbackPolicy("RequireAuthenticatedUser", policy => policy.RequireAuthenticatedUser());
+if (!disableAuth)
+{
+    builder
+        .Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"))
+        .EnableTokenAcquisitionToCallDownstreamApi()
+        .AddInMemoryTokenCaches()
+        .AddDownstreamApi(EchoService.ServiceName, builder.Configuration.GetSection("Echo"))
+        .AddDownstreamApi(InspectionService.ServiceName, builder.Configuration.GetSection("IDA"))
+        .AddDownstreamApi(IsarService.ServiceName, builder.Configuration.GetSection("Isar"));
 
+    builder
+        .Services.AddAuthorizationBuilder()
+        .AddFallbackPolicy("RequireAuthenticatedUser", policy => policy.RequireAuthenticatedUser());
+}
+else
+{
+    Console.WriteLine("Authentication and Authorization are disabled.");
+    builder.Services.AddHttpClient(
+        IsarService.ServiceName,
+        client =>
+        {
+            // Explicitly ensure no Authorization header is set
+            client.DefaultRequestHeaders.Authorization = null;
+        }
+    );
+    // .AddDownstreamApi(InspectionService.ServiceName, builder.Configuration.GetSection("IDA"));
+}
 builder.Services.AddSignalR();
 
 var app = builder.Build();
@@ -156,21 +173,30 @@ app.UseSwagger(c =>
         }
     );
 });
+
 app.UseSwaggerUI(c =>
 {
-    c.OAuthClientId(builder.Configuration["AzureAd:ClientId"]);
-    // The following parameter represents the "audience" of the access token.
-    c.OAuthAdditionalQueryStringParams(
-        new Dictionary<string, string>
-        {
+    if (!disableAuth)
+    {
+        c.OAuthClientId(builder.Configuration["AzureAd:ClientId"]);
+        c.OAuthAdditionalQueryStringParams(
+            new Dictionary<string, string>
             {
-                "Resource",
-                builder.Configuration["AzureAd:ClientId"]
-                    ?? throw new ArgumentException("No Azure Ad ClientId")
-            },
-        }
-    );
-    c.OAuthUsePkce();
+                {
+                    "Resource",
+                    builder.Configuration["AzureAd:ClientId"]
+                        ?? throw new ArgumentException("No Azure Ad ClientId")
+                },
+            }
+        );
+        c.OAuthUsePkce();
+    }
+    else
+    {
+        Console.WriteLine("Swagger OAuth is disabled.");
+        // Ensure no OAuth configuration is applied
+        c.OAuthClientId(null);
+    }
 });
 
 var option = new RewriteOptions();
@@ -188,10 +214,16 @@ app.UseCors(corsBuilder =>
         .AllowCredentials()
 );
 
-app.UseHttpsRedirection();
-
-app.UseAuthentication();
-app.UseAuthorization();
+if (!disableAuth)
+{
+    app.UseHttpsRedirection();
+    app.UseAuthentication();
+    app.UseAuthorization();
+}
+else
+{
+    Console.WriteLine("Authentication and Authorization are disabled.");
+}
 
 app.MapHub<SignalRHub>(
     "/hub",
@@ -201,7 +233,14 @@ app.MapHub<SignalRHub>(
     }
 );
 
-app.MapControllers();
+if (!disableAuth)
+{
+    app.MapControllers();
+}
+else
+{
+    app.MapControllers().AllowAnonymous();
+}
 
 app.Run();
 

@@ -29,7 +29,7 @@ namespace Api.Services.MissionLoaders
         public async Task<List<PlantInfo>> GetPlantInfos()
         {
             var installations = await installationService.ReadAll();
-            return installations.Select(i => new PlantInfo(i)).ToList();
+            return [.. installations.Select(i => new PlantInfo(i))];
         }
     }
 }

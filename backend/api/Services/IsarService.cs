@@ -25,7 +25,7 @@ namespace Api.Services
     }
 
     public class IsarService(
-        IDownstreamApi isarApi,
+        HttpClient isarApi,
         IMissionDefinitionService missionDefinitionService,
         ILogger<IsarService> logger
     ) : IIsarService
@@ -298,16 +298,15 @@ namespace Api.Services
                     null,
                     "application/json"
                 );
-            var response = await isarApi.CallApiForAppAsync(
-                ServiceName,
-                options =>
-                {
-                    options.HttpMethod = method.Method;
-                    options.BaseUrl = isarBaseUri;
-                    options.RelativePath = relativeUri;
-                },
-                content
-            );
+            HttpResponseMessage? response = null;
+            if (method == HttpMethod.Post)
+            {
+                response = await isarApi.PostAsync(ServiceName, content);
+            }
+            else if (method == HttpMethod.Get)
+            {
+                response = await isarApi.GetAsync(ServiceName);
+            }
             return response;
         }
 

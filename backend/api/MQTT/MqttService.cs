@@ -271,7 +271,7 @@ namespace Api.Mqtt
                 when (ex is JsonException or NotSupportedException or ArgumentException)
             {
                 _logger.LogError(
-                    "Could not create '{className}' object from MQTT message json",
+                    "Could not create '{className}' object from ISAR MQTT message json",
                     typeof(T).Name
                 );
                 return;
@@ -325,7 +325,7 @@ namespace Api.Mqtt
                 when (ex is JsonException or NotSupportedException or ArgumentException)
             {
                 _logger.LogError(
-                    "Could not create '{className}' object from MQTT message json",
+                    "Could not create '{className}' object from IDA MQTT message json",
                     typeof(T).Name
                 );
                 return;

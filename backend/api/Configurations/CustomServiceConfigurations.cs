@@ -81,58 +81,76 @@ namespace Api.Configurations
             IConfiguration configuration
         )
         {
-            services.AddSwaggerGen(c =>
+            bool disableAuth = configuration.GetValue<bool>("DisableAuth");
+            if (disableAuth)
             {
-                // Add Authorization button in UI
-                c.AddSecurityDefinition(
-                    "oauth2",
-                    new OpenApiSecurityScheme
-                    {
-                        Type = SecuritySchemeType.OAuth2,
-                        Flows = new OpenApiOAuthFlows
+                Console.WriteLine("Swagger OAuth is disabled.");
+                // Ensure no OAuth configuration is applied
+                services.AddSwaggerGen(c =>
+                {
+                    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Flotilla API", Version = "v1" });
+                    // Make swagger use xml comments from functions
+                    string xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                    string xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                    c.IncludeXmlComments(xmlPath);
+                });
+                return services;
+            }
+            else
+            {
+                services.AddSwaggerGen(c =>
+                {
+                    // Add Authorization button in UI
+                    c.AddSecurityDefinition(
+                        "oauth2",
+                        new OpenApiSecurityScheme
                         {
-                            AuthorizationCode = new OpenApiOAuthFlow
+                            Type = SecuritySchemeType.OAuth2,
+                            Flows = new OpenApiOAuthFlows
                             {
-                                TokenUrl = new Uri(
-                                    $"{configuration["AzureAd:Instance"]}/{configuration["AzureAd:TenantId"]}/oauth2/token"
-                                ),
-                                AuthorizationUrl = new Uri(
-                                    $"{configuration["AzureAd:Instance"]}/{configuration["AzureAd:TenantId"]}/oauth2/authorize"
-                                ),
-                                Scopes = new Dictionary<string, string>
+                                AuthorizationCode = new OpenApiOAuthFlow
                                 {
+                                    TokenUrl = new Uri(
+                                        $"{configuration["AzureAd:Instance"]}/{configuration["AzureAd:TenantId"]}/oauth2/token"
+                                    ),
+                                    AuthorizationUrl = new Uri(
+                                        $"{configuration["AzureAd:Instance"]}/{configuration["AzureAd:TenantId"]}/oauth2/authorize"
+                                    ),
+                                    Scopes = new Dictionary<string, string>
                                     {
-                                        $"api://{configuration["AzureAd:ClientId"]}/user_impersonation",
-                                        "User Impersonation"
+                                        {
+                                            $"api://{configuration["AzureAd:ClientId"]}/user_impersonation",
+                                            "User Impersonation"
+                                        },
                                     },
                                 },
                             },
-                        },
-                    }
-                );
-                // Show which endpoints have authorization in the UI
-                c.AddSecurityRequirement(
-                    new OpenApiSecurityRequirement
-                    {
+                        }
+                    );
+                    // Show which endpoints have authorization in the UI
+                    c.AddSecurityRequirement(
+                        new OpenApiSecurityRequirement
                         {
-                            new OpenApiSecurityScheme
                             {
-                                Reference = new OpenApiReference
+                                new OpenApiSecurityScheme
                                 {
-                                    Type = ReferenceType.SecurityScheme,
-                                    Id = "oauth2",
+                                    Reference = new OpenApiReference
+                                    {
+                                        Type = ReferenceType.SecurityScheme,
+                                        Id = "oauth2",
+                                    },
                                 },
+                                Array.Empty<string>()
                             },
-                            Array.Empty<string>()
-                        },
-                    }
-                );
+                        }
+                    );
 
-                // Make swagger use xml comments from functions
-                string xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                string xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-                c.IncludeXmlComments(xmlPath);
-            });
+                    // Make swagger use xml comments from functions
+                    string xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                    string xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                    c.IncludeXmlComments(xmlPath);
+                });
+            }
 
             return services;
         }
