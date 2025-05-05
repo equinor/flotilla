@@ -192,7 +192,7 @@ namespace Api.Database.Models
         Blocked,
         BlockedProtectiveStop,
         ReturningHome,
-        UnkownStatus,
+        UnknownStatus,
     }
 
     public enum RobotFlotillaStatus
