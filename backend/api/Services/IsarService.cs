@@ -24,28 +24,15 @@ namespace Api.Services
         public Task<MediaConfig?> GetMediaStreamConfig(Robot robot);
     }
 
-    public class IsarService(
-        IDownstreamApi isarApi,
-        IMissionDefinitionService missionDefinitionService,
-        ILogger<IsarService> logger
-    ) : IIsarService
+    public class IsarService(IDownstreamApi isarApi, ILogger<IsarService> logger) : IIsarService
     {
         public const string ServiceName = "IsarApi";
 
         public async Task<IsarMission> StartMission(Robot robot, MissionRun missionRun)
         {
-            string? mapName = null;
-            if (missionRun.MissionId != null)
-            {
-                var missionDefinition = await missionDefinitionService.ReadById(
-                    missionRun.MissionId
-                );
-                mapName = missionDefinition?.Map?.MapName;
-            }
-
             var isarMissionDefinition = new
             {
-                mission_definition = new IsarMissionDefinition(missionRun, mapName: mapName),
+                mission_definition = new IsarMissionDefinition(missionRun),
             };
 
             HttpResponseMessage? response;
