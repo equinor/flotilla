@@ -99,6 +99,8 @@ bool useInMemoryDatabase = builder
 builder.Services.AddScoped<RobotController>();
 builder.Services.AddScoped<EmergencyActionController>();
 builder.Services.AddScoped<IUserInfoService, UserInfoService>();
+builder.Services.AddScoped<IAutoScheduleService, AutoScheduleService>();
+
 builder.Services.AddTransient<ISignalRService, SignalRService>();
 
 builder.Services.AddHostedService<MqttEventHandler>();

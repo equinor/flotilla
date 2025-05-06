@@ -19,6 +19,7 @@ import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { DockAlertContent, DockAlertListContent } from 'components/Alerts/DockAlert'
 import { useLanguageContext } from './LanguageContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
+import { InfoAlertContent, InfoAlertListContent } from 'components/Alerts/InfoAlertContent'
 
 export enum AlertType {
     MissionFail,
@@ -29,13 +30,15 @@ export enum AlertType {
     DismissDock,
     DockSuccess,
     AutoScheduleFail,
+    InfoAlert,
 }
 
 const alertTypeEnumMap: { [key: string]: AlertType } = {
     DockFailure: AlertType.DockFail,
     generalFailure: AlertType.RequestFail,
     DockSuccess: AlertType.DockSuccess,
-    autoSchedule: AlertType.AutoScheduleFail,
+    AutoScheduleFail: AlertType.AutoScheduleFail,
+    skipAutoMission: AlertType.InfoAlert,
 }
 
 type AlertDictionaryType = {
@@ -260,6 +263,17 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                         AlertCategory.INFO
                     )
                     clearListAlert(AlertType.RequestDock)
+                } else if (alertType === AlertType.InfoAlert) {
+                    setAlert(
+                        alertType,
+                        <InfoAlertContent title={backendAlert.alertTitle} message={backendAlert.alertMessage} />,
+                        AlertCategory.INFO
+                    )
+                    setListAlert(
+                        alertType,
+                        <InfoAlertListContent title={backendAlert.alertTitle} message={backendAlert.alertMessage} />,
+                        AlertCategory.INFO
+                    )
                 } else {
                     setAlert(
                         alertType,

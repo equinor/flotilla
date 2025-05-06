@@ -8,6 +8,7 @@ import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { Robot, RobotStatus } from 'models/Robot'
 import { RobotMissionQueueView } from './MissionQueueView'
 import { FrontPageSectionId } from 'models/FrontPageSectionId'
+import { NextAutoScheduleMissionView } from '../AutoScheduleSection/AutoScheduleSection'
 
 const MissionControlStyle = styled.div`
     display: flex;
@@ -30,7 +31,7 @@ const MissionControlCardStyle = styled(Card)`
     }
 
     @media (max-width: 960px) {
-        max-width: 669px;
+        max-width: 90hw;
         align-self: stretch;
     }
 `
@@ -61,6 +62,7 @@ export const MissionControlSection = () => {
                 {enabledRobots.length > 0 && missionControlCards}
                 {enabledRobots.length === 0 && <MissionControlPlaceholderCard />}
             </MissionControlBody>
+            <NextAutoScheduleMissionView />
         </MissionControlStyle>
     )
 }
