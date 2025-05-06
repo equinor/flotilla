@@ -1,5 +1,3 @@
-using System;
-using System.Threading.Tasks;
 using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
@@ -29,10 +27,8 @@ namespace Api.HostedServices
                 .CreateScope()
                 .ServiceProvider.GetRequiredService<IMissionDefinitionService>();
 
-        private IMissionSchedulingService MissionSchedulingService =>
-            _scopeFactory
-                .CreateScope()
-                .ServiceProvider.GetRequiredService<IMissionSchedulingService>();
+        private IMissionRunService MissionRunService =>
+            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionRunService>();
 
         private IRobotService RobotService =>
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IRobotService>();
@@ -109,18 +105,6 @@ namespace Api.HostedServices
             var jobDelays = new List<TimeSpan>();
             foreach (var missionDefinition in selectedMissionDefinitions)
             {
-                if (missionDefinition.LastSuccessfulRun == null)
-                {
-                    string message =
-                        $"Mission definition with Id {missionDefinition.Id} does not have a last successful mission run.";
-                    ReportMessageToSignalR(
-                        message,
-                        missionDefinition.Id,
-                        missionDefinition.InstallationCode
-                    );
-                    continue;
-                }
-
                 jobDelays = missionDefinition
                     .AutoScheduleFrequency!.GetSchedulingTimesUntilMidnight()
                     ?.ToList();
@@ -224,10 +208,37 @@ namespace Api.HostedServices
 
             try
             {
-                await MissionSchedulingService.ScheduleMissionRunFromMissionDefinitionLastSuccessfullRun(
-                    missionDefinition.Id,
-                    robot.Id
+                var missionTasks = await MissionLoader.GetTasksForMission(
+                    missionDefinition.Source.SourceId
                 );
+                if (missionTasks == null)
+                {
+                    _logger.LogError(
+                        "No mission tasks were found for mission definition {MissionDefinitionId}.",
+                        missionDefinition.Id
+                    );
+                    return;
+                }
+
+                var missionRun = new MissionRun
+                {
+                    Name = missionDefinition.Name,
+                    Robot = robot,
+                    MissionId = missionDefinition.Id,
+                    Status = MissionStatus.Pending,
+                    MissionRunType = MissionRunType.Normal,
+                    DesiredStartTime = DateTime.UtcNow,
+                    Tasks = missionTasks,
+                    InstallationCode = missionDefinition.InstallationCode,
+                    InspectionArea = missionDefinition.InspectionArea,
+                };
+
+                if (missionRun.Tasks.Any())
+                {
+                    missionRun.SetEstimatedTaskDuration();
+                }
+
+                await MissionRunService.Create(missionRun);
             }
             catch (Exception e)
             {
