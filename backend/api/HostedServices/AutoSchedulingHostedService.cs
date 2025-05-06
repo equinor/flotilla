@@ -1,26 +1,20 @@
+using System.Text.Json;
 using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
 using Api.Services.MissionLoaders;
-using Api.Utilities;
 using Hangfire;
 
 namespace Api.HostedServices
 {
-    public class AutoSchedulingHostedService : IHostedService, IDisposable
+    public class AutoSchedulingHostedService(
+        ILogger<AutoSchedulingHostedService> logger,
+        IServiceScopeFactory scopeFactory
+    ) : IHostedService, IDisposable
     {
-        private readonly ILogger<AutoSchedulingHostedService> _logger;
-        private readonly IServiceScopeFactory _scopeFactory;
+        private readonly ILogger<AutoSchedulingHostedService> _logger = logger;
+        private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
         private Timer? _timer = null;
-
-        public AutoSchedulingHostedService(
-            ILogger<AutoSchedulingHostedService> logger,
-            IServiceScopeFactory scopeFactory
-        )
-        {
-            _logger = logger;
-            _scopeFactory = scopeFactory;
-        }
 
         private IMissionDefinitionService MissionDefinitionService =>
             _scopeFactory
@@ -30,14 +24,14 @@ namespace Api.HostedServices
         private IMissionRunService MissionRunService =>
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionRunService>();
 
-        private IRobotService RobotService =>
-            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IRobotService>();
-
         private IMissionLoader MissionLoader =>
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionLoader>();
 
-        private ISignalRService SignalRService =>
-            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ISignalRService>();
+        private IRobotService RobotService =>
+            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IRobotService>();
+
+        private IAutoScheduleService AutoScheduleService =>
+            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IAutoScheduleService>();
 
         public Task StartAsync(CancellationToken stoppingToken)
         {
@@ -62,12 +56,12 @@ namespace Api.HostedServices
             await DoWork();
         }
 
-        public async Task<IList<TimeSpan>?> TestableDoWork()
+        public async Task<IList<(TimeSpan, TimeOnly)>?> TestableDoWork()
         {
             return await DoWork(false);
         }
 
-        private async Task<IList<TimeSpan>?> DoWork(bool? scheduleJobs = true)
+        private async Task<IList<(TimeSpan, TimeOnly)>?> DoWork(bool? scheduleJobs = true)
         {
             var missionQuery = new MissionDefinitionQueryStringParameters();
 
@@ -89,6 +83,8 @@ namespace Api.HostedServices
                 return null;
             }
 
+            await ResetAutoScheduledJobsObjects(missionDefinitions);
+
             var selectedMissionDefinitions = missionDefinitions.Where(m =>
                 m.AutoScheduleFrequency != null
                 && m.AutoScheduleFrequency.GetSchedulingTimesUntilMidnight() != null
@@ -102,7 +98,7 @@ namespace Api.HostedServices
                 return null;
             }
 
-            var jobDelays = new List<TimeSpan>();
+            var jobDelays = new List<(TimeSpan, TimeOnly)>();
             foreach (var missionDefinition in selectedMissionDefinitions)
             {
                 jobDelays = missionDefinition
@@ -125,22 +121,36 @@ namespace Api.HostedServices
 
                 foreach (var jobDelay in jobDelays)
                 {
+                    var existingJobs = AutoScheduleService.DeserializeAutoScheduleJobs(
+                        missionDefinition
+                    );
+
+                    if (existingJobs.ContainsKey(jobDelay.Item2))
+                        continue;
+
                     _logger.LogInformation(
                         "Scheduling mission run for mission definition {MissionDefinitionId} in {TimeLeft}.",
                         missionDefinition.Id,
                         jobDelay
                     );
-                    BackgroundJob.Schedule(
-                        () => AutomaticScheduleMissionRun(missionDefinition),
-                        jobDelay
+
+                    var jobId = BackgroundJob.Schedule(
+                        () => AutoScheduleMissionRun(missionDefinition),
+                        jobDelay.Item1
                     );
+
+                    existingJobs.Add(jobDelay.Item2, jobId);
+
+                    missionDefinition.AutoScheduleFrequency!.AutoScheduledJobs =
+                        JsonSerializer.Serialize(existingJobs);
+                    await MissionDefinitionService.Update(missionDefinition);
                 }
             }
 
             return jobDelays;
         }
 
-        public async Task AutomaticScheduleMissionRun(MissionDefinition missionDefinition)
+        public async Task AutoScheduleMissionRun(MissionDefinition missionDefinition)
         {
             _logger.LogInformation(
                 "Scheduling mission run for mission definition {MissionDefinitionId}.",
@@ -151,11 +161,7 @@ namespace Api.HostedServices
             {
                 string message =
                     $"Mission definition {missionDefinition.Id} has no inspection area.";
-                ReportMessageToSignalR(
-                    message,
-                    missionDefinition.Id,
-                    missionDefinition.InstallationCode
-                );
+                AutoScheduleService.ReportAutoScheduleFailToSignalR(message, missionDefinition);
                 return;
             }
 
@@ -176,11 +182,7 @@ namespace Api.HostedServices
             {
                 string message =
                     $"No robots found for installation code {missionDefinition.InstallationCode}.";
-                ReportMessageToSignalR(
-                    message,
-                    missionDefinition.Id,
-                    missionDefinition.InstallationCode
-                );
+                AutoScheduleService.ReportAutoScheduleFailToSignalR(message, missionDefinition);
                 return;
             }
 
@@ -191,11 +193,7 @@ namespace Api.HostedServices
             {
                 string message =
                     $"No robot found for mission definition {missionDefinition.Id} and inspection area {missionDefinition.InspectionArea.Id}.";
-                ReportMessageToSignalR(
-                    message,
-                    missionDefinition.Id,
-                    missionDefinition.InstallationCode
-                );
+                AutoScheduleService.ReportAutoScheduleFailToSignalR(message, missionDefinition);
 
                 return;
             }
@@ -249,19 +247,21 @@ namespace Api.HostedServices
             return;
         }
 
-        private void ReportMessageToSignalR(
-            string message,
-            string missionDefinitionId,
-            string installationCode
-        )
+        public async Task ResetAutoScheduledJobsObjects(List<MissionDefinition> missionDefinitions)
         {
-            _logger.LogError(message);
+            foreach (var missionDefinition in missionDefinitions)
+            {
+                if (
+                    missionDefinition.AutoScheduleFrequency == null
+                    || missionDefinition.AutoScheduleFrequency.AutoScheduledJobs == null
+                )
+                    continue;
 
-            SignalRService.ReportAutoScheduleFailToSignalR(
-                missionDefinitionId,
-                message,
-                installationCode
-            );
+                missionDefinition.AutoScheduleFrequency.AutoScheduledJobs = null;
+                await MissionDefinitionService.Update(missionDefinition);
+            }
+
+            return;
         }
 
         public Task StopAsync(CancellationToken stoppingToken)

@@ -4,6 +4,7 @@ import { Button, Checkbox, Chip, TextField, Typography } from '@equinor/eds-core
 import { tokens } from '@equinor/eds-tokens'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { AutoScheduleFrequency, DaysOfWeek } from 'models/AutoScheduleFrequency'
+import { allDays } from '../FrontPage/AutoScheduleSection/AutoScheduleSection'
 
 const StyledSelectSection = styled.div`
     display: flex;
@@ -51,15 +52,6 @@ interface EditAutoScheduleDialogContentProps {
 const SelectDaysOfWeek = ({ currentAutoScheduleDays, changedAutoScheduleDays }: EditAutoScheduleDaysProps) => {
     const { TranslateText } = useLanguageContext()
 
-    const allDays = [
-        DaysOfWeek.Monday,
-        DaysOfWeek.Tuesday,
-        DaysOfWeek.Wednesday,
-        DaysOfWeek.Thursday,
-        DaysOfWeek.Friday,
-        DaysOfWeek.Saturday,
-        DaysOfWeek.Sunday,
-    ]
     const isAllSelected = currentAutoScheduleDays?.length === allDays.length
 
     const selectAll = () => {

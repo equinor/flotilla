@@ -2,9 +2,8 @@ import { Button, Table, Typography } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
 import { StyledDialog, StyledTableBody, StyledTableCell } from 'components/Styles/StyledComponents'
-import { DaysOfWeek } from 'models/AutoScheduleFrequency'
+import { DaysOfWeek, parseAutoScheduledJobIds } from 'models/AutoScheduleFrequency'
 import { config } from 'config'
-import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import { capitalizeFirstLetter } from 'utils/StringFormatting'
 import { StyledIcon } from 'components/Pages/InspectionPage/InspectionTable'
@@ -14,6 +13,8 @@ import { FormCard } from 'components/Pages/MissionDefinitionPage/MissionDefiniti
 import { MissionDefinitionEditDialogContent } from 'components/Pages/MissionDefinitionPage/MissionDefinitionPage'
 import { MissionDefinition } from 'models/MissionDefinition'
 import { SelectMissionsComponent } from '../MissionOverview/ScheduleMissionDialog/SelectMissionsToScheduleDialog'
+import { BackendAPICaller } from 'api/ApiCaller'
+import { Link } from 'react-router-dom'
 
 const StyledSection = styled.div`
     display: flex;
@@ -22,9 +23,10 @@ const StyledSection = styled.div`
     gap: 1rem;
 `
 const StyledTableRow = styled.div`
-    display: flex;
-    flex-direction: row;
+    display: grid;
+    align-items: center;
     gap: 1rem;
+    grid-template-columns: 100px auto 100px;
 `
 const StyledHeader = styled.div`
     gap: 0px;
@@ -39,10 +41,6 @@ const StyledButtonSection = styled.div`
     align-items: flex-start;
     gap: 8px;
     align-self: stretch;
-
-    @media (max-width: 600px) {
-        justify-content: flex-start;
-    }
 `
 const StyledButton = styled(Button)`
     display: flex;
@@ -56,14 +54,44 @@ const StyledFormCard = styled(FormCard)`
     margin-top: 2px;
 `
 
+const StyledNextAutoMission = styled.div`
+    margin-top: 30px;
+`
+
+const StyledTable = styled(Table)`
+    width: 960px;
+    margin-top: 10px;
+    border-top: 1px solid #dcdcdc;
+
+    @media (max-width: 960px) {
+        width: 95%;
+    }
+`
+
+const skipAutoScheduledMission = async (missionId: string, timeOfDay: string) => {
+    await BackendAPICaller.skipAutoScheduledMission(missionId, timeOfDay)
+}
+
+export const allDays = [
+    DaysOfWeek.Monday,
+    DaysOfWeek.Tuesday,
+    DaysOfWeek.Wednesday,
+    DaysOfWeek.Thursday,
+    DaysOfWeek.Friday,
+    DaysOfWeek.Saturday,
+    DaysOfWeek.Sunday,
+]
+
+const getDayIndexMondaySunday = (date: Date) => (date.getDay() === 0 ? 6 : date.getDay() - 1)
+
 const AutoScheduleList = () => {
     const { TranslateText } = useLanguageContext()
     const { missionDefinitions } = useMissionDefinitionsContext()
     const [dialogOpen, setDialogOpen] = useState<boolean>(false)
     const [selectedMissions, setSelectedMissions] = useState<MissionDefinition[]>([])
-    const navigate = useNavigate()
 
     const autoScheduleMissionDefinitions = missionDefinitions.filter((m) => m.autoScheduleFrequency)
+    const currentDayOfTheWeek = allDays[getDayIndexMondaySunday(new Date())]
 
     const openDialog = () => {
         setDialogOpen(true)
@@ -72,16 +100,6 @@ const AutoScheduleList = () => {
         setDialogOpen(false)
         setSelectedMissions([])
     }
-
-    const allDays = [
-        DaysOfWeek.Monday,
-        DaysOfWeek.Tuesday,
-        DaysOfWeek.Wednesday,
-        DaysOfWeek.Thursday,
-        DaysOfWeek.Friday,
-        DaysOfWeek.Saturday,
-        DaysOfWeek.Sunday,
-    ]
 
     const DayOverview = () =>
         allDays.map((day) => {
@@ -107,16 +125,31 @@ const AutoScheduleList = () => {
                     <StyledTableBody>
                         {timeMissionPairs.length > 0 ? (
                             timeMissionPairs.map(({ time, mission }) => (
-                                <Table.Row
-                                    key={mission.id + time}
-                                    onClick={() =>
-                                        navigate(`${config.FRONTEND_BASE_ROUTE}/mission-definition/${mission.id}`)
-                                    }
-                                >
+                                <Table.Row key={mission.id + time}>
                                     <Table.Cell>
                                         <StyledTableRow>
                                             <Typography>{`${time.substring(0, 5)}`}</Typography>
-                                            <Typography link>{mission.name}</Typography>
+                                            <Typography
+                                                as={Link}
+                                                to={`${config.FRONTEND_BASE_ROUTE}/mission-definition/${mission.id}`}
+                                                link
+                                            >
+                                                {mission.name}
+                                            </Typography>
+                                            {day === currentDayOfTheWeek &&
+                                                mission.autoScheduleFrequency &&
+                                                mission.autoScheduleFrequency.autoScheduledJobs &&
+                                                parseAutoScheduledJobIds(
+                                                    mission.autoScheduleFrequency.autoScheduledJobs
+                                                )[time] && (
+                                                    <Button
+                                                        style={{ maxWidth: '100px' }}
+                                                        variant="ghost"
+                                                        onClick={() => skipAutoScheduledMission(mission.id, time)}
+                                                    >
+                                                        {TranslateText('SkipAutoMission')}
+                                                    </Button>
+                                                )}
                                         </StyledTableRow>
                                     </Table.Cell>
                                 </Table.Row>
@@ -182,6 +215,73 @@ const AutoScheduleList = () => {
         </>
     )
 }
+
+export const NextAutoScheduleMissionView = () => {
+    const { TranslateText } = useLanguageContext()
+    const { missionDefinitions } = useMissionDefinitionsContext()
+
+    const autoScheduleMissionDefinitions = missionDefinitions.filter((m) => m.autoScheduleFrequency)
+    const currentDayOfTheWeek = allDays[getDayIndexMondaySunday(new Date())]
+
+    const missionDefinitionList = autoScheduleMissionDefinitions.filter((m) =>
+        m.autoScheduleFrequency!.daysOfWeek.includes(currentDayOfTheWeek)
+    )
+
+    const timeMissionPair = missionDefinitionList
+        .filter((m) => m.autoScheduleFrequency?.autoScheduledJobs)
+        .flatMap((m) =>
+            m
+                .autoScheduleFrequency!.timesOfDayCET.filter(
+                    (time) => parseAutoScheduledJobIds(m.autoScheduleFrequency!.autoScheduledJobs!)[time]
+                )
+                .map((time) => ({ time, mission: m }))
+        )
+        .sort((a, b) => (a.time > b.time ? 1 : -1))
+        .at(0)
+
+    return (
+        <>
+            {timeMissionPair && (
+                <StyledNextAutoMission>
+                    <Typography variant="h5">{TranslateText('Next Scheduled Auto Mission')}</Typography>
+                    <StyledTable key={timeMissionPair.mission.id}>
+                        <StyledTableBody>
+                            <Table.Row key={timeMissionPair.mission.id + timeMissionPair.time}>
+                                <Table.Cell>
+                                    <StyledTableRow>
+                                        <Typography>{`${timeMissionPair.time.substring(0, 5)}`}</Typography>
+                                        <Typography
+                                            as={Link}
+                                            to={`${config.FRONTEND_BASE_ROUTE}/mission-definition/${timeMissionPair.mission.id}`}
+                                            link
+                                        >
+                                            {timeMissionPair.mission.name}
+                                        </Typography>
+                                        {
+                                            <Button
+                                                style={{ maxWidth: '100px' }}
+                                                variant="ghost"
+                                                onClick={() =>
+                                                    skipAutoScheduledMission(
+                                                        timeMissionPair.mission.id,
+                                                        timeMissionPair.time
+                                                    )
+                                                }
+                                            >
+                                                {TranslateText('SkipAutoMission')}
+                                            </Button>
+                                        }
+                                    </StyledTableRow>
+                                </Table.Cell>
+                            </Table.Row>
+                        </StyledTableBody>
+                    </StyledTable>
+                </StyledNextAutoMission>
+            )}
+        </>
+    )
+}
+
 export const AutoScheduleSection = () => {
     return AutoScheduleList()
 }

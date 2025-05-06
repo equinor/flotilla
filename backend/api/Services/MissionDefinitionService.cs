@@ -1,10 +1,12 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq.Expressions;
+using System.Text.Json;
 using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
 using Api.Utilities;
+using Hangfire;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Services
@@ -44,6 +46,11 @@ namespace Api.Services
         public Task<MissionDefinition?> Delete(string id);
 
         public void DetachTracking(FlotillaDbContext context, MissionDefinition missionDefinition);
+
+        public Task SkipAutoMission(
+            MissionDefinition missionDefinition,
+            TimeOnly scheduledTimeInLocalTime
+        );
     }
 
     [SuppressMessage(
@@ -62,7 +69,8 @@ namespace Api.Services
         IAccessRoleService accessRoleService,
         ILogger<IMissionDefinitionService> logger,
         IMissionRunService missionRunService,
-        ISourceService sourceService
+        ISourceService sourceService,
+        IAutoScheduleService autoScheduleService
     ) : IMissionDefinitionService
     {
         public async Task<MissionDefinition> Create(MissionDefinition missionDefinition)
@@ -345,6 +353,68 @@ namespace Api.Services
             if (missionDefinition.Source != null)
                 sourceService.DetachTracking(context, missionDefinition.Source);
             context.Entry(missionDefinition).State = EntityState.Detached;
+        }
+
+        public async Task SkipAutoMission(
+            MissionDefinition missionDefinition,
+            TimeOnly scheduledTimeInLocalTime
+        )
+        {
+            string message;
+
+            var jobs = autoScheduleService.DeserializeAutoScheduleJobs(missionDefinition);
+
+            if (missionDefinition.AutoScheduleFrequency == null || jobs.Count == 0)
+            {
+                message =
+                    $"Mission definition {missionDefinition.Id} has no scheduled auto missions.";
+                autoScheduleService.ReportAutoScheduleFailToSignalR(message, missionDefinition);
+
+                return;
+            }
+
+            string? job = null;
+            try
+            {
+                job = jobs[scheduledTimeInLocalTime];
+            }
+            catch (KeyNotFoundException)
+            {
+                message =
+                    $"Mission definition {missionDefinition.Id} has no scheduled auto mission scheduled for {scheduledTimeInLocalTime}.";
+                autoScheduleService.ReportAutoScheduleFailToSignalR(message, missionDefinition);
+                return;
+            }
+
+            if (job == null || job == "")
+            {
+                message =
+                    $"Mission definition {missionDefinition.Id} has no scheduled auto mission scheduled for {scheduledTimeInLocalTime}.";
+                autoScheduleService.ReportAutoScheduleFailToSignalR(message, missionDefinition);
+                return;
+            }
+
+            try
+            {
+                BackgroundJob.Delete(job);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"Failed to delete background job: {job}");
+                return;
+            }
+
+            jobs.Remove(scheduledTimeInLocalTime);
+
+            missionDefinition.AutoScheduleFrequency!.AutoScheduledJobs = JsonSerializer.Serialize(
+                jobs
+            );
+            await Update(missionDefinition);
+
+            message =
+                $"Skipped auto mission definition {missionDefinition.Name} planned for {scheduledTimeInLocalTime}.";
+            autoScheduleService.ReportSkipAutoScheduleToSignalR(message, missionDefinition);
+            return;
         }
     }
 }
