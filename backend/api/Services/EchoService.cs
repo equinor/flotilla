@@ -39,7 +39,7 @@ namespace Api.Services
                 ? "robots/robot-plan?Status=Ready"
                 : $"robots/robot-plan?InstallationCode={installationCode}&&Status=Ready";
 
-            var response = await echoApi.CallApiForUserAsync(
+            var response = await echoApi.CallApiForAppAsync(
                 ServiceName,
                 options =>
                 {
@@ -86,7 +86,7 @@ namespace Api.Services
         {
             string relativePath = $"robots/robot-plan/{echoMissionId}";
 
-            var response = await echoApi.CallApiForUserAsync(
+            var response = await echoApi.CallApiForAppAsync(
                 ServiceName,
                 options =>
                 {
@@ -139,7 +139,7 @@ namespace Api.Services
         public async Task<List<PlantInfo>> GetPlantInfos()
         {
             string relativePath = "plantinfo";
-            var response = await echoApi.CallApiForUserAsync(
+            var response = await echoApi.CallApiForAppAsync(
                 ServiceName,
                 options =>
                 {
