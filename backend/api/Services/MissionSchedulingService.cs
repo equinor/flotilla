@@ -25,24 +25,16 @@ namespace Api.Services
         public bool MissionRunQueueIsEmpty(IList<MissionRun> missionRunQueue);
 
         public void TriggerRobotReadyForMissions(RobotReadyForMissionsEventArgs e);
-
-        public Task ScheduleMissionRunFromMissionDefinitionLastSuccessfullRun(
-            string missionDefinitionId,
-            string robotId
-        );
     }
 
     public class MissionSchedulingService(
         ILogger<MissionSchedulingService> logger,
         IMissionRunService missionRunService,
-        IMissionDefinitionService missionDefinitionService,
-        IMapService mapService,
         IRobotService robotService,
         IIsarService isarService,
         ISignalRService signalRService,
         IErrorHandlingService errorHandlingService,
-        IInspectionAreaService inspectionAreaService,
-        IInstallationService installationService
+        IInspectionAreaService inspectionAreaService
     ) : IMissionSchedulingService
     {
         public async Task StartNextMissionRunIfSystemIsAvailable(Robot robot)
@@ -566,181 +558,5 @@ namespace Api.Services
         }
 
         public static event EventHandler<RobotReadyForMissionsEventArgs>? RobotReadyForMissions;
-
-        public async Task ScheduleMissionRunFromMissionDefinitionLastSuccessfullRun(
-            string missionDefinitionId,
-            string robotId
-        )
-        {
-            logger.LogInformation(
-                "Scheduling mission run for robot with ID {RobotId} from mission definition with ID {MissionDefinitionId}",
-                robotId,
-                missionDefinitionId
-            );
-
-            Robot robot;
-            try
-            {
-                robot = await robotService.GetRobotWithSchedulingPreCheck(robotId);
-            }
-            catch (RobotNotFoundException)
-            {
-                logger.LogError(
-                    "Robot with ID {RobotId} was not found when scheduling mission run",
-                    robotId
-                );
-                return;
-            }
-            catch (RobotPreCheckFailedException)
-            {
-                logger.LogError(
-                    "Robot with ID {RobotId} failed pre-check when scheduling mission run",
-                    robotId
-                );
-                return;
-            }
-
-            var missionDefinition = await missionDefinitionService.ReadById(
-                missionDefinitionId,
-                readOnly: true
-            );
-            if (missionDefinition == null)
-            {
-                logger.LogWarning(
-                    "Mission definition with ID {MissionDefinitionId} was not found",
-                    missionDefinitionId
-                );
-                return;
-            }
-            else if (missionDefinition.InspectionArea == null)
-            {
-                logger.LogWarning(
-                    "Mission definition with ID {id} does not have an inspection area when scheduling",
-                    missionDefinition.Id
-                );
-                return;
-            }
-            else if (missionDefinition.LastSuccessfulRun == null)
-            {
-                logger.LogWarning(
-                    "Mission definition with ID {id} does not have a last successful run when scheduling",
-                    missionDefinition.Id
-                );
-                return;
-            }
-
-            try
-            {
-                await installationService.AssertRobotIsOnSameInstallationAsMission(
-                    robot,
-                    missionDefinition
-                );
-            }
-            catch (InstallationNotFoundException)
-            {
-                logger.LogError(
-                    "Installation for mission definition with ID {MissionDefinitionId} was not found",
-                    missionDefinitionId
-                );
-                return;
-            }
-            catch (RobotNotInSameInstallationAsMissionException)
-            {
-                logger.LogError(
-                    "Robot with ID {RobotId} is not in the same installation as the mission definition with ID {MissionDefinitionId}",
-                    robotId,
-                    missionDefinitionId
-                );
-                return;
-            }
-
-            MissionRun? lastSuccessfulRun;
-            try
-            {
-                lastSuccessfulRun = await missionRunService.ReadById(
-                    missionDefinition.LastSuccessfulRun.Id
-                );
-                if (lastSuccessfulRun == null)
-                {
-                    logger.LogError(
-                        "Last successful mission run with ID {MissionRunId} was null when scheduling mission from last successful mission run",
-                        missionDefinition.LastSuccessfulRun.Id
-                    );
-                    return;
-                }
-            }
-            catch (Exception e)
-            {
-                logger.LogError(
-                    e,
-                    "Last successful mission run with ID {MissionRunId} was not found when scheduling mission from last successful mission run",
-                    missionDefinition.LastSuccessfulRun.Id
-                );
-                return;
-            }
-
-            var missionTasks = new List<MissionTask>();
-
-            foreach (var task in lastSuccessfulRun.Tasks)
-            {
-                missionTasks.Add(new MissionTask(task));
-            }
-
-            if (missionTasks.Count == 0)
-            {
-                logger.LogWarning(
-                    "Mission definition with ID {id} does not have tasks when scheduling",
-                    missionDefinition.Id
-                );
-                return;
-            }
-
-            var missionRun = new MissionRun
-            {
-                Name = missionDefinition.Name,
-                Robot = robot,
-                MissionId = missionDefinition.Id,
-                Status = MissionStatus.Pending,
-                MissionRunType = MissionRunType.Normal,
-                DesiredStartTime = DateTime.UtcNow,
-                Tasks = missionTasks,
-                InstallationCode = missionDefinition.InstallationCode,
-                InspectionArea = missionDefinition.InspectionArea,
-            };
-
-            if (missionDefinition.Map == null)
-            {
-                var newMap = await mapService.ChooseMapFromMissionRunTasks(missionRun);
-                if (newMap != null)
-                {
-                    logger.LogInformation(
-                        $"Assigned map {newMap.MapName} to mission definition with id {missionDefinition.Id}"
-                    );
-                    missionDefinition.Map = newMap;
-                    await missionDefinitionService.Update(missionDefinition);
-                }
-            }
-
-            if (missionRun.Tasks.Any())
-            {
-                missionRun.SetEstimatedTaskDuration();
-            }
-
-            MissionRun newMissionRun;
-            try
-            {
-                newMissionRun = await missionRunService.Create(missionRun);
-            }
-            catch (UnsupportedRobotCapabilityException)
-            {
-                logger.LogError(
-                    "Unsupported robot capability detected when scheduling mission for robot {robotName}.",
-                    robot.Name
-                );
-                return;
-            }
-
-            return;
-        }
     }
 }
