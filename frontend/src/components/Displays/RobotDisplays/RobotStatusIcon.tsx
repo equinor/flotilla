@@ -69,15 +69,13 @@ export const RobotStatusChip = ({ status, flotillaStatus, isarConnected, itemSiz
         iconColor = tokens.colors.interactive.disabled__text.hex
         statusIcon = Icons.Info
         status = RobotStatus.ConnectionIssues
-    } else if (flotillaStatus && status === RobotStatus.Available && flotillaStatus === RobotFlotillaStatus.Home) {
+    } else if (
+        flotillaStatus === RobotFlotillaStatus.Home &&
+        (status === RobotStatus.Available || status === RobotStatus.ReturningHome)
+    ) {
         iconColor = tokens.colors.interactive.danger__resting.hex
         statusIcon = Icons.Warning
-        status = RobotStatus.Home
-    } else if (
-        flotillaStatus &&
-        status === RobotStatus.Available &&
-        flotillaStatus === RobotFlotillaStatus.Recharging
-    ) {
+    } else if (status === RobotStatus.Home && flotillaStatus === RobotFlotillaStatus.Recharging) {
         iconColor = '#FFC300'
         statusIcon = Icons.BatteryCharging
         status = RobotStatus.Recharging
