@@ -10,8 +10,6 @@ namespace Api.Controllers.Models
         public Position InspectionTarget { get; set; }
 
         public float? VideoDuration { get; set; }
-
-        public AnalysisType? AnalysisType { get; set; }
     }
 
     public struct CustomTaskQuery
