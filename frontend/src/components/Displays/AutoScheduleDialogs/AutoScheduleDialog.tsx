@@ -1,18 +1,18 @@
-import { BackendAPICaller } from 'api/ApiCaller'
-import { AlertCategory } from 'components/Alerts/AlertsBanner'
-import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
-import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { MissionDefinition } from 'models/MissionDefinition'
-import { MissionDefinitionUpdateForm } from 'models/MissionDefinitionUpdateForm'
-import { config } from 'config'
-import { ChangeEvent, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { EditAutoScheduleDialogContent } from './EditAutoScheduleDialogContent'
-import { Button, Dialog, TextField, Typography } from '@equinor/eds-core-react'
-import styled from 'styled-components'
-import { AutoScheduleFrequency } from 'models/AutoScheduleFrequency'
-import { ButtonSection, FormCard } from './AutoScheduleStyledComponents'
+import { BackendAPICaller } from "api/ApiCaller"
+import { AlertCategory } from "components/Alerts/AlertsBanner"
+import { FailedRequestAlertContent, FailedRequestAlertListContent } from "components/Alerts/FailedRequestAlert"
+import { AlertType, useAlertContext } from "components/Contexts/AlertContext"
+import { useLanguageContext } from "components/Contexts/LanguageContext"
+import { MissionDefinition } from "models/MissionDefinition"
+import { MissionDefinitionUpdateForm } from "models/MissionDefinitionUpdateForm"
+import { config } from "config"
+import { ChangeEvent, useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { EditAutoScheduleDialogContent } from "./EditAutoScheduleDialogContent"
+import { Button, Dialog, TextField, Typography } from "@equinor/eds-core-react"
+import styled from "styled-components"
+import { AutoScheduleFrequency } from "models/AutoScheduleFrequency"
+import { ButtonSection, FormCard } from "./AutoScheduleStyledComponents"
 
 const StyledFormCard = styled(FormCard)`
     display: flex;
