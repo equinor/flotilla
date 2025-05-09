@@ -323,5 +323,7 @@
     "Edit auto scheduling": "Edit auto scheduling",
     "SkipAutoMission": "Skip",
     "Next Scheduled Auto Mission": "Next Scheduled Auto Mission",
-    "There are currently no automatically scheduled missions.": "There are currently no automatically scheduled missions."
+    "There are currently no automatically scheduled missions.": "There are currently no automatically scheduled missions.",
+    "Edit auto scheduling of mission": "Edit auto scheduling of mission",
+    "Select mission for auto scheduling": "Select mission for auto scheduling"
 }

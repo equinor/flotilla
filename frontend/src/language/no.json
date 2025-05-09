@@ -323,5 +323,7 @@
     "Edit auto scheduling": "Oppdater planlagt automatisk kjøring",
     "SkipAutoMission": "Hopp over",
     "Next Scheduled Auto Mission": "Neste Planlagte Automatisk Kjøring",
-    "There are currently no automatically scheduled missions.": "Det er for øyeblikket ingen oppdrag som er lagt til automatisk kjøring."
+    "There are currently no automatically scheduled missions.": "Det er for øyeblikket ingen oppdrag som er lagt til automatisk kjøring.",
+    "Edit auto scheduling of mission": "Endre planlagt automatisk kjøring for oppdraget",
+    "Select mission for auto scheduling": "Velg oppdrag for planlegging av automatisk kjøring"
 }

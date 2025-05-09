@@ -27,9 +27,6 @@ const StyledTableRow = styled.div`
     gap: 1rem;
     grid-template-columns: 100px auto 100px;
 `
-const StyledHeader = styled.div`
-    gap: 0px;
-`
 const StyledDayOverview = styled.div`
     display: grid;
     gap: 0px;
@@ -41,11 +38,7 @@ const StyledMissionButton = styled.div`
 const StyledView = styled.div`
     display: flex;
     align-items: flex-start;
-
-    gap: 8px;
-    align-self: stretch;
 `
-
 const StyledContent = styled.div`
     display: flex;
     flex-direction: column;
@@ -54,9 +47,6 @@ const StyledContent = styled.div`
         align-items: start;
     }
     max-width: 960px;
-`
-const StyledFormCard = styled(FormCard)`
-    margin-top: 2px;
 `
 
 const StyledNextAutoMission = styled.div`
@@ -182,24 +172,59 @@ const AutoScheduleList = () => {
         <>
             {autoScheduleMissionDefinitions.length > 0 ? (
                 <>
-                    <StyledHeader>
-                        <Typography>
-                            {TranslateText('These missions will be automatically scheduled at the specified time')}
-                        </Typography>
-                    </StyledHeader>
+                    <Typography>
+                        {TranslateText('These missions will be automatically scheduled at the specified time')}
+                    </Typography>
                     <StyledDayOverview>
                         <DayOverview />
                     </StyledDayOverview>
                 </>
-                    ) : (
-                    <StyledHeader>
-                        <Typography>
-                            {TranslateText('There are currently no automatically scheduled missions.')}
-                        </Typography>
-                    </StyledHeader>
-
+            ) : (
+                <Typography>{TranslateText('There are currently no automatically scheduled missions.')}</Typography>
             )}
-            </>
+        </>
+    )
+
+    const UpdateAutoSchedulingDialogContent = () => (
+        <>
+            <StyledDialog.Header>
+                <StyledDialog.Title>
+                    <Typography variant="h3">
+                        {TranslateText('Edit auto scheduling of mission') + ' ' + selectedMissions[0]?.name}
+                    </Typography>
+                </StyledDialog.Title>
+            </StyledDialog.Header>
+            <FormCard>
+                <MissionDefinitionEditDialogContent
+                    missionDefinition={selectedMissions[0]}
+                    fieldName="autoScheduleFrequency"
+                    closeEditDialog={closeDialog}
+                />
+            </FormCard>
+        </>
+    )
+
+    const SelectMissionDialogContent = () => (
+        <>
+            <StyledDialog.Header>
+                <StyledDialog.Title>
+                    <Typography variant="h3">{TranslateText('Select mission for auto scheduling')}</Typography>
+                </StyledDialog.Title>
+            </StyledDialog.Header>
+            <StyledDialog.CustomContent>
+                <SelectMissionsComponent
+                    missions={missionDefinitions}
+                    selectedMissions={selectedMissions}
+                    setSelectedMissions={setSelectedMissions}
+                    multiple={false}
+                />
+            </StyledDialog.CustomContent>
+            <StyledDialog.Actions>
+                <Button onClick={closeDialog} variant="outlined" color="primary">
+                    {TranslateText('Cancel')}
+                </Button>
+            </StyledDialog.Actions>
+        </>
     )
 
     return (
@@ -209,36 +234,15 @@ const AutoScheduleList = () => {
                     <EditAutoSchedulingButton />
                 </StyledMissionButton>
                 <StyledSection>
-                    <DisplayScheduledMissions/>
+                    <DisplayScheduledMissions />
                 </StyledSection>
-                <>
-                    {dialogOpen && (
-                        <StyledDialog open={true}>
-                            <StyledDialog.Header>
-                                <StyledDialog.Title>
-                                    <Typography variant="h3">{TranslateText('New scheduled mission')}</Typography>
-                                </StyledDialog.Title>
-                            </StyledDialog.Header>
-                            <StyledDialog.CustomContent>
-                                <SelectMissionsComponent
-                                    missions={missionDefinitions}
-                                    selectedMissions={selectedMissions}
-                                    setSelectedMissions={setSelectedMissions}
-                                    multiple={false}
-                                />
-                                {dialogOpen && selectedMissions.length === 1 && (
-                                    <StyledFormCard>
-                                        <MissionDefinitionEditDialogContent
-                                            missionDefinition={selectedMissions[0]}
-                                            fieldName="autoScheduleFrequency"
-                                            closeEditDialog={closeDialog}
-                                        />
-                                    </StyledFormCard>
-                                )}
-                            </StyledDialog.CustomContent>
-                        </StyledDialog>
+                <StyledDialog open={dialogOpen}>
+                    {selectedMissions.length === 1 ? (
+                        <UpdateAutoSchedulingDialogContent />
+                    ) : (
+                        <SelectMissionDialogContent />
                     )}
-                </>
+                </StyledDialog>
             </StyledContent>
         </StyledView>
     )
