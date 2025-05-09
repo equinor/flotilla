@@ -320,7 +320,8 @@
     "Remove all": "Remove all",
     "Remove all missions": "Remove all missions",
     "Remove all missions dialog text": "Please confirm that you want to remove all the missions from the queue.",
-    "New scheduled mission": "New scheduled mission",
+    "Edit auto scheduling": "Edit auto scheduling",
     "SkipAutoMission": "Skip",
-    "Next Scheduled Auto Mission": "Next Scheduled Auto Mission"
+    "Next Scheduled Auto Mission": "Next Scheduled Auto Mission",
+    "There are currently no automatically scheduled missions.": "There are currently no automatically scheduled missions."
 }

@@ -1,12 +1,11 @@
-import { Button, Table, Typography } from '@equinor/eds-core-react'
+import { Button, Icon, Table, Typography } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
-import { StyledDialog, StyledTableBody, StyledTableCell } from 'components/Styles/StyledComponents'
+import { StyledDialog, StyledTableBody, StyledTableCell, TextAlignedButton } from 'components/Styles/StyledComponents'
 import { DaysOfWeek, parseAutoScheduledJobIds } from 'models/AutoScheduleFrequency'
 import { config } from 'config'
 import styled from 'styled-components'
 import { capitalizeFirstLetter } from 'utils/StringFormatting'
-import { StyledIcon } from 'components/Pages/InspectionPage/InspectionTable'
 import { Icons } from 'utils/icons'
 import { useState } from 'react'
 import { FormCard } from 'components/Pages/MissionDefinitionPage/MissionDefinitionStyledComponents'
@@ -35,21 +34,27 @@ const StyledDayOverview = styled.div`
     display: grid;
     gap: 0px;
 `
-const StyledButtonSection = styled.div`
+const StyledMissionButton = styled.div`
     display: flex;
-    justify-content: flex-end;
+    padding-bottom: 30px;
+`
+const StyledView = styled.div`
+    display: flex;
     align-items: flex-start;
+
     gap: 8px;
     align-self: stretch;
 `
-const StyledButton = styled(Button)`
-    display: flex;
-    padding: 0px 16px;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-`
 
+const StyledContent = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: end;
+    @media (max-width: 600px) {
+        align-items: start;
+    }
+    max-width: 960px;
+`
 const StyledFormCard = styled(FormCard)`
     margin-top: 2px;
 `
@@ -166,16 +171,17 @@ const AutoScheduleList = () => {
             )
         })
 
-    return (
+    const EditAutoSchedulingButton = () => (
+        <TextAlignedButton onClick={openDialog}>
+            <Icon name={Icons.Add} size={24} />
+            {TranslateText('Edit auto scheduling')}
+        </TextAlignedButton>
+    )
+
+    const DisplayScheduledMissions = () => (
         <>
-            <StyledButtonSection>
-                <StyledButton onClick={openDialog}>
-                    <StyledIcon name={Icons.Add} size={24} />
-                    {TranslateText('New scheduled mission')}
-                </StyledButton>
-            </StyledButtonSection>
-            {autoScheduleMissionDefinitions.length > 0 && (
-                <StyledSection>
+            {autoScheduleMissionDefinitions.length > 0 ? (
+                <>
                     <StyledHeader>
                         <Typography>
                             {TranslateText('These missions will be automatically scheduled at the specified time')}
@@ -184,6 +190,28 @@ const AutoScheduleList = () => {
                     <StyledDayOverview>
                         <DayOverview />
                     </StyledDayOverview>
+                </>
+                    ) : (
+                    <StyledHeader>
+                        <Typography>
+                            {TranslateText('There are currently no automatically scheduled missions.')}
+                        </Typography>
+                    </StyledHeader>
+
+            )}
+            </>
+    )
+
+    return (
+        <StyledView>
+            <StyledContent>
+                <StyledMissionButton>
+                    <EditAutoSchedulingButton />
+                </StyledMissionButton>
+                <StyledSection>
+                    <DisplayScheduledMissions/>
+                </StyledSection>
+                <>
                     {dialogOpen && (
                         <StyledDialog open={true}>
                             <StyledDialog.Header>
@@ -210,9 +238,9 @@ const AutoScheduleList = () => {
                             </StyledDialog.CustomContent>
                         </StyledDialog>
                     )}
-                </StyledSection>
-            )}
-        </>
+                </>
+            </StyledContent>
+        </StyledView>
     )
 }
 
