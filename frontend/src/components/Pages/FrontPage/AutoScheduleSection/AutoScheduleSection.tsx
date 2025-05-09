@@ -35,21 +35,27 @@ const StyledDayOverview = styled.div`
     display: grid;
     gap: 0px;
 `
-const StyledButtonSection = styled.div`
+const StyledMissionButton = styled.div`
     display: flex;
-    justify-content: flex-end;
+    padding-bottom: 30px;
+`
+const StyledView = styled.div`
+    display: flex;
     align-items: flex-start;
+
     gap: 8px;
     align-self: stretch;
 `
-const StyledButton = styled(Button)`
-    display: flex;
-    padding: 0px 16px;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-`
 
+const StyledContent = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: end;
+    @media (max-width: 600px) {
+        align-items: start;
+    }
+    max-width: 960px;
+`
 const StyledFormCard = styled(FormCard)`
     margin-top: 2px;
 `
@@ -83,6 +89,10 @@ export const allDays = [
 ]
 
 const getDayIndexMondaySunday = (date: Date) => (date.getDay() === 0 ? 6 : date.getDay() - 1)
+
+const AlignedTextButton = styled(StyledButton)`
+    text-align: left;
+`
 
 const AutoScheduleList = () => {
     const { TranslateText } = useLanguageContext()
@@ -166,16 +176,17 @@ const AutoScheduleList = () => {
             )
         })
 
-    return (
+    const AddScheduleNewMissionButton = () => (
+        <AlignedTextButton onClick={openDialog}>
+            <Icon name={Icons.Add} size={24} />
+            {TranslateText('New scheduled mission')}
+        </AlignedTextButton>
+    )
+
+    const DisplayScheduledMissions = () => (
         <>
-            <StyledButtonSection>
-                <StyledButton onClick={openDialog}>
-                    <StyledIcon name={Icons.Add} size={24} />
-                    {TranslateText('New scheduled mission')}
-                </StyledButton>
-            </StyledButtonSection>
-            {autoScheduleMissionDefinitions.length > 0 && (
-                <StyledSection>
+            {autoScheduleMissionDefinitions.length > 0 ? (
+                <>
                     <StyledHeader>
                         <Typography>
                             {TranslateText('These missions will be automatically scheduled at the specified time')}
@@ -184,6 +195,28 @@ const AutoScheduleList = () => {
                     <StyledDayOverview>
                         <DayOverview />
                     </StyledDayOverview>
+                </>
+                    ) : (
+                    <StyledHeader>
+                        <Typography>
+                            {TranslateText('There are currently no automatically scheduled missions.')}
+                        </Typography>
+                    </StyledHeader>
+
+            )}
+            </>
+    )
+
+    return (
+        <StyledView>
+            <StyledContent>
+                <StyledMissionButton>
+                    <AddScheduleNewMissionButton/>
+                </StyledMissionButton>
+                <StyledSection>
+                    <DisplayScheduledMissions/>
+                </StyledSection>
+                <>
                     {dialogOpen && (
                         <StyledDialog open={true}>
                             <StyledDialog.Header>
@@ -210,9 +243,9 @@ const AutoScheduleList = () => {
                             </StyledDialog.CustomContent>
                         </StyledDialog>
                     )}
-                </StyledSection>
-            )}
-        </>
+                </>
+            </StyledContent>
+        </StyledView>
     )
 }
 

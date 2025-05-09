@@ -322,5 +322,6 @@
     "Remove all missions dialog text": "Please confirm that you want to remove all the missions from the queue.",
     "New scheduled mission": "New scheduled mission",
     "SkipAutoMission": "Skip",
-    "Next Scheduled Auto Mission": "Next Scheduled Auto Mission"
+    "Next Scheduled Auto Mission": "Next Scheduled Auto Mission",
+    "There are currently no automatically scheduled missions.": "There are currently no automatically scheduled missions."
 }
