@@ -1,20 +1,6 @@
 import { Button, Card, Dialog } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 
-export const FormCard = styled(Card)`
-    display: flex;
-    justify-content: center;
-    padding: 8px;
-    gap: 25px;
-    box-shadow: none;
-`
-
-export const ButtonSection = styled.div`
-    display: flex;
-    margin-left: auto;
-    gap: 10px;
-`
-
 export const FormContainer = styled.div`
     display: flex;
     gap: 10px 20px;
@@ -31,14 +17,6 @@ export const FormItem = styled.div`
     word-break: break-word;
     hyphens: auto;
     min-height: 80px;
-`
-
-export const StyledDialog = styled(Dialog)`
-    display: flex;
-    justify-content: space-between;
-    padding: 1rem;
-    width: auto;
-    min-width: 300px;
 `
 
 export const TitleComponent = styled.div`
