@@ -9,12 +9,12 @@ import { capitalizeFirstLetter } from 'utils/StringFormatting'
 import { StyledIcon } from 'components/Pages/InspectionPage/InspectionTable'
 import { Icons } from 'utils/icons'
 import { useState } from 'react'
-import { FormCard } from 'components/Pages/MissionDefinitionPage/MissionDefinitionStyledComponents'
-import { MissionDefinitionEditDialogContent } from 'components/Pages/MissionDefinitionPage/MissionDefinitionPage'
 import { MissionDefinition } from 'models/MissionDefinition'
 import { SelectMissionsComponent } from '../MissionOverview/ScheduleMissionDialog/SelectMissionsToScheduleDialog'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { Link } from 'react-router-dom'
+import { AutoScheduleEditDialogContent } from 'components/Displays/AutoScheduleDialogs/AutoScheduleDialog'
+import { FormCard } from 'components/Displays/AutoScheduleDialogs/AutoScheduleStyledComponents'
 
 const StyledSection = styled.div`
     display: flex;
@@ -200,7 +200,7 @@ const AutoScheduleList = () => {
                                 />
                                 {dialogOpen && selectedMissions.length === 1 && (
                                     <StyledFormCard>
-                                        <MissionDefinitionEditDialogContent
+                                        <AutoScheduleEditDialogContent
                                             missionDefinition={selectedMissions[0]}
                                             fieldName="autoScheduleFrequency"
                                             closeEditDialog={closeDialog}

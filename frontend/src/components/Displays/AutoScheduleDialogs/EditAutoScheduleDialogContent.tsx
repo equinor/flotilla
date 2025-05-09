@@ -4,7 +4,7 @@ import { Button, Checkbox, Chip, TextField, Typography } from '@equinor/eds-core
 import { tokens } from '@equinor/eds-tokens'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { AutoScheduleFrequency, DaysOfWeek } from 'models/AutoScheduleFrequency'
-import { allDays } from '../FrontPage/AutoScheduleSection/AutoScheduleSection'
+import { allDays } from 'components/Pages/FrontPage/AutoScheduleSection/AutoScheduleSection'
 
 const StyledSelectSection = styled.div`
     display: flex;

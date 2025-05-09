@@ -1,4 +1,4 @@
-import { ChangeEvent, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { MissionDefinitionHeader } from './MissionDefinitionHeader/MissionDefinitionHeader'
 import { BackButton } from 'utils/BackButton'
@@ -17,26 +17,14 @@ import styled from 'styled-components'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
-import {
-    displayAutoScheduleFrequency,
-    EditAutoScheduleDialogContent,
-} from 'components/Pages/MissionDefinitionPage/EditAutoScheduleDialogContent'
-import { AutoScheduleFrequency } from 'models/AutoScheduleFrequency'
 import { TaskTableAndMap } from '../MissionPage/TaskTableAndMap'
 import { useQuery } from '@tanstack/react-query'
+import { EditButton, FormContainer, FormItem, TitleComponent } from './MissionDefinitionStyledComponents'
 import {
-    ButtonSection,
-    EditButton,
-    FormCard,
-    FormContainer,
-    FormItem,
-    StyledDialog,
-    TitleComponent,
-} from './MissionDefinitionStyledComponents'
-
-const StyledFormCard = styled(FormCard)`
-    max-width: 340px;
-`
+    EditAutoScheduleDialogContent,
+    displayAutoScheduleFrequency,
+} from 'components/Displays/AutoScheduleDialogs/EditAutoScheduleDialogContent'
+import { AutoScheduleEditDialog } from 'components/Displays/AutoScheduleDialogs/AutoScheduleDialog'
 
 const StyledCard = styled(Card)`
     display: flex;
@@ -180,7 +168,7 @@ const MissionDefinitionPageBody = ({ missionDefinition }: { missionDefinition: M
             </FormContainer>
 
             {isEditDialogOpen && (
-                <MissionDefinitionEditDialog
+                <AutoScheduleEditDialog
                     fieldName={selectedField}
                     missionDefinition={missionDefinition}
                     closeEditDialog={() => setIsEditDialogOpen(false)}
@@ -190,134 +178,6 @@ const MissionDefinitionPageBody = ({ missionDefinition }: { missionDefinition: M
                 {lastMissionRun && <TaskTableAndMap mission={lastMissionRun} missionDefinitionPage={true} />}
             </StyledTableAndMap>
         </StyledMissionDefinitionPageBody>
-    )
-}
-
-interface IMissionDefinitionEditDialogProps {
-    missionDefinition: MissionDefinition
-    fieldName: string
-    closeEditDialog: () => void
-}
-
-export const MissionDefinitionEditDialogContent = ({
-    missionDefinition,
-    fieldName,
-    closeEditDialog,
-}: IMissionDefinitionEditDialogProps) => {
-    const defaultMissionDefinitionForm: MissionDefinitionUpdateForm = {
-        comment: missionDefinition.comment,
-        autoScheduleFrequency: missionDefinition.autoScheduleFrequency,
-        name: missionDefinition.name,
-        isDeprecated: false,
-    }
-    const { TranslateText } = useLanguageContext()
-    const { setAlert, setListAlert } = useAlertContext()
-    const navigate = useNavigate()
-    const [form, setForm] = useState<MissionDefinitionUpdateForm>(defaultMissionDefinitionForm)
-
-    const isUpdateButtonDisabled = () => {
-        if (fieldName !== 'autoScheduleFrequency') return false
-        if (form.autoScheduleFrequency?.daysOfWeek.length === 0) return true
-        if (form.autoScheduleFrequency?.timesOfDayCET.length === 0) return true
-        return false
-    }
-
-    const handleSubmit = () => {
-        BackendAPICaller.updateMissionDefinition(missionDefinition.id, form)
-            .then((missionDefinition) => {
-                closeEditDialog()
-                if (missionDefinition.isDeprecated) navigate(`${config.FRONTEND_BASE_ROUTE}/FrontPage`)
-            })
-            .catch(() => {
-                setAlert(
-                    AlertType.RequestFail,
-                    <FailedRequestAlertContent translatedMessage={TranslateText('Failed to update inspection')} />,
-                    AlertCategory.ERROR
-                )
-                setListAlert(
-                    AlertType.RequestFail,
-                    <FailedRequestAlertListContent translatedMessage={TranslateText('Failed to update inspection')} />,
-                    AlertCategory.ERROR
-                )
-            })
-    }
-
-    const changedAutoScheduleFrequency = (newAutoScheduleFrequency: AutoScheduleFrequency) => {
-        setForm({ ...form, autoScheduleFrequency: newAutoScheduleFrequency })
-    }
-
-    const getFormItem = () => {
-        switch (fieldName) {
-            case 'autoScheduleFrequency':
-                return (
-                    <EditAutoScheduleDialogContent
-                        currentAutoScheduleFrequency={missionDefinition.autoScheduleFrequency}
-                        changedAutoScheduleFrequency={changedAutoScheduleFrequency}
-                    />
-                )
-            case 'comment':
-                return (
-                    <TextField
-                        id="commentEdit"
-                        multiline
-                        rows={2}
-                        label={TranslateText('Comment')}
-                        value={form.comment ?? ''}
-                        onChange={(changes: ChangeEvent<HTMLInputElement>) =>
-                            setForm({ ...form, comment: changes.target.value })
-                        }
-                    />
-                )
-            case 'name':
-                return (
-                    <TextField
-                        id="nameEdit"
-                        value={form.name ?? ''}
-                        label={TranslateText('Name')}
-                        onChange={(changes: ChangeEvent<HTMLInputElement>) =>
-                            setForm({ ...form, name: changes.target.value })
-                        }
-                    />
-                )
-            default:
-                console.error('Invalid field name: ', fieldName)
-                break
-        }
-    }
-
-    return (
-        <>
-            {getFormItem()}
-            <ButtonSection>
-                <Button onClick={closeEditDialog} variant="outlined" color="primary">
-                    {TranslateText('Cancel')}
-                </Button>
-                <Button onClick={handleSubmit} disabled={isUpdateButtonDisabled()} variant="contained" color="primary">
-                    {TranslateText('Update')}
-                </Button>
-            </ButtonSection>
-        </>
-    )
-}
-
-const MissionDefinitionEditDialog = ({
-    missionDefinition,
-    fieldName,
-    closeEditDialog,
-}: IMissionDefinitionEditDialogProps) => {
-    const { TranslateText } = useLanguageContext()
-
-    return (
-        <StyledDialog open={true}>
-            <StyledFormCard>
-                <Typography variant="h2">{TranslateText('Edit') + ' ' + TranslateText(fieldName)}</Typography>
-                <MissionDefinitionEditDialogContent
-                    missionDefinition={missionDefinition}
-                    fieldName={fieldName}
-                    closeEditDialog={closeEditDialog}
-                />
-            </StyledFormCard>
-        </StyledDialog>
     )
 }
 
