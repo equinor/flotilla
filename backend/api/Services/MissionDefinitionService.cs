@@ -47,7 +47,12 @@ namespace Api.Services
 
         public void DetachTracking(FlotillaDbContext context, MissionDefinition missionDefinition);
 
-        public Task SkipAutoMission(
+        public Task UpdateAutoMissionScheduledJobs(
+            MissionDefinition missionDefinition,
+            TimeOnly scheduledTimeInLocalTime
+        );
+
+        public Task SkipAutoMissionScheduledJob(
             MissionDefinition missionDefinition,
             TimeOnly scheduledTimeInLocalTime
         );
@@ -355,7 +360,7 @@ namespace Api.Services
             context.Entry(missionDefinition).State = EntityState.Detached;
         }
 
-        public async Task SkipAutoMission(
+        public async Task UpdateAutoMissionScheduledJobs(
             MissionDefinition missionDefinition,
             TimeOnly scheduledTimeInLocalTime
         )
@@ -369,7 +374,6 @@ namespace Api.Services
                 message =
                     $"Mission definition {missionDefinition.Id} has no scheduled auto missions.";
                 autoScheduleService.ReportAutoScheduleFailToSignalR(message, missionDefinition);
-
                 return;
             }
 
@@ -410,8 +414,28 @@ namespace Api.Services
                 jobs
             );
             await Update(missionDefinition);
+            return;
+        }
 
-            message =
+        public async Task SkipAutoMissionScheduledJob(
+            MissionDefinition missionDefinition,
+            TimeOnly scheduledTimeInLocalTime
+        )
+        {
+            try
+            {
+                await UpdateAutoMissionScheduledJobs(missionDefinition, scheduledTimeInLocalTime);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(
+                    ex,
+                    $"Failed to update auto mission scheduled jobs for mission definition {missionDefinition.Id} at {scheduledTimeInLocalTime}."
+                );
+                return;
+            }
+
+            var message =
                 $"Skipped auto mission definition {missionDefinition.Name} planned for {scheduledTimeInLocalTime}.";
             autoScheduleService.ReportSkipAutoScheduleToSignalR(message, missionDefinition);
             return;
