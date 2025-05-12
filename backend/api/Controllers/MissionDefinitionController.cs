@@ -273,7 +273,7 @@ namespace Api.Controllers
 
             try
             {
-                await missionDefinitionService.SkipAutoMission(
+                await missionDefinitionService.SkipAutoMissionScheduledJob(
                     missionDefinition,
                     skipAutoMissionQuery.TimeOfDay
                 );

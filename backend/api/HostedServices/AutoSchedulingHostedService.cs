@@ -135,7 +135,7 @@ namespace Api.HostedServices
                     );
 
                     var jobId = BackgroundJob.Schedule(
-                        () => AutoScheduleMissionRun(missionDefinition),
+                        () => AutoScheduleMissionRun(missionDefinition.Id, jobDelay.Item2),
                         jobDelay.Item1
                     );
 
@@ -150,12 +150,39 @@ namespace Api.HostedServices
             return jobDelays;
         }
 
-        public async Task AutoScheduleMissionRun(MissionDefinition missionDefinition)
+        public async Task AutoScheduleMissionRun(string missionDefinitionId, TimeOnly timeOfDay)
         {
             _logger.LogInformation(
                 "Scheduling mission run for mission definition {MissionDefinitionId}.",
-                missionDefinition.Id
+                missionDefinitionId
             );
+
+            var missionDefinition = await MissionDefinitionService.ReadById(missionDefinitionId);
+            if (missionDefinition == null)
+            {
+                _logger.LogError(
+                    "Mission definition {MissionDefinitionId} not found.",
+                    missionDefinitionId
+                );
+                return;
+            }
+
+            try
+            {
+                await MissionDefinitionService.UpdateAutoMissionScheduledJobs(
+                    missionDefinition,
+                    timeOfDay
+                );
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(
+                    e,
+                    "Failed to update auto mission scheduled jobs for mission definition {MissionDefinitionId} at {TimeOfDay}.",
+                    missionDefinition.Id,
+                    timeOfDay
+                );
+            }
 
             if (missionDefinition.InspectionArea == null)
             {
@@ -243,7 +270,6 @@ namespace Api.HostedServices
                 _logger.LogError(e, "{ErrorMessage}", e.Message);
                 return;
             }
-
             return;
         }
 
