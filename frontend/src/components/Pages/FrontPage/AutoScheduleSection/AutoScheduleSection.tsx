@@ -79,6 +79,45 @@ export const allDays = [
 
 const getDayIndexMondaySunday = (date: Date) => (date.getDay() === 0 ? 6 : date.getDay() - 1)
 
+const AutoScheduleMissionTableRow = ({
+    day,
+    time,
+    mission,
+}: {
+    day: DaysOfWeek
+    time: string
+    mission: MissionDefinition
+}) => {
+    const { TranslateText } = useLanguageContext()
+
+    const currentDayOfTheWeek = allDays[getDayIndexMondaySunday(new Date())]
+
+    return (
+        <Table.Row key={mission.id + time}>
+            <Table.Cell>
+                <StyledTableRow>
+                    <Typography>{`${time.substring(0, 5)}`}</Typography>
+                    <Typography as={Link} to={`${config.FRONTEND_BASE_ROUTE}/mission-definition/${mission.id}`} link>
+                        {mission.name}
+                    </Typography>
+                    {day === currentDayOfTheWeek &&
+                        mission.autoScheduleFrequency &&
+                        mission.autoScheduleFrequency.autoScheduledJobs &&
+                        parseAutoScheduledJobIds(mission.autoScheduleFrequency.autoScheduledJobs)[time] && (
+                            <Button
+                                style={{ maxWidth: '100px' }}
+                                variant="ghost"
+                                onClick={() => skipAutoScheduledMission(mission.id, time)}
+                            >
+                                {TranslateText('SkipAutoMission')}
+                            </Button>
+                        )}
+                </StyledTableRow>
+            </Table.Cell>
+        </Table.Row>
+    )
+}
+
 const AutoScheduleList = () => {
     const { TranslateText } = useLanguageContext()
     const { missionDefinitions } = useMissionDefinitionsContext()
@@ -86,7 +125,6 @@ const AutoScheduleList = () => {
     const [selectedMissions, setSelectedMissions] = useState<MissionDefinition[]>([])
 
     const autoScheduleMissionDefinitions = missionDefinitions.filter((m) => m.autoScheduleFrequency)
-    const currentDayOfTheWeek = allDays[getDayIndexMondaySunday(new Date())]
 
     const openDialog = () => {
         setDialogOpen(true)
@@ -120,34 +158,12 @@ const AutoScheduleList = () => {
                     <StyledTableBody>
                         {timeMissionPairs.length > 0 ? (
                             timeMissionPairs.map(({ time, mission }) => (
-                                <Table.Row key={mission.id + time}>
-                                    <Table.Cell>
-                                        <StyledTableRow>
-                                            <Typography>{`${time.substring(0, 5)}`}</Typography>
-                                            <Typography
-                                                as={Link}
-                                                to={`${config.FRONTEND_BASE_ROUTE}/mission-definition/${mission.id}`}
-                                                link
-                                            >
-                                                {mission.name}
-                                            </Typography>
-                                            {day === currentDayOfTheWeek &&
-                                                mission.autoScheduleFrequency &&
-                                                mission.autoScheduleFrequency.autoScheduledJobs &&
-                                                parseAutoScheduledJobIds(
-                                                    mission.autoScheduleFrequency.autoScheduledJobs
-                                                )[time] && (
-                                                    <Button
-                                                        style={{ maxWidth: '100px' }}
-                                                        variant="ghost"
-                                                        onClick={() => skipAutoScheduledMission(mission.id, time)}
-                                                    >
-                                                        {TranslateText('SkipAutoMission')}
-                                                    </Button>
-                                                )}
-                                        </StyledTableRow>
-                                    </Table.Cell>
-                                </Table.Row>
+                                <AutoScheduleMissionTableRow
+                                    key={time + mission.id}
+                                    day={day}
+                                    time={time}
+                                    mission={mission}
+                                />
                             ))
                         ) : (
                             <Table.Row>
@@ -248,9 +264,45 @@ const AutoScheduleList = () => {
     )
 }
 
+const ShowLessOrMoreButton = ({
+    showMore,
+    setShowMore,
+}: {
+    showMore: boolean
+    setShowMore: (newShowMore: boolean) => void
+}) => {
+    const { TranslateText } = useLanguageContext()
+
+    if (showMore) {
+        return (
+            <Button
+                variant="ghost"
+                onClick={() => {
+                    setShowMore(false)
+                }}
+            >
+                <Icon name={Icons.UpChevron} size={16} />
+                {TranslateText('Show less')}
+            </Button>
+        )
+    }
+    return (
+        <Button
+            variant="ghost"
+            onClick={() => {
+                setShowMore(true)
+            }}
+        >
+            <Icon name={Icons.DownChevron} size={16} />
+            {TranslateText('Show more')}
+        </Button>
+    )
+}
+
 export const NextAutoScheduleMissionView = () => {
     const { TranslateText } = useLanguageContext()
     const { missionDefinitions } = useMissionDefinitionsContext()
+    const [showMore, setShowMore] = useState(false)
 
     const autoScheduleMissionDefinitions = missionDefinitions.filter((m) => m.autoScheduleFrequency)
     const currentDayOfTheWeek = allDays[getDayIndexMondaySunday(new Date())]
@@ -259,7 +311,7 @@ export const NextAutoScheduleMissionView = () => {
         m.autoScheduleFrequency!.daysOfWeek.includes(currentDayOfTheWeek)
     )
 
-    const timeMissionPair = missionDefinitionList
+    const timeMissionPairs = missionDefinitionList
         .filter((m) => m.autoScheduleFrequency?.autoScheduledJobs)
         .flatMap((m) =>
             m
@@ -269,45 +321,37 @@ export const NextAutoScheduleMissionView = () => {
                 .map((time) => ({ time, mission: m }))
         )
         .sort((a, b) => (a.time > b.time ? 1 : -1))
-        .at(0)
 
     return (
         <>
-            {timeMissionPair && (
+            {timeMissionPairs.length > 0 && (
                 <StyledNextAutoMission>
-                    <Typography variant="h5">{TranslateText('Next Scheduled Auto Mission')}</Typography>
-                    <StyledTable key={timeMissionPair.mission.id}>
+                    <Typography variant="h5">{TranslateText('Next auto scheduled mission for today')}</Typography>
+                    <StyledTable>
                         <StyledTableBody>
-                            <Table.Row key={timeMissionPair.mission.id + timeMissionPair.time}>
-                                <Table.Cell>
-                                    <StyledTableRow>
-                                        <Typography>{`${timeMissionPair.time.substring(0, 5)}`}</Typography>
-                                        <Typography
-                                            as={Link}
-                                            to={`${config.FRONTEND_BASE_ROUTE}/mission-definition/${timeMissionPair.mission.id}`}
-                                            link
-                                        >
-                                            {timeMissionPair.mission.name}
-                                        </Typography>
-                                        {
-                                            <Button
-                                                style={{ maxWidth: '100px' }}
-                                                variant="ghost"
-                                                onClick={() =>
-                                                    skipAutoScheduledMission(
-                                                        timeMissionPair.mission.id,
-                                                        timeMissionPair.time
-                                                    )
-                                                }
-                                            >
-                                                {TranslateText('SkipAutoMission')}
-                                            </Button>
-                                        }
-                                    </StyledTableRow>
-                                </Table.Cell>
-                            </Table.Row>
+                            {!showMore ? (
+                                <AutoScheduleMissionTableRow
+                                    day={currentDayOfTheWeek}
+                                    time={timeMissionPairs[0].time}
+                                    mission={timeMissionPairs[0].mission}
+                                />
+                            ) : (
+                                <>
+                                    {timeMissionPairs.map(({ time, mission }) => (
+                                        <AutoScheduleMissionTableRow
+                                            key={time + mission.id}
+                                            day={currentDayOfTheWeek}
+                                            time={time}
+                                            mission={mission}
+                                        />
+                                    ))}
+                                </>
+                            )}
                         </StyledTableBody>
                     </StyledTable>
+                    {timeMissionPairs.length > 1 && (
+                        <ShowLessOrMoreButton showMore={showMore} setShowMore={setShowMore} />
+                    )}
                 </StyledNextAutoMission>
             )}
         </>
