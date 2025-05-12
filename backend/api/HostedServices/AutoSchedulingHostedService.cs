@@ -157,6 +157,8 @@ namespace Api.HostedServices
                 missionDefinition.Id
             );
 
+            await ResetAutoScheduledJobsObjects([missionDefinition]);
+
             if (missionDefinition.InspectionArea == null)
             {
                 string message =
