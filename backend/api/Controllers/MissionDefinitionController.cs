@@ -249,7 +249,7 @@ namespace Api.Controllers
         /// </summary>
         [HttpPut]
         [Authorize(Roles = Role.User)]
-        [Route("{id}/skip-auto-mission")]
+        [Route("{missionDefinitionId}/skip-auto-mission")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
