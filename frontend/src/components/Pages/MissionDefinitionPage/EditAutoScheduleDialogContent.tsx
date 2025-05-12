@@ -206,6 +206,7 @@ export const EditAutoScheduleDialogContent = ({
         changedAutoScheduleFrequency({
             daysOfWeek: currentAutoSetDays,
             timesOfDayCET: currentAutoSetTimes,
+            autoScheduledJobs: currentAutoScheduleFrequency?.autoScheduledJobs,
         })
     }, [currentAutoSetDays, currentAutoSetTimes])
 
