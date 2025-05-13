@@ -8,7 +8,7 @@ import { MissionDefinitionPage } from './MissionDefinitionPage/MissionDefinition
 import { AssetSelectionPage } from './AssetSelectionPage/AssetSelectionPage'
 import {
     AutoSchedulePage,
-    DeckOverviewPage,
+    AreaOverviewPage,
     MissionControlPage,
     MissionHistoryPage,
     PredefinedMissionsPage,
@@ -46,7 +46,7 @@ export const FlotillaSite = () => {
                         <Route path={`${config.FRONTEND_BASE_ROUTE}/missionControl`} element={<MissionControlPage />} />
                         <Route
                             path={`${config.FRONTEND_BASE_ROUTE}/inspectionOverview`}
-                            element={<DeckOverviewPage />}
+                            element={<AreaOverviewPage />}
                         />
                         <Route
                             path={`${config.FRONTEND_BASE_ROUTE}/predefinedMissions`}

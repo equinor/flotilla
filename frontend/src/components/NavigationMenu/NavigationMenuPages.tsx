@@ -14,9 +14,9 @@ export const MissionControlPage = () => {
     )
 }
 
-export const DeckOverviewPage = () => {
+export const AreaOverviewPage = () => {
     return (
-        <DefaultPage pageName="inspectionOverview'">
+        <DefaultPage pageName="areaOverview'">
             <InspectionSection />
         </DefaultPage>
     )
