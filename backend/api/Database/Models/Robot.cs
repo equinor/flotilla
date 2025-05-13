@@ -118,8 +118,8 @@ namespace Api.Database.Models
             if (IsRobotBatteryTooLow())
                 return false;
             if (
-                Model.BatteryMissionStartThreshold != null
-                && Model.BatteryMissionStartThreshold > BatteryLevel
+                Model.BatteryWarningThreshold != null
+                && Model.BatteryWarningThreshold > BatteryLevel
             )
                 return false;
             return !IsRobotPressureTooHigh() && !IsRobotPressureTooLow();
