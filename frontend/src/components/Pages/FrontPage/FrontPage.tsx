@@ -117,7 +117,7 @@ export const FrontPage = ({ initialTab }: { initialTab: TabNames }) => {
                         <StyledTabsList>
                             <Tabs.Tab>{TranslateText('Mission Control')}</Tabs.Tab>
                             {installationInspectionAreas.length > 1 ? (
-                                <Tabs.Tab>{TranslateText('Deck Overview')}</Tabs.Tab>
+                                <Tabs.Tab>{TranslateText('Area Overview')}</Tabs.Tab>
                             ) : (
                                 <></>
                             )}

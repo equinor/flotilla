@@ -29,7 +29,7 @@ export const NavigationMenu = () => {
             ? [
                   { path: 'missionControl', label: 'Mission Control' },
                   { path: 'history', label: 'Mission History' },
-                  { path: 'inspectionOverview', label: 'Deck Overview' },
+                  { path: 'areaOverview', label: 'Area Overview' },
                   { path: 'predefinedMissions', label: 'Predefined Missions' },
                   { path: 'autoSchedule', label: 'Auto Scheduling' },
                   { path: 'robots', label: 'Robots' },
