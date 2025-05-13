@@ -20,7 +20,7 @@ namespace Api.Controllers.Models
         public TimeSpan? InspectionFrequency { get; set; }
 
         /// <summary>
-        /// Change the automated scheduling frequency
+        /// Change the time and day in the automated scheduling frequency
         /// </summary>
         public AutoScheduleFrequency? AutoScheduleFrequency { get; set; }
     }

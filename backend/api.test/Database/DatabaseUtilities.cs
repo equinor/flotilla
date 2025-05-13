@@ -79,18 +79,21 @@ namespace Api.Test.Database
                 _userInfoService
             );
             _sourceService = new SourceService(context, new Mock<ILogger<SourceService>>().Object);
-            _autoScheduleService = new AutoScheduleService(
-                new Mock<ILogger<AutoScheduleService>>().Object,
-                new MockSignalRService()
-            );
             _missionDefinitionService = new MissionDefinitionService(
                 context,
                 new MockSignalRService(),
                 _accessRoleService,
                 new Mock<ILogger<MissionDefinitionService>>().Object,
                 _missionRunService,
-                _sourceService,
-                _autoScheduleService
+                _sourceService
+            );
+            _autoScheduleService = new AutoScheduleService(
+                new Mock<ILogger<AutoScheduleService>>().Object,
+                _missionDefinitionService,
+                _robotService,
+                new MockMissionLoader(),
+                _missionRunService,
+                new MockSignalRService()
             );
         }
 
