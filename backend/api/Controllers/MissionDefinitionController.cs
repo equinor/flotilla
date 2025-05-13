@@ -14,7 +14,8 @@ namespace Api.Controllers
         ILogger<MissionDefinitionController> logger,
         IMissionDefinitionService missionDefinitionService,
         IMissionDefinitionTaskService missionDefinitionTaskService,
-        IMissionRunService missionRunService
+        IMissionRunService missionRunService,
+        IAutoScheduleService autoScheduleService
     ) : ControllerBase
     {
         /// <summary>
@@ -171,7 +172,12 @@ namespace Api.Controllers
             missionDefinition.Name = missionDefinitionQuery.Name;
             missionDefinition.Comment = missionDefinitionQuery.Comment;
             missionDefinition.InspectionFrequency = missionDefinitionQuery.InspectionFrequency;
-            missionDefinition.AutoScheduleFrequency = missionDefinitionQuery.AutoScheduleFrequency;
+            missionDefinition.AutoScheduleFrequency =
+                await autoScheduleService.UpdateAutoScheduleFrequency(
+                    missionDefinition,
+                    missionDefinitionQuery.AutoScheduleFrequency
+                );
+
             var newMissionDefinition = await missionDefinitionService.Update(missionDefinition);
             return new MissionDefinitionResponse(newMissionDefinition);
         }
@@ -273,7 +279,7 @@ namespace Api.Controllers
 
             try
             {
-                await missionDefinitionService.SkipAutoMissionScheduledJob(
+                await autoScheduleService.SkipAutoMissionScheduledJob(
                     missionDefinition,
                     skipAutoMissionQuery.TimeOfDay
                 );
