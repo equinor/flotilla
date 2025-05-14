@@ -35,13 +35,17 @@ namespace Api.HostedServices
         {
             _logger.LogInformation("Auto Scheduling Hosted Service Running.");
 
-            var timeUntilMidnight = (
-                DateTime.UtcNow.Date.AddDays(1) - DateTime.UtcNow
-            ).TotalSeconds;
+            // Should run every day at CET midnight
+            TimeZoneInfo zoneCET = TimeZoneInfo.FindSystemTimeZoneById(
+                "Central European Standard Time"
+            );
+            DateTime nowCET = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, zoneCET);
+            var timeUntilMidnightCET = (nowCET.Date.AddDays(1) - nowCET).TotalSeconds;
+
             _timer = new Timer(
                 PrivateDoWork,
                 null,
-                TimeSpan.FromSeconds(timeUntilMidnight),
+                TimeSpan.FromSeconds(timeUntilMidnightCET),
                 TimeSpan.FromDays(1)
             );
 

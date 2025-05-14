@@ -48,8 +48,6 @@ namespace Api.Database.Models
             );
             DateTime nowLocal = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, tzi);
             TimeOnly nowLocalTimeOnly = TimeOnly.FromDateTime(nowLocal);
-            TimeSpan timeTilUtcMidnight =
-                new TimeOnly(0, 0, 0) - TimeOnly.FromDateTime(DateTime.UtcNow);
 
             var autoScheduleNext = new List<(TimeSpan, TimeOnly)>();
 
@@ -57,25 +55,10 @@ namespace Api.Database.Models
             {
                 autoScheduleNext.AddRange(
                     TimesOfDayCET
-                        .Where(time =>
-                            (time >= nowLocalTimeOnly)
-                            && (time - nowLocalTimeOnly <= timeTilUtcMidnight)
-                        )
+                        .Where(time => time >= nowLocalTimeOnly)
                         .Select(time => (time - nowLocalTimeOnly, time))
                 );
             }
-            if (DaysOfWeek.Contains(nowLocal.AddDays(1).DayOfWeek))
-            {
-                autoScheduleNext.AddRange(
-                    TimesOfDayCET
-                        .Where(time =>
-                            (time < nowLocalTimeOnly)
-                            && (time - nowLocalTimeOnly <= timeTilUtcMidnight)
-                        )
-                        .Select(time => (time - nowLocalTimeOnly, time))
-                );
-            }
-
             return autoScheduleNext.Count > 0 ? autoScheduleNext : null;
         }
     }
