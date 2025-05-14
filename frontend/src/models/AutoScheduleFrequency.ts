@@ -1,3 +1,5 @@
+import { convertUTCDateToLocalDate } from 'utils/StringFormatting'
+
 export interface AutoScheduleFrequency {
     timesOfDayCET: string[] // Format HH:mm:ss
     daysOfWeek: DaysOfWeek[]
@@ -17,3 +19,15 @@ export enum DaysOfWeek {
     Saturday = 'Saturday',
     Sunday = 'Sunday',
 }
+
+export const allDays = [
+    DaysOfWeek.Monday,
+    DaysOfWeek.Tuesday,
+    DaysOfWeek.Wednesday,
+    DaysOfWeek.Thursday,
+    DaysOfWeek.Friday,
+    DaysOfWeek.Saturday,
+    DaysOfWeek.Sunday,
+]
+
+export const allDaysIndexOfToday = (convertUTCDateToLocalDate(new Date()).getDay() + 6) % 7
