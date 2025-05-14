@@ -8,7 +8,7 @@ import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { Robot, RobotStatus } from 'models/Robot'
 import { RobotMissionQueueView } from './MissionQueueView'
 import { FrontPageSectionId } from 'models/FrontPageSectionId'
-import { NextAutoScheduleMissionView } from '../AutoScheduleSection/AutoScheduleSection'
+import { NextAutoScheduleMissionView } from '../AutoScheduleSection/NextAutoScheduleMissionView'
 
 const MissionControlStyle = styled.div`
     display: flex;

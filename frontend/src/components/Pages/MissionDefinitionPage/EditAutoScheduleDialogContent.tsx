@@ -3,8 +3,7 @@ import { ChangeEvent, useEffect, useState } from 'react'
 import { Button, Checkbox, Chip, TextField, Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { AutoScheduleFrequency, DaysOfWeek } from 'models/AutoScheduleFrequency'
-import { allDays } from '../FrontPage/AutoScheduleSection/AutoScheduleSection'
+import { allDays, AutoScheduleFrequency, DaysOfWeek } from 'models/AutoScheduleFrequency'
 
 const StyledSelectSection = styled.div`
     display: flex;
