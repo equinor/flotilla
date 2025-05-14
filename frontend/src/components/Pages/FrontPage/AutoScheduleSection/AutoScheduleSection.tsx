@@ -77,7 +77,7 @@ export const allDays = [
     DaysOfWeek.Sunday,
 ]
 
-const getDayIndexMondaySunday = (date: Date) => (date.getDay() === 0 ? 6 : date.getDay() - 1)
+const allDaysIndexOfToday = (new Date().getDay() + 6) % 7
 
 const AutoScheduleMissionTableRow = ({
     day,
@@ -90,7 +90,7 @@ const AutoScheduleMissionTableRow = ({
 }) => {
     const { TranslateText } = useLanguageContext()
 
-    const currentDayOfTheWeek = allDays[getDayIndexMondaySunday(new Date())]
+    const currentDayOfTheWeek = allDays[allDaysIndexOfToday]
 
     return (
         <Table.Row key={mission.id + time}>
@@ -125,6 +125,7 @@ const AutoScheduleList = () => {
     const [selectedMissions, setSelectedMissions] = useState<MissionDefinition[]>([])
 
     const autoScheduleMissionDefinitions = missionDefinitions.filter((m) => m.autoScheduleFrequency)
+    const allDaysSortedByToday = allDays.slice(allDaysIndexOfToday).concat(allDays.slice(0, allDaysIndexOfToday))
 
     const openDialog = () => {
         setDialogOpen(true)
@@ -135,7 +136,7 @@ const AutoScheduleList = () => {
     }
 
     const DayOverview = () =>
-        allDays.map((day) => {
+        allDaysSortedByToday.map((day, index) => {
             const missionDefinitions = autoScheduleMissionDefinitions.filter((m) =>
                 m.autoScheduleFrequency!.daysOfWeek.includes(day)
             )
@@ -152,7 +153,10 @@ const AutoScheduleList = () => {
                 <Table key={day}>
                     <Table.Head>
                         <Table.Row>
-                            <StyledTableCell>{capitalizeFirstLetter(TranslateText(day))}</StyledTableCell>
+                            <StyledTableCell>
+                                {capitalizeFirstLetter(TranslateText(day))}
+                                {index === 0 && ` (${TranslateText('today')})`}
+                            </StyledTableCell>
                         </Table.Row>
                     </Table.Head>
                     <StyledTableBody>
@@ -305,7 +309,7 @@ export const NextAutoScheduleMissionView = () => {
     const [showMore, setShowMore] = useState(false)
 
     const autoScheduleMissionDefinitions = missionDefinitions.filter((m) => m.autoScheduleFrequency)
-    const currentDayOfTheWeek = allDays[getDayIndexMondaySunday(new Date())]
+    const currentDayOfTheWeek = allDays[allDaysIndexOfToday]
 
     const missionDefinitionList = autoScheduleMissionDefinitions.filter((m) =>
         m.autoScheduleFrequency!.daysOfWeek.includes(currentDayOfTheWeek)

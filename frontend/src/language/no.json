@@ -327,5 +327,6 @@
     "Select mission for auto scheduling": "Velg oppdrag for planlegging av automatisk kjøring",
     "Next auto scheduled mission for today": "Neste automatisk kjørte oppdrag for i dag",
     "Show more": "Vis flere",
-    "Show less": "Vis færre"
+    "Show less": "Vis færre",
+    "today": "i dag"
 }
