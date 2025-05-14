@@ -77,7 +77,7 @@ export const allDays = [
     DaysOfWeek.Sunday,
 ]
 
-const allDaysIndexOfToday = (new Date().getDay() + 6) % 7
+const allDaysIndexOfToday = (convertUTCDateToLocalDate(new Date()).getDay() + 6) % 7
 
 const AutoScheduleMissionTableRow = ({
     day,
