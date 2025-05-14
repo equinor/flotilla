@@ -322,6 +322,7 @@
     "Remove all missions dialog text": "Vennligst bekreft at du ønsker å fjerne alle oppdragene fra køen.",
     "Edit auto scheduling": "Oppdater planlagt automatisk kjøring",
     "SkipAutoMission": "Hopp over",
+    "Skipped": "Hoppet over",
     "There are currently no automatically scheduled missions.": "Det er for øyeblikket ingen oppdrag som er lagt til automatisk kjøring.",
     "Edit auto scheduling of mission": "Endre planlagt automatisk kjøring for oppdraget",
     "Select mission for auto scheduling": "Velg oppdrag for planlegging av automatisk kjøring",
