@@ -584,8 +584,6 @@ namespace Api.EventHandlers
             else if (
                 robot.FlotillaStatus == RobotFlotillaStatus.Recharging
                 && robot.IsRobotReadyToStartMissions()
-                && robot.Model.BatteryMissionStartThreshold != null
-                && robot.Model.BatteryMissionStartThreshold < robot.BatteryLevel
             )
             {
                 _logger.LogInformation(
