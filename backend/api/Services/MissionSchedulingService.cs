@@ -12,8 +12,6 @@ namespace Api.Services
     {
         public Task StartNextMissionRunIfSystemIsAvailable(Robot robot);
 
-        public Task<bool> OngoingMission(string robotId);
-
         public Task FreezeMissionRunQueueForRobot(string robotId);
 
         public Task StopCurrentMissionRun(string robotId, string? stopReason = null);
@@ -244,12 +242,6 @@ namespace Api.Services
                     robot.Id
                 );
             }
-        }
-
-        public async Task<bool> OngoingMission(string robotId)
-        {
-            var ongoingMissions = await GetOngoingMissions(robotId, readOnly: true);
-            return ongoingMissions is not null && ongoingMissions.Any();
         }
 
         public async Task FreezeMissionRunQueueForRobot(string robotId)
