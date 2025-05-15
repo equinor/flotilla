@@ -1,5 +1,4 @@
-﻿using Api.Database.Models;
-using Api.Services;
+﻿using Api.Services;
 using Api.Services.Events;
 using Api.Utilities;
 
