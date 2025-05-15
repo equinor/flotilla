@@ -285,8 +285,33 @@ namespace Api.Services
                 logger.LogWarning("{Message}", errorMessage);
                 throw new MissionRunNotFoundException(errorMessage);
             }
+            if (ongoingMissionRuns.Count > 1)
+            {
+                logger.LogError(
+                    $"There were multiple ongoing mission runs to stop for robot {robotId}"
+                );
+                if (robot.CurrentMissionId != null)
+                {
+                    foreach (var missionRun in ongoingMissionRuns)
+                    {
+                        if (missionRun.Id != robot.CurrentMissionId)
+                        {
+                            logger.LogError(
+                                "Mission run {MissionRunId} was set to failed as status was ongoing but it was not the current mission run",
+                                missionRun.Id
+                            );
+                            await missionRunService.UpdateMissionRunProperty(
+                                missionRun.Id,
+                                "Status",
+                                MissionStatus.Failed
+                            );
+                        }
+                    }
+                }
+            }
 
             IList<string> ongoingMissionRunIds = ongoingMissionRuns
+                .Where(missionRun => missionRun.Id == robot.CurrentMissionId)
                 .Select(missionRun => missionRun.Id)
                 .ToList();
 
