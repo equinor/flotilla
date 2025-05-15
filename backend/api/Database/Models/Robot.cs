@@ -122,6 +122,12 @@ namespace Api.Database.Models
                 && Model.BatteryWarningThreshold > BatteryLevel
             )
                 return false;
+            if (
+                FlotillaStatus == RobotFlotillaStatus.Recharging
+                && Model.BatteryMissionStartThreshold != null
+                && Model.BatteryMissionStartThreshold > BatteryLevel
+            )
+                return false;
             return !IsRobotPressureTooHigh() && !IsRobotPressureTooLow();
         }
 
