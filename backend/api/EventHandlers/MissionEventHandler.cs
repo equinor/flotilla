@@ -112,7 +112,7 @@ namespace Api.EventHandlers
             var robot = e.Robot;
 
             _logger.LogInformation(
-                "Triggered EmergencyButtonPressed event for robot ID: {RobotId}",
+                "Triggered RobotEmergencyEvent for robot ID: {RobotId}",
                 robot.Id
             );
 
@@ -209,7 +209,7 @@ namespace Api.EventHandlers
             var robot = e.Robot;
 
             _logger.LogInformation(
-                "Triggered EmergencyButtonPressed event for robot ID: {RobotId}",
+                "Triggered release robot from dock event for robot ID: {RobotId}",
                 e.Robot.Id
             );
 
