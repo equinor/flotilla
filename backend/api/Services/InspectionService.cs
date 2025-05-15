@@ -130,7 +130,7 @@ namespace Api.Services
             string inspectionId
         )
         {
-            string relativePath = $"InspectionData/{inspectionId}/inspection-data-storage-location";
+            string relativePath = $"PlantData/{inspectionId}/inspection-data-storage-location";
 
             HttpResponseMessage response;
             try
