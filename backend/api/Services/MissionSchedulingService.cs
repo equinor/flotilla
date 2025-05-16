@@ -194,10 +194,7 @@ namespace Api.Services
                     );
                 }
             }
-            catch (RobotBusyException)
-            {
-                return;
-            }
+            catch (RobotBusyException) { }
         }
 
         public async Task HandleBatteryAndPressureLevel(Robot robot)

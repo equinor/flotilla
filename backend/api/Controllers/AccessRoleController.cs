@@ -71,7 +71,7 @@ namespace Api.Controllers
                 if (installation is null)
                 {
                     logger.LogInformation("Installation not found when creating new access roles");
-                    return NotFound($"Installation not found");
+                    return NotFound("Installation not found");
                 }
 
                 var existingAccessRole = await accessRoleService.ReadByInstallation(installation!);
@@ -83,7 +83,7 @@ namespace Api.Controllers
                     logger.LogInformation(
                         "An access role for the given installation and role name already exists"
                     );
-                    return BadRequest($"Access role already exists");
+                    return BadRequest("Access role already exists");
                 }
 
                 var newAccessRole = await accessRoleService.Create(

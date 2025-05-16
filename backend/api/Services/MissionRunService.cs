@@ -359,14 +359,13 @@ namespace Api.Services
                 .ThenInclude(task => task.Inspection)
                 .Include(missionRun => missionRun.Robot)
                 .ThenInclude(robot => robot.CurrentInstallation)
-                .Where(
-                    (m) =>
-                        m.InspectionArea == null
-                        || accessibleInstallationCodes.Result.Contains(
-                            m.InspectionArea.Installation.InstallationCode.ToUpper()
-                        )
+                .Where(m =>
+                    m.InspectionArea == null
+                    || accessibleInstallationCodes.Result.Contains(
+                        m.InspectionArea.Installation.InstallationCode.ToUpper()
+                    )
                 )
-                .Where((m) => m.IsDeprecated == false);
+                .Where(m => m.IsDeprecated == false);
             return readOnly ? query.AsNoTracking() : query.AsTracking();
         }
 

@@ -520,16 +520,15 @@ namespace Api.Services
                 .Include(r => r.Model)
                 .Include(r => r.CurrentInstallation)
 #pragma warning disable CA1304
-                .Where(
-                    (r) =>
-                        !r.Deprecated
-                        && (
-                            r.CurrentInstallation == null
-                            || r.CurrentInstallation.InstallationCode == null
-                            || accessibleInstallationCodes.Result.Contains(
-                                r.CurrentInstallation.InstallationCode.ToUpper()
-                            )
+                .Where(r =>
+                    !r.Deprecated
+                    && (
+                        r.CurrentInstallation == null
+                        || r.CurrentInstallation.InstallationCode == null
+                        || accessibleInstallationCodes.Result.Contains(
+                            r.CurrentInstallation.InstallationCode.ToUpper()
                         )
+                    )
                 );
 #pragma warning restore CA1304
             return readOnly ? query.AsNoTracking() : query.AsTracking();

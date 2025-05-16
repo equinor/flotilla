@@ -396,11 +396,8 @@ namespace Api.Services
                 .InspectionAreas.Include(p => p.Plant)
                 .ThenInclude(p => p.Installation)
                 .Include(i => i.Installation)
-                .Where(
-                    (d) =>
-                        accessibleInstallationCodes.Contains(
-                            d.Installation.InstallationCode.ToUpper()
-                        )
+                .Where(d =>
+                    accessibleInstallationCodes.Contains(d.Installation.InstallationCode.ToUpper())
                 );
             return readOnly ? query.AsNoTracking() : query.AsTracking();
         }

@@ -338,7 +338,7 @@ namespace Api.Services
         {
             return (
                 await context
-                    .TagInspectionMetadata.Where((e) => e.TagId == echoTag.TagId)
+                    .TagInspectionMetadata.Where(e => e.TagId == echoTag.TagId)
                     .FirstOrDefaultAsync()
             )?.ZoomDescription;
         }

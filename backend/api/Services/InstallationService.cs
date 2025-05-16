@@ -9,20 +9,20 @@ namespace Api.Services
 {
     public interface IInstallationService
     {
-        public abstract Task<IList<Installation>> ReadAll(bool readOnly = true);
+        public Task<IList<Installation>> ReadAll(bool readOnly = true);
 
-        public abstract Task<Installation?> ReadById(string id, bool readOnly = true);
+        public Task<Installation?> ReadById(string id, bool readOnly = true);
 
-        public abstract Task<Installation?> ReadByInstallationCode(
+        public Task<Installation?> ReadByInstallationCode(
             string installation,
             bool readOnly = true
         );
 
-        public abstract Task<Installation> Create(CreateInstallationQuery newInstallation);
+        public Task<Installation> Create(CreateInstallationQuery newInstallation);
 
-        public abstract Task<Installation> Update(Installation installation);
+        public Task<Installation> Update(Installation installation);
 
-        public abstract Task<Installation?> Delete(string id);
+        public Task<Installation?> Delete(string id);
 
         public Task AssertRobotIsOnSameInstallationAsMission(
             Robot robot,
@@ -56,8 +56,8 @@ namespace Api.Services
         private IQueryable<Installation> GetInstallations(bool readOnly = true)
         {
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
-            var query = context.Installations.Where(
-                (i) => accessibleInstallationCodes.Result.Contains(i.InstallationCode.ToUpper())
+            var query = context.Installations.Where(i =>
+                accessibleInstallationCodes.Result.Contains(i.InstallationCode.ToUpper())
             );
             return readOnly ? query.AsNoTracking() : query.AsTracking();
         }

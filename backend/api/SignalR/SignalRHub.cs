@@ -15,10 +15,10 @@ namespace Api.SignalRHubs
             if (Context.User != null)
             {
                 var roles = Context
-                    .User.Claims.Where(
-                        (c) => c.Type.EndsWith("/role", StringComparison.CurrentCulture)
+                    .User.Claims.Where(c =>
+                        c.Type.EndsWith("/role", StringComparison.CurrentCulture)
                     )
-                    .Select((c) => c.Value)
+                    .Select(c => c.Value)
                     .ToList();
 
                 var installationCodes = await accessRoleService.GetAllowedInstallationCodes(roles);

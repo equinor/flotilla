@@ -46,7 +46,7 @@ public class SourceControllerTests : IAsyncLifetime
         var sourceTwo = await DatabaseUtilities.NewSource(sourceId: "TestIdTwo");
 
         // Act
-        var response = await Client.GetAsync($"/sources");
+        var response = await Client.GetAsync("/sources");
         var sources = await response.Content.ReadFromJsonAsync<List<Source>>(SerializerOptions);
 
         // Assert
