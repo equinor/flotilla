@@ -13,7 +13,7 @@ namespace Api.Test.Database
             var mockAngleAxisParameters = new EnuPosition(0, 0, 1);
             float mockAngle = 0;
 
-            var expected = new Orientation()
+            var expected = new Orientation
             {
                 X = 0,
                 Y = 0,
@@ -34,7 +34,7 @@ namespace Api.Test.Database
             var mockAngleAxisParameters = new EnuPosition(0, 0, 1);
             float mockAngle = MathF.PI;
 
-            var expected = new Orientation()
+            var expected = new Orientation
             {
                 X = 0,
                 Y = 0,
@@ -53,7 +53,7 @@ namespace Api.Test.Database
             var mockAngleAxisParameters = new EnuPosition(0, 0, 1);
             float mockAngle = -180F * MathF.PI / 180F;
 
-            var expected = new Orientation()
+            var expected = new Orientation
             {
                 X = 0,
                 Y = 0,

@@ -96,7 +96,7 @@ namespace Api.Controllers
                     logger.LogInformation(
                         "An installation for given name and installation already exists"
                     );
-                    return BadRequest($"Installation already exists");
+                    return BadRequest("Installation already exists");
                 }
 
                 var newInstallation = await installationService.Create(installation);

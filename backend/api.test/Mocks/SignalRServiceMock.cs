@@ -6,8 +6,6 @@ namespace Api.Test.Mocks
 {
     public class MockSignalRService : ISignalRService
     {
-        public MockSignalRService() { }
-
         public async Task SendMessageAsync<T>(
             string label,
             Installation? installation,
@@ -22,29 +20,17 @@ namespace Api.Test.Mocks
             await Task.CompletedTask;
         }
 
-        public void ReportDockFailureToSignalR(Robot robot, string message)
-        {
-            return;
-        }
+        public void ReportDockFailureToSignalR(Robot robot, string message) { }
 
-        public void ReportDockSuccessToSignalR(Robot robot, string message)
-        {
-            return;
-        }
+        public void ReportDockSuccessToSignalR(Robot robot, string message) { }
 
-        public void ReportGeneralFailToSignalR(Robot robot, string title, string message)
-        {
-            return;
-        }
+        public void ReportGeneralFailToSignalR(Robot robot, string title, string message) { }
 
         public void ReportAutoScheduleToSignalR(
             string type,
             string missionDefinitionId,
             string message,
             string installationCode
-        )
-        {
-            return;
-        }
+        ) { }
     }
 }

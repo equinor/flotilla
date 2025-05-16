@@ -120,10 +120,9 @@ namespace Api.Services
                 return (
                     readOnly ? context.Inspections.AsNoTracking() : context.Inspections.AsTracking()
                 );
-            else
-                throw new UnauthorizedAccessException(
-                    $"User does not have permission to view inspections"
-                );
+            throw new UnauthorizedAccessException(
+                "User does not have permission to view inspections"
+            );
         }
 
         private async Task<SaraInspectionDataResponse?> GetInspectionStorageInfo(

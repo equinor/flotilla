@@ -6,20 +6,17 @@ namespace Api.Services
 {
     public interface IRobotModelService
     {
-        public abstract Task<IEnumerable<RobotModel>> ReadAll(bool readOnly = true);
+        public Task<IEnumerable<RobotModel>> ReadAll(bool readOnly = true);
 
-        public abstract Task<RobotModel?> ReadById(string id, bool readOnly = true);
+        public Task<RobotModel?> ReadById(string id, bool readOnly = true);
 
-        public abstract Task<RobotModel?> ReadByRobotType(
-            RobotType robotType,
-            bool readOnly = true
-        );
+        public Task<RobotModel?> ReadByRobotType(RobotType robotType, bool readOnly = true);
 
-        public abstract Task<RobotModel> Create(RobotModel newRobotModel);
+        public Task<RobotModel> Create(RobotModel newRobotModel);
 
-        public abstract Task<RobotModel> Update(RobotModel robotModel);
+        public Task<RobotModel> Update(RobotModel robotModel);
 
-        public abstract Task<RobotModel?> Delete(string id);
+        public Task<RobotModel?> Delete(string id);
 
         public void DetachTracking(FlotillaDbContext context, RobotModel robotModel);
     }

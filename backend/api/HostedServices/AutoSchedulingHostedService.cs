@@ -12,7 +12,7 @@ namespace Api.HostedServices
     {
         private readonly ILogger<AutoSchedulingHostedService> _logger = logger;
         private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
-        private Timer? _timer = null;
+        private Timer? _timer;
 
         private IMissionDefinitionService MissionDefinitionService =>
             _scopeFactory
@@ -125,8 +125,6 @@ namespace Api.HostedServices
                 missionDefinition.AutoScheduleFrequency.AutoScheduledJobs = null;
                 await MissionDefinitionService.Update(missionDefinition);
             }
-
-            return;
         }
 
         public Task StopAsync(CancellationToken stoppingToken)

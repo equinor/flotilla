@@ -59,7 +59,7 @@ namespace Api.Test.Controllers
 
             var source = await SourceService.CreateSourceIfDoesNotExist([]);
 
-            var missionDefinition = new MissionDefinition()
+            var missionDefinition = new MissionDefinition
             {
                 Source = source,
                 InstallationCode = installation.InstallationCode,
