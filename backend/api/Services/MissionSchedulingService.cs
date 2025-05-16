@@ -495,6 +495,11 @@ namespace Api.Services
                         newMissionRun,
                         triggerCreatedMissionRunEvent: false
                     );
+                    logger.LogInformation(
+                        "Interrupted mission run {MissionRunId} was rescheduled as new mission run {NewMissionRunId}",
+                        missionRun.Id,
+                        newMissionRun.Id
+                    );
                 }
                 catch (UnsupportedRobotCapabilityException)
                 {
