@@ -76,7 +76,10 @@ namespace Api.EventHandlers
             }
             catch (MissionRunNotFoundException)
             {
-                return;
+                _logger.LogWarning(
+                    "Mission run not found for robot ID: {RobotId} when exceuting OnMissionRunCreated",
+                    missionRun.Robot.Id
+                );
             }
             finally
             {
@@ -98,7 +101,10 @@ namespace Api.EventHandlers
             }
             catch (MissionRunNotFoundException)
             {
-                return;
+                _logger.LogWarning(
+                    "Mission run not found for robot ID: {RobotId} when excecuting OnRobotReadyForMissions",
+                    e.Robot.Id
+                );
             }
             finally
             {
