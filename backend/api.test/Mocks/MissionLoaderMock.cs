@@ -9,7 +9,7 @@ using Api.Services.MissionLoaders;
 
 namespace Api.Test.Mocks
 {
-    public class MockMissionLoader() : IMissionLoader
+    public class MockMissionLoader : IMissionLoader
     {
         private readonly List<PlantInfo> _mockPlantInfo =
         [

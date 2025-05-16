@@ -146,24 +146,18 @@ namespace Api.Configurations
             if (missionLoaderFileName == null)
                 return services;
 
-            try
+            var loaderType = Type.GetType(missionLoaderFileName);
+            if (loaderType != null && typeof(IMissionLoader).IsAssignableFrom(loaderType))
             {
-                var loaderType = Type.GetType(missionLoaderFileName);
-                if (loaderType != null && typeof(IMissionLoader).IsAssignableFrom(loaderType))
-                {
-                    services.AddScoped(typeof(IMissionLoader), loaderType);
-                }
-                else
-                {
-                    throw new InvalidOperationException(
-                        "The specified class does not implement IMissionLoader or could not be found."
-                    );
-                }
+                services.AddScoped(typeof(IMissionLoader), loaderType);
             }
-            catch (Exception)
+            else
             {
-                throw;
+                throw new InvalidOperationException(
+                    "The specified class does not implement IMissionLoader or could not be found."
+                );
             }
+
             return services;
         }
     }

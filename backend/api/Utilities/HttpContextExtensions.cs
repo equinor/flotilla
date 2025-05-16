@@ -18,10 +18,8 @@ namespace Api.Utilities
         {
             var claims = client.GetRequestedClaims();
             var roles = claims
-                .Where(
-                    (c) =>
-                        c.Type == "roles"
-                        || c.Type.EndsWith("role", StringComparison.CurrentCulture)
+                .Where(c =>
+                    c.Type == "roles" || c.Type.EndsWith("role", StringComparison.CurrentCulture)
                 )
                 .ToList();
             return roles;
@@ -30,7 +28,7 @@ namespace Api.Utilities
         public static List<string> GetRequestedRoleNames(this HttpContext client)
         {
             var roleClaims = GetRequestedRoles(client);
-            return roleClaims.Select((c) => c.Value).ToList();
+            return roleClaims.Select(c => c.Value).ToList();
         }
 
         public static List<System.Security.Claims.Claim> GetRequestedClaims(this HttpContext client)

@@ -65,12 +65,11 @@ namespace Api.Controllers
                 return NotFound("Mission run not found");
 
             var missionTasks = missionRun
-                .Tasks.Where(
-                    (t) =>
-                        t.Status != Database.Models.TaskStatus.Successful
-                        && t.Status != Database.Models.TaskStatus.PartiallySuccessful
+                .Tasks.Where(t =>
+                    t.Status != Database.Models.TaskStatus.Successful
+                    && t.Status != Database.Models.TaskStatus.PartiallySuccessful
                 )
-                .Select((t) => new MissionTask(t))
+                .Select(t => new MissionTask(t))
                 .ToList();
 
             if (missionTasks == null || missionTasks.Count == 0)
@@ -161,7 +160,8 @@ namespace Api.Controllers
             {
                 return NotFound("Mission definition not found");
             }
-            else if (missionDefinition.InspectionArea == null)
+
+            if (missionDefinition.InspectionArea == null)
             {
                 logger.LogWarning(
                     "Mission definition with ID {id} does not have an inspection area when scheduling",
@@ -334,7 +334,7 @@ namespace Api.Controllers
             if (inspectionAreaForMission.Id != robot.CurrentInspectionAreaId)
             {
                 return BadRequest(
-                    $"The tasks of the mission are not inside the inspection area of the robot"
+                    "The tasks of the mission are not inside the inspection area of the robot"
                 );
             }
 
@@ -498,7 +498,7 @@ namespace Api.Controllers
                 if (inspectionAreaForMission.Id != robot.CurrentInspectionAreaId)
                 {
                     return BadRequest(
-                        $"The tasks of the mission are not inside the inspection area of the robot"
+                        "The tasks of the mission are not inside the inspection area of the robot"
                     );
                 }
 

@@ -58,7 +58,7 @@ namespace Api.Test.Controllers
             var installation = await DatabaseUtilities.NewInstallation();
             var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
 
-            var query = new CreateInspectionAreaQuery()
+            var query = new CreateInspectionAreaQuery
             {
                 InstallationCode = installation.InstallationCode,
                 PlantCode = plant.PlantCode,

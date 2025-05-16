@@ -241,7 +241,7 @@ namespace Api.Controllers
                     logger.LogInformation(
                         "An inspection area for given name and inspection area already exists"
                     );
-                    return BadRequest($"InspectionArea already exists");
+                    return BadRequest("InspectionArea already exists");
                 }
 
                 var newInspectionArea = await inspectionAreaService.Create(inspectionArea);

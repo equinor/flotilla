@@ -242,10 +242,7 @@ namespace Api.EventHandlers
             {
                 await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(robot);
             }
-            catch (MissionRunNotFoundException)
-            {
-                return;
-            }
+            catch (MissionRunNotFoundException) { }
             finally
             {
                 _startMissionSemaphore.Release();

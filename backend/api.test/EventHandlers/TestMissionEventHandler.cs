@@ -260,7 +260,7 @@ namespace Api.Test.EventHandlers
                 installation.InstallationCode,
                 plant.PlantCode
             );
-            var robot = await DatabaseUtilities.NewRobot(RobotStatus.Available, installation, null);
+            var robot = await DatabaseUtilities.NewRobot(RobotStatus.Available, installation);
             var missionRunOne = await DatabaseUtilities.NewMissionRun(
                 installation.InstallationCode,
                 robot,

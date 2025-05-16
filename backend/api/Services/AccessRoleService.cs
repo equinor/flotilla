@@ -38,7 +38,7 @@ namespace Api.Services
             if (httpContextAccessor.HttpContext == null)
                 return await context
                     .Installations.AsNoTracking()
-                    .Select((i) => i.InstallationCode.ToUpperInvariant())
+                    .Select(i => i.InstallationCode.ToUpperInvariant())
                     .ToListAsync();
 
             var roles = httpContextAccessor.HttpContext.GetRequestedRoleNames();
@@ -51,19 +51,15 @@ namespace Api.Services
             if (roles.Contains(SUPER_ADMIN_ROLE_NAME))
                 return await context
                     .Installations.AsNoTracking()
-                    .Select((i) => i.InstallationCode.ToUpperInvariant())
+                    .Select(i => i.InstallationCode.ToUpperInvariant())
                     .ToListAsync();
-            else
-                return await GetAccessRoles(readOnly: true)
-                    .Include((r) => r.Installation)
-                    .Where((r) => roles.Contains(r.RoleName))
-                    .Select(
-                        (r) =>
-                            r.Installation != null
-                                ? r.Installation.InstallationCode.ToUpperInvariant()
-                                : ""
-                    )
-                    .ToListAsync();
+            return await GetAccessRoles(readOnly: true)
+                .Include(r => r.Installation)
+                .Where(r => roles.Contains(r.RoleName))
+                .Select(r =>
+                    r.Installation != null ? r.Installation.InstallationCode.ToUpperInvariant() : ""
+                )
+                .ToListAsync();
         }
 
         private void ThrowExceptionIfNotAdmin()
@@ -92,7 +88,7 @@ namespace Api.Services
 
             context.Entry(installation).State = EntityState.Unchanged;
 
-            var newAccessRole = new AccessRole()
+            var newAccessRole = new AccessRole
             {
                 Installation = installation,
                 RoleName = roleName,
@@ -109,17 +105,15 @@ namespace Api.Services
         {
             ThrowExceptionIfNotAdmin();
             return await GetAccessRoles(readOnly: true)
-                .Include((r) => r.Installation)
-                .Where((r) => r.Installation.Id == installation.Id)
+                .Include(r => r.Installation)
+                .Where(r => r.Installation.Id == installation.Id)
                 .FirstOrDefaultAsync();
         }
 
         public async Task<List<AccessRole>> ReadAll()
         {
             ThrowExceptionIfNotAdmin();
-            return await GetAccessRoles(readOnly: true)
-                .Include((r) => r.Installation)
-                .ToListAsync();
+            return await GetAccessRoles(readOnly: true).Include(r => r.Installation).ToListAsync();
         }
 
         public bool IsUserAdmin()

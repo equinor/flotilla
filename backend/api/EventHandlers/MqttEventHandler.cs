@@ -216,7 +216,6 @@ namespace Api.EventHandlers
                     "Failed to add robot {robotQueryName} with to the database",
                     robotQuery.Name
                 );
-                return;
             }
         }
 

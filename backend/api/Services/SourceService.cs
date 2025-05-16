@@ -8,24 +8,24 @@ namespace Api.Services
 {
     public interface ISourceService
     {
-        public abstract Task<Source> Create(Source source);
+        public Task<Source> Create(Source source);
 
-        public abstract Task<List<Source>> ReadAll(bool readOnly = true);
+        public Task<List<Source>> ReadAll(bool readOnly = true);
 
-        public abstract Task<Source?> ReadById(string id, bool readOnly = true);
+        public Task<Source?> ReadById(string id, bool readOnly = true);
 
-        public abstract Task<Source?> CheckForExistingSource(string sourceId);
+        public Task<Source?> CheckForExistingSource(string sourceId);
 
-        public abstract Task<Source?> CheckForExistingSourceFromTasks(IList<MissionTask> tasks);
+        public Task<Source?> CheckForExistingSourceFromTasks(IList<MissionTask> tasks);
 
-        public abstract Task<Source> CreateSourceIfDoesNotExist(
+        public Task<Source> CreateSourceIfDoesNotExist(
             List<MissionTask> tasks,
             bool readOnly = true
         );
 
-        public abstract Task<List<MissionTask>?> GetMissionTasksFromSourceId(string id);
+        public Task<List<MissionTask>?> GetMissionTasksFromSourceId(string id);
 
-        public abstract Task<Source?> Delete(string id);
+        public Task<Source?> Delete(string id);
 
         public void DetachTracking(FlotillaDbContext context, Source source);
     }

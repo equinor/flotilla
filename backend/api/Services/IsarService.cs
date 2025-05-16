@@ -320,7 +320,7 @@ namespace Api.Services
 
         public async Task<MediaConfig?> GetMediaStreamConfig(Robot robot)
         {
-            string mediaStreamPath = $"/media/media-stream-config";
+            string mediaStreamPath = "/media/media-stream-config";
             var response = await CallApi(HttpMethod.Get, robot.IsarUri, mediaStreamPath);
 
             if (!response.IsSuccessStatusCode)

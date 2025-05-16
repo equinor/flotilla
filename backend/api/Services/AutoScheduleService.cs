@@ -272,9 +272,7 @@ namespace Api.Services
             catch (Exception e)
             {
                 logger.LogError(e, "{ErrorMessage}", e.Message);
-                return;
             }
-            return;
         }
 
         public async Task<AutoScheduleFrequency?> UpdateAutoScheduleFrequency(
@@ -382,7 +380,6 @@ namespace Api.Services
                 jobs
             );
             await missionDefinitionService.Update(missionDefinition);
-            return;
         }
 
         public async Task SkipAutoMissionScheduledJob(
@@ -406,7 +403,6 @@ namespace Api.Services
             var message =
                 $"Skipped auto mission definition {missionDefinition.Name} planned for {scheduledTimeInLocalTime}.";
             ReportSkipAutoScheduleToSignalR(message, missionDefinition);
-            return;
         }
 
         public async Task SkipAllAutoMissions(MissionDefinition missionDefinition)

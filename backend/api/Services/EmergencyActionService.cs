@@ -11,8 +11,6 @@ namespace Api.Services
 
     public class EmergencyActionService : IEmergencyActionService
     {
-        public EmergencyActionService() { }
-
         public void SendRobotToDock(RobotEmergencyEventArgs e)
         {
             OnSendRobotToDockTriggered(e);
