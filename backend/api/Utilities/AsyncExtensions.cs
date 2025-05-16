@@ -32,10 +32,9 @@ namespace Api.Utilities
                 // just throw an exception.
                 if (IsCompleted)
                     throw new OperationCanceledException();
-                else
-                    throw new InvalidOperationException(
-                        "The cancellation token has not yet been cancelled."
-                    );
+                throw new InvalidOperationException(
+                    "The cancellation token has not yet been cancelled."
+                );
             }
 
             // called by compiler generated/.net internals to check

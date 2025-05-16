@@ -76,7 +76,10 @@ namespace Api.EventHandlers
             }
             catch (MissionRunNotFoundException)
             {
-                return;
+                _logger.LogWarning(
+                    "Mission run not found for robot ID: {RobotId} when exceuting OnMissionRunCreated",
+                    missionRun.Robot.Id
+                );
             }
             finally
             {
@@ -98,7 +101,10 @@ namespace Api.EventHandlers
             }
             catch (MissionRunNotFoundException)
             {
-                return;
+                _logger.LogWarning(
+                    "Mission run not found for robot ID: {RobotId} when excecuting OnRobotReadyForMissions",
+                    e.Robot.Id
+                );
             }
             finally
             {
@@ -196,7 +202,6 @@ namespace Api.EventHandlers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to send robot {RobotId} to dock", robot.Id);
-                return;
             }
         }
 
@@ -242,10 +247,7 @@ namespace Api.EventHandlers
             {
                 await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(robot);
             }
-            catch (MissionRunNotFoundException)
-            {
-                return;
-            }
+            catch (MissionRunNotFoundException) { }
             finally
             {
                 _startMissionSemaphore.Release();

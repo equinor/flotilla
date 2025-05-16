@@ -194,10 +194,7 @@ namespace Api.Services
                     );
                 }
             }
-            catch (RobotBusyException)
-            {
-                return;
-            }
+            catch (RobotBusyException) { }
         }
 
         public async Task HandleBatteryAndPressureLevel(Robot robot)
@@ -497,6 +494,11 @@ namespace Api.Services
                     await missionRunService.Create(
                         newMissionRun,
                         triggerCreatedMissionRunEvent: false
+                    );
+                    logger.LogInformation(
+                        "Interrupted mission run {MissionRunId} was rescheduled as new mission run {NewMissionRunId}",
+                        missionRun.Id,
+                        newMissionRun.Id
                     );
                 }
                 catch (UnsupportedRobotCapabilityException)

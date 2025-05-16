@@ -146,9 +146,9 @@ namespace Api.Test.Controllers
             Assert.True(responseMissionTwo.IsSuccessStatusCode);
             Assert.True(responseMissionThree.IsSuccessStatusCode);
 
-            Assert.Single(missionRuns!.Where((m) => m.Id == missionRunOne!.Id).ToList());
-            Assert.Single(missionRuns!.Where((m) => m.Id == missionRunTwo!.Id).ToList());
-            Assert.Single(missionRuns!.Where((m) => m.Id == missionRunThree!.Id).ToList());
+            Assert.Single(missionRuns!.Where(m => m.Id == missionRunOne!.Id).ToList());
+            Assert.Single(missionRuns!.Where(m => m.Id == missionRunTwo!.Id).ToList());
+            Assert.Single(missionRuns!.Where(m => m.Id == missionRunThree!.Id).ToList());
         }
 
         [Fact]

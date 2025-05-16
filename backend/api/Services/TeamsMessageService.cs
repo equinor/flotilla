@@ -7,7 +7,7 @@ namespace Api.Services
         public void TriggerTeamsMessageReceived(TeamsMessageEventArgs e);
     }
 
-    public class TeamsMessageService() : ITeamsMessageService
+    public class TeamsMessageService : ITeamsMessageService
     {
         public static event EventHandler<TeamsMessageEventArgs>? TeamsMessage;
 

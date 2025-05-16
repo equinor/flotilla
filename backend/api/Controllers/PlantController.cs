@@ -104,7 +104,7 @@ namespace Api.Controllers
                 if (existingPlant != null)
                 {
                     logger.LogInformation("A plant for given name and plant already exists");
-                    return BadRequest($"Plant already exists");
+                    return BadRequest("Plant already exists");
                 }
 
                 var newPlant = await plantService.Create(plant);

@@ -103,12 +103,10 @@ namespace Api.Services
                     );
                     throw new ConfigException($"Unable to find blob container {containerName}");
                 }
-                else
-                {
-                    string errorMessage = $"Failed to fetch blob items because: {e.Message}";
-                    logger.LogError(e, "{ErrorMessage}", errorMessage);
-                    throw;
-                }
+
+                string errorMessage = $"Failed to fetch blob items because: {e.Message}";
+                logger.LogError(e, "{ErrorMessage}", errorMessage);
+                throw;
             }
         }
 

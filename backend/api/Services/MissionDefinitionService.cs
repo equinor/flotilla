@@ -265,12 +265,11 @@ namespace Api.Services
                 .Include(missionDefinition => missionDefinition.Source)
                 .Include(missionDefinition => missionDefinition.LastSuccessfulRun)
                 .Include(missionDefinition => missionDefinition.InspectionArea)
-                .Where(
-                    (m) =>
-                        m.InspectionArea == null
-                        || accessibleInstallationCodes.Result.Contains(
-                            m.InspectionArea.Installation.InstallationCode.ToUpper()
-                        )
+                .Where(m =>
+                    m.InspectionArea == null
+                    || accessibleInstallationCodes.Result.Contains(
+                        m.InspectionArea.Installation.InstallationCode.ToUpper()
+                    )
                 )
                 .Include(missionDefinition => missionDefinition.Map);
             return readOnly ? query.AsNoTracking() : query.AsTracking();

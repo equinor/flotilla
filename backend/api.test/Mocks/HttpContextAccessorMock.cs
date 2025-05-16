@@ -19,7 +19,7 @@ namespace Api.Test.Mocks
         {
             var context = new DefaultHttpContext();
             var tokenHandler = new JwtSecurityTokenHandler();
-            var claims = roles.Select<string, Claim>((r) => new(ClaimTypes.Role, r)).ToList();
+            var claims = roles.Select<string, Claim>(r => new(ClaimTypes.Role, r)).ToList();
 
             var rng = RandomNumberGenerator.Create();
             byte[] key = new byte[32];
