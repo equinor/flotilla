@@ -127,7 +127,7 @@ namespace Api.Database.Models
                 IsarTaskType.TakeThermalImage => InspectionType.ThermalImage,
                 IsarTaskType.TakeVideo => InspectionType.Video,
                 IsarTaskType.TakeThermalVideo => InspectionType.ThermalVideo,
-                IsarTaskType.TakeGasMeasurement => InspectionType.GasMeasurement,
+                IsarTaskType.TakeCO2Measurement => InspectionType.CO2Measurement,
                 _ => throw new ArgumentException(
                     $"ISAR task type '{isarTask.TaskType}' not supported for inspections"
                 ),
@@ -167,8 +167,8 @@ namespace Api.Database.Models
                 InspectionType.ThermalVideo => capabilities.Contains(
                     RobotCapabilitiesEnum.take_thermal_video
                 ),
-                InspectionType.GasMeasurement => capabilities.Contains(
-                    RobotCapabilitiesEnum.take_gas_measurement
+                InspectionType.CO2Measurement => capabilities.Contains(
+                    RobotCapabilitiesEnum.take_co2_measurement
                 ),
                 InspectionType.Audio => capabilities.Contains(RobotCapabilitiesEnum.record_audio),
                 _ => false,
@@ -192,7 +192,7 @@ namespace Api.Database.Models
         Video,
         ThermalVideo,
         Audio,
-        GasMeasurement,
+        CO2Measurement,
     }
 
     public enum AnalysisType
