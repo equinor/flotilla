@@ -214,7 +214,7 @@ namespace Api.Database.Models
         take_image,
         take_video,
         take_thermal_video,
-        take_gas_measurement,
+        take_co2_measurement,
         record_audio,
     }
 

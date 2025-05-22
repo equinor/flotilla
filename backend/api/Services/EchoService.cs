@@ -280,9 +280,7 @@ namespace Api.Services
         {
             var inspections = echoTag
                 .Inspections.Select(inspection => new Inspection(
-                    inspectionType: inspection.InspectionType != InspectionType.Audio
-                        ? inspection.InspectionType
-                        : InspectionType.GasMeasurement,
+                    inspectionType: inspection.InspectionType,
                     videoDuration: inspection.TimeInSeconds,
                     inspectionTarget: inspection.InspectionPoint,
                     inspectionTargetName: inspection.InspectionPointName,

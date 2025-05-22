@@ -43,6 +43,7 @@ namespace Api.Services.MissionLoaders
                 "Video" => InspectionType.Video,
                 "ThermicVideo" => InspectionType.ThermalVideo,
                 "ThermalVideo" => InspectionType.ThermalVideo,
+                "CO2" => InspectionType.CO2Measurement,
                 _ => throw new InvalidDataException(
                     $"Echo sensor type '{sensorType}' not supported"
                 ),
