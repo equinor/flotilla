@@ -485,7 +485,7 @@ namespace Api.Services
                     InstallationCode = missionRun.InspectionArea!.Installation.InstallationCode,
                     InspectionArea = missionRun.InspectionArea,
                     Status = MissionStatus.Pending,
-                    DesiredStartTime = DateTime.UtcNow,
+                    DesiredStartTime = missionRun.DesiredStartTime,
                     Tasks = unfinishedTasks,
                 };
 
