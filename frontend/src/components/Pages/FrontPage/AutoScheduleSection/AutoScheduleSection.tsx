@@ -12,6 +12,7 @@ import { MissionDefinitionEditDialogContent } from 'components/Pages/MissionDefi
 import { MissionDefinition } from 'models/MissionDefinition'
 import { SelectMissionsComponent } from '../MissionOverview/ScheduleMissionDialog/SelectMissionsToScheduleDialog'
 import { AutoScheduleMissionTableRow } from './AutoScheduleMissionTableRow'
+import { CalendarPro } from './AutoScheduleCalendar'
 
 const StyledSection = styled.div`
     display: flex;
@@ -35,7 +36,19 @@ const StyledContent = styled.div`
     @media (max-width: 600px) {
         align-items: start;
     }
-    max-width: 960px;
+    max-width: 95%;
+`
+
+const StyledDesktopView = styled.div`
+    @media (max-width: 600px) {
+        display: none;
+    }
+`
+
+const StyledPhoneView = styled.div`
+    @media (min-width: 600px) {
+        display: none;
+    }
 `
 
 const EditAutoSchedulingButton = () => {
@@ -182,7 +195,12 @@ export const AutoScheduleSection = () => {
         <StyledView>
             <StyledContent>
                 <EditAutoSchedulingButton />
-                <DayOverview />
+                <StyledDesktopView>
+                    <CalendarPro />
+                </StyledDesktopView>
+                <StyledPhoneView>
+                    <DayOverview />
+                </StyledPhoneView>
             </StyledContent>
         </StyledView>
     )
