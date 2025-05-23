@@ -14,7 +14,7 @@ const upsertMissionList = (list: Mission[], mission: Mission) => {
     const i = newMissionList.findIndex((e) => e.id === mission.id)
     if (i > -1) newMissionList[i] = mission
     else newMissionList.push(mission)
-    return newMissionList
+    return newMissionList.sort((a, b) => (a.desiredStartTime > b.desiredStartTime ? 1 : -1))
 }
 interface IMissionRunsContext {
     ongoingMissions: Mission[]
