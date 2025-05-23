@@ -49,6 +49,8 @@ import {
     pause,
     delete_to_trash,
     menu,
+    view_week,
+    list,
 } from '@equinor/eds-icons'
 
 Icon.add({
@@ -101,6 +103,8 @@ Icon.add({
     pause,
     delete_to_trash,
     menu,
+    view_week,
+    list,
 })
 
 export enum Icons {
@@ -153,4 +157,6 @@ export enum Icons {
     PauseStandard = 'pause',
     Delete = 'delete_to_trash',
     Menu = 'menu',
+    ViewWeek = 'view_week',
+    List = 'list',
 }
