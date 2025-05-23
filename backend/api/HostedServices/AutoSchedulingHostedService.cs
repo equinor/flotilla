@@ -45,8 +45,8 @@ namespace Api.HostedServices
             _timer = new Timer(
                 PrivateDoWork,
                 null,
-                TimeSpan.FromSeconds(timeUntilMidnightCET),
-                TimeSpan.FromDays(1)
+                TimeSpan.FromMinutes(3),
+                TimeSpan.FromMinutes(3)
             );
 
             PrivateDoWork(null);

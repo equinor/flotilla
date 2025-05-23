@@ -329,5 +329,6 @@
     "Next auto scheduled mission for today": "Next auto scheduled mission for today",
     "Show more": "Show more",
     "Show less": "Show less",
-    "today": "today"
+    "today": "today",
+    "Are you sure you want to delete {0} scheduled for {1}?": "Are you sure you want to delete {0} scheduled for {1}?"
 }
