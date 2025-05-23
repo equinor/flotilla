@@ -15,8 +15,38 @@ const StyledTableRow = styled.div`
     grid-template-columns: 100px auto 100px;
 `
 
-const skipAutoScheduledMission = async (missionId: string, timeOfDay: string) => {
+export const skipAutoScheduledMission = async (missionId: string, timeOfDay: string) => {
     await BackendAPICaller.skipAutoScheduledMission(missionId, timeOfDay)
+}
+
+export enum MissionStatusType {
+    ScheduledJob = 'ScheduledJob',
+    SkippedJob = 'SkippedJob',
+    PastJob = 'PastJob',
+    FutureUnstartedJob = 'FutureUnstartedJob',
+}
+
+const currentDayOfTheWeek = allDays[allDaysIndexOfToday]
+
+const getNowAsTimeOnly = () => {
+    return convertUTCDateToLocalDate(new Date()).toISOString().substring(11, 19)
+}
+
+export const selectMissionStatusType = (day: DaysOfWeek, time: string, mission: MissionDefinition) => {
+    if (day !== currentDayOfTheWeek) {
+        return MissionStatusType.FutureUnstartedJob
+    }
+    if (time < getNowAsTimeOnly()) {
+        return MissionStatusType.PastJob
+    }
+    if (
+        mission.autoScheduleFrequency &&
+        mission.autoScheduleFrequency.autoScheduledJobs &&
+        parseAutoScheduledJobIds(mission.autoScheduleFrequency.autoScheduledJobs)[time]
+    ) {
+        return MissionStatusType.ScheduledJob
+    }
+    return MissionStatusType.SkippedJob
 }
 
 export const AutoScheduleMissionTableRow = ({
@@ -30,33 +60,7 @@ export const AutoScheduleMissionTableRow = ({
 }) => {
     const { TranslateText } = useLanguageContext()
 
-    enum MissionStatusType {
-        ScheduledJob = 'ScheduledJob',
-        SkippedJob = 'SkippedJob',
-        PastJob = 'PastJob',
-        FutureUnstartedJob = 'FutureUnstartedJob',
-    }
-
-    const currentDayOfTheWeek = allDays[allDaysIndexOfToday]
-
-    const selectMissionStatusType = () => {
-        if (day !== currentDayOfTheWeek) {
-            return MissionStatusType.FutureUnstartedJob
-        }
-        if (time < convertUTCDateToLocalDate(new Date()).toISOString().substring(11, 19)) {
-            return MissionStatusType.PastJob
-        }
-        if (
-            mission.autoScheduleFrequency &&
-            mission.autoScheduleFrequency.autoScheduledJobs &&
-            parseAutoScheduledJobIds(mission.autoScheduleFrequency.autoScheduledJobs)[time]
-        ) {
-            return MissionStatusType.ScheduledJob
-        }
-        return MissionStatusType.SkippedJob
-    }
-
-    const missionStatusType = selectMissionStatusType()
+    const missionStatusType = selectMissionStatusType(day, time, mission)
 
     const typographyColor =
         missionStatusType === MissionStatusType.SkippedJob || missionStatusType === MissionStatusType.PastJob

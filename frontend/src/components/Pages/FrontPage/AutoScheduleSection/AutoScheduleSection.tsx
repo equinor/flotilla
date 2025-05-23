@@ -12,12 +12,17 @@ import { MissionDefinitionEditDialogContent } from 'components/Pages/MissionDefi
 import { MissionDefinition } from 'models/MissionDefinition'
 import { SelectMissionsComponent } from '../MissionOverview/ScheduleMissionDialog/SelectMissionsToScheduleDialog'
 import { AutoScheduleMissionTableRow } from './AutoScheduleMissionTableRow'
+import { CalendarPro } from './AutoScheduleCalendar'
 
 const StyledSection = styled.div`
     display: flex;
     flex-direction: column;
     max-width: 960px;
     gap: 1rem;
+
+    @media (min-width: 600px) {
+        min-width: 90vw;
+    }
 `
 const StyledDayOverview = styled.div`
     display: grid;
@@ -35,7 +40,25 @@ const StyledContent = styled.div`
     @media (max-width: 600px) {
         align-items: start;
     }
-    max-width: 960px;
+    max-width: 95%;
+`
+
+const StyledDesktopView = styled.div`
+    @media (max-width: 600px) {
+        display: none;
+    }
+`
+
+const StyledPhoneView = styled.div`
+    @media (min-width: 600px) {
+        display: none;
+    }
+`
+
+const StyledButtons = styled.div`
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
 `
 
 const EditAutoSchedulingButton = () => {
@@ -178,11 +201,23 @@ const DayOverview = () => {
 }
 
 export const AutoScheduleSection = () => {
+    const [showListView, setShowListView] = useState(false)
+    const { TranslateText } = useLanguageContext()
+
     return (
         <StyledView>
             <StyledContent>
-                <EditAutoSchedulingButton />
-                <DayOverview />
+                <StyledButtons>
+                    <Button variant="ghost" onClick={() => setShowListView(!showListView)}>
+                        <Icon name={showListView ? Icons.ViewWeek : Icons.List} size={24} />
+                        {showListView ? TranslateText('Switch to calendar view') : TranslateText('Switch to list view')}
+                    </Button>
+                    <EditAutoSchedulingButton />
+                </StyledButtons>
+                <StyledDesktopView>{showListView ? <DayOverview /> : <CalendarPro />}</StyledDesktopView>
+                <StyledPhoneView>
+                    <DayOverview />
+                </StyledPhoneView>
             </StyledContent>
         </StyledView>
     )

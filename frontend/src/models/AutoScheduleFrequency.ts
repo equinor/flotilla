@@ -30,4 +30,14 @@ export const allDays = [
     DaysOfWeek.Sunday,
 ]
 
+export const allDaysStartingSunday = [
+    DaysOfWeek.Sunday,
+    DaysOfWeek.Monday,
+    DaysOfWeek.Tuesday,
+    DaysOfWeek.Wednesday,
+    DaysOfWeek.Thursday,
+    DaysOfWeek.Friday,
+    DaysOfWeek.Saturday,
+]
+
 export const allDaysIndexOfToday = (convertUTCDateToLocalDate(new Date()).getDay() + 6) % 7
