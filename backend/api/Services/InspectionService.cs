@@ -39,11 +39,8 @@ namespace Api.Services
 
         public async Task<byte[]?> FetchInspectionImageFromIsarInspectionId(string isarInspectionId)
         {
-            var inspectionData =
-                await GetInspectionStorageInfo(isarInspectionId)
-                ?? throw new InspectionNotFoundException(
-                    $"Could not find inspection data for inspection with ISAR Inspection Id {isarInspectionId}."
-                );
+            var inspectionData = await GetInspectionStorageInfo(isarInspectionId);
+
             return await blobService.DownloadBlob(
                 inspectionData.BlobName,
                 inspectionData.BlobContainer,
@@ -125,29 +122,20 @@ namespace Api.Services
             );
         }
 
-        private async Task<SaraInspectionDataResponse?> GetInspectionStorageInfo(
-            string inspectionId
-        )
+        private async Task<SaraInspectionDataResponse> GetInspectionStorageInfo(string inspectionId)
         {
             string relativePath = $"PlantData/{inspectionId}/inspection-data-storage-location";
 
             HttpResponseMessage response;
-            try
-            {
-                response = await saraApi.CallApiForAppAsync(
-                    ServiceName,
-                    options =>
-                    {
-                        options.HttpMethod = HttpMethod.Get.Method;
-                        options.RelativePath = relativePath;
-                    }
-                );
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "{ErrorMessage}", e.Message);
-                return null;
-            }
+
+            response = await saraApi.CallApiForAppAsync(
+                ServiceName,
+                options =>
+                {
+                    options.HttpMethod = HttpMethod.Get.Method;
+                    options.RelativePath = relativePath;
+                }
+            );
 
             if (response.StatusCode == HttpStatusCode.OK)
             {
@@ -159,45 +147,31 @@ namespace Api.Services
 
             if (response.StatusCode == HttpStatusCode.Accepted)
             {
-                logger.LogInformation(
-                    "Inspection data storage location for inspection with Id {inspectionId} is not yet available",
-                    inspectionId
+                throw new InspectionNotFoundException(
+                    "Inspection data storage location is not yet available."
                 );
-                return null;
             }
 
             if (response.StatusCode == HttpStatusCode.InternalServerError)
             {
-                logger.LogError(
-                    "Inetrnal server error when trying to get inspection data for inspection with Id {inspectionId}",
-                    inspectionId
+                throw new InspectionNotFoundException(
+                    "Internal server error when trying to get inspection data"
                 );
-                return null;
             }
 
             if (response.StatusCode == HttpStatusCode.NotFound)
             {
-                logger.LogError(
-                    "Could not find inspection data for inspection with Id {inspectionId}",
-                    inspectionId
-                );
-                return null;
+                throw new InspectionNotFoundException("Could not find inspection data");
             }
 
             if (response.StatusCode == HttpStatusCode.UnprocessableEntity)
             {
-                logger.LogError(
-                    "Anonymization workflow failed for inspection with Id {inspectionId}",
-                    inspectionId
-                );
-                return null;
+                throw new InspectionNotFoundException("Anonymization workflow failed");
             }
 
-            logger.LogError(
-                "Unexpected error when trying to get inspection data for inspection with Id {inspectionId}",
-                inspectionId
+            throw new InspectionNotFoundException(
+                "Unexpected error when trying to get inspection data"
             );
-            return null;
         }
 
         public void DetachTracking(FlotillaDbContext context, Inspection inspection)
