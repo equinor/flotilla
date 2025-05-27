@@ -52,7 +52,7 @@ const StyledTypography = styled(Typography)`
     font-size: 32px;
     font-style: normal;
     font-weight: 400;
-    line-height: 40px; /* 125% */
+    line-height: 40px;
     @media (max-width: 600px) {
         font-size: 24px;
     }
