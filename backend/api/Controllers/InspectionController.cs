@@ -84,10 +84,16 @@ namespace Api.Controllers
 
                 return File(inspectionStream, "image/png");
             }
-            catch (InspectionNotFoundException)
+            catch (InspectionNotFoundException e)
             {
                 return NotFound(
-                    $"Could not find inspection image with ISAR Inspection ID {isarInspectionId}"
+                    $"Could not find inspection image with ISAR Inspection ID{isarInspectionId}. Error message: '{e.Message}'"
+                );
+            }
+            catch (Exception e)
+            {
+                return NotFound(
+                    $"Could not find inspection image with ISAR Inspection ID{isarInspectionId}. Error of type '{e.GetType()}' with message '{e.Message}'."
                 );
             }
         }
