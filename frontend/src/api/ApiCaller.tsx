@@ -87,7 +87,7 @@ export class BackendAPICaller {
 
     private static handleError = (requestType: string, path: string) => (e: Error) => {
         if (isApiError(e)) {
-            console.error(`Failed to ${requestType} /${path}: ` + (e as ApiError).logMessage)
+            console.error(`Failed to ${requestType} /${path}: ` + (e as ApiError).message)
             throw new Error((e as ApiError).message)
         }
 
