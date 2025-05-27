@@ -44,13 +44,13 @@ const CalendarProWrapper = styled.div`
     }
 
     .calendar_default_rowheader_inner {
-        font-size: 20px; /* match your main text size */
+        font-size: 20px;
         border-bottom: none;
         background-color: ${tokens.colors.ui.background__default.hex};
     }
 
     .calendar_default_colheader_inner {
-        font-size: 15px; /* match your main text size */
+        font-size: 15px;
         border-right: none;
         background-color: ${tokens.colors.ui.background__default.hex};
     }
