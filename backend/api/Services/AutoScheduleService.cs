@@ -94,8 +94,6 @@ namespace Api.Services
             MissionDefinition missionDefinition
         )
         {
-            logger.LogError(message);
-
             signalRService.ReportAutoScheduleToSignalR(
                 "AutoScheduleFail",
                 missionDefinition.Name,
@@ -197,6 +195,7 @@ namespace Api.Services
             {
                 string message =
                     $"Mission definition {missionDefinition.Id} has no inspection area.";
+                logger.LogError(message);
                 ReportAutoScheduleFailToSignalR(message, missionDefinition);
                 return;
             }
@@ -218,6 +217,7 @@ namespace Api.Services
             {
                 string message =
                     $"No robots found for installation code {missionDefinition.InstallationCode}.";
+                logger.LogError(message);
                 ReportAutoScheduleFailToSignalR(message, missionDefinition);
                 return;
             }
@@ -229,6 +229,7 @@ namespace Api.Services
             {
                 string message =
                     $"No robot found for mission definition {missionDefinition.Id} and inspection area {missionDefinition.InspectionArea.Id}.";
+                logger.LogError(message);
                 ReportAutoScheduleFailToSignalR(message, missionDefinition);
 
                 return;
