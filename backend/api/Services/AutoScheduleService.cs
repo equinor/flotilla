@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Api.Database.Models;
 using Api.Services.MissionLoaders;
+using Api.Utilities;
 using Hangfire;
 
 namespace Api.Services
@@ -17,7 +18,7 @@ namespace Api.Services
             AutoScheduleFrequency? newAutoScheduleFrequency
         );
 
-        public Task UpdateAutoMissionScheduledJobs(
+        public Task RemoveFromAutoMissionScheduledJobs(
             MissionDefinition missionDefinition,
             TimeOnly scheduledTimeInLocalTime
         );
@@ -176,7 +177,11 @@ namespace Api.Services
 
             try
             {
-                await UpdateAutoMissionScheduledJobs(missionDefinition, timeOfDay);
+                await RemoveFromAutoMissionScheduledJobs(missionDefinition, timeOfDay);
+            }
+            catch (FailedToRemoveAutoSchedulingException e)
+            {
+                logger.LogError(e.Message);
             }
             catch (Exception e)
             {
@@ -326,7 +331,7 @@ namespace Api.Services
             return updatedMissionDefinition.AutoScheduleFrequency;
         }
 
-        public async Task UpdateAutoMissionScheduledJobs(
+        public async Task RemoveFromAutoMissionScheduledJobs(
             MissionDefinition missionDefinition,
             TimeOnly scheduledTimeInLocalTime
         )
@@ -339,8 +344,7 @@ namespace Api.Services
             {
                 message =
                     $"Mission definition {missionDefinition.Id} has no scheduled auto missions.";
-                ReportAutoScheduleFailToSignalR(message, missionDefinition);
-                return;
+                throw new FailedToRemoveAutoSchedulingException(message);
             }
 
             string? job;
@@ -352,26 +356,25 @@ namespace Api.Services
             {
                 message =
                     $"Mission definition {missionDefinition.Id} has no scheduled auto mission scheduled for {scheduledTimeInLocalTime}.";
-                ReportAutoScheduleFailToSignalR(message, missionDefinition);
-                return;
+                throw new FailedToRemoveAutoSchedulingException(message);
             }
 
             if (job == null || job == "")
             {
                 message =
                     $"Mission definition {missionDefinition.Id} has no scheduled auto mission scheduled for {scheduledTimeInLocalTime}.";
-                ReportAutoScheduleFailToSignalR(message, missionDefinition);
-                return;
+                throw new FailedToRemoveAutoSchedulingException(message);
             }
 
             try
             {
                 BackgroundJob.Delete(job);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                logger.LogError(ex, $"Failed to delete background job: {job}");
-                return;
+                throw new FailedToRemoveAutoSchedulingException(
+                    $"Failed to delete background job: {job}"
+                );
             }
 
             jobs.Remove(scheduledTimeInLocalTime);
@@ -389,7 +392,16 @@ namespace Api.Services
         {
             try
             {
-                await UpdateAutoMissionScheduledJobs(missionDefinition, scheduledTimeInLocalTime);
+                await RemoveFromAutoMissionScheduledJobs(
+                    missionDefinition,
+                    scheduledTimeInLocalTime
+                );
+            }
+            catch (FailedToRemoveAutoSchedulingException ex)
+            {
+                logger.LogError(ex.Message);
+                ReportAutoScheduleFailToSignalR(ex.Message, missionDefinition);
+                return;
             }
             catch (Exception ex)
             {
@@ -397,6 +409,7 @@ namespace Api.Services
                     ex,
                     $"Failed to update auto mission scheduled jobs for mission definition {missionDefinition.Id} at {scheduledTimeInLocalTime}."
                 );
+                ReportAutoScheduleFailToSignalR(ex.Message, missionDefinition);
                 return;
             }
 
