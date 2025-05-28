@@ -1,6 +1,7 @@
 ﻿using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
+using Api.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -74,9 +75,10 @@ public class RobotModelController(
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<RobotModel>> GetRobotModelById([FromRoute] string id)
     {
-        var robotModel = await robotModelService.ReadById(id, readOnly: true);
+        var validatedId = Validate.UUID(id);
+        var robotModel = await robotModelService.ReadById(validatedId, readOnly: true);
         if (robotModel == null)
-            return NotFound($"Could not find robotModel with id '{id}'");
+            return NotFound($"Could not find robotModel with id '{validatedId}'");
         return Ok(robotModel);
     }
 
@@ -144,14 +146,15 @@ public class RobotModelController(
         [FromBody] UpdateRobotModelQuery robotModelQuery
     )
     {
-        logger.LogInformation("Updating robot model with id '{id}'", id);
+        var validatedId = Validate.UUID(id);
+        logger.LogInformation("Updating robot model with id '{id}'", validatedId);
 
         if (!ModelState.IsValid)
             return BadRequest("Invalid data.");
 
-        var robotModel = await robotModelService.ReadById(id, readOnly: true);
+        var robotModel = await robotModelService.ReadById(validatedId, readOnly: true);
         if (robotModel == null)
-            return NotFound($"Could not find robot model with id '{id}'");
+            return NotFound($"Could not find robot model with id '{validatedId}'");
 
         return await UpdateModel(robotModel, robotModelQuery);
     }
