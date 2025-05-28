@@ -117,7 +117,10 @@ builder.Services.AddHangfire(Configuration => Configuration.UseInMemoryStorage()
 builder.Services.AddHangfireServer();
 
 builder
-    .Services.AddControllers()
+    .Services.AddControllers(options =>
+    {
+        options.Filters.Add<IdSanitizationFilter>();
+    })
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
