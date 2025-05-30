@@ -142,6 +142,8 @@ namespace Api.Controllers
             [FromBody] UpdateMissionDefinitionQuery missionDefinitionQuery
         )
         {
+            id = Sanitize.SanitizeUserInput(id);
+
             logger.LogInformation("Updating mission definition with id '{Id}'", id);
 
             if (!ModelState.IsValid)
@@ -204,6 +206,8 @@ namespace Api.Controllers
             [FromBody] UpdateMissionDefinitionIsDeprecatedQuery missionDefinitionIsDeprecatedQuery
         )
         {
+            id = Sanitize.SanitizeUserInput(id);
+
             logger.LogInformation(
                 "Updating mission definition IsDeprected value for id '{Id}'",
                 id
@@ -240,6 +244,8 @@ namespace Api.Controllers
             [FromRoute] string id
         )
         {
+            id = Sanitize.SanitizeUserInput(id);
+
             logger.LogInformation("Deprecating mission definition with id '{Id}'", id);
             var missionDefinition = await missionDefinitionService.Delete(id);
             if (missionDefinition is null)
@@ -266,6 +272,9 @@ namespace Api.Controllers
             [FromBody] SkipAutoMissionQuery skipAutoMissionQuery
         )
         {
+            missionDefinitionId = Sanitize.SanitizeUserInput(missionDefinitionId);
+            skipAutoMissionQuery = Sanitize.SanitizeUserInput(skipAutoMissionQuery);
+
             var missionDefinition = await missionDefinitionService.ReadById(
                 missionDefinitionId,
                 readOnly: true

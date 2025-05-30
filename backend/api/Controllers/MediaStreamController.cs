@@ -1,6 +1,7 @@
 ﻿using Api.Controllers.Models;
 using Api.Services;
 using Api.Services.Models;
+using Api.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -30,6 +31,8 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<MediaConfig?>> GetMediaStreamConfig([FromRoute] string id)
         {
+            id = Sanitize.SanitizeUserInput(id);
+
             try
             {
                 var robot = await robotService.ReadById(id);
