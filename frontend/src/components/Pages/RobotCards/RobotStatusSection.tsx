@@ -28,9 +28,11 @@ export const RobotStatusSection = () => {
                 ? robot.status! > robotToCompareWith.status!
                     ? 1
                     : -1
-                : robot.name! > robotToCompareWith.name!
-                  ? 1
-                  : -1
+                : robot.name! === robotToCompareWith.name!
+                  ? 0
+                  : robot.name! > robotToCompareWith.name!
+                    ? 1
+                    : -1
         )
 
     const robotDisplay = relevantRobots.map((robot) => <RobotStatusCard key={robot.id} robot={robot} />)
