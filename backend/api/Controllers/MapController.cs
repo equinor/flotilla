@@ -1,5 +1,6 @@
 ﻿using Api.Controllers.Models;
 using Api.Services;
+using Api.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -27,6 +28,9 @@ namespace Api.Controllers
             string mapName
         )
         {
+            installationCode = Sanitize.SanitizeUserInput(installationCode);
+            mapName = Sanitize.SanitizeUserInput(mapName);
+
             byte[]? mapStream = await mapService.FetchMapImage(mapName, installationCode);
 
             if (mapStream == null)
