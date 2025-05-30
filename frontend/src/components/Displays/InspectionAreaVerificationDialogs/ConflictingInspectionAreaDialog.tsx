@@ -24,11 +24,16 @@ export const ConflictingRobotInspectionAreaDialog = ({
     const [robotInspectionAreaName, setRobotInspectionAreaName] = useState<string>('...')
 
     useEffect(() => {
-        BackendAPICaller.getInspectionAreaById(robotInspectionAreaId).then((inspectionArea) => {
-            if (inspectionArea) {
-                setRobotInspectionAreaName(inspectionArea.inspectionAreaName)
-            }
-        })
+        BackendAPICaller.getInspectionAreaById(robotInspectionAreaId)
+            .then((inspectionArea) => {
+                if (inspectionArea) {
+                    setRobotInspectionAreaName(inspectionArea.inspectionAreaName)
+                }
+            })
+            .catch((error) => {
+                console.error('Error fetching inspection area:', error)
+                setRobotInspectionAreaName('Unknown Inspection Area')
+            })
     }, [robotInspectionAreaId])
 
     return (
