@@ -64,6 +64,8 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<RobotResponse>> GetRobotById([FromRoute] string id)
         {
+            id = Sanitize.SanitizeUserInput(id);
+
             logger.LogInformation("Getting robot with id={Id}", id);
             try
             {
@@ -102,6 +104,8 @@ namespace Api.Controllers
             [FromBody] CreateRobotQuery robotQuery
         )
         {
+            robotQuery = Sanitize.SanitizeUserInput(robotQuery);
+
             logger.LogInformation("Creating new robot");
             try
             {
@@ -155,6 +159,8 @@ namespace Api.Controllers
             [FromBody] Robot robot
         )
         {
+            id = Sanitize.SanitizeUserInput(id);
+
             logger.LogInformation("Updating robot with id={Id}", id);
 
             if (!ModelState.IsValid)
@@ -207,6 +213,9 @@ namespace Api.Controllers
             [FromBody] UpdateRobotQuery query
         )
         {
+            id = Sanitize.SanitizeUserInput(id);
+            query = Sanitize.SanitizeUserInput(query);
+
             logger.LogInformation("Updating robot with id={Id}", id);
 
             if (!ModelState.IsValid)
@@ -271,6 +280,8 @@ namespace Api.Controllers
             [FromRoute] bool deprecated
         )
         {
+            id = Sanitize.SanitizeUserInput(id);
+
             logger.LogInformation(
                 "Updating deprecated on robot with id={Id} to deprecated={Deprecated}",
                 id,
@@ -323,6 +334,9 @@ namespace Api.Controllers
             [FromRoute] string currentInspectionAreaId
         )
         {
+            id = Sanitize.SanitizeUserInput(id);
+            currentInspectionAreaId = Sanitize.SanitizeUserInput(currentInspectionAreaId);
+
             logger.LogInformation(
                 "Updating current inspection area with id {currentInspectionAreaId} on robot with id={Id}",
                 currentInspectionAreaId,
@@ -374,6 +388,10 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<RobotResponse>> DeleteRobot([FromRoute] string id)
         {
+            id = Sanitize.SanitizeUserInput(id);
+
+            logger.LogInformation("Deleting robot with id={Id}", id);
+
             var robot = await robotService.Delete(id);
             if (robot is null)
             {
@@ -405,6 +423,8 @@ namespace Api.Controllers
             [FromBody] RobotStatus robotStatus
         )
         {
+            id = Sanitize.SanitizeUserInput(id);
+
             logger.LogInformation("Updating robot status with id={Id}", id);
 
             if (!ModelState.IsValid)
@@ -457,6 +477,8 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> StopMission([FromRoute] string robotId)
         {
+            robotId = Sanitize.SanitizeUserInput(robotId);
+
             var robot = await robotService.ReadById(robotId, readOnly: true);
             if (robot == null)
             {
@@ -527,6 +549,8 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> PauseMission([FromRoute] string robotId)
         {
+            robotId = Sanitize.SanitizeUserInput(robotId);
+
             var robot = await robotService.ReadById(robotId, readOnly: true);
             if (robot == null)
             {
@@ -577,6 +601,8 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> ResumeMission([FromRoute] string robotId)
         {
+            robotId = Sanitize.SanitizeUserInput(robotId);
+
             var robot = await robotService.ReadById(robotId, readOnly: true);
             if (robot == null)
             {
@@ -630,6 +656,8 @@ namespace Api.Controllers
             [FromRoute] string armPosition
         )
         {
+            robotId = Sanitize.SanitizeUserInput(robotId);
+
             var robot = await robotService.ReadById(robotId, readOnly: true);
             if (robot == null)
             {
@@ -699,6 +727,8 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> ResetRobot([FromRoute] string robotId)
         {
+            robotId = Sanitize.SanitizeUserInput(robotId);
+
             var robot = await robotService.ReadById(robotId, readOnly: true);
             if (robot == null)
             {
