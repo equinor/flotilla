@@ -112,7 +112,7 @@ export const CalendarPro = () => {
                 })
             )
         )
-        .sort((a, b) => (a.time > b.time ? 1 : -1))
+        .sort((a, b) => (a.time === b.time ? 0 : a.time > b.time ? 1 : -1))
 
     const dateInDayPilotFormat = (day: DaysOfWeek, time: string) => {
         const d = new Date()
