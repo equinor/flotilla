@@ -144,7 +144,7 @@ const DayTable = ({ day, isToday }: { day: DaysOfWeek; isToday: boolean }) => {
             })
         )
         .flat()
-        .sort((a, b) => (a.time > b.time ? 1 : -1))
+        .sort((a, b) => (a.time === b.time ? 0 : a.time > b.time ? 1 : -1))
 
     return (
         <Table key={day}>

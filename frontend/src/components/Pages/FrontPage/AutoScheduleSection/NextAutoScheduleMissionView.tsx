@@ -78,7 +78,7 @@ export const NextAutoScheduleMissionView = () => {
                 )
                 .map((time) => ({ time, mission: m }))
         )
-        .sort((a, b) => (a.time > b.time ? 1 : -1))
+        .sort((a, b) => (a.time === b.time ? 0 : a.time > b.time ? 1 : -1))
 
     return (
         <>

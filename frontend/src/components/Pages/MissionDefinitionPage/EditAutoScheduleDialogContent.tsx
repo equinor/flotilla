@@ -125,10 +125,7 @@ const SelectTimesOfDay = ({ currentAutoScheduleTimes, changedAutoScheduleTimes }
     const SelectedTimeChips = () => (
         <StyledTimeChips>
             {currentAutoScheduleTimes
-                .sort((a, b) => {
-                    if (a > b) return 1
-                    return -1
-                })
+                .sort((a, b) => (a === b ? 0 : a > b ? 1 : -1))
                 .map((time) => (
                     <Chip key={time} onDelete={() => removeTime(time)}>
                         {formatTimeToDisplay(time)}
