@@ -1,6 +1,7 @@
 ﻿using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
+using Api.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -144,6 +145,8 @@ public class RobotModelController(
         [FromBody] UpdateRobotModelQuery robotModelQuery
     )
     {
+        id = Sanitize.SanitizeUserInput(id);
+
         logger.LogInformation("Updating robot model with id '{id}'", id);
 
         if (!ModelState.IsValid)

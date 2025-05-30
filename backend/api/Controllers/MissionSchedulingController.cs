@@ -43,6 +43,8 @@ namespace Api.Controllers
             [FromBody] ScheduleMissionQuery scheduledMissionQuery
         )
         {
+            scheduledMissionQuery = Sanitize.SanitizeUserInput(scheduledMissionQuery);
+
             Robot robot;
             try
             {
@@ -135,6 +137,8 @@ namespace Api.Controllers
             [FromBody] ScheduleMissionQuery scheduledMissionQuery
         )
         {
+            scheduledMissionQuery = Sanitize.SanitizeUserInput(scheduledMissionQuery);
+
             Robot robot;
             try
             {
@@ -256,6 +260,8 @@ namespace Api.Controllers
             [FromBody] ScheduledMissionQuery scheduledMissionQuery
         )
         {
+            scheduledMissionQuery = Sanitize.SanitizeUserInput(scheduledMissionQuery);
+
             Robot robot;
             try
             {
@@ -443,6 +449,8 @@ namespace Api.Controllers
             [FromBody] CustomMissionQuery customMissionQuery
         )
         {
+            customMissionQuery = Sanitize.SanitizeUserInput(customMissionQuery);
+
             customMissionQuery.InstallationCode = customMissionQuery.InstallationCode.ToUpper();
 
             Robot robot;

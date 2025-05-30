@@ -83,6 +83,8 @@ namespace Api.Controllers
             [FromRoute] string missionSourceId
         )
         {
+            missionSourceId = Sanitize.SanitizeUserInput(missionSourceId);
+
             try
             {
                 var mission = await missionLoader.GetMissionById(missionSourceId);

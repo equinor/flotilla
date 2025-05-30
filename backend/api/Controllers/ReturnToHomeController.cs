@@ -28,6 +28,8 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> ScheduleReturnToHomeMission([FromRoute] string robotId)
         {
+            robotId = Sanitize.SanitizeUserInput(robotId);
+
             var robot = await robotService.ReadById(robotId, readOnly: true);
             if (robot is null)
             {

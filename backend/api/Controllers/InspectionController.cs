@@ -35,6 +35,8 @@ namespace Api.Controllers
             [FromBody] IsarZoomDescription zoom
         )
         {
+            tagId = Sanitize.SanitizeUserInput(tagId);
+
             logger.LogInformation($"Updating zoom value for tag with ID {tagId}");
 
             var newMetadata = new TagInspectionMetadata { TagId = tagId, ZoomDescription = zoom };
@@ -70,6 +72,8 @@ namespace Api.Controllers
             [FromRoute] string isarInspectionId
         )
         {
+            isarInspectionId = Sanitize.SanitizeUserInput(isarInspectionId);
+
             try
             {
                 byte[]? inspectionStream =
