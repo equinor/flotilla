@@ -1,60 +1,105 @@
-import { DayPilot, DayPilotCalendar } from 'daypilot-pro-react'
-import { useEffect, useMemo } from 'react'
+import { Calendar, dateFnsLocalizer, Views } from 'react-big-calendar'
+import { format, parse, startOfWeek, getDay } from 'date-fns'
+import { nb } from 'date-fns/locale'
+import 'react-big-calendar/lib/css/react-big-calendar.css'
+import styled from 'styled-components'
+import { useMemo, useState } from 'react'
 import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
 import { allDaysStartingSunday, DaysOfWeek } from 'models/AutoScheduleFrequency'
-import styled from 'styled-components'
-import { useState } from 'react'
-import { MissionDefinition } from 'models/MissionDefinition'
 import { MissionStatusType, selectMissionStatusType, skipAutoScheduledMission } from './AutoScheduleMissionTableRow'
 import { tokens } from '@equinor/eds-tokens'
-import type { CalendarProps } from 'daypilot-pro-react'
 import { useNavigate } from 'react-router-dom'
 import { config } from 'config'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { Button, Typography } from '@equinor/eds-core-react'
+import { StyledDialog } from 'components/Styles/StyledComponents'
 
-const CalendarProWrapper = styled.div`
-    height: 80vh;
+const locales = { nb }
+const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales })
+
+const CalendarColors = {
+    Scheduled: {
+        background: tokens.colors.infographic.primary__lichen_green.hex,
+        border: tokens.colors.interactive.success__resting.hex,
+    },
+    Upcoming: {
+        background: tokens.colors.infographic.primary__moss_green_13.hex,
+        border: tokens.colors.infographic.primary__moss_green_100.hex,
+    },
+    Skipped: {
+        background: tokens.colors.ui.background__default.hex,
+        border: tokens.colors.interactive.disabled__text.hex,
+    },
+    Completed: {
+        background: '#f7f7f7',
+        border: tokens.colors.interactive.disabled__text.hex,
+    },
+}
+
+const CalendarWrapper = styled.div`
+    height: 70vh;
     width: 90vw;
     margin: 2px;
 
-    .calendar_default_main {
-        height: 100%;
-        width: 100%;
+    .rbc-calendar {
         border: none;
-        border-bottom: 1px solid ${tokens.colors.ui.background__medium.hex};
+    }
+
+    .rbc-time-view {
+        border-left: none;
+        border-top: none;
+    }
+
+    .rbc-row {
+        min-height: 0px;
+    }
+
+    .rbc-header {
+        min-height: 30px;
+        align-content: center;
+        background-color: ${tokens.colors.ui.background__default.hex};
+    }
+
+    .rbc-day-bg {
+        display: none;
+    }
+
+    .rbc-day-slot .rbc-event {
+        display: block;
+    }
+
+    .rbc-event {
+        padding: 2px !important;
+    }
+
+    .rbc-event-content {
+        font-size: 10pt;
+        font-family: Equinor;
+        word-break: break-word;
+        white-space: normal;
+    }
+
+    .rbc-time-header-content,
+    .rbc-time-gutter,
+    .rbc-time-content {
         font-family: Equinor;
     }
 
-    .calendar_default_event_inner {
-        font-size: 10pt;
-        border-radius: 4px;
-        border: 1px solid;
+    .rbc-time-slot {
+        align-content: top;
+        padding-top: 10px;
+        min-height: 80px;
+    }
+    .rbc-time-content {
+        border-top: none;
     }
 
-    .calendar_default_event {
-        overflow: hidden;
-    }
-    .child {
-        position: absolute;
-        z-index: 1;
-        padding: 2px;
-        width: 55px;
-        height: 25px;
-        background-color: ${tokens.colors.ui.background__default.hex};
-    }
-
-    .calendar_default_rowheader_inner {
-        font-size: 20px;
-        border-bottom: none;
-        background-color: ${tokens.colors.ui.background__default.hex};
-    }
-
-    .calendar_default_colheader_inner {
-        font-size: 15px;
-        border-right: none;
+    .rbc-time-gutter {
+        text-align: center;
         background-color: ${tokens.colors.ui.background__default.hex};
     }
 `
+
 const LegendWrapper = styled.div`
     display: flex;
     gap: 16px;
@@ -80,161 +125,204 @@ const LegendColor = styled.span<{ color: string }>`
     border-radius: 0;
 `
 
-const CalendarColors = {
-    ScheduledBackground: tokens.colors.infographic.primary__lichen_green.hex,
-    ScheduledBorder: tokens.colors.interactive.success__resting.hex,
-    UpcomingBackground: tokens.colors.infographic.primary__moss_green_13.hex,
-    UpcomingBorder: tokens.colors.infographic.primary__moss_green_100.hex,
-    SkippedBackground: tokens.colors.ui.background__default.hex,
-    SkippedBorder: tokens.colors.interactive.disabled__text.hex,
-    CompletedBackground: '#f7f7f7',
-    CompletedBorder: tokens.colors.interactive.disabled__text.hex,
-}
+const StyledEvent = styled.div`
+    position: relative,
+    width: 100%;
+    height: 100%;
+    padding: 4px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+
+    span {
+    overflow: hidden;
+    white-space: wrap;
+    text-overflow: ellipsis;
+  }
+`
+
+const StyledSkipButton = styled(Button)`
+    position: absolute;
+    bottom: 4px;
+    left: 4px;
+    padding: 2px 6px;
+    cursor: pointer;
+    font-size: 12px;
+    height: 25px;
+    background-color: ${CalendarColors.Scheduled.background};
+    color: ${tokens.colors.text.static_icons__default.hex};
+    border: 1px solid ${CalendarColors.Scheduled.border};
+
+    &:hover {
+        background-color: ${tokens.colors.ui.background__default.hex};
+        border: 1px solid ${CalendarColors.Scheduled.border};
+    }
+`
+
+const StyledDialogActions = styled(StyledDialog.Actions)`
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+`
 
 const legendItems = [
-    { color: CalendarColors.ScheduledBackground, label: 'Scheduled' },
-    { color: CalendarColors.UpcomingBackground, label: 'Upcoming' },
-    { color: CalendarColors.SkippedBackground, label: 'Skipped' },
-    { color: CalendarColors.CompletedBackground, label: 'Completed' },
+    { color: CalendarColors.Scheduled, label: 'Scheduled' },
+    { color: CalendarColors.Upcoming, label: 'Upcoming' },
+    { color: CalendarColors.Skipped, label: 'Skipped' },
+    { color: CalendarColors.Completed, label: 'Completed' },
 ]
 
 export const CalendarPro = () => {
     const { missionDefinitions } = useMissionDefinitionsContext()
-    const navigate = useNavigate()
     const { TranslateText } = useLanguageContext()
+    const navigate = useNavigate()
+    const [dialogOpen, setDialogOpen] = useState<boolean>(false)
+    const [selectedEvent, setSelectedEvent] = useState<any>(null)
 
-    const autoScheduledMissionDefinitions = missionDefinitions.filter((m) => m.autoScheduleFrequency)
-    const timeMissionPairs = autoScheduledMissionDefinitions
-        .flatMap((mission) =>
-            mission.autoScheduleFrequency!.daysOfWeek.flatMap((day) =>
-                mission.autoScheduleFrequency!.timesOfDayCET.map((time) => {
-                    return { day, time, mission }
-                })
-            )
-        )
-        .sort((a, b) => (a.time === b.time ? 0 : a.time > b.time ? 1 : -1))
-
-    const dateInDayPilotFormat = (day: DaysOfWeek, time: string) => {
-        const d = new Date()
-        d.setDate(d.getDate() + ((allDaysStartingSunday.indexOf(day) - d.getDay() + 7) % 7))
-        return new DayPilot.Date(new Date(`${d.toISOString().split('T')[0]}T${time}`), true)
+    const getTargetDate = (day: DaysOfWeek, time: string) => {
+        const today = new Date()
+        const offset = (allDaysStartingSunday.indexOf(day) - today.getDay() + 7) % 7
+        const targetDate = new Date(today)
+        targetDate.setDate(today.getDate() + offset)
+        const [hours, minutes] = time.split(':').map(Number)
+        targetDate.setHours(hours, minutes, 0, 0)
+        return targetDate
     }
-
-    const isSkipDisabled = (day: DaysOfWeek, time: string, mission: MissionDefinition) =>
-        selectMissionStatusType(day, time, mission) !== MissionStatusType.ScheduledJob
-
-    const choseEventColors = (day: DaysOfWeek, time: string, mission: MissionDefinition) => {
-        const missionStatusType = selectMissionStatusType(day, time, mission)
-
-        switch (missionStatusType) {
-            case MissionStatusType.ScheduledJob:
-                return {
-                    backColor: CalendarColors.ScheduledBackground,
-                    borderColor: CalendarColors.ScheduledBorder,
-                }
-            case MissionStatusType.FutureUnstartedJob:
-                return {
-                    backColor: CalendarColors.UpcomingBackground,
-                    borderColor: CalendarColors.UpcomingBorder,
-                }
-            case MissionStatusType.SkippedJob:
-                return {
-                    backColor: CalendarColors.SkippedBackground,
-                    borderColor: CalendarColors.SkippedBorder,
-                }
-            default:
-                return {
-                    backColor: CalendarColors.CompletedBackground,
-                    borderColor: CalendarColors.CompletedBorder,
-                }
-        }
-    }
-
-    const [calendarConfig, setConfig] = useState<CalendarProps>({
-        viewType: 'Days',
-        height: 600,
-        cellHeight: 35,
-        durationBarVisible: false,
-        headerDateFormat: 'dd dddd',
-        startDate: DayPilot.Date.today(),
-        days: 7,
-        timeFormat: 'Clock24Hours',
-        cellDuration: 30,
-        eventDeleteHandling: 'CallBack',
-        eventArrangement: 'SideBySide',
-        eventMoveHandling: 'Disabled',
-        eventResizeHandling: 'Disabled',
-        onEventDelete: async (args) => {
-            const { text, start } = args.e.data
-            const missionId = args.e.data.data.tags.missionId
-            const timeOfDay = args.e.data.data.tags.timeOfDay
-
-            const dateString = DayPilot.Date.parse(start, 'yyyy-MM-ddTHH:mm:ss').toString('HH:mm')
-            const confirmed = window.confirm(
-                TranslateText('Are you sure you want to skip {0} scheduled for today at {1}?', [text, dateString])
-            )
-            if (!confirmed) return
-
-            await skipAutoScheduledMission(missionId, timeOfDay)
-            setConfig((prev) => ({
-                ...prev,
-                events: prev.events?.filter((e) => e.id !== args.e.id()) || [],
-            }))
-        },
-        onEventClicked: async (args) => {
-            const missionId = args.e.data.data.tags.missionId
-            navigate(`${config.FRONTEND_BASE_ROUTE}/mission-definition/${missionId}`)
-        },
-        events: [],
-    })
 
     const events = useMemo(() => {
-        return timeMissionPairs.map(({ day, time, mission }) => {
-            const start = dateInDayPilotFormat(day, time)
-            const { backColor, borderColor } = choseEventColors(day, time, mission)
+        return missionDefinitions
+            .filter((m) => m.autoScheduleFrequency)
+            .flatMap((mission) => {
+                return mission.autoScheduleFrequency!.daysOfWeek.flatMap((day) => {
+                    return mission.autoScheduleFrequency!.timesOfDayCET.map((time) => {
+                        const targetDate = getTargetDate(day, time)
+                        const status = selectMissionStatusType(day, time, mission)
+                        const color =
+                            status === MissionStatusType.ScheduledJob
+                                ? CalendarColors.Scheduled
+                                : status === MissionStatusType.FutureUnstartedJob
+                                  ? CalendarColors.Upcoming
+                                  : status === MissionStatusType.SkippedJob
+                                    ? CalendarColors.Skipped
+                                    : CalendarColors.Completed
 
-            const isSkipped = selectMissionStatusType(day, time, mission) === MissionStatusType.SkippedJob
-            const displayText = isSkipped ? `${mission.name}` + ' (' + TranslateText('Skipped') + ')' : mission.name
-
-            return {
-                id: crypto.randomUUID(),
-                text: displayText,
-                start: start,
-                end: start.addMinutes(31),
-                backColor: backColor,
-                borderColor: borderColor,
-                deleteDisabled: isSkipDisabled(day, time, mission),
-                data: {
-                    tags: {
-                        missionId: mission.id,
-                        timeOfDay: time,
-                    },
-                },
-            }
-        })
+                        return {
+                            id: `${mission.id}-${day}-${time}`,
+                            title: `${mission.name}${status === MissionStatusType.SkippedJob ? ' (' + TranslateText('Skipped') + ')' : ''}`,
+                            start: targetDate,
+                            end: new Date(targetDate.getTime() + 60 * 60000),
+                            skip: status === MissionStatusType.ScheduledJob,
+                            resource: mission.id,
+                            color,
+                            status,
+                            metadata: {
+                                missionName: mission.name,
+                                missionId: mission.id,
+                                time,
+                            },
+                        }
+                    })
+                })
+            })
     }, [missionDefinitions])
 
-    useEffect(() => {
-        setConfig((prev) => ({
-            ...prev,
-            events,
-        }))
-    }, [missionDefinitions])
+    const handleCloseDialog = () => {
+        setDialogOpen(false)
+    }
+
+    const handleSelectEvent = (event: any) => {
+        setSelectedEvent(event)
+        setDialogOpen(true)
+    }
+
+    const renderDialog = () => (
+        <StyledDialog open={dialogOpen} onClose={handleCloseDialog}>
+            <StyledDialog.Header>
+                <Typography variant="h3">{TranslateText('Skip') + ' ' + TranslateText('Mission')}</Typography>
+            </StyledDialog.Header>
+            <StyledDialog.Content>
+                {TranslateText('Are you sure you want to skip {0} scheduled for today at {1}?', [
+                    selectedEvent.metadata.missionName,
+                    selectedEvent.metadata.time.slice(0, 5),
+                ])}
+            </StyledDialog.Content>
+            <StyledDialogActions>
+                <Button onClick={handleCloseDialog} variant="outlined" color="primary">
+                    {TranslateText('Cancel')}
+                </Button>
+                <Button
+                    onClick={async () => {
+                        if (selectedEvent) {
+                            await skipAutoScheduledMission(
+                                selectedEvent.metadata.missionId,
+                                selectedEvent.metadata.time
+                            )
+                        }
+                        setDialogOpen(false)
+                        setSelectedEvent(null)
+                    }}
+                    variant="outlined"
+                    color="danger"
+                >
+                    {TranslateText('Skip')}
+                </Button>
+            </StyledDialogActions>
+        </StyledDialog>
+    )
+
+    const CustomEvent = ({ event }: { event: any }) => {
+        return (
+            <StyledEvent>
+                <span>{event.title}</span>
+                {event.skip && (
+                    <StyledSkipButton onClick={() => handleSelectEvent(event)}>
+                        {TranslateText('Skip')}
+                    </StyledSkipButton>
+                )}
+            </StyledEvent>
+        )
+    }
 
     return (
         <>
             <LegendWrapper>
                 {legendItems.map(({ color, label }) => (
                     <LegendItem key={label}>
-                        <LegendColor color={color} />
+                        <LegendColor color={color.background} />
                         <span>{TranslateText(label)}</span>
                     </LegendItem>
                 ))}
             </LegendWrapper>
-            <CalendarProWrapper>
-                <div className="child"></div>
-                <DayPilotCalendar {...calendarConfig} />
-            </CalendarProWrapper>
+            <CalendarWrapper>
+                <Calendar
+                    localizer={localizer}
+                    events={events}
+                    components={{ event: CustomEvent }}
+                    defaultView={Views.WEEK}
+                    views={[Views.WEEK]}
+                    startAccessor="start"
+                    endAccessor="end"
+                    step={60}
+                    timeslots={1}
+                    formats={{
+                        timeGutterFormat: 'HH:mm', // 24-hour format for gutter
+                        eventTimeRangeFormat: () => '',
+                    }}
+                    eventPropGetter={(event) => ({
+                        style: {
+                            backgroundColor: event.color.background,
+                            borderRadius: '4px',
+                            border: `1px solid ${event.color.border}`,
+                            color: '#000',
+                        },
+                    })}
+                    onDoubleClickEvent={(event) =>
+                        navigate(`${config.FRONTEND_BASE_ROUTE}/mission-definition/${event.metadata.missionId}`)
+                    }
+                />
+            </CalendarWrapper>
+            {dialogOpen && renderDialog()}
         </>
     )
 }
