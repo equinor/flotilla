@@ -86,8 +86,11 @@ export const MissionMapView = ({ mission }: MissionProps) => {
     const populateMap = async () => {
         const { data, isError, error } = useQuery({
             queryKey: ['fetchMap', mission.installationCode, mission.id, mapInfo?.mapName],
-            queryFn: () => BackendAPICaller.getMap(mission.installationCode!, mapInfo!.mapName),
-            enabled: !!(mapInfo && mapInfo.mapName),
+            queryFn: () => {
+                if (!mapInfo?.mapName) return Promise.resolve(undefined)
+                return BackendAPICaller.getMap(mission.installationCode!, mapInfo.mapName)
+            },
+            enabled: !!mapInfo?.mapName,
             staleTime: Infinity,
             retry: 1,
         })
