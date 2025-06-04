@@ -58,12 +58,14 @@ namespace Api.Utilities
             return inputQuery;
         }
 
+        public static TimeOnly SanitizeUserInput(TimeOnly time)
+        {
+            return new TimeOnly(time.Hour, time.Minute, time.Second);
+        }
+
         public static SkipAutoMissionQuery SanitizeUserInput(SkipAutoMissionQuery inputQuery)
         {
-            inputQuery.TimeOfDay = new TimeOnly(
-                inputQuery.TimeOfDay.Hour,
-                inputQuery.TimeOfDay.Minute
-            );
+            inputQuery.TimeOfDay = SanitizeUserInput(inputQuery.TimeOfDay);
             return inputQuery;
         }
     }
