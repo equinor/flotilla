@@ -657,6 +657,7 @@ namespace Api.Controllers
         )
         {
             robotId = Sanitize.SanitizeUserInput(robotId);
+            armPosition = Sanitize.SanitizeUserInput(armPosition);
 
             var robot = await robotService.ReadById(robotId, readOnly: true);
             if (robot == null)
