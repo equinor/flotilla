@@ -307,8 +307,6 @@
     "Automatic scheduling of missions": "Automatic scheduling of missions",
     "Info: Autoscheduling..": "Automatic scheduling is a feature that allows operators to plan missions in advance. This allows the robots to run missions without daily use of Flotilla. Go to the 'Auto Scheduling' page to see which missions will be run and to edit when the missions will run.",
     "Go to": "Go to",
-    "Updating mission tasks": "Updating mission tasks",
-    "Info: Updating mission tasks..": "Updating of mission tasks occur in 'Echo Mission planner'. If using inspection target from STID, the value will be fetched from STID when the mission is set to ready. If the position in STID is updated, the mission will not use the updated value unless the mission in the mission planner gets set to ready again.",
     "Remove all": "Remove all",
     "Remove all missions": "Remove all missions",
     "Remove all missions dialog text": "Please confirm that you want to remove all the missions from the queue.",
