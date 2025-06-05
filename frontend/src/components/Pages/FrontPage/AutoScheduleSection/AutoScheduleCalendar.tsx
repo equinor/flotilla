@@ -171,7 +171,7 @@ export const CalendarPro = () => {
 
             const dateString = DayPilot.Date.parse(start, 'yyyy-MM-ddTHH:mm:ss').toString('HH:mm')
             const confirmed = window.confirm(
-                TranslateText('Are you sure you want to remove {0} scheduled for today at {1}?', [text, dateString])
+                TranslateText('Are you sure you want to skip {0} scheduled for today at {1}?', [text, dateString])
             )
             if (!confirmed) return
 

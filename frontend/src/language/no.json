@@ -330,7 +330,7 @@
     "Show more": "Vis flere",
     "Show less": "Vis færre",
     "today": "i dag",
-    "Are you sure you want to remove {0} scheduled for today at {1}?": "Er du sikker på at du vil fjerne kjøringen av oppdrag {0} kl {1} i dag?",
+    "Are you sure you want to skip {0} scheduled for today at {1}?": "Er du sikker på at du vil fjerne kjøringen av oppdrag {0} kl {1} i dag?",
     "Switch to calendar view": "Bytt til kalender visning",
     "Switch to list view": "Bytt til liste visning",
     "Scheduled": "Kommende for i dag",
