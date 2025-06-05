@@ -7,12 +7,19 @@ import { convertUTCDateToLocalDate } from 'utils/StringFormatting'
 import { MissionDefinition } from 'models/MissionDefinition'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { Link } from 'react-router-dom'
+import { StyledDialog } from 'components/Styles/StyledComponents'
+import { useState } from 'react'
 
 const StyledTableRow = styled.div`
     display: grid;
     align-items: center;
     gap: 1rem;
     grid-template-columns: 100px auto 100px;
+`
+
+const StyledDialogActions = styled(StyledDialog.Actions)`
+    display: flex;
+    gap: 5px;
 `
 
 export const skipAutoScheduledMission = async (missionId: string, timeOfDay: string) => {
@@ -59,6 +66,7 @@ export const AutoScheduleMissionTableRow = ({
     mission: MissionDefinition
 }) => {
     const { TranslateText } = useLanguageContext()
+    const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
 
     const missionStatusType = selectMissionStatusType(day, time, mission)
 
@@ -86,13 +94,40 @@ export const AutoScheduleMissionTableRow = ({
                             style={{ maxWidth: '100px' }}
                             variant="ghost"
                             disabled={missionStatusType === MissionStatusType.SkippedJob}
-                            onClick={() => skipAutoScheduledMission(mission.id, time)}
+                            onClick={() => setIsDialogOpen(true)}
                         >
                             {missionStatusType === MissionStatusType.ScheduledJob
                                 ? TranslateText('SkipAutoMission')
                                 : TranslateText('Skipped')}
                         </Button>
                     )}
+                    <StyledDialog open={isDialogOpen}>
+                        <StyledDialog.Header>
+                            <StyledDialog.Title>
+                                {TranslateText('Skip') + ' ' + TranslateText('Mission')}
+                            </StyledDialog.Title>
+                        </StyledDialog.Header>
+                        <StyledDialog.CustomContent>
+                            <Typography>
+                                {TranslateText('Are you sure you want to skip {0} scheduled for today at {1}?', [
+                                    mission.name,
+                                    time.slice(0, 5),
+                                ])}
+                            </Typography>
+                        </StyledDialog.CustomContent>
+                        <StyledDialogActions>
+                            <Button onClick={() => setIsDialogOpen(false)} variant="outlined" color="primary">
+                                {TranslateText('Close')}
+                            </Button>
+                            <Button
+                                onClick={() => skipAutoScheduledMission(mission.id, time)}
+                                variant="outlined"
+                                color="danger"
+                            >
+                                {TranslateText('Skip')}
+                            </Button>
+                        </StyledDialogActions>
+                    </StyledDialog>
                 </StyledTableRow>
             </Table.Cell>
         </Table.Row>

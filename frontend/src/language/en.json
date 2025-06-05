@@ -330,7 +330,7 @@
     "Show more": "Show more",
     "Show less": "Show less",
     "today": "today",
-    "Are you sure you want to remove {0} scheduled for today at {1}?": "Are you sure you want to remove {0} scheduled for today at {1}?",
+    "Are you sure you want to skip {0} scheduled for today at {1}?": "Are you sure you want to skip {0} scheduled for today at {1}?",
     "Switch to calendar view": "Switch to calendar view",
     "Switch to list view": "Switch to list view",
     "Scheduled": "Scheduled",
