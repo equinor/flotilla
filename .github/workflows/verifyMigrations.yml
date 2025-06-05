@@ -16,7 +16,7 @@ jobs:
 
       - name: Get changed files in the migrations folder
         id: changed-files-specific
-        uses: tj-actions/changed-files@v44.5.1
+        uses: tj-actions/changed-files@v46.0.5
         with:
           files: backend/api/Migrations/**
           sha: ${{ github.event.pull_request.head.sha }}
