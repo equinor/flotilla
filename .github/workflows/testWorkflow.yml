@@ -1,0 +1,61 @@
+name: Update database
+
+on:
+  issue_comment:
+    types: [created]
+
+defaults:
+  run:
+    working-directory: backend/api
+
+jobs:
+  # The base job checks if comment is the right function and made on a pull request
+  base_check:
+    if: |
+      github.event.issue.pull_request &&
+      github.event.comment.body == '/TestWorkflow'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    outputs:
+      eyes_id: ${{ fromJson(steps.eyes.outputs.data).id }}
+    steps:
+      # Using the post request directly to be able to remove the reaction later (Need reaction id for this)
+      # This allows the reaction to act as a status for the function.
+      - name: React to comment
+        uses: octokit/request-action@v2.x
+        id: eyes
+        with:
+          route: POST /repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}/reactions
+          content: "eyes"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+
+  database_update_start:
+    needs: base_check
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Remove 'eyes' reaction
+        uses: octokit/request-action@v2.x
+        with:
+          route: DELETE /repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}/reactions/${{ needs.get_review_state.outputs.eyes_id }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: React to comment
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ github.event.comment.id }}
+          reactions: rocket, +1
+
+      - name: Add comment
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            :eyes: Doing something ${{github.event.issue.pull_request.head.sha}} :eyes:
