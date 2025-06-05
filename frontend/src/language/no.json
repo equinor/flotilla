@@ -307,8 +307,6 @@
     "Automatic scheduling of missions": "Automatisk kjøring av oppdrag",
     "Info: Autoscheduling..": "Automatisk kjøring av oppdrag er en funksjonalitet som lar operatører planlegge oppdrag på forhånd. Dette gjør at robotene kan kjøre oppdrag uten daglig bruk av Flotilla. Gå til 'Automatisk kjøring' siden for å se hvilke oppdrag som vil bli kjørt og for å redigere når oppdragene skal kjøre.",
     "Go to": "Gå til",
-    "Updating mission tasks": "Oppdatere oppgaver i et oppdrag",
-    "Info: Updating mission tasks..": "Oppdatering av oppdragets oppgaver foregår i 'Echo Mission planner'. Hvis det brukes inspeksjonspunkt fra STID, vil verdien bli hentet fra STID når oppdraget er satt til 'Ready'. Hvis posisjonen i STID blir oppdatert, vil oppdraget ikke bruke den oppdaterte verdien med mindre oppdraget i oppdragsplanleggeren blir satt til 'Ready' igjen.",
     "Remove all": "Fjern alle",
     "Remove all missions": "Fjern alle oppdragene",
     "Remove all missions dialog text": "Vennligst bekreft at du ønsker å fjerne alle oppdragene fra køen.",
