@@ -211,7 +211,7 @@ export const CalendarPro = () => {
                             id: `${mission.id}-${day}-${time}`,
                             title: `${mission.name}${status === MissionStatusType.SkippedJob ? ' (' + TranslateText('Skipped') + ')' : ''}`,
                             start: targetDate,
-                            end: new Date(targetDate.getTime() + 60 * 60000),
+                            end: new Date(targetDate.getTime() + 59 * 60 * 1000),
                             skip: status === MissionStatusType.ScheduledJob,
                             resource: mission.id,
                             color,
