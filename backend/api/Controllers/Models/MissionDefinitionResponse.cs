@@ -6,37 +6,26 @@ namespace Api.Controllers.Models
 {
     public class MissionDefinitionResponse
     {
-        [JsonPropertyName("id")]
         public string Id { get; set; } = string.Empty;
 
-        [JsonPropertyName("name")]
         public string Name { get; set; } = string.Empty;
 
-        [JsonPropertyName("installationCode")]
         public string InstallationCode { get; set; } = string.Empty;
 
-        [JsonPropertyName("comment")]
         public string? Comment { get; set; }
 
-        [JsonPropertyName("inspectionFrequency")]
         public TimeSpan? InspectionFrequency { get; set; }
 
-        [JsonPropertyName("autoScheduleFrequency")]
         public AutoScheduleFrequency? AutoScheduleFrequency { get; set; }
 
-        [JsonPropertyName("lastSuccessfulRun")]
         public virtual MissionRun? LastSuccessfulRun { get; set; }
 
-        [JsonPropertyName("inspectionArea")]
         public InspectionAreaResponse? InspectionArea { get; set; }
 
-        [JsonPropertyName("isDeprecated")]
         public bool IsDeprecated { get; set; }
 
-        [JsonPropertyName("sourceId")]
         public string SourceId { get; set; } = string.Empty;
 
-        [JsonPropertyName("map")]
         public MapMetadata? Map { get; set; }
 
         [JsonConstructor]
@@ -72,26 +61,19 @@ namespace Api.Controllers.Models
         MissionDefinition missionDefinition
     )
     {
-        [JsonPropertyName("id")]
         public string Id { get; } = missionDefinition.Id;
 
-        [JsonPropertyName("tasks")]
         public List<MissionTask> Tasks { get; } =
             service.GetTasksFromSource(missionDefinition.Source).Result!;
 
-        [JsonPropertyName("name")]
         public string Name { get; } = missionDefinition.Name;
 
-        [JsonPropertyName("installationCode")]
         public string InstallationCode { get; } = missionDefinition.InstallationCode;
 
-        [JsonPropertyName("comment")]
         public string? Comment { get; } = missionDefinition.Comment;
 
-        [JsonPropertyName("inspectionFrequency")]
         public TimeSpan? InspectionFrequency { get; } = missionDefinition.InspectionFrequency;
 
-        [JsonPropertyName("autoScheduleFrequency")]
         public AutoScheduleFrequency? AutoScheduleFrequency { get; } =
             (
                 missionDefinition.AutoScheduleFrequency is not null
@@ -100,16 +82,12 @@ namespace Api.Controllers.Models
                 ? missionDefinition.AutoScheduleFrequency
                 : null;
 
-        [JsonPropertyName("lastSuccessfulRun")]
         public virtual MissionRun? LastSuccessfulRun { get; } = missionDefinition.LastSuccessfulRun;
 
-        [JsonPropertyName("inspectionArea")]
         public InspectionArea? InspectionArea { get; } = missionDefinition.InspectionArea;
 
-        [JsonPropertyName("isDeprecated")]
         public bool IsDeprecated { get; } = missionDefinition.IsDeprecated;
 
-        [JsonPropertyName("map")]
         public MapMetadata? Map { get; } = missionDefinition.Map;
     }
 }
