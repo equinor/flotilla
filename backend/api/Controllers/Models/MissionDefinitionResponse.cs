@@ -45,10 +45,7 @@ namespace Api.Controllers.Models
                 )
                     ? missionDefinition.AutoScheduleFrequency
                     : null;
-            InspectionArea =
-                missionDefinition.InspectionArea != null
-                    ? new InspectionAreaResponse(missionDefinition.InspectionArea)
-                    : null;
+            InspectionArea = new InspectionAreaResponse(missionDefinition.InspectionArea);
             LastSuccessfulRun = missionDefinition.LastSuccessfulRun;
             IsDeprecated = missionDefinition.IsDeprecated;
             SourceId = missionDefinition.Source.SourceId;

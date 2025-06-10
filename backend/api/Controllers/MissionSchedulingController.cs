@@ -377,6 +377,7 @@ namespace Api.Controllers
                     Name = condensedMissionDefinition.Name,
                     InspectionFrequency = scheduledMissionQuery.InspectionFrequency,
                     InstallationCode = scheduledMissionQuery.InstallationCode,
+                    InspectionArea = inspectionAreaForMission,
                     Map = new MapMetadata(),
                 };
 

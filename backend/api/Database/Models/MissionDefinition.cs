@@ -20,6 +20,9 @@ namespace Api.Database.Models
         [Required]
         public string InstallationCode { get; set; }
 
+        [Required]
+        public InspectionArea InspectionArea { get; set; }
+
         [MaxLength(1000)]
         public string? Comment { get; set; }
 
@@ -29,8 +32,6 @@ namespace Api.Database.Models
         public AutoScheduleFrequency? AutoScheduleFrequency { get; set; }
 
         public virtual MissionRun? LastSuccessfulRun { get; set; }
-
-        public InspectionArea? InspectionArea { get; set; }
 
         public MapMetadata? Map { get; set; }
 

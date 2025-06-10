@@ -43,7 +43,7 @@ export const InspectionSection = () => {
     const inspectionAreaInspections: InspectionAreaInspectionTuple[] =
         inspectionAreas?.map(({ inspectionArea }) => {
             const missionDefinitionsInInspectionArea = missionDefinitions.filter(
-                (m) => m.inspectionArea?.inspectionAreaName === inspectionArea.inspectionAreaName
+                (m) => m.inspectionArea.inspectionAreaName === inspectionArea.inspectionAreaName
             )
             return {
                 inspections: missionDefinitionsInInspectionArea.map((m) => {
