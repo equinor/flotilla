@@ -11,7 +11,7 @@ export interface MissionDefinition {
     inspectionFrequency?: string
     autoScheduleFrequency?: AutoScheduleFrequency
     lastSuccessfulRun?: Mission
-    inspectionArea?: InspectionArea
+    inspectionArea: InspectionArea
     isDeprecated: boolean
     sourceId: string
     map?: MapMetadata

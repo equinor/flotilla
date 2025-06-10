@@ -162,9 +162,7 @@ const MissionDefinitionPageBody = ({ missionDefinition }: { missionDefinition: M
                 <MetadataItem title={TranslateText('Name')} content={missionDefinition.name} onEdit={onEdit('name')} />
                 <MetadataItem
                     title={TranslateText('Inspection area')}
-                    content={
-                        missionDefinition.inspectionArea ? missionDefinition.inspectionArea.inspectionAreaName : ''
-                    }
+                    content={missionDefinition.inspectionArea.inspectionAreaName}
                 />
                 <MetadataItem
                     title={TranslateText('Automated scheduling')}
