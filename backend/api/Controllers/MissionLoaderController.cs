@@ -27,20 +27,22 @@ namespace Api.Controllers
         /// </remarks>
         [HttpGet]
         [Route("available-missions/{installationCode}")]
-        [ProducesResponseType(typeof(IList<MissionDefinitionResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IList<CondensedMissionDefinition>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status502BadGateway)]
-        public async Task<ActionResult<IList<MissionDefinitionResponse>>> GetAvailableMissions(
+        public async Task<ActionResult<IList<CondensedMissionDefinition>>> GetAvailableMissions(
             [FromRoute] string? installationCode
         )
         {
-            IQueryable<MissionDefinition> missionDefinitions;
+            IQueryable<CondensedMissionDefinition> condensedMissionDefinitions;
             try
             {
-                missionDefinitions = await missionLoader.GetAvailableMissions(installationCode);
+                condensedMissionDefinitions = await missionLoader.GetAvailableMissions(
+                    installationCode
+                );
             }
             catch (InvalidDataException e)
             {
@@ -58,10 +60,7 @@ namespace Api.Controllers
                 return new StatusCodeResult(StatusCodes.Status500InternalServerError);
             }
 
-            var missionDefinitionResponses = missionDefinitions
-                .Select(m => new MissionDefinitionResponse(m))
-                .ToList();
-            return Ok(missionDefinitionResponses);
+            return Ok(condensedMissionDefinitions);
         }
 
         /// <summary>
@@ -72,14 +71,14 @@ namespace Api.Controllers
         /// </remarks>
         [HttpGet]
         [Route("missions/{missionSourceId}")]
-        [ProducesResponseType(typeof(MissionDefinitionResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(CondensedMissionDefinition), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status502BadGateway)]
-        public async Task<ActionResult<MissionDefinitionResponse>> GetMissionDefinition(
+        public async Task<ActionResult<CondensedMissionDefinition>> GetMissionById(
             [FromRoute] string missionSourceId
         )
         {

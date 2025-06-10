@@ -10,7 +10,7 @@ import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { useRobotContext } from 'components/Contexts/RobotContext'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
-import { MissionDefinition } from 'models/MissionDefinition'
+import { CondensedMissionDefinition } from 'models/CondensedMissionDefinition'
 import { Icons } from 'utils/icons'
 import { StyledButton } from 'components/Styles/StyledComponents'
 import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
@@ -48,7 +48,7 @@ export const InspectionOverviewSection = () => {
     const { missionDefinitions } = useMissionDefinitionsContext()
     const [isFetchingMissions, setIsFetchingMissions] = useState<boolean>(false)
     const [isScheduleMissionDialogOpen, setIsScheduleMissionDialogOpen] = useState<boolean>(false)
-    const [missions, setMissions] = useState<MissionDefinition[]>([])
+    const [missions, setMissions] = useState<CondensedMissionDefinition[]>([])
 
     const isScheduleButtonDisabled = enabledRobots.length === 0 || installationCode === ''
 

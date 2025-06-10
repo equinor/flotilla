@@ -281,11 +281,12 @@ namespace Api.Controllers
             string missionSourceId = scheduledMissionQuery.MissionSourceId.ToString(
                 CultureInfo.CurrentCulture
             );
-            MissionDefinition? missionDefinition;
+
+            CondensedMissionDefinition? condensedMissionDefinition;
             try
             {
-                missionDefinition = await missionLoader.GetMissionById(missionSourceId);
-                if (missionDefinition == null)
+                condensedMissionDefinition = await missionLoader.GetMissionById(missionSourceId);
+                if (condensedMissionDefinition == null)
                 {
                     return NotFound("Mission not found");
                 }
@@ -356,7 +357,7 @@ namespace Api.Controllers
             if (source == null)
             {
                 source = await sourceService.Create(
-                    new Source { SourceId = $"{missionDefinition.Id}" }
+                    new Source { SourceId = $"{condensedMissionDefinition.Id}" }
                 );
             }
             else
@@ -373,7 +374,7 @@ namespace Api.Controllers
                 {
                     Id = Guid.NewGuid().ToString(),
                     Source = source,
-                    Name = missionDefinition.Name,
+                    Name = condensedMissionDefinition.Name,
                     InspectionFrequency = scheduledMissionQuery.InspectionFrequency,
                     InstallationCode = scheduledMissionQuery.InstallationCode,
                     Map = new MapMetadata(),
@@ -395,7 +396,7 @@ namespace Api.Controllers
 
             var missionRun = new MissionRun
             {
-                Name = missionDefinition.Name,
+                Name = condensedMissionDefinition.Name,
                 Robot = robot,
                 MissionId = scheduledMissionDefinition.Id,
                 Status = MissionStatus.Pending,

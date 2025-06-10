@@ -85,18 +85,20 @@ namespace Api.Test.Mocks
                 Source = new Source { Id = "", SourceId = "" },
             };
 
-        public async Task<MissionDefinition?> GetMissionById(string sourceMissionId)
+        public async Task<CondensedMissionDefinition?> GetMissionById(string sourceMissionId)
         {
             await Task.Run(() => Thread.Sleep(1));
-            return _mockMissionDefinition;
+            return new CondensedMissionDefinition(_mockMissionDefinition);
         }
 
-        public async Task<IQueryable<MissionDefinition>> GetAvailableMissions(
+        public async Task<IQueryable<CondensedMissionDefinition>> GetAvailableMissions(
             string? installationCode
         )
         {
             await Task.Run(() => Thread.Sleep(1));
-            return new List<MissionDefinition>([_mockMissionDefinition]).AsQueryable();
+            return new List<CondensedMissionDefinition>(
+                [new CondensedMissionDefinition(_mockMissionDefinition)]
+            ).AsQueryable();
         }
 
         public async Task<List<MissionTask>?> GetTasksForMission(string sourceMissionId)

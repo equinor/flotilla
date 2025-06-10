@@ -13,8 +13,10 @@ namespace Api.Services
 {
     public interface IEchoService
     {
-        public Task<IQueryable<MissionDefinition>> GetAvailableMissions(string? installationCode);
-        public Task<MissionDefinition?> GetMissionById(string sourceMissionId);
+        public Task<IQueryable<CondensedMissionDefinition>> GetAvailableMissions(
+            string? installationCode
+        );
+        public Task<CondensedMissionDefinition?> GetMissionById(string sourceMissionId);
         public Task<List<MissionTask>?> GetTasksForMission(string missionSourceId);
         public Task<List<PlantInfo>> GetPlantInfos();
         public Task<TagInspectionMetadata> CreateOrUpdateTagInspectionMetadata(
@@ -31,7 +33,7 @@ namespace Api.Services
     {
         public const string ServiceName = "EchoApi";
 
-        public async Task<IQueryable<MissionDefinition>> GetAvailableMissions(
+        public async Task<IQueryable<CondensedMissionDefinition>> GetAvailableMissions(
             string? installationCode
         )
         {
@@ -54,7 +56,7 @@ namespace Api.Services
                 await response.Content.ReadFromJsonAsync<List<EchoMissionResponse>>()
                 ?? throw new JsonException("Failed to deserialize missions from Echo");
 
-            var availableMissions = new List<MissionDefinition>();
+            var availableMissions = new List<CondensedMissionDefinition>();
 
             foreach (var echoMissionResponse in echoMissions)
             {
@@ -63,22 +65,24 @@ namespace Api.Services
                 {
                     continue;
                 }
-                var missionDefinition = await EchoMissionToMissionDefinition(echoMission);
-                if (missionDefinition == null)
+                var missionDefinitionResponse = await EchoMissionToCondensedMissionDefinition(
+                    echoMission
+                );
+                if (missionDefinitionResponse == null)
                 {
                     continue;
                 }
-                availableMissions.Add(missionDefinition);
+                availableMissions.Add(missionDefinitionResponse);
             }
 
             return availableMissions.AsQueryable();
         }
 
-        public async Task<MissionDefinition?> GetMissionById(string sourceMissionId)
+        public async Task<CondensedMissionDefinition?> GetMissionById(string sourceMissionId)
         {
             var echoMission = await GetEchoMission(sourceMissionId);
 
-            var mission = await EchoMissionToMissionDefinition(echoMission);
+            var mission = await EchoMissionToCondensedMissionDefinition(echoMission);
             return mission;
         }
 
@@ -118,7 +122,7 @@ namespace Api.Services
             return missionTasks;
         }
 
-        private async Task<MissionDefinition?> EchoMissionToMissionDefinition(
+        private async Task<CondensedMissionDefinition?> EchoMissionToCondensedMissionDefinition(
             EchoMission echoMission
         )
         {
@@ -126,10 +130,10 @@ namespace Api.Services
                 await sourceService.CheckForExistingSource(echoMission.Id)
                 ?? await sourceService.Create(new Source { SourceId = $"{echoMission.Id}" });
 
-            var missionDefinition = new MissionDefinition
+            var missionDefinition = new CondensedMissionDefinition
             {
                 Id = Guid.NewGuid().ToString(),
-                Source = source,
+                SourceId = source.SourceId,
                 Name = echoMission.Name,
                 InstallationCode = echoMission.InstallationCode,
             };

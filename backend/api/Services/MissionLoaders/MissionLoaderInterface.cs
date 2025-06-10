@@ -5,9 +5,11 @@ namespace Api.Services.MissionLoaders
 {
     public interface IMissionLoader
     {
-        public Task<MissionDefinition?> GetMissionById(string sourceMissionId);
+        public Task<CondensedMissionDefinition?> GetMissionById(string sourceMissionId);
 
-        public Task<IQueryable<MissionDefinition>> GetAvailableMissions(string? installationCode);
+        public Task<IQueryable<CondensedMissionDefinition>> GetAvailableMissions(
+            string? installationCode
+        );
 
         public Task<List<MissionTask>?> GetTasksForMission(string sourceMissionId);
 

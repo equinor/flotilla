@@ -5,14 +5,14 @@ namespace Api.Services.MissionLoaders
 {
     public class EchoMissionLoader(IEchoService echoService) : IMissionLoader
     {
-        public async Task<IQueryable<MissionDefinition>> GetAvailableMissions(
+        public async Task<IQueryable<CondensedMissionDefinition>> GetAvailableMissions(
             string? installationCode
         )
         {
             return await echoService.GetAvailableMissions(installationCode);
         }
 
-        public async Task<MissionDefinition?> GetMissionById(string sourceMissionId)
+        public async Task<CondensedMissionDefinition?> GetMissionById(string sourceMissionId)
         {
             return await echoService.GetMissionById(sourceMissionId);
         }

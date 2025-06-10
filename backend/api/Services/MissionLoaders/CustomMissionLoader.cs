@@ -9,16 +9,22 @@ namespace Api.Services.MissionLoaders
         ISourceService sourceService
     ) : IMissionLoader
     {
-        public async Task<IQueryable<MissionDefinition>> GetAvailableMissions(
+        public async Task<IQueryable<CondensedMissionDefinition>> GetAvailableMissions(
             string? installationCode
         )
         {
-            return await missionDefinitionService.ReadByInstallationCode(installationCode ?? "");
+            var missionDefinitions = await missionDefinitionService.ReadByInstallationCode(
+                installationCode ?? ""
+            );
+            return missionDefinitions.Select(m => new CondensedMissionDefinition(m));
         }
 
-        public async Task<MissionDefinition?> GetMissionById(string sourceMissionId)
+        public async Task<CondensedMissionDefinition?> GetMissionById(string sourceMissionId)
         {
-            return await missionDefinitionService.ReadBySourceId(sourceMissionId);
+            var missionDefinition = await missionDefinitionService.ReadBySourceId(sourceMissionId);
+            return missionDefinition != null
+                ? new CondensedMissionDefinition(missionDefinition)
+                : null;
         }
 
         public async Task<List<MissionTask>?> GetTasksForMission(string missionSourceId)
