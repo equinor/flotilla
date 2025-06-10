@@ -104,7 +104,7 @@ export const AutoScheduleMissionTableRow = ({
                     <StyledDialog open={isDialogOpen}>
                         <StyledDialog.Header>
                             <StyledDialog.Title>
-                                {TranslateText('Skip') + ' ' + TranslateText('Mission')}
+                                {TranslateText('SkipAutoMission') + ' ' + TranslateText('Mission')}
                             </StyledDialog.Title>
                         </StyledDialog.Header>
                         <StyledDialog.CustomContent>
@@ -124,7 +124,7 @@ export const AutoScheduleMissionTableRow = ({
                                 variant="outlined"
                                 color="danger"
                             >
-                                {TranslateText('Skip')}
+                                {TranslateText('SkipAutoMission')}
                             </Button>
                         </StyledDialogActions>
                     </StyledDialog>
