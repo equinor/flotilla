@@ -12,6 +12,7 @@ import { MissionDefinitionUpdateForm } from 'models/MissionDefinitionUpdateForm'
 import { InspectionArea } from 'models/InspectionArea'
 import { ApiError, isApiError } from './ApiError'
 import { MediaStreamConfig } from 'models/VideoStream'
+import { CondensedMissionDefinition } from 'models/CondensedMissionDefinition'
 
 /** Implements the request sent to the backend api. */
 export class BackendAPICaller {
@@ -187,7 +188,7 @@ export class BackendAPICaller {
         return { pagination: pagination, content: result.content }
     }
 
-    static async getAvailableMissions(installationCode: string = ''): Promise<MissionDefinition[]> {
+    static async getAvailableMissions(installationCode: string = ''): Promise<CondensedMissionDefinition[]> {
         const path: string = 'mission-loader/available-missions/' + installationCode
         const result = await BackendAPICaller.GET<MissionDefinition[]>(path).catch(
             BackendAPICaller.handleError('GET', path)

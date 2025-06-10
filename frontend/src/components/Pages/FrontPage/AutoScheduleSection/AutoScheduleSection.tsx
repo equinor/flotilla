@@ -1,4 +1,4 @@
-import { Button, Icon, Table, Typography } from '@equinor/eds-core-react'
+import { Autocomplete, Button, Icon, Table, Typography } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
 import { StyledDialog, StyledTableBody, StyledTableCell, TextAlignedButton } from 'components/Styles/StyledComponents'
@@ -6,11 +6,10 @@ import { allDays, allDaysIndexOfToday, DaysOfWeek } from 'models/AutoScheduleFre
 import styled from 'styled-components'
 import { capitalizeFirstLetter } from 'utils/StringFormatting'
 import { Icons } from 'utils/icons'
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import { FormCard } from 'components/Pages/MissionDefinitionPage/MissionDefinitionStyledComponents'
 import { MissionDefinitionEditDialogContent } from 'components/Pages/MissionDefinitionPage/MissionDefinitionPage'
 import { MissionDefinition } from 'models/MissionDefinition'
-import { SelectMissionsComponent } from '../MissionOverview/ScheduleMissionDialog/SelectMissionsToScheduleDialog'
 import { AutoScheduleMissionTableRow } from './AutoScheduleMissionTableRow'
 import { CalendarPro } from './AutoScheduleCalendar'
 
@@ -60,6 +59,37 @@ const StyledButtons = styled.div`
     flex-direction: row;
     gap: 10px;
 `
+
+const SelectMissionsComponent = memo(
+    ({
+        missions,
+        selectedMissions,
+        setSelectedMissions,
+        multiple = true,
+    }: {
+        missions: MissionDefinition[]
+        selectedMissions: MissionDefinition[]
+        setSelectedMissions: (missions: MissionDefinition[]) => void
+        multiple?: boolean
+    }) => {
+        const { TranslateText } = useLanguageContext()
+
+        return (
+            <Autocomplete
+                dropdownHeight={200}
+                optionLabel={(m) => m.name}
+                options={missions}
+                onOptionsChange={(changes) => setSelectedMissions(changes.selectedItems)}
+                label={TranslateText('Select missions')}
+                multiple={multiple}
+                selectedOptions={selectedMissions}
+                placeholder={`${selectedMissions.length}/${missions.length} ${TranslateText('selected')}`}
+                autoWidth
+                onFocus={(e) => e.preventDefault()}
+            />
+        )
+    }
+)
 
 const EditAutoSchedulingButton = () => {
     const { TranslateText } = useLanguageContext()

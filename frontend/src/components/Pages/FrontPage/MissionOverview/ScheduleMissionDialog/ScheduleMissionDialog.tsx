@@ -1,7 +1,7 @@
-import { MissionDefinition } from 'models/MissionDefinition'
 import { FetchingMissionsDialog } from './FetchingMissionsDialog'
 import { NoMissionsDialog } from './NoMissionsDialog'
 import { SelectMissionsToScheduleDialog } from './SelectMissionsToScheduleDialog'
+import { CondensedMissionDefinition } from 'models/CondensedMissionDefinition'
 
 export const ScheduleMissionDialog = ({
     onClose,
@@ -9,7 +9,7 @@ export const ScheduleMissionDialog = ({
     isFetchingMissions,
 }: {
     onClose: () => void
-    missions: MissionDefinition[]
+    missions: CondensedMissionDefinition[]
     isFetchingMissions: boolean
 }) => {
     const isEmptyMissionsDialogOpen = !isFetchingMissions && missions.length === 0

@@ -4,7 +4,7 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { memo, useState } from 'react'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { Robot, RobotStatus } from 'models/Robot'
-import { MissionDefinition } from 'models/MissionDefinition'
+import { CondensedMissionDefinition } from 'models/CondensedMissionDefinition'
 import { useRobotContext } from 'components/Contexts/RobotContext'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
@@ -40,7 +40,7 @@ const StyledDialog = styled(Dialog)`
 `
 
 interface ScheduleDialogProps {
-    missionsList: MissionDefinition[]
+    missionsList: CondensedMissionDefinition[]
     closeDialog: () => void
 }
 
@@ -49,13 +49,13 @@ export const SelectMissionsToScheduleDialog = ({ missionsList, closeDialog }: Sc
     const { installationCode } = useInstallationContext()
     const { setAlert, setListAlert } = useAlertContext()
     const { setLoadingRobotMissionSet } = useMissionsContext()
-    const [selectedMissions, setSelectedMissions] = useState<MissionDefinition[]>([])
+    const [selectedMissions, setSelectedMissions] = useState<CondensedMissionDefinition[]>([])
     const [selectedRobot, setSelectedRobot] = useState<Robot | undefined>(undefined)
 
     const onScheduleButtonPress = () => {
         if (!selectedRobot) return
 
-        selectedMissions.forEach((mission: MissionDefinition) => {
+        selectedMissions.forEach((mission: CondensedMissionDefinition) => {
             BackendAPICaller.postMission(mission.sourceId, selectedRobot.id, installationCode).catch((e) => {
                 setAlert(
                     AlertType.RequestFail,
@@ -122,16 +122,16 @@ export const SelectMissionsToScheduleDialog = ({ missionsList, closeDialog }: Sc
     )
 }
 
-export const SelectMissionsComponent = memo(
+const SelectMissionsComponent = memo(
     ({
         missions,
         selectedMissions,
         setSelectedMissions,
         multiple = true,
     }: {
-        missions: MissionDefinition[]
-        selectedMissions: MissionDefinition[]
-        setSelectedMissions: (missions: MissionDefinition[]) => void
+        missions: CondensedMissionDefinition[]
+        selectedMissions: CondensedMissionDefinition[]
+        setSelectedMissions: (missions: CondensedMissionDefinition[]) => void
         multiple?: boolean
     }) => {
         const { TranslateText } = useLanguageContext()
