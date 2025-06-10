@@ -239,7 +239,9 @@ export const CalendarPro = () => {
     const renderDialog = () => (
         <StyledDialog open={dialogOpen} onClose={handleCloseDialog}>
             <StyledDialog.Header>
-                <Typography variant="h3">{TranslateText('Skip') + ' ' + TranslateText('Mission')}</Typography>
+                <Typography variant="h3">
+                    {TranslateText('SkipAutoMission') + ' ' + TranslateText('Mission')}
+                </Typography>
             </StyledDialog.Header>
             <StyledDialog.Content>
                 {TranslateText('Are you sure you want to skip {0} scheduled for today at {1}?', [
@@ -265,7 +267,7 @@ export const CalendarPro = () => {
                     variant="outlined"
                     color="danger"
                 >
-                    {TranslateText('Skip')}
+                    {TranslateText('SkipAutoMission')}
                 </Button>
             </StyledDialogActions>
         </StyledDialog>
@@ -277,7 +279,7 @@ export const CalendarPro = () => {
                 <span>{event.title}</span>
                 {event.skip && (
                     <StyledSkipButton onClick={() => handleSelectEvent(event)}>
-                        {TranslateText('Skip')}
+                        {TranslateText('SkipAutoMission')}
                     </StyledSkipButton>
                 )}
             </StyledEvent>
