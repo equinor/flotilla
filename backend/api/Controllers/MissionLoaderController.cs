@@ -113,6 +113,11 @@ namespace Api.Controllers
                 logger.LogError(e, message);
                 return StatusCode(StatusCodes.Status502BadGateway, message);
             }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Unexpected error while getting mission definition");
+                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+            }
         }
 
         /// <summary>

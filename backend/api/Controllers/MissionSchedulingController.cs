@@ -314,6 +314,11 @@ namespace Api.Controllers
                 logger.LogError(e, "Message: {errorMessage}", Message);
                 return StatusCode(StatusCodes.Status502BadGateway, Message);
             }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Error getting mission from mission loader");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"{e.Message}");
+            }
 
             var missionTasks = await missionLoader.GetTasksForMission(missionSourceId);
 
