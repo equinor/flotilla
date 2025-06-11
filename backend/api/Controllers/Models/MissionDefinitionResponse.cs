@@ -81,7 +81,7 @@ namespace Api.Controllers.Models
 
         public virtual MissionRun? LastSuccessfulRun { get; } = missionDefinition.LastSuccessfulRun;
 
-        public InspectionArea? InspectionArea { get; } = missionDefinition.InspectionArea;
+        public InspectionArea InspectionArea { get; } = missionDefinition.InspectionArea;
 
         public bool IsDeprecated { get; } = missionDefinition.IsDeprecated;
 

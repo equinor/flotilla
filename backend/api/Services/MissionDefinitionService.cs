@@ -71,20 +71,17 @@ namespace Api.Services
             {
                 context.Entry(missionDefinition.LastSuccessfulRun).State = EntityState.Unchanged;
             }
-            if (missionDefinition.InspectionArea is not null)
-            {
-                context.Entry(missionDefinition.InspectionArea).State = EntityState.Unchanged;
-            }
             if (missionDefinition.Source is not null)
             {
                 context.Entry(missionDefinition.Source).State = EntityState.Unchanged;
             }
+            context.Entry(missionDefinition.InspectionArea).State = EntityState.Unchanged;
 
             await context.MissionDefinitions.AddAsync(missionDefinition);
-            await ApplyDatabaseUpdate(missionDefinition.InspectionArea?.Installation);
+            await ApplyDatabaseUpdate(missionDefinition.InspectionArea.Installation);
             _ = signalRService.SendMessageAsync(
                 "Mission definition created",
-                missionDefinition.InspectionArea?.Installation,
+                missionDefinition.InspectionArea.Installation,
                 new MissionDefinitionResponse(missionDefinition)
             );
             DetachTracking(context, missionDefinition);
@@ -198,19 +195,16 @@ namespace Api.Services
             {
                 context.Entry(missionDefinition.LastSuccessfulRun).State = EntityState.Unchanged;
             }
-            if (missionDefinition.InspectionArea is not null)
-            {
-                context.Entry(missionDefinition.InspectionArea).State = EntityState.Unchanged;
-            }
+            context.Entry(missionDefinition.InspectionArea).State = EntityState.Unchanged;
 
             // Owned optional properties are not nullable
             missionDefinition.AutoScheduleFrequency ??= new AutoScheduleFrequency();
 
             var entry = context.Update(missionDefinition);
-            await ApplyDatabaseUpdate(missionDefinition.InspectionArea?.Installation);
+            await ApplyDatabaseUpdate(missionDefinition.InspectionArea.Installation);
             _ = signalRService.SendMessageAsync(
                 "Mission definition updated",
-                missionDefinition?.InspectionArea?.Installation,
+                missionDefinition?.InspectionArea.Installation,
                 missionDefinition != null ? new MissionDefinitionResponse(missionDefinition) : null
             );
             DetachTracking(context, missionDefinition!);
@@ -266,8 +260,7 @@ namespace Api.Services
                 .Include(missionDefinition => missionDefinition.LastSuccessfulRun)
                 .Include(missionDefinition => missionDefinition.InspectionArea)
                 .Where(m =>
-                    m.InspectionArea == null
-                    || accessibleInstallationCodes.Result.Contains(
+                    accessibleInstallationCodes.Result.Contains(
                         m.InspectionArea.Installation.InstallationCode.ToUpper()
                     )
                 )
