@@ -12,7 +12,7 @@ interface IProps {
     scheduleMissions: () => void
     closeDialog: () => void
     robotId: string
-    missionInspectionAreas: (InspectionArea | undefined)[]
+    missionInspectionAreas: InspectionArea[]
 }
 
 enum DialogTypes {
@@ -33,7 +33,7 @@ export const ScheduleMissionWithInspectionAreaVerification = ({
     const [selectedRobot, setSelectedRobot] = useState<Robot>()
 
     const unikMissionInspectionAreas = missionInspectionAreas.filter(
-        (inspectionArea, index, self) => inspectionArea && self.findIndex((i) => i?.id === inspectionArea.id) === index
+        (inspectionArea, index, self) => self.findIndex((i) => i.id === inspectionArea.id) === index
     )
 
     useEffect(() => {

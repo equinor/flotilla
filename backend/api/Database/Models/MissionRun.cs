@@ -77,7 +77,8 @@ namespace Api.Database.Models
         [MaxLength(1000)]
         public string? Comment { get; set; }
 
-        public InspectionArea? InspectionArea { get; set; }
+        [Required]
+        public InspectionArea InspectionArea { get; set; }
 
         public bool IsCompleted =>
             _status
