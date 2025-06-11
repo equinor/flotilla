@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Text.Json.Serialization;
 using Api.Database.Models;
 using Microsoft.EntityFrameworkCore;
+using TaskStatus = Api.Database.Models.TaskStatus;
 
 namespace Api.Services.Models
 {
@@ -27,7 +28,15 @@ namespace Api.Services.Models
         public IsarMissionDefinition(MissionRun missionRun)
         {
             Name = missionRun.Name;
-            Tasks = [.. missionRun.Tasks.Select(task => new IsarTaskDefinition(task))];
+            // Filtering on status to remove completed tasks in case it is a resumed mission
+            Tasks =
+            [
+                .. missionRun
+                    .Tasks.Where(task =>
+                        task.Status != TaskStatus.Successful && task.Status != TaskStatus.Failed
+                    )
+                    .Select(task => new IsarTaskDefinition(task)),
+            ];
         }
     }
 

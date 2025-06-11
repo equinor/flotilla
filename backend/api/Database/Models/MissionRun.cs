@@ -28,6 +28,11 @@ namespace Api.Database.Models
                 {
                     EndTime = DateTime.UtcNow;
                 }
+                // If a mission is resumed
+                else if (!IsCompleted && EndTime is not null)
+                {
+                    EndTime = null;
+                }
 
                 if (_status is MissionStatus.Ongoing && StartTime is null)
                 {

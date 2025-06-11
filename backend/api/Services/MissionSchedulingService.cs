@@ -14,7 +14,7 @@ namespace Api.Services
 
         public Task FreezeMissionRunQueueForRobot(string robotId);
 
-        public Task StopCurrentMissionRun(string robotId, string? stopReason = null);
+        public Task MoveCurrentMissionRunBackToQueue(string robotId, string? stopReason = null);
 
         public Task AbortAllScheduledNormalMissions(string robotId, string? abortReason = null);
 
@@ -256,7 +256,10 @@ namespace Api.Services
             );
         }
 
-        public async Task StopCurrentMissionRun(string robotId, string? stopReason = null)
+        public async Task MoveCurrentMissionRunBackToQueue(
+            string robotId,
+            string? stopReason = null
+        )
         {
             var robot = await robotService.ReadById(robotId, readOnly: true);
             if (robot == null)
@@ -463,56 +466,35 @@ namespace Api.Services
                     return;
                 }
 
-                var unfinishedTasks = missionRun
-                    .Tasks.Where(t =>
-                        !new List<Database.Models.TaskStatus>
-                        {
-                            Database.Models.TaskStatus.Successful,
-                            Database.Models.TaskStatus.Failed,
-                        }.Contains(t.Status)
-                    )
-                    .Select(t => new MissionTask(t))
-                    .ToList();
-
-                if (unfinishedTasks.Count == 0)
-                    continue;
-
-                var newMissionRun = new MissionRun
-                {
-                    Name = missionRun.Name,
-                    Robot = missionRun.Robot,
-                    MissionRunType = missionRun.MissionRunType,
-                    InstallationCode = missionRun.InspectionArea!.Installation.InstallationCode,
-                    InspectionArea = missionRun.InspectionArea,
-                    Status = MissionStatus.Pending,
-                    DesiredStartTime = missionRun.DesiredStartTime,
-                    Tasks = unfinishedTasks,
-                };
-
-                try
-                {
-                    await missionRunService.Create(
-                        newMissionRun,
-                        triggerCreatedMissionRunEvent: false
-                    );
-                    logger.LogInformation(
-                        "Interrupted mission run {MissionRunId} was rescheduled as new mission run {NewMissionRunId}",
-                        missionRun.Id,
-                        newMissionRun.Id
-                    );
-                }
-                catch (UnsupportedRobotCapabilityException)
-                {
-                    logger.LogError(
-                        "Unsupported robot capability detected when restarting interrupted missions for robot {robotName}. This should not happen.",
-                        missionRun.Robot.Name
-                    );
-                }
+                logger.LogInformation(
+                    "Moving interrupted mission run {MissionRunId} back to the queue",
+                    missionRun.Id
+                );
+                await missionRunService.UpdateMissionRunProperty(
+                    missionRun.Id,
+                    "Status",
+                    MissionStatus.Pending
+                );
+                _ = signalRService.SendMessageAsync(
+                    "Mission run created",
+                    missionRun?.InspectionArea?.Installation,
+                    missionRun != null ? new MissionRunResponse(missionRun) : null
+                );
             }
         }
 
         private async Task StartMissionRun(MissionRun queuedMissionRun, Robot robot)
         {
+            // Reset status reason in case this is a restarted mission run
+            if (queuedMissionRun.StatusReason != null)
+            {
+                await missionRunService.UpdateMissionRunProperty(
+                    queuedMissionRun.Id,
+                    "StatusReason",
+                    null
+                );
+            }
+
             IsarMission isarMission;
             try
             {

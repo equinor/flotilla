@@ -755,7 +755,7 @@ namespace Api.Controllers
 
             try
             {
-                await missionSchedulingService.StopCurrentMissionRun(robot.Id);
+                await missionSchedulingService.MoveCurrentMissionRunBackToQueue(robot.Id);
             }
             catch (RobotNotFoundException)
             {

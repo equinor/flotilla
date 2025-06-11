@@ -155,7 +155,7 @@ namespace Api.EventHandlers
 
             try
             {
-                await MissionScheduling.StopCurrentMissionRun(robot.Id, e.Message);
+                await MissionScheduling.MoveCurrentMissionRunBackToQueue(robot.Id, e.Message);
             }
             catch (RobotNotFoundException)
             {
