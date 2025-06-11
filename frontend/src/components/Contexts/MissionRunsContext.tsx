@@ -179,7 +179,7 @@ const useMissionRuns = (): IMissionRunsContext => {
     const [filteredOngoingMissions, setFilteredOngoingMissions] = useState<Mission[]>([])
     useEffect(() => {
         setFilteredOngoingMissions(ongoingMissions.filter((m) => m.installationCode === installationCode))
-        setFilteredMissionQueue(missionQueue.filter((m) => m.inspectionArea?.installationCode === installationCode))
+        setFilteredMissionQueue(missionQueue.filter((m) => m.inspectionArea.installationCode === installationCode))
     }, [installationCode, ongoingMissions, missionQueue])
 
     return {

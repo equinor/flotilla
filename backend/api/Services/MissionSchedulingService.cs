@@ -82,14 +82,6 @@ namespace Api.Services
                 return;
             }
 
-            if (missionRun.InspectionArea == null)
-            {
-                logger.LogWarning(
-                    "Mission {MissionRunId} does not have an inspection area, but will be started anyways.",
-                    missionRun.Id
-                );
-            }
-
             if (robot.CurrentInspectionAreaId == null)
             {
                 logger.LogError(
@@ -134,7 +126,7 @@ namespace Api.Services
                     await AbortMissionRun(
                         missionRun,
                         $"Mission run {missionRun.Id} aborted: Robot {robot.Name} is on inspection area {currentInspectionArea.Name} "
-                            + $"and mission run is on inspection area {missionRun.InspectionArea?.Name}"
+                            + $"and mission run is on inspection area {missionRun.InspectionArea.Name}"
                     );
                 }
                 catch (RobotNotFoundException)

@@ -31,7 +31,7 @@ export interface Mission {
     statusReason?: string
     comment?: string
     installationCode: string
-    inspectionArea?: InspectionArea
+    inspectionArea: InspectionArea
     robot: Robot
     status: MissionStatus
     isCompleted: boolean
@@ -47,6 +47,12 @@ export const placeholderMission: Mission = {
     name: 'placeholderMission',
     robot: placeholderRobot,
     installationCode: 'placeholderInstallationCode',
+    inspectionArea: {
+        id: 'placeholderInspectionAreaId',
+        inspectionAreaName: 'placeholderInspectionArea',
+        plantName: 'placeholderPlantName',
+        installationCode: 'placeholderInstallationCode',
+    },
     status: MissionStatus.Pending,
     isCompleted: false,
     desiredStartTime: new Date(),

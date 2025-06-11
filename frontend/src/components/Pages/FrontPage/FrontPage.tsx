@@ -61,7 +61,7 @@ const OngoingMissionsInfo = ({ goToOngoingTab }: { goToOngoingTab: () => void })
     const { ongoingMissions } = useMissionsContext()
 
     const areaNames = new Set(
-        ongoingMissions.map((m) => m.inspectionArea?.inspectionAreaName).filter((area) => area !== undefined)
+        ongoingMissions.map((m) => m.inspectionArea.inspectionAreaName).filter((area) => area !== undefined)
     )
     const formattedAreaNames = Array.from(areaNames).join(' | ')
 
