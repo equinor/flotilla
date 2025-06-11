@@ -191,15 +191,6 @@ namespace Api.Services
                 );
             }
 
-            if (missionDefinition.InspectionArea == null)
-            {
-                string message =
-                    $"Mission definition {missionDefinition.Id} has no inspection area.";
-                logger.LogError(message);
-                ReportAutoScheduleFailToSignalR(message, missionDefinition);
-                return;
-            }
-
             IList<Robot> robots;
             try
             {

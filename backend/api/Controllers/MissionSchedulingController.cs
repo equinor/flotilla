@@ -165,14 +165,6 @@ namespace Api.Controllers
                 return NotFound("Mission definition not found");
             }
 
-            if (missionDefinition.InspectionArea == null)
-            {
-                logger.LogWarning(
-                    "Mission definition with ID {id} does not have an inspection area when scheduling",
-                    missionDefinition.Id
-                );
-            }
-
             try
             {
                 await installationService.AssertRobotIsOnSameInstallationAsMission(
@@ -381,15 +373,12 @@ namespace Api.Controllers
                     Map = new MapMetadata(),
                 };
 
-            if (
-                scheduledMissionDefinition.InspectionArea == null
-                || scheduledMissionDefinition.InspectionArea.Id != inspectionAreaForMission.Id
-            )
+            if (scheduledMissionDefinition.InspectionArea.Id != inspectionAreaForMission.Id)
             {
                 logger.LogWarning(
                     "Inspection area for mission definition {Id} was changed from {OldInspectionAreaId} to {NewInspectionAreaId}",
                     scheduledMissionDefinition.Id,
-                    scheduledMissionDefinition.InspectionArea?.Id,
+                    scheduledMissionDefinition.InspectionArea.Id,
                     inspectionAreaForMission.Id
                 );
                 scheduledMissionDefinition.InspectionArea = inspectionAreaForMission;
