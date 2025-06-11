@@ -123,20 +123,17 @@ namespace Api.Services
                 );
             }
 
-            if (missionRun.InspectionArea is not null)
-            {
-                context.Entry(missionRun.InspectionArea).State = EntityState.Unchanged;
-            }
+            context.Entry(missionRun.InspectionArea).State = EntityState.Unchanged;
             if (missionRun.Robot is not null)
             {
                 context.Entry(missionRun.Robot).State = EntityState.Unchanged;
             }
             await context.MissionRuns.AddAsync(missionRun);
-            await ApplyDatabaseUpdate(missionRun.InspectionArea?.Installation);
+            await ApplyDatabaseUpdate(missionRun.InspectionArea.Installation);
 
             _ = signalRService.SendMessageAsync(
                 "Mission run created",
-                missionRun.InspectionArea?.Installation,
+                missionRun.InspectionArea.Installation,
                 new MissionRunResponse(missionRun)
             );
 
@@ -280,10 +277,7 @@ namespace Api.Services
             {
                 context.Entry(missionRun.Robot).State = EntityState.Unchanged;
             }
-            if (missionRun.InspectionArea is not null)
-            {
-                context.Entry(missionRun.InspectionArea).State = EntityState.Unchanged;
-            }
+            context.Entry(missionRun.InspectionArea).State = EntityState.Unchanged;
             foreach (var task in missionRun.Tasks)
             {
                 if (task.Inspection != null)
@@ -291,10 +285,10 @@ namespace Api.Services
             }
 
             var entry = context.Update(missionRun);
-            await ApplyDatabaseUpdate(missionRun.InspectionArea?.Installation);
+            await ApplyDatabaseUpdate(missionRun.InspectionArea.Installation);
             _ = signalRService.SendMessageAsync(
                 "Mission run updated",
-                missionRun?.InspectionArea?.Installation,
+                missionRun?.InspectionArea.Installation,
                 missionRun != null ? new MissionRunResponse(missionRun) : null
             );
             DetachTracking(context, missionRun!);
@@ -306,16 +300,13 @@ namespace Api.Services
             {
                 context.Entry(missionRun.Robot).State = EntityState.Unchanged;
             }
-            if (missionRun.InspectionArea is not null)
-            {
-                context.Entry(missionRun.InspectionArea).State = EntityState.Unchanged;
-            }
+            context.Entry(missionRun.InspectionArea).State = EntityState.Unchanged;
 
             var entry = context.Update(missionRun);
-            await ApplyDatabaseUpdate(missionRun.InspectionArea?.Installation);
+            await ApplyDatabaseUpdate(missionRun.InspectionArea.Installation);
             _ = signalRService.SendMessageAsync(
                 "Mission run updated",
-                missionRun?.InspectionArea?.Installation,
+                missionRun?.InspectionArea.Installation,
                 missionRun != null ? new MissionRunResponse(missionRun) : null
             );
             DetachTracking(context, missionRun!);
@@ -333,7 +324,7 @@ namespace Api.Services
             await UpdateMissionRunProperty(missionRun.Id, "IsDeprecated", true);
             _ = signalRService.SendMessageAsync(
                 "Mission run deleted",
-                missionRun?.InspectionArea?.Installation,
+                missionRun?.InspectionArea.Installation,
                 missionRun != null ? new MissionRunResponse(missionRun) : null
             );
 
@@ -360,8 +351,7 @@ namespace Api.Services
                 .Include(missionRun => missionRun.Robot)
                 .ThenInclude(robot => robot.CurrentInstallation)
                 .Where(m =>
-                    m.InspectionArea == null
-                    || accessibleInstallationCodes.Result.Contains(
+                    accessibleInstallationCodes.Result.Contains(
                         m.InspectionArea.Installation.InstallationCode.ToUpper()
                     )
                 )
@@ -635,7 +625,7 @@ namespace Api.Services
             {
                 _ = signalRService.SendMessageAsync(
                     "Mission run failed",
-                    missionRun?.InspectionArea?.Installation,
+                    missionRun?.InspectionArea.Installation,
                     missionRun != null ? new MissionRunResponse(missionRun) : null
                 );
             }

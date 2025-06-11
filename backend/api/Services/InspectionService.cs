@@ -98,7 +98,7 @@ namespace Api.Services
                 )
                 .AsNoTracking()
                 .FirstOrDefaultAsync();
-            var installation = missionRun?.InspectionArea?.Installation;
+            var installation = missionRun?.InspectionArea.Installation;
 
             await ApplyDatabaseUpdate(installation);
             DetachTracking(context, inspection);
