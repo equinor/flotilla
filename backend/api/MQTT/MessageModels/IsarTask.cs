@@ -27,17 +27,18 @@ namespace Api.Mqtt.MessageModels
         [JsonPropertyName("timestamp")]
         public DateTime Timestamp { get; set; }
 
-        public MissionTaskType GetMissionTaskTypeFromIsarTask(string isarTaskType)
+        public bool IsInspectionTask(string isarTaskType)
         {
             return isarTaskType switch
             {
-                "record_audio" => MissionTaskType.Inspection,
-                "take_image" => MissionTaskType.Inspection,
-                "take_video" => MissionTaskType.Inspection,
-                "take_thermal_image" => MissionTaskType.Inspection,
-                "take_thermal_video" => MissionTaskType.Inspection,
-                "return_to_home" => MissionTaskType.ReturnHome,
-                "take_co2_measurement" => MissionTaskType.Inspection,
+                "record_audio" => true,
+                "take_image" => true,
+                "take_video" => true,
+                "take_thermal_image" => true,
+                "take_thermal_video" => true,
+                "take_co2_measurement" => true,
+                "return_to_home" => false,
+                "move_arm" => false,
 
                 _ => throw new ArgumentException($"ISAR Task type '{isarTaskType}' not supported"),
             };

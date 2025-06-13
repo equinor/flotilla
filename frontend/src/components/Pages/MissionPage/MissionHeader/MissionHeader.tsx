@@ -8,7 +8,7 @@ import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { StatusReason } from '../StatusReason'
 import { MissionRestartButton } from 'components/Displays/MissionButtons/MissionRestartButton'
-import { TaskStatus, TaskType } from 'models/Task'
+import { TaskStatus } from 'models/Task'
 import { convertUTCDateToLocalDate, formatDateTime } from 'utils/StringFormatting'
 import { calculateRemaindingTimeInMinutes } from 'utils/CalculateRemaingingTime'
 import { useNavigate } from 'react-router-dom'
@@ -165,9 +165,6 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
 
     const batteryValue = mission.robot.batteryLevel ? `${Math.round(mission.robot.batteryLevel)}%` : '---%'
 
-    let missionTaskType = TaskType.Inspection
-    if (mission.tasks.every((task) => task.type === TaskType.ReturnHome)) missionTaskType = TaskType.ReturnHome
-
     return (
         <>
             <HeaderSection>
@@ -175,13 +172,13 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
                     <StyledTypography>{mission.name}</StyledTypography>
                     {isMissionActive && (
                         <MissionControlButtons
-                            missionTaskType={missionTaskType}
+                            isReturnToHomeMission={false}
                             missionName={mission.name}
                             robotId={mission.robot.id}
                             missionStatus={mission.status}
                         />
                     )}
-                    {mission.endTime && mission.tasks[0]?.type !== TaskType.ReturnHome && (
+                    {mission.endTime && (
                         <MissionRestartButton
                             mission={mission}
                             hasFailedTasks={missionHasFailedTasks}

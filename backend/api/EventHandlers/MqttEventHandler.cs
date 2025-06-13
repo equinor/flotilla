@@ -498,6 +498,16 @@ namespace Api.EventHandlers
                 return;
             }
 
+            if (!task.IsInspectionTask(task.TaskType))
+            {
+                _logger.LogInformation(
+                    "Received status update to status {status} for task of type {taskType}. As this is not an inspection task, the task update will be disregarded.",
+                    status,
+                    task.TaskType
+                );
+                return;
+            }
+
             try
             {
                 await MissionTaskService.UpdateMissionTaskStatus(task.TaskId, status);
@@ -507,16 +517,13 @@ namespace Api.EventHandlers
                 return;
             }
 
-            if (task.GetMissionTaskTypeFromIsarTask(task.TaskType) == MissionTaskType.Inspection)
+            try
             {
-                try
-                {
-                    await InspectionService.UpdateInspectionStatus(task.TaskId, status);
-                }
-                catch (InspectionNotFoundException)
-                {
-                    return;
-                }
+                await InspectionService.UpdateInspectionStatus(task.TaskId, status);
+            }
+            catch (InspectionNotFoundException)
+            {
+                return;
             }
 
             var missionRun = await MissionRunService.ReadByIsarMissionId(

@@ -1,7 +1,7 @@
 import { Button, Icon, Typography } from '@equinor/eds-core-react'
 import { MissionRestartButton } from 'components/Displays/MissionButtons/MissionRestartButton'
 import { Mission } from 'models/Mission'
-import { TaskStatus, TaskType } from 'models/Task'
+import { TaskStatus } from 'models/Task'
 import { ReactNode } from 'react'
 import styled from 'styled-components'
 import { Icons } from 'utils/icons'
@@ -97,7 +97,7 @@ export const AlertListContents = ({ icon, iconColor, alertTitle, alertText, miss
             <StyledListItem>
                 <Typography variant="body_short">{alertText}</Typography>
                 <Right>
-                    {mission !== undefined && mission.tasks[0]?.type !== TaskType.ReturnHome && (
+                    {mission !== undefined && (
                         <MissionRestartButton
                             mission={mission}
                             hasFailedTasks={missionHasFailedTasks}

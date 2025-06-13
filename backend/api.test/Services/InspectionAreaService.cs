@@ -60,8 +60,8 @@ namespace Api.Test.Services
 
             List<MissionTask> missionTasks =
             [
-                new(new Pose(1, 1, 1, 0, 0, 0, 1), MissionTaskType.Inspection),
-                new(new Pose(2, 2, 2, 0, 0, 0, 1), MissionTaskType.ReturnHome),
+                new(new Pose(1, 1, 1, 0, 0, 0, 1)),
+                new(new Pose(2, 2, 2, 0, 0, 0, 1)),
             ];
 
             var testBool = InspectionAreaService.MissionTasksAreInsideInspectionAreaPolygon(
@@ -93,8 +93,8 @@ namespace Api.Test.Services
                 }";
             List<MissionTask> missionTasks =
             [
-                new(new Pose(1, 1, 1, 0, 0, 0, 1), MissionTaskType.ReturnHome),
-                new(new Pose(11, 11, 11, 0, 0, 0, 1), MissionTaskType.ReturnHome),
+                new(new Pose(1, 1, 1, 0, 0, 0, 1)),
+                new(new Pose(11, 11, 11, 0, 0, 0, 1)),
             ];
 
             var testBool = InspectionAreaService.MissionTasksAreInsideInspectionAreaPolygon(

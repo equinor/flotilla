@@ -5,7 +5,6 @@ export interface Task {
     id: string
     isarTaskId?: string
     taskOrder: number
-    type: TaskType
     tagId?: string
     description?: string
     tagLink?: string
@@ -26,9 +25,4 @@ export enum TaskStatus {
     Failed = 'Failed',
     Cancelled = 'Cancelled',
     Paused = 'Paused',
-}
-
-export enum TaskType {
-    Inspection = 'Inspection',
-    ReturnHome = 'ReturnHome',
 }

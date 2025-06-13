@@ -56,7 +56,8 @@ namespace Api.Services
             var inspection = await ReadByIsarTaskId(isarTaskId, readOnly: true);
             if (inspection is null)
             {
-                string errorMessage = $"Inspection with task ID {isarTaskId} could not be found";
+                string errorMessage =
+                    $"Inspection with task ID {isarTaskId} could not be found when trying to update status to {isarTaskStatus}.";
                 logger.LogError("{Message}", errorMessage);
                 throw new InspectionNotFoundException(errorMessage);
             }

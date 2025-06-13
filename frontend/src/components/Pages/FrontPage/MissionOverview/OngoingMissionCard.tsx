@@ -7,7 +7,6 @@ import { MissionProgressDisplay } from 'components/Displays/MissionDisplays/Miss
 import { MissionStatusDisplayWithHeader } from 'components/Displays/MissionDisplays/MissionStatusDisplay'
 import { useNavigate } from 'react-router-dom'
 import { MissionControlButtons } from 'components/Displays/MissionButtons/MissionControlButtons'
-import { TaskType } from 'models/Task'
 import { StyledButton } from 'components/Styles/StyledComponents'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
@@ -97,7 +96,7 @@ export const OngoingMissionCard = ({ mission }: MissionProps) => {
                 </Midcontent>
                 <MissionControlButtons
                     missionName={mission.name}
-                    missionTaskType={TaskType.Inspection}
+                    isReturnToHomeMission={false}
                     robotId={mission.robot.id}
                     missionStatus={mission.status}
                 />
@@ -119,7 +118,7 @@ export const OngoingMissionCard = ({ mission }: MissionProps) => {
                 </LeftSection>
                 <MissionControlButtons
                     missionName={mission.name}
-                    missionTaskType={TaskType.Inspection}
+                    isReturnToHomeMission={false}
                     robotId={mission.robot.id}
                     missionStatus={mission.status}
                 />
@@ -156,7 +155,7 @@ export const OngoingReturnHomeMissionCard = ({ robot }: { robot: Robot }) => {
                 </Midcontent>
                 <MissionControlButtons
                     missionName={missionName}
-                    missionTaskType={TaskType.ReturnHome}
+                    isReturnToHomeMission={true}
                     robotId={robot.id}
                     missionStatus={MissionStatus.Ongoing}
                 />
@@ -177,7 +176,7 @@ export const OngoingReturnHomeMissionCard = ({ robot }: { robot: Robot }) => {
                 </LeftSection>
                 <MissionControlButtons
                     missionName={missionName}
-                    missionTaskType={TaskType.ReturnHome}
+                    isReturnToHomeMission={true}
                     robotId={robot.id}
                     missionStatus={MissionStatus.Ongoing}
                 />
