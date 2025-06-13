@@ -17,6 +17,4 @@ topic read isar/+/inspection_value
 user sara
 topic read isar/+/inspection_result
 topic read isar/+/inspection_value
-
-user sara
 topic write sara/visualization_available
