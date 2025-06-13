@@ -58,7 +58,7 @@ namespace Api.Services
             if (missionRun == null)
                 return;
 
-            if (robot.MissionQueueFrozen && !missionRun.IsReturnHomeOrEmergencyMission())
+            if (robot.MissionQueueFrozen && !missionRun.IsEmergencyMission())
             {
                 logger.LogInformation(
                     "Robot {robotName} is ready to start a mission but its mission queue is frozen",
@@ -116,7 +116,7 @@ namespace Api.Services
             }
 
             if (
-                !missionRun.IsReturnHomeOrEmergencyMission()
+                !missionRun.IsEmergencyMission()
                 && !inspectionAreaService.MissionTasksAreInsideInspectionAreaPolygon(
                     (List<MissionTask>)missionRun.Tasks,
                     currentInspectionArea
@@ -153,7 +153,7 @@ namespace Api.Services
 
             if (
                 (robot.IsRobotPressureTooLow() || robot.IsRobotBatteryTooLow())
-                && !missionRun.IsReturnHomeOrEmergencyMission()
+                && !missionRun.IsEmergencyMission()
             )
             {
                 await HandleBatteryAndPressureLevel(robot);
@@ -436,11 +436,6 @@ namespace Api.Services
                     readOnly: true
                 );
             }
-            missionRun ??= await missionRunService.ReadNextScheduledMissionRun(
-                robot.Id,
-                type: MissionRunType.ReturnHome,
-                readOnly: true
-            );
             return missionRun;
         }
 
@@ -458,12 +453,6 @@ namespace Api.Services
                         $"Interrupted mission run with Id {missionRunId} could not be found"
                     );
                     continue;
-                }
-
-                if (missionRun.IsReturnHomeMission())
-                {
-                    logger.LogWarning("Return home mission will not be added back to the queue.");
-                    return;
                 }
 
                 logger.LogInformation(
