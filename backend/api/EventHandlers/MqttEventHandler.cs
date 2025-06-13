@@ -537,7 +537,7 @@ namespace Api.EventHandlers
 
             _ = SignalRService.SendMessageAsync(
                 "Mission run updated",
-                missionRun?.InspectionArea?.Installation,
+                missionRun?.InspectionArea.Installation,
                 missionRun != null ? new MissionRunResponse(missionRun) : null
             );
 
