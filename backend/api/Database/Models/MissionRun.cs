@@ -145,19 +145,9 @@ namespace Api.Database.Models
             }
         }
 
-        public bool IsReturnHomeMission()
-        {
-            return MissionRunType == MissionRunType.ReturnHome;
-        }
-
         public bool IsEmergencyMission()
         {
             return MissionRunType == MissionRunType.Emergency;
-        }
-
-        public bool IsReturnHomeOrEmergencyMission()
-        {
-            return IsReturnHomeMission() || IsEmergencyMission();
         }
     }
 
@@ -176,7 +166,6 @@ namespace Api.Database.Models
     public enum MissionRunType
     {
         Normal,
-        ReturnHome,
         Emergency,
     }
 }

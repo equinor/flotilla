@@ -30,7 +30,6 @@ public class MissionSchedulingHelpersTests : IAsyncLifetime
     )]
     [InlineData(true, MissionRunType.Normal, RobotStatus.Available, true, false, false)]
     [InlineData(true, MissionRunType.Emergency, RobotStatus.Available, true, false, true)]
-    [InlineData(true, MissionRunType.ReturnHome, RobotStatus.Available, true, false, true)]
     [InlineData(false, MissionRunType.Normal, RobotStatus.Available, false, false, false)]
     [InlineData(false, MissionRunType.Normal, RobotStatus.Available, true, true, false)]
     public void CheckLogicOfSystemIsAvailableToRunAMissionFunction(
