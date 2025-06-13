@@ -5,7 +5,6 @@ import { useState } from 'react'
 import { useMissionControlContext } from 'components/Contexts/MissionControlContext'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
-import { TaskType } from 'models/Task'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
@@ -41,7 +40,7 @@ const ContainButton = styled.div`
 interface MissionProps {
     missionName?: string
     robotId: string
-    missionTaskType: TaskType | undefined
+    isReturnToHomeMission: boolean
 }
 
 export enum MissionStatusRequest {
@@ -50,47 +49,31 @@ export enum MissionStatusRequest {
     Resume,
 }
 
-const DialogContent = ({ missionTaskType }: { missionTaskType: TaskType | undefined }) => {
+const DialogContent = ({ isReturnToHomeMission }: { isReturnToHomeMission: boolean }) => {
     const { TranslateText } = useLanguageContext()
-    switch (missionTaskType) {
-        case TaskType.ReturnHome:
-            return (
-                <StyledText>
-                    <Typography variant="body_long">
-                        {TranslateText('Skip button pressed during return home warning text')}
-                    </Typography>
-                    <Typography variant="body_long">
-                        {TranslateText('Skip button pressed confirmation text')}
-                    </Typography>
-                </StyledText>
-            )
-        case TaskType.Inspection:
-            return (
-                <StyledText>
-                    <Typography variant="body_long">{TranslateText('Skip button pressed warning text')}</Typography>
-                    <Typography variant="body_long">
-                        {TranslateText('Skip button pressed confirmation text')}
-                    </Typography>
-                </StyledText>
-            )
-        default:
-            return (
-                <StyledText>
-                    <Typography variant="body_long">
-                        {TranslateText('Skip button pressed with no tasktype warning text')}
-                    </Typography>
-                    <Typography variant="body_long">
-                        {TranslateText('Skip button pressed with no mission confirmation text')}
-                    </Typography>
-                </StyledText>
-            )
+
+    if (isReturnToHomeMission) {
+        return (
+            <StyledText>
+                <Typography variant="body_long">
+                    {TranslateText('Skip button pressed during return home warning text')}
+                </Typography>
+                <Typography variant="body_long">{TranslateText('Skip button pressed confirmation text')}</Typography>
+            </StyledText>
+        )
     }
+    return (
+        <StyledText>
+            <Typography variant="body_long">{TranslateText('Skip button pressed warning text')}</Typography>
+            <Typography variant="body_long">{TranslateText('Skip button pressed confirmation text')}</Typography>
+        </StyledText>
+    )
 }
 
 export const SkipMissionDialog = ({
     missionName,
     robotId,
-    missionTaskType,
+    isReturnToHomeMission,
     isSkipMissionDialogOpen,
     toggleDialog,
 }: MissionProps & { isSkipMissionDialogOpen: boolean; toggleDialog: () => void }) => {
@@ -108,7 +91,7 @@ export const SkipMissionDialog = ({
                 </Dialog.Title>
             </Dialog.Header>
             <Dialog.CustomContent>
-                <DialogContent missionTaskType={missionTaskType} />
+                <DialogContent isReturnToHomeMission={isReturnToHomeMission} />
             </Dialog.CustomContent>
             <Dialog.Actions>
                 <StyledDisplayButtons>

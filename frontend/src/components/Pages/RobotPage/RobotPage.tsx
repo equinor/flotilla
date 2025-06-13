@@ -22,7 +22,6 @@ import { MoveRobotArmSection } from './RobotArmMovement'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
 import { SkipMissionDialog } from '../FrontPage/MissionOverview/StopDialogs'
-import { TaskType } from 'models/Task'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { ReturnHomeButton } from './ReturnHomeButton'
 
@@ -134,10 +133,6 @@ export const RobotPage = () => {
 
     const mission = ongoingMissions.find((mission) => mission.robot.id === selectedRobot?.id)
 
-    let missionTaskType = undefined
-    if (mission?.tasks.every((task) => task.type === TaskType.Inspection)) missionTaskType = TaskType.Inspection
-    if (mission?.tasks.every((task) => task.type === TaskType.ReturnHome)) missionTaskType = TaskType.ReturnHome
-
     useEffect(() => {
         if (robotId && mediaStreams && Object.keys(mediaStreams).includes(robotId)) {
             const mediaStreamConfig = mediaStreams[robotId]
@@ -227,7 +222,7 @@ export const RobotPage = () => {
                         <SkipMissionDialog
                             missionName={mission?.name}
                             robotId={selectedRobot.id}
-                            missionTaskType={missionTaskType}
+                            isReturnToHomeMission={selectedRobot.status === RobotStatus.ReturningHome}
                             isSkipMissionDialogOpen={isDialogOpen}
                             toggleDialog={toggleSkipMissionDialog}
                         />

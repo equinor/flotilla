@@ -26,8 +26,7 @@ namespace Api.Database.Models
             int? poseId,
             string? taskDescription,
             IsarZoomDescription? zoomDescription = null,
-            TaskStatus status = TaskStatus.NotStarted,
-            MissionTaskType type = MissionTaskType.Inspection
+            TaskStatus status = TaskStatus.NotStarted
         )
         {
             TagLink = tagLink;
@@ -37,7 +36,6 @@ namespace Api.Database.Models
             TaskOrder = taskOrder;
             Description = taskDescription;
             Status = status;
-            Type = type;
             IsarZoomDescription = zoomDescription;
             if (inspection != null)
                 Inspection = new Inspection(inspection);
@@ -51,41 +49,16 @@ namespace Api.Database.Models
             TaskOrder = taskQuery.TaskOrder;
             Status = TaskStatus.NotStarted;
             IsarZoomDescription = taskQuery.IsarZoomDescription;
-            if (taskQuery.Inspection is not null)
-            {
-                Inspection = new Inspection((CustomInspectionQuery)taskQuery.Inspection);
-                Type = MissionTaskType.Inspection;
-            }
-            else
-            {
-                Type = MissionTaskType.ReturnHome;
-            }
+            Inspection = new Inspection(taskQuery.Inspection);
         }
 
-        public MissionTask(Pose robotPose, MissionTaskType type)
+        public MissionTask(Pose robotPose)
         {
-            switch (type)
-            {
-                case MissionTaskType.ReturnHome:
-                    Type = type;
-                    Description = "Return home";
-                    RobotPose = robotPose;
-                    TaskOrder = 0;
-                    Status = TaskStatus.NotStarted;
-                    break;
-                case MissionTaskType.Inspection:
-                    Type = type;
-                    Description = "Inspection";
-                    RobotPose = robotPose;
-                    TaskOrder = 0;
-                    Status = TaskStatus.NotStarted;
-                    Inspection = new Inspection();
-                    break;
-                default:
-                    throw new MissionTaskNotFoundException(
-                        "MissionTaskType should be ReturnHome or Inspection"
-                    );
-            }
+            Description = "Inspection";
+            RobotPose = robotPose;
+            TaskOrder = 0;
+            Status = TaskStatus.NotStarted;
+            Inspection = new Inspection();
         }
 
         // Creates a copy of the provided task
@@ -116,9 +89,6 @@ namespace Api.Database.Models
 
         [Required]
         public int TaskOrder { get; set; }
-
-        [Required]
-        public MissionTaskType Type { get; set; }
 
         [MaxLength(200)]
         public string? TagId { get; set; }
@@ -195,17 +165,9 @@ namespace Api.Database.Models
             };
         }
 
-        public static string ConvertMissionTaskTypeToIsarTaskType(MissionTaskType missionTaskType)
+        public static string GetIsarInspectionTaskType()
         {
-            return missionTaskType switch
-            {
-                MissionTaskType.ReturnHome => "return_to_home",
-                MissionTaskType.Inspection => "inspection",
-                _ => throw new ArgumentException(
-                    $"ISAR Mission task type '{missionTaskType}' not supported"
-                ),
-            };
-            ;
+            return "inspection";
         }
 
         public static string CalculateHashFromTasks(IList<MissionTask> tasks)
@@ -238,11 +200,5 @@ namespace Api.Database.Models
         Failed,
         Cancelled,
         Paused,
-    }
-
-    public enum MissionTaskType
-    {
-        Inspection,
-        ReturnHome,
     }
 }

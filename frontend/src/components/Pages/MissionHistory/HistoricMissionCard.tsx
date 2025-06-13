@@ -6,7 +6,7 @@ import {
     MissionStatusDisplayShort,
 } from 'components/Displays/MissionDisplays/MissionStatusDisplay'
 import { MissionRestartButton } from 'components/Displays/MissionButtons/MissionRestartButton'
-import { TaskStatus, TaskType } from 'models/Task'
+import { TaskStatus } from 'models/Task'
 import { useNavigate } from 'react-router-dom'
 import { formatDateTime } from 'utils/StringFormatting'
 
@@ -68,9 +68,7 @@ export const HistoricMissionCard = ({ index, mission }: IndexedMissionProps) => 
                 <MissionEndTimeDisplay mission={mission} />
             </Table.Cell>
             <Table.Cell id={InspectionTableColumns.Rerun}>
-                {mission.tasks[0]?.type !== TaskType.ReturnHome && (
-                    <MissionRestartButton mission={mission} hasFailedTasks={missionHasFailedTasks} smallButton={true} />
-                )}
+                <MissionRestartButton mission={mission} hasFailedTasks={missionHasFailedTasks} smallButton={true} />
             </Table.Cell>
         </Table.Row>
     )

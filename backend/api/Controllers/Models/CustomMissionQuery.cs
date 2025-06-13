@@ -24,7 +24,7 @@ namespace Api.Controllers.Models
 
         public IsarZoomDescription? IsarZoomDescription { get; set; }
 
-        public CustomInspectionQuery? Inspection { get; set; }
+        public CustomInspectionQuery Inspection { get; set; }
     }
 
     public struct CustomMissionQuery

@@ -302,8 +302,7 @@ namespace Api.Services
                         taskOrder: echoTag.PlanOrder,
                         taskDescription: inspection.InspectionTargetName,
                         zoomDescription: await FindInspectionZoom(echoTag),
-                        status: Database.Models.TaskStatus.NotStarted,
-                        type: MissionTaskType.Inspection
+                        status: Database.Models.TaskStatus.NotStarted
                     )
                 );
             }

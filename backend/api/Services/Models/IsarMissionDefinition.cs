@@ -63,7 +63,7 @@ namespace Api.Services.Models
         public IsarTaskDefinition(MissionTask missionTask)
         {
             Id = missionTask.IsarTaskId;
-            Type = MissionTask.ConvertMissionTaskTypeToIsarTaskType(missionTask.Type);
+            Type = MissionTask.GetIsarInspectionTaskType();
             Pose = new IsarPose(missionTask.RobotPose);
             Tag = missionTask.TagId;
             Zoom = missionTask.IsarZoomDescription;

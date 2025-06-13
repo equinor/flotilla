@@ -254,8 +254,6 @@
     "Open robot information": "Åpne robotinformasjon",
     "Not available": "Ikke tilgjengelig",
     "No mission running": "Ingen pågående Flotilla oppdrag",
-    "Skip button pressed with no tasktype warning text": "Et signal om å hoppe over oppdraget ble mottat uten noen pågående oppdrag.",
-    "Skip button pressed with no mission confirmation text": "Ønsker du å sende signalet om å stoppe nåværende oppdrag til roboten likevel?",
     "Tag": "Tag",
     "Timestamp": "Tidspunkt",
     "Last completed inspection": "Siste gjennomførte inspeksjon",

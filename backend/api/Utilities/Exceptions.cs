@@ -61,9 +61,6 @@
 
     public class IsarCommunicationException(string message) : Exception(message) { }
 
-    public class ReturnToHomeMissionFailedToScheduleException(string message)
-        : Exception(message) { }
-
     public class RobotCurrentAreaMissingException(string message) : Exception(message) { }
 
     public class UnsupportedRobotCapabilityException(string message) : Exception(message) { }

@@ -126,14 +126,7 @@ namespace Api.Test.Database
                 InstallationCode = installationCode,
             };
 
-            if (missionRunType == MissionRunType.ReturnHome)
-            {
-                missionRun.Tasks = [new(new Pose(), MissionTaskType.ReturnHome)];
-            }
-            else
-            {
-                missionRun.Tasks = [new(new Pose(), MissionTaskType.Inspection)];
-            }
+            missionRun.Tasks = [new(new Pose())];
             if (writeToDatabase)
             {
                 return await _missionRunService.Create(missionRun, false);
