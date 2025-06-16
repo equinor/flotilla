@@ -24,7 +24,7 @@ export type MissionStatusFilterOptions = (typeof missionStatusFilterOptionsItera
 
 export interface Mission {
     id: string
-    missionId?: string
+    missionId: string
     isarMissionId?: string
     name: string
     description?: string
@@ -45,6 +45,7 @@ export interface Mission {
 export const placeholderMission: Mission = {
     id: 'placeholderId',
     name: 'placeholderMission',
+    missionId: 'placeholderMissionId',
     robot: placeholderRobot,
     installationCode: 'placeholderInstallationCode',
     inspectionArea: {

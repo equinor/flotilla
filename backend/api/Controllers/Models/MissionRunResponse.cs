@@ -7,7 +7,7 @@ namespace Api.Controllers.Models
     {
         public string Id { get; set; }
 
-        public string? MissionId { get; set; }
+        public string MissionId { get; set; }
 
         public string? IsarMissionId { get; set; }
 

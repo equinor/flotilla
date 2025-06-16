@@ -3,6 +3,7 @@ using System;
 using Api.Database.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Api.Migrations
 {
     [DbContext(typeof(FlotillaDbContext))]
-    partial class FlotillaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250616112006_MakeMissionIdInMissionRunRequired")]
+    partial class MakeMissionIdInMissionRunRequired
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -217,7 +220,6 @@ namespace Api.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<string>("InspectionAreaId")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("InstallationCode")
@@ -703,8 +705,7 @@ namespace Api.Migrations
                     b.HasOne("Api.Database.Models.InspectionArea", "InspectionArea")
                         .WithMany()
                         .HasForeignKey("InspectionAreaId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Api.Database.Models.Robot", "Robot")
                         .WithMany()

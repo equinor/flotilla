@@ -110,13 +110,21 @@ namespace Api.Test.Database
         {
             tasks ??= [];
 
+            var missionDefinition = await NewMissionDefinition(
+                null,
+                installationCode,
+                inspectionArea,
+                null,
+                writeToDatabase
+            );
+
             if (string.IsNullOrEmpty(isarMissionId))
                 isarMissionId = Guid.NewGuid().ToString();
             var missionRun = new MissionRun
             {
                 Name = "testMission",
                 Robot = robot,
-                MissionId = null,
+                MissionId = missionDefinition.Id,
                 IsarMissionId = isarMissionId,
                 MissionRunType = missionRunType,
                 Status = missionStatus,
