@@ -14,8 +14,8 @@ namespace Api.Database.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string Id { get; set; }
 
-        //[Required] // Return home missions do not have a corresponding MissionDefinition
-        public string? MissionId { get; set; }
+        [Required]
+        public string MissionId { get; set; }
 
         [Required]
         public MissionStatus Status
