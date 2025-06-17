@@ -66,7 +66,6 @@ namespace Api.Database.Models
         {
             TaskOrder = copy.TaskOrder;
             TagId = copy.TagId;
-            IsarTaskId = Guid.NewGuid().ToString();
             Description = copy.Description;
             TagLink = copy.TagLink;
             RobotPose = new Pose(copy.RobotPose);
@@ -82,10 +81,6 @@ namespace Api.Database.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string Id { get; set; }
-
-        [MaxLength(200)]
-        // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Local
-        public string? IsarTaskId { get; set; } = Guid.NewGuid().ToString();
 
         [Required]
         public int TaskOrder { get; set; }
@@ -174,7 +169,7 @@ namespace Api.Database.Models
             var genericTasks = new List<MissionTask>();
             foreach (var task in tasks)
             {
-                var taskCopy = new MissionTask(task) { Id = "", IsarTaskId = "" };
+                var taskCopy = new MissionTask(task) { Id = "" };
                 if (taskCopy.Inspection is not null)
                     taskCopy.Inspection = new Inspection(taskCopy.Inspection, useEmptyID: true);
 
