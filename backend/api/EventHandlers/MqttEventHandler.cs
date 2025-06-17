@@ -508,9 +508,10 @@ namespace Api.EventHandlers
                 return;
             }
 
+            MissionTask missionTask;
             try
             {
-                await MissionTaskService.UpdateMissionTaskStatus(task.TaskId, status);
+                missionTask = await MissionTaskService.UpdateMissionTaskStatus(task.TaskId, status);
             }
             catch (MissionTaskNotFoundException)
             {
@@ -519,7 +520,15 @@ namespace Api.EventHandlers
 
             try
             {
-                await InspectionService.UpdateInspectionStatus(task.TaskId, status);
+                if (missionTask.Inspection is null)
+                {
+                    _logger.LogWarning(
+                        "Inspection for task {taskId} is null, cannot update inspection status",
+                        task.TaskId
+                    );
+                    return;
+                }
+                await InspectionService.UpdateInspectionStatus(missionTask.Inspection.Id, status);
             }
             catch (InspectionNotFoundException)
             {

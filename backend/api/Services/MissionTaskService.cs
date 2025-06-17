@@ -10,7 +10,7 @@ namespace Api.Services
     public interface IMissionTaskService
     {
         public Task<MissionTask> UpdateMissionTaskStatus(
-            string isarTaskId,
+            string taskId,
             IsarTaskStatus isarTaskStatus
         );
 
@@ -26,14 +26,14 @@ namespace Api.Services
         : IMissionTaskService
     {
         public async Task<MissionTask> UpdateMissionTaskStatus(
-            string isarTaskId,
+            string taskId,
             IsarTaskStatus isarTaskStatus
         )
         {
-            var missionTask = await ReadByIsarTaskId(isarTaskId, readOnly: true);
+            var missionTask = await ReadByTaskId(taskId, readOnly: true);
             if (missionTask is null)
             {
-                string errorMessage = $"Inspection with ID {isarTaskId} could not be found";
+                string errorMessage = $"Inspection with ID {taskId} could not be found";
                 logger.LogError("{Message}", errorMessage);
                 throw new MissionTaskNotFoundException(errorMessage);
             }
@@ -53,12 +53,10 @@ namespace Api.Services
             return entry.Entity;
         }
 
-        private async Task<MissionTask?> ReadByIsarTaskId(string id, bool readOnly = true)
+        private async Task<MissionTask?> ReadByTaskId(string id, bool readOnly = true)
         {
             return await GetMissionTasks(readOnly: readOnly)
-                .FirstOrDefaultAsync(missionTask =>
-                    missionTask.IsarTaskId != null && missionTask.IsarTaskId.Equals(id)
-                );
+                .FirstOrDefaultAsync(missionTask => missionTask.Id.Equals(id));
         }
 
         private IQueryable<MissionTask> GetMissionTasks(bool readOnly = true)

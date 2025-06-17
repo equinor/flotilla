@@ -767,7 +767,7 @@ namespace Api.Services
             missionRun.IsarMissionId = isarMission.IsarMissionId;
             foreach (var isarTask in isarMission.Tasks)
             {
-                var task = missionRun.GetTaskByIsarId(isarTask.IsarTaskId);
+                var task = missionRun.GetTaskById(isarTask.IsarTaskId);
                 task?.UpdateWithIsarInfo(isarTask);
             }
             await UpdateWithInspections(missionRun);

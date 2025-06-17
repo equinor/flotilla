@@ -113,20 +113,6 @@ namespace Api.Database.Models
 
         public void UpdateWithIsarInfo(IsarTask isarTask)
         {
-            UpdateStatus(isarTask.TaskStatus);
-            InspectionType = isarTask.TaskType switch
-            {
-                IsarTaskType.RecordAudio => InspectionType.Audio,
-                IsarTaskType.TakeImage => InspectionType.Image,
-                IsarTaskType.TakeThermalImage => InspectionType.ThermalImage,
-                IsarTaskType.TakeVideo => InspectionType.Video,
-                IsarTaskType.TakeThermalVideo => InspectionType.ThermalVideo,
-                IsarTaskType.TakeCO2Measurement => InspectionType.CO2Measurement,
-                _ => throw new ArgumentException(
-                    $"ISAR task type '{isarTask.TaskType}' not supported for inspections"
-                ),
-            };
-            IsarTaskId = isarTask.IsarTaskId;
             if (isarTask.IsarInspectionId != null)
             {
                 IsarInspectionId = isarTask.IsarInspectionId;
