@@ -25,10 +25,7 @@ const InspectionOverview = ({ tasks }: { tasks: Task[] }) => {
                     tasks.map(
                         (task) =>
                             task.status === TaskStatus.Successful && (
-                                <StyledImageCard
-                                    key={task.isarTaskId}
-                                    onClick={() => switchSelectedInspectionTask(task)}
-                                >
+                                <StyledImageCard key={task.id} onClick={() => switchSelectedInspectionTask(task)}>
                                     <SmallInspectionImage task={task} />
                                     <StyledInspectionData>
                                         {task.tagId && (

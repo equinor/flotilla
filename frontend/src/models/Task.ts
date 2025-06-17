@@ -3,7 +3,6 @@ import { Pose } from './Pose'
 
 export interface Task {
     id: string
-    isarTaskId?: string
     taskOrder: number
     tagId?: string
     description?: string

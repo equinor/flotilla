@@ -97,8 +97,7 @@ namespace Api.Services
 
                 foreach (var task in content)
                 {
-                    task.Id = Guid.NewGuid().ToString(); // This is needed as tasks are owned by mission runs
-                    task.IsarTaskId = Guid.NewGuid().ToString(); // This is needed to update the tasks for the correct mission run
+                    task.Id = Guid.NewGuid().ToString(); // This is needed as tasks are owned by mission runs and to update the tasks for the correct mission run
                 }
                 return content;
             }

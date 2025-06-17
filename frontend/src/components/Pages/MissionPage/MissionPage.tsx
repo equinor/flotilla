@@ -108,7 +108,7 @@ export const MissionPage = () => {
                                     <VideoStreamWindow videoStreams={videoMediaStreams} />
                                 )}
                             </VideoStreamSection>
-                            {selectedInspectionTask && selectedInspectionTask.isarTaskId && (
+                            {selectedInspectionTask && selectedInspectionTask.id && (
                                 <InspectionDialogView
                                     selectedTask={selectedInspectionTask}
                                     tasks={selectedMission.tasks}

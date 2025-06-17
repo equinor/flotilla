@@ -47,7 +47,6 @@ namespace Api.Database.Models
         )
         {
             Id = useEmptyID ? "" : Guid.NewGuid().ToString();
-            IsarTaskId = useEmptyID ? "" : copy.IsarTaskId;
             IsarInspectionId = useEmptyID ? "" : copy.IsarInspectionId;
             Status = inspectionStatus ?? copy.Status;
             InspectionType = copy.InspectionType;
@@ -59,11 +58,6 @@ namespace Api.Database.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string Id { get; set; }
-
-        [Required]
-        [MaxLength(200)]
-        // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Local
-        public string IsarTaskId { get; set; } = Guid.NewGuid().ToString();
 
         [Required]
         [MaxLength(200)]
