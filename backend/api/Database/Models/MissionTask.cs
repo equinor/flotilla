@@ -140,7 +140,6 @@ namespace Api.Database.Models
 
         public void UpdateWithIsarInfo(IsarTask isarTask)
         {
-            UpdateStatus(isarTask.TaskStatus);
             if (
                 isarTask.TaskType != IsarTaskType.ReturnToHome
                 && isarTask.TaskType != IsarTaskType.MoveArm

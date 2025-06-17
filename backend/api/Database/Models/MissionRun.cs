@@ -103,22 +103,9 @@ namespace Api.Database.Models
 
         public bool IsDeprecated { get; set; }
 
-        public void UpdateWithIsarInfo(IsarMission isarMission)
+        public MissionTask? GetTaskById(string taskId)
         {
-            IsarMissionId = isarMission.IsarMissionId;
-            foreach (var isarTask in isarMission.Tasks)
-            {
-                var task = GetTaskByIsarId(isarTask.IsarTaskId);
-                task?.UpdateWithIsarInfo(isarTask);
-            }
-        }
-
-        public MissionTask? GetTaskByIsarId(string isarTaskId)
-        {
-            return Tasks.FirstOrDefault(task =>
-                task.IsarTaskId != null
-                && task.IsarTaskId.Equals(isarTaskId, StringComparison.Ordinal)
-            );
+            return Tasks.FirstOrDefault(task => task.Id.Equals(taskId, StringComparison.Ordinal));
         }
 
         public static MissionStatus GetMissionStatusFromString(string status)

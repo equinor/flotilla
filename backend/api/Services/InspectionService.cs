@@ -16,10 +16,10 @@ namespace Api.Services
     {
         public Task<byte[]?> FetchInspectionImageFromIsarInspectionId(string isarInspectionId);
         public Task<Inspection> UpdateInspectionStatus(
-            string isarTaskId,
+            string inspectionId,
             IsarTaskStatus isarTaskStatus
         );
-        public Task<Inspection?> ReadByIsarTaskId(string id, bool readOnly = true);
+        public Task<Inspection?> ReadByInspectionId(string id, bool readOnly = true);
     }
 
     [SuppressMessage(
@@ -49,15 +49,15 @@ namespace Api.Services
         }
 
         public async Task<Inspection> UpdateInspectionStatus(
-            string isarTaskId,
+            string inspectionId,
             IsarTaskStatus isarTaskStatus
         )
         {
-            var inspection = await ReadByIsarTaskId(isarTaskId, readOnly: true);
+            var inspection = await ReadByInspectionId(inspectionId, readOnly: true);
             if (inspection is null)
             {
                 string errorMessage =
-                    $"Inspection with task ID {isarTaskId} could not be found when trying to update status to {isarTaskStatus}.";
+                    $"Inspection with task ID {inspectionId} could not be found when trying to update status to {isarTaskStatus}.";
                 logger.LogError("{Message}", errorMessage);
                 throw new InspectionNotFoundException(errorMessage);
             }
@@ -104,12 +104,10 @@ namespace Api.Services
             DetachTracking(context, inspection);
         }
 
-        public async Task<Inspection?> ReadByIsarTaskId(string id, bool readOnly = true)
+        public async Task<Inspection?> ReadByInspectionId(string id, bool readOnly = true)
         {
             return await GetInspections(readOnly: readOnly)
-                .FirstOrDefaultAsync(inspection =>
-                    inspection.IsarTaskId != null && inspection.IsarTaskId.Equals(id)
-                );
+                .FirstOrDefaultAsync(inspection => inspection.Id.Equals(id));
         }
 
         private IQueryable<Inspection> GetInspections(bool readOnly = true)
