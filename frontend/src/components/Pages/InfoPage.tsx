@@ -51,7 +51,8 @@ const StyledInfoSection = styled.div`
     background-color: ${tokens.colors.ui.background__default.rgba};
     width: 100vw;
     justify-content: center;
-    align-items: center;
+    align-items: top;
+    gap: 20px;
 
     @media (max-width: 500px) {
         flex-direction: column;
@@ -65,9 +66,11 @@ const StyledInfo = styled.div`
     flex-direction: column;
     width: 50%;
     gap: 2rem;
+    padding-top: 50px;
 
     @media (max-width: 500px) {
         width: 90%;
+        padding-left: 15px;
     }
 `
 
@@ -94,14 +97,6 @@ export const InfoPage = () => {
                             </JustifiedTypography>
                             <JustifiedTypography variant="body_short">
                                 {TranslateText('Info: Autoscheduling..')}
-                            </JustifiedTypography>
-                        </StyledParagraph>
-                        <StyledParagraph>
-                            <JustifiedTypography variant="h4">
-                                {TranslateText('Updating mission tasks')}
-                            </JustifiedTypography>
-                            <JustifiedTypography variant="body_short">
-                                {TranslateText('Info: Updating mission tasks..')}
                             </JustifiedTypography>
                         </StyledParagraph>
                     </StyledInfo>
