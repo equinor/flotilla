@@ -13,7 +13,6 @@ namespace Api.Services
         public Task SendMessageAsync<T>(string label, Installation? installation, T messageObject);
         public Task SendMessageAsync(string label, Installation? installation, string message);
         public void ReportDockFailureToSignalR(Robot robot, string message);
-        public void ReportDockSuccessToSignalR(Robot robot, string message);
         public void ReportGeneralFailToSignalR(Robot robot, string title, string message);
         public void ReportAutoScheduleToSignalR(
             string type,
@@ -86,21 +85,6 @@ namespace Api.Services
                 new AlertResponse(
                     "DockFailure",
                     "Dock failure",
-                    message,
-                    robot.CurrentInstallation.InstallationCode,
-                    robot.Id
-                )
-            );
-        }
-
-        public void ReportDockSuccessToSignalR(Robot robot, string message)
-        {
-            _ = SendMessageAsync(
-                "Alert",
-                robot.CurrentInstallation,
-                new AlertResponse(
-                    "DockSuccess",
-                    "Successful drive to Dock",
                     message,
                     robot.CurrentInstallation.InstallationCode,
                     robot.Id
