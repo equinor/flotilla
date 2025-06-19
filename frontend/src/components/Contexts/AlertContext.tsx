@@ -8,7 +8,7 @@ import { useInstallationContext } from './InstallationContext'
 import { Alert } from 'models/Alert'
 import { useRobotContext } from './RobotContext'
 import { BlockedRobotAlertContent, BlockedRobotAlertListContent } from 'components/Alerts/BlockedRobotAlert'
-import { RobotStatus } from 'models/Robot'
+import { RobotFlotillaStatus, RobotStatus } from 'models/Robot'
 import {
     FailedAlertContent,
     FailedAlertListContent,
@@ -36,7 +36,6 @@ export enum AlertType {
 const alertTypeEnumMap: { [key: string]: AlertType } = {
     DockFailure: AlertType.DockFail,
     generalFailure: AlertType.RequestFail,
-    DockSuccess: AlertType.DockSuccess,
     AutoScheduleFail: AlertType.AutoScheduleFail,
     skipAutoMission: AlertType.InfoAlert,
 }
@@ -250,20 +249,7 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                     return
                 }
 
-                if (alertType === AlertType.DockSuccess) {
-                    setAlert(
-                        alertType,
-                        <DockAlertContent alertType={alertType} alertCategory={AlertCategory.INFO} />,
-                        AlertCategory.INFO
-                    )
-                    clearAlert(AlertType.RequestDock)
-                    setListAlert(
-                        alertType,
-                        <DockAlertListContent alertType={alertType} alertCategory={AlertCategory.INFO} />,
-                        AlertCategory.INFO
-                    )
-                    clearListAlert(AlertType.RequestDock)
-                } else if (alertType === AlertType.InfoAlert) {
+                if (alertType === AlertType.InfoAlert) {
                     setAlert(
                         alertType,
                         <InfoAlertContent title={backendAlert.alertTitle} message={backendAlert.alertMessage} />,
@@ -349,6 +335,52 @@ export const AlertProvider: FC<Props> = ({ children }) => {
             )
         }
     }, [connectionReady, autoScheduleFailedMissionDict])
+
+    const robotsWithFrozenQueue = enabledRobots.filter((robot) => robot.flotillaStatus === RobotFlotillaStatus.Home)
+
+    const getActiveSendToDockAlertType = () => {
+        if (robotsWithFrozenQueue.length === 0) return undefined
+        else if (robotsWithFrozenQueue.find((robot) => robot.status !== RobotStatus.Home)) return AlertType.RequestDock
+        else return AlertType.DockSuccess
+    }
+
+    const [activeSendToDockAlertType, setActiveSendToDockAlertType] = useState<AlertType | undefined>(
+        getActiveSendToDockAlertType()
+    )
+
+    useEffect(() => {
+        let newActiveSendToDockAlertType = getActiveSendToDockAlertType()
+        if (activeSendToDockAlertType === newActiveSendToDockAlertType) return
+
+        if (activeSendToDockAlertType !== undefined && newActiveSendToDockAlertType === undefined) {
+            newActiveSendToDockAlertType = AlertType.DismissDock
+        }
+        setActiveSendToDockAlertType(newActiveSendToDockAlertType)
+    }, [robotsWithFrozenQueue])
+
+    useEffect(() => {
+        clearListAlert(AlertType.DismissDock)
+        clearAlert(AlertType.DismissDock)
+        clearListAlert(AlertType.RequestDock)
+        clearAlert(AlertType.RequestDock)
+        clearListAlert(AlertType.DockSuccess)
+        clearAlert(AlertType.DockSuccess)
+
+        if (activeSendToDockAlertType === undefined) return
+        const alertCategory =
+            activeSendToDockAlertType === AlertType.RequestDock ? AlertCategory.WARNING : AlertCategory.INFO
+
+        setListAlert(
+            AlertType.RequestDock,
+            <DockAlertListContent alertType={activeSendToDockAlertType} alertCategory={alertCategory} />,
+            alertCategory
+        )
+        setAlert(
+            AlertType.RequestDock,
+            <DockAlertContent alertType={activeSendToDockAlertType} alertCategory={alertCategory} />,
+            alertCategory
+        )
+    }, [activeSendToDockAlertType])
 
     return (
         <AlertContext.Provider
