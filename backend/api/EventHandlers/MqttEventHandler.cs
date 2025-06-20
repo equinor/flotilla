@@ -415,6 +415,12 @@ namespace Api.EventHandlers
                         isarMission.MissionId,
                         status
                     );
+                if (isarMission.ErrorDescription is not null)
+                    await MissionRunService.UpdateMissionRunProperty(
+                        updatedFlotillaMissionRun.Id,
+                        "StatusReason",
+                        isarMission.ErrorDescription
+                    );
             }
             catch (MissionRunNotFoundException)
             {

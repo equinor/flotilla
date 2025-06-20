@@ -19,5 +19,12 @@ namespace Api.Mqtt.MessageModels
 
         [JsonPropertyName("timestamp")]
         public DateTime Timestamp { get; set; }
+
+#nullable enable
+        [JsonPropertyName("error_reason")]
+        public string? ErrorReason { get; set; }
+
+        [JsonPropertyName("error_description")]
+        public string? ErrorDescription { get; set; }
     }
 }
