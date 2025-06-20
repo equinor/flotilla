@@ -22,8 +22,6 @@ namespace Api.Test.Mocks
 
         public void ReportDockFailureToSignalR(Robot robot, string message) { }
 
-        public void ReportDockSuccessToSignalR(Robot robot, string message) { }
-
         public void ReportGeneralFailToSignalR(Robot robot, string title, string message) { }
 
         public void ReportAutoScheduleToSignalR(
