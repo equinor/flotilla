@@ -37,6 +37,7 @@
     "Available": "Tilgjengelig",
     "Busy": "Opptatt",
     "Offline": "Frakoblet",
+    "BlockedProtectiveStop": "Ekstern stopp aktiv",
     "Start time": "Starttidspunkt",
     "Time used": "Tid brukt",
     "minutes": "minutter",
