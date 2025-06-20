@@ -37,6 +37,7 @@
     "Available": "Available",
     "Busy": "Busy",
     "Offline": "Offline",
+    "BlockedProtectiveStop": "Remote stop active",
     "Start time": "Start time",
     "Time used": "Time used",
     "minutes": "minutes",
