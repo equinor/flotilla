@@ -3,6 +3,7 @@ using System;
 using Api.Database.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Api.Migrations
 {
     [DbContext(typeof(FlotillaDbContext))]
-    partial class FlotillaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250626114904_AddAnalysisResultToInspections")]
+    partial class AddAnalysisResultToInspections
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -108,6 +111,9 @@ namespace Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("text");
 
+                    b.Property<DateTime?>("EndTime")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("InspectionTargetName")
                         .HasColumnType("text");
 
@@ -123,6 +129,13 @@ namespace Api.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime?>("StartTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<float?>("VideoDuration")
                         .HasColumnType("real");
@@ -322,9 +335,6 @@ namespace Api.Migrations
 
                     b.Property<DateTime?>("EndTime")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("ErrorDescription")
-                        .HasColumnType("text");
 
                     b.Property<string>("InspectionId")
                         .HasColumnType("text");

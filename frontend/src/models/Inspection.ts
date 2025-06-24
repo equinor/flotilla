@@ -31,3 +31,17 @@ export interface SaraInspectionVisualizationReady {
     blobContainer: string
     blobName: string
 }
+
+export interface SaraAnalysisResultReady {
+    inspectionId: string
+    displayText: string
+    analysisType: string
+    value: number
+    unit: string
+    class: string
+    confidence: number
+    warning: string
+    storageAccount: string
+    blobContainer: string
+    blobName: string
+}

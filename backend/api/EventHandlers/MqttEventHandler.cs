@@ -79,6 +79,7 @@ namespace Api.EventHandlers
             MqttService.MqttIsarCloudHealthReceived += OnIsarCloudHealthUpdate;
             MqttService.MqttIsarStartupReceived += OnIsarStartup;
             MqttService.MqttSaraInspectionResultReceived += OnSaraInspectionResultUpdate;
+            MqttService.MqttSaraAnalysisResultMessage += OnSaraAnalysisResultMessage;
         }
 
         public override void Unsubscribe()
@@ -93,6 +94,7 @@ namespace Api.EventHandlers
             MqttService.MqttIsarCloudHealthReceived -= OnIsarCloudHealthUpdate;
             MqttService.MqttIsarStartupReceived -= OnIsarStartup;
             MqttService.MqttSaraInspectionResultReceived -= OnSaraInspectionResultUpdate;
+            MqttService.MqttSaraAnalysisResultMessage -= OnSaraAnalysisResultMessage;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -754,6 +756,58 @@ namespace Api.EventHandlers
                 "Inspection Visulization Ready",
                 installation,
                 inspectionResultMessage
+            );
+        }
+
+        private async void OnSaraAnalysisResultMessage(object? sender, MqttReceivedArgs mqttArgs)
+        {
+            var saraAnalysisResult = (SaraAnalysisResultMessage)mqttArgs.Message;
+
+            var analysisResult = new AnalysisResult
+            {
+                InspectionId = saraAnalysisResult.InspectionId,
+                AnalysisType = saraAnalysisResult.AnalysisType,
+                DisplayText = saraAnalysisResult.DisplayText,
+                Value = saraAnalysisResult.Value,
+                Unit = saraAnalysisResult.Unit,
+                Class = saraAnalysisResult.Class,
+                Warning = saraAnalysisResult.Warning,
+                Confidence = saraAnalysisResult.Confidence,
+                StorageAccount = saraAnalysisResult.StorageAccount,
+                BlobContainer = saraAnalysisResult.BlobContainer,
+                BlobName = saraAnalysisResult.BlobName,
+            };
+
+            var installation = await InstallationService.ReadByInstallationCode(
+                analysisResult.BlobContainer,
+                readOnly: true
+            );
+
+            if (installation == null)
+            {
+                _logger.LogError(
+                    "Installation with code {Code} not found when processing SARA analysis result update",
+                    analysisResult.BlobContainer
+                );
+                return;
+            }
+
+            var inspection = await InspectionService.ReadByIsarInspectionId(analysisResult.InspectionId);
+            if (inspection is null)
+            {
+                _logger.LogError(
+                    "Inspection with ISAR ID {id} not found when processing SARA analysis result update",
+                    analysisResult.InspectionId
+                );
+                return;
+            }
+
+            inspection.AnalysisResult = analysisResult;
+
+            _ = SignalRService.SendMessageAsync(
+                "Analysis Result Ready",
+                installation,
+                analysisResult
             );
         }
     }

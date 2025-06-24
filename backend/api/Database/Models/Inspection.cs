@@ -60,6 +60,8 @@ namespace Api.Database.Models
         [Required]
         public InspectionType InspectionType { get; set; }
 
+        public AnalysisResult AnalysisResult { get; set; }
+
         public float? VideoDuration { get; set; }
 
         [MaxLength(250)]
