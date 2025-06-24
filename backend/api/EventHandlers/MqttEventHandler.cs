@@ -78,6 +78,7 @@ namespace Api.EventHandlers
             MqttService.MqttIsarPoseReceived += OnIsarPoseUpdate;
             MqttService.MqttIsarCloudHealthReceived += OnIsarCloudHealthUpdate;
             MqttService.MqttSaraInspectionResultReceived += OnSaraInspectionResultUpdate;
+            MqttService.MqttSaraAnalysisResultMessage += OnSaraAnalysisResultMessage;
         }
 
         public override void Unsubscribe()
@@ -91,6 +92,7 @@ namespace Api.EventHandlers
             MqttService.MqttIsarPoseReceived -= OnIsarPoseUpdate;
             MqttService.MqttIsarCloudHealthReceived -= OnIsarCloudHealthUpdate;
             MqttService.MqttSaraInspectionResultReceived -= OnSaraInspectionResultUpdate;
+            MqttService.MqttSaraAnalysisResultMessage -= OnSaraAnalysisResultMessage;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -732,6 +734,46 @@ namespace Api.EventHandlers
                 "Inspection Visulization Ready",
                 installation,
                 inspectionResultMessage
+            );
+        }
+
+        private async void OnSaraAnalysisResultMessage(object? sender, MqttReceivedArgs mqttArgs)
+        {
+            var analysisResult = (SaraAnalysisResultMessage)mqttArgs.Message;
+
+            var analysisResultMessage = new AnalysisResultMessage
+            {
+                InspectionId = analysisResult.InspectionId,
+                AnalysisType = analysisResult.AnalysisType,
+                DisplayText = analysisResult.DisplayText,
+                Value = analysisResult.Value,
+                Unit = analysisResult.Unit,
+                Class = analysisResult.Class,
+                Warning = analysisResult.Warning,
+                Confidence = analysisResult.Confidence,
+                StorageAccount = analysisResult.StorageAccount,
+                BlobContainer = analysisResult.BlobContainer,
+                BlobName = analysisResult.BlobName,
+            };
+
+            var installation = await InstallationService.ReadByInstallationCode(
+                analysisResult.BlobContainer,
+                readOnly: true
+            );
+
+            if (installation == null)
+            {
+                _logger.LogError(
+                    "Installation with code {Code} not found when processing SARA analysis result update",
+                    analysisResult.BlobContainer
+                );
+                return;
+            }
+
+            _ = SignalRService.SendMessageAsync(
+                "Analysis Result Ready",
+                installation,
+                analysisResultMessage
             );
         }
     }

@@ -40,3 +40,13 @@ export interface SaraInspectionVisualizationReady {
     blobContainer: string
     blobName: string
 }
+
+export interface SaraAnalysisResultReady {
+    inspectionId: string
+    analysisType: string
+    regressionResult: number
+    classResult: string
+    storageAccount: string
+    blobContainer: string
+    blobName: string
+}
