@@ -175,8 +175,7 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                     const newRecentFailedMissions = missions.content.filter(
                         (m) =>
                             convertUTCDateToLocalDate(new Date(m.endTime!)) > lastDismissTime &&
-                            (!installationCode ||
-                                m.installationCode!.toLocaleLowerCase() !== installationCode.toLocaleLowerCase())
+                            m.installationCode!.toLocaleLowerCase() === installationCode.toLocaleLowerCase()
                     )
                     setRecentFailedMissions(newRecentFailedMissions)
                 })
@@ -209,10 +208,8 @@ export const AlertProvider: FC<Props> = ({ children }) => {
 
                 setRecentFailedMissions((failedMissions) => {
                     if (
-                        installationCode &&
-                        (!newFailedMission.installationCode ||
-                            newFailedMission.installationCode.toLocaleLowerCase() !==
-                                installationCode.toLocaleLowerCase())
+                        !newFailedMission.installationCode ||
+                        newFailedMission.installationCode.toLocaleLowerCase() !== installationCode.toLocaleLowerCase()
                     )
                         return failedMissions // Ignore missions for other installations
                     // Ignore missions shortly after the user dismissed the last one
