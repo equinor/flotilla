@@ -87,6 +87,7 @@ namespace Api.Mqtt
         public static event EventHandler<MqttReceivedArgs>? MqttIsarCloudHealthReceived;
         public static event EventHandler<MqttReceivedArgs>? MqttIsarStartupReceived;
         public static event EventHandler<MqttReceivedArgs>? MqttSaraInspectionResultReceived;
+        public static event EventHandler<MqttReceivedArgs>? MqttSaraAnalysisResultMessage;
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -150,6 +151,9 @@ namespace Api.Mqtt
                     break;
                 case Type type when type == typeof(SaraInspectionResultMessage):
                     OnSaraTopicReceived<SaraInspectionResultMessage>(content);
+                    break;
+                case Type type when type == typeof(SaraAnalysisResultMessage):
+                    OnSaraTopicReceived<SaraAnalysisResultMessage>(content);
                     break;
                 default:
                     _logger.LogWarning(
@@ -343,6 +347,8 @@ namespace Api.Mqtt
                 {
                     _ when type == typeof(SaraInspectionResultMessage) =>
                         MqttSaraInspectionResultReceived,
+                    _ when type == typeof(SaraAnalysisResultMessage) =>
+                        MqttSaraAnalysisResultMessage,
                     _ => throw new NotImplementedException(
                         $"No event defined for message type '{typeof(T).Name}'"
                     ),
