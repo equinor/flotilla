@@ -108,8 +108,10 @@ export const AlertProvider: FC<Props> = ({ children }) => {
     const clearAlerts = () => setAlerts({})
 
     const clearAlert = (source: AlertType) => {
-        if (source === AlertType.MissionFail)
+        if (source === AlertType.MissionFail) {
             sessionStorage.setItem(dismissMissionFailTimeKey, JSON.stringify(Date.now()))
+            setRecentFailedMissions([])
+        }
 
         if (source === AlertType.AutoScheduleFail) {
             setAutoScheduleFailedMissionDict({})
@@ -164,9 +166,6 @@ export const AlertProvider: FC<Props> = ({ children }) => {
         }
     }
 
-    // This variable is needed since the state in the useEffect below uses an outdated alert object
-    const [newFailedMissions, setNewFailedMissions] = useState<Mission[]>([])
-
     // Set the initial failed missions when loading the page or changing installations
     useEffect(() => {
         const updateRecentFailedMissions = () => {
@@ -179,7 +178,6 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                             (!installationCode ||
                                 m.installationCode!.toLocaleLowerCase() !== installationCode.toLocaleLowerCase())
                     )
-                    if (newRecentFailedMissions.length > 0) setNewFailedMissions(newRecentFailedMissions)
                     setRecentFailedMissions(newRecentFailedMissions)
                 })
                 .catch(() => {
@@ -277,20 +275,19 @@ export const AlertProvider: FC<Props> = ({ children }) => {
     }, [registerEvent, connectionReady, installationCode, enabledRobots, autoScheduleFailedMissionDict])
 
     useEffect(() => {
-        if (newFailedMissions.length > 0) {
+        if (recentFailedMissions.length > 0) {
             setAlert(
                 AlertType.MissionFail,
-                <FailedMissionAlertContent missions={newFailedMissions} />,
+                <FailedMissionAlertContent missions={recentFailedMissions} />,
                 AlertCategory.ERROR
             )
             setListAlert(
                 AlertType.MissionFail,
-                <FailedMissionAlertListContent missions={newFailedMissions} />,
+                <FailedMissionAlertListContent missions={recentFailedMissions} />,
                 AlertCategory.ERROR
             )
-            setNewFailedMissions([])
         }
-    }, [newFailedMissions])
+    }, [recentFailedMissions])
 
     useEffect(() => {
         const newBlockedRobotNames = enabledRobots
