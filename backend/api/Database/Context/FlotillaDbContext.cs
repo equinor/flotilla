@@ -20,6 +20,7 @@ namespace Api.Database.Context
         public DbSet<MissionRun> MissionRuns => Set<MissionRun>();
         public DbSet<MissionTask> MissionTasks => Set<MissionTask>();
         public DbSet<Inspection> Inspections => Set<Inspection>();
+        public DbSet<AnalysisResult> AnalysisResults => Set<AnalysisResult>();
         public DbSet<MissionDefinition> MissionDefinitions => Set<MissionDefinition>();
         public DbSet<Plant> Plants => Set<Plant>();
         public DbSet<Installation> Installations => Set<Installation>();

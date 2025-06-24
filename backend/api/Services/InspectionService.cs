@@ -16,6 +16,7 @@ namespace Api.Services
     {
         public Task<byte[]?> FetchInspectionImageFromIsarInspectionId(string isarInspectionId);
         public Task<Inspection?> ReadByInspectionId(string id, bool readOnly = true);
+        public Task<Inspection?> ReadByIsarInspectionId(string id, bool readOnly = true);
     }
 
     [SuppressMessage(
@@ -58,6 +59,12 @@ namespace Api.Services
             throw new UnauthorizedAccessException(
                 "User does not have permission to view inspections"
             );
+        }
+
+        public async Task<Inspection?> ReadByIsarInspectionId(string id, bool readOnly = true)
+        {
+            return await GetInspections(readOnly: readOnly)
+                .FirstOrDefaultAsync(inspection => inspection.IsarInspectionId.Equals(id));
         }
 
         private async Task<SaraInspectionDataResponse> GetInspectionStorageInfo(string inspectionId)
