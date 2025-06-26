@@ -809,7 +809,9 @@ namespace Api.EventHandlers
                 return;
             }
 
-            var inspection = await InspectionService.ReadByIsarInspectionId(analysisResult.InspectionId);
+            var inspection = await InspectionService.ReadByIsarInspectionId(
+                analysisResult.InspectionId
+            );
             if (inspection is null)
             {
                 _logger.LogError(
