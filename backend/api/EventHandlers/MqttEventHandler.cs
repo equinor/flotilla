@@ -413,12 +413,7 @@ namespace Api.EventHandlers
                 updatedFlotillaMissionRun =
                     await MissionRunService.UpdateMissionRunStatusByIsarMissionId(
                         isarMission.MissionId,
-                        status
-                    );
-                if (isarMission.ErrorDescription is not null)
-                    await MissionRunService.UpdateMissionRunProperty(
-                        updatedFlotillaMissionRun.Id,
-                        "StatusReason",
+                        status,
                         isarMission.ErrorDescription
                     );
             }

@@ -65,7 +65,8 @@ namespace Api.Services
 
         public Task<MissionRun> UpdateMissionRunStatusByIsarMissionId(
             string isarMissionId,
-            MissionStatus missionStatus
+            MissionStatus missionStatus,
+            string? errorDescription = null
         );
 
         public Task<MissionRun?> Delete(string id);
@@ -606,7 +607,8 @@ namespace Api.Services
 
         public async Task<MissionRun> UpdateMissionRunStatusByIsarMissionId(
             string isarMissionId,
-            MissionStatus missionStatus
+            MissionStatus missionStatus,
+            string? errorDescription = null
         )
         {
             var missionRun = await ReadByIsarMissionId(isarMissionId, readOnly: true);
@@ -623,6 +625,15 @@ namespace Api.Services
 
             if (missionRun.Status == MissionStatus.Failed)
             {
+                if (errorDescription is not null)
+                {
+                    missionRun = await UpdateMissionRunProperty(
+                        missionRun.Id,
+                        "StatusReason",
+                        errorDescription
+                    );
+                }
+
                 _ = signalRService.SendMessageAsync(
                     "Mission run failed",
                     missionRun?.InspectionArea.Installation,
