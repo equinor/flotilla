@@ -1,6 +1,5 @@
 import { Icon, Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
-import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { AlertType } from 'components/Contexts/AlertContext'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { TextAlignedButton } from 'components/Styles/StyledComponents'
@@ -19,13 +18,12 @@ const StyledAlertTitle = styled.div`
 `
 interface DockBannerProps {
     alertType: AlertType
-    alertCategory: AlertCategory
 }
 
-export const DockAlertContent = ({ alertType, alertCategory }: DockBannerProps) => {
+export const DockAlertContent = ({ alertType }: DockBannerProps) => {
     const { TranslateText } = useLanguageContext()
     const buttonBackgroundColor =
-        alertCategory === AlertCategory.WARNING
+        alertType === AlertType.RequestDock
             ? tokens.colors.interactive.warning__highlight.hex
             : tokens.colors.infographic.primary__mist_blue.hex
 
@@ -34,41 +32,30 @@ export const DockAlertContent = ({ alertType, alertCategory }: DockBannerProps) 
             <StyledAlertTitle>
                 <Icon name="error_outlined" />
                 <Typography>
-                    {alertCategory === AlertCategory.WARNING ? TranslateText('WARNING') : TranslateText('INFO')}
+                    {alertType === AlertType.RequestDock ? TranslateText('WARNING') : TranslateText('INFO')}
                 </Typography>
             </StyledAlertTitle>
             <TextAlignedButton variant="ghost" color="secondary" style={{ backgroundColor: buttonBackgroundColor }}>
-                {alertCategory === AlertCategory.WARNING && TranslateText('Dock banner text')}
-                {alertCategory === AlertCategory.INFO &&
-                    alertType === AlertType.DockSuccess &&
-                    TranslateText('Dock successful text')}
-                {alertCategory === AlertCategory.INFO &&
-                    alertType === AlertType.DismissDock &&
-                    TranslateText('Dismiss dock banner text')}
+                {alertType === AlertType.RequestDock && TranslateText('Dock banner text')}
+                {alertType === AlertType.DockSuccess && TranslateText('Dock successful text')}
+                {alertType === AlertType.DismissDock && TranslateText('Dismiss dock banner text')}
             </TextAlignedButton>
         </StyledDiv>
     )
 }
 
-export const DockAlertListContent = ({ alertType, alertCategory }: DockBannerProps) => {
+export const DockAlertListContent = ({ alertType }: DockBannerProps) => {
     const { TranslateText } = useLanguageContext()
-    let titleMessage = TranslateText('INFO')
+    const isWarning = alertType === AlertType.RequestDock
+    const titleMessage = isWarning ? TranslateText('WARNING') : TranslateText('INFO')
+    const icon = isWarning ? Icons.Warning : Icons.Info
+    const iconColor = isWarning
+        ? tokens.colors.interactive.danger__resting.hex
+        : tokens.colors.text.static_icons__default.hex
+
     let message = TranslateText('Dock banner text')
-    let icon = Icons.Warning
-    let iconColor = tokens.colors.interactive.danger__resting.hex
-    if (alertCategory === AlertCategory.WARNING) titleMessage = TranslateText('WARNING')
-    if (alertCategory === AlertCategory.INFO && alertType === AlertType.DockSuccess)
-        [message, icon, iconColor] = [
-            TranslateText('Dock successful text'),
-            Icons.Info,
-            tokens.colors.text.static_icons__default.hex,
-        ]
-    if (alertCategory === AlertCategory.INFO && alertType === AlertType.DismissDock)
-        [message, icon, iconColor] = [
-            TranslateText('Dismiss dock banner text'),
-            Icons.Info,
-            tokens.colors.text.static_icons__default.hex,
-        ]
+    if (alertType === AlertType.DockSuccess) message = TranslateText('Dock successful text')
+    if (alertType === AlertType.DismissDock) message = TranslateText('Dismiss dock banner text')
 
     return <AlertListContents icon={icon} alertTitle={titleMessage} alertText={message} iconColor={iconColor} />
 }

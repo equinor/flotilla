@@ -372,14 +372,10 @@ export const AlertProvider: FC<Props> = ({ children }) => {
 
         setListAlert(
             AlertType.RequestDock,
-            <DockAlertListContent alertType={activeSendToDockAlertType} alertCategory={alertCategory} />,
+            <DockAlertListContent alertType={activeSendToDockAlertType} />,
             alertCategory
         )
-        setAlert(
-            AlertType.RequestDock,
-            <DockAlertContent alertType={activeSendToDockAlertType} alertCategory={alertCategory} />,
-            alertCategory
-        )
+        setAlert(AlertType.RequestDock, <DockAlertContent alertType={activeSendToDockAlertType} />, alertCategory)
     }, [activeSendToDockAlertType])
 
     return (
