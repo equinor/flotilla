@@ -81,6 +81,7 @@ builder.Services.AddScoped<IBlobService, BlobService>();
 builder.Services.AddScoped<IInstallationService, InstallationService>();
 builder.Services.AddScoped<IPlantService, PlantService>();
 builder.Services.AddScoped<IInspectionAreaService, InspectionAreaService>();
+builder.Services.AddScoped<IAreaPolygonService, AreaPolygonService>();
 
 builder.Services.AddScoped<IErrorHandlingService, ErrorHandlingService>();
 builder.Services.AddScoped<ITaskDurationService, TaskDurationService>();
