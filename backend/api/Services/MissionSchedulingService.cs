@@ -262,7 +262,7 @@ namespace Api.Services
             }
 
             var ongoingMissionRuns = await GetOngoingMissions(robotId, readOnly: true);
-            if (ongoingMissionRuns is null)
+            if (ongoingMissionRuns is null || ongoingMissionRuns.Count == 0)
             {
                 string errorMessage =
                     $"There were no ongoing mission runs to stop for robot {robotId}";
