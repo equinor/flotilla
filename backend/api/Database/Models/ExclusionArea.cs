@@ -1,10 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 #pragma warning disable CS8618
 namespace Api.Database.Models
 {
-    public class InspectionArea
+    public class ExclusionArea
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -16,10 +16,10 @@ namespace Api.Database.Models
         [Required]
         public virtual Installation Installation { get; set; }
 
-        [Required]
         [MaxLength(200)]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
-        public AreaPolygon? AreaPolygon { get; set; }
+        [Required]
+        public AreaPolygon AreaPolygon { get; set; }
     }
 }
