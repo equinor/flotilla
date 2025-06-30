@@ -37,6 +37,11 @@ namespace Api.Services
             bool readOnly = true
         );
 
+        public Task<List<MissionTask>> FilterOutExcludedMissionTasks(
+            IList<MissionTask> missionTasks,
+            string installationCode
+        );
+
         public Task<ExclusionArea> Create(CreateExclusionAreaQuery newExclusionArea);
 
         public Task<ExclusionArea> Update(ExclusionArea exclusionArea);
@@ -61,7 +66,8 @@ namespace Api.Services
         IInstallationService installationService,
         IPlantService plantService,
         IAccessRoleService accessRoleService,
-        ISignalRService signalRService
+        ISignalRService signalRService,
+        IAreaPolygonService areaPolygonService
     ) : IExclusionAreaService
     {
         public async Task<IEnumerable<ExclusionArea>> ReadAll(bool readOnly = true)
@@ -146,6 +152,28 @@ namespace Api.Services
                 )
                 .ToListAsync();
             return exclusionAreas;
+        }
+
+        public async Task<List<MissionTask>> FilterOutExcludedMissionTasks(
+            IList<MissionTask> missionTasks,
+            string installationCode
+        )
+        {
+            var exclusionAreas = await ReadByInstallationCode(installationCode);
+
+            return
+            [
+                .. missionTasks.Where(t =>
+                    !exclusionAreas.Any(e =>
+                        areaPolygonService.IsPositionInsidePolygon(
+                            e.AreaPolygon.Positions,
+                            t.RobotPose.Position,
+                            e.AreaPolygon.ZMin,
+                            e.AreaPolygon.ZMax
+                        )
+                    )
+                ),
+            ];
         }
 
         public async Task<ExclusionArea> Create(CreateExclusionAreaQuery newExclusionAreaQuery)

@@ -69,6 +69,7 @@ builder.Services.AddScoped<IMissionDefinitionTaskService, MissionDefinitionTaskS
 builder.Services.AddScoped<IMissionTaskService, MissionTaskService>();
 builder.Services.AddScoped<IInspectionService, InspectionService>();
 builder.Services.AddScoped<ISourceService, SourceService>();
+builder.Services.AddScoped<IExclusionAreaService, ExclusionAreaService>();
 
 builder.Services.AddScoped<IMissionSchedulingService, MissionSchedulingService>();
 
