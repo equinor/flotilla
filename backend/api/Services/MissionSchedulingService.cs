@@ -33,7 +33,8 @@ namespace Api.Services
         ISignalRService signalRService,
         IErrorHandlingService errorHandlingService,
         IInspectionAreaService inspectionAreaService,
-        IAreaPolygonService areaPolygonService
+        IAreaPolygonService areaPolygonService,
+        IExclusionAreaService exclusionAreaService
     ) : IMissionSchedulingService
     {
         public async Task StartNextMissionRunIfSystemIsAvailable(Robot robot)
@@ -111,6 +112,46 @@ namespace Api.Services
                     robot.Id
                 );
                 return;
+            }
+
+            if (!missionRun.IsEmergencyMission())
+            {
+                missionRun.Tasks = await exclusionAreaService.FilterOutExcludedMissionTasks(
+                    missionRun.Tasks,
+                    missionRun.InstallationCode
+                );
+
+                if (missionRun.Tasks.Count == 0)
+                {
+                    logger.LogWarning(
+                        "MissionRun {RobotName} was not started on robot {RobotId} as all its tasks are in exclusion areas",
+                        missionRun.Id,
+                        robot.Id
+                    );
+                    try
+                    {
+                        await AbortMissionRun(
+                            missionRun,
+                            $"Mission run {missionRun.Id} aborted: All tasks are in exclusion areas"
+                        );
+                    }
+                    catch (RobotNotFoundException)
+                    {
+                        logger.LogError(
+                            "Failed to abort scheduled mission {missionRun.Id} for robot {RobotName} with Id {RobotId}",
+                            missionRun.Id,
+                            robot.Name,
+                            robot.Id
+                        );
+                    }
+                    return;
+                }
+
+                await missionRunService.UpdateMissionRunProperty(
+                    missionRun.Id,
+                    "Tasks",
+                    missionRun.Tasks
+                );
             }
 
             if (
