@@ -27,6 +27,7 @@ namespace Api.Test.Database
         private readonly UserInfoService _userInfoService;
         private readonly SourceService _sourceService;
         private readonly AutoScheduleService _autoScheduleService;
+        private readonly AreaPolygonService _areaPolygonService;
         private readonly string _testInstallationCode = "InstCode";
         private readonly string _testInstallationName = "Installation";
         private readonly string _testPlantCode = "PlantCode";
@@ -45,12 +46,16 @@ namespace Api.Test.Database
                 new Mock<ILogger<MissionTaskService>>().Object
             );
             _plantService = new PlantService(context, _installationService, _accessRoleService);
+            _areaPolygonService = new AreaPolygonService(
+                new Mock<ILogger<AreaPolygonService>>().Object
+            );
             _inspectionAreaService = new InspectionAreaService(
                 context,
                 _installationService,
                 _plantService,
                 _accessRoleService,
                 new MockSignalRService(),
+                _areaPolygonService,
                 new Mock<ILogger<InspectionAreaService>>().Object
             );
             _userInfoService = new UserInfoService(
@@ -208,7 +213,7 @@ namespace Api.Test.Database
             string installationCode,
             string plantCode,
             string inspectionAreaName = "",
-            InspectionAreaPolygon? areaPolygonJson = null
+            AreaPolygon? areaPolygon = null
         )
         {
             if (string.IsNullOrEmpty(inspectionAreaName))
@@ -218,7 +223,7 @@ namespace Api.Test.Database
                 InstallationCode = installationCode,
                 PlantCode = plantCode,
                 Name = inspectionAreaName,
-                AreaPolygonJson = areaPolygonJson,
+                AreaPolygon = areaPolygon,
             };
 
             return await _inspectionAreaService.Create(createInspectionAreaQuery);

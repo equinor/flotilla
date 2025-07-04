@@ -166,7 +166,7 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<InspectionArea>> UpdateInspectionAreaJsonPolygon(
             [FromRoute] string inspectionAreaId,
-            [FromBody] InspectionAreaPolygon areaPolygonJson
+            [FromBody] AreaPolygon areaPolygonJson
         )
         {
             try
@@ -178,8 +178,7 @@ namespace Api.Controllers
                 if (inspectionArea == null)
                     return NotFound($"Could not find inspection area with id {inspectionAreaId}");
 
-                var jsonString = JsonSerializer.Serialize(areaPolygonJson);
-                inspectionArea.AreaPolygonJson = jsonString;
+                inspectionArea.AreaPolygon = areaPolygonJson;
                 var updatedInspectionArea = await inspectionAreaService.Update(inspectionArea);
                 return Ok(inspectionArea);
             }
