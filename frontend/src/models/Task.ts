@@ -14,6 +14,7 @@ export interface Task {
     startTime?: Date
     endTime?: Date
     inspection: Inspection
+    errorDescription?: string
 }
 
 export enum TaskStatus {

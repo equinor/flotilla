@@ -133,6 +133,8 @@ namespace Api.Database.Models
 
         public Inspection? Inspection { get; set; }
 
+        public string? ErrorDescription { get; set; }
+
         public void UpdateWithIsarInfo(IsarTask isarTask)
         {
             if (

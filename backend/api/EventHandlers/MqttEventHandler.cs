@@ -512,7 +512,11 @@ namespace Api.EventHandlers
             MissionTask missionTask;
             try
             {
-                missionTask = await MissionTaskService.UpdateMissionTaskStatus(task.TaskId, status);
+                missionTask = await MissionTaskService.UpdateMissionTaskStatus(
+                    task.TaskId,
+                    status,
+                    task.ErrorDescription
+                );
             }
             catch (MissionTaskNotFoundException)
             {
