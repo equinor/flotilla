@@ -11,7 +11,8 @@ namespace Api.Services
     {
         public Task<MissionTask> UpdateMissionTaskStatus(
             string taskId,
-            IsarTaskStatus isarTaskStatus
+            IsarTaskStatus isarTaskStatus,
+            string? errorDescription = null
         );
 
         public void DetachTracking(FlotillaDbContext context, MissionTask missionTask);
@@ -27,7 +28,8 @@ namespace Api.Services
     {
         public async Task<MissionTask> UpdateMissionTaskStatus(
             string taskId,
-            IsarTaskStatus isarTaskStatus
+            IsarTaskStatus isarTaskStatus,
+            string? errorDescription = null
         )
         {
             var missionTask = await ReadByTaskId(taskId, readOnly: true);
@@ -39,6 +41,11 @@ namespace Api.Services
             }
 
             missionTask.UpdateStatus(isarTaskStatus);
+
+            if (isarTaskStatus == IsarTaskStatus.Failed && errorDescription != null)
+            {
+                missionTask.ErrorDescription = errorDescription;
+            }
             return await Update(missionTask);
         }
 

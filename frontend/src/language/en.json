@@ -327,5 +327,7 @@
     "Switch to list view": "Switch to list view",
     "Scheduled": "Scheduled",
     "Upcoming": "Upcoming",
-    "Completed": "Completed"
+    "Completed": "Completed",
+    "More info": "More info",
+    "Error description": "Error description"
 }

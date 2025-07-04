@@ -24,6 +24,9 @@ namespace Api.Mqtt.MessageModels
         [JsonPropertyName("task_type")]
         public string TaskType { get; set; }
 
+        [JsonPropertyName("error_description")]
+        public string ErrorDescription { get; set; }
+
         [JsonPropertyName("timestamp")]
         public DateTime Timestamp { get; set; }
 

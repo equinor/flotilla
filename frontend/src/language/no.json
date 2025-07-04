@@ -327,5 +327,7 @@
     "Switch to list view": "Bytt til liste visning",
     "Scheduled": "Kommende for i dag",
     "Upcoming": "Kommende",
-    "Completed": "Fullført"
+    "Completed": "Fullført",
+    "More info": "Mer info",
+    "Error description": "Feilmelding"
 }

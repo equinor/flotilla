@@ -75,7 +75,7 @@ const TaskTableRows = ({ tasks, missionDefinitionPage }: TaskTableProps) => {
                             <InspectionTypesDisplay task={task} />
                         </Table.Cell>
                         <Table.Cell>
-                            <TaskStatusDisplay status={task.status} />
+                            <TaskStatusDisplay status={task.status} errorMessage={task.errorDescription} />
                         </Table.Cell>
                     </>
                 )}
