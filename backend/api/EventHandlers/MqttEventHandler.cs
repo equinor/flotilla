@@ -433,14 +433,9 @@ namespace Api.EventHandlers
                 robot.Name,
                 updatedFlotillaMissionRun.Id
             );
-
-            if (updatedFlotillaMissionRun.MissionId == null)
+            if (robot.CurrentMissionId == flotillaMissionRun.Id)
             {
-                _logger.LogInformation(
-                    "Mission run {missionRunId} does not have a mission definition associated with it",
-                    updatedFlotillaMissionRun.Id
-                );
-                return;
+                await RobotService.UpdateCurrentMissionId(robot.Id, null);
             }
 
             try
