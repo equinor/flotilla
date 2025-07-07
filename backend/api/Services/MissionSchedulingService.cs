@@ -319,7 +319,7 @@ namespace Api.Services
                 const string Message = "Error connecting to ISAR while stopping mission";
                 logger.LogError(e, "{Message}", Message);
                 await errorHandlingService.HandleLosingConnectionToIsar(robot.Id);
-                throw new MissionException(Message, (int)e.StatusCode!);
+                throw new MissionException(Message, 0);
             }
             catch (MissionException e)
             {
