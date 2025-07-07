@@ -85,6 +85,7 @@ namespace Api.Mqtt
         public static event EventHandler<MqttReceivedArgs>? MqttIsarPressureReceived;
         public static event EventHandler<MqttReceivedArgs>? MqttIsarPoseReceived;
         public static event EventHandler<MqttReceivedArgs>? MqttIsarCloudHealthReceived;
+        public static event EventHandler<MqttReceivedArgs>? MqttIsarStartupReceived;
         public static event EventHandler<MqttReceivedArgs>? MqttSaraInspectionResultReceived;
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -143,6 +144,9 @@ namespace Api.Mqtt
                     break;
                 case Type type when type == typeof(IsarCloudHealthMessage):
                     OnIsarTopicReceived<IsarCloudHealthMessage>(content);
+                    break;
+                case Type type when type == typeof(IsarStartupMessage):
+                    OnIsarTopicReceived<IsarStartupMessage>(content);
                     break;
                 case Type type when type == typeof(SaraInspectionResultMessage):
                     OnSaraTopicReceived<SaraInspectionResultMessage>(content);
@@ -292,6 +296,7 @@ namespace Api.Mqtt
                     _ when type == typeof(IsarPressureMessage) => MqttIsarPressureReceived,
                     _ when type == typeof(IsarPoseMessage) => MqttIsarPoseReceived,
                     _ when type == typeof(IsarCloudHealthMessage) => MqttIsarCloudHealthReceived,
+                    _ when type == typeof(IsarStartupMessage) => MqttIsarStartupReceived,
                     _ => throw new NotImplementedException(
                         $"No event defined for message type '{typeof(T).Name}'"
                     ),
