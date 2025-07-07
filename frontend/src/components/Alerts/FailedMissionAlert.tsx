@@ -1,22 +1,12 @@
 import { config } from 'config'
 import { Mission, MissionStatus } from 'models/Mission'
-import styled from 'styled-components'
 import { MissionStatusDisplay } from 'components/Displays/MissionDisplays/MissionStatusDisplay'
 import { useNavigate } from 'react-router-dom'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { TextAlignedButton } from 'components/Styles/StyledComponents'
 import { AlertListContents } from './AlertsListItem'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
-
-const Indent = styled.div`
-    padding: 0px 0px 0px 5px;
-`
-const StyledButton = styled(TextAlignedButton)`
-    :hover {
-        background-color: #ff9797;
-    }
-`
+import { AlertContainer, AlertButton } from './AlertStyles'
 
 interface MissionsProps {
     missions: Mission[]
@@ -32,10 +22,10 @@ const FailedMission = ({ missions }: MissionsProps) => {
     }
 
     return (
-        <StyledButton onClick={goToMission} variant="ghost" color="secondary">
+        <AlertButton onClick={goToMission} variant="ghost" color="secondary">
             <strong>{`'${mission.name}'`}</strong> {TranslateText('failed on robot')}{' '}
             <strong>{`'${mission.robot.name}'`}:</strong> {mission.statusReason}
-        </StyledButton>
+        </AlertButton>
     )
 }
 
@@ -48,21 +38,21 @@ const SeveralFailedMissions = ({ missions }: MissionsProps) => {
     }
 
     return (
-        <StyledButton onClick={goToHistory} variant="ghost" color="secondary">
+        <AlertButton onClick={goToHistory} variant="ghost" color="secondary">
             {missions.length.toString() +
                 ' ' +
                 TranslateText("missions failed recently. See 'Mission History' for more information.")}
-        </StyledButton>
+        </AlertButton>
     )
 }
 
 export const FailedMissionAlertContent = ({ missions }: MissionsProps) => {
     return (
-        <Indent>
+        <AlertContainer>
             <MissionStatusDisplay status={MissionStatus.Failed} />
             {missions.length === 1 && <FailedMission missions={missions} />}
             {missions.length > 1 && <SeveralFailedMissions missions={missions} />}
-        </Indent>
+        </AlertContainer>
     )
 }
 

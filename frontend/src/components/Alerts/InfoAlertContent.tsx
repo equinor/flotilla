@@ -1,37 +1,23 @@
-import { Icon, Typography } from '@equinor/eds-core-react'
-import styled from 'styled-components'
+import { Typography } from '@equinor/eds-core-react'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
-import { TextAlignedButton } from 'components/Styles/StyledComponents'
 import { AlertListContents } from './AlertsListItem'
-
-const StyledDiv = styled.div`
-    align-items: center;
-`
-const StyledAlertTitle = styled.div`
-    display: flex;
-    gap: 0.5em;
-    align-items: flex-end;
-`
-const Indent = styled.div`
-    padding: 5px 9px;
-`
+import { AlertContainer, AlertIndent, StyledAlertIcon, StyledAlertTitle } from './AlertStyles'
 
 export const InfoAlertContent = ({ title, message }: { title: string; message: string }) => {
-    const iconColor = tokens.colors.interactive.primary__resting.hex
-
+    const iconColor = tokens.colors.interactive.danger__resting.hex
     return (
-        <StyledDiv>
+        <AlertContainer>
             <StyledAlertTitle>
-                <Icon name={Icons.Info} style={{ color: iconColor }} />
+                <StyledAlertIcon name={Icons.Info} style={{ color: iconColor }} />
                 <Typography>{title}</Typography>
             </StyledAlertTitle>
-            <Indent>
-                <TextAlignedButton variant="ghost" color="secondary">
+            <AlertIndent>
+                <Typography group="navigation" variant="button">
                     {message}
-                </TextAlignedButton>
-            </Indent>
-        </StyledDiv>
+                </Typography>
+            </AlertIndent>
+        </AlertContainer>
     )
 }
 

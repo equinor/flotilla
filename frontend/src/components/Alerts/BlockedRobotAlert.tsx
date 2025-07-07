@@ -1,22 +1,9 @@
-import { Icon, Typography } from '@equinor/eds-core-react'
-import styled from 'styled-components'
+import { Typography } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
-import { TextAlignedButton } from 'components/Styles/StyledComponents'
 import { AlertListContents } from './AlertsListItem'
-
-const StyledDiv = styled.div`
-    align-items: center;
-`
-const StyledAlertTitle = styled.div`
-    display: flex;
-    gap: 0.3em;
-    align-items: flex-end;
-`
-const Indent = styled.div`
-    padding: 0px 9px;
-`
+import { AlertButton, AlertContainer, AlertIndent, StyledAlertIcon, StyledAlertTitle } from './AlertStyles'
 
 interface AlertProps {
     robotNames: string[]
@@ -25,21 +12,24 @@ interface AlertProps {
 export const BlockedRobotAlertContent = ({ robotNames }: AlertProps) => {
     const { TranslateText } = useLanguageContext()
     return (
-        <StyledDiv>
+        <AlertContainer>
             <StyledAlertTitle>
-                <Icon name={Icons.Warning} style={{ color: tokens.colors.interactive.danger__resting.hex }} />
+                <StyledAlertIcon
+                    name={Icons.Warning}
+                    style={{ color: tokens.colors.interactive.danger__resting.hex }}
+                />
                 <Typography>{TranslateText('Robot is blocked')}</Typography>
             </StyledAlertTitle>
-            <Indent>
-                <TextAlignedButton variant="ghost" color="secondary">
+            <AlertIndent>
+                <AlertButton variant="ghost" color="secondary">
                     {robotNames.length === 1 &&
                         `${TranslateText('The robot')} ${robotNames[0]} ${TranslateText(
                             'is blocked and cannot perform tasks'
                         )}.`}
                     {robotNames.length > 1 && TranslateText('Several robots are blocked and cannot perform tasks.')}
-                </TextAlignedButton>
-            </Indent>
-        </StyledDiv>
+                </AlertButton>
+            </AlertIndent>
+        </AlertContainer>
     )
 }
 
