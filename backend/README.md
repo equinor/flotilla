@@ -259,22 +259,3 @@ The connection strings for the AI instances are stored in the keyvault.
 ## Custom Mission Loaders
 
 You can create your own mission loader to fetch missions from some external system. The custom mission loader needs to fulfill the [IMissionLoader](api/Services/MissionLoaders/MissionLoaderInterface.cs) interface. If your mission loader is an external API you might need to add it as a downstream API in [Program.cs](api/Program.cs)
-
-## Authorization
-
-We use role-based access control (RBAC) for authorization.
-
-The access matrix looks like this:
-
-|                            | **Read Only** | **User** | **Admin** |
-| -------------------------- | ------------- | -------- | --------- |
-| InspectionArea             | Read          | Read     | CRUD      |
-| Plant                      | Read          | Read     | CRUD      |
-| Installation               | Read          | Read     | CRUD      |
-| MissionLoader              | Read          | Read     | CRUD      |
-| Missions                   | Read          | Read     | CRUD      |
-| Robots                     | Read          | Read     | CRUD      |
-| Robot Models               | Read          | Read     | CRUD      |
-| Start Missions Directly    | ❌            | ❌       | ✔️        |
-| Stop/Pause/Resume Missions | ❌            | ✔️       | ✔️        |
-| Send Robot to Dock         | ❌            | ✔️       | ✔️        |
