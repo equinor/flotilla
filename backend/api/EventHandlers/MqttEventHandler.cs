@@ -77,6 +77,7 @@ namespace Api.EventHandlers
             MqttService.MqttIsarPressureReceived += OnIsarPressureUpdate;
             MqttService.MqttIsarPoseReceived += OnIsarPoseUpdate;
             MqttService.MqttIsarCloudHealthReceived += OnIsarCloudHealthUpdate;
+            MqttService.MqttIsarStartupReceived += OnIsarStartup;
             MqttService.MqttSaraInspectionResultReceived += OnSaraInspectionResultUpdate;
         }
 
@@ -90,6 +91,7 @@ namespace Api.EventHandlers
             MqttService.MqttIsarPressureReceived -= OnIsarPressureUpdate;
             MqttService.MqttIsarPoseReceived -= OnIsarPoseUpdate;
             MqttService.MqttIsarCloudHealthReceived -= OnIsarCloudHealthUpdate;
+            MqttService.MqttIsarStartupReceived -= OnIsarStartup;
             MqttService.MqttSaraInspectionResultReceived -= OnSaraInspectionResultUpdate;
         }
 
@@ -150,26 +152,6 @@ namespace Api.EventHandlers
 
             if (robot.IsRobotReadyToStartMissions())
             {
-                try
-                {
-                    _updateRobotSemaphore.WaitOne();
-                    _logger.LogDebug("Semaphore acquired for updating robot current mission id");
-
-                    await RobotService.UpdateCurrentMissionId(robot.Id, null);
-                }
-                catch (RobotNotFoundException)
-                {
-                    _logger.LogError(
-                        "Robot {robotName} not found when updating current mission id to null",
-                        robot.Name
-                    );
-                    return;
-                }
-                finally
-                {
-                    _updateRobotSemaphore.Release();
-                    _logger.LogDebug("Semaphore released after updating robot current mission id");
-                }
                 MissionScheduling.TriggerRobotReadyForMissions(
                     new RobotReadyForMissionsEventArgs(robot)
                 );
@@ -699,6 +681,52 @@ namespace Api.EventHandlers
             string message = $"Failed telemetry request for robot {cloudHealthStatus.RobotName}.";
 
             TeamsMessageService.TriggerTeamsMessageReceived(new TeamsMessageEventArgs(message));
+        }
+
+        private async void OnIsarStartup(object? sender, MqttReceivedArgs mqttArgs)
+        {
+            var startupMessage = (IsarStartupMessage)mqttArgs.Message;
+
+            var robot = await RobotService.ReadByIsarId(startupMessage.IsarId, readOnly: true);
+            if (robot == null)
+            {
+                _logger.LogInformation(
+                    "Received message from unknown ISAR instance {Id}",
+                    startupMessage.IsarId
+                );
+                return;
+            }
+
+            _logger.LogInformation(
+                "Received ISAR restart event for robot {robotName} with ISAR id {isarId}. Will restart ongoing missionRun, if any, by moving it back to the queue.",
+                robot.Name,
+                robot.IsarId
+            );
+            try
+            {
+                await MissionScheduling.MoveCurrentMissionRunBackToQueue(robot.Id);
+            }
+            catch (MissionRunNotFoundException)
+            {
+                _logger.LogInformation(
+                    "Tried to restart mission run on isar restarte event. No ongoing mission found."
+                );
+            }
+            catch (MissionException)
+            {
+                _logger.LogError(
+                    "Tried to restart mission run on isar restarte event. Failed to move current mission run back to queue"
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Tried to restart mission run on isar restarte event. Failed to move current mission run back to queue for robot {robotName} with ISAR id {isarId} with unexpected exception",
+                    robot.Name,
+                    robot.IsarId
+                );
+            }
         }
 
         private async void OnSaraInspectionResultUpdate(object? sender, MqttReceivedArgs mqttArgs)
