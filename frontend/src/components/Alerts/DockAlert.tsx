@@ -1,21 +1,11 @@
-import { Icon, Typography } from '@equinor/eds-core-react'
+import { Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import { AlertType } from 'components/Contexts/AlertContext'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { TextAlignedButton } from 'components/Styles/StyledComponents'
-import styled from 'styled-components'
 import { AlertListContents } from './AlertsListItem'
 import { Icons } from 'utils/icons'
+import { AlertContainer, AlertIndent, StyledAlertIcon, StyledAlertTitle } from './AlertStyles'
 
-const StyledDiv = styled.div`
-    flex-direction: column;
-`
-
-const StyledAlertTitle = styled.div`
-    display: flex;
-    gap: 0.3em;
-    align-items: flex-end;
-`
 interface DockBannerProps {
     alertType: AlertType
 }
@@ -28,19 +18,24 @@ export const DockAlertContent = ({ alertType }: DockBannerProps) => {
             : tokens.colors.infographic.primary__mist_blue.hex
 
     return (
-        <StyledDiv>
+        <AlertContainer>
             <StyledAlertTitle>
-                <Icon name="error_outlined" />
+                <StyledAlertIcon
+                    name="error_outlined"
+                    style={{ color: tokens.colors.text.static_icons__secondary.hex }}
+                />
                 <Typography>
                     {alertType === AlertType.RequestDock ? TranslateText('WARNING') : TranslateText('INFO')}
                 </Typography>
             </StyledAlertTitle>
-            <TextAlignedButton variant="ghost" color="secondary" style={{ backgroundColor: buttonBackgroundColor }}>
-                {alertType === AlertType.RequestDock && TranslateText('Dock banner text')}
-                {alertType === AlertType.DockSuccess && TranslateText('Dock successful text')}
-                {alertType === AlertType.DismissDock && TranslateText('Dismiss dock banner text')}
-            </TextAlignedButton>
-        </StyledDiv>
+            <AlertIndent color="secondary" style={{ backgroundColor: buttonBackgroundColor }}>
+                <Typography group="navigation" variant="button">
+                    {alertType === AlertType.RequestDock && TranslateText('Dock banner text')}
+                    {alertType === AlertType.DockSuccess && TranslateText('Dock successful text')}
+                    {alertType === AlertType.DismissDock && TranslateText('Dismiss dock banner text')}
+                </Typography>
+            </AlertIndent>
+        </AlertContainer>
     )
 }
 
