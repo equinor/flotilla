@@ -1,4 +1,4 @@
-import { Button, Table, Typography } from '@equinor/eds-core-react'
+import { Button, Icon, Popover, Table, Typography } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { allDays, allDaysIndexOfToday, DaysOfWeek, parseAutoScheduledJobIds } from 'models/AutoScheduleFrequency'
 import { config } from 'config'
@@ -8,7 +8,9 @@ import { MissionDefinition } from 'models/MissionDefinition'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { Link } from 'react-router-dom'
 import { StyledDialog } from 'components/Styles/StyledComponents'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import { Icons } from 'utils/icons'
+import { tokens } from '@equinor/eds-tokens'
 
 const StyledTableRow = styled.div`
     display: grid;
@@ -20,6 +22,18 @@ const StyledTableRow = styled.div`
 const StyledDialogActions = styled(StyledDialog.Actions)`
     display: flex;
     gap: 5px;
+`
+
+const StyledMissionInfo = styled.div`
+    display: flex;
+    align-items: center;
+    gap: 10px;
+`
+
+const StyledButton = styled(Button)`
+    &&:hover {
+        background-color: ${tokens.colors.ui.background__medium.hex};
+    }
 `
 
 export const skipAutoScheduledMission = async (missionId: string, timeOfDay: string) => {
@@ -67,27 +81,64 @@ export const AutoScheduleMissionTableRow = ({
 }) => {
     const { TranslateText } = useLanguageContext()
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
+    const referenceElement = useRef<HTMLButtonElement>(null)
+    const [isOpen, setIsOpen] = useState(false)
 
     const missionStatusType = selectMissionStatusType(day, time, mission)
 
     const typographyColor =
         missionStatusType === MissionStatusType.SkippedJob || missionStatusType === MissionStatusType.PastJob
-            ? 'disabled'
-            : 'primary'
+            ? tokens.colors.interactive.disabled__text.hex
+            : tokens.colors.interactive.primary__resting.hex
+
+    const handleOpen = () => {
+        setIsOpen(true)
+    }
+    const handleClose = () => {
+        setIsOpen(false)
+    }
 
     return (
         <Table.Row key={mission.id + time}>
             <Table.Cell>
                 <StyledTableRow>
                     <Typography color={typographyColor}>{`${time.substring(0, 5)}`}</Typography>
-                    <Typography
-                        color={typographyColor}
-                        as={Link}
-                        to={`${config.FRONTEND_BASE_ROUTE}/mission-definition/${mission.id}`}
-                        link
-                    >
-                        {mission.name}
-                    </Typography>
+
+                    <StyledMissionInfo>
+                        <Typography
+                            color={typographyColor}
+                            as={Link}
+                            to={`${config.FRONTEND_BASE_ROUTE}/mission-definition/${mission.id}`}
+                            link
+                        >
+                            {mission.name}
+                        </Typography>
+
+                        {mission.comment && (
+                            <>
+                                <StyledButton
+                                    variant="ghost_icon"
+                                    aria-haspopup
+                                    aria-expanded={isOpen}
+                                    ref={referenceElement}
+                                    onClick={handleOpen}
+                                >
+                                    <Icon name={Icons.Info} color={typographyColor} />
+                                </StyledButton>
+
+                                <Popover
+                                    open={isOpen}
+                                    anchorEl={referenceElement.current}
+                                    onClose={handleClose}
+                                    placement="top"
+                                >
+                                    <Popover.Content>
+                                        <Typography variant="body_short">{mission.comment}</Typography>
+                                    </Popover.Content>
+                                </Popover>
+                            </>
+                        )}
+                    </StyledMissionInfo>
                     {(missionStatusType === MissionStatusType.ScheduledJob ||
                         missionStatusType === MissionStatusType.SkippedJob) && (
                         <Button
