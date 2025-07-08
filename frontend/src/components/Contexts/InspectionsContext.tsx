@@ -1,7 +1,7 @@
 import { createContext, FC, useContext, useEffect, useState } from 'react'
 import { Task } from 'models/Task'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
-import { SaraInspectionVisualizationReady } from 'models/Inspection'
+import { SaraAnalysisResultReady, SaraInspectionVisualizationReady } from 'models/Inspection'
 import { useQuery } from '@tanstack/react-query'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { queryClient } from '../../App'
@@ -36,6 +36,15 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
                     queryKey: ['fetchInspectionData', inspectionVisualizationData.inspectionId],
                 })
                 fetchImageData(inspectionVisualizationData.inspectionId)
+            })
+        }
+    }, [registerEvent, connectionReady])
+
+    useEffect(() => {
+        if (connectionReady) {
+            registerEvent(SignalREventLabels.analysisResultReady, (username: string, message: string) => {
+                const analysisResultData: SaraAnalysisResultReady = JSON.parse(message)
+                console.log('Received analysis result ', analysisResultData)
             })
         }
     }, [registerEvent, connectionReady])
