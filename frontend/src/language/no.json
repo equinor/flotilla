@@ -258,6 +258,7 @@
     "Pressure is too high to start a mission.": "Trykket er for høyt til å starte oppdrag.",
     "Pressure is too low to start a mission. Queued missions will run when the pressure is over {0}mBar.": "Trykket er for lavt til å starte oppdrag. Oppdrag i kø vil kjøres når trykket er over {0}mBar.",
     "Pressure is too low to start a mission.": "Trykket er for lavt til å starte oppdrag.",
+    "Robot is sent to dock and cannot run missions. Queued missions will run when robot is dismissed from dock.": "Roboten er sendt til ladestasjon og kan ikke kjøre oppdrag. Oppdrag i kø vil kjøres når roboten slippes ut fra ladestasjon.",
     "Queued Missions": "Oppdragskø",
     "Waiting for inspection result": "Venter på inspeksjonsresultat",
     "Viewing of the inspection type is not supported": "Visning av inspeksjonstypen støttes ikke",
