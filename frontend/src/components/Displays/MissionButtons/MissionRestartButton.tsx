@@ -11,7 +11,6 @@ import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'compon
 import { Mission } from 'models/Mission'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { ScheduleMissionWithInspectionAreaVerification } from '../InspectionAreaVerificationDialogs/ScheduleMissionWithInspectionAreaVerification'
-import { useInstallationContext } from 'components/Contexts/InstallationContext'
 
 const Centered = styled.div`
     display: flex;
@@ -42,11 +41,10 @@ export const MissionRestartButton = ({ mission, hasFailedTasks, smallButton }: M
     const [isLocationVerificationOpen, setIsLocationVerificationOpen] = useState<boolean>(false)
     const [selectedRerunOption, setSelectedRerunOption] = useState<ReRunOptions>()
     const anchorRef = useRef<HTMLButtonElement>(null)
-    const { installationCode } = useInstallationContext()
 
     const navigate = useNavigate()
     const navigateToHome = () => {
-        const path = `${config.FRONTEND_BASE_ROUTE}/${installationCode}`
+        const path = `${config.FRONTEND_BASE_ROUTE}/FrontPage`
         navigate(path)
     }
 
