@@ -25,8 +25,6 @@ namespace Api.Services
 
         public Task<MissionRun?> ReadById(string id, bool readOnly = true);
 
-        public Task<MissionRun?> ReadByIsarMissionId(string isarMissionId, bool readOnly = true);
-
         public Task<IList<MissionRun>> ReadMissionRunQueue(
             string robotId,
             MissionRunType type = MissionRunType.Normal,
@@ -63,8 +61,8 @@ namespace Api.Services
             MissionRunType missionRunType
         );
 
-        public Task<MissionRun> UpdateMissionRunStatusByIsarMissionId(
-            string isarMissionId,
+        public Task<MissionRun> UpdateMissionRunStatus(
+            string missionId,
             MissionStatus missionStatus,
             string? errorDescription = null
         );
@@ -578,18 +576,6 @@ namespace Api.Services
 
         #region ISAR Specific methods
 
-        public async Task<MissionRun?> ReadByIsarMissionId(
-            string isarMissionId,
-            bool readOnly = true
-        )
-        {
-            return await GetMissionRunsWithSubModels(readOnly: readOnly)
-                .FirstOrDefaultAsync(missionRun =>
-                    missionRun.IsarMissionId != null
-                    && missionRun.IsarMissionId.Equals(isarMissionId)
-                );
-        }
-
         public async Task<MissionRun> UpdateMissionRunType(
             string missionRunId,
             MissionRunType missionRunType
@@ -606,16 +592,16 @@ namespace Api.Services
             return await UpdateMissionRunProperty(missionRun.Id, "MissionRunType", missionRunType);
         }
 
-        public async Task<MissionRun> UpdateMissionRunStatusByIsarMissionId(
-            string isarMissionId,
+        public async Task<MissionRun> UpdateMissionRunStatus(
+            string missionId,
             MissionStatus missionStatus,
             string? errorDescription = null
         )
         {
-            var missionRun = await ReadByIsarMissionId(isarMissionId, readOnly: true);
+            var missionRun = await ReadById(missionId, readOnly: true);
             if (missionRun is null)
             {
-                string errorMessage = $"Mission with isar mission Id {isarMissionId} was not found";
+                string errorMessage = $"Mission with isar mission Id {missionId} was not found";
                 logger.LogError("{Message}", errorMessage);
                 throw new MissionRunNotFoundException(errorMessage);
             }
@@ -778,7 +764,6 @@ namespace Api.Services
                     $"Could not find mission run with ID {missionRunId}"
                 );
 
-            missionRun.IsarMissionId = isarMission.IsarMissionId;
             foreach (var isarTask in isarMission.Tasks)
             {
                 var task = missionRun.GetTaskById(isarTask.IsarTaskId);

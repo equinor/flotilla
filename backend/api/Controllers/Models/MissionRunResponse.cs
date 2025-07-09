@@ -9,8 +9,6 @@ namespace Api.Controllers.Models
 
         public string MissionId { get; set; }
 
-        public string? IsarMissionId { get; set; }
-
         public string Name { get; set; }
 
         public string? Description { get; set; }
@@ -51,7 +49,6 @@ namespace Api.Controllers.Models
         {
             Id = mission.Id;
             MissionId = mission.MissionId;
-            IsarMissionId = mission.IsarMissionId;
             Name = mission.Name;
             Description = mission.Description;
             StatusReason = mission.StatusReason;
