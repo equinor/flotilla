@@ -14,7 +14,7 @@ import { MissionHistoryView } from '../MissionHistory/MissionHistoryView'
 import { RobotStatusSection } from '../RobotCards/RobotStatusSection'
 import { Icons } from 'utils/icons'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { config } from 'config'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
 
@@ -89,6 +89,7 @@ export enum TabNames {
 }
 
 export const FrontPage = ({ initialTab }: { initialTab: TabNames }) => {
+    const { installationCode } = useParams()
     const [activeTab, setActiveTab] = useState(initialTab)
     const { TranslateText } = useLanguageContext()
     const { installationInspectionAreas } = useInstallationContext()
@@ -99,7 +100,7 @@ export const FrontPage = ({ initialTab }: { initialTab: TabNames }) => {
     const goToTab = (tabIndex: number) => {
         const tabName = Object.values(TabNames)[tabIndex]
         setActiveTab(tabName)
-        const path = `${config.FRONTEND_BASE_ROUTE}/FrontPage/${tabName}`
+        const path = `${config.FRONTEND_BASE_ROUTE}/${installationCode}/${tabName}`
         navigate(path)
     }
     const getIndexFromTabName = (tabName: TabNames) => {

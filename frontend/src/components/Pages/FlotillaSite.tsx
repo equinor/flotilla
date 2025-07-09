@@ -26,13 +26,13 @@ export const FlotillaSite = () => {
                     <Routes>
                         <Route path={`${config.FRONTEND_BASE_ROUTE}/`} element={<AssetSelectionPage />} />
                         <Route
-                            path={`${config.FRONTEND_BASE_ROUTE}/FrontPage`}
+                            path={`${config.FRONTEND_BASE_ROUTE}/:installationCode`}
                             element={<FrontPage initialTab={frontPageTabOptions[0]} />}
                         />
                         {frontPageTabOptions.map((tab) => (
                             <Route
                                 key={tab}
-                                path={`${config.FRONTEND_BASE_ROUTE}/FrontPage/${tab}`}
+                                path={`${config.FRONTEND_BASE_ROUTE}/:installationCode/${tab}`}
                                 element={<FrontPage initialTab={tab} />}
                             />
                         ))}
