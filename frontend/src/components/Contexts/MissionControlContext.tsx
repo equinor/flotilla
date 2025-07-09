@@ -67,7 +67,6 @@ export const MissionControlProvider: FC<Props> = ({ children }) => {
             case MissionStatusRequest.Pause: {
                 setIsWaitingForResponse(robotId, true)
                 BackendAPICaller.pauseMission(robotId)
-                    .then(() => setIsWaitingForResponse(robotId, false))
                     .catch(() => {
                         setAlert(
                             AlertType.RequestFail,
@@ -83,13 +82,15 @@ export const MissionControlProvider: FC<Props> = ({ children }) => {
                             />,
                             AlertCategory.ERROR
                         )
+                    })
+                    .finally(() => {
+                        setIsWaitingForResponse(robotId, false)
                     })
                 break
             }
             case MissionStatusRequest.Resume: {
                 setIsWaitingForResponse(robotId, true)
                 BackendAPICaller.resumeMission(robotId)
-                    .then(() => setIsWaitingForResponse(robotId, false))
                     .catch(() => {
                         setAlert(
                             AlertType.RequestFail,
@@ -106,12 +107,14 @@ export const MissionControlProvider: FC<Props> = ({ children }) => {
                             AlertCategory.ERROR
                         )
                     })
+                    .finally(() => {
+                        setIsWaitingForResponse(robotId, false)
+                    })
                 break
             }
             case MissionStatusRequest.Stop: {
                 setIsWaitingForResponse(robotId, true)
                 BackendAPICaller.stopMission(robotId)
-                    .then(() => setIsWaitingForResponse(robotId, false))
                     .catch(() => {
                         setAlert(
                             AlertType.RequestFail,
@@ -127,6 +130,9 @@ export const MissionControlProvider: FC<Props> = ({ children }) => {
                             />,
                             AlertCategory.ERROR
                         )
+                    })
+                    .finally(() => {
+                        setIsWaitingForResponse(robotId, false)
                     })
                 break
             }
