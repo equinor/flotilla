@@ -258,6 +258,7 @@
     "Pressure is too high to start a mission.": "Pressure is too high to start a mission.",
     "Pressure is too low to start a mission. Queued missions will run when the pressure is over {0}mBar.": "Pressure is too low to start a mission. Queued missions will run when the pressure is over {0}mBar.",
     "Pressure is too low to start a mission.": "Pressure is too low to start a mission.",
+    "Robot is sent to dock and cannot run missions. Queued missions will run when robot is dismissed from dock.": "Robot is sent to dock and cannot run missions. Queued missions will run when robot is dismissed from dock.",
     "Queued Missions": "Queued Missions",
     "Waiting for inspection result": "Waiting for inspection result",
     "Viewing of the inspection type is not supported": "Viewing of the inspection type is not supported",
