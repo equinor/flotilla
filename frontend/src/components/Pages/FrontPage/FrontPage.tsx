@@ -91,7 +91,7 @@ export enum TabNames {
 export const FrontPage = ({ initialTab }: { initialTab: TabNames }) => {
     const [activeTab, setActiveTab] = useState(initialTab)
     const { TranslateText } = useLanguageContext()
-    const { installationInspectionAreas } = useInstallationContext()
+    const { installationCode, installationInspectionAreas } = useInstallationContext()
 
     redirectIfNoInstallationSelected()
 
