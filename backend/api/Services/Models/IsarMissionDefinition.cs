@@ -11,6 +11,9 @@ namespace Api.Services.Models
     /// </summary>
     public struct IsarMissionDefinition
     {
+        [JsonPropertyName("id")]
+        public string? Id { get; set; }
+
         [JsonPropertyName("name")]
         public string? Name { get; set; }
 
@@ -25,6 +28,7 @@ namespace Api.Services.Models
 
         public IsarMissionDefinition(MissionRun missionRun)
         {
+            Id = missionRun.Id;
             Name = missionRun.Name;
             // Filtering on status to remove completed tasks in case it is a resumed mission
             Tasks =

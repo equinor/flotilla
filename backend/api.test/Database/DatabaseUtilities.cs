@@ -109,7 +109,6 @@ namespace Api.Test.Database
             bool writeToDatabase = false,
             MissionRunType missionRunType = MissionRunType.Normal,
             MissionStatus missionStatus = MissionStatus.Pending,
-            string isarMissionId = "",
             MissionTask[] tasks = null!
         )
         {
@@ -123,14 +122,11 @@ namespace Api.Test.Database
                 writeToDatabase
             );
 
-            if (string.IsNullOrEmpty(isarMissionId))
-                isarMissionId = Guid.NewGuid().ToString();
             var missionRun = new MissionRun
             {
                 Name = "testMission",
                 Robot = robot,
                 MissionId = missionDefinition.Id,
-                IsarMissionId = isarMissionId,
                 MissionRunType = missionRunType,
                 Status = missionStatus,
                 DesiredStartTime = DateTime.UtcNow,

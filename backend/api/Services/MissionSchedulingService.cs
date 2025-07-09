@@ -317,28 +317,24 @@ namespace Api.Services
                 throw new MissionRunNotFoundException(errorMessage);
             }
 
-            var ongoingMissionRunInfos = ongoingMissionRuns
+            var ongoingMissionRunIds = ongoingMissionRuns
                 .Where(missionRun => missionRun.Id == robot.CurrentMissionId)
-                .Select(missionRun => (Id: missionRun.Id, IsarMissionId: missionRun.IsarMissionId))
+                .Select(missionRun => missionRun.Id)
                 .ToList();
 
             try
             {
-                foreach (var ongoingMissionRunInfo in ongoingMissionRunInfos)
+                foreach (var ongoingMissionRunId in ongoingMissionRunIds)
                 {
-                    if (ongoingMissionRunInfo.IsarMissionId != null)
-                    {
-                        logger.LogInformation(
-                            "The Isar mission ID we try to stop is"
-                                + ongoingMissionRunInfo.IsarMissionId
-                        );
-                        await isarService.StopMission(robot, ongoingMissionRunInfo.IsarMissionId);
-                    }
+                    logger.LogInformation(
+                        $"Sending request to stop mission with ID {ongoingMissionRunId}"
+                    );
+                    await isarService.StopMission(robot, ongoingMissionRunId);
 
-                    if (stopReason is not null && ongoingMissionRunInfo.Id != null)
+                    if (stopReason is not null)
                     {
                         await missionRunService.UpdateMissionRunProperty(
-                            ongoingMissionRunInfo.Id,
+                            ongoingMissionRunId,
                             "StatusReason",
                             stopReason
                         );
@@ -369,7 +365,6 @@ namespace Api.Services
                 logger.LogWarning("{Message}", $"No mission was running for robot {robot.Id}");
             }
 
-            var ongoingMissionRunIds = ongoingMissionRunInfos.Select(info => info.Id).ToList();
             await MoveInterruptedMissionsToQueue(ongoingMissionRunIds);
 
             try

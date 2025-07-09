@@ -111,7 +111,6 @@ public static class TestObjectGenerator
         DateTime? startTime = null,
         IList<MissionTask>? tasks = null,
         MissionRunType missionRunType = MissionRunType.Normal,
-        string? isarMissionId = null,
         bool isDeprecated = false
     )
     {
@@ -125,7 +124,6 @@ public static class TestObjectGenerator
             Robot = robot,
             Tasks = tasks ?? [],
             MissionRunType = missionRunType,
-            IsarMissionId = isarMissionId ?? Guid.NewGuid().ToString(),
             InspectionArea = inspectionArea,
             Name = name,
             IsDeprecated = isDeprecated,
