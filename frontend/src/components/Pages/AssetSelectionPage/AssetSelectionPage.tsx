@@ -89,7 +89,6 @@ export const AssetSelectionPage = () => {
 }
 
 export const findNavigationPage = () => {
-    const { installationCode } = useInstallationContext()
     if (window.innerWidth <= 600) {
         return `${config.FRONTEND_BASE_ROUTE}/missionControl`
     } else {

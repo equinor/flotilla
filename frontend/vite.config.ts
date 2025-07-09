@@ -1,25 +1,11 @@
-import { defineConfig } from 'vitest/config';
+import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react-swc'
-import history from 'connect-history-api-fallback'
-import type { Plugin } from 'vite'
 
 // https://vitejs.dev/config/
 export default defineConfig({
   base: './',
   plugins: [
-    react(),
-    {
-      name: 'spa-fallback',
-      configureServer(server) {
-        server.middlewares.use(
-          history({
-            disableDotRule: true,
-            htmlAcceptHeaders: ['text/html', 'application/xhtml+xml'],
-          })
-        );
-      },
-    } as Plugin,
-  ],
+    react()],
   test: {
     environment: 'jsdom',
   },
