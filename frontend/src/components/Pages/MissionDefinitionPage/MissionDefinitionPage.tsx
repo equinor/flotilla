@@ -33,7 +33,6 @@ import {
     StyledDialog,
     TitleComponent,
 } from './MissionDefinitionStyledComponents'
-import { useInstallationContext } from 'components/Contexts/InstallationContext'
 
 const StyledFormCard = styled(FormCard)`
     max-width: 340px;
@@ -213,7 +212,6 @@ export const MissionDefinitionEditDialogContent = ({
     const { setAlert, setListAlert } = useAlertContext()
     const navigate = useNavigate()
     const [form, setForm] = useState<MissionDefinitionUpdateForm>(defaultMissionDefinitionForm)
-    const { installationCode } = useInstallationContext()
 
     const isUpdateButtonDisabled = () => {
         if (fieldName !== 'autoScheduleFrequency') return false
@@ -226,7 +224,7 @@ export const MissionDefinitionEditDialogContent = ({
         BackendAPICaller.updateMissionDefinition(missionDefinition.id, form)
             .then((missionDefinition) => {
                 closeEditDialog()
-                if (missionDefinition.isDeprecated) navigate(`${config.FRONTEND_BASE_ROUTE}/${installationCode}`)
+                if (missionDefinition.isDeprecated) navigate(`${config.FRONTEND_BASE_ROUTE}/FrontPage`)
             })
             .catch(() => {
                 setAlert(

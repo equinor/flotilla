@@ -93,7 +93,7 @@ export const findNavigationPage = () => {
     if (window.innerWidth <= 600) {
         return `${config.FRONTEND_BASE_ROUTE}/missionControl`
     } else {
-        return `${config.FRONTEND_BASE_ROUTE}/${installationCode}`
+        return `${config.FRONTEND_BASE_ROUTE}/FrontPage`
     }
 }
 
