@@ -90,9 +90,9 @@ export const AssetSelectionPage = () => {
 
 export const findNavigationPage = () => {
     if (window.innerWidth <= 600) {
-        return `${config.FRONTEND_BASE_ROUTE}/missionControl`
+        return `${config.FRONTEND_BASE_ROUTE}/mission-control`
     } else {
-        return `${config.FRONTEND_BASE_ROUTE}/FrontPage`
+        return `${config.FRONTEND_BASE_ROUTE}/front-page`
     }
 }
 

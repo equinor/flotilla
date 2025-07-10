@@ -44,7 +44,7 @@ export const MissionRestartButton = ({ mission, hasFailedTasks, smallButton }: M
 
     const navigate = useNavigate()
     const navigateToHome = () => {
-        const path = `${config.FRONTEND_BASE_ROUTE}/FrontPage`
+        const path = `${config.FRONTEND_BASE_ROUTE}/front-page`
         navigate(path)
     }
 
