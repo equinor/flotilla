@@ -27,18 +27,18 @@ export const NavigationMenu = () => {
     const paths =
         installationInspectionAreas.length > 1
             ? [
-                  { path: 'missionControl', label: 'Mission Control' },
+                  { path: 'mission-control', label: 'Mission Control' },
                   { path: 'history', label: 'Mission History' },
-                  { path: 'areaOverview', label: 'Area Overview' },
-                  { path: 'predefinedMissions', label: 'Predefined Missions' },
-                  { path: 'autoSchedule', label: 'Auto Scheduling' },
+                  { path: 'area-overview', label: 'Area Overview' },
+                  { path: 'predefined-missions', label: 'Predefined Missions' },
+                  { path: 'auto-schedule', label: 'Auto Scheduling' },
                   { path: 'robots', label: 'Robots' },
               ]
             : [
-                  { path: 'missionControl', label: 'Mission Control' },
+                  { path: 'mission-control', label: 'Mission Control' },
                   { path: 'history', label: 'Mission History' },
-                  { path: 'predefinedMissions', label: 'Predefined Missions' },
-                  { path: 'autoSchedule', label: 'Auto Scheduling' },
+                  { path: 'predefined-missions', label: 'Predefined Missions' },
+                  { path: 'auto-schedule', label: 'Auto Scheduling' },
                   { path: 'robots', label: 'Robots' },
               ]
 

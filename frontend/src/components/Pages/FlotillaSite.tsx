@@ -26,13 +26,13 @@ export const FlotillaSite = () => {
                     <Routes>
                         <Route path={`${config.FRONTEND_BASE_ROUTE}/`} element={<AssetSelectionPage />} />
                         <Route
-                            path={`${config.FRONTEND_BASE_ROUTE}/FrontPage`}
+                            path={`${config.FRONTEND_BASE_ROUTE}/front-page`}
                             element={<FrontPage initialTab={frontPageTabOptions[0]} />}
                         />
                         {frontPageTabOptions.map((tab) => (
                             <Route
                                 key={tab}
-                                path={`${config.FRONTEND_BASE_ROUTE}/FrontPage-${tab}`}
+                                path={`${config.FRONTEND_BASE_ROUTE}/front-page-${tab}`}
                                 element={<FrontPage initialTab={tab} />}
                             />
                         ))}
@@ -43,16 +43,19 @@ export const FlotillaSite = () => {
                         />
                         <Route path={`${config.FRONTEND_BASE_ROUTE}/history`} element={<MissionHistoryPage />} />
                         <Route path={`${config.FRONTEND_BASE_ROUTE}/robot/:robotId`} element={<RobotPage />} />
-                        <Route path={`${config.FRONTEND_BASE_ROUTE}/missionControl`} element={<MissionControlPage />} />
                         <Route
-                            path={`${config.FRONTEND_BASE_ROUTE}/inspectionOverview`}
+                            path={`${config.FRONTEND_BASE_ROUTE}/mission-control`}
+                            element={<MissionControlPage />}
+                        />
+                        <Route
+                            path={`${config.FRONTEND_BASE_ROUTE}/inspection-overview`}
                             element={<AreaOverviewPage />}
                         />
                         <Route
-                            path={`${config.FRONTEND_BASE_ROUTE}/predefinedMissions`}
+                            path={`${config.FRONTEND_BASE_ROUTE}/predefined-missions`}
                             element={<PredefinedMissionsPage />}
                         />
-                        <Route path={`${config.FRONTEND_BASE_ROUTE}/autoSchedule`} element={<AutoSchedulePage />} />
+                        <Route path={`${config.FRONTEND_BASE_ROUTE}/auto-schedule`} element={<AutoSchedulePage />} />
                         <Route path={`${config.FRONTEND_BASE_ROUTE}/robots`} element={<RobotStatusPage />} />
                         <Route path={`${config.FRONTEND_BASE_ROUTE}/info`} element={<InfoPage />} />
                     </Routes>

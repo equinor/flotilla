@@ -224,7 +224,7 @@ export const MissionDefinitionEditDialogContent = ({
         BackendAPICaller.updateMissionDefinition(missionDefinition.id, form)
             .then((missionDefinition) => {
                 closeEditDialog()
-                if (missionDefinition.isDeprecated) navigate(`${config.FRONTEND_BASE_ROUTE}/FrontPage`)
+                if (missionDefinition.isDeprecated) navigate(`${config.FRONTEND_BASE_ROUTE}/front-page`)
             })
             .catch(() => {
                 setAlert(

@@ -80,12 +80,12 @@ const OngoingMissionsInfo = ({ goToOngoingTab }: { goToOngoingTab: () => void })
 }
 
 export enum TabNames {
-    MissionControl = 'MissionControl',
-    InspectionPlan = 'InspectionPlan',
-    PredefinedMissions = 'PredefinedMissions',
-    MissionHistory = 'MissionHistory',
-    AutoScheduling = 'AutoScheduling',
-    Robots = 'Robots',
+    MissionControl = 'mission-control',
+    InspectionPlan = 'inspection-plan',
+    PredefinedMissions = 'predefined-missions',
+    MissionHistory = 'mission-history',
+    AutoScheduling = 'auto-scheduling',
+    Robots = 'robots',
 }
 
 export const FrontPage = ({ initialTab }: { initialTab: TabNames }) => {
@@ -99,7 +99,7 @@ export const FrontPage = ({ initialTab }: { initialTab: TabNames }) => {
     const goToTab = (tabIndex: number) => {
         const tabName = Object.values(TabNames)[tabIndex]
         setActiveTab(tabName)
-        const path = `${config.FRONTEND_BASE_ROUTE}/FrontPage-${tabName}`
+        const path = `${config.FRONTEND_BASE_ROUTE}/front-page-${tabName}`
         navigate(path)
     }
     const getIndexFromTabName = (tabName: TabNames) => {

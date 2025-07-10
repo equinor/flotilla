@@ -33,7 +33,7 @@ const SeveralFailedMissions = ({ missions }: MissionsProps) => {
     const { TranslateText } = useLanguageContext()
     const navigate = useNavigate()
     const goToHistory = () => {
-        const path = `${config.FRONTEND_BASE_ROUTE}/history`
+        const path = `${config.FRONTEND_BASE_ROUTE}/front-page-history`
         navigate(path)
     }
 
