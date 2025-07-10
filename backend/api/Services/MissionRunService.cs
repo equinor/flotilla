@@ -740,6 +740,13 @@ namespace Api.Services
                     task.Inspection.Status = InspectionStatus.Failed;
                 }
             }
+
+            _ = signalRService.SendMessageAsync(
+                "Mission run failed",
+                missionRun.InspectionArea.Installation,
+                new MissionRunResponse(missionRun)
+            );
+
             await Update(missionRun);
             return missionRun;
         }
