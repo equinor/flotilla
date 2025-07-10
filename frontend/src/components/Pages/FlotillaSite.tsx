@@ -32,7 +32,7 @@ export const FlotillaSite = () => {
                         {frontPageTabOptions.map((tab) => (
                             <Route
                                 key={tab}
-                                path={`${config.FRONTEND_BASE_ROUTE}/FrontPage/${tab}`}
+                                path={`${config.FRONTEND_BASE_ROUTE}/FrontPage-${tab}`}
                                 element={<FrontPage initialTab={tab} />}
                             />
                         ))}

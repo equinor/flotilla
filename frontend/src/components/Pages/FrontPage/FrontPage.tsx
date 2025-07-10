@@ -99,7 +99,7 @@ export const FrontPage = ({ initialTab }: { initialTab: TabNames }) => {
     const goToTab = (tabIndex: number) => {
         const tabName = Object.values(TabNames)[tabIndex]
         setActiveTab(tabName)
-        const path = `${config.FRONTEND_BASE_ROUTE}/FrontPage/${tabName}`
+        const path = `${config.FRONTEND_BASE_ROUTE}/FrontPage-${tabName}`
         navigate(path)
     }
     const getIndexFromTabName = (tabName: TabNames) => {
