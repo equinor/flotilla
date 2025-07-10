@@ -1,4 +1,4 @@
-import { Icon, Typography } from '@equinor/eds-core-react'
+import { Typography } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
@@ -47,7 +47,7 @@ export const FailedAutoMissionAlertContent = ({
     return (
         <AlertContainer>
             <StyledAlertTitle>
-                <Icon name={Icons.Failed} style={{ color: iconColor }} />
+                <StyledAlertIcon name={Icons.Failed} style={{ color: iconColor }} />
                 <Typography>{TranslateText('Failed to Auto Schedule Missions')}</Typography>
             </StyledAlertTitle>
             <AlertIndent>

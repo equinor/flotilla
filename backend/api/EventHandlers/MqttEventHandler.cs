@@ -374,6 +374,23 @@ namespace Api.EventHandlers
                 string errorMessage =
                     $"Mission with isar mission Id {isarMission.MissionId} was not found";
                 _logger.LogError("{Message}", errorMessage);
+
+                var isarRobot = await RobotService.ReadByIsarId(isarMission.IsarId, readOnly: true);
+
+                // Check if return home mission fails
+                if (status == MissionStatus.Failed && isarRobot != null)
+                {
+                    string errorDescription =
+                        isarMission.ErrorDescription ?? "The initiated mission failed";
+                    string reportMessage = $"Failed mission for robot {isarRobot.Name}";
+
+                    SignalRService.ReportGeneralFailToSignalR(
+                        isarRobot,
+                        reportMessage,
+                        errorDescription
+                    );
+                }
+
                 return;
             }
 
