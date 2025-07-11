@@ -19,7 +19,6 @@ namespace Api.Services
             try
             {
                 await missionRunService.UpdateCurrentRobotMissionToFailed(robotId);
-                await robotService.UpdateRobotStatus(robotId, RobotStatus.Offline);
                 await robotService.UpdateCurrentMissionId(robotId, null);
                 await robotService.UpdateRobotIsarConnected(robotId, false);
             }
