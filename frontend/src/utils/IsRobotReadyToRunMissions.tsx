@@ -32,7 +32,11 @@ const isRobotPressureTooLow = (robot: Robot): boolean => {
 export const NoMissionReason = ({ robot }: { robot: Robot }) => {
     const { TranslateText } = useLanguageContext()
     let message = undefined
-    if (isBatteryTooLow(robot)) {
+    if (robot.flotillaStatus === RobotFlotillaStatus.Home) {
+        message = TranslateText(
+            'Robot is sent to dock and cannot run missions. Queued missions will run when robot is dismissed from dock.'
+        )
+    } else if (isBatteryTooLow(robot)) {
         message = robot.model.batteryMissionStartThreshold
             ? TranslateText(
                   'Battery is too low to start a mission. Queued missions will run when the battery is over {0}',
