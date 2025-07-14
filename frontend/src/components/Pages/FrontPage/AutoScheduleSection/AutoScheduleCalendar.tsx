@@ -320,7 +320,7 @@ export const CalendarPro = () => {
                         },
                     })}
                     onDoubleClickEvent={(event) =>
-                        navigate(`${config.FRONTEND_BASE_ROUTE}/mission-definition/${event.metadata.missionId}`)
+                        navigate(`${config.FRONTEND_BASE_ROUTE}/missiondefinition-${event.metadata.missionId}`)
                     }
                 />
             </CalendarWrapper>

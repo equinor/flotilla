@@ -1,5 +1,4 @@
 import { Icon, Typography } from '@equinor/eds-core-react'
-import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 import { BackButton } from 'utils/BackButton'
 import { Header } from 'components/Header/Header'
@@ -101,9 +100,8 @@ const StyledSmallContainer = styled.div`
     }
 `
 
-export const RobotPage = () => {
+export const RobotPage = ({ robotId }: { robotId: string }) => {
     const { TranslateText } = useLanguageContext()
-    const { robotId } = useParams()
     const { enabledRobots } = useRobotContext()
     const { mediaStreams, addMediaStreamConfigIfItDoesNotExist } = useMediaStreamContext()
     const [videoMediaStreams, setVideoMediaStreams] = useState<MediaStreamTrack[]>([])

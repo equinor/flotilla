@@ -108,7 +108,7 @@ export const AutoScheduleMissionTableRow = ({
                         <Typography
                             color={typographyColor}
                             as={Link}
-                            to={`${config.FRONTEND_BASE_ROUTE}/mission-definition/${mission.id}`}
+                            to={`${config.FRONTEND_BASE_ROUTE}/missiondefinition-${mission.id}`}
                             link
                         >
                             {mission.name}

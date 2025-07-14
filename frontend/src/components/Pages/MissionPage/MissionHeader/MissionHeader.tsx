@@ -187,9 +187,7 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
                     )}
                     <Button
                         variant="outlined"
-                        onClick={() =>
-                            navigate(`${config.FRONTEND_BASE_ROUTE}/mission-definition/${mission.missionId}`)
-                        }
+                        onClick={() => navigate(`${config.FRONTEND_BASE_ROUTE}/missiondefinition-${mission.missionId}`)}
                     >
                         {TranslateText('View mission definition')}
                     </Button>
