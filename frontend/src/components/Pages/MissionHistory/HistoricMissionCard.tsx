@@ -57,7 +57,7 @@ export const HistoricMissionCard = ({ index, mission }: IndexedMissionProps) => 
                 <MissionStatusDisplay status={mission.status} />
             </Table.Cell>
             <Table.Cell id={InspectionTableColumns.Name}>
-                <Typography link onClick={() => navigate(`${config.FRONTEND_BASE_ROUTE}/mission/${mission.id}`)}>
+                <Typography link onClick={() => navigate(`${config.FRONTEND_BASE_ROUTE}/mission-${mission.id}`)}>
                     {mission.name}
                 </Typography>
             </Table.Cell>

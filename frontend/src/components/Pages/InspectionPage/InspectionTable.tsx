@@ -189,7 +189,7 @@ const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialo
             <Table.Cell id={InspectionTableColumns.Name}>
                 <Typography
                     link
-                    onClick={() => navigate(`${config.FRONTEND_BASE_ROUTE}/mission-definition/${mission.id}`)}
+                    onClick={() => navigate(`${config.FRONTEND_BASE_ROUTE}/missiondefinition-${mission.id}`)}
                 >
                     {mission.name}
                 </Typography>

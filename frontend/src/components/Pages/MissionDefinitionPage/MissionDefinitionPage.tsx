@@ -1,5 +1,5 @@
 import { ChangeEvent, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { MissionDefinitionHeader } from './MissionDefinitionHeader/MissionDefinitionHeader'
 import { BackButton } from 'utils/BackButton'
 import { BackendAPICaller } from 'api/ApiCaller'
@@ -319,8 +319,7 @@ const MissionDefinitionEditDialog = ({
     )
 }
 
-export const MissionDefinitionPage = () => {
-    const { missionId } = useParams()
+export const MissionDefinitionPage = ({ missionId }: { missionId: string }) => {
     const { missionDefinitions } = useMissionDefinitionsContext()
     const { TranslateText } = useLanguageContext()
     const navigate = useNavigate()
@@ -340,7 +339,7 @@ export const MissionDefinitionPage = () => {
                             disabled={!selectedMissionDefinition.lastSuccessfulRun}
                             onClick={() =>
                                 navigate(
-                                    `${config.FRONTEND_BASE_ROUTE}/mission/${selectedMissionDefinition.lastSuccessfulRun!.id}`
+                                    `${config.FRONTEND_BASE_ROUTE}/mission-${selectedMissionDefinition.lastSuccessfulRun!.id}`
                                 )
                             }
                         >

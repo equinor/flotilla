@@ -1,10 +1,7 @@
 import { config } from 'config'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { FrontPage, TabNames } from './FrontPage/FrontPage'
-import { MissionPage } from './MissionPage/MissionPage'
-import { RobotPage } from './RobotPage/RobotPage'
 import { APIUpdater } from 'components/Contexts/APIUpdater'
-import { MissionDefinitionPage } from './MissionDefinitionPage/MissionDefinitionPage'
 import { AssetSelectionPage } from './AssetSelectionPage/AssetSelectionPage'
 import {
     AutoSchedulePage,
@@ -15,6 +12,7 @@ import {
     RobotStatusPage,
 } from '../NavigationMenu/NavigationMenuPages'
 import { InfoPage } from './InfoPage'
+import { PageRouter } from './PageRouter'
 
 export const FlotillaSite = () => {
     const frontPageTabOptions = Object.values(TabNames)
@@ -36,13 +34,8 @@ export const FlotillaSite = () => {
                                 element={<FrontPage initialTab={tab} />}
                             />
                         ))}
-                        <Route path={`${config.FRONTEND_BASE_ROUTE}/mission/:missionId`} element={<MissionPage />} />
-                        <Route
-                            path={`${config.FRONTEND_BASE_ROUTE}/mission-definition/:missionId`}
-                            element={<MissionDefinitionPage />}
-                        />
+                        <Route path={`${config.FRONTEND_BASE_ROUTE}/:page`} element={<PageRouter />} />
                         <Route path={`${config.FRONTEND_BASE_ROUTE}/history`} element={<MissionHistoryPage />} />
-                        <Route path={`${config.FRONTEND_BASE_ROUTE}/robot/:robotId`} element={<RobotPage />} />
                         <Route
                             path={`${config.FRONTEND_BASE_ROUTE}/mission-control`}
                             element={<MissionControlPage />}

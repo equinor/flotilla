@@ -1,7 +1,6 @@
 import { VideoStreamWindow } from 'components/Pages/MissionPage/VideoStream/VideoStreamWindow'
 import { Mission } from 'models/Mission'
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 import { MissionHeader } from './MissionHeader/MissionHeader'
 import { BackButton } from 'utils/BackButton'
@@ -37,8 +36,7 @@ export const VideoStreamSection = styled.div`
     gap: 1rem;
 `
 
-export const MissionPage = () => {
-    const { missionId } = useParams()
+export const MissionPage = ({ missionId }: { missionId: string }) => {
     const { TranslateText } = useLanguageContext()
     const { setAlert, setListAlert } = useAlertContext()
     const [videoMediaStreams, setVideoMediaStreams] = useState<MediaStreamTrack[]>([])

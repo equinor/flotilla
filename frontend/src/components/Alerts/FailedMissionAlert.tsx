@@ -17,7 +17,7 @@ const FailedMission = ({ missions }: MissionsProps) => {
     const { TranslateText } = useLanguageContext()
     const navigate = useNavigate()
     const goToMission = () => {
-        const path = `${config.FRONTEND_BASE_ROUTE}/mission/${mission.id}`
+        const path = `${config.FRONTEND_BASE_ROUTE}/mission-${mission.id}`
         navigate(path)
     }
 
