@@ -15,6 +15,7 @@ import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import assetImage from 'mediaAssets/assetPage.jpg'
+import { useNavigate } from 'react-router-dom'
 
 const Centered = styled.div`
     display: flex;
@@ -104,11 +105,18 @@ const InstallationPicker = () => {
     const [selectedInstallation, setSelectedInstallation] = useState<string>(installationName)
     const [showActivePlants, setShowActivePlants] = useState<boolean>(true)
     const [updateListOfActivePlants, setUpdateListOfActivePlants] = useState<boolean>(false)
+    const navigate = useNavigate()
 
     const mappedOptions = allPlantsMap ? allPlantsMap : new Map<string, string>()
 
     const validateInstallation = (installationName: string) =>
         Array.from(mappedOptions.keys()).includes(installationName)
+
+    const handleClick = () => {
+        switchInstallation(selectedInstallation)
+        const target = findNavigationPage()
+        navigate(target)
+    }
 
     useEffect(() => {
         if (BackendAPICaller.accessToken) {
@@ -164,11 +172,7 @@ const InstallationPicker = () => {
                 checked={showActivePlants}
                 onChange={(e) => setShowActivePlants(e.target.checked)}
             />
-            <StyledButton
-                onClick={() => switchInstallation(selectedInstallation)}
-                disabled={!selectedInstallation}
-                href={findNavigationPage()}
-            >
+            <StyledButton onClick={() => handleClick()} disabled={!selectedInstallation}>
                 {TranslateText('Confirm installation')}
             </StyledButton>
         </StyledAssetSelection>
