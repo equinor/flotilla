@@ -10,6 +10,7 @@ import { FrontPageSectionId } from 'models/FrontPageSectionId'
 import { NavigationMenu } from 'components/NavigationMenu/NavigationMenu'
 import { findNavigationPage } from 'components/Pages/AssetSelectionPage/AssetSelectionPage'
 import { AlertIcon } from 'components/Header/AlertIcon'
+import { useNavigate } from 'react-router-dom'
 
 const StyledTopBar = styled(TopBar)`
     align-items: center;
@@ -57,6 +58,7 @@ const StyledNavigationMenu = styled.div`
 export const Header = ({ page }: { page: string }) => {
     const { alerts } = useAlertContext()
     const { installationName } = useInstallationContext()
+    const navigate = useNavigate()
 
     return (
         <>
@@ -64,7 +66,7 @@ export const Header = ({ page }: { page: string }) => {
                 <StyledWrapper>
                     <TopBar.Header
                         onClick={() => {
-                            window.location.href = findNavigationPage()
+                            navigate(findNavigationPage())
                         }}
                     >
                         <StyledTopBarHeader>
