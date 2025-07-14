@@ -87,7 +87,7 @@ export const Header = ({ page }: { page: string }) => {
                         <Button
                             variant="ghost_icon"
                             onClick={() => {
-                                window.location.href = `${config.FRONTEND_BASE_ROUTE}/`
+                                navigate(`${config.FRONTEND_BASE_ROUTE}/`)
                             }}
                         >
                             <Icon name={Icons.Platform} size={24} title="Change Asset" />
@@ -95,7 +95,7 @@ export const Header = ({ page }: { page: string }) => {
                         <Button
                             variant="ghost_icon"
                             onClick={() => {
-                                window.location.href = `${config.FRONTEND_BASE_ROUTE}/info`
+                                navigate(`${config.FRONTEND_BASE_ROUTE}/info`)
                             }}
                         >
                             <Icon name={Icons.Info} size={24} title="Info Page" />
