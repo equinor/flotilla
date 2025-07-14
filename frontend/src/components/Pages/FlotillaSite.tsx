@@ -36,7 +36,7 @@ export const FlotillaSite = () => {
                                 element={<FrontPage initialTab={tab} />}
                             />
                         ))}
-                        <Route path={`${config.FRONTEND_BASE_ROUTE}/mission/:missionId`} element={<MissionPage />} />
+                        <Route path={`${config.FRONTEND_BASE_ROUTE}/:missionId`} element={<MissionPage />} />
                         <Route
                             path={`${config.FRONTEND_BASE_ROUTE}/mission-definition/:missionId`}
                             element={<MissionDefinitionPage />}
