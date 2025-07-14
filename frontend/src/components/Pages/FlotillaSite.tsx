@@ -1,5 +1,5 @@
 import { config } from 'config'
-import { HashRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { FrontPage, TabNames } from './FrontPage/FrontPage'
 import { MissionPage } from './MissionPage/MissionPage'
 import { RobotPage } from './RobotPage/RobotPage'
@@ -22,7 +22,7 @@ export const FlotillaSite = () => {
     return (
         <>
             <APIUpdater>
-                <HashRouter>
+                <BrowserRouter>
                     <Routes>
                         <Route path={`${config.FRONTEND_BASE_ROUTE}/`} element={<AssetSelectionPage />} />
                         <Route
@@ -59,7 +59,7 @@ export const FlotillaSite = () => {
                         <Route path={`${config.FRONTEND_BASE_ROUTE}/robots`} element={<RobotStatusPage />} />
                         <Route path={`${config.FRONTEND_BASE_ROUTE}/info`} element={<InfoPage />} />
                     </Routes>
-                </HashRouter>
+                </BrowserRouter>
             </APIUpdater>
         </>
     )
