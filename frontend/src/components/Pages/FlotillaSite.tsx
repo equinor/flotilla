@@ -13,6 +13,7 @@ import {
 } from '../NavigationMenu/NavigationMenuPages'
 import { InfoPage } from './InfoPage'
 import { PageRouter } from './PageRouter'
+import { PageNotFound } from './NotFoundPage'
 
 export const FlotillaSite = () => {
     const frontPageTabOptions = Object.values(TabNames)
@@ -51,6 +52,7 @@ export const FlotillaSite = () => {
                         <Route path={`${config.FRONTEND_BASE_ROUTE}/auto-schedule`} element={<AutoSchedulePage />} />
                         <Route path={`${config.FRONTEND_BASE_ROUTE}/robots`} element={<RobotStatusPage />} />
                         <Route path={`${config.FRONTEND_BASE_ROUTE}/info`} element={<InfoPage />} />
+                        <Route path="*" element={<PageNotFound />} />
                     </Routes>
                 </BrowserRouter>
             </APIUpdater>
