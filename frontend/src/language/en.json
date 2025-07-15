@@ -223,6 +223,7 @@
     "Failed to retrieve robots": "Failed to retrieve robots",
     "Failed to retrieve inspection plans": "Failed to retrieve inspection plan",
     "Failed to retrieve installations": "Failed to retrieve installations",
+    "Failed to retrieve installations from Echo": "Failed to retrieve installations from Echo",
     "Failed to retrieve mission runs": "Failed to retrieve mission runs",
     "Failed to retrieve areas on inspection area {0}": "Failed to retrieve areas on inspection area {0}",
     "Failed to retrieve inspection areas on installation {0}": "Failed to retrieve inspection areas on installation {0}",

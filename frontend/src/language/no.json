@@ -223,6 +223,7 @@
     "Failed to retrieve robots": "Kunne ikke hente liste over roboter",
     "Failed to retrieve inspection plans": "Kunne ikke hente inspeksjonsplanen",
     "Failed to retrieve installations": "Kunne ikke hente installasjoner",
+    "Failed to retrieve installations from Echo": "Kunne ikke hente installasjoner fra Echo",
     "Failed to retrieve mission runs": "Kunne ikke hente oppdrag",
     "Failed to retrieve areas on inspection area {0}": "Kunne ikke hente området på inspeksjonsområde {0}",
     "Failed to retrieve inspection areas on installation {0}": "Kunne ikke hente inspeksjonsområde på installasjon {0}",
