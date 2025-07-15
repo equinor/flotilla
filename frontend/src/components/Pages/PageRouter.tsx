@@ -4,25 +4,20 @@ import { RobotPage } from './RobotPage/RobotPage'
 import { MissionDefinitionPage } from './MissionDefinitionPage/MissionDefinitionPage'
 import { Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
+import { PageNotFound } from './NotFoundPage'
 
-const StyledTypography = styled.div`
-    position: absolute;
-    top: 30%;
-    left: 50%;
-    transform: translate(-70%, -50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+const StyledTypography = styled(Typography)`
+    text-align: center;
     gap: 10px;
 `
+
 export const PageRouter = () => {
     const { page } = useParams()
     if (!page) return InvalidRoute()
 
     const [pageName, id] = page.split(/-(.+)/)
 
-    if (ValidateUUID(id)) return PageNotFound()
+    if (!ValidateUUID(id)) return PageNotFound()
 
     switch (pageName) {
         case 'mission':
@@ -35,24 +30,12 @@ export const PageRouter = () => {
             return PageNotFound()
     }
 }
-const ValidateUUID = (id: string) => {
-    return (id.match(/-/g) || []).length > 4
-}
 
-const PageNotFound = () => {
-    return (
-        <StyledTypography>
-            <Typography variant="h1"> {'404'} </Typography>
-            <Typography variant="h2">{'Page Not Found'}</Typography>
-            <Typography variant="body_short">{"We could't find the page you're looking for."} </Typography>
-        </StyledTypography>
-    )
+const ValidateUUID = (id: string) => {
+    const regex = /^[\da-f]{8}-([\da-f]{4}-){3}[\da-f]{12}$/i
+    return regex.test(id)
 }
 
 const InvalidRoute = () => {
-    return (
-        <StyledTypography>
-            <Typography variant="body_short">Invalid route</Typography>
-        </StyledTypography>
-    )
+    return <StyledTypography variant="body_short">Invalid route</StyledTypography>
 }
