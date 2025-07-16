@@ -59,7 +59,9 @@ namespace Api.Services
                 if (response.StatusCode == HttpStatusCode.Conflict)
                     throw new RobotBusyException("Robot was not available when starting mission");
 
-                (string message, int statusCode) = GetErrorDescriptionFoFailedIsarRequest(response);
+                (string message, int statusCode) = GetErrorDescriptionForFailedIsarRequest(
+                    response
+                );
                 string errorResponse = await response.Content.ReadAsStringAsync();
                 logger.LogError("{Message}: {ErrorResponse}", message, errorResponse);
                 throw new MissionException(message, statusCode);
@@ -109,7 +111,9 @@ namespace Api.Services
                 if (response.StatusCode == HttpStatusCode.Conflict)
                     throw new RobotBusyException("Robot was not available when starting mission");
 
-                (string message, int statusCode) = GetErrorDescriptionFoFailedIsarRequest(response);
+                (string message, int statusCode) = GetErrorDescriptionForFailedIsarRequest(
+                    response
+                );
                 string errorResponse = await response.Content.ReadAsStringAsync();
                 logger.LogError("{Message}: {ErrorResponse}", message, errorResponse);
                 throw new MissionException(message, statusCode);
@@ -127,7 +131,9 @@ namespace Api.Services
 
             if (!response.IsSuccessStatusCode)
             {
-                (string message, int statusCode) = GetErrorDescriptionFoFailedIsarRequest(response);
+                (string message, int statusCode) = GetErrorDescriptionForFailedIsarRequest(
+                    response
+                );
                 string errorResponse = await response.Content.ReadAsStringAsync();
                 if (
                     response.StatusCode == HttpStatusCode.Conflict
@@ -171,7 +177,9 @@ namespace Api.Services
 
             if (!response.IsSuccessStatusCode)
             {
-                (string message, int statusCode) = GetErrorDescriptionFoFailedIsarRequest(response);
+                (string message, int statusCode) = GetErrorDescriptionForFailedIsarRequest(
+                    response
+                );
                 string errorResponse = await response.Content.ReadAsStringAsync();
                 logger.LogError("{Message}: {ErrorResponse}", message, errorResponse);
                 throw new MissionException(message, statusCode);
@@ -203,7 +211,9 @@ namespace Api.Services
 
             if (!response.IsSuccessStatusCode)
             {
-                (string message, int statusCode) = GetErrorDescriptionFoFailedIsarRequest(response);
+                (string message, int statusCode) = GetErrorDescriptionForFailedIsarRequest(
+                    response
+                );
                 string errorResponse = await response.Content.ReadAsStringAsync();
                 logger.LogError("{Message}: {ErrorResponse}", message, errorResponse);
                 throw new MissionException(message, statusCode);
@@ -232,7 +242,9 @@ namespace Api.Services
 
             if (!response.IsSuccessStatusCode)
             {
-                (string message, int statusCode) = GetErrorDescriptionFoFailedIsarRequest(response);
+                (string message, int statusCode) = GetErrorDescriptionForFailedIsarRequest(
+                    response
+                );
                 string errorResponse = await response.Content.ReadAsStringAsync();
                 logger.LogError("{Message}: {ErrorResponse}", message, errorResponse);
                 throw new MissionException(message, statusCode);
@@ -298,7 +310,7 @@ namespace Api.Services
             return response;
         }
 
-        private static (string, int) GetErrorDescriptionFoFailedIsarRequest(
+        private static (string, int) GetErrorDescriptionForFailedIsarRequest(
             HttpResponseMessage response
         )
         {
@@ -325,7 +337,7 @@ namespace Api.Services
 
             if (!response.IsSuccessStatusCode)
             {
-                (string message, _) = GetErrorDescriptionFoFailedIsarRequest(response);
+                (string message, _) = GetErrorDescriptionForFailedIsarRequest(response);
                 string errorResponse = await response.Content.ReadAsStringAsync();
                 logger.LogError("{Message}: {ErrorResponse}", message, errorResponse);
                 throw new ConfigException(message);
