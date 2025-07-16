@@ -293,7 +293,7 @@ namespace Api.Test.EventHandlers
                 {
                     RobotName = robot.Name,
                     IsarId = robot.IsarId,
-                    MissionId = missionRunOnePostCreation.IsarMissionId,
+                    MissionId = missionRunOnePostCreation.Id,
                     Status = "successful",
                     Timestamp = DateTime.UtcNow,
                 }
@@ -348,8 +348,7 @@ namespace Api.Test.EventHandlers
                 inspectionArea,
                 true,
                 MissionRunType.Normal,
-                MissionStatus.Ongoing,
-                Guid.NewGuid().ToString()
+                MissionStatus.Ongoing
             );
             var missionRun2 = await DatabaseUtilities.NewMissionRun(
                 installation.InstallationCode,
@@ -372,7 +371,7 @@ namespace Api.Test.EventHandlers
                 {
                     RobotName = robot.Name,
                     IsarId = robot.IsarId,
-                    MissionId = missionRun1.IsarMissionId,
+                    MissionId = missionRun1.Id,
                     Status = "successful",
                     Timestamp = DateTime.UtcNow,
                 }

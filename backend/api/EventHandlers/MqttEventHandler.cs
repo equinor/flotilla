@@ -365,7 +365,7 @@ namespace Api.EventHandlers
                 return;
             }
 
-            var flotillaMissionRun = await MissionRunService.ReadByIsarMissionId(
+            var flotillaMissionRun = await MissionRunService.ReadById(
                 isarMission.MissionId,
                 readOnly: true
             );
@@ -409,12 +409,11 @@ namespace Api.EventHandlers
             MissionRun updatedFlotillaMissionRun;
             try
             {
-                updatedFlotillaMissionRun =
-                    await MissionRunService.UpdateMissionRunStatusByIsarMissionId(
-                        isarMission.MissionId,
-                        status,
-                        isarMission.ErrorDescription
-                    );
+                updatedFlotillaMissionRun = await MissionRunService.UpdateMissionRunStatus(
+                    isarMission.MissionId,
+                    status,
+                    isarMission.ErrorDescription
+                );
             }
             catch (MissionRunNotFoundException)
             {
@@ -534,10 +533,7 @@ namespace Api.EventHandlers
                 return;
             }
 
-            var missionRun = await MissionRunService.ReadByIsarMissionId(
-                task.MissionId,
-                readOnly: true
-            );
+            var missionRun = await MissionRunService.ReadById(task.MissionId, readOnly: true);
             if (missionRun is null)
             {
                 _logger.LogWarning("Mission run with ID {Id} was not found", task.MissionId);

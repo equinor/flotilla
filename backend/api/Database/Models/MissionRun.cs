@@ -65,9 +65,6 @@ namespace Api.Database.Models
         [Required]
         public MissionRunType MissionRunType { get; set; }
 
-        [MaxLength(200)]
-        public string? IsarMissionId { get; set; }
-
         [MaxLength(450)]
         public string? Description { get; set; }
 
