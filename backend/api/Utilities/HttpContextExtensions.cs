@@ -1,47 +1,23 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+﻿using System.Security.Claims;
 
 namespace Api.Utilities
 {
     public static class HttpContextExtensions
     {
-        public static string GetRequestToken(this HttpContext client)
+        public static List<System.Security.Claims.Claim> GetRequestedRoles(this HttpContext context)
         {
-            if (!client.Request.Headers.TryGetValue("Authorization", out var value))
-            {
-                throw new HttpRequestException("Not a protected endpoint!");
-            }
-
-            return value.ToString().Replace("Bearer ", "", StringComparison.CurrentCulture);
+            return context.User?.Claims.Where(c => c.Type == ClaimTypes.Role).ToList()
+                ?? new List<Claim>();
         }
 
-        public static List<System.Security.Claims.Claim> GetRequestedRoles(this HttpContext client)
+        public static List<Claim> GetRequestedClaims(this HttpContext context)
         {
-            var claims = client.GetRequestedClaims();
-            var roles = claims
-                .Where(c =>
-                    c.Type == "roles" || c.Type.EndsWith("role", StringComparison.CurrentCulture)
-                )
-                .ToList();
-            return roles;
+            return context.User?.Claims.ToList() ?? new List<Claim>();
         }
 
-        public static List<System.Security.Claims.Claim> GetRequestedClaims(this HttpContext client)
+        public static string? GetUserObjectId(this HttpContext context)
         {
-            string accessTokenBase64 = client.GetRequestToken();
-            var handler = new JwtSecurityTokenHandler();
-            var jwtSecurityToken = handler.ReadJwtToken(accessTokenBase64);
-            return jwtSecurityToken.Claims.ToList();
-        }
-
-        public static string? GetUserObjectId(this HttpContext client)
-        {
-            var claims = client.GetRequestedClaims();
-            var objectIdClaim = claims.FirstOrDefault(c => c.Type == "oid");
-            if (objectIdClaim is null)
-            {
-                return null;
-            }
-            return objectIdClaim.Value;
+            return context.User?.FindFirst("oid")?.Value;
         }
     }
 }
