@@ -1,6 +1,6 @@
-﻿using Api.Database.Context;
+﻿using System.Security.Claims;
+using Api.Database.Context;
 using Api.Database.Models;
-using Api.Utilities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Services
@@ -35,24 +35,29 @@ namespace Api.Services
 
         public async Task<List<string>> GetAllowedInstallationCodes()
         {
-            if (httpContextAccessor.HttpContext == null)
+            var user = httpContextAccessor.HttpContext?.User;
+
+            if (user == null)
                 return await context
                     .Installations.AsNoTracking()
                     .Select(i => i.InstallationCode.ToUpperInvariant())
                     .ToListAsync();
 
-            var roles = httpContextAccessor.HttpContext.GetRequestedRoleNames();
+            if (user.IsInRole(SUPER_ADMIN_ROLE_NAME))
+                return await context
+                    .Installations.AsNoTracking()
+                    .Select(i => i.InstallationCode.ToUpperInvariant())
+                    .ToListAsync();
 
-            return await GetAllowedInstallationCodes(roles);
+            var userRoles = user
+                .Claims.Where(c => c.Type == ClaimTypes.Role)
+                .Select(c => c.Value)
+                .ToList();
+            return await GetAllowedInstallationCodes(userRoles);
         }
 
         public async Task<List<string>> GetAllowedInstallationCodes(List<string> roles)
         {
-            if (roles.Contains(SUPER_ADMIN_ROLE_NAME))
-                return await context
-                    .Installations.AsNoTracking()
-                    .Select(i => i.InstallationCode.ToUpperInvariant())
-                    .ToListAsync();
             return await GetAccessRoles(readOnly: true)
                 .Include(r => r.Installation)
                 .Where(r => roles.Contains(r.RoleName))
@@ -69,8 +74,7 @@ namespace Api.Services
                     "Access roles can only be created in authenticated HTTP requests"
                 );
 
-            var roles = httpContextAccessor.HttpContext.GetRequestedRoleNames();
-            if (!roles.Contains(SUPER_ADMIN_ROLE_NAME))
+            if (!httpContextAccessor.HttpContext.User.IsInRole(SUPER_ADMIN_ROLE_NAME))
                 throw new HttpRequestException(
                     "This user is not authorised to create a new access role"
                 );
@@ -118,10 +122,7 @@ namespace Api.Services
 
         public bool IsUserAdmin()
         {
-            if (!IsAuthenticationAvailable())
-                return false;
-            var roles = httpContextAccessor.HttpContext!.GetRequestedRoleNames();
-            return roles.Contains(SUPER_ADMIN_ROLE_NAME);
+            return httpContextAccessor.HttpContext?.User?.IsInRole(SUPER_ADMIN_ROLE_NAME) ?? false;
         }
 
         public bool IsAuthenticationAvailable()
