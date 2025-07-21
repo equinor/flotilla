@@ -8,59 +8,52 @@ import { Icons } from 'utils/icons'
 import { AlertCategory } from './AlertsBanner'
 
 const StyledListContainer = styled.div`
-    isplay: flex;
-    width: 320px;
-    height: auto;
-    justify-content: space-between;
-    align-items: center;
-`
-const outline = styled.div`
+    width: 330px;
+    border-radius: 6px;
     border: 1px solid lightgray;
-`
-const StyledListHeading = styled(outline)`
-    display: flex;
-    height: 40px;
-    align-items: center;
-    justify-content: space-between;
-    padding: 6px 5px 6px 5px;
-    border-radius: 3px 3px 0px 0px;
-`
-const StyledListItem = styled(outline)`
     display: flex;
     flex-direction: column;
-    align-items: left;
-    row-gap: 10px;
-    border-radius: 0px 0px 3px 3px;
-    border-top: none;
-    padding: 5px;
+    gap: 0;
 `
-const HorizontalContent = styled.div`
+
+const StyledListHeading = styled.div`
     display: flex;
-    flex-direction: row;
     align-items: center;
-    column-gap: 4px;
+    gap: 4px;
+    padding: 8px 8px 0 8px;
+    height: 30px;
 `
+
+const StyledListItem = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border-radius: 0 0 3px 3px;
+    padding: 10px;
+`
+
 const StyledIcon = styled(Icon)`
     width: 24px;
-    min-width: 24px;
     height: 24px;
+    flex-shrink: 0;
 `
+
 const Horizontal = styled.div`
     display: flex;
-    flex-direction: row;
     justify-content: space-between;
-    align-items: top;
+    align-items: flex-start;
 `
+
 const Right = styled.div`
     display: flex;
-    align-items: right;
-    justify-content: right;
-    align-content: center;
+    justify-content: flex-end;
+    align-items: center;
 `
+
 const StyledButton = styled(Button)`
-    margin-top: 15px;
-    right: 26px;
+    margin-top: 9px;
     position: absolute;
+    right: 20px;
     height: 30px;
     width: 30px;
     color: black;
@@ -89,10 +82,8 @@ export const AlertListContents = ({ icon, iconColor, alertTitle, alertText, miss
     return (
         <StyledListContainer>
             <StyledListHeading>
-                <HorizontalContent>
-                    <StyledIcon name={icon} style={{ color: iconColor }} />
-                    <Typography variant="h6">{alertTitle}</Typography>
-                </HorizontalContent>
+                <StyledIcon name={icon} style={{ color: iconColor }} />
+                <Typography variant="h6">{alertTitle}</Typography>
             </StyledListHeading>
             <StyledListItem>
                 <Typography variant="body_short">{alertText}</Typography>

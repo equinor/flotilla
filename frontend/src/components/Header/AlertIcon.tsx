@@ -15,21 +15,25 @@ const Circle = styled.div`
     height: 9px;
     border-radius: 50%;
 `
-const StyledAlertPopoverHeader = styled(Popover.Header)`
-    width: 350px;
-`
-const StyledAlertPopoverTitle = styled(Popover.Title)`
-    width: 100%;
+const StyledAlertPopoverHeader = styled.div`
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-right: 0.25em !important;
+    padding: 8px 16px 0px 16px;
+    margin-bottom: -10px;
+    width: 340px;
 `
+
 const StyledAlertList = styled.div`
     display: grid;
     grid-template-rows: repeat(auto-fill);
     align-items: center;
-    gap: 0.5rem;
+    gap: 15px;
+`
+
+const StyledPopover = styled(Popover)`
+    width: 360px;
+    border-radius: 6px;
 `
 
 export const AlertIcon = () => {
@@ -61,19 +65,17 @@ export const AlertIcon = () => {
                         <Circle style={{ background: tokens.colors.interactive.danger__resting.hex }} />
                     )}
             </Button>
-            <Popover
+            <StyledPopover
                 onClose={onAlertClose}
                 open={isAlertDialogOpen}
                 placement={'bottom-end'}
                 anchorEl={referenceElementNotifications.current}
             >
                 <StyledAlertPopoverHeader>
-                    <StyledAlertPopoverTitle>
-                        <Typography variant="h6">{TranslateText('Alerts')}</Typography>
-                        <Button variant={'ghost_icon'} style={{ color: 'black' }} onClick={onAlertClose}>
-                            <Icon name="close" size={24} />
-                        </Button>
-                    </StyledAlertPopoverTitle>
+                    <Typography variant="h4">{TranslateText('Alerts')}</Typography>
+                    <Button variant={'ghost_icon'} style={{ color: 'black' }} onClick={onAlertClose}>
+                        <Icon name="close" size={24} />
+                    </Button>
                 </StyledAlertPopoverHeader>
                 <Popover.Content>
                     {Object.entries(listAlerts).length === 0 && installationName && (
@@ -93,7 +95,7 @@ export const AlertIcon = () => {
                         </StyledAlertList>
                     )}
                 </Popover.Content>
-            </Popover>
+            </StyledPopover>
         </>
     )
 }
