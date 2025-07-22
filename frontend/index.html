@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
     <head>
         <meta charset="utf-8" />
@@ -16,6 +16,15 @@
 
     <body leftmargin="0px" topmargin="0px">
         <noscript>You need to enable JavaScript to run this app.</noscript>
+        <script>
+            window.VITE_AI_CONNECTION_STRING = '${VITE_AI_CONNECTION_STRING}'
+            window.VITE_BACKEND_URL = '${VITE_BACKEND_URL}'
+            window.VITE_BACKEND_API_SCOPE = '${VITE_BACKEND_API_SCOPE}'
+            window.VITE_FRONTEND_URL = '${VITE_FRONTEND_URL}'
+            window.VITE_FRONTEND_BASE_ROUTE = '${VITE_FRONTEND_BASE_ROUTE}'
+            window.VITE_AD_CLIENT_ID = '${VITE_AD_CLIENT_ID}'
+            window.VITE_AD_TENANT_ID = '${VITE_AD_TENANT_ID}'
+        </script>
         <div id="root"></div>
         <script type="module" src="/src/index.tsx"></script>
         <!--
@@ -28,13 +37,4 @@
       To begin the development, run `npm start` or `yarn start`.
       To create a production bundle, use `npm run build` or `yarn build`.
     --></body>
-    <script>
-        window.VITE_AI_CONNECTION_STRING = '${VITE_AI_CONNECTION_STRING}'
-        window.VITE_BACKEND_URL = '${VITE_BACKEND_URL}'
-        window.VITE_BACKEND_API_SCOPE = '${VITE_BACKEND_API_SCOPE}'
-        window.VITE_FRONTEND_URL = '${VITE_FRONTEND_URL}'
-        window.VITE_FRONTEND_BASE_ROUTE = '${VITE_FRONTEND_BASE_ROUTE}'
-        window.VITE_AD_CLIENT_ID = '${VITE_AD_CLIENT_ID}'
-        window.VITE_AD_TENANT_ID = '${VITE_AD_TENANT_ID}'
-    </script>
 </html>
