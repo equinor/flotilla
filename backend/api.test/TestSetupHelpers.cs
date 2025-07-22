@@ -111,4 +111,30 @@ public static class TestSetupHelpers
 
         return client;
     }
+
+    public static UnauthenticatedWebApplicationFactory<Program> ConfigureUnauthenticatedWebApplicationFactory(
+        string? databaseName = null,
+        string? postgreSqlConnectionString = null
+    )
+    {
+        return new UnauthenticatedWebApplicationFactory<Program>(
+            databaseName,
+            postgreSqlConnectionString
+        );
+    }
+
+    public static HttpClient ConfigureUnauthenticatedHttpClient(
+        UnauthenticatedWebApplicationFactory<Program> factory
+    )
+    {
+        var client = factory.CreateClient(
+            new WebApplicationFactoryClientOptions
+            {
+                AllowAutoRedirect = false,
+                BaseAddress = new Uri("http://localhost:8000"),
+            }
+        );
+
+        return client;
+    }
 }
