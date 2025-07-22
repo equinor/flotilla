@@ -7,12 +7,9 @@ namespace Api.Database.Models
 {
     public class Inspection
     {
-        private InspectionStatus _status;
-
         public Inspection()
         {
             InspectionType = InspectionType.Image;
-            Status = InspectionStatus.NotStarted;
             InspectionTarget = new Position();
         }
 
@@ -20,15 +17,13 @@ namespace Api.Database.Models
             InspectionType inspectionType,
             float? videoDuration,
             Position inspectionTarget,
-            string? inspectionTargetName,
-            InspectionStatus status = InspectionStatus.NotStarted
+            string? inspectionTargetName
         )
         {
             InspectionType = inspectionType;
             VideoDuration = videoDuration;
             InspectionTarget = inspectionTarget;
             InspectionTargetName = inspectionTargetName;
-            Status = status;
         }
 
         public Inspection(CustomInspectionQuery inspectionQuery)
@@ -36,19 +31,13 @@ namespace Api.Database.Models
             InspectionType = inspectionQuery.InspectionType;
             InspectionTarget = inspectionQuery.InspectionTarget;
             VideoDuration = inspectionQuery.VideoDuration;
-            Status = InspectionStatus.NotStarted;
         }
 
         // Creates a blank deepcopy of the provided inspection
-        public Inspection(
-            Inspection copy,
-            InspectionStatus? inspectionStatus = null,
-            bool useEmptyID = false
-        )
+        public Inspection(Inspection copy, bool useEmptyID = false)
         {
             Id = useEmptyID ? "" : Guid.NewGuid().ToString();
             IsarInspectionId = useEmptyID ? "" : copy.IsarInspectionId;
-            Status = inspectionStatus ?? copy.Status;
             InspectionType = copy.InspectionType;
             VideoDuration = copy.VideoDuration;
             InspectionUrl = copy.InspectionUrl;
@@ -69,31 +58,6 @@ namespace Api.Database.Models
         public string? InspectionTargetName { get; set; }
 
         [Required]
-        public InspectionStatus Status
-        {
-            get => _status;
-            set
-            {
-                _status = value;
-                if (IsCompleted && EndTime is null)
-                {
-                    EndTime = DateTime.UtcNow;
-                }
-
-                if (_status is InspectionStatus.InProgress && StartTime is null)
-                {
-                    StartTime = DateTime.UtcNow;
-                }
-            }
-        }
-
-        public bool IsCompleted =>
-            _status
-                is InspectionStatus.Cancelled
-                    or InspectionStatus.Successful
-                    or InspectionStatus.Failed;
-
-        [Required]
         public InspectionType InspectionType { get; set; }
 
         public float? VideoDuration { get; set; }
@@ -101,32 +65,12 @@ namespace Api.Database.Models
         [MaxLength(250)]
         public string? InspectionUrl { get; set; }
 
-        public DateTime? StartTime { get; private set; }
-
-        public DateTime? EndTime { get; private set; }
-
         public void UpdateWithIsarInfo(IsarTask isarTask)
         {
             if (isarTask.IsarInspectionId != null)
             {
                 IsarInspectionId = isarTask.IsarInspectionId;
             }
-        }
-
-        public void UpdateStatus(IsarTaskStatus isarStatus)
-        {
-            Status = isarStatus switch
-            {
-                IsarTaskStatus.NotStarted => InspectionStatus.NotStarted,
-                IsarTaskStatus.InProgress => InspectionStatus.InProgress,
-                IsarTaskStatus.Successful => InspectionStatus.Successful,
-                IsarTaskStatus.Cancelled => InspectionStatus.Cancelled,
-                IsarTaskStatus.Failed => InspectionStatus.Failed,
-                IsarTaskStatus.Paused => InspectionStatus.InProgress,
-                _ => throw new ArgumentException(
-                    $"ISAR task status '{isarStatus}' not supported for inspection status"
-                ),
-            };
         }
 
         public bool IsSupportedInspectionType(IList<RobotCapabilitiesEnum> capabilities)
@@ -148,15 +92,6 @@ namespace Api.Database.Models
                 _ => false,
             };
         }
-    }
-
-    public enum InspectionStatus
-    {
-        Successful,
-        InProgress,
-        NotStarted,
-        Failed,
-        Cancelled,
     }
 
     public enum InspectionType

@@ -287,8 +287,7 @@ namespace Api.Services
                     inspectionType: inspection.InspectionType,
                     videoDuration: inspection.TimeInSeconds,
                     inspectionTarget: inspection.InspectionPoint,
-                    inspectionTargetName: inspection.InspectionPointName,
-                    status: InspectionStatus.NotStarted
+                    inspectionTargetName: inspection.InspectionPointName
                 ))
                 .ToList();
 

@@ -3,7 +3,6 @@ import { Position } from './Position'
 export interface Inspection {
     id: string
     isarInspectionId: string
-    status: InspectionStatus
     isCompleted: boolean
     inspectionType: InspectionType
     inspectionTarget: Position
@@ -11,14 +10,6 @@ export interface Inspection {
     inspectionUrl?: string
     startTime?: Date
     endTime?: Date
-}
-
-enum InspectionStatus {
-    Successful = 'Successful',
-    InProgress = 'InProgress',
-    NotStarted = 'NotStarted',
-    Failed = 'Failed',
-    Cancelled = 'Cancelled',
 }
 
 export enum InspectionType {
