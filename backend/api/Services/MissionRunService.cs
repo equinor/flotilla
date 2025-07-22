@@ -349,6 +349,7 @@ namespace Api.Services
                 .ThenInclude(robot => robot.Model)
                 .Include(missionRun => missionRun.Tasks)
                 .ThenInclude(task => task.Inspection)
+                .ThenInclude(inspection => inspection != null ? inspection.AnalysisResult : null)
                 .Include(missionRun => missionRun.Robot)
                 .ThenInclude(robot => robot.CurrentInstallation)
                 .Where(m =>
