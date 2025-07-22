@@ -2,7 +2,6 @@
 using System.Globalization;
 using System.Net;
 using System.Text.Json;
-using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
 using Api.Services.Models;
@@ -19,7 +18,12 @@ namespace Api.Services
             string inspectionId,
             IsarTaskStatus isarTaskStatus
         );
+        public Task<Inspection> UpdateInspectionAnalysisResults(
+            string inspectionId,
+            AnalysisResult analysisResult
+        );
         public Task<Inspection?> ReadByInspectionId(string id, bool readOnly = true);
+        public Task<Inspection?> ReadByIsarInspectionId(string id, bool readOnly = true);
     }
 
     [SuppressMessage(
@@ -67,6 +71,47 @@ namespace Api.Services
             return inspection;
         }
 
+        public async Task<Inspection> UpdateInspectionAnalysisResults(
+            string inspectionId,
+            AnalysisResult analysisResult
+        )
+        {
+            var inspection = await ReadByInspectionId(inspectionId, readOnly: true);
+            if (inspection is null)
+            {
+                string errorMessage =
+                    $"Inspection with task ID {inspectionId} could not be found when trying to update analysis result.";
+                logger.LogError("{Message}", errorMessage);
+                throw new InspectionNotFoundException(errorMessage);
+            }
+
+            var existingAnalysisResult = context
+                .AnalysisResults.Where(a => a.InspectionId == inspectionId)
+                .FirstOrDefault();
+
+            if (existingAnalysisResult == null)
+            {
+                context.AnalysisResults.Add(analysisResult);
+                inspection.AnalysisResult = analysisResult;
+                await Update(inspection);
+                return inspection;
+            }
+            else if (
+                inspection.AnalysisResult == null
+                || inspection.AnalysisResult.InspectionId == existingAnalysisResult.InspectionId
+            )
+            {
+                inspection.AnalysisResult = existingAnalysisResult;
+                context.Update(inspection.AnalysisResult);
+                await Update(inspection);
+                return inspection;
+            }
+            else
+            {
+                return inspection;
+            }
+        }
+
         private async Task ApplyDatabaseUpdate(Installation? installation)
         {
             var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes();
@@ -112,13 +157,18 @@ namespace Api.Services
 
         private IQueryable<Inspection> GetInspections(bool readOnly = true)
         {
+            var query = context.Inspections.Include(i => i.AnalysisResult);
             if (accessRoleService.IsUserAdmin() || !accessRoleService.IsAuthenticationAvailable())
-                return (
-                    readOnly ? context.Inspections.AsNoTracking() : context.Inspections.AsTracking()
-                );
+                return (readOnly ? query.AsNoTracking() : query.AsTracking());
             throw new UnauthorizedAccessException(
                 "User does not have permission to view inspections"
             );
+        }
+
+        public async Task<Inspection?> ReadByIsarInspectionId(string id, bool readOnly = true)
+        {
+            return await GetInspections(readOnly: readOnly)
+                .FirstOrDefaultAsync(inspection => inspection.IsarInspectionId.Equals(id));
         }
 
         private async Task<SaraInspectionDataResponse> GetInspectionStorageInfo(string inspectionId)
