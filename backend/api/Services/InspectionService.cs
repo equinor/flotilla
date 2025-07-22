@@ -15,10 +15,6 @@ namespace Api.Services
     public interface IInspectionService
     {
         public Task<byte[]?> FetchInspectionImageFromIsarInspectionId(string isarInspectionId);
-        public Task<Inspection> UpdateInspectionStatus(
-            string inspectionId,
-            IsarTaskStatus isarTaskStatus
-        );
         public Task<Inspection?> ReadByInspectionId(string id, bool readOnly = true);
     }
 
@@ -29,7 +25,6 @@ namespace Api.Services
     )]
     public class InspectionService(
         FlotillaDbContext context,
-        ILogger<InspectionService> logger,
         IDownstreamApi saraApi,
         IAccessRoleService accessRoleService,
         IBlobService blobService
@@ -46,62 +41,6 @@ namespace Api.Services
                 inspectionData.BlobContainer,
                 inspectionData.StorageAccount
             );
-        }
-
-        public async Task<Inspection> UpdateInspectionStatus(
-            string inspectionId,
-            IsarTaskStatus isarTaskStatus
-        )
-        {
-            var inspection = await ReadByInspectionId(inspectionId, readOnly: true);
-            if (inspection is null)
-            {
-                string errorMessage =
-                    $"Inspection with task ID {inspectionId} could not be found when trying to update status to {isarTaskStatus}.";
-                logger.LogError("{Message}", errorMessage);
-                throw new InspectionNotFoundException(errorMessage);
-            }
-
-            inspection.UpdateStatus(isarTaskStatus);
-            await Update(inspection);
-            return inspection;
-        }
-
-        private async Task ApplyDatabaseUpdate(Installation? installation)
-        {
-            var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes();
-            if (
-                installation == null
-                || accessibleInstallationCodes.Contains(
-                    installation.InstallationCode.ToUpper(CultureInfo.CurrentCulture)
-                )
-            )
-                await context.SaveChangesAsync();
-            else
-                throw new UnauthorizedAccessException(
-                    $"User does not have permission to update area in installation {installation.Name}"
-                );
-        }
-
-        private async Task Update(Inspection inspection)
-        {
-            var entry = context.Update(inspection);
-
-            var missionRun = await context
-                .MissionRuns.Include(missionRun => missionRun.InspectionArea)
-                .ThenInclude(area => area != null ? area.Installation : null)
-                .Include(missionRun => missionRun.Robot)
-                .Where(missionRun =>
-                    missionRun.Tasks.Any(missionTask =>
-                        missionTask.Inspection != null && missionTask.Inspection.Id == inspection.Id
-                    )
-                )
-                .AsNoTracking()
-                .FirstOrDefaultAsync();
-            var installation = missionRun?.InspectionArea.Installation;
-
-            await ApplyDatabaseUpdate(installation);
-            DetachTracking(context, inspection);
         }
 
         public async Task<Inspection?> ReadByInspectionId(string id, bool readOnly = true)
@@ -171,11 +110,6 @@ namespace Api.Services
             throw new InspectionNotFoundException(
                 "Unexpected error when trying to get inspection data"
             );
-        }
-
-        public void DetachTracking(FlotillaDbContext context, Inspection inspection)
-        {
-            context.Entry(inspection).State = EntityState.Detached;
         }
     }
 }

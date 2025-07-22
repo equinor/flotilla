@@ -734,11 +734,6 @@ namespace Api.Services
             foreach (var task in missionRun.Tasks.Where(task => !task.IsCompleted))
             {
                 task.Status = Database.Models.TaskStatus.Failed;
-
-                if (task.Inspection != null && !task.Inspection.IsCompleted)
-                {
-                    task.Inspection.Status = InspectionStatus.Failed;
-                }
             }
 
             _ = signalRService.SendMessageAsync(

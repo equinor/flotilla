@@ -74,7 +74,7 @@ namespace Api.Database.Models
             IsarZoomDescription = copy.IsarZoomDescription;
             if (copy.Inspection is not null)
             {
-                Inspection = new Inspection(copy.Inspection, InspectionStatus.NotStarted);
+                Inspection = new Inspection(copy.Inspection);
             }
         }
 

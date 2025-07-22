@@ -517,23 +517,6 @@ namespace Api.EventHandlers
                 return;
             }
 
-            try
-            {
-                if (missionTask.Inspection is null)
-                {
-                    _logger.LogWarning(
-                        "Inspection for task {taskId} is null, cannot update inspection status",
-                        task.TaskId
-                    );
-                    return;
-                }
-                await InspectionService.UpdateInspectionStatus(missionTask.Inspection.Id, status);
-            }
-            catch (InspectionNotFoundException)
-            {
-                return;
-            }
-
             var missionRun = await MissionRunService.ReadByIsarMissionId(
                 task.MissionId,
                 readOnly: true
