@@ -529,6 +529,7 @@ namespace Api.Database.Context
             {
                 task.Inspection = inspections[0];
             }
+            missionRuns[0].Tasks = tasks;
             context.AddRange(tasks);
             context.AddRange(missionDefinitions);
             context.AddRange(missionRuns);

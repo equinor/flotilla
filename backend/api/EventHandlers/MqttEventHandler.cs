@@ -823,6 +823,8 @@ namespace Api.EventHandlers
 
             inspection.AnalysisResult = analysisResult;
 
+            await InspectionService.UpdateInspectionAnalysisResults(inspection.Id, analysisResult);
+
             _ = SignalRService.SendMessageAsync(
                 "Analysis Result Ready",
                 installation,
