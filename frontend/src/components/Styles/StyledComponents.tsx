@@ -1,6 +1,7 @@
 import { Button, Dialog, Table, Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import styled from 'styled-components'
+import { phone_width } from 'utils/constants'
 
 export const StyledDialog = styled(Dialog)`
     width: calc(100vw * 0.8);
@@ -33,7 +34,7 @@ export const StyledPage = styled.div`
     flex-direction: column;
     gap: 1rem;
     padding: 2rem;
-    @media (max-width: 600px) {
+    @media (max-width: ${phone_width}) {
         padding: 0.7rem;
     }
     min-height: calc(100vh - 65px);

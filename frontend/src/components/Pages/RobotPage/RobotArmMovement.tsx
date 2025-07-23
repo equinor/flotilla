@@ -6,6 +6,7 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { tokens } from '@equinor/eds-tokens'
 import styled from 'styled-components'
 import { StyledButton, StyledDialog } from 'components/Styles/StyledComponents'
+import { phone_width } from 'utils/constants'
 
 interface RobotProps {
     robot: Robot
@@ -30,7 +31,7 @@ const RobotArmMovementSection = styled.div`
     display: flex;
     flex-direction: row;
     gap: 1rem;
-    @media (max-width: 600px) {
+    @media (max-width: ${phone_width}) {
         flex-direction: column;
     }
     margin: 0.5rem 0rem;

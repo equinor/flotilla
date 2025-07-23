@@ -12,6 +12,7 @@ import { MissionDefinitionEditDialogContent } from 'components/Pages/MissionDefi
 import { MissionDefinition } from 'models/MissionDefinition'
 import { AutoScheduleMissionTableRow } from './AutoScheduleMissionTableRow'
 import { CalendarPro } from './AutoScheduleCalendar'
+import { phone_width } from 'utils/constants'
 
 const StyledSection = styled.div`
     display: flex;
@@ -19,7 +20,7 @@ const StyledSection = styled.div`
     max-width: 960px;
     gap: 1rem;
 
-    @media (min-width: 600px) {
+    @media (min-width: ${phone_width}) ) {
         min-width: 90vw;
     }
 `
@@ -36,20 +37,20 @@ const StyledContent = styled.div`
     flex-direction: column;
     gap: 30px;
     align-items: end;
-    @media (max-width: 600px) {
+    @media (max-width: ${phone_width}) {
         align-items: start;
     }
     max-width: 95%;
 `
 
 const StyledDesktopView = styled.div`
-    @media (max-width: 600px) {
+    @media (max-width: ${phone_width}) {
         display: none;
     }
 `
 
 const StyledPhoneView = styled.div`
-    @media (min-width: 600px) {
+    @media (min-width: ${phone_width}) ) {
         display: none;
     }
 `

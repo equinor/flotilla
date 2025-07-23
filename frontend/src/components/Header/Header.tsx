@@ -11,11 +11,12 @@ import { NavigationMenu } from 'components/NavigationMenu/NavigationMenu'
 import { findNavigationPage } from 'components/Pages/AssetSelectionPage/AssetSelectionPage'
 import { AlertIcon } from 'components/Header/AlertIcon'
 import { useNavigate } from 'react-router-dom'
+import { phone_width } from 'utils/constants'
 
 const StyledTopBar = styled(TopBar)`
     align-items: center;
     box-shadow: none;
-    @media (max-width: 600px) {
+    @media (max-width: ${phone_width}) {
         grid-column-gap: 12px;
     }
     height: fit-content;
@@ -50,7 +51,7 @@ const StyledTopBarHeader = styled.div`
 `
 const StyledNavigationMenu = styled.div`
     display: none;
-    @media (max-width: 600px) {
+    @media (max-width: ${phone_width}) {
         display: block;
     }
 `

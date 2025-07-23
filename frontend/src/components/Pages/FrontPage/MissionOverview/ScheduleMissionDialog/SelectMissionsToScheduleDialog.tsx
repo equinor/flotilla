@@ -11,6 +11,7 @@ import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
+import { phone_width } from 'utils/constants'
 
 const StyledMissionDialog = styled.div`
     display: flex;
@@ -34,7 +35,7 @@ const StyledDialog = styled(Dialog)`
     padding: 1rem;
     width: 580px;
 
-    @media (max-width: 600px) {
+    @media (max-width: ${phone_width}) {
         width: 80vw;
     }
 `
