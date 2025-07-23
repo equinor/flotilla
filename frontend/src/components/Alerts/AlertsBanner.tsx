@@ -3,6 +3,7 @@ import { tokens } from '@equinor/eds-tokens'
 import { ReactNode, useState } from 'react'
 import styled from 'styled-components'
 import { Icons } from 'utils/icons'
+import { phone_width } from 'utils/constants'
 
 const StyledCard = styled.div`
     display: flex;
@@ -14,7 +15,7 @@ const StyledCard = styled.div`
     align-items: center;
     overflow: hidden;
 
-    @media (max-width: 600px) {
+    @media (max-width: ${phone_width}) {
         padding: 6px 8px 2px 10px;
     }
 `

@@ -17,6 +17,7 @@ import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { useNavigate } from 'react-router-dom'
 import { config } from 'config'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
+import { phone_width } from 'utils/constants'
 
 const StyledFrontPage = styled.div`
     display: flex;
@@ -26,7 +27,7 @@ const StyledFrontPage = styled.div`
     background-color: ${tokens.colors.ui.background__light.hex};
     min-height: calc(100vh - 65px);
 
-    @media (max-width: 600px) {
+    @media (max-width: ${phone_width}) {
         display: none;
     }
 `
@@ -81,7 +82,7 @@ const OngoingMissionsInfo = ({ goToOngoingTab }: { goToOngoingTab: () => void })
 
 export enum TabNames {
     MissionControl = 'mission-control',
-    InspectionPlan = 'inspection-plan',
+    InspectionPlan = 'inspection-overview',
     PredefinedMissions = 'predefined-missions',
     MissionHistory = 'mission-history',
     AutoScheduling = 'auto-scheduling',

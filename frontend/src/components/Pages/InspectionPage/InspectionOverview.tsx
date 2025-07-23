@@ -16,12 +16,13 @@ import { StyledButton } from 'components/Styles/StyledComponents'
 import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { Placeholder } from './InspectionUtilities'
+import { phone_width } from 'utils/constants'
 
 const StyledContent = styled.div`
     display: flex;
     flex-direction: column;
     align-items: end;
-    @media (max-width: 600px) {
+    @media (max-width: ${phone_width}) {
         align-items: start;
     }
 `
