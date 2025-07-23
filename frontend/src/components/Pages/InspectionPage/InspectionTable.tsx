@@ -16,6 +16,7 @@ import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { useRobotContext } from 'components/Contexts/RobotContext'
 import { FrontPageSectionId } from 'models/FrontPageSectionId'
 import { SmallScreenInfoText } from 'utils/InfoText'
+import { phone_width } from 'utils/constants'
 
 const StyledIcon = styled(Icon)`
     display: flex;
@@ -26,7 +27,7 @@ const StyledIcon = styled(Icon)`
 const StyledTable = styled.div`
     display: grid;
     overflow-x: auto;
-    @media (max-width: 700px) {
+    @media (max-width: ${phone_width}) {
         width: calc(100vw - 30px);
     }
     max-width: fit-content;
@@ -56,7 +57,7 @@ const HideColumnsOnSmallScreen = styled.div`
     #SmallScreenInfoText {
         display: none;
     }
-    @media (max-width: 500px) {
+    @media (max-width: ${phone_width}) {
         #${InspectionTableColumns.Description} {
             display: none;
         }

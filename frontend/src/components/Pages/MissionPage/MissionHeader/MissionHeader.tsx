@@ -13,6 +13,7 @@ import { convertUTCDateToLocalDate, formatDateTime } from 'utils/StringFormattin
 import { calculateRemaindingTimeInMinutes } from 'utils/CalculateRemaingingTime'
 import { useNavigate } from 'react-router-dom'
 import { config } from 'config'
+import { phone_width } from 'utils/constants'
 
 const HeaderSection = styled(Card)`
     width: 100%;
@@ -34,7 +35,7 @@ const InfoSection = styled.div`
     flex-wrap: wrap;
     gap: 32px;
     width: fit-content;
-    @media (max-width: 600px) {
+    @media (max-width: ${phone_width}) {
         display: grid;
         grid-template-columns: repeat(3, calc(75vw / 3));
         gap: 32px;
@@ -53,7 +54,7 @@ const StyledTypography = styled(Typography)`
     font-style: normal;
     font-weight: 400;
     line-height: 40px;
-    @media (max-width: 600px) {
+    @media (max-width: ${phone_width}) {
         font-size: 24px;
     }
 `

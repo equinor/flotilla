@@ -16,12 +16,13 @@ import { Icons } from 'utils/icons'
 import { InspectionType } from 'models/Inspection'
 import { useMissionFilterContext } from 'components/Contexts/MissionFilterContext'
 import { tokens } from '@equinor/eds-tokens'
+import { phone_width } from 'utils/constants'
 
 const StyledHeader = styled.div`
     display: flex;
     align-items: center;
     gap: 1rem;
-    @media (max-width: 730px) {
+    @media (max-width: ${phone_width}) {
         max-width: 300px;
     }
 `

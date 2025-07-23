@@ -13,6 +13,7 @@ import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'compon
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { ScheduleMissionWithInspectionAreaVerification } from 'components/Displays/InspectionAreaVerificationDialogs/ScheduleMissionWithInspectionAreaVerification'
+import { phone_width } from 'utils/constants'
 
 interface IProps {
     selectedMissions: MissionDefinition[]
@@ -32,7 +33,7 @@ const StyledMissionDialog = styled.div`
     justify-content: space-between;
     width: 580px;
 
-    @media (max-width: 600px) {
+    @media (max-width: ${phone_width}) {
         width: 80vw;
     }
 `

@@ -16,6 +16,7 @@ import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'compon
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import assetImage from 'mediaAssets/assetPage.jpg'
 import { useNavigate } from 'react-router-dom'
+import { phone_width } from '../../../utils/constants'
 
 const Centered = styled.div`
     display: flex;
@@ -39,7 +40,7 @@ const StyledImage = styled.img`
     object-fit: cover;
     height: 500px;
 
-    @media (max-width: 500px) {
+    @media (max-width: ${phone_width}) {
         height: 400px;
     }
 `

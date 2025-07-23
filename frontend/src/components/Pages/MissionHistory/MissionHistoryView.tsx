@@ -15,6 +15,7 @@ import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { StyledTableBody, StyledTableCaption, StyledTableCell } from 'components/Styles/StyledComponents'
+import { phone_width } from 'utils/constants'
 
 enum InspectionTableColumns {
     StatusShort = 'StatusShort',
@@ -30,7 +31,7 @@ const HideColumnsOnSmallScreen = styled.div`
     #SmallScreenInfoText {
         display: none;
     }
-    @media (max-width: 730px) {
+    @media (max-width: ${phone_width}) {
         #SmallScreenInfoText {
             display: grid;
             grid-template-columns: auto auto;
@@ -40,7 +41,7 @@ const HideColumnsOnSmallScreen = styled.div`
             max-width: 400px;
         }
     }
-    @media (max-width: 600px) {
+    @media (max-width: ${phone_width}) {
         #${InspectionTableColumns.Status} {
             display: none;
         }
@@ -51,7 +52,7 @@ const HideColumnsOnSmallScreen = styled.div`
             display: none;
         }
     }
-    @media (min-width: 601px) {
+    @media (min-width: ${phone_width}) ) {
         #${InspectionTableColumns.StatusShort} {
             display: none;
         }

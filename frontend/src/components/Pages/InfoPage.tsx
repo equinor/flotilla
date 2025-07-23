@@ -5,6 +5,7 @@ import { Header } from 'components/Header/Header'
 import { StyledPage } from 'components/Styles/StyledComponents'
 import styled from 'styled-components'
 import infoPageImage from 'mediaAssets/taurob-about-us.png'
+import { phone_width } from 'utils/constants'
 
 const StyledInfoPAge = styled(StyledPage)`
     width: 100%;
@@ -29,7 +30,7 @@ const StyledAboutSection = styled.div`
 const StyledTypography = styled(Typography)`
     text-align: center;
     width: 600px;
-    @media (max-width: 600px) {
+    @media (max-width: ${phone_width}) {
         width: 350px;
     }
 `
@@ -39,7 +40,7 @@ const StyledImage = styled.img`
     max-width: 45%;
     padding-left: 20px;
 
-    @media (max-width: 600px) {
+    @media (max-width: ${phone_width}) {
         max-width: 100vw;
         padding: 0px;
     }
@@ -54,7 +55,7 @@ const StyledInfoSection = styled.div`
     align-items: top;
     gap: 20px;
 
-    @media (max-width: 500px) {
+    @media (max-width: ${phone_width}) {
         flex-direction: column;
         gap: 2rem;
         padding-top: 20px;
@@ -68,7 +69,7 @@ const StyledInfo = styled.div`
     gap: 2rem;
     padding-top: 50px;
 
-    @media (max-width: 500px) {
+    @media (max-width: ${phone_width}) {
         width: 90%;
         padding-left: 15px;
     }

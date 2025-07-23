@@ -22,6 +22,7 @@ import { tokens } from '@equinor/eds-tokens'
 import { SkipMissionDialog } from '../FrontPage/MissionOverview/StopDialogs'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { ReturnHomeButton } from './ReturnHomeButton'
+import { phone_width } from 'utils/constants'
 
 const StyledRobotPage = styled(StyledPage)`
     background-color: ${tokens.colors.ui.background__light.hex};
@@ -37,7 +38,7 @@ const RobotInfo = styled.div`
     gap: 32px;
     align-self: stretch;
     width: calc(80vw);
-    @media (max-width: 600px) {
+    @media (max-width: ${phone_width}) {
         flex-direction: column;
     }
 `
@@ -46,7 +47,7 @@ const StatusContent = styled.div`
     display: grid;
     grid-template-columns: 160px 100px 160px;
     align-self: start;
-    @media (max-width: 600px) {
+    @media (max-width: ${phone_width}) {
         align-items: flex-start;
         grid-template-columns: repeat(1, 70vw);
         flex-direction: column;
@@ -58,7 +59,7 @@ const StyledContainer = styled.div`
     display: flex;
     padding: 24px;
     width: 910px;
-    @media (max-width: 600px) {
+    @media (max-width: ${phone_width}) {
         width: 80vw;
     }
     flex-direction: column;
@@ -95,7 +96,7 @@ const StyledSmallContainer = styled.div`
     border: 1px solid ${tokens.colors.ui.background__medium.hex};
     background: ${tokens.colors.ui.background__default.hex};
     margin: 2rem 0rem;
-    @media (max-width: 600px) {
+    @media (max-width: ${phone_width}) {
         width: 80vw;
     }
 `

@@ -5,15 +5,16 @@ import { TaskTable } from './TaskOverview/TaskTable'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { MissionMapView } from './MapPosition/MissionMapView'
 import { Mission } from 'models/Mission'
+import { phone_width } from 'utils/constants'
 
 const TaskAndMapSection = styled.div`
     display: flex;
     min-height: 60%;
     padding: 24px;
-    @media (max-width: 600px) {
+    @media (max-width: ${phone_width}) {
         padding: 6px 8px 8px 6px;
     }
-    @media (min-width: 600px) {
+    @media (min-width: ${phone_width}) {
         min-width: 930px;
     }
     flex-direction: column;

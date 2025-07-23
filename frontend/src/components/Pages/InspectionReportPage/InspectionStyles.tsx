@@ -1,9 +1,10 @@
 import { Button, Card, Dialog } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import { styled } from 'styled-components'
+import { phone_width } from 'utils/constants'
 
 export const HiddenOnSmallScreen = styled.div`
-    @media (max-width: 600px) {
+    @media (max-width: ${phone_width}) {
         display: none;
     }
 `
