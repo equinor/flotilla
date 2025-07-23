@@ -269,45 +269,29 @@ namespace Api.Services
                 logger.LogWarning("{Message}", errorMessage);
                 throw new MissionRunNotFoundException(errorMessage);
             }
-            if (ongoingMissionRuns.Count > 1)
-            {
-                logger.LogError(
-                    $"There were multiple ongoing mission runs to stop for robot {robotId}"
-                );
-                if (robot.CurrentMissionId != null)
-                {
-                    foreach (var missionRun in ongoingMissionRuns)
-                    {
-                        if (missionRun.Id != robot.CurrentMissionId)
-                        {
-                            logger.LogError(
-                                "Mission run {MissionRunId} was set to failed as status was ongoing but it was not the current mission run",
-                                missionRun.Id
-                            );
-                            await missionRunService.UpdateMissionRunProperty(
-                                missionRun.Id,
-                                "Status",
-                                MissionStatus.Failed
-                            );
-                        }
-                    }
-                }
-            }
 
-            IList<string> ongoingMissionRunIds = ongoingMissionRuns
+            var ongoingMissionRunInfos = ongoingMissionRuns
                 .Where(missionRun => missionRun.Id == robot.CurrentMissionId)
-                .Select(missionRun => missionRun.Id)
+                .Select(missionRun => (Id: missionRun.Id, IsarMissionId: missionRun.IsarMissionId))
                 .ToList();
 
             try
             {
-                await isarService.StopMission(robot);
-                if (stopReason is not null)
+                foreach (var ongoingMissionRunInfo in ongoingMissionRunInfos)
                 {
-                    foreach (var ongoingMissionRunId in ongoingMissionRunIds)
+                    if (ongoingMissionRunInfo.IsarMissionId != null)
+                    {
+                        logger.LogInformation(
+                            "The Isar mission ID we try to stop is"
+                                + ongoingMissionRunInfo.IsarMissionId
+                        );
+                        await isarService.StopMission(robot, ongoingMissionRunInfo.IsarMissionId);
+                    }
+
+                    if (stopReason is not null && ongoingMissionRunInfo.Id != null)
                     {
                         await missionRunService.UpdateMissionRunProperty(
-                            ongoingMissionRunId,
+                            ongoingMissionRunInfo.Id,
                             "StatusReason",
                             stopReason
                         );
@@ -338,6 +322,7 @@ namespace Api.Services
                 logger.LogWarning("{Message}", $"No mission was running for robot {robot.Id}");
             }
 
+            var ongoingMissionRunIds = ongoingMissionRunInfos.Select(info => info.Id).ToList();
             await MoveInterruptedMissionsToQueue(ongoingMissionRunIds);
 
             try
