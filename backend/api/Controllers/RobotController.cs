@@ -499,8 +499,8 @@ namespace Api.Controllers
             }
             catch (MissionException e)
             {
-                logger.LogError(e, "Error while stopping ISAR mission");
-                return StatusCode(StatusCodes.Status502BadGateway, $"{e.Message}");
+                logger.LogWarning("Error while stopping ISAR mission: {e}", e.Message);
+                return StatusCode(StatusCodes.Status200OK, $"Mission was already stopped");
             }
             catch (JsonException e)
             {
