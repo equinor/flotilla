@@ -17,6 +17,9 @@ const StyledPageContent = styled.div`
 
     @media (max-width: 600px) {
         flex-direction: column;
+        top: 60%;
+        left: 50%;
+        transform: translate(-50%, -50%);
     }
 `
 const StyledTypography = styled(Typography)`
