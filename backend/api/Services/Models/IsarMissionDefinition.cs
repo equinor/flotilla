@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
-using System.Globalization;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using Api.Database.Models;
 using Microsoft.EntityFrameworkCore;
@@ -37,6 +35,17 @@ namespace Api.Services.Models
                     )
                     .Select(task => new IsarTaskDefinition(task)),
             ];
+        }
+    }
+
+    public struct IsarStopMissionDefinition
+    {
+        [JsonPropertyName("mission_id")]
+        public string? MissionId { get; set; }
+
+        public IsarStopMissionDefinition(string? missionId)
+        {
+            MissionId = missionId;
         }
     }
 
