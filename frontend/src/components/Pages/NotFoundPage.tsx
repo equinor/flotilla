@@ -18,6 +18,9 @@ const StyledPageContent = styled.div`
 
     @media (max-width: ${phone_width}) {
         flex-direction: column;
+        top: 60%;
+        left: 50%;
+        transform: translate(-50%, -50%);
     }
 `
 const StyledTypography = styled(Typography)`
