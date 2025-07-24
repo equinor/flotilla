@@ -52,7 +52,7 @@ const HideColumnsOnSmallScreen = styled.div`
             display: none;
         }
     }
-    @media (min-width: ${phone_width}) ) {
+    @media (min-width: ${phone_width}) {
         #${InspectionTableColumns.StatusShort} {
             display: none;
         }
