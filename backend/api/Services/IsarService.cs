@@ -13,7 +13,7 @@ namespace Api.Services
 
         public Task ReturnHome(Robot robot);
 
-        public Task<IsarControlMissionResponse> StopMission(Robot robot);
+        public Task<IsarControlMissionResponse> StopMission(Robot robot, string? missionId = "");
 
         public Task<IsarControlMissionResponse> PauseMission(Robot robot);
 
@@ -120,14 +120,25 @@ namespace Api.Services
             }
         }
 
-        public async Task<IsarControlMissionResponse> StopMission(Robot robot)
+        public async Task<IsarControlMissionResponse> StopMission(
+            Robot robot,
+            string? missionId = ""
+        )
         {
             logger.LogInformation(
                 "Stopping mission on robot '{Id}' on ISAR at '{Uri}'",
                 robot.Id,
                 robot.IsarUri
             );
-            var response = await CallApi(HttpMethod.Post, robot.IsarUri, "schedule/stop-mission");
+
+            var content = new { mission_id = new IsarStopMissionDefinition(missionId) };
+
+            var response = await CallApi(
+                HttpMethod.Post,
+                robot.IsarUri,
+                "schedule/stop-mission",
+                content
+            );
 
             if (!response.IsSuccessStatusCode)
             {
@@ -135,15 +146,13 @@ namespace Api.Services
                     response
                 );
                 string errorResponse = await response.Content.ReadAsStringAsync();
-                if (
-                    response.StatusCode == HttpStatusCode.Conflict
-                    && errorResponse.Contains("idle", StringComparison.CurrentCultureIgnoreCase)
-                )
+                if (response.StatusCode == HttpStatusCode.NotFound)
                 {
-                    logger.LogError("No mission was running for robot '{Id}", robot.Id);
-                    throw new MissionNotFoundException(
-                        $"No mission was running for robot {robot.Id}"
-                    );
+                    logger.LogError($"No mission found for the mission_id sent: {missionId}");
+                }
+                if (response.StatusCode == HttpStatusCode.Conflict)
+                {
+                    logger.LogError("No mission found to stop");
                 }
 
                 logger.LogError("{Message}: {ErrorResponse}", message, errorResponse);
