@@ -9,6 +9,7 @@ import { Robot, RobotStatus } from 'models/Robot'
 import { RobotMissionQueueView } from './MissionQueueView'
 import { FrontPageSectionId } from 'models/FrontPageSectionId'
 import { NextAutoScheduleMissionView } from '../AutoScheduleSection/NextAutoScheduleMissionView'
+import { useState } from 'react'
 
 const MissionControlStyle = styled.div`
     display: flex;
@@ -70,6 +71,7 @@ export const MissionControlSection = () => {
 const MissionControlCard = ({ robot }: { robot: Robot }) => {
     const { ongoingMissions } = useMissionsContext()
     const ongoingMission = ongoingMissions.find((mission) => mission.robot.id === robot.id)
+    const [isOpen, setIsOpen] = useState<boolean>(false)
     return (
         <MissionControlCardStyle
             id={FrontPageSectionId.RobotCard + robot.id}
@@ -78,14 +80,14 @@ const MissionControlCard = ({ robot }: { robot: Robot }) => {
             <OngoingMissionControlCardStyle>
                 <RobotCard robot={robot} />
                 {ongoingMission ? (
-                    <OngoingMissionCard mission={ongoingMission} />
+                    <OngoingMissionCard mission={ongoingMission} isOpen={isOpen} setIsOpen={setIsOpen} />
                 ) : robot.status === RobotStatus.ReturningHome ? (
-                    <OngoingReturnHomeMissionCard robot={robot} />
+                    <OngoingReturnHomeMissionCard robot={robot} isOpen={isOpen} setIsOpen={setIsOpen} />
                 ) : (
-                    <OngoingMissionPlaceholderCard robot={robot} />
+                    <OngoingMissionPlaceholderCard robot={robot} isOpen={isOpen} setIsOpen={setIsOpen} />
                 )}
             </OngoingMissionControlCardStyle>
-            <RobotMissionQueueView robot={robot} />
+            {isOpen && <RobotMissionQueueView robot={robot} />}
         </MissionControlCardStyle>
     )
 }
