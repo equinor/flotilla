@@ -344,16 +344,16 @@ namespace Api.Test.Controllers
             var installation = await DatabaseUtilities.NewInstallation();
             var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
 
-            var inspectionPolygonRobot = new InspectionAreaPolygon
+            var inspectionPolygonRobot = new AreaPolygon
             {
                 ZMin = 0,
                 ZMax = 10,
                 Positions =
                 [
-                    new XYPosition { X = 11, Y = 11 },
-                    new XYPosition { X = 11, Y = 20 },
-                    new XYPosition { X = 20, Y = 20 },
-                    new XYPosition { X = 20, Y = 11 },
+                    new PolygonPoint { X = 11, Y = 11 },
+                    new PolygonPoint { X = 11, Y = 20 },
+                    new PolygonPoint { X = 20, Y = 20 },
+                    new PolygonPoint { X = 20, Y = 11 },
                 ],
             };
 
@@ -364,16 +364,16 @@ namespace Api.Test.Controllers
                 inspectionPolygonRobot
             );
 
-            var inspectionPolygonMission = new InspectionAreaPolygon
+            var inspectionPolygonMission = new AreaPolygon
             {
                 ZMin = 0,
                 ZMax = 10,
                 Positions =
                 [
-                    new XYPosition { X = 0, Y = 0 },
-                    new XYPosition { X = 0, Y = 10 },
-                    new XYPosition { X = 10, Y = 10 },
-                    new XYPosition { X = 10, Y = 0 },
+                    new PolygonPoint { X = 0, Y = 0 },
+                    new PolygonPoint { X = 0, Y = 10 },
+                    new PolygonPoint { X = 10, Y = 10 },
+                    new PolygonPoint { X = 10, Y = 0 },
                 ],
             };
             var _inspectionAreaMission = await DatabaseUtilities.NewInspectionArea(

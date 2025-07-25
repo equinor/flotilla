@@ -3,6 +3,7 @@ using System;
 using Api.Database.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Api.Migrations
 {
     [DbContext(typeof(FlotillaDbContext))]
-    partial class FlotillaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250627122538_MakeAreaPolygonOwned")]
+    partial class MakeAreaPolygonOwned
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -46,38 +49,14 @@ namespace Api.Migrations
                     b.ToTable("AccessRoles");
                 });
 
-            modelBuilder.Entity("Api.Database.Models.ExclusionArea", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("text");
-
-                    b.Property<string>("InstallationId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Name")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<string>("PlantId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("InstallationId");
-
-                    b.HasIndex("PlantId");
-
-                    b.ToTable("ExclusionAreas");
-                });
-
             modelBuilder.Entity("Api.Database.Models.Inspection", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("text");
+
+                    b.Property<DateTime?>("EndTime")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("InspectionTargetName")
                         .HasColumnType("text");
@@ -94,6 +73,13 @@ namespace Api.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime?>("StartTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<float?>("VideoDuration")
                         .HasColumnType("real");
@@ -290,9 +276,6 @@ namespace Api.Migrations
 
                     b.Property<DateTime?>("EndTime")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("ErrorDescription")
-                        .HasColumnType("text");
 
                     b.Property<string>("InspectionId")
                         .HasColumnType("text");
@@ -524,54 +507,6 @@ namespace Api.Migrations
                         .HasForeignKey("InstallationId");
 
                     b.Navigation("Installation");
-                });
-
-            modelBuilder.Entity("Api.Database.Models.ExclusionArea", b =>
-                {
-                    b.HasOne("Api.Database.Models.Installation", "Installation")
-                        .WithMany()
-                        .HasForeignKey("InstallationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Api.Database.Models.Plant", "Plant")
-                        .WithMany()
-                        .HasForeignKey("PlantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.OwnsOne("Api.Database.Models.AreaPolygon", "AreaPolygon", b1 =>
-                        {
-                            b1.Property<string>("ExclusionAreaId")
-                                .HasColumnType("text");
-
-                            b1.Property<string>("Positions")
-                                .IsRequired()
-                                .HasColumnType("text")
-                                .HasAnnotation("Relational:JsonPropertyName", "positions");
-
-                            b1.Property<double>("ZMax")
-                                .HasColumnType("double precision")
-                                .HasAnnotation("Relational:JsonPropertyName", "zmax");
-
-                            b1.Property<double>("ZMin")
-                                .HasColumnType("double precision")
-                                .HasAnnotation("Relational:JsonPropertyName", "zmin");
-
-                            b1.HasKey("ExclusionAreaId");
-
-                            b1.ToTable("ExclusionAreas");
-
-                            b1.WithOwner()
-                                .HasForeignKey("ExclusionAreaId");
-                        });
-
-                    b.Navigation("AreaPolygon")
-                        .IsRequired();
-
-                    b.Navigation("Installation");
-
-                    b.Navigation("Plant");
                 });
 
             modelBuilder.Entity("Api.Database.Models.Inspection", b =>
