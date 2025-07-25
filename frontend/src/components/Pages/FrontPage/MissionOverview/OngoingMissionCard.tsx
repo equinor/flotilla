@@ -12,9 +12,24 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
 import { Robot } from 'models/Robot'
 import { NoMissionReason } from 'utils/IsRobotReadyToRunMissions'
+import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 
 interface MissionProps {
     mission: Mission
+    isOpen?: boolean
+    setIsOpen?: (isOpen: boolean) => void
+}
+
+interface MissionQueueButtonViewProps {
+    robotId?: string    
+    isOpen?: boolean
+    setIsOpen?: (isOpen: boolean) => void
+}
+
+interface PlaceholderProps {
+    robot?: Robot
+    isOpen?: boolean
+    setIsOpen?: (isOpen: boolean) => void
 }
 
 const StyledLargeScreenMissionCard = styled.div`
@@ -70,14 +85,57 @@ const StyledGhostButton = styled(StyledButton)`
     padding: 0;
 `
 
-export const OngoingMissionCard = ({ mission }: MissionProps) => {
-    const { TranslateText } = useLanguageContext()
+const StyledDropdownButton = styled(Button)`
+    display: flex;
+    padding: 0 8px;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    max-width: 200px;
+`
 
+const StyledPlaceholder = styled.div`
+position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 16px;
+  gap: 16px;
+  background-color: ${tokens.colors.ui.background__light.hex};
+  align-self: stretch;
+
+  @media (max-width: 600px) {
+        padding: 8px; 
+        gap: 8px;
+    }
+`
+ 
+const StyledBottomRightButtonWrapper = styled.div`
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+
+
+  @media (max-width: 600px) {
+    position: static;
+  }
+`
+
+const StyledWrapper = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+`
+
+
+export const OngoingMissionCard = ({ mission, isOpen, setIsOpen }: MissionProps) => {
+    const { TranslateText } = useLanguageContext()
     const navigate = useNavigate()
     const routeChange = () => {
         const path = `${config.FRONTEND_BASE_ROUTE}/mission-${mission.id}`
         navigate(path)
     }
+
 
     const SmallScreenContent = (
         <StyledSmallScreenMissionCard>
@@ -101,6 +159,11 @@ export const OngoingMissionCard = ({ mission }: MissionProps) => {
                     missionStatus={mission.status}
                 />
             </ControlButtonSpacing>
+                            <MissionQueueButtonView
+                    robotId={mission.robot.id}
+                    isOpen={isOpen}
+                    setIsOpen={setIsOpen}
+                />
         </StyledSmallScreenMissionCard>
     )
 
@@ -123,10 +186,17 @@ export const OngoingMissionCard = ({ mission }: MissionProps) => {
                     missionStatus={mission.status}
                 />
             </ControlButtonSpacing>
-            <StyledGhostButton variant="ghost" onClick={routeChange}>
-                {TranslateText('Open mission')}
-                <Icon name={Icons.RightCheveron} size={16} />
-            </StyledGhostButton>
+            <ControlButtonSpacing>
+                <StyledGhostButton variant="ghost" onClick={routeChange}>
+                    {TranslateText('Open mission')}
+                    <Icon name={Icons.RightCheveron} size={16} />
+                </StyledGhostButton>
+                <MissionQueueButtonView
+                    robotId={mission.robot.id}
+                    isOpen={isOpen}
+                    setIsOpen={setIsOpen}
+                />
+            </ControlButtonSpacing>
         </StyledLargeScreenMissionCard>
     )
 
@@ -192,21 +262,48 @@ export const OngoingReturnHomeMissionCard = ({ robot }: { robot: Robot }) => {
     )
 }
 
-export const OngoingMissionPlaceholderCard = ({ robot }: { robot?: Robot }) => {
-    const { TranslateText } = useLanguageContext()
+export const OngoingMissionPlaceholderCard = ({ robot, isOpen, setIsOpen }: PlaceholderProps) => {
+    const { TranslateText } = useLanguageContext()   
+
 
     return (
-        <>
-            <StyledSmallScreenMissionCard
-                style={{ backgroundColor: tokens.colors.ui.background__light.hex, gap: '8px' }}
-            >
-                <Typography variant="h5">{TranslateText('No ongoing missions')}</Typography>
+        <StyledPlaceholder>            
+            <Typography variant="h5">{TranslateText('No ongoing missions')}</Typography>
+            <StyledWrapper>
                 {robot && <NoMissionReason robot={robot} />}
-            </StyledSmallScreenMissionCard>
-            <StyledLargeScreenMissionCard style={{ backgroundColor: tokens.colors.ui.background__light.hex }}>
-                <Typography variant="h5">{TranslateText('No ongoing missions')}</Typography>
-                {robot && <NoMissionReason robot={robot} />}
-            </StyledLargeScreenMissionCard>
-        </>
+            <StyledBottomRightButtonWrapper>
+            <MissionQueueButtonView
+                robotId={robot?.id}
+                isOpen={isOpen}
+                setIsOpen={setIsOpen}
+            />
+            </StyledBottomRightButtonWrapper>
+            </StyledWrapper>
+        </StyledPlaceholder>
     )
 }
+
+export const MissionQueueButtonView = ({ robotId, isOpen, setIsOpen }: MissionQueueButtonViewProps ) =>{
+    const { TranslateText } = useLanguageContext()
+    const { missionQueue } = useMissionsContext()
+
+    const robotMissionQueue = missionQueue.filter((m) => m.robot.id === robotId)
+    const queueLength = robotMissionQueue.length
+
+    const openMissionQueueView = () => {
+    if (setIsOpen) {
+        setIsOpen(!isOpen);
+    }
+    }
+    return (
+        <>
+        {queueLength >= 1 && (
+                <StyledDropdownButton variant="ghost" onClick={openMissionQueueView}>
+                    {` ${queueLength} ${TranslateText('missions in queue')}`}
+                    <Icon name={isOpen ? Icons.UpChevron : Icons.DownChevron}  size={16} />
+                </StyledDropdownButton>
+        )}
+        </>
+    )
+
+} 
