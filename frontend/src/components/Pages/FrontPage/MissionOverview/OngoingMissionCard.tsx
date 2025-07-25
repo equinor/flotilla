@@ -12,6 +12,7 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
 import { Robot } from 'models/Robot'
 import { NoMissionReason } from 'utils/IsRobotReadyToRunMissions'
+import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 
 interface MissionProps {
     mission: Mission
@@ -70,14 +71,25 @@ const StyledGhostButton = styled(StyledButton)`
     padding: 0;
 `
 
+const StyledDropdownButton = styled(Button)`
+    display: flex;
+    padding: 0 8px;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+`
+
 export const OngoingMissionCard = ({ mission }: MissionProps) => {
     const { TranslateText } = useLanguageContext()
-
+    const { missionQueue } = useMissionsContext()
     const navigate = useNavigate()
     const routeChange = () => {
         const path = `${config.FRONTEND_BASE_ROUTE}/mission-${mission.id}`
         navigate(path)
     }
+
+    const robotMissionQueue = missionQueue.filter((m) => m.robot.id === mission.robot.id)
+    const queueLength = robotMissionQueue.length
 
     const SmallScreenContent = (
         <StyledSmallScreenMissionCard>
@@ -123,10 +135,18 @@ export const OngoingMissionCard = ({ mission }: MissionProps) => {
                     missionStatus={mission.status}
                 />
             </ControlButtonSpacing>
-            <StyledGhostButton variant="ghost" onClick={routeChange}>
-                {TranslateText('Open mission')}
-                <Icon name={Icons.RightCheveron} size={16} />
-            </StyledGhostButton>
+            <ControlButtonSpacing>
+                <StyledGhostButton variant="ghost" onClick={routeChange}>
+                    {TranslateText('Open mission')}
+                    <Icon name={Icons.RightCheveron} size={16} />
+                </StyledGhostButton>
+                {queueLength && queueLength > 0 && (
+                    <StyledDropdownButton variant="ghost">
+                        {` ${queueLength} ${TranslateText('missions in queue')}`}
+                        <Icon name={Icons.DownChevron} size={16} />
+                    </StyledDropdownButton>
+                )}
+            </ControlButtonSpacing>
         </StyledLargeScreenMissionCard>
     )
 
