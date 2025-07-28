@@ -89,6 +89,11 @@ namespace Api.Services
                     robot.Name,
                     robot.Id
                 );
+                signalRService.ReportGeneralFailToSignalR(
+                    robot,
+                    $"Robot {robot.Name} is not in an Inspection Area",
+                    "Robot is not in an Inspection Area and therefore cannot start a mission. The Mission will be added to the queue."
+                );
                 return;
             }
 
