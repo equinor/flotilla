@@ -77,6 +77,7 @@ namespace Api.EventHandlers
             MqttService.MqttIsarPressureReceived += OnIsarPressureUpdate;
             MqttService.MqttIsarPoseReceived += OnIsarPoseUpdate;
             MqttService.MqttIsarCloudHealthReceived += OnIsarCloudHealthUpdate;
+            MqttService.MqttIsarInterventionNeededReceived += OnIsarInterventionNeededUpdate;
             MqttService.MqttIsarStartupReceived += OnIsarStartup;
             MqttService.MqttSaraInspectionResultReceived += OnSaraInspectionResultUpdate;
             MqttService.MqttSaraAnalysisResultMessage += OnSaraAnalysisResultMessage;
@@ -92,6 +93,8 @@ namespace Api.EventHandlers
             MqttService.MqttIsarPressureReceived -= OnIsarPressureUpdate;
             MqttService.MqttIsarPoseReceived -= OnIsarPoseUpdate;
             MqttService.MqttIsarCloudHealthReceived -= OnIsarCloudHealthUpdate;
+            MqttService.MqttIsarInterventionNeededReceived -= OnIsarInterventionNeededUpdate;
+            MqttService.MqttSaraInspectionResultReceived -= OnSaraInspectionResultUpdate;
             MqttService.MqttIsarStartupReceived -= OnIsarStartup;
             MqttService.MqttSaraInspectionResultReceived -= OnSaraInspectionResultUpdate;
             MqttService.MqttSaraAnalysisResultMessage -= OnSaraAnalysisResultMessage;
@@ -676,6 +679,31 @@ namespace Api.EventHandlers
             }
 
             string message = $"Failed telemetry request for robot {cloudHealthStatus.RobotName}.";
+
+            TeamsMessageService.TriggerTeamsMessageReceived(new TeamsMessageEventArgs(message));
+        }
+
+        private async void OnIsarInterventionNeededUpdate(object? sender, MqttReceivedArgs mqttArgs)
+        {
+            var interventionNeededMessage = (IsarInterventionNeededMessage)mqttArgs.Message;
+
+            var robot = await RobotService.ReadByIsarId(
+                interventionNeededMessage.IsarId,
+                readOnly: true
+            );
+            if (robot == null)
+            {
+                _logger.LogInformation(
+                    "Received message from unknown ISAR instance {Id} with robot name {Name}",
+                    interventionNeededMessage.IsarId,
+                    interventionNeededMessage.RobotName
+                );
+                return;
+            }
+
+            string message =
+                $"Intervention needed for robot {interventionNeededMessage.RobotName}. "
+                + $"Reason: {interventionNeededMessage.Reason}";
 
             TeamsMessageService.TriggerTeamsMessageReceived(new TeamsMessageEventArgs(message));
         }
