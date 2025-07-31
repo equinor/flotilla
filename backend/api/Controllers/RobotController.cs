@@ -572,7 +572,7 @@ namespace Api.Controllers
             catch (MissionPauseException e)
             {
                 logger.LogError(e, "Error while pausing ISAR mission");
-                return StatusCode(StatusCodes.Status502BadGateway, $"{e.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"{e.Message}");
             }
             catch (JsonException e)
             {
@@ -624,7 +624,7 @@ namespace Api.Controllers
             catch (MissionResumeException e)
             {
                 logger.LogError(e, "Error while resuming ISAR mission");
-                return StatusCode(StatusCodes.Status502BadGateway, $"{e.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"{e.Message}");
             }
             catch (JsonException e)
             {
@@ -699,7 +699,7 @@ namespace Api.Controllers
                 const string ErrorMessage =
                     "An error occurred while setting the arm position mission";
                 logger.LogError(e, "{Message}", ErrorMessage);
-                return StatusCode(StatusCodes.Status502BadGateway, ErrorMessage);
+                return StatusCode(StatusCodes.Status500InternalServerError, ErrorMessage);
             }
             catch (JsonException e)
             {
