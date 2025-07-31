@@ -23,6 +23,7 @@ namespace Api.Mqtt
                 { "isar/+/pressure", typeof(IsarPressureMessage) },
                 { "isar/+/pose", typeof(IsarPoseMessage) },
                 { "isar/+/cloud_health", typeof(IsarCloudHealthMessage) },
+                { "isar/+/intervention_needed", typeof(IsarInterventionNeededMessage) },
                 { "isar/+/startup", typeof(IsarStartupMessage) },
                 { "sara/visualization_available", typeof(SaraInspectionResultMessage) },
                 { "sara/analysis_result_available", typeof(SaraAnalysisResultMessage) },
