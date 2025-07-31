@@ -604,8 +604,8 @@ namespace Api.Controllers
             }
             catch (MissionPauseException e)
             {
-                logger.LogError(e, "Error while pausing ISAR mission");
-                return StatusCode(StatusCodes.Status502BadGateway, $"{e.Message}");
+                logger.LogError(e, "Unable to pause mission for robot {RobotId}", robotId);
+                return StatusCode(StatusCodes.Status400BadRequest, $"{e.Message}");
             }
             catch (JsonException e)
             {
@@ -656,8 +656,8 @@ namespace Api.Controllers
             }
             catch (MissionResumeException e)
             {
-                logger.LogError(e, "Error while resuming ISAR mission");
-                return StatusCode(StatusCodes.Status502BadGateway, $"{e.Message}");
+                logger.LogError(e, "Unable to resume mission for robot {RobotId}", robotId);
+                return StatusCode(StatusCodes.Status400BadRequest, $"{e.Message}");
             }
             catch (JsonException e)
             {
@@ -729,10 +729,9 @@ namespace Api.Controllers
             }
             catch (MissionArmPositionException e)
             {
-                const string ErrorMessage =
-                    "An error occurred while setting the arm position mission";
+                const string ErrorMessage = "Unable to set the arm position mission";
                 logger.LogError(e, "{Message}", ErrorMessage);
-                return StatusCode(StatusCodes.Status502BadGateway, ErrorMessage);
+                return StatusCode(StatusCodes.Status400BadRequest, ErrorMessage);
             }
             catch (JsonException e)
             {
