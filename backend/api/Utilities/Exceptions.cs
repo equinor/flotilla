@@ -16,6 +16,62 @@
         public int IsarStatusCode { get; set; }
     }
 
+    public class MissionStoppedException : Exception
+    {
+        public MissionStoppedException(string message)
+            : base(message) { }
+
+        public MissionStoppedException(string message, int isarStatusCode)
+            : base(message)
+        {
+            IsarStatusCode = isarStatusCode;
+        }
+
+        public int IsarStatusCode { get; set; }
+    }
+
+    public class MissionPauseException : Exception
+    {
+        public MissionPauseException(string message)
+            : base(message) { }
+
+        public MissionPauseException(string message, int isarStatusCode)
+            : base(message)
+        {
+            IsarStatusCode = isarStatusCode;
+        }
+
+        public int IsarStatusCode { get; set; }
+    }
+
+    public class MissionResumeException : Exception
+    {
+        public MissionResumeException(string message)
+            : base(message) { }
+
+        public MissionResumeException(string message, int isarStatusCode)
+            : base(message)
+        {
+            IsarStatusCode = isarStatusCode;
+        }
+
+        public int IsarStatusCode { get; set; }
+    }
+
+    public class MissionArmPositionException : Exception
+    {
+        public MissionArmPositionException(string message)
+            : base(message) { }
+
+        public MissionArmPositionException(string message, int isarStatusCode)
+            : base(message)
+        {
+            IsarStatusCode = isarStatusCode;
+        }
+
+        public int IsarStatusCode { get; set; }
+    }
+
     public class MissionSourceTypeException(string message) : Exception(message) { }
 
     public class SourceException(string message) : Exception(message) { }
