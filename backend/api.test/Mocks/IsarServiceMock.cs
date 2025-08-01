@@ -67,5 +67,10 @@ namespace Api.Test.Mocks
                 MediaConnectionType = MediaConnectionType.LiveKit,
             };
         }
+
+        public async Task ReleaseInterventionNeeded(string robotIsarUri)
+        {
+            await Task.Run(() => Thread.Sleep(1));
+        }
     }
 }
