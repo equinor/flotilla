@@ -23,6 +23,7 @@ import { SkipMissionDialog } from '../FrontPage/MissionOverview/StopDialogs'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { ReturnHomeButton } from './ReturnHomeButton'
 import { phone_width } from 'utils/constants'
+import { InterventionNeededButton } from './InterventionNeededButton'
 
 const StyledRobotPage = styled(StyledPage)`
     background-color: ${tokens.colors.ui.background__light.hex};
@@ -150,6 +151,9 @@ export const RobotPage = ({ robotId }: { robotId: string }) => {
                                         {TranslateText('Stop')} {selectedRobot.name}
                                     </StyledTextButton>
                                     {selectedRobot && <ReturnHomeButton robot={selectedRobot} />}
+                                    {selectedRobot && selectedRobot.status == RobotStatus.InterventionNeeded && (
+                                        <InterventionNeededButton robot={selectedRobot} />
+                                    )}
                                 </StyledLeftContent>
                                 <StatusContent>
                                     <StyledStatusElement>

@@ -822,5 +822,56 @@ namespace Api.Controllers
 
             return NoContent();
         }
+
+        /// <summary>
+        ///     Resume paused mission on a robot
+        /// </summary>
+        /// <remarks>
+        ///     <para> This query resumes the currently paused mission for a robot </para>
+        /// </remarks>
+        [HttpPost]
+        [Authorize(Roles = Role.Admin)]
+        [Route("{robotId}/release-intervention-needed")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> ReleaseInterventionNeeded([FromRoute] string robotId)
+        {
+            var robot = await robotService.ReadById(robotId, readOnly: true);
+            if (robot == null)
+            {
+                logger.LogWarning("Could not find robot with id={Id}", robotId);
+                return NotFound();
+            }
+
+            try
+            {
+                await isarService.ReleaseInterventionNeeded(robot.IsarUri);
+            }
+            catch (IsarCommunicationException e)
+            {
+                logger.LogError(e, "ISAR communication error while releasing intervention needed");
+                return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
+            }
+            catch (HttpRequestException e)
+            {
+                const string Message =
+                    "Error connecting to ISAR while releasing intervention needed";
+                logger.LogError(e, "{Message}", Message);
+                await errorHandlingService.HandleLosingConnectionToIsar(robot.Id);
+                return StatusCode(StatusCodes.Status500InternalServerError, Message);
+            }
+            catch (JsonException e)
+            {
+                const string Message = "Error while processing of the response from ISAR";
+                logger.LogError(e, "{Message}", Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, Message);
+            }
+
+            return NoContent();
+        }
     }
 }
