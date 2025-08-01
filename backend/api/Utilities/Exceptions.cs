@@ -48,6 +48,8 @@
 
     public class InspectionAreaExistsException(string message) : Exception(message) { }
 
+    public class ExclusionAreaExistsException(string message) : Exception(message) { }
+
     public class DockException(string message) : Exception(message) { }
 
     public class RobotNotAvailableException(string message) : Exception(message) { }

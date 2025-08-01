@@ -34,11 +34,6 @@ namespace Api.Services
             bool readOnly = true
         );
 
-        public bool MissionTasksAreInsideInspectionAreaPolygon(
-            List<MissionTask> missionTasks,
-            InspectionArea inspectionArea
-        );
-
         public Task<List<InspectionArea>> ReadInspectionAreasByInstallation(
             string installationCode,
             bool readOnly = true
@@ -74,6 +69,7 @@ namespace Api.Services
         IPlantService plantService,
         IAccessRoleService accessRoleService,
         ISignalRService signalRService,
+        IAreaPolygonService areaPolygonService,
         ILogger<InspectionAreaService> logger
     ) : IInspectionAreaService
     {
@@ -159,7 +155,7 @@ namespace Api.Services
             inspectionAreas =
             [
                 .. inspectionAreas.Where(a =>
-                    MissionTasksAreInsideInspectionAreaPolygon(missionTasks, a)
+                    areaPolygonService.MissionTasksAreInsideAreaPolygon(missionTasks, a.AreaPolygon)
                 ),
             ];
 
@@ -171,93 +167,6 @@ namespace Api.Services
                 );
             }
             return inspectionAreas.FirstOrDefault();
-        }
-
-        public bool MissionTasksAreInsideInspectionAreaPolygon(
-            List<MissionTask> missionTasks,
-            InspectionArea inspectionArea
-        )
-        {
-            if (string.IsNullOrEmpty(inspectionArea.AreaPolygonJson))
-            {
-                logger.LogWarning(
-                    "No polygon defined for inspection area {inspectionAreaName}",
-                    inspectionArea.Name
-                );
-                return true;
-            }
-
-            var inspectionAreaPolygon = JsonSerializer.Deserialize<InspectionAreaPolygon>(
-                inspectionArea.AreaPolygonJson
-            );
-
-            if (inspectionAreaPolygon == null)
-            {
-                logger.LogWarning(
-                    "Invalid polygon defined for inspection area {inspectionAreaName}",
-                    inspectionArea.Name
-                );
-                return true;
-            }
-
-            foreach (var missionTask in missionTasks)
-            {
-                var robotPosition = missionTask.RobotPose.Position;
-                if (
-                    !IsPositionInsidePolygon(
-                        inspectionAreaPolygon.Positions,
-                        robotPosition,
-                        inspectionAreaPolygon.ZMin,
-                        inspectionAreaPolygon.ZMax
-                    )
-                )
-                {
-                    logger.LogWarning(
-                        "Robot position {robotPosition} is outside the inspection area polygon for task {taskId}",
-                        robotPosition,
-                        missionTask.Id
-                    );
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        private static bool IsPositionInsidePolygon(
-            List<XYPosition> polygon,
-            Position position,
-            double zMin,
-            double zMax
-        )
-        {
-            var x = position.X;
-            var y = position.Y;
-            var z = position.Z;
-
-            if (z < zMin || z > zMax)
-            {
-                return false;
-            }
-
-            // Ray-casting algorithm for checking if the point is inside the polygon
-            var inside = false;
-            for (int i = 0, j = polygon.Count - 1; i < polygon.Count; j = i++)
-            {
-                var xi = polygon[i].X;
-                var yi = polygon[i].Y;
-                var xj = polygon[j].X;
-                var yj = polygon[j].Y;
-
-                var intersect =
-                    ((yi > y) != (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
-                if (intersect)
-                {
-                    inside = !inside;
-                }
-            }
-
-            return inside;
         }
 
         public async Task<List<InspectionArea>> ReadInspectionAreasByInstallation(
@@ -307,29 +216,12 @@ namespace Api.Services
                 );
             }
 
-            string inspectionAreaPolygon = "";
-            if (newInspectionAreaQuery.AreaPolygonJson != null)
-            {
-                try
-                {
-                    inspectionAreaPolygon = JsonSerializer.Serialize(
-                        newInspectionAreaQuery.AreaPolygonJson
-                    );
-                }
-                catch (Exception)
-                {
-                    throw new InvalidPolygonException(
-                        "The polygon is invalid and could not be parsed"
-                    );
-                }
-            }
-
             var inspectionArea = new InspectionArea
             {
                 Name = newInspectionAreaQuery.Name,
                 Installation = installation,
                 Plant = plant,
-                AreaPolygonJson = inspectionAreaPolygon,
+                AreaPolygon = newInspectionAreaQuery.AreaPolygon,
             };
 
             context.Entry(inspectionArea.Installation).State = EntityState.Unchanged;

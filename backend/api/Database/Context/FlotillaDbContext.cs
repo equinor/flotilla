@@ -1,4 +1,5 @@
-﻿using Api.Database.Models;
+﻿using System.Text.Json;
+using Api.Database.Models;
 using Api.Services.MissionLoaders;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -25,6 +26,7 @@ namespace Api.Database.Context
         public DbSet<Plant> Plants => Set<Plant>();
         public DbSet<Installation> Installations => Set<Installation>();
         public DbSet<InspectionArea> InspectionAreas => Set<InspectionArea>();
+        public DbSet<ExclusionArea> ExclusionAreas => Set<ExclusionArea>();
         public DbSet<Source> Sources => Set<Source>();
         public DbSet<AccessRole> AccessRoles => Set<AccessRole>();
         public DbSet<UserInfo> UserInfos => Set<UserInfo>();
@@ -112,6 +114,48 @@ namespace Api.Database.Context
                 .HasOne(p => p.Installation)
                 .WithMany()
                 .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder
+                .Entity<InspectionArea>()
+                .OwnsOne(
+                    i => i.AreaPolygon,
+                    areaPolygon =>
+                    {
+                        areaPolygon.WithOwner();
+#pragma warning disable CS8603
+                        areaPolygon
+                            .Property(p => p.Positions)
+                            .HasConversion(
+                                v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                                v =>
+                                    JsonSerializer.Deserialize<List<PolygonPoint>>(
+                                        v,
+                                        (JsonSerializerOptions?)null
+                                    )
+                            );
+#pragma warning restore CS8603
+                    }
+                );
+            modelBuilder
+                .Entity<ExclusionArea>()
+                .OwnsOne(
+                    i => i.AreaPolygon,
+                    areaPolygon =>
+                    {
+                        areaPolygon.WithOwner();
+#pragma warning disable CS8603
+                        areaPolygon
+                            .Property(p => p.Positions)
+                            .HasConversion(
+                                v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                                v =>
+                                    JsonSerializer.Deserialize<List<PolygonPoint>>(
+                                        v,
+                                        (JsonSerializerOptions?)null
+                                    )
+                            );
+#pragma warning restore CS8603
+                    }
+                );
         }
 
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)

@@ -69,6 +69,7 @@ builder.Services.AddScoped<IMissionDefinitionTaskService, MissionDefinitionTaskS
 builder.Services.AddScoped<IMissionTaskService, MissionTaskService>();
 builder.Services.AddScoped<IInspectionService, InspectionService>();
 builder.Services.AddScoped<ISourceService, SourceService>();
+builder.Services.AddScoped<IExclusionAreaService, ExclusionAreaService>();
 
 builder.Services.AddScoped<IMissionSchedulingService, MissionSchedulingService>();
 
@@ -81,6 +82,7 @@ builder.Services.AddScoped<IBlobService, BlobService>();
 builder.Services.AddScoped<IInstallationService, InstallationService>();
 builder.Services.AddScoped<IPlantService, PlantService>();
 builder.Services.AddScoped<IInspectionAreaService, InspectionAreaService>();
+builder.Services.AddScoped<IAreaPolygonService, AreaPolygonService>();
 
 builder.Services.AddScoped<IErrorHandlingService, ErrorHandlingService>();
 builder.Services.AddScoped<ITaskDurationService, TaskDurationService>();

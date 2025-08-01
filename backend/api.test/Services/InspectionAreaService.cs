@@ -18,6 +18,7 @@ namespace Api.Test.Services
         public required PostgreSqlContainer Container;
         public required IMissionRunService MissionRunService;
         public required IInspectionAreaService InspectionAreaService;
+        public required IAreaPolygonService AreaPolygonService;
 
         public async Task InitializeAsync()
         {
@@ -33,30 +34,26 @@ namespace Api.Test.Services
             );
             MissionRunService = serviceProvider.GetRequiredService<IMissionRunService>();
             InspectionAreaService = serviceProvider.GetRequiredService<IInspectionAreaService>();
+            AreaPolygonService = serviceProvider.GetRequiredService<IAreaPolygonService>();
         }
 
         public Task DisposeAsync() => Task.CompletedTask;
 
         [Fact]
-        public async Task TestTasksInsidePolygon()
+        public void TestTasksInsidePolygon()
         {
-            var installation = await DatabaseUtilities.NewInstallation();
-            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
-            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
-                installation.InstallationCode,
-                plant.PlantCode
-            );
-            inspectionArea.AreaPolygonJson =
-                @"{
-                    ""zmin"": 0,
-                    ""zmax"": 10,
-                    ""positions"": [
-                        { ""x"": 0, ""y"": 0 },
-                        { ""x"": 0, ""y"": 10 },
-                        { ""x"": 10, ""y"": 10 },
-                        { ""x"": 10, ""y"": 0 }
-                    ]
-                }";
+            var areaPolygon = new AreaPolygon
+            {
+                ZMin = 0,
+                ZMax = 10,
+                Positions =
+                [
+                    new PolygonPoint { X = 0, Y = 0 },
+                    new PolygonPoint { X = 0, Y = 10 },
+                    new PolygonPoint { X = 10, Y = 10 },
+                    new PolygonPoint { X = 10, Y = 0 },
+                ],
+            };
 
             List<MissionTask> missionTasks =
             [
@@ -64,42 +61,37 @@ namespace Api.Test.Services
                 new(new Pose(2, 2, 2, 0, 0, 0, 1)),
             ];
 
-            var testBool = InspectionAreaService.MissionTasksAreInsideInspectionAreaPolygon(
+            var testBool = AreaPolygonService.MissionTasksAreInsideAreaPolygon(
                 missionTasks,
-                inspectionArea
+                areaPolygon
             );
             Assert.True(testBool);
         }
 
         [Fact]
-        public async Task TestTasksOutsidePolygon()
+        public void TestTasksOutsidePolygon()
         {
-            var installation = await DatabaseUtilities.NewInstallation();
-            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
-            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
-                installation.InstallationCode,
-                plant.PlantCode
-            );
-            inspectionArea.AreaPolygonJson =
-                @"{
-                    ""zmin"": 0,
-                    ""zmax"": 10,
-                    ""positions"": [
-                        { ""x"": 0, ""y"": 0 },
-                        { ""x"": 0, ""y"": 10 },
-                        { ""x"": 10, ""y"": 10 },
-                        { ""x"": 10, ""y"": 0 }
-                    ]
-                }";
+            var areaPolygon = new AreaPolygon
+            {
+                ZMin = 0,
+                ZMax = 10,
+                Positions =
+                [
+                    new PolygonPoint { X = 0, Y = 0 },
+                    new PolygonPoint { X = 0, Y = 10 },
+                    new PolygonPoint { X = 10, Y = 10 },
+                    new PolygonPoint { X = 10, Y = 0 },
+                ],
+            };
             List<MissionTask> missionTasks =
             [
                 new(new Pose(1, 1, 1, 0, 0, 0, 1)),
                 new(new Pose(11, 11, 11, 0, 0, 0, 1)),
             ];
 
-            var testBool = InspectionAreaService.MissionTasksAreInsideInspectionAreaPolygon(
+            var testBool = AreaPolygonService.MissionTasksAreInsideAreaPolygon(
                 missionTasks,
-                inspectionArea
+                areaPolygon
             );
             Assert.False(testBool);
         }
