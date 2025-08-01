@@ -167,23 +167,22 @@ namespace Api.Test.Controllers
                 plant.PlantCode
             );
 
-            var jsonString =
-                @"{
-                    ""zmin"": 0,
-                    ""zmax"": 10,
-                    ""positions"": [
-                        { ""x"": 0, ""y"": 0 },
-                        { ""x"": 0, ""y"": 10 },
-                        { ""x"": 10, ""y"": 10 },
-                        { ""x"": 10, ""y"": 0 }
-                    ]
-                }";
+            var areaPolygon = new AreaPolygon
+            {
+                ZMin = 0,
+                ZMax = 10,
+                Positions =
+                [
+                    new PolygonPoint { X = 0, Y = 0 },
+                    new PolygonPoint { X = 0, Y = 10 },
+                    new PolygonPoint { X = 10, Y = 10 },
+                    new PolygonPoint { X = 10, Y = 0 },
+                ],
+            };
 
-            var content = new StringContent(jsonString, null, "application/json");
+            var areaPolygonJson = JsonSerializer.Serialize(areaPolygon);
 
-            var expectedJsonString = await content.ReadAsStringAsync();
-            expectedJsonString = expectedJsonString.Replace("\n", "").Replace(" ", "");
-            expectedJsonString = expectedJsonString.Replace("\r", "").Replace(" ", "");
+            var content = new StringContent(areaPolygonJson, null, "application/json");
 
             // Act
             var response = await Client.PatchAsync(
@@ -196,7 +195,10 @@ namespace Api.Test.Controllers
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            Assert.Equal(expectedJsonString, inspectionAreaResponse!.AreaPolygonJson!);
+            Assert.Equal(
+                areaPolygonJson,
+                JsonSerializer.Serialize(inspectionAreaResponse!.AreaPolygon!)
+            );
         }
 
         [Fact]
