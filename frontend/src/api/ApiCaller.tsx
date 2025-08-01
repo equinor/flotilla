@@ -425,4 +425,9 @@ export class BackendAPICaller {
 
         await BackendAPICaller.PUT(path, body).catch(BackendAPICaller.handleError('POST', path))
     }
+
+    static async releaseInterventionNeeded(robotId: string): Promise<void> {
+        const path: string = `robots/${robotId}/release-intervention-needed`
+        await BackendAPICaller.POST(path, {}).catch(BackendAPICaller.handleError('POST', path))
+    }
 }

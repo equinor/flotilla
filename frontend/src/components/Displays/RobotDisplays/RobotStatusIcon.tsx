@@ -57,6 +57,12 @@ export const RobotStatusChip = ({ status, flotillaStatus, isarConnected, itemSiz
             iconColor = tokens.colors.text.static_icons__default.hex
             break
         }
+        case RobotStatus.InterventionNeeded: {
+            statusIcon = Icons.Blocked
+            iconColor = tokens.colors.text.static_icons__default.hex
+            break
+        }
+
         default: {
             iconColor = tokens.colors.text.static_icons__default.hex
             statusIcon = Icons.CloudOff
