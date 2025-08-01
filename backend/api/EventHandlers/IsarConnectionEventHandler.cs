@@ -157,7 +157,7 @@ namespace Api.EventHandlers
                     robotHeartbeatMessage.IsarId
                 );
             }
-            else
+            else if (robot.IsarConnected)
             {
                 _logger.LogWarning(
                     "Connection to ISAR instance '{Id}' timed out - It will be disabled and active missions aborted",
