@@ -22,6 +22,7 @@ namespace Api.Services
         public Task<IsarMission> StartMoveArm(Robot robot, string armPosition);
 
         public Task<MediaConfig?> GetMediaStreamConfig(Robot robot);
+        public Task ReleaseInterventionNeeded(string robotIsarUri);
     }
 
     public class IsarService(IDownstreamApi isarApi, ILogger<IsarService> logger) : IIsarService
@@ -282,6 +283,37 @@ namespace Api.Services
                 robot.Id
             );
             return isarMission;
+        }
+
+        public async Task ReleaseInterventionNeeded(string robotIsarUri)
+        {
+            HttpResponseMessage? response;
+            try
+            {
+                response = await CallApi(
+                    HttpMethod.Post,
+                    robotIsarUri,
+                    "schedule/release-intervention-needed"
+                );
+            }
+            catch (Exception e)
+            {
+                logger.LogError(
+                    "Encountered an exception when making an API call to ISAR: {Message}",
+                    e.Message
+                );
+                throw new IsarCommunicationException(e.Message);
+            }
+
+            if (!response.IsSuccessStatusCode)
+            {
+                (string message, int statusCode) = GetErrorDescriptionForFailedIsarRequest(
+                    response
+                );
+                string errorResponse = await response.Content.ReadAsStringAsync();
+                logger.LogError("{Message}: {ErrorResponse}", message, errorResponse);
+                throw new IsarCommunicationException(message);
+            }
         }
 
         /// <summary>
