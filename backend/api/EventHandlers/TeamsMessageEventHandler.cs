@@ -1,10 +1,6 @@
-﻿using System;
-using System.Globalization;
-using System.IO;
+﻿using System.Globalization;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Nodes;
 using AdaptiveCards.Templating;
 using Api.Services;
 using Api.Services.Events;

@@ -15,6 +15,7 @@ export enum RobotStatus {
     ReturningHome = 'ReturningHome',
     ConnectionIssues = 'Connection Issues',
     UnknownStatus = 'UnknownStatus',
+    InterventionNeeded = 'InterventionNeeded',
 }
 
 export enum RobotFlotillaStatus {

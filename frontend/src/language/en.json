@@ -330,5 +330,6 @@
     "Upcoming": "Upcoming",
     "Completed": "Completed",
     "More info": "More info",
-    "Error description": "Error description"
+    "Error description": "Error description",
+    "Unable to release robot {0} from intervention mode": "Unable to release robot {0} from intervention mode"
 }
