@@ -32,7 +32,8 @@ namespace Api.Services
         IIsarService isarService,
         ISignalRService signalRService,
         IErrorHandlingService errorHandlingService,
-        IInspectionAreaService inspectionAreaService
+        IInspectionAreaService inspectionAreaService,
+        IAreaPolygonService areaPolygonService
     ) : IMissionSchedulingService
     {
         public async Task StartNextMissionRunIfSystemIsAvailable(Robot robot)
@@ -114,9 +115,9 @@ namespace Api.Services
 
             if (
                 !missionRun.IsEmergencyMission()
-                && !inspectionAreaService.MissionTasksAreInsideInspectionAreaPolygon(
+                && !areaPolygonService.MissionTasksAreInsideAreaPolygon(
                     (List<MissionTask>)missionRun.Tasks,
-                    currentInspectionArea
+                    currentInspectionArea.AreaPolygon
                 )
             )
             {
