@@ -1,4 +1,5 @@
-﻿using Api.Database.Models;
+﻿using System.Text.Json;
+using Api.Database.Models;
 using Api.Services.MissionLoaders;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -112,6 +113,16 @@ namespace Api.Database.Context
                 .HasOne(p => p.Installation)
                 .WithMany()
                 .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder
+                .Entity<InspectionArea>()
+                .OwnsOne(i => i.AreaPolygon, areaPolygon =>
+                {
+                    areaPolygon.WithOwner();
+                    areaPolygon.Property(p => p.Positions)
+                .HasConversion(
+                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
+                    v => JsonSerializer.Deserialize<List<PolygonPoint>>(v, (JsonSerializerOptions)null));
+                });
         }
 
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)

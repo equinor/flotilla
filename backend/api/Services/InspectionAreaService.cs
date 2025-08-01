@@ -178,23 +178,10 @@ namespace Api.Services
             InspectionArea inspectionArea
         )
         {
-            if (string.IsNullOrEmpty(inspectionArea.AreaPolygonJson))
+            if (inspectionArea.AreaPolygon is null)
             {
                 logger.LogWarning(
                     "No polygon defined for inspection area {inspectionAreaName}",
-                    inspectionArea.Name
-                );
-                return true;
-            }
-
-            var inspectionAreaPolygon = JsonSerializer.Deserialize<InspectionAreaPolygon>(
-                inspectionArea.AreaPolygonJson
-            );
-
-            if (inspectionAreaPolygon == null)
-            {
-                logger.LogWarning(
-                    "Invalid polygon defined for inspection area {inspectionAreaName}",
                     inspectionArea.Name
                 );
                 return true;
@@ -205,10 +192,10 @@ namespace Api.Services
                 var robotPosition = missionTask.RobotPose.Position;
                 if (
                     !IsPositionInsidePolygon(
-                        inspectionAreaPolygon.Positions,
+                        inspectionArea.AreaPolygon.Positions,
                         robotPosition,
-                        inspectionAreaPolygon.ZMin,
-                        inspectionAreaPolygon.ZMax
+                        inspectionArea.AreaPolygon.ZMin,
+                        inspectionArea.AreaPolygon.ZMax
                     )
                 )
                 {
@@ -225,7 +212,7 @@ namespace Api.Services
         }
 
         private static bool IsPositionInsidePolygon(
-            List<XYPosition> polygon,
+            List<PolygonPoint> polygon,
             Position position,
             double zMin,
             double zMax
@@ -307,29 +294,12 @@ namespace Api.Services
                 );
             }
 
-            string inspectionAreaPolygon = "";
-            if (newInspectionAreaQuery.AreaPolygonJson != null)
-            {
-                try
-                {
-                    inspectionAreaPolygon = JsonSerializer.Serialize(
-                        newInspectionAreaQuery.AreaPolygonJson
-                    );
-                }
-                catch (Exception)
-                {
-                    throw new InvalidPolygonException(
-                        "The polygon is invalid and could not be parsed"
-                    );
-                }
-            }
-
             var inspectionArea = new InspectionArea
             {
                 Name = newInspectionAreaQuery.Name,
                 Installation = installation,
                 Plant = plant,
-                AreaPolygonJson = inspectionAreaPolygon,
+                AreaPolygon = newInspectionAreaQuery.AreaPolygon,
             };
 
             context.Entry(inspectionArea.Installation).State = EntityState.Unchanged;

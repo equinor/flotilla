@@ -1,4 +1,5 @@
-﻿using Api.Services.Models;
+﻿using Api.Database.Models;
+using Api.Services.Models;
 
 namespace Api.Controllers.Models
 {
@@ -7,6 +8,6 @@ namespace Api.Controllers.Models
         public string InstallationCode { get; set; }
         public string PlantCode { get; set; }
         public string Name { get; set; }
-        public InspectionAreaPolygon? AreaPolygonJson { get; set; }
+        public AreaPolygon? AreaPolygon { get; set; }
     }
 }
