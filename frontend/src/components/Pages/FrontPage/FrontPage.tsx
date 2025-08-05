@@ -18,6 +18,7 @@ import { useNavigate } from 'react-router-dom'
 import { config } from 'config'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { phone_width } from 'utils/constants'
+import { MissionStats } from '../InstallationStats/InstallationstatsView'
 
 const StyledFrontPage = styled.div`
     display: flex;
@@ -87,6 +88,7 @@ export enum TabNames {
     MissionHistory = 'mission-history',
     AutoScheduling = 'auto-scheduling',
     Robots = 'robots',
+    Statistics = 'statistics',
 }
 
 export const FrontPage = ({ initialTab }: { initialTab: TabNames }) => {
@@ -126,6 +128,7 @@ export const FrontPage = ({ initialTab }: { initialTab: TabNames }) => {
                             <Tabs.Tab>{TranslateText('Mission History')}</Tabs.Tab>
                             <Tabs.Tab>{TranslateText('Auto Scheduling')}</Tabs.Tab>
                             <Tabs.Tab>{TranslateText('Robots')}</Tabs.Tab>
+                            <Tabs.Tab>{TranslateText('Statistics')}</Tabs.Tab>
                         </StyledTabsList>
                         <StyledTabHeaderRightContent>
                             <OngoingMissionsInfo goToOngoingTab={setActiveTabToMissionControl} />
@@ -150,6 +153,9 @@ export const FrontPage = ({ initialTab }: { initialTab: TabNames }) => {
                         </Tabs.Panel>
                         <Tabs.Panel>
                             <RobotStatusSection />
+                        </Tabs.Panel>
+                        <Tabs.Panel>
+                            <MissionStats />
                         </Tabs.Panel>
                     </Tabs.Panels>
                 </Tabs>
