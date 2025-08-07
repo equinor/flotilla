@@ -59,6 +59,19 @@ namespace Api.Configurations
             else
             {
                 string? connection = configuration["Database:PostgreSqlConnectionString"];
+                int DATABASE_TIMEOUT;
+                var timeoutValue = configuration["Database:Timeout"];
+                if (
+                    !string.IsNullOrEmpty(timeoutValue)
+                    && int.TryParse(timeoutValue, out var parsedTimeout)
+                )
+                {
+                    DATABASE_TIMEOUT = parsedTimeout;
+                }
+                else
+                {
+                    DATABASE_TIMEOUT = 30;
+                }
                 // Setting splitting behavior explicitly to avoid warning
                 services.AddDbContext<FlotillaDbContext>(
                     options =>
@@ -68,6 +81,7 @@ namespace Api.Configurations
                             {
                                 o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery);
                                 o.EnableRetryOnFailure();
+                                o.CommandTimeout(DATABASE_TIMEOUT);
                             }
                         ),
                     ServiceLifetime.Transient
