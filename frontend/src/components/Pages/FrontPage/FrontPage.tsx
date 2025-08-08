@@ -6,7 +6,7 @@ import { tokens } from '@equinor/eds-tokens'
 import { MissionControlSection } from './MissionOverview/MissionControlSection'
 import { redirectIfNoInstallationSelected } from 'utils/RedirectIfNoInstallationSelected'
 import { AutoScheduleSection } from './AutoScheduleSection/AutoScheduleSection'
-import { useState } from 'react'
+import { useState, useMemo, type ReactNode } from 'react'
 import { Icon, Tabs, Typography } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { InspectionSection } from '../InspectionPage/InspectionSection'
@@ -71,12 +71,9 @@ const OngoingMissionsInfo = ({ goToOngoingTab }: { goToOngoingTab: () => void })
         <StyledOngoingMissionsInfo onClick={goToOngoingTab}>
             <StyledNumberOfMissions>
                 <Icon name={Icons.Ongoing} size={24} />
-                <Typography variant="h5">
-                    {' '}
-                    {`${ongoingMissions.length} ${TranslateText('Ongoing missions')}`}
-                </Typography>
+                <Typography variant="h5">{`${ongoingMissions.length} ${TranslateText('Ongoing missions')}`}</Typography>
             </StyledNumberOfMissions>
-            <Typography variant="body_short"> {formattedAreaNames} </Typography>
+            <Typography variant="body_short">{formattedAreaNames}</Typography>
         </StyledOngoingMissionsInfo>
     )
 }
@@ -91,73 +88,86 @@ export enum TabNames {
     Statistics = 'statistics',
 }
 
+type TabDef = {
+    name: TabNames
+    label: string
+    render: () => ReactNode
+}
+
 export const FrontPage = ({ initialTab }: { initialTab: TabNames }) => {
-    const [activeTab, setActiveTab] = useState(initialTab)
+    const [activeTab, setActiveTab] = useState<TabNames>(initialTab)
     const { TranslateText } = useLanguageContext()
     const { installationInspectionAreas } = useInstallationContext()
 
     redirectIfNoInstallationSelected()
 
     const navigate = useNavigate()
-    const goToTab = (tabIndex: number) => {
-        const tabName = Object.values(TabNames)[tabIndex]
-        setActiveTab(tabName)
-        const path = `${config.FRONTEND_BASE_ROUTE}/front-page-${tabName}`
-        navigate(path)
-    }
-    const getIndexFromTabName = (tabName: TabNames) => {
-        return Object.values(TabNames).indexOf(tabName)
+
+    const tabs: TabDef[] = useMemo(() => {
+        const list: TabDef[] = [
+            {
+                name: TabNames.MissionControl,
+                label: TranslateText('Mission Control'),
+                render: () => <MissionControlSection />,
+            },
+            ...(installationInspectionAreas.length > 1
+                ? [
+                      {
+                          name: TabNames.InspectionPlan,
+                          label: TranslateText('Area Overview'),
+                          render: () => <InspectionSection />,
+                      },
+                  ]
+                : []),
+            {
+                name: TabNames.PredefinedMissions,
+                label: TranslateText('Predefined Missions'),
+                render: () => <InspectionOverviewSection />,
+            },
+            {
+                name: TabNames.MissionHistory,
+                label: TranslateText('Mission History'),
+                render: () => <MissionHistoryView refreshInterval={1000} />,
+            },
+            {
+                name: TabNames.AutoScheduling,
+                label: TranslateText('Auto Scheduling'),
+                render: () => <AutoScheduleSection />,
+            },
+            { name: TabNames.Robots, label: TranslateText('Robots'), render: () => <RobotStatusSection /> },
+            { name: TabNames.Statistics, label: TranslateText('Statistics'), render: () => <MissionStats /> },
+        ]
+        return list
+    }, [installationInspectionAreas.length, TranslateText])
+
+    const activeIndex = tabs.findIndex((t) => t.name === activeTab)
+
+    const goToTab = (index: number) => {
+        const tab = tabs[index]
+        setActiveTab(tab.name)
+        navigate(`${config.FRONTEND_BASE_ROUTE}/front-page-${tab.name}`)
     }
 
-    const setActiveTabToMissionControl = () => goToTab(getIndexFromTabName(TabNames.MissionControl))
+    const setActiveTabToMissionControl = () => goToTab(tabs.findIndex((t) => t.name === TabNames.MissionControl))
 
     return (
         <>
             <Header page={'frontPage'} />
             <StyledFrontPage>
-                <Tabs activeTab={getIndexFromTabName(activeTab)} onChange={goToTab}>
+                <Tabs activeTab={activeIndex} onChange={goToTab}>
                     <StyledTabHeader>
                         <StyledTabsList>
-                            <Tabs.Tab>{TranslateText('Mission Control')}</Tabs.Tab>
-                            {installationInspectionAreas.length > 1 ? (
-                                <Tabs.Tab>{TranslateText('Area Overview')}</Tabs.Tab>
-                            ) : (
-                                <></>
-                            )}
-                            <Tabs.Tab>{TranslateText('Predefined Missions')}</Tabs.Tab>
-                            <Tabs.Tab>{TranslateText('Mission History')}</Tabs.Tab>
-                            <Tabs.Tab>{TranslateText('Auto Scheduling')}</Tabs.Tab>
-                            <Tabs.Tab>{TranslateText('Robots')}</Tabs.Tab>
-                            <Tabs.Tab>{TranslateText('Statistics')}</Tabs.Tab>
+                            {tabs.map((t) => (
+                                <Tabs.Tab key={t.name}>{t.label}</Tabs.Tab>
+                            ))}
                         </StyledTabsList>
                         <StyledTabHeaderRightContent>
                             <OngoingMissionsInfo goToOngoingTab={setActiveTabToMissionControl} />
                             <StopRobotDialog />
                         </StyledTabHeaderRightContent>
                     </StyledTabHeader>
-                    <Tabs.Panels>
-                        <Tabs.Panel>
-                            <MissionControlSection />
-                        </Tabs.Panel>
-                        <Tabs.Panel>
-                            <InspectionSection />
-                        </Tabs.Panel>
-                        <Tabs.Panel>
-                            <InspectionOverviewSection />
-                        </Tabs.Panel>
-                        <Tabs.Panel>
-                            <MissionHistoryView refreshInterval={1000} />
-                        </Tabs.Panel>
-                        <Tabs.Panel>
-                            <AutoScheduleSection />
-                        </Tabs.Panel>
-                        <Tabs.Panel>
-                            <RobotStatusSection />
-                        </Tabs.Panel>
-                        <Tabs.Panel>
-                            <MissionStats />
-                        </Tabs.Panel>
-                    </Tabs.Panels>
+
+                    {tabs[activeIndex]?.render()}
                 </Tabs>
             </StyledFrontPage>
         </>
