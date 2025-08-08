@@ -530,7 +530,7 @@ namespace Api.Controllers
                 await errorHandlingService.HandleLosingConnectionToIsar(robot.Id);
                 return StatusCode(StatusCodes.Status502BadGateway, Message);
             }
-            catch (MissionException e)
+            catch (MissionStoppedException e)
             {
                 logger.LogWarning("Error while stopping ISAR mission: {e}", e.Message);
                 return StatusCode(StatusCodes.Status200OK, $"Mission was already stopped");
@@ -602,10 +602,10 @@ namespace Api.Controllers
                 await errorHandlingService.HandleLosingConnectionToIsar(robot.Id);
                 return StatusCode(StatusCodes.Status502BadGateway, Message);
             }
-            catch (MissionException e)
+            catch (MissionPauseException e)
             {
-                logger.LogError(e, "Error while pausing ISAR mission");
-                return StatusCode(StatusCodes.Status502BadGateway, $"{e.Message}");
+                logger.LogError(e, "Unable to pause mission for robot {RobotId}", robotId);
+                return StatusCode(StatusCodes.Status400BadRequest, $"{e.Message}");
             }
             catch (JsonException e)
             {
@@ -654,10 +654,10 @@ namespace Api.Controllers
                 await errorHandlingService.HandleLosingConnectionToIsar(robot.Id);
                 return StatusCode(StatusCodes.Status502BadGateway, Message);
             }
-            catch (MissionException e)
+            catch (MissionResumeException e)
             {
-                logger.LogError(e, "Error while resuming ISAR mission");
-                return StatusCode(StatusCodes.Status502BadGateway, $"{e.Message}");
+                logger.LogError(e, "Unable to resume mission for robot {RobotId}", robotId);
+                return StatusCode(StatusCodes.Status400BadRequest, $"{e.Message}");
             }
             catch (JsonException e)
             {
@@ -727,12 +727,11 @@ namespace Api.Controllers
                 await errorHandlingService.HandleLosingConnectionToIsar(robot.Id);
                 return StatusCode(StatusCodes.Status502BadGateway, errorMessage);
             }
-            catch (MissionException e)
+            catch (MissionArmPositionException e)
             {
-                const string ErrorMessage =
-                    "An error occurred while setting the arm position mission";
+                const string ErrorMessage = "Unable to set the arm position mission";
                 logger.LogError(e, "{Message}", ErrorMessage);
-                return StatusCode(StatusCodes.Status502BadGateway, ErrorMessage);
+                return StatusCode(StatusCodes.Status400BadRequest, ErrorMessage);
             }
             catch (JsonException e)
             {
