@@ -84,7 +84,7 @@ namespace Api.Configurations
                                 o.CommandTimeout(DATABASE_TIMEOUT);
                             }
                         ),
-                    ServiceLifetime.Transient
+                    ServiceLifetime.Scoped
                 );
             }
             return services;
