@@ -20,3 +20,12 @@ services:
       - Mqtt__Host=broker
       - ASPNETCORE_ENVIRONMENT=Development
       - AZURE_CLIENT_SECRET=${FLOTILLA_CLIENT_SECRET}
+
+  aspire-dashboard:
+    image: mcr.microsoft.com/dotnet/aspire-dashboard
+    ports:
+      - 4317:4317
+      - 18888:18888
+      - 18889:18889
+    environment:
+      - ASPIRE_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS=true
