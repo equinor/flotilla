@@ -1,4 +1,6 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Diagnostics;
+using System.Diagnostics.Metrics;
+using System.Text.Json.Serialization;
 using Api.Configurations;
 using Api.Controllers;
 using Api.Controllers.Models;
@@ -51,12 +53,17 @@ builder.Services.ConfigureDatabase(builder.Configuration, builder.Environment.En
 
 builder.Services.ConfigureMissionLoader(builder.Configuration);
 
-builder.Services.AddApplicationInsightsTelemetry();
-
-// Disable Application Insights Telemetry when debugging
-#if DEBUG
-TelemetryDebugWriter.IsTracingDisabled = true;
-#endif
+var openTelemetryEnabled = builder.Configuration.GetValue<bool?>("OpenTelemetry:Enabled") ?? false;
+var otelActivitySource = new ActivitySource("FlotillaBackend");
+var otelMeter = new Meter("FlotillaBackend.Metrics", "0.0.1");
+if (openTelemetryEnabled)
+{
+    builder.AddCustomOpenTelemetry(otelActivitySource, otelMeter);
+}
+else
+{
+    builder.Services.AddApplicationInsightsTelemetry();
+}
 
 builder.Services.AddScoped<IAccessRoleService, AccessRoleService>();
 

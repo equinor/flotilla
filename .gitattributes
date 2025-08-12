@@ -1,3 +1,6 @@
 * text=auto
 # On windows, this is necessary for the .sh files to have the correct line endings (LF)
 *.sh text eol=lf
+*.csproj text eol=lf
+*.json text eol=lf
+*.cs text eol=lf
