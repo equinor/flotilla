@@ -18,11 +18,11 @@ const locales = { nb }
 const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales })
 
 const CalendarColors = {
-    Scheduled: {
+    Planned: {
         background: tokens.colors.infographic.primary__lichen_green.hex,
         border: tokens.colors.interactive.success__resting.hex,
     },
-    Upcoming: {
+    Future: {
         background: tokens.colors.infographic.primary__moss_green_13.hex,
         border: tokens.colors.infographic.primary__moss_green_100.hex,
     },
@@ -30,7 +30,7 @@ const CalendarColors = {
         background: tokens.colors.ui.background__default.hex,
         border: tokens.colors.interactive.disabled__text.hex,
     },
-    Completed: {
+    Passed: {
         background: '#f7f7f7',
         border: tokens.colors.interactive.disabled__text.hex,
     },
@@ -150,13 +150,13 @@ const StyledSkipButton = styled(Button)`
     cursor: pointer;
     font-size: 12px;
     height: 25px;
-    background-color: ${CalendarColors.Scheduled.background};
+    background-color: ${CalendarColors.Planned.background};
     color: ${tokens.colors.text.static_icons__default.hex};
-    border: 1px solid ${CalendarColors.Scheduled.border};
+    border: 1px solid ${CalendarColors.Planned.border};
 
     &:hover {
         background-color: ${tokens.colors.ui.background__default.hex};
-        border: 1px solid ${CalendarColors.Scheduled.border};
+        border: 1px solid ${CalendarColors.Planned.border};
     }
 `
 
@@ -167,10 +167,10 @@ const StyledDialogActions = styled(StyledDialog.Actions)`
 `
 
 const legendItems = [
-    { color: CalendarColors.Scheduled, label: 'Scheduled' },
-    { color: CalendarColors.Upcoming, label: 'Upcoming' },
+    { color: CalendarColors.Planned, label: 'Planned today' },
+    { color: CalendarColors.Future, label: 'Future missions' },
     { color: CalendarColors.Skipped, label: 'Skipped' },
-    { color: CalendarColors.Completed, label: 'Completed' },
+    { color: CalendarColors.Passed, label: 'Passed' },
 ]
 
 export const CalendarPro = () => {
@@ -200,12 +200,12 @@ export const CalendarPro = () => {
                         const status = selectMissionStatusType(day, time, mission)
                         const color =
                             status === MissionStatusType.ScheduledJob
-                                ? CalendarColors.Scheduled
+                                ? CalendarColors.Planned
                                 : status === MissionStatusType.FutureUnstartedJob
-                                  ? CalendarColors.Upcoming
+                                  ? CalendarColors.Future
                                   : status === MissionStatusType.SkippedJob
                                     ? CalendarColors.Skipped
-                                    : CalendarColors.Completed
+                                    : CalendarColors.Passed
 
                         return {
                             id: `${mission.id}-${day}-${time}`,
