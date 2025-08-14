@@ -106,6 +106,7 @@ const useMissionRuns = (): IMissionRunsContext => {
                     return updateQueueIfMissionAlreadyQueued(oldQueueCopy, updatedMission)
                 })
                 setOngoingMissions((oldMissionList) => {
+                    console.log('setOngoingMissions', oldMissionList)
                     const oldMissionListCopy = [...oldMissionList]
                     return updateOngoingMissionsWithUpdatedMission(oldMissionListCopy, updatedMission)
                 })
