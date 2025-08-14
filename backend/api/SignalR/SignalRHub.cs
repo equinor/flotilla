@@ -5,7 +5,8 @@ namespace Api.SignalRHubs
 {
     public interface ISignalRClient { }
 
-    public class SignalRHub(IAccessRoleService accessRoleService) : Hub<ISignalRClient>
+    public class SignalRHub(IAccessRoleService accessRoleService, IConfiguration configuration)
+        : Hub<ISignalRClient>
     {
         /// <summary>
         /// Called when a new connection is made.
@@ -25,10 +26,12 @@ namespace Api.SignalRHubs
 
                 if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Local")
                 {
-                    string? localDevUser = Environment.GetEnvironmentVariable("LOCAL_DEVUSERID");
+                    string? localDevUser = configuration
+                        .GetSection("Local")
+                        .GetValue<string?>("DevUserId");
                     if (localDevUser is null || localDevUser.Equals("", StringComparison.Ordinal))
                         throw new HubException(
-                            "Running in development mode, but missing LOCAL_DEVUSERID value in environment"
+                            "Running in development mode, but missing Local_DevUserId value in environment"
                         );
 
                     await Groups.AddToGroupAsync(Context.ConnectionId, localDevUser); // This is used instead of Users.All

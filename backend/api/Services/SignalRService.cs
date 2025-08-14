@@ -5,6 +5,7 @@ using Api.Database.Models;
 using Api.Services.Models;
 using Api.SignalRHubs;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Configuration;
 
 namespace Api.Services
 {
@@ -26,10 +27,12 @@ namespace Api.Services
     {
         private readonly JsonSerializerOptions _serializerOptions;
         private readonly IHubContext<SignalRHub> _signalRHub;
+        private readonly IConfiguration _configuration;
 
-        public SignalRService(IHubContext<SignalRHub> signalRHub)
+        public SignalRService(IHubContext<SignalRHub> signalRHub, IConfiguration configuration)
         {
             _signalRHub = signalRHub;
+            _configuration = configuration;
             _serializerOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
             _serializerOptions.Converters.Add(new JsonStringEnumConverter());
         }
@@ -48,7 +51,9 @@ namespace Api.Services
         {
             if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Local")
             {
-                string? localDevUser = Environment.GetEnvironmentVariable("LOCAL_DEVUSERID");
+                string? localDevUser = _configuration
+                    .GetSection("Local")
+                    .GetValue<string?>("DevUserId");
                 if (localDevUser is null || localDevUser.Equals("", StringComparison.Ordinal))
                     return;
 

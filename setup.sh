@@ -45,7 +45,7 @@ fi
 
 if [ "$backend_abort" != "true" ]; then
     echo -e "Flotilla azure client secret needed for backend dockerization."
-    echo -en "Input Flotilla Azure Client Secret (copy-paste from KeyVault):\n" 
+    echo -en "Input Flotilla Azure Client Secret (copy-paste from KeyVault):\n"
 
     while [ true ]
     do
@@ -67,7 +67,7 @@ if [ "$backend_abort" != "true" ]; then
 
 
     echo -e "Flotilla broker server key needed for backend dockerization."
-    echo -en "Input Flotilla Broker Server Key (copy-paste from KeyVault):\n" 
+    echo -en "Input Flotilla Broker Server Key (copy-paste from KeyVault):\n"
 
     while [ true ]
     do
@@ -107,7 +107,7 @@ fi
 if [ "$backend_abort" != "true" ]; then
 
     echo -e "Azure client id needed for backend dockerization."
-    echo -en "Azure Client Id (copy-paste from KeyVault):\n" 
+    echo -en "Azure Client Id (copy-paste from KeyVault):\n"
 
     while [ true ]
     do
@@ -125,7 +125,7 @@ if [ "$backend_abort" != "true" ]; then
     echo -e "Added client id to .env file"
 
     echo -e "Azure tenant id needed for backend dockerization."
-    echo -en "Azure Tenant Id (copy-paste from KeyVault):\n" 
+    echo -en "Azure Tenant Id (copy-paste from KeyVault):\n"
 
     while [ true ]
     do
@@ -143,7 +143,7 @@ if [ "$backend_abort" != "true" ]; then
     echo -e "Added tenant id to .env file"
 
     echo -e "Azure client secret needed for backend dockerization."
-    echo -en "Azure Client Secret (copy-paste from KeyVault):\n" 
+    echo -en "Azure Client Secret (copy-paste from KeyVault):\n"
 
     while [ true ]
     do
@@ -159,9 +159,9 @@ if [ "$backend_abort" != "true" ]; then
 
     echo "AZURE_CLIENT_SECRET=$az_client_secret" >> $flotilla_dir/backend/api/.env
     echo -e "Added client secret to .env file"
-    
+
     echo -e "A username is needed for local development with SignalR"
-    echo -en "Input a username for yourself (this only needs to be unique within your development environment):\n" 
+    echo -en "Input a username for yourself (this only needs to be unique within your development environment):\n"
 
     while [ true ]
     do
@@ -175,7 +175,7 @@ if [ "$backend_abort" != "true" ]; then
         fi
     done
 
-    echo "LOCAL_DEVUSERID=$local_dev_username" >> $flotilla_dir/backend/api/.env
+    echo "Local__DevUserId=$local_dev_username" >> $flotilla_dir/backend/api/.env
     echo -e "Added local development username to .env file"
 
     echo -e "Backup setup - Done!"
@@ -200,7 +200,7 @@ if [ -f $flotilla_dir/.env ]; then
 fi
 if [ "$broker_abort" != "true" ]; then
     echo -e "MQTT TLS Server key needed for the broker to communicate using TLS"
-    echo -en "Input MQTT broker server key (copy-paste from KeyVault):\n" 
+    echo -en "Input MQTT broker server key (copy-paste from KeyVault):\n"
     read -s broker_server_key
 
     # Save to .env file

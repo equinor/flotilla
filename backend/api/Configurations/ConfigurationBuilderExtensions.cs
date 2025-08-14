@@ -3,7 +3,7 @@
     public static class ConfigurationBuilderExtensions
     {
         /// <summary>
-        /// Creates the AZURE_CLIENT_ID, AZURE_TENANT_ID and LOCAL_DEVUSERID configuration values for the
+        /// Creates the AZURE_CLIENT_ID and AZURE_TENANT_ID configuration values for the
         /// <see href="https://docs.microsoft.com/en-us/dotnet/api/azure.identity.environmentcredential?view=azure-dotnet">Environment Credentials</see>
         /// used by the application when dockerized.
         /// </summary>
@@ -27,18 +27,6 @@
             {
                 Environment.SetEnvironmentVariable("AZURE_TENANT_ID", tenantId);
                 Console.WriteLine("'AZURE_TENANT_ID' set to " + tenantId);
-            }
-
-            if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Local")
-            {
-                string? userId = builder
-                    .Configuration.GetSection("Local")
-                    .GetValue<string?>("DevUserId");
-                if (tenantId is not null)
-                {
-                    Environment.SetEnvironmentVariable("LOCAL_DEVUSERID", userId);
-                    Console.WriteLine("'LOCAL_DEVUSERID' set to " + userId);
-                }
             }
         }
 
