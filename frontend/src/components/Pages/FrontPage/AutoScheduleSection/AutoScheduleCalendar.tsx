@@ -30,7 +30,7 @@ const CalendarColors = {
         background: tokens.colors.ui.background__default.hex,
         border: tokens.colors.interactive.disabled__text.hex,
     },
-    Completed: {
+    Passed: {
         background: '#f7f7f7',
         border: tokens.colors.interactive.disabled__text.hex,
     },
@@ -167,10 +167,10 @@ const StyledDialogActions = styled(StyledDialog.Actions)`
 `
 
 const legendItems = [
-    { color: CalendarColors.Scheduled, label: 'Scheduled' },
-    { color: CalendarColors.Upcoming, label: 'Upcoming' },
+    { color: CalendarColors.Scheduled, label: 'Scheduled today' },
+    { color: CalendarColors.Upcoming, label: 'Future missions' },
     { color: CalendarColors.Skipped, label: 'Skipped' },
-    { color: CalendarColors.Completed, label: 'Completed' },
+    { color: CalendarColors.Passed, label: 'Passed' },
 ]
 
 export const CalendarPro = () => {
@@ -205,7 +205,7 @@ export const CalendarPro = () => {
                                   ? CalendarColors.Upcoming
                                   : status === MissionStatusType.SkippedJob
                                     ? CalendarColors.Skipped
-                                    : CalendarColors.Completed
+                                    : CalendarColors.Passed
 
                         return {
                             id: `${mission.id}-${day}-${time}`,
