@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Text.Json.Serialization;
 using Api.Configurations;
@@ -47,6 +47,8 @@ if (builder.Configuration.GetSection("KeyVault").GetValue<bool>("UseKeyVault"))
     }
 }
 
+var applicationName = builder.Configuration["AppName"] ?? "FlotillaBackend";
+
 builder.ConfigureLogger();
 
 builder.Services.ConfigureDatabase(builder.Configuration, builder.Environment.EnvironmentName);
@@ -54,8 +56,8 @@ builder.Services.ConfigureDatabase(builder.Configuration, builder.Environment.En
 builder.Services.ConfigureMissionLoader(builder.Configuration);
 
 var openTelemetryEnabled = builder.Configuration.GetValue<bool?>("OpenTelemetry:Enabled") ?? false;
-var otelActivitySource = new ActivitySource("FlotillaBackend");
-var otelMeter = new Meter("FlotillaBackend.Metrics", "0.0.1");
+var otelActivitySource = new ActivitySource(applicationName);
+var otelMeter = new Meter($"{applicationName}.Metrics", "0.0.1");
 if (openTelemetryEnabled)
 {
     builder.AddCustomOpenTelemetry(otelActivitySource, otelMeter);

@@ -8,6 +8,7 @@ frontend/dist/
 *.log
 *.vs
 *.code-workspace
+*.editorconfig
 
 # Environment variables
 *.env

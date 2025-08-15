@@ -18,6 +18,8 @@ public static class TelemetryConfigurations
         Meter meter
     )
     {
+        var applicationName = builder.Configuration["AppName"] ?? "FlotillaBackend";
+
         // Logging
         builder.Logging.AddOpenTelemetry(logging =>
         {
@@ -28,14 +30,14 @@ public static class TelemetryConfigurations
         // Tracing & Metrics pipeline
         var otel = builder
             .Services.AddOpenTelemetry()
-            .ConfigureResource(r => r.AddService("FlotillaBackend"))
+            .ConfigureResource(r => r.AddService(applicationName))
             .WithTracing(t =>
             {
                 t.SetSampler(new AlwaysOnSampler())
                     .SetResourceBuilder(
                         ResourceBuilder
                             .CreateDefault()
-                            .AddService("FlotillaBackend", serviceVersion: "0.0.1")
+                            .AddService(applicationName, serviceVersion: "0.0.1")
                     )
                     .AddAspNetCoreInstrumentation()
                     .AddEntityFrameworkCoreInstrumentation()
