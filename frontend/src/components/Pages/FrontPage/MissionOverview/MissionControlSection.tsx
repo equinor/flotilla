@@ -71,7 +71,7 @@ export const MissionControlSection = () => {
 const MissionControlCard = ({ robot }: { robot: Robot }) => {
     const { ongoingMissions } = useMissionsContext()
     const ongoingMission = ongoingMissions.find((mission) => mission.robot.id === robot.id)
-    const [isOpen, setIsOpen] = useState<boolean>(false)
+    const [isOpen, setIsOpen] = useState<boolean>(true)
     return (
         <MissionControlCardStyle
             id={FrontPageSectionId.RobotCard + robot.id}
