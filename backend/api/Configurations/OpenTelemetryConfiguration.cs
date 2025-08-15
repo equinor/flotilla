@@ -55,19 +55,26 @@ public static class TelemetryConfigurations
                     .AddProcessInstrumentation();
             });
 
-        // Connect to Azure Monitor if connection string is provided
-        var applicationInsightsConnectionString = builder.Configuration[
-            "ApplicationInsights:ConnectionString"
-        ];
+        // Conditionally connect to Azure Monitor
+        var azureMonitorExportEnabled =
+            builder.Configuration.GetValue<bool?>("OpenTelemetry:AzureMonitorExportEnabled")
+            ?? false;
 
-        if (!string.IsNullOrEmpty(applicationInsightsConnectionString))
+        if (azureMonitorExportEnabled)
         {
-            builder
-                .Services.AddOpenTelemetry()
-                .UseAzureMonitor(o =>
-                {
-                    o.ConnectionString = applicationInsightsConnectionString;
-                });
+            var applicationInsightsConnectionString = builder.Configuration[
+                "ApplicationInsights:ConnectionString"
+            ];
+
+            if (!string.IsNullOrEmpty(applicationInsightsConnectionString))
+            {
+                builder
+                    .Services.AddOpenTelemetry()
+                    .UseAzureMonitor(o =>
+                    {
+                        o.ConnectionString = applicationInsightsConnectionString;
+                    });
+            }
         }
 
         // Connect to OpenTelemetry OTLP exporter if endpoint is provided, used for local aspire dashboard
