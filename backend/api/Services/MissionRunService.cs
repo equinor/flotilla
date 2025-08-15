@@ -287,8 +287,8 @@ namespace Api.Services
             await ApplyDatabaseUpdate(missionRun.InspectionArea.Installation);
             _ = signalRService.SendMessageAsync(
                 "Mission run updated",
-                missionRun?.InspectionArea.Installation,
-                missionRun != null ? new MissionRunResponse(missionRun) : null
+                missionRun.InspectionArea.Installation,
+                new MissionRunResponse(missionRun)
             );
             DetachTracking(context, missionRun!);
         }
@@ -305,8 +305,8 @@ namespace Api.Services
             await ApplyDatabaseUpdate(missionRun.InspectionArea.Installation);
             _ = signalRService.SendMessageAsync(
                 "Mission run updated",
-                missionRun?.InspectionArea.Installation,
-                missionRun != null ? new MissionRunResponse(missionRun) : null
+                missionRun.InspectionArea.Installation,
+                new MissionRunResponse(missionRun)
             );
             DetachTracking(context, missionRun!);
         }
