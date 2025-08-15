@@ -485,8 +485,8 @@ namespace Api.Services
                 );
                 _ = signalRService.SendMessageAsync(
                     "Mission run created",
-                    missionRun?.InspectionArea?.Installation,
-                    missionRun != null ? new MissionRunResponse(missionRun) : null
+                    missionRun.InspectionArea.Installation,
+                    new MissionRunResponse(missionRun)
                 );
             }
         }

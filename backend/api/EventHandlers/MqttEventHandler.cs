@@ -525,12 +525,13 @@ namespace Api.EventHandlers
             if (missionRun is null)
             {
                 _logger.LogWarning("Mission run with ID {Id} was not found", task.MissionId);
+                return;
             }
 
             _ = SignalRService.SendMessageAsync(
                 "Mission run updated",
-                missionRun?.InspectionArea.Installation,
-                missionRun != null ? new MissionRunResponse(missionRun) : null
+                missionRun.InspectionArea.Installation,
+                new MissionRunResponse(missionRun)
             );
 
             _logger.LogInformation(
