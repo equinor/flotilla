@@ -157,7 +157,7 @@ namespace Api.Services
                 }
 
                 logger.LogError("{Message}: {ErrorResponse}", message, errorResponse);
-                throw new MissionException(message, statusCode);
+                throw new MissionStoppedException(message, statusCode);
             }
             if (response.Content is null)
             {
@@ -192,7 +192,7 @@ namespace Api.Services
                 );
                 string errorResponse = await response.Content.ReadAsStringAsync();
                 logger.LogError("{Message}: {ErrorResponse}", message, errorResponse);
-                throw new MissionException(message, statusCode);
+                throw new MissionPauseException(message, statusCode);
             }
             if (response.Content is null)
             {
@@ -226,12 +226,12 @@ namespace Api.Services
                 );
                 string errorResponse = await response.Content.ReadAsStringAsync();
                 logger.LogError("{Message}: {ErrorResponse}", message, errorResponse);
-                throw new MissionException(message, statusCode);
+                throw new MissionResumeException(message, statusCode);
             }
             if (response.Content is null)
             {
                 logger.LogError("Could not read content from mission");
-                throw new MissionException("Could not read content from mission");
+                throw new MissionResumeException("Could not read content from mission");
             }
 
             var isarMissionResponse =
@@ -257,13 +257,13 @@ namespace Api.Services
                 );
                 string errorResponse = await response.Content.ReadAsStringAsync();
                 logger.LogError("{Message}: {ErrorResponse}", message, errorResponse);
-                throw new MissionException(message, statusCode);
+                throw new MissionArmPositionException(message, statusCode);
             }
             if (response.Content is null)
             {
                 string errorMessage = "Could not read content from start move arm";
                 logger.LogError("{ErrorMessage}", errorMessage);
-                throw new MissionException(errorMessage);
+                throw new MissionArmPositionException(errorMessage);
             }
 
             var isarMissionResponse =
