@@ -99,6 +99,7 @@ export const RobotStatusCard = ({ robot }: RobotProps) => {
                                 <Typography variant="meta">{TranslateText('Battery')}</Typography>
                                 <BatteryStatusDisplay
                                     batteryLevel={robot.batteryLevel}
+                                    batteryState={robot.batteryState}
                                     batteryWarningLimit={robot.model.batteryWarningThreshold}
                                 />
                             </VerticalContent>
