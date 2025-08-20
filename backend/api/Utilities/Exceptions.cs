@@ -30,6 +30,8 @@
 
     public class InspectionNotFoundException(string message) : Exception(message) { }
 
+    public class InspectionNotAvailableYetException(string message) : Exception(message) { }
+
     public class MissionTaskNotFoundException(string message) : Exception(message) { }
 
     public class MissionRunNotFoundException(string message) : Exception(message) { }
