@@ -207,7 +207,21 @@ namespace Api.Database.Context
                 Pose = new Pose(),
             };
 
-            return new List<Robot>([robot1, robot2, robot3, robot4]);
+            var robot5 = new Robot
+            {
+                Name = "PlacebotKårstø",
+                IsarId = "00000000-0000-0000-0000-000000000001",
+                SerialNumber = "Placebot2",
+                Status = RobotStatus.Available,
+                Host = "localhost",
+                Port = 3000,
+                CurrentInstallation = installations[1],
+                CurrentInspectionAreaId = inspectionAreas[5].Id,
+                Documentation = [],
+                Pose = new Pose(),
+            };
+
+            return new List<Robot>([robot1, robot2, robot3, robot4, robot5]);
         }
 
         private static List<MissionDefinition> GetMissionDefinitions()
@@ -518,6 +532,7 @@ namespace Api.Database.Context
             robots[1].Model = models.Find(model => model.Type == RobotType.ExR2)!;
             robots[2].Model = models.Find(model => model.Type == RobotType.AnymalX)!;
             robots[3].Model = models.Find(model => model.Type == RobotType.Robot)!;
+            robots[4].Model = models.Find(model => model.Type == RobotType.Robot)!;
 
             context.AddRange(robots);
             context.AddRange(plants);
