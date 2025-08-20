@@ -22,7 +22,9 @@ namespace Api.SignalRHubs
                     .Select(c => c.Value)
                     .ToList();
 
-                var installationCodes = await accessRoleService.GetAllowedInstallationCodes(roles);
+                var installationCodes = await accessRoleService.GetAllowedInstallationCodes(
+                    Context.User
+                );
 
                 if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Local")
                 {
