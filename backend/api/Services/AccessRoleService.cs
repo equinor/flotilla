@@ -8,7 +8,7 @@ namespace Api.Services
     public interface IAccessRoleService
     {
         public Task<List<string>> GetAllowedInstallationCodes();
-        public Task<List<string>> GetAllowedInstallationCodes(List<string> roles);
+        public Task<List<string>> GetAllowedInstallationCodes(ClaimsPrincipal user);
         public bool IsUserAdmin();
         public bool IsAuthenticationAvailable();
         public Task<AccessRole> Create(
@@ -37,6 +37,11 @@ namespace Api.Services
         {
             var user = httpContextAccessor.HttpContext?.User;
 
+            return await GetAllowedInstallationCodes(user);
+        }
+
+        public async Task<List<string>> GetAllowedInstallationCodes(ClaimsPrincipal? user)
+        {
             if (user == null)
                 return await context
                     .Installations.AsNoTracking()
