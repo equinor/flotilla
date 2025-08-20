@@ -82,22 +82,49 @@ namespace Api.Controllers
                     );
 
                 if (inspectionStream == null)
+                {
+                    logger.LogError(
+                        "Could not fetch inspection with ISAR Inspection ID {isarInspectionId}",
+                        isarInspectionId
+                    );
                     return NotFound(
                         $"Could not fetch inspection with ISAR Inspection ID {isarInspectionId}"
                     );
+                }
 
                 return File(inspectionStream, "image/png");
             }
+            catch (InspectionNotAvailableYetException e)
+            {
+                logger.LogInformation(
+                    e,
+                    "Inspection not available yet for ISAR Inspection ID {IsarInspectionId}",
+                    isarInspectionId
+                );
+                return NotFound(
+                    $"Inspection not available yet for ISAR Inspection ID {isarInspectionId}"
+                );
+            }
             catch (InspectionNotFoundException e)
             {
+                logger.LogError(
+                    e,
+                    "Could not find inspection image with ISAR Inspection ID {IsarInspectionId}",
+                    isarInspectionId
+                );
                 return NotFound(
-                    $"Could not find inspection image with ISAR Inspection ID{isarInspectionId}. Error message: '{e.Message}'"
+                    $"Could not find inspection image with ISAR Inspection ID{isarInspectionId}"
                 );
             }
             catch (Exception e)
             {
+                logger.LogError(
+                    e,
+                    "Could not find inspection image with ISAR Inspection ID {IsarInspectionId}",
+                    isarInspectionId
+                );
                 return NotFound(
-                    $"Could not find inspection image with ISAR Inspection ID{isarInspectionId}. Error of type '{e.GetType()}' with message '{e.Message}'."
+                    $"Could not find inspection image with ISAR Inspection ID{isarInspectionId}."
                 );
             }
         }

@@ -173,7 +173,7 @@ namespace Api.Services
 
             if (response.StatusCode == HttpStatusCode.Accepted)
             {
-                throw new InspectionNotFoundException(
+                throw new InspectionNotAvailableYetException(
                     "Inspection data storage location is not yet available."
                 );
             }
