@@ -1,0 +1,69 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+    
+  tail_sampling:
+    decision_wait: 3s
+    num_traces: 50
+    expected_new_traces_per_sec: 10
+    policies:
+      [
+        {
+          name: errors_policy,
+          type: status_code,
+          status_code: {status_codes: [ERROR]}
+        },
+        {
+          name: http_error_policy,
+          type: numeric_attribute,
+          numeric_attribute: {key: "http.status_code", min_value: 400, max_value: 999}
+        },
+        {
+          name: https_policy,
+          type: string_attribute,
+          string_attribute: {key: "url.scheme", values: ["https"]}
+        },
+        {
+          name: sample_policy,
+          type: probabilistic,
+          probabilistic: {sampling_percentage: 10}
+        }
+      ]
+      
+  batch:
+    timeout: 1s
+    send_batch_size: 10
+
+exporters:
+  otlp/aspire:
+    endpoint: "aspire-dashboard:18889"
+    tls:
+      insecure: true
+
+service:
+  telemetry:
+    logs: # the logs of the otel collector itself
+      level: "info"
+      encoding: "json"
+  
+  extensions: [health_check]
+  
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [tail_sampling, batch]
+      exporters: [otlp/aspire]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp/aspire]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp/aspire]

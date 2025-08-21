@@ -1,9 +1,11 @@
 services:
+
   frontend:
     build: frontend
     ports:
       - "3001:3001"
     env_file: "frontend/.env"
+
   broker:
     build:
       context: broker
@@ -11,6 +13,7 @@ services:
       - "1883:1883"
     environment:
       - TLS_SERVER_KEY=${FLOTILLA_BROKER_SERVER_KEY}
+
   backend:
     build: backend
     ports:
@@ -24,8 +27,16 @@ services:
   aspire-dashboard:
     image: mcr.microsoft.com/dotnet/aspire-dashboard
     ports:
-      - 4317:4317
       - 18888:18888
       - 18889:18889
     environment:
       - ASPIRE_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS=true
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.132.3
+    command: ["--config=/conf/config.yaml"]
+    ports:
+      - "4317:4317"  # OTLP gRPC
+      - "4318:4318"  # OTLP HTTP
+    volumes:
+      - ./config/otel-collector-config.yaml:/conf/config.yaml:ro

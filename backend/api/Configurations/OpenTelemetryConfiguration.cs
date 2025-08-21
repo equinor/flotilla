@@ -34,6 +34,7 @@ public static class TelemetryConfigurations
             .WithTracing(t =>
             {
                 t.SetSampler(new AlwaysOnSampler())
+                    .SetErrorStatusOnException(true)
                     .SetResourceBuilder(
                         ResourceBuilder
                             .CreateDefault()
@@ -79,10 +80,42 @@ public static class TelemetryConfigurations
 
         // Connect to OpenTelemetry OTLP exporter if endpoint is provided, used for local aspire dashboard
         var openTelemetryEndpoint = builder.Configuration["OpenTelemetry:OtelExporterOtlpEndpoint"];
+        var openTelemetryProtocolSetting = builder.Configuration[
+            "OpenTelemetry:OtelExporterOtlpProtocol"
+        ];
+
+        Console.WriteLine($"OpenTelemetry endpoint: {openTelemetryEndpoint}");
+        Console.WriteLine(
+            $"OpenTelemetry protocol: {openTelemetryProtocolSetting ?? "Not set (using default HttpProtobuf)"}"
+        );
+
         if (!string.IsNullOrWhiteSpace(openTelemetryEndpoint))
         {
             var uri = new Uri(openTelemetryEndpoint);
-            var protocol = OtlpExportProtocol.Grpc;
+            var protocol = OtlpExportProtocol.HttpProtobuf; // Default
+
+            if (!string.IsNullOrWhiteSpace(openTelemetryProtocolSetting))
+            {
+                switch (openTelemetryProtocolSetting.ToLower())
+                {
+                    case "grpc":
+                        protocol = OtlpExportProtocol.Grpc;
+                        Console.WriteLine("Using gRPC protocol for OpenTelemetry export");
+                        break;
+                    case "httpprotobuf":
+                        Console.WriteLine("Using HTTP/Protobuf protocol for OpenTelemetry export");
+                        break;
+                    default:
+                        Console.WriteLine(
+                            $"Unknown protocol '{openTelemetryProtocolSetting}', defaulting to HTTP/Protobuf"
+                        );
+                        break;
+                }
+            }
+            else
+            {
+                Console.WriteLine("Using default HTTP/Protobuf protocol for OpenTelemetry export");
+            }
 
             otel.UseOtlpExporter(protocol, uri);
         }
