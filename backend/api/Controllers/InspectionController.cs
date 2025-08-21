@@ -94,10 +94,9 @@ namespace Api.Controllers
 
                 return File(inspectionStream, "image/png");
             }
-            catch (InspectionNotAvailableYetException e)
+            catch (InspectionNotAvailableYetException)
             {
                 logger.LogInformation(
-                    e,
                     "Inspection not available yet for ISAR Inspection ID {IsarInspectionId}",
                     isarInspectionId
                 );
