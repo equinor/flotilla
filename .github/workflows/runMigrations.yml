@@ -58,4 +58,5 @@ jobs:
         env:
           AZURE_CLIENT_ID: ${{ secrets.ClientId }}
           AZURE_CLIENT_SECRET: ${{ secrets.ClientSecret }}
+          AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
           ASPNETCORE_ENVIRONMENT: ${{ vars.AspNetEnvironment }}
