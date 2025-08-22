@@ -210,7 +210,10 @@ app.MapHub<SignalRHub>(
     "/hub",
     options =>
     {
-        options.Transports = HttpTransportType.WebSockets | HttpTransportType.LongPolling;
+        options.Transports =
+            HttpTransportType.WebSockets
+            | HttpTransportType.ServerSentEvents
+            | HttpTransportType.LongPolling;
     }
 );
 
