@@ -25,9 +25,9 @@ processors:
           numeric_attribute: {key: "http.status_code", min_value: 400, max_value: 999}
         },
         {
-          name: https_policy,
+          name: http(s)_policy,
           type: string_attribute,
-          string_attribute: {key: "url.scheme", values: ["https"]}
+          string_attribute: {key: "url.scheme", values: ["https", "http"]}
         },
         {
           name: sample_policy,

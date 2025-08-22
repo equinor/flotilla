@@ -62,6 +62,16 @@ or
 docker compose up --build
 ```
 
+### Using the aspire dashboard
+
+The docker-compose contains a container for the aspire dashboard to show telemetry and a opentelemetry collector to filter telemetry.
+The aspire dashboard is available at http://localhost:18888 when run via docker compose.
+
+To spin up only the broker, collector and aspire dashboard use
+```bash
+docker compose up broker aspire-dashboard otel-collector
+```
+
 ## Contributions
 
 Equinor welcomes all kinds of contributions, including code, bug reports, issues, feature requests, and documentation.
