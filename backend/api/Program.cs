@@ -148,6 +148,25 @@ builder
     .AddDownstreamApi(InspectionService.ServiceName, builder.Configuration.GetSection("SARA"))
     .AddDownstreamApi(IsarService.ServiceName, builder.Configuration.GetSection("Isar"));
 
+builder.Services.Configure<JwtBearerOptions>(
+    JwtBearerDefaults.AuthenticationScheme,
+    options =>
+    {
+        options.Events ??= new JwtBearerEvents();
+        options.Events.OnMessageReceived = context =>
+        {
+            if (
+                context.HttpContext.Request.Path.StartsWithSegments("/hub")
+                && context.Request.Query.TryGetValue("access_token", out var token)
+            )
+            {
+                context.Token = token;
+            }
+            return Task.CompletedTask;
+        };
+    }
+);
+
 builder
     .Services.AddAuthorizationBuilder()
     .AddFallbackPolicy("RequireAuthenticatedUser", policy => policy.RequireAuthenticatedUser());
