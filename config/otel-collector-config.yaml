@@ -52,7 +52,6 @@ service:
       level: "info"
       encoding: "json"
   
-  extensions: [health_check]
   
   pipelines:
     traces:
