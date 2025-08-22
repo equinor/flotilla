@@ -64,7 +64,10 @@ export const SignalRProvider: FC<Props> = ({ children }) => {
             const newConnection = new signalR.HubConnectionBuilder()
                 .withUrl(URL, {
                     accessTokenFactory: () => accessToken,
-                    transport: signalR.HttpTransportType.WebSockets | signalR.HttpTransportType.LongPolling,
+                    transport:
+                        signalR.HttpTransportType.WebSockets |
+                        signalR.HttpTransportType.ServerSentEvents |
+                        signalR.HttpTransportType.LongPolling,
                 })
                 .withAutomaticReconnect()
                 .build()
