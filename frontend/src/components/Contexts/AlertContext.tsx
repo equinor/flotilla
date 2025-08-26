@@ -7,7 +7,6 @@ import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { useInstallationContext } from './InstallationContext'
 import { Alert } from 'models/Alert'
 import { useRobotContext } from './RobotContext'
-import { BlockedRobotAlertContent, BlockedRobotAlertListContent } from 'components/Alerts/BlockedRobotAlert'
 import { RobotFlotillaStatus, RobotStatus } from 'models/Robot'
 import {
     FailedAlertContent,
@@ -80,7 +79,6 @@ export const AlertProvider: FC<Props> = ({ children }) => {
     const [alerts, setAlerts] = useState<AlertDictionaryType>(defaultAlertInterface.alerts)
     const [listAlerts, setListAlerts] = useState<AlertDictionaryType>(defaultAlertInterface.listAlerts)
     const [recentFailedMissions, setRecentFailedMissions] = useState<Mission[]>([])
-    const [blockedRobotNames, setBlockedRobotNames] = useState<string[]>([])
     const { registerEvent, connectionReady } = useSignalRContext()
     const { installationCode } = useInstallationContext()
     const { TranslateText } = useLanguageContext()
@@ -285,35 +283,6 @@ export const AlertProvider: FC<Props> = ({ children }) => {
             )
         }
     }, [recentFailedMissions])
-
-    useEffect(() => {
-        const newBlockedRobotNames = enabledRobots
-            .filter((robot) => robot.status === RobotStatus.Blocked)
-            .map((robot) => robot.name!)
-
-        const isBlockedRobotNamesModifyed =
-            newBlockedRobotNames.some((name) => !blockedRobotNames.includes(name)) ||
-            newBlockedRobotNames.length !== blockedRobotNames.length
-
-        if (isBlockedRobotNamesModifyed) {
-            if (newBlockedRobotNames.length > 0) {
-                setAlert(
-                    AlertType.BlockedRobot,
-                    <BlockedRobotAlertContent robotNames={newBlockedRobotNames} />,
-                    AlertCategory.WARNING
-                )
-                setListAlert(
-                    AlertType.BlockedRobot,
-                    <BlockedRobotAlertListContent robotNames={newBlockedRobotNames} />,
-                    AlertCategory.WARNING
-                )
-            } else {
-                clearAlert(AlertType.BlockedRobot)
-                clearListAlert(AlertType.BlockedRobot)
-            }
-        }
-        setBlockedRobotNames(newBlockedRobotNames)
-    }, [enabledRobots, installationCode])
 
     useEffect(() => {
         if (Object.keys(autoScheduleFailedMissionDict).length > 0) {
