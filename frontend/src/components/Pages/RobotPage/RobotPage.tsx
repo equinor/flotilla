@@ -24,6 +24,8 @@ import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { ReturnHomeButton } from './ReturnHomeButton'
 import { phone_width } from 'utils/constants'
 import { InterventionNeededButton } from './InterventionNeededButton'
+import { BackendAPICaller } from 'api/ApiCaller'
+import { useQuery } from '@tanstack/react-query'
 
 const StyledRobotPage = styled(StyledPage)`
     background-color: ${tokens.colors.ui.background__light.hex};
@@ -46,7 +48,7 @@ const RobotInfo = styled.div`
 const StatusContent = styled.div`
     gap: 48px;
     display: grid;
-    grid-template-columns: 160px 100px 160px;
+    grid-template-columns: auto auto auto;
     align-self: start;
     @media (max-width: ${phone_width}) {
         align-items: flex-start;
@@ -156,6 +158,18 @@ export const RobotPage = ({ robotId }: { robotId: string }) => {
             <></>
         )
 
+    const currentInspectionArea = useQuery({
+        queryKey: ['fetchCurrentInspectionArea', robotId],
+        queryFn: async () => {
+            if (selectedRobot && selectedRobot.currentInspectionAreaId)
+                return await BackendAPICaller.getInspectionAreaById(selectedRobot.currentInspectionAreaId)
+            return null
+        },
+        retry: 2,
+        retryDelay: 2000,
+        enabled: selectedRobot && selectedRobot.currentInspectionAreaId != null,
+    }).data
+
     return (
         <>
             <Header page={'robot'} />
@@ -221,6 +235,16 @@ export const RobotPage = ({ robotId }: { robotId: string }) => {
                                                     </Typography>
                                                     <Typography style={{ fontSize: '24px' }}>
                                                         {selectedRobot.model.type}
+                                                    </Typography>
+                                                </StyledStatusElement>
+                                            )}
+                                            {currentInspectionArea && (
+                                                <StyledStatusElement>
+                                                    <Typography variant="caption">
+                                                        {TranslateText('Current Inspection Area')}
+                                                    </Typography>
+                                                    <Typography style={{ fontSize: '24px' }}>
+                                                        {currentInspectionArea.inspectionAreaName}
                                                     </Typography>
                                                 </StyledStatusElement>
                                             )}
