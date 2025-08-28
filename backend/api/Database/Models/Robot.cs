@@ -17,7 +17,6 @@ namespace Api.Database.Models
             Deprecated = false;
             Host = "localhost";
             Port = 3000;
-            Pose = new Pose();
         }
 
         public Robot(
@@ -50,7 +49,6 @@ namespace Api.Database.Models
             Deprecated = false;
             RobotCapabilities = createQuery.RobotCapabilities;
             Status = createQuery.Status;
-            Pose = new Pose();
             Model = model;
         }
 
@@ -78,60 +76,7 @@ namespace Api.Database.Models
 
         public string? CurrentInspectionAreaId { get; set; }
 
-        public float BatteryLevel { get; set; }
-
-        public BatteryState? BatteryState { get; set; }
-
-        public float? PressureLevel { get; set; }
-
-        public bool IsRobotPressureTooLow()
-        {
-            if (Model.LowerPressureWarningThreshold == null)
-            {
-                return false;
-            }
-            return PressureLevel == null || Model.LowerPressureWarningThreshold >= PressureLevel;
-        }
-
-        public bool IsRobotPressureTooHigh()
-        {
-            if (Model.UpperPressureWarningThreshold == null)
-            {
-                return false;
-            }
-            return PressureLevel == null || Model.UpperPressureWarningThreshold <= PressureLevel;
-        }
-
-        public bool IsRobotBatteryTooLow()
-        {
-            if (Model.BatteryWarningThreshold == null)
-            {
-                return false;
-            }
-            return Model.BatteryWarningThreshold >= BatteryLevel;
-        }
-
-        public bool IsRobotReadyToStartMissions()
-        {
-            if (!HasStatusThatCanReceiveMissions())
-                return false;
-            if (IsRobotBatteryTooLow())
-                return false;
-            if (
-                Model.BatteryWarningThreshold != null
-                && Model.BatteryWarningThreshold > BatteryLevel
-            )
-                return false;
-            if (
-                FlotillaStatus == RobotFlotillaStatus.Recharging
-                && Model.BatteryMissionStartThreshold != null
-                && Model.BatteryMissionStartThreshold > BatteryLevel
-            )
-                return false;
-            return !IsRobotPressureTooHigh() && !IsRobotPressureTooLow();
-        }
-
-        public bool HasStatusThatCanReceiveMissions()
+        public static bool IsStatusThatCanReceiveMissions(RobotStatus status)
         {
             var RobotStatusesWhereRobotCanStartMission = new[]
             {
@@ -139,7 +84,7 @@ namespace Api.Database.Models
                 RobotStatus.Home,
                 RobotStatus.ReturningHome,
             };
-            return RobotStatusesWhereRobotCanStartMission.Contains(Status);
+            return RobotStatusesWhereRobotCanStartMission.Contains(status);
         }
 
         public IList<DocumentInfo> Documentation { get; set; }
@@ -167,9 +112,6 @@ namespace Api.Database.Models
 
         [Required]
         public RobotFlotillaStatus FlotillaStatus { get; set; } = RobotFlotillaStatus.Normal;
-
-        [Required]
-        public Pose Pose { get; set; }
 
         public string? CurrentMissionId { get; set; }
 
@@ -200,13 +142,13 @@ namespace Api.Database.Models
         ReturningHome,
         UnknownStatus,
         InterventionNeeded,
+        Recharging,
     }
 
     public enum RobotFlotillaStatus
     {
         Normal,
         Home,
-        Recharging,
     }
 
     public enum RobotCapabilitiesEnum

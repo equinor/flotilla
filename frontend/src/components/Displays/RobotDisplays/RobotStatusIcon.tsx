@@ -62,6 +62,12 @@ export const RobotStatusChip = ({ status, flotillaStatus, isarConnected, itemSiz
             iconColor = tokens.colors.text.static_icons__default.hex
             break
         }
+        case RobotStatus.Recharging: {
+            iconColor = '#FFC300'
+            statusIcon = Icons.BatteryCharging
+            status = RobotStatus.Recharging
+            break
+        }
 
         default: {
             iconColor = tokens.colors.text.static_icons__default.hex
@@ -81,10 +87,6 @@ export const RobotStatusChip = ({ status, flotillaStatus, isarConnected, itemSiz
     ) {
         iconColor = tokens.colors.interactive.danger__resting.hex
         statusIcon = Icons.Warning
-    } else if (status === RobotStatus.Home && flotillaStatus === RobotFlotillaStatus.Recharging) {
-        iconColor = '#FFC300'
-        statusIcon = Icons.BatteryCharging
-        status = RobotStatus.Recharging
     }
 
     return (

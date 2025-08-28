@@ -266,12 +266,6 @@ namespace Api.Controllers
 
                 switch (fieldName)
                 {
-                    case "pose":
-                        if (query.Pose == null)
-                            return BadRequest("Cannot set robot pose to null");
-                        await robotService.UpdateRobotPose(id, query.Pose);
-                        robot.Pose = query.Pose;
-                        break;
                     case "missionId":
                         await robotService.UpdateCurrentMissionId(id, query.MissionId);
                         robot.CurrentMissionId = query.MissionId;

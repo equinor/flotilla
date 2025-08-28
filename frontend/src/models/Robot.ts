@@ -21,7 +21,6 @@ export enum RobotStatus {
 export enum RobotFlotillaStatus {
     Normal = 'Normal',
     Home = 'Home',
-    Recharging = 'Recharging',
 }
 
 export interface Robot {

@@ -86,8 +86,6 @@ namespace Api.Database.Context
                 .HasOne(m => m.InspectionArea)
                 .WithMany()
                 .OnDelete(DeleteBehavior.Restrict);
-            modelBuilder.Entity<Robot>().OwnsOne(r => r.Pose).OwnsOne(p => p.Orientation);
-            modelBuilder.Entity<Robot>().OwnsOne(r => r.Pose).OwnsOne(p => p.Position);
 
             // There can only be one robot model per robot type
             modelBuilder.Entity<RobotModel>().HasIndex(model => model.Type).IsUnique();

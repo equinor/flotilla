@@ -164,7 +164,6 @@ namespace Api.Database.Context
                 Port = 3000,
                 CurrentInstallation = installations[0],
                 Documentation = [],
-                Pose = new Pose(),
             };
 
             var robot2 = new Robot
@@ -177,7 +176,6 @@ namespace Api.Database.Context
                 Port = 3000,
                 CurrentInstallation = installations[0],
                 Documentation = [],
-                Pose = new Pose(),
             };
 
             var robot3 = new Robot
@@ -190,7 +188,6 @@ namespace Api.Database.Context
                 Port = 3000,
                 CurrentInstallation = installations[0],
                 Documentation = [],
-                Pose = new Pose(),
             };
 
             var robot4 = new Robot
@@ -204,7 +201,6 @@ namespace Api.Database.Context
                 CurrentInstallation = installations[0],
                 CurrentInspectionAreaId = inspectionAreas[0].Id,
                 Documentation = [],
-                Pose = new Pose(),
             };
 
             return new List<Robot>([robot1, robot2, robot3, robot4]);

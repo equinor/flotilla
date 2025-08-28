@@ -61,9 +61,6 @@ public static class TestObjectGenerator
         string? id = null,
         string? isarId = null,
         string serialNumber = "TestSerialNumber",
-        float batteryLevel = 100,
-        BatteryState batteryState = BatteryState.Normal,
-        float pressureLevel = 90,
         string host = "localhost",
         int port = 8080,
         IList<RobotCapabilitiesEnum>? capabilities = null,
@@ -71,7 +68,6 @@ public static class TestObjectGenerator
         bool deprecated = false,
         bool missionQueueFrozen = false,
         RobotFlotillaStatus flotillaStatus = RobotFlotillaStatus.Normal,
-        Pose? pose = null,
         string? currentMissionId = null
     )
     {
@@ -84,9 +80,6 @@ public static class TestObjectGenerator
             SerialNumber = serialNumber,
             CurrentInstallation = currentInstallation,
             CurrentInspectionAreaId = currentInspectionAreaId,
-            BatteryLevel = batteryLevel,
-            BatteryState = batteryState,
-            PressureLevel = pressureLevel,
             Host = host,
             Port = port,
             RobotCapabilities = capabilities ?? [],
@@ -95,7 +88,6 @@ public static class TestObjectGenerator
             MissionQueueFrozen = missionQueueFrozen,
             Status = robotStatus,
             FlotillaStatus = flotillaStatus,
-            Pose = pose ?? new Pose(),
             CurrentMissionId = currentMissionId,
         };
     }

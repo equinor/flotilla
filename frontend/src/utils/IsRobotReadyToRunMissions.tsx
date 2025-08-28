@@ -1,6 +1,6 @@
 import { Typography } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { Robot, RobotFlotillaStatus } from 'models/Robot'
+import { Robot, RobotFlotillaStatus, RobotStatus } from 'models/Robot'
 
 const isBatteryTooLow = (robot: Robot): boolean => {
     if (robot.batteryLevel == null) return false
@@ -8,7 +8,7 @@ const isBatteryTooLow = (robot: Robot): boolean => {
         (robot.model.batteryWarningThreshold && robot.batteryLevel < robot.model.batteryWarningThreshold) ||
         (robot.model.batteryMissionStartThreshold &&
             robot.batteryLevel < robot.model.batteryMissionStartThreshold &&
-            robot.flotillaStatus === RobotFlotillaStatus.Recharging)
+            robot.status === RobotStatus.Recharging)
     ) {
         return true
     }

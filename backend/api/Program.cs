@@ -99,10 +99,6 @@ builder.Services.AddScoped<ILastMissionRunService, LastMissionRunService>();
 builder.Services.AddScoped<IEmergencyActionService, EmergencyActionService>();
 builder.Services.AddScoped<ITeamsMessageService, TeamsMessageService>();
 
-builder.Services.AddScoped<IBatteryLevelService, BatteryLevelService>();
-builder.Services.AddScoped<IPressureLevelService, PressureLevelService>();
-builder.Services.AddScoped<IRobotPoseService, RobotPoseService>();
-
 bool useInMemoryDatabase = builder
     .Configuration.GetSection("Database")
     .GetValue<bool>("UseInMemoryDatabase");
