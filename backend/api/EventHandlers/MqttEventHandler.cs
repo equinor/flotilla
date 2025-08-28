@@ -32,8 +32,6 @@ namespace Api.EventHandlers
             Subscribe();
         }
 
-        private IBatteryLevelService BatteryLevelService =>
-            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IBatteryLevelService>();
         private IInspectionService InspectionService =>
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IInspectionService>();
         private IInstallationService InstallationService =>
@@ -50,22 +48,14 @@ namespace Api.EventHandlers
                 .ServiceProvider.GetRequiredService<IMissionSchedulingService>();
         private IMissionTaskService MissionTaskService =>
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionTaskService>();
-        private IPressureLevelService PressureLevelService =>
-            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IPressureLevelService>();
         private IRobotService RobotService =>
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IRobotService>();
-        private IRobotPoseService RobotPoseService =>
-            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IRobotPoseService>();
         private ISignalRService SignalRService =>
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ISignalRService>();
         private ITaskDurationService TaskDurationService =>
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ITaskDurationService>();
         private ITeamsMessageService TeamsMessageService =>
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ITeamsMessageService>();
-        private IEmergencyActionService EmergencyActionService =>
-            _scopeFactory
-                .CreateScope()
-                .ServiceProvider.GetRequiredService<IEmergencyActionService>();
 
         public override void Subscribe()
         {
@@ -79,6 +69,7 @@ namespace Api.EventHandlers
             MqttService.MqttIsarCloudHealthReceived += OnIsarCloudHealthUpdate;
             MqttService.MqttIsarInterventionNeededReceived += OnIsarInterventionNeededUpdate;
             MqttService.MqttIsarStartupReceived += OnIsarStartup;
+            MqttService.MqttIsarMissionAborted += OnIsarMissionAborted;
             MqttService.MqttSaraInspectionResultReceived += OnSaraInspectionResultUpdate;
             MqttService.MqttSaraAnalysisResultMessage += OnSaraAnalysisResultMessage;
         }
@@ -96,7 +87,7 @@ namespace Api.EventHandlers
             MqttService.MqttIsarInterventionNeededReceived -= OnIsarInterventionNeededUpdate;
             MqttService.MqttSaraInspectionResultReceived -= OnSaraInspectionResultUpdate;
             MqttService.MqttIsarStartupReceived -= OnIsarStartup;
-            MqttService.MqttSaraInspectionResultReceived -= OnSaraInspectionResultUpdate;
+            MqttService.MqttIsarMissionAborted -= OnIsarMissionAborted;
             MqttService.MqttSaraAnalysisResultMessage -= OnSaraAnalysisResultMessage;
         }
 
@@ -155,7 +146,7 @@ namespace Api.EventHandlers
                 robot.CurrentInspectionAreaId
             );
 
-            if (robot.IsRobotReadyToStartMissions())
+            if (Robot.IsStatusThatCanReceiveMissions(isarStatus.Status))
             {
                 MissionScheduling.TriggerRobotReadyForMissions(
                     new RobotReadyForMissionsEventArgs(robot)
@@ -349,6 +340,67 @@ namespace Api.EventHandlers
                 $"\nRobotCapabilities ({robot.RobotCapabilities} -> {newRobotCapabilities})\n"
             );
             robot.RobotCapabilities = newRobotCapabilities;
+        }
+
+        private async void OnIsarMissionAborted(object? sender, MqttReceivedArgs mqttArgs)
+        {
+            var isarAbortedMission = (IsarMissionAbortedMessage)mqttArgs.Message;
+
+            var robot = await RobotService.ReadByIsarId(isarAbortedMission.IsarId, readOnly: true);
+            if (robot is null)
+            {
+                _logger.LogError(
+                    "Could not find robot '{RobotName}' with ISAR id '{IsarId}'",
+                    isarAbortedMission.RobotName,
+                    isarAbortedMission.IsarId
+                );
+                return;
+            }
+
+            try
+            {
+                var missionRun = await MissionScheduling.MoveMissionRunBackToQueue(
+                    robot.Id,
+                    isarAbortedMission.MissionId,
+                    isarAbortedMission.Reason
+                );
+
+                _logger.LogInformation(
+                    "Mission '{Id}' (ISARMissionID='{IsarMissionId}') was aborted by ISAR for robot '{RobotName}' with ISAR id '{IsarId}': {Reason}",
+                    missionRun.Id,
+                    isarAbortedMission.MissionId,
+                    isarAbortedMission.RobotName,
+                    isarAbortedMission.IsarId,
+                    isarAbortedMission.Reason
+                );
+            }
+            catch (RobotNotFoundException)
+            {
+                _logger.LogWarning(
+                    "Mission with ISAR ID '{IsarMissionId}' was aborted by ISAR with ISAR id '{IsarId}' but that robot could not be found: {Reason}",
+                    isarAbortedMission.MissionId,
+                    isarAbortedMission.IsarId,
+                    isarAbortedMission.Reason
+                );
+            }
+            catch (MissionRunNotFoundException)
+            {
+                _logger.LogWarning(
+                    "Mission with ISAR ID '{IsarMissionId}' was aborted by ISAR with ISAR id '{IsarId}' but could not be found: {Reason}",
+                    isarAbortedMission.MissionId,
+                    isarAbortedMission.IsarId,
+                    isarAbortedMission.Reason
+                );
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(
+                    "Mission with ISAR ID '{IsarMissionId}' was aborted by ISAR with ISAR id '{IsarId}' but an unhandled exception occured: {Reason}",
+                    isarAbortedMission.MissionId,
+                    isarAbortedMission.IsarId,
+                    e.StackTrace
+                );
+            }
         }
 
         private async void OnIsarMissionUpdate(object? sender, MqttReceivedArgs mqttArgs)
@@ -547,103 +599,32 @@ namespace Api.EventHandlers
         {
             var batteryStatus = (IsarBatteryMessage)mqttArgs.Message;
 
-            _updateRobotSemaphore.WaitOne();
-            _logger.LogDebug("Semaphore acquired for updating battery");
-
-            var robot = await BatteryLevelService.UpdateBatteryLevel(
-                batteryStatus.BatteryLevel,
-                batteryStatus.IsarId
-            );
-            if (robot != null && robot.BatteryState != batteryStatus.BatteryState)
-            {
-                await RobotService.UpdateRobotBatteryState(robot.Id, batteryStatus.BatteryState);
-            }
-
-            _updateRobotSemaphore.Release();
-            _logger.LogDebug("Semaphore released after updating battery");
+            var robot = await RobotService.ReadByIsarId(batteryStatus.IsarId);
 
             if (robot == null)
                 return;
-            robot.BatteryLevel = batteryStatus.BatteryLevel;
 
-            if (robot.FlotillaStatus == RobotFlotillaStatus.Normal && robot.IsRobotBatteryTooLow())
-            {
-                _logger.LogInformation(
-                    "Sending robot '{RobotName}' to its dock as its battery level is too low.",
-                    robot.Name
-                );
-                EmergencyActionService.SendRobotToDock(
-                    new RobotEmergencyEventArgs(
-                        robot,
-                        RobotFlotillaStatus.Recharging,
-                        "Robot battery level too low to complete mission"
-                    )
-                );
-            }
-            else if (
-                robot.FlotillaStatus == RobotFlotillaStatus.Recharging
-                && robot.IsRobotReadyToStartMissions()
-            )
-            {
-                _logger.LogInformation(
-                    "Releasing robot '{RobotName}' from its dock as its battery and pressure levels are good enough to run missions.",
-                    robot.Name
-                );
-                EmergencyActionService.ReleaseRobotFromDock(
-                    new RobotEmergencyEventArgs(robot, RobotFlotillaStatus.Normal)
-                );
-            }
+            await RobotService.SendToSignalROnPropertyUpdate(
+                robot.Id,
+                "batteryState",
+                batteryStatus.BatteryState
+            );
+            await RobotService.SendToSignalROnPropertyUpdate(
+                robot.Id,
+                "batteryLevel",
+                batteryStatus.BatteryLevel
+            );
         }
 
         private async void OnIsarPressureUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
             var pressureStatus = (IsarPressureMessage)mqttArgs.Message;
 
-            _updateRobotSemaphore.WaitOne();
-            _logger.LogDebug("Semaphore acquired for updating pressure");
-
-            var robot = await PressureLevelService.UpdatePressureLevel(
-                pressureStatus.PressureLevel,
-                pressureStatus.IsarId
+            await RobotService.SendToSignalROnPropertyUpdate(
+                pressureStatus.IsarId,
+                "pressureLevel",
+                pressureStatus.PressureLevel
             );
-
-            _updateRobotSemaphore.Release();
-            _logger.LogDebug("Semaphore released after updating pressure");
-
-            if (robot == null)
-                return;
-            robot.PressureLevel = pressureStatus.PressureLevel;
-
-            if (
-                robot.FlotillaStatus == RobotFlotillaStatus.Normal
-                && (robot.IsRobotPressureTooLow() || robot.IsRobotPressureTooHigh())
-            )
-            {
-                _logger.LogInformation(
-                    "Sending robot '{RobotName}' to its dock as its pressure is too low or high.",
-                    robot.Name
-                );
-                EmergencyActionService.SendRobotToDock(
-                    new RobotEmergencyEventArgs(
-                        robot,
-                        RobotFlotillaStatus.Recharging,
-                        "Robot couldn't complete mission as pressure level were outside acceptable range"
-                    )
-                );
-            }
-            else if (
-                robot.FlotillaStatus == RobotFlotillaStatus.Recharging
-                && robot.IsRobotReadyToStartMissions()
-            )
-            {
-                _logger.LogInformation(
-                    "Releasing robot '{RobotName}' from its dock as its battery and pressure levels are good enough to run missions.",
-                    robot.Name
-                );
-                EmergencyActionService.ReleaseRobotFromDock(
-                    new RobotEmergencyEventArgs(robot, RobotFlotillaStatus.Normal)
-                );
-            }
         }
 
         private async void OnIsarPoseUpdate(object? sender, MqttReceivedArgs mqttArgs)
@@ -651,13 +632,7 @@ namespace Api.EventHandlers
             var poseStatus = (IsarPoseMessage)mqttArgs.Message;
             var pose = new Pose(poseStatus.Pose);
 
-            _updateRobotSemaphore.WaitOne();
-            _logger.LogDebug("Semaphore acquired for updating pose");
-
-            await RobotPoseService.UpdateRobotPose(pose, poseStatus.IsarId);
-
-            _updateRobotSemaphore.Release();
-            _logger.LogDebug("Semaphore released after updating pose");
+            await RobotService.SendToSignalROnPropertyUpdate(poseStatus.IsarId, "pose", pose);
         }
 
         private async void OnIsarCloudHealthUpdate(object? sender, MqttReceivedArgs mqttArgs)

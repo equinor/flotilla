@@ -43,7 +43,6 @@ namespace Api.Test.Controllers
             var query = new UpdateRobotQuery
             {
                 InspectionAreaId = inspectionAreaId,
-                Pose = pose,
                 MissionId = missionId,
             };
 
@@ -52,7 +51,6 @@ namespace Api.Test.Controllers
 
             // Assert
             Assert.Equal(inspectionAreaId, sanitizedQuery.InspectionAreaId);
-            Assert.Equal(pose, sanitizedQuery.Pose);
             Assert.Equal(missionId, sanitizedQuery.MissionId);
         }
 
@@ -67,7 +65,6 @@ namespace Api.Test.Controllers
             var query = new UpdateRobotQuery
             {
                 InspectionAreaId = inspectionAreaId,
-                Pose = pose,
                 MissionId = missionId,
             };
 
@@ -76,7 +73,6 @@ namespace Api.Test.Controllers
 
             // Assert
             Assert.Equal(inspectionAreaId, sanitizedQuery.InspectionAreaId);
-            Assert.Equal(pose, sanitizedQuery.Pose);
             Assert.Equal(missionId, sanitizedQuery.MissionId);
         }
 
@@ -91,7 +87,6 @@ namespace Api.Test.Controllers
             var query = new UpdateRobotQuery
             {
                 InspectionAreaId = inspectionAreaId,
-                Pose = pose,
                 MissionId = missionId,
             };
 

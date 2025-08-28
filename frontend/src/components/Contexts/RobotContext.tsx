@@ -47,6 +47,9 @@ export const RobotProvider: FC<Props> = ({ children }) => {
         if (connectionReady) {
             registerEvent(SignalREventLabels.robotAdded, (username: string, message: string) => {
                 const updatedRobot: Robot = JSON.parse(message)
+                updatedRobot.batteryLevel = undefined
+                updatedRobot.batteryState = undefined
+                updatedRobot.pressureLevel = undefined
                 setEnabledRobots((oldRobotList) => {
                     let oldRobotListCopy = [...oldRobotList]
                     oldRobotListCopy = upsertRobotList(oldRobotListCopy, updatedRobot)
@@ -99,6 +102,11 @@ export const RobotProvider: FC<Props> = ({ children }) => {
         if (!enabledRobots || enabledRobots.length === 0)
             BackendAPICaller.getEnabledRobots()
                 .then((robots) => {
+                    robots.forEach((r) => {
+                        r.batteryLevel = undefined
+                        r.batteryState = undefined
+                        r.pressureLevel = undefined
+                    })
                     setEnabledRobots(robots)
                 })
                 .catch(() => {

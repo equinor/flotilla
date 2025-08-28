@@ -89,11 +89,6 @@ namespace Api.EventHandlers
 
         private async void OnRobotReadyForMissions(object? sender, RobotReadyForMissionsEventArgs e)
         {
-            if (!e.Robot.IsRobotReadyToStartMissions())
-            {
-                _logger.LogWarning("OnRobotReadyForMissions was not ready to start the mission");
-                return;
-            }
             _startMissionSemaphore.WaitOne();
             try
             {

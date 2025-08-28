@@ -112,10 +112,9 @@ namespace Api.EventHandlers
 
             // If the robot became available while the connection was not active, then this will not be triggered
             // It will however be triggered if the robot lost connection while restarting or while idle
-            if (robot.IsRobotReadyToStartMissions())
-                MissionSchedulingService.TriggerRobotReadyForMissions(
-                    new RobotReadyForMissionsEventArgs(robot)
-                );
+            MissionSchedulingService.TriggerRobotReadyForMissions(
+                new RobotReadyForMissionsEventArgs(robot)
+            );
         }
 
         private void AddTimerForRobot(IsarRobotHeartbeatMessage isarRobotHeartbeat, Robot robot)

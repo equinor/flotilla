@@ -19,12 +19,6 @@ namespace Api.Controllers.Models
 
         public string? CurrentInspectionAreaId { get; set; }
 
-        public float BatteryLevel { get; set; }
-
-        public BatteryState? BatteryState { get; set; }
-
-        public float? PressureLevel { get; set; }
-
         public IList<DocumentInfo> Documentation { get; set; }
 
         public string Host { get; set; }
@@ -38,8 +32,6 @@ namespace Api.Controllers.Models
         public RobotFlotillaStatus FlotillaStatus { get; set; }
 
         public RobotStatus Status { get; set; }
-
-        public Pose Pose { get; set; }
 
         public string? CurrentMissionId { get; set; }
 
@@ -62,9 +54,6 @@ namespace Api.Controllers.Models
             SerialNumber = robot.SerialNumber;
             CurrentInstallation = robot.CurrentInstallation;
             CurrentInspectionAreaId = robot.CurrentInspectionAreaId;
-            BatteryLevel = robot.BatteryLevel;
-            BatteryState = robot.BatteryState;
-            PressureLevel = robot.PressureLevel;
             Documentation = robot.Documentation;
             Host = robot.Host;
             Port = robot.Port;
@@ -72,7 +61,6 @@ namespace Api.Controllers.Models
             Deprecated = robot.Deprecated;
             FlotillaStatus = robot.FlotillaStatus;
             Status = robot.Status;
-            Pose = robot.Pose;
             CurrentMissionId = robot.CurrentMissionId;
             IsarUri = robot.IsarUri;
             RobotCapabilities = robot.RobotCapabilities;

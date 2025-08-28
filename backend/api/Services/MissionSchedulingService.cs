@@ -2,7 +2,6 @@
 using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services.Events;
-using Api.Services.Helpers;
 using Api.Services.Models;
 using Api.Utilities;
 
@@ -16,11 +15,15 @@ namespace Api.Services
 
         public Task MoveCurrentMissionRunBackToQueue(string robotId, string? stopReason = null);
 
+        public Task<MissionRun> MoveMissionRunBackToQueue(
+            string robotId,
+            string isarMissionRunId,
+            string? stopReason = null
+        );
+
         public Task AbortAllScheduledNormalMissions(string robotId, string? abortReason = null);
 
         public Task UnfreezeMissionRunQueueForRobot(string robotId);
-
-        public bool MissionRunQueueIsEmpty(IList<MissionRun> missionRunQueue);
 
         public void TriggerRobotReadyForMissions(RobotReadyForMissionsEventArgs e);
     }
@@ -65,21 +68,6 @@ namespace Api.Services
                 logger.LogInformation(
                     "Robot {robotName} is ready to start a mission but its mission queue is frozen",
                     robot.Name
-                );
-                return;
-            }
-
-            if (
-                !MissionSchedulingHelpers.TheSystemIsAvailableToRunAMission(
-                    robot,
-                    missionRun,
-                    logger
-                )
-            )
-            {
-                logger.LogInformation(
-                    "Mission {MissionRunId} was put on the queue as the system may not start a mission now",
-                    missionRun.Id
                 );
                 return;
             }
@@ -190,15 +178,6 @@ namespace Api.Services
                 return;
             }
 
-            if (
-                (robot.IsRobotPressureTooLow() || robot.IsRobotBatteryTooLow())
-                && !missionRun.IsEmergencyMission()
-            )
-            {
-                await HandleBatteryAndPressureLevel(robot);
-                return;
-            }
-
             try
             {
                 await StartMissionRun(missionRun, robot);
@@ -234,50 +213,6 @@ namespace Api.Services
                 }
             }
             catch (RobotBusyException) { }
-        }
-
-        public async Task HandleBatteryAndPressureLevel(Robot robot)
-        {
-            if (robot.IsRobotPressureTooLow())
-            {
-                logger.LogError(
-                    "Robot with ID: {RobotId} cannot start missions because pressure value is too low.",
-                    robot.Id
-                );
-                signalRService.ReportGeneralFailToSignalR(
-                    robot,
-                    $"Low pressure value for robot {robot.Name}",
-                    "Pressure value is too low to start a mission."
-                );
-            }
-            if (robot.IsRobotBatteryTooLow())
-            {
-                logger.LogError(
-                    "Robot with ID: {RobotId} cannot start missions because battery value is too low.",
-                    robot.Id
-                );
-                signalRService.ReportGeneralFailToSignalR(
-                    robot,
-                    $"Low battery value for robot {robot.Name}",
-                    "Battery value is too low to start a mission."
-                );
-            }
-
-            try
-            {
-                await AbortAllScheduledNormalMissions(
-                    robot.Id,
-                    $"Mission aborted for robot {robot.Name}: pressure or battery values too low."
-                );
-            }
-            catch (RobotNotFoundException)
-            {
-                logger.LogError(
-                    "Failed to abort scheduled missions for robot {RobotName} with Id {RobotId} since the robot was not found",
-                    robot.Name,
-                    robot.Id
-                );
-            }
         }
 
         public async Task FreezeMissionRunQueueForRobot(string robotId)
@@ -374,6 +309,65 @@ namespace Api.Services
             catch (RobotNotFoundException) { }
         }
 
+        public async Task<MissionRun> MoveMissionRunBackToQueue(
+            string robotId,
+            string isarMissionRunId,
+            string? stopReason = null
+        )
+        {
+            var robot = await robotService.ReadById(robotId, readOnly: true);
+            if (robot == null)
+            {
+                string errorMessage = $"Robot with ID: {robotId} was not found in the database";
+                logger.LogError("{Message}", errorMessage);
+                throw new RobotNotFoundException(errorMessage);
+            }
+
+            var missionRun = await missionRunService.ReadById(isarMissionRunId, readOnly: true);
+            if (missionRun is null)
+            {
+                string errorMessage =
+                    $"Mission {isarMissionRunId} on robot {robotId} was not found and could not be put back on the queue";
+                logger.LogWarning("{Message}", errorMessage);
+                throw new MissionRunNotFoundException(errorMessage);
+            }
+
+            await missionRunService.UpdateMissionRunProperty(
+                missionRun.Id,
+                "StatusReason",
+                stopReason
+            );
+
+            await missionRunService.UpdateMissionRunProperty(
+                missionRun.Id,
+                "Status",
+                MissionStatus.Pending
+            );
+            _ = signalRService.SendMessageAsync(
+                "Mission run created",
+                missionRun.InspectionArea.Installation,
+                new MissionRunResponse(missionRun)
+            );
+
+            try
+            {
+                if (robot.CurrentMissionId == missionRun.Id)
+                {
+                    await robotService.UpdateCurrentMissionId(robot.Id, null);
+                }
+            }
+            catch (RobotNotFoundException) { }
+            catch (MissionNotFoundException)
+            {
+                logger.LogError(
+                    "Mission not found when setting last mission run for mission definition {missionId}",
+                    missionRun.MissionId
+                );
+            }
+
+            return missionRun;
+        }
+
         public async Task AbortMissionRun(MissionRun missionRun, string abortReason)
         {
             await missionRunService.UpdateMissionRunProperty(
@@ -428,11 +422,6 @@ namespace Api.Services
                     abortReason
                 );
             }
-        }
-
-        public bool MissionRunQueueIsEmpty(IList<MissionRun> missionRunQueue)
-        {
-            return !missionRunQueue.Any();
         }
 
         public void TriggerRobotReadyForMissions(RobotReadyForMissionsEventArgs e)
@@ -535,8 +524,6 @@ namespace Api.Services
                 MissionStatus.Ongoing
             );
 
-            robot.Status = RobotStatus.Busy;
-            await robotService.UpdateRobotStatus(robot.Id, RobotStatus.Busy);
             await robotService.UpdateCurrentMissionId(robot.Id, queuedMissionRun.Id);
 
             logger.LogInformation("Started mission run '{Id}'", queuedMissionRun.Id);
