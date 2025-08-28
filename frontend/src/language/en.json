@@ -335,5 +335,6 @@
     "Unable to release robot {0} from intervention mode": "Unable to release robot {0} from intervention mode",
     "Robot ready for missions": "Robot ready for missions",
     "InterventionNeeded": "Intervention Needed",
-    "ReturnHomePaused": "Returning home paused"
+    "ReturnHomePaused": "Returning home paused",
+    "Current Inspection Area": "Current Inspection Area"
 }
