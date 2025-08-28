@@ -22,7 +22,7 @@ processors:
         {
           name: http_error_policy,
           type: numeric_attribute,
-          numeric_attribute: {key: "http.status_code", min_value: 400, max_value: 999}
+          numeric_attribute: {key: "http.status_code", min_value: 0, max_value: 999}
         },
         {
           name: http(s)_policy,
@@ -32,7 +32,7 @@ processors:
         {
           name: sample_policy,
           type: probabilistic,
-          probabilistic: {sampling_percentage: 10}
+          probabilistic: {sampling_percentage: 5}
         }
       ]
       
