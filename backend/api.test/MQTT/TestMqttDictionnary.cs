@@ -11,7 +11,7 @@ namespace Api.Test.MQTT
 
         public TestMqttDictionary()
         {
-            _topics["isar/+/task"] = "leveledTask";
+            _topics["isar/+/task/+"] = "leveledTask";
             _topics["isar/task"] = "simpleTask";
             _topics["many/#"] = "wrong";
             _topics["many/specific"] = "wrong";
@@ -27,7 +27,7 @@ namespace Api.Test.MQTT
         [Fact]
         public void ShouldMatchWildcardTopic()
         {
-            const string Topic = "isar/extraLevel/task";
+            const string Topic = "isar/extraLevel/task/+";
             string? value = _topics.GetItemByTopic(Topic);
 
             Assert.NotNull(value);
