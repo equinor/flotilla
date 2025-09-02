@@ -823,7 +823,7 @@ namespace Api.Controllers
         ///     <para> This query resumes the currently paused mission for a robot </para>
         /// </remarks>
         [HttpPost]
-        [Authorize(Roles = Role.Admin)]
+        [Authorize(Roles = Role.User)]
         [Route("{robotId}/release-intervention-needed")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -837,7 +837,7 @@ namespace Api.Controllers
             if (robot == null)
             {
                 logger.LogWarning("Could not find robot with id={Id}", robotId);
-                return NotFound();
+                return NotFound("Robot not found");
             }
 
             try
