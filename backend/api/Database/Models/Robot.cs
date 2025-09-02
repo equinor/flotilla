@@ -137,7 +137,6 @@ namespace Api.Database.Models
         Busy,
         Home,
         Offline,
-        Blocked,
         BlockedProtectiveStop,
         ReturningHome,
         UnknownStatus,
