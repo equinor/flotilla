@@ -61,7 +61,13 @@ namespace Api.Services
             }
 
             if (missionRun == null)
+            {
+                logger.LogInformation(
+                    "A mission could have been started for robot {robotId}, but no missions were found on the queue",
+                    robot.Id
+                );
                 return;
+            }
 
             if (robot.MissionQueueFrozen && !missionRun.IsEmergencyMission())
             {
@@ -442,6 +448,13 @@ namespace Api.Services
                     robot.Id,
                     type: MissionRunType.Normal,
                     readOnly: true
+                );
+            }
+            else
+            {
+                logger.LogInformation(
+                    "An attempt to run a mission on robot {id} was made, but its mission queue was frozen",
+                    robot.Id
                 );
             }
             return missionRun;
