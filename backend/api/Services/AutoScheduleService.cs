@@ -226,6 +226,10 @@ namespace Api.Services
                 return;
             }
 
+            var pendingMissionRuns = await missionRunService.ReadMissionRunQueue(robot.Id);
+            if (pendingMissionRuns.Any((m) => m.MissionId == missionDefinition.Id))
+                return; // No need to schedule already scheduled mission
+
             logger.LogInformation(
                 "Scheduling mission run for mission definition {MissionDefinitionId} and robot {RobotId}.",
                 missionDefinition.Id,

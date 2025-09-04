@@ -450,33 +450,6 @@ namespace Api.Services
                 );
         }
 
-        private async Task VerifyThatUserIsAuthorizedToUpdateDataForInstallation(
-            Installation? installation
-        )
-        {
-            var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes();
-            if (
-                installation == null
-                || accessibleInstallationCodes.Contains(
-                    installation.InstallationCode.ToUpper(CultureInfo.CurrentCulture)
-                )
-            )
-                return;
-
-            throw new UnauthorizedAccessException(
-                $"User does not have permission to update robot in installation {installation.Name}"
-            );
-        }
-
-        private void NotifySignalROfUpdatedRobot(Robot robot, Installation installation)
-        {
-            _ = signalRService.SendMessageAsync(
-                "Robot updated",
-                installation,
-                robot != null ? new RobotResponse(robot) : null
-            );
-        }
-
         public void DetachTracking(FlotillaDbContext context, Robot robot)
         {
             context.Entry(robot).State = EntityState.Detached;
