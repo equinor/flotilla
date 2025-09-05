@@ -334,5 +334,6 @@
     "Statistics": "Statistikk",
     "Unable to release robot {0} from intervention mode": "Kunne ikke frigjøre robot {0} fra intervensjonsmodus",
     "Robot ready for missions": "Roboten klar for oppdrag",
-    "InterventionNeeded": "Intervensjon nødvendig"
+    "InterventionNeeded": "Intervensjon nødvendig",
+    "ReturnHomePaused": "Kjøring hjem pauset"
 }

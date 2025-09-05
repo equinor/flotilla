@@ -334,5 +334,6 @@
     "Statistics": "Statistics",
     "Unable to release robot {0} from intervention mode": "Unable to release robot {0} from intervention mode",
     "Robot ready for missions": "Robot ready for missions",
-    "InterventionNeeded": "Intervention Needed"
+    "InterventionNeeded": "Intervention Needed",
+    "ReturnHomePaused": "Returning home paused"
 }
