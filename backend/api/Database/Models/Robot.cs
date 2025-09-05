@@ -140,6 +140,7 @@ namespace Api.Database.Models
         Blocked,
         BlockedProtectiveStop,
         ReturningHome,
+        ReturnHomePaused,
         UnknownStatus,
         InterventionNeeded,
         Recharging,

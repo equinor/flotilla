@@ -40,7 +40,6 @@ const ContainButton = styled.div`
 interface MissionProps {
     missionName?: string
     robotId: string
-    isReturnToHomeMission: boolean
 }
 
 export enum MissionStatusRequest {
@@ -49,19 +48,9 @@ export enum MissionStatusRequest {
     Resume,
 }
 
-const DialogContent = ({ isReturnToHomeMission }: { isReturnToHomeMission: boolean }) => {
+const DialogContent = () => {
     const { TranslateText } = useLanguageContext()
 
-    if (isReturnToHomeMission) {
-        return (
-            <StyledText>
-                <Typography variant="body_long">
-                    {TranslateText('Skip button pressed during return home warning text')}
-                </Typography>
-                <Typography variant="body_long">{TranslateText('Skip button pressed confirmation text')}</Typography>
-            </StyledText>
-        )
-    }
     return (
         <StyledText>
             <Typography variant="body_long">{TranslateText('Skip button pressed warning text')}</Typography>
@@ -73,7 +62,6 @@ const DialogContent = ({ isReturnToHomeMission }: { isReturnToHomeMission: boole
 export const SkipMissionDialog = ({
     missionName,
     robotId,
-    isReturnToHomeMission,
     isSkipMissionDialogOpen,
     toggleDialog,
 }: MissionProps & { isSkipMissionDialogOpen: boolean; toggleDialog: () => void }) => {
@@ -91,7 +79,7 @@ export const SkipMissionDialog = ({
                 </Dialog.Title>
             </Dialog.Header>
             <Dialog.CustomContent>
-                <DialogContent isReturnToHomeMission={isReturnToHomeMission} />
+                <DialogContent />
             </Dialog.CustomContent>
             <Dialog.Actions>
                 <StyledDisplayButtons>

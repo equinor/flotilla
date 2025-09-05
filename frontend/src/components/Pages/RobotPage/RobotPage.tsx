@@ -211,13 +211,16 @@ export const RobotPage = ({ robotId }: { robotId: string }) => {
                             </RobotInfo>
                         </StyledContainer>
 
-                        <SkipMissionDialog
-                            missionName={mission?.name}
-                            robotId={selectedRobot.id}
-                            isReturnToHomeMission={selectedRobot.status === RobotStatus.ReturningHome}
-                            isSkipMissionDialogOpen={isDialogOpen}
-                            toggleDialog={toggleSkipMissionDialog}
-                        />
+                        {selectedRobot.status === RobotStatus.ReturningHome ? (
+                            <SkipMissionDialog
+                                missionName={mission?.name}
+                                robotId={selectedRobot.id}
+                                isSkipMissionDialogOpen={isDialogOpen}
+                                toggleDialog={toggleSkipMissionDialog}
+                            />
+                        ) : (
+                            <></>
+                        )}
                         {selectedRobot.model.type === RobotType.TaurobInspector && (
                             <StyledSmallContainer>
                                 <MoveRobotArmSection robot={selectedRobot} />
