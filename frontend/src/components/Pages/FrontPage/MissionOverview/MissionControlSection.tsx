@@ -72,6 +72,29 @@ const MissionControlCard = ({ robot }: { robot: Robot }) => {
     const { ongoingMissions } = useMissionsContext()
     const ongoingMission = ongoingMissions.find((mission) => mission.robot.id === robot.id)
     const [isOpen, setIsOpen] = useState<boolean>(true)
+
+    let missionCard
+    switch (robot.status) {
+        case RobotStatus.ReturningHome:
+            missionCard = (
+                <OngoingReturnHomeMissionCard robot={robot} isOpen={isOpen} setIsOpen={setIsOpen} isPaused={false} />
+            )
+            break
+        case RobotStatus.ReturnHomePaused:
+            missionCard = (
+                <OngoingReturnHomeMissionCard robot={robot} isOpen={isOpen} setIsOpen={setIsOpen} isPaused={true} />
+            )
+            break
+        case RobotStatus.Busy:
+            if (ongoingMission)
+                missionCard = <OngoingMissionCard mission={ongoingMission} isOpen={isOpen} setIsOpen={setIsOpen} />
+            else missionCard = <OngoingMissionPlaceholderCard robot={robot} isOpen={isOpen} setIsOpen={setIsOpen} />
+            break
+        default:
+            missionCard = <OngoingMissionPlaceholderCard robot={robot} isOpen={isOpen} setIsOpen={setIsOpen} />
+            break
+    }
+
     return (
         <MissionControlCardStyle
             id={FrontPageSectionId.RobotCard + robot.id}
@@ -79,13 +102,7 @@ const MissionControlCard = ({ robot }: { robot: Robot }) => {
         >
             <OngoingMissionControlCardStyle>
                 <RobotCard robot={robot} />
-                {ongoingMission ? (
-                    <OngoingMissionCard mission={ongoingMission} isOpen={isOpen} setIsOpen={setIsOpen} />
-                ) : robot.status === RobotStatus.ReturningHome ? (
-                    <OngoingReturnHomeMissionCard robot={robot} isOpen={isOpen} setIsOpen={setIsOpen} />
-                ) : (
-                    <OngoingMissionPlaceholderCard robot={robot} isOpen={isOpen} setIsOpen={setIsOpen} />
-                )}
+                {missionCard}
             </OngoingMissionControlCardStyle>
             {isOpen && <RobotMissionQueueView robot={robot} />}
         </MissionControlCardStyle>

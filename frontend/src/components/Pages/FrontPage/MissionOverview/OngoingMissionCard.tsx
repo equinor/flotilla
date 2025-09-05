@@ -36,6 +36,7 @@ interface ReturnHomeProps {
     robot: Robot
     isOpen?: boolean
     setIsOpen?: (isOpen: boolean | ((prev: boolean) => boolean)) => void
+    isPaused: boolean
 }
 
 const StyledLargeScreenMissionCard = styled.div`
@@ -204,9 +205,11 @@ export const OngoingMissionCard = ({ mission, isOpen, setIsOpen }: MissionProps)
     )
 }
 
-export const OngoingReturnHomeMissionCard = ({ robot, isOpen, setIsOpen }: ReturnHomeProps) => {
+export const OngoingReturnHomeMissionCard = ({ robot, isOpen, setIsOpen, isPaused }: ReturnHomeProps) => {
     const { TranslateText } = useLanguageContext()
     const missionName = TranslateText('Return robot to home')
+
+    const missionStatus = isPaused ? MissionStatus.Paused : MissionStatus.Ongoing
 
     const SmallScreenContent = (
         <StyledSmallScreenMissionCard>
@@ -217,13 +220,13 @@ export const OngoingReturnHomeMissionCard = ({ robot, isOpen, setIsOpen }: Retur
             </StyledHeader>
             <ControlButtonSpacing>
                 <Midcontent>
-                    <MissionStatusDisplayWithHeader status={MissionStatus.Ongoing} />
+                    <MissionStatusDisplayWithHeader status={missionStatus} />
                 </Midcontent>
                 <MissionControlButtons
                     missionName={missionName}
                     isReturnToHomeMission={true}
                     robotId={robot.id}
-                    missionStatus={MissionStatus.Ongoing}
+                    missionStatus={missionStatus}
                 />
             </ControlButtonSpacing>
             <MissionQueueButtonView robotId={robot.id} isOpen={isOpen} setIsOpen={setIsOpen} />
@@ -238,14 +241,14 @@ export const OngoingReturnHomeMissionCard = ({ robot, isOpen, setIsOpen }: Retur
                         {missionName}
                     </Typography>
                     <Midcontent>
-                        <MissionStatusDisplayWithHeader status={MissionStatus.Ongoing} />
+                        <MissionStatusDisplayWithHeader status={missionStatus} />
                     </Midcontent>
                 </LeftSection>
                 <MissionControlButtons
                     missionName={missionName}
                     isReturnToHomeMission={true}
                     robotId={robot.id}
-                    missionStatus={MissionStatus.Ongoing}
+                    missionStatus={missionStatus}
                 />
             </ControlButtonSpacing>
             <StyledBottomRightButtonWrapper>

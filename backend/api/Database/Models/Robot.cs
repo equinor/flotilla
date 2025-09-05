@@ -139,6 +139,7 @@ namespace Api.Database.Models
         Offline,
         BlockedProtectiveStop,
         ReturningHome,
+        ReturnHomePaused,
         UnknownStatus,
         InterventionNeeded,
         Recharging,
