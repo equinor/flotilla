@@ -35,6 +35,7 @@ export const RobotStatusChip = ({ status, flotillaStatus, isarConnected, itemSiz
     switch (status) {
         case RobotStatus.Home:
         case RobotStatus.ReturningHome:
+        case RobotStatus.ReturnHomePaused:
         case RobotStatus.Available: {
             statusIcon = Icons.Successful
             iconColor = tokens.colors.interactive.success__resting.hex

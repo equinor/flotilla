@@ -130,6 +130,32 @@ export const RobotPage = ({ robotId }: { robotId: string }) => {
         }
     }, [mediaStreams, robotId])
 
+    const stopButton =
+        selectedRobot && selectedRobot.status === RobotStatus.Busy ? (
+            <StyledTextButton variant="contained" onClick={toggleSkipMissionDialog}>
+                <Icon
+                    name={Icons.StopButton}
+                    style={{ color: tokens.colors.interactive.icon_on_interactive_colors.rgba }}
+                    size={24}
+                />
+                {TranslateText('Stop')} {selectedRobot.name}
+            </StyledTextButton>
+        ) : (
+            <></>
+        )
+
+    const skipMissionDialog =
+        selectedRobot && selectedRobot.status === RobotStatus.Busy ? (
+            <SkipMissionDialog
+                missionName={mission?.name}
+                robotId={selectedRobot.id}
+                isSkipMissionDialogOpen={isDialogOpen}
+                toggleDialog={toggleSkipMissionDialog}
+            />
+        ) : (
+            <></>
+        )
+
     return (
         <>
             <Header page={'robot'} />
@@ -142,14 +168,7 @@ export const RobotPage = ({ robotId }: { robotId: string }) => {
                             <RobotInfo>
                                 <StyledLeftContent>
                                     <RobotImage height="350px" robotType={selectedRobot.model.type} />
-                                    <StyledTextButton variant="contained" onClick={toggleSkipMissionDialog}>
-                                        <Icon
-                                            name={Icons.StopButton}
-                                            style={{ color: tokens.colors.interactive.icon_on_interactive_colors.rgba }}
-                                            size={24}
-                                        />
-                                        {TranslateText('Stop')} {selectedRobot.name}
-                                    </StyledTextButton>
+                                    {stopButton}
                                     {selectedRobot && <ReturnHomeButton robot={selectedRobot} />}
                                     {selectedRobot && selectedRobot.status == RobotStatus.InterventionNeeded && (
                                         <InterventionNeededButton robot={selectedRobot} />
@@ -210,14 +229,7 @@ export const RobotPage = ({ robotId }: { robotId: string }) => {
                                 </StatusContent>
                             </RobotInfo>
                         </StyledContainer>
-
-                        <SkipMissionDialog
-                            missionName={mission?.name}
-                            robotId={selectedRobot.id}
-                            isReturnToHomeMission={selectedRobot.status === RobotStatus.ReturningHome}
-                            isSkipMissionDialogOpen={isDialogOpen}
-                            toggleDialog={toggleSkipMissionDialog}
-                        />
+                        {skipMissionDialog}
                         {selectedRobot.model.type === RobotType.TaurobInspector && (
                             <StyledSmallContainer>
                                 <MoveRobotArmSection robot={selectedRobot} />
