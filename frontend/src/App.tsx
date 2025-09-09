@@ -7,7 +7,6 @@ import { MissionControlProvider } from 'components/Contexts/MissionControlContex
 import { MissionFilterProvider } from 'components/Contexts/MissionFilterContext'
 import { MissionRunsProvider } from 'components/Contexts/MissionRunsContext'
 import { AlertProvider } from 'components/Contexts/AlertContext'
-import { InstallationProvider } from 'components/Contexts/InstallationContext'
 import { AuthProvider } from 'components/Contexts/AuthProvider'
 import { SignalRProvider } from 'components/Contexts/SignalRContext'
 import { RobotProvider } from 'components/Contexts/RobotContext'
@@ -35,34 +34,32 @@ const App = () => (
         <LanguageProvider>
             <SignalRProvider>
                 <QueryClientProvider client={queryClient}>
-                    <InstallationProvider>
+                    <RobotProvider>
                         <InspectionsProvider>
                             <MissionDefinitionsProvider>
-                                <RobotProvider>
-                                    <MissionRunsProvider>
-                                        <AlertProvider>
-                                            <MissionRunsProvider>
-                                                <MissionControlProvider>
-                                                    <UnauthenticatedTemplate>
-                                                        <div className="sign-in-page">
-                                                            <AssetSelectionPage></AssetSelectionPage>
-                                                        </div>
-                                                    </UnauthenticatedTemplate>
-                                                    <AuthenticatedTemplate>
-                                                        <MissionFilterProvider>
-                                                            <MediaStreamProvider>
-                                                                <FlotillaSite />
-                                                            </MediaStreamProvider>
-                                                        </MissionFilterProvider>
-                                                    </AuthenticatedTemplate>
-                                                </MissionControlProvider>
-                                            </MissionRunsProvider>
-                                        </AlertProvider>
-                                    </MissionRunsProvider>
-                                </RobotProvider>
+                                <MissionRunsProvider>
+                                    <AlertProvider>
+                                        <MissionRunsProvider>
+                                            <MissionControlProvider>
+                                                <UnauthenticatedTemplate>
+                                                    <div className="sign-in-page">
+                                                        <AssetSelectionPage></AssetSelectionPage>
+                                                    </div>
+                                                </UnauthenticatedTemplate>
+                                                <AuthenticatedTemplate>
+                                                    <MissionFilterProvider>
+                                                        <MediaStreamProvider>
+                                                            <FlotillaSite />
+                                                        </MediaStreamProvider>
+                                                    </MissionFilterProvider>
+                                                </AuthenticatedTemplate>
+                                            </MissionControlProvider>
+                                        </MissionRunsProvider>
+                                    </AlertProvider>
+                                </MissionRunsProvider>
                             </MissionDefinitionsProvider>
                         </InspectionsProvider>
-                    </InstallationProvider>
+                    </RobotProvider>
                 </QueryClientProvider>
             </SignalRProvider>
         </LanguageProvider>

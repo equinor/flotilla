@@ -12,7 +12,5 @@ namespace Api.Services.MissionLoaders
         );
 
         public Task<List<MissionTask>?> GetTasksForMission(string sourceMissionId);
-
-        public Task<List<PlantInfo>> GetPlantInfos();
     }
 }

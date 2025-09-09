@@ -30,10 +30,5 @@ namespace Api.Services.MissionLoaders
 
             return await echoService.GetTasksForMission(missionSourceId);
         }
-
-        public async Task<List<PlantInfo>> GetPlantInfos()
-        {
-            return await echoService.GetPlantInfos();
-        }
     }
 }

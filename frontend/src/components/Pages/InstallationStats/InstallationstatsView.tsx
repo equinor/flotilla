@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import { BackendAPICaller } from 'api/ApiCaller'
-import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { useRobotContext } from 'components/Contexts/RobotContext'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
@@ -59,8 +58,7 @@ export const MissionStats = () => {
     const [robotStats, setRobotStats] = useState<GroupedStats>({})
     const [loading, setLoading] = useState(true)
     const [timeSpan, setTimeSpan] = useState('day')
-    const { installationCode } = useInstallationContext()
-    const { enabledRobots } = useRobotContext()
+    const { enabledRobots, installationCode } = useRobotContext()
     const { setAlert, setListAlert } = useAlertContext()
     const { TranslateText } = useLanguageContext()
 

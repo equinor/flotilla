@@ -1,7 +1,5 @@
-﻿using System.Globalization;
-using System.Text.Json;
+﻿using System.Text.Json;
 using Api.Controllers.Models;
-using Api.Database.Models;
 using Api.Services;
 using Api.Services.MissionLoaders;
 using Api.Utilities;
@@ -15,8 +13,7 @@ namespace Api.Controllers
     [Authorize(Roles = Role.Any)]
     public class MissionLoaderController(
         ILogger<MissionLoaderController> logger,
-        IMissionLoader missionLoader,
-        IRobotService robotService
+        IMissionLoader missionLoader
     ) : ControllerBase
     {
         /// <summary>
@@ -124,103 +121,6 @@ namespace Api.Controllers
             catch (Exception e)
             {
                 logger.LogError(e, "Unexpected error while getting mission definition");
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
-        }
-
-        /// <summary>
-        ///     Get selected information on all the plants
-        /// </summary>
-        [HttpGet]
-        [Route("plants")]
-        [ProducesResponseType(typeof(List<PlantInfo>), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        [ProducesResponseType(StatusCodes.Status502BadGateway)]
-        [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
-        public async Task<ActionResult<PlantInfo>> GetPlantInfos()
-        {
-            try
-            {
-                var plantInfos = await missionLoader.GetPlantInfos();
-                return Ok(plantInfos);
-            }
-            catch (HttpRequestException e)
-            {
-                logger.LogError(e, "Error getting plant info");
-                return StatusCode(StatusCodes.Status502BadGateway);
-            }
-            catch (MissionLoaderUnavailableException e)
-            {
-                logger.LogError(e, "Mission loader unavailable: {message}", e.Message);
-                return StatusCode(
-                    StatusCodes.Status503ServiceUnavailable,
-                    "External API is unavailable"
-                );
-            }
-            catch (JsonException e)
-            {
-                logger.LogError(e, "Error deserializing plant info response");
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
-        }
-
-        /// <summary>
-        ///     Get all plants associated with an active robot.
-        /// </summary>
-        /// <remarks>
-        ///     <para> Retrieves the plants that have an active robot </para>
-        /// </remarks>
-        [HttpGet]
-        [Authorize(Roles = Role.User)]
-        [Route("active-plants")]
-        [ProducesResponseType(typeof(IList<PlantInfo>), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
-        public async Task<ActionResult<IList<PlantInfo>>> GetActivePlants()
-        {
-            var plants = await robotService.ReadAllActivePlants(readOnly: true);
-
-            if (plants == null)
-            {
-                logger.LogWarning("Could not retrieve robot plants information");
-                throw new RobotInformationNotAvailableException(
-                    "Could not retrieve robot plants information"
-                );
-            }
-
-            plants = plants.Select(p => p.ToLower(CultureInfo.CurrentCulture));
-
-            try
-            {
-                var plantInfos = await missionLoader.GetPlantInfos();
-
-                plantInfos = plantInfos
-                    .Where(p => plants.Contains(p.PlantCode.ToLower(CultureInfo.CurrentCulture)))
-                    .ToList();
-                return Ok(plantInfos);
-            }
-            catch (HttpRequestException e)
-            {
-                logger.LogError(e, "Error getting plant info");
-                return StatusCode(StatusCodes.Status502BadGateway);
-            }
-            catch (MissionLoaderUnavailableException e)
-            {
-                logger.LogError(e, "Mission loader unavailable: {message}", e.Message);
-                return StatusCode(
-                    StatusCodes.Status503ServiceUnavailable,
-                    "External API is unavailable"
-                );
-            }
-            catch (JsonException e)
-            {
-                logger.LogError(e, "Error deserializing plant info response");
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }

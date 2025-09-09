@@ -110,43 +110,5 @@ namespace Api.Test.Services
                 exception.Message
             );
         }
-
-        [Fact]
-        public async Task TestGetPlantInfos_WhenServerReturns500_ThrowsException()
-        {
-            //Arrange
-            var echoApiMock = new Mock<IDownstreamApi>();
-            var logger = new Mock<ILogger<EchoService>>();
-            var sourceService = new Mock<ISourceService>();
-
-            var httpResponse = new HttpResponseMessage(HttpStatusCode.InternalServerError);
-
-            echoApiMock
-                .Setup(a =>
-                    a.CallApiForAppAsync(
-                        It.IsAny<string>(),
-                        It.IsAny<Action<DownstreamApiOptions>?>(),
-                        It.IsAny<HttpContent?>(),
-                        It.IsAny<CancellationToken>()
-                    )
-                )
-                .ReturnsAsync(httpResponse);
-
-            var echoService = new EchoService(
-                logger.Object,
-                echoApiMock.Object,
-                sourceService.Object,
-                Context
-            );
-
-            //Act
-            var exception = await Assert.ThrowsAsync<MissionLoaderUnavailableException>(
-                async () => await echoService.GetPlantInfos()
-            );
-            Assert.Equal(
-                "Echo API unavailable. Status code: InternalServerError",
-                exception.Message
-            );
-        }
     }
 }

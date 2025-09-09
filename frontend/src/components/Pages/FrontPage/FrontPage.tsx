@@ -16,9 +16,9 @@ import { Icons } from 'utils/icons'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { useNavigate } from 'react-router-dom'
 import { config } from 'config'
-import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { phone_width } from 'utils/constants'
 import { MissionStats } from '../InstallationStats/InstallationstatsView'
+import { useRobotContext } from 'components/Contexts/RobotContext'
 
 const StyledFrontPage = styled.div`
     display: flex;
@@ -97,7 +97,7 @@ type TabDef = {
 export const FrontPage = ({ initialTab }: { initialTab: TabNames }) => {
     const [activeTab, setActiveTab] = useState<TabNames>(initialTab)
     const { TranslateText } = useLanguageContext()
-    const { installationInspectionAreas } = useInstallationContext()
+    const { installationInspectionAreas } = useRobotContext()
 
     redirectIfNoInstallationSelected()
 

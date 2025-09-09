@@ -146,7 +146,7 @@ export const MediaStreamProvider: FC<Props> = ({ children }) => {
             .then((conf: MediaStreamConfig | null | undefined) => {
                 if (conf) addConfigToMediaStreams(conf)
             })
-            .catch((e) => console.error(e))
+            .catch(() => console.log(`No media config found for robot with ID ${robotId}`))
     }
 
     return (
