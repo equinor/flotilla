@@ -7,7 +7,7 @@ import { MissionDefinitionQueryParameters } from 'models/MissionDefinitionQueryP
 import { PaginatedResponse, PaginationHeader, PaginationHeaderName } from 'models/PaginatedResponse'
 import { timeout } from 'utils/timeout'
 import { tokenReverificationInterval } from 'components/Contexts/AuthProvider'
-import { MissionDefinition, PlantInfo } from 'models/MissionDefinition'
+import { MissionDefinition } from 'models/MissionDefinition'
 import { MissionDefinitionUpdateForm } from 'models/MissionDefinitionUpdateForm'
 import { InspectionArea } from 'models/InspectionArea'
 import { ApiError, isApiError } from './ApiError'
@@ -255,18 +255,6 @@ export class BackendAPICaller {
     static async getMissionRunById(missionId: string): Promise<Mission> {
         const path: string = 'missions/runs/' + missionId
         const result = await BackendAPICaller.GET<Mission>(path).catch(BackendAPICaller.handleError('GET', path))
-        return result.content
-    }
-
-    static async getPlantInfo(): Promise<PlantInfo[]> {
-        const path: string = 'mission-loader/plants'
-        const result = await BackendAPICaller.GET<PlantInfo[]>(path).catch(BackendAPICaller.handleError('GET', path))
-        return result.content
-    }
-
-    static async getActivePlants(): Promise<PlantInfo[]> {
-        const path: string = 'mission-loader/active-plants'
-        const result = await BackendAPICaller.GET<PlantInfo[]>(path).catch(BackendAPICaller.handleError('GET', path))
         return result.content
     }
 

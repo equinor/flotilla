@@ -16,8 +16,3 @@ export interface MissionDefinition {
     sourceId: string
     map?: MapMetadata
 }
-
-export interface PlantInfo {
-    plantCode: string
-    projectDescription: string
-}
