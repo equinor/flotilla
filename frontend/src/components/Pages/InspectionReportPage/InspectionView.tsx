@@ -1,6 +1,5 @@
 import { Icon, Typography } from '@equinor/eds-core-react'
 import { Task } from 'models/Task'
-import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { Icons } from 'utils/icons'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { formatDateTime } from 'utils/StringFormatting'
@@ -18,6 +17,7 @@ import {
 import { InspectionOverviewDialogView } from './InspectionOverview'
 import { useState } from 'react'
 import { LargeDialogInspectionImage } from './InspectionReportImage'
+import { useRobotContext } from 'components/Contexts/RobotContext'
 interface InspectionDialogViewProps {
     selectedTask: Task
     tasks: Task[]
@@ -25,7 +25,7 @@ interface InspectionDialogViewProps {
 
 export const InspectionDialogView = ({ selectedTask, tasks }: InspectionDialogViewProps) => {
     const { TranslateText } = useLanguageContext()
-    const { installationName } = useInstallationContext()
+    const { installationName } = useRobotContext()
     const { switchSelectedInspectionTask } = useInspectionsContext()
     const [switchImageDirection, setSwitchImageDirection] = useState<number>(0)
 

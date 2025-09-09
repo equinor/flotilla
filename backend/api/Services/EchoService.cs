@@ -18,7 +18,6 @@ namespace Api.Services
         );
         public Task<CondensedMissionDefinition?> GetMissionById(string sourceMissionId);
         public Task<List<MissionTask>?> GetTasksForMission(string missionSourceId);
-        public Task<List<PlantInfo>> GetPlantInfos();
         public Task<TagInspectionMetadata> CreateOrUpdateTagInspectionMetadata(
             TagInspectionMetadata metadata
         );
@@ -138,26 +137,6 @@ namespace Api.Services
                 InstallationCode = echoMission.InstallationCode,
             };
             return missionDefinition;
-        }
-
-        public async Task<List<PlantInfo>> GetPlantInfos()
-        {
-            string relativePath = "plantinfo";
-            var response = await echoApi.CallApiForAppAsync(
-                ServiceName,
-                options =>
-                {
-                    options.HttpMethod = HttpMethod.Get.Method;
-                    options.RelativePath = relativePath;
-                }
-            );
-
-            response.EnsureSuccessStatusCode();
-            var echoPlantInfoResponse =
-                await response.Content.ReadFromJsonAsync<List<EchoPlantInfoResponse>>()
-                ?? throw new JsonException("Failed to deserialize plant information from Echo");
-            var installations = ProcessEchoPlantInfos(echoPlantInfoResponse);
-            return installations;
         }
 
         private static List<EchoTag> ProcessPlanItems(

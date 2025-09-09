@@ -11,16 +11,6 @@ namespace Api.Test.Mocks
 {
     public class MockMissionLoader : IMissionLoader
     {
-        private readonly List<PlantInfo> _mockPlantInfo =
-        [
-            new PlantInfo
-            {
-                PlantCode = "testInstallation",
-                ProjectDescription = "testInstallation",
-            },
-            new PlantInfo { PlantCode = "JSV", ProjectDescription = "JSVtestInstallation" },
-        ];
-
         private readonly List<MissionTask> _mockMissionTasks =
         [
             new MissionTask(
@@ -105,12 +95,6 @@ namespace Api.Test.Mocks
         {
             await Task.Run(() => Thread.Sleep(1));
             return _mockMissionTasks;
-        }
-
-        public async Task<List<PlantInfo>> GetPlantInfos()
-        {
-            await Task.Run(() => Thread.Sleep(1));
-            return _mockPlantInfo;
         }
     }
 }

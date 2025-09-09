@@ -2,7 +2,6 @@ import { Autocomplete, Button, Card, Dialog, Typography } from '@equinor/eds-cor
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { memo, useState } from 'react'
-import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { Robot, RobotStatus } from 'models/Robot'
 import { CondensedMissionDefinition } from 'models/CondensedMissionDefinition'
 import { useRobotContext } from 'components/Contexts/RobotContext'
@@ -47,7 +46,7 @@ interface ScheduleDialogProps {
 
 export const SelectMissionsToScheduleDialog = ({ missionsList, closeDialog }: ScheduleDialogProps) => {
     const { TranslateText } = useLanguageContext()
-    const { installationCode } = useInstallationContext()
+    const { installationCode } = useRobotContext()
     const { setAlert, setListAlert } = useAlertContext()
     const { setLoadingRobotMissionSet } = useMissionsContext()
     const [selectedMissions, setSelectedMissions] = useState<CondensedMissionDefinition[]>([])
