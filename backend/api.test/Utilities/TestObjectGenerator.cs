@@ -112,7 +112,7 @@ public static class TestObjectGenerator
             MissionId = missionId ?? Guid.NewGuid().ToString(),
             Status = missionStatus,
             InstallationCode = installationCode,
-            DesiredStartTime = startTime ?? DateTime.UtcNow,
+            CreationTime = startTime ?? DateTime.UtcNow,
             Robot = robot,
             Tasks = tasks ?? [],
             MissionRunType = missionRunType,

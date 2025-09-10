@@ -27,7 +27,7 @@ namespace Api.Controllers.Models
 
         public bool IsCompleted;
 
-        public DateTime DesiredStartTime { get; set; }
+        public DateTime CreationTime { get; set; }
 
         public DateTime? StartTime { get; private set; }
 
@@ -61,7 +61,7 @@ namespace Api.Controllers.Models
             Robot = new RobotResponse(mission.Robot);
             Status = mission.Status;
             IsCompleted = mission.IsCompleted;
-            DesiredStartTime = mission.DesiredStartTime;
+            CreationTime = mission.CreationTime;
             StartTime = mission.StartTime;
             EndTime = mission.EndTime;
             EstimatedTaskDuration = mission.EstimatedTaskDuration;

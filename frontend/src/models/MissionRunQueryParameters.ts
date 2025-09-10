@@ -14,8 +14,8 @@ export interface MissionRunQueryParameters {
     maxStartTime?: number
     minEndTime?: number
     maxEndTime?: number
-    minDesiredStartTime?: number
-    maxDesiredStartTime?: number
+    minCreationTime?: number
+    maxCreationTime?: number
     pageNumber?: number
     pageSize?: number
     orderBy?: string

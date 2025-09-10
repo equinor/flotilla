@@ -129,7 +129,7 @@ namespace Api.Test.Database
                 MissionId = missionDefinition.Id,
                 MissionRunType = missionRunType,
                 Status = missionStatus,
-                DesiredStartTime = DateTime.UtcNow,
+                CreationTime = DateTime.UtcNow,
                 InspectionArea = inspectionArea,
                 Tasks = tasks,
                 InstallationCode = installationCode,

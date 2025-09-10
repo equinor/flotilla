@@ -72,7 +72,7 @@ export const MissionStats = () => {
                 const { min } = getEpochRangeFromTimeSpan(timeSpan)
                 const missions = await BackendAPICaller.getMissionRuns({
                     pageSize: pageSize,
-                    minDesiredStartTime: min,
+                    minCreationTime: min,
                 })
                 const relevantMissions = missions.content.filter((m) => enabledRobots.some((r) => r.id === m.robot.id))
                 const byRobot = computeMissionStats(relevantMissions)

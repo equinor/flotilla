@@ -31,7 +31,7 @@ namespace Api.Controllers.Models
     {
         public string RobotId { get; set; }
 
-        public DateTime? DesiredStartTime { get; set; }
+        public DateTime? CreationTime { get; set; }
 
         public string InstallationCode { get; set; }
 

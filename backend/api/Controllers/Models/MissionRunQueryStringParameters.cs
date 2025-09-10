@@ -7,7 +7,7 @@ namespace Api.Controllers.Models
         public MissionRunQueryStringParameters()
         {
             // Default order is desired start time
-            OrderBy = "DesiredStartTime desc";
+            OrderBy = "CreationTime desc";
         }
 
         /// <summary>
@@ -90,12 +90,12 @@ namespace Api.Controllers.Models
         /// <summary>
         /// Filter for Start Time in epoch time format
         /// </summary>
-        public long MinDesiredStartTime { get; set; }
+        public long MinCreationTime { get; set; }
 
         /// /// <summary>
         /// Filter for Start Time in epoch time format
         /// </summary>
-        public long MaxDesiredStartTime { get; set; } = DateTimeOffset.MaxValue.ToUnixTimeSeconds();
+        public long MaxCreationTime { get; set; } = DateTimeOffset.MaxValue.ToUnixTimeSeconds();
 
         #endregion Time Filters
     }

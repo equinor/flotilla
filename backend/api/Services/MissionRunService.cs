@@ -194,7 +194,7 @@ namespace Api.Services
                     && missionRun.Status == MissionStatus.Pending
                     && missionRun.MissionRunType == type
                 )
-                .OrderBy(missionRun => missionRun.DesiredStartTime)
+                .OrderBy(missionRun => missionRun.CreationTime)
                 .ToListAsync();
         }
 
@@ -205,7 +205,7 @@ namespace Api.Services
         )
         {
             return await GetMissionRunsWithSubModels(readOnly: readOnly)
-                .OrderBy(missionRun => missionRun.DesiredStartTime)
+                .OrderBy(missionRun => missionRun.CreationTime)
                 .FirstOrDefaultAsync(missionRun =>
                     missionRun.Robot.Id == robotId
                     && missionRun.Status == MissionStatus.Pending
@@ -232,7 +232,7 @@ namespace Api.Services
 
             return await GetMissionRunsWithSubModels(readOnly: readOnly)
                 .Where(missionFilter)
-                .OrderBy(missionRun => missionRun.DesiredStartTime)
+                .OrderBy(missionRun => missionRun.CreationTime)
                 .ToListAsync();
         }
 
@@ -243,7 +243,7 @@ namespace Api.Services
         {
             return await GetMissionRunsWithSubModels(readOnly: readOnly)
                 .Where(m => m.MissionId == missionId && m.EndTime == null)
-                .OrderBy(m => m.DesiredStartTime)
+                .OrderBy(m => m.CreationTime)
                 .FirstOrDefaultAsync();
         }
 
@@ -443,8 +443,8 @@ namespace Api.Services
         ///     <see cref="MissionRunQueryStringParameters.MaxStartTime" />,
         ///     <see cref="MissionRunQueryStringParameters.MinEndTime" />,
         ///     <see cref="MissionRunQueryStringParameters.MaxEndTime" />,
-        ///     <see cref="MissionRunQueryStringParameters.MinDesiredStartTime" /> and
-        ///     <see cref="MissionRunQueryStringParameters.MaxDesiredStartTime" />
+        ///     <see cref="MissionRunQueryStringParameters.MinCreationTime" /> and
+        ///     <see cref="MissionRunQueryStringParameters.MaxCreationTime" />
         ///     <para>
         ///         Uses LINQ Expression trees (see
         ///         <seealso href="https://docs.microsoft.com/en-us/dotnet/csharp/expression-trees" />)
@@ -521,15 +521,15 @@ namespace Api.Services
                     && DateTime.Compare(missionRun.EndTime.Value, maxEndTime) <= 0
                 );
 
-            var minDesiredStartTime = DateTimeUtilities.UnixTimeStampToDateTime(
-                parameters.MinDesiredStartTime
+            var minCreationTime = DateTimeUtilities.UnixTimeStampToDateTime(
+                parameters.MinCreationTime
             );
-            var maxDesiredStartTime = DateTimeUtilities.UnixTimeStampToDateTime(
-                parameters.MaxDesiredStartTime
+            var maxCreationTime = DateTimeUtilities.UnixTimeStampToDateTime(
+                parameters.MaxCreationTime
             );
-            Expression<Func<MissionRun, bool>> desiredStartTimeFilter = missionRun =>
-                DateTime.Compare(missionRun.DesiredStartTime, minDesiredStartTime) >= 0
-                && DateTime.Compare(missionRun.DesiredStartTime, maxDesiredStartTime) <= 0;
+            Expression<Func<MissionRun, bool>> creationTimeFilter = missionRun =>
+                DateTime.Compare(missionRun.CreationTime, minCreationTime) >= 0
+                && DateTime.Compare(missionRun.CreationTime, maxCreationTime) <= 0;
 
             // The parameter of the filter expression
             var missionRun = Expression.Parameter(typeof(MissionRun));
@@ -548,7 +548,7 @@ namespace Api.Services
                                 Expression.AndAlso(
                                     Expression.Invoke(inspectionTypeFilter, missionRun),
                                     Expression.AndAlso(
-                                        Expression.Invoke(desiredStartTimeFilter, missionRun),
+                                        Expression.Invoke(creationTimeFilter, missionRun),
                                         Expression.AndAlso(
                                             Expression.Invoke(startTimeFilter, missionRun),
                                             Expression.AndAlso(

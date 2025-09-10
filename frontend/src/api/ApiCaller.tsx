@@ -177,8 +177,8 @@ export class BackendAPICaller {
         if (parameters.maxStartTime) path = path + 'MaxStartTime=' + parameters.maxStartTime + '&'
         if (parameters.minEndTime) path = path + 'MinEndTime=' + parameters.minEndTime + '&'
         if (parameters.maxEndTime) path = path + 'MaxEndTime=' + parameters.maxEndTime + '&'
-        if (parameters.minDesiredStartTime) path = path + 'MinDesiredStartTime=' + parameters.minDesiredStartTime + '&'
-        if (parameters.maxDesiredStartTime) path = path + 'MaxDesiredStartTime=' + parameters.maxDesiredStartTime + '&'
+        if (parameters.minCreationTime) path = path + 'MinCreationTime=' + parameters.minCreationTime + '&'
+        if (parameters.maxCreationTime) path = path + 'MaxCreationTime=' + parameters.maxCreationTime + '&'
 
         const result = await BackendAPICaller.GET<Mission[]>(path).catch(BackendAPICaller.handleError('GET', path))
         if (!result.headers.has(PaginationHeaderName)) {

@@ -15,7 +15,7 @@ const upsertMissionList = (list: Mission[], mission: Mission) => {
     if (i > -1) newMissionList[i] = mission
     else newMissionList.push(mission)
     return newMissionList.sort((a, b) =>
-        a.desiredStartTime === b.desiredStartTime ? 0 : a.desiredStartTime > b.desiredStartTime ? 1 : -1
+        a.creationTime === b.creationTime ? 0 : a.creationTime > b.creationTime ? 1 : -1
     )
 }
 interface IMissionRunsContext {
@@ -154,7 +154,7 @@ const useMissionRuns = (): IMissionRunsContext => {
             const queue = await fetchMissionRuns({
                 statuses: [MissionStatus.Pending],
                 pageSize: 100,
-                orderBy: 'DesiredStartTime',
+                orderBy: 'CreationTime',
             }).catch(() => {
                 setAlert(
                     AlertType.RequestFail,

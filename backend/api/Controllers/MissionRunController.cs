@@ -32,9 +32,9 @@ namespace Api.Controllers
             [FromQuery] MissionRunQueryStringParameters parameters
         )
         {
-            if (parameters.MaxDesiredStartTime < parameters.MinDesiredStartTime)
+            if (parameters.MaxCreationTime < parameters.MinCreationTime)
             {
-                return BadRequest("Max DesiredStartTime cannot be less than min DesiredStartTime");
+                return BadRequest("Max CreationTime cannot be less than min CreationTime");
             }
             if (parameters.MaxStartTime < parameters.MinStartTime)
             {

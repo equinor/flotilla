@@ -46,7 +46,7 @@ namespace Api.Database.Models
         public string InstallationCode { get; set; }
 
         [Required]
-        public DateTime DesiredStartTime { get; set; }
+        public DateTime CreationTime { get; set; }
 
         [Required]
         public virtual Robot Robot { get; set; }
