@@ -3,6 +3,6 @@
     public class ScheduleMissionQuery
     {
         public string RobotId { get; set; } = string.Empty;
-        public DateTime? DesiredStartTime { get; set; }
+        public DateTime? CreationTime { get; set; }
     }
 }

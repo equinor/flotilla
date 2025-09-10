@@ -120,7 +120,7 @@ namespace Api.Test.Controllers
             var missionQuery = new CustomMissionQuery
             {
                 RobotId = robot.Id,
-                DesiredStartTime = DateTime.UtcNow,
+                CreationTime = DateTime.UtcNow,
                 InstallationCode = installation.InstallationCode,
                 Name = "TestMission",
                 Tasks = tasks,
@@ -251,7 +251,7 @@ namespace Api.Test.Controllers
             var missionQuery = new CustomMissionQuery
             {
                 RobotId = robot.Id,
-                DesiredStartTime = DateTime.UtcNow,
+                CreationTime = DateTime.UtcNow,
                 InstallationCode = installation.InstallationCode,
                 Name = "TestMission",
                 Tasks = tasks,

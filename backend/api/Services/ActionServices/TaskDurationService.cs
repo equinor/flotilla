@@ -26,7 +26,7 @@ namespace Api.Services.ActionServices
             var missionRunsForEstimation = await missionRunService.ReadAll(
                 new MissionRunQueryStringParameters
                 {
-                    MinDesiredStartTime = minEpochTime,
+                    MinCreationTime = minEpochTime,
                     RobotModelType = robotType,
                     PageSize = QueryStringParameters.MaxPageSize,
                 },

@@ -71,7 +71,7 @@ namespace Api.Test.Controllers
                 RobotId = robot.Id,
                 InstallationCode = installation.InstallationCode,
                 MissionSourceId = "95",
-                DesiredStartTime = DateTime.UtcNow,
+                CreationTime = DateTime.UtcNow,
             };
             var content = new StringContent(
                 JsonSerializer.Serialize(query),
@@ -112,7 +112,7 @@ namespace Api.Test.Controllers
                 RobotId = robot.Id,
                 InstallationCode = installation.InstallationCode,
                 MissionSourceId = "97",
-                DesiredStartTime = DateTime.UtcNow,
+                CreationTime = DateTime.UtcNow,
             };
             var content = new StringContent(
                 JsonSerializer.Serialize(query),
@@ -245,7 +245,7 @@ namespace Api.Test.Controllers
             var scheduleQuery = new ScheduleMissionQuery
             {
                 RobotId = robot.Id,
-                DesiredStartTime = DateTime.SpecifyKind(new DateTime(2050, 1, 1), DateTimeKind.Utc),
+                CreationTime = DateTime.SpecifyKind(new DateTime(2050, 1, 1), DateTimeKind.Utc),
             };
             var scheduleContent = new StringContent(
                 JsonSerializer.Serialize(scheduleQuery),
@@ -411,7 +411,7 @@ namespace Api.Test.Controllers
             {
                 RobotId = robotId,
                 InstallationCode = installationCode,
-                DesiredStartTime = DateTime.SpecifyKind(new DateTime(3050, 1, 1), DateTimeKind.Utc),
+                CreationTime = DateTime.SpecifyKind(new DateTime(3050, 1, 1), DateTimeKind.Utc),
                 InspectionFrequency = new TimeSpan(14, 0, 0, 0),
                 Name = "TestMission",
                 Tasks =

@@ -34,7 +34,7 @@ export interface Mission {
     robot: Robot
     status: MissionStatus
     isCompleted: boolean
-    desiredStartTime: Date
+    creationTime: Date
     startTime?: Date
     endTime?: Date
     estimatedTaskDuration?: number
@@ -55,6 +55,6 @@ export const placeholderMission: Mission = {
     },
     status: MissionStatus.Pending,
     isCompleted: false,
-    desiredStartTime: new Date(),
+    creationTime: new Date(),
     tasks: [],
 }

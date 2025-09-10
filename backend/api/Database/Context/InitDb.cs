@@ -388,7 +388,7 @@ namespace Api.Database.Context
                 InspectionArea = inspectionAreas[0],
                 MissionId = missionDefinitions[0].Id,
                 Status = MissionStatus.Successful,
-                DesiredStartTime = DateTime.UtcNow,
+                CreationTime = DateTime.UtcNow,
                 Tasks = [],
             };
 
@@ -400,7 +400,7 @@ namespace Api.Database.Context
                 InspectionArea = inspectionAreas[1],
                 MissionId = missionDefinitions[0].Id,
                 Status = MissionStatus.Successful,
-                DesiredStartTime = DateTime.UtcNow,
+                CreationTime = DateTime.UtcNow,
                 Tasks = [],
             };
             missionDefinitions[0].LastSuccessfulRun = missionRun2;
@@ -413,7 +413,7 @@ namespace Api.Database.Context
                 InspectionArea = inspectionAreas[1],
                 MissionId = missionDefinitions[1].Id,
                 Status = MissionStatus.Successful,
-                DesiredStartTime = DateTime.UtcNow,
+                CreationTime = DateTime.UtcNow,
                 Tasks = [],
             };
 
@@ -425,7 +425,7 @@ namespace Api.Database.Context
                 InspectionArea = inspectionAreas[1],
                 MissionId = missionDefinitions[1].Id,
                 Status = MissionStatus.Failed,
-                DesiredStartTime = DateTime.UtcNow,
+                CreationTime = DateTime.UtcNow,
                 Tasks = [tasks[0], tasks[1]],
             };
 
@@ -437,7 +437,7 @@ namespace Api.Database.Context
                 InspectionArea = inspectionAreas[1],
                 MissionId = missionDefinitions[1].Id,
                 Status = MissionStatus.PartiallySuccessful,
-                DesiredStartTime = DateTime.UtcNow,
+                CreationTime = DateTime.UtcNow,
                 Tasks = [tasks[0], tasks[2]],
             };
 
@@ -449,7 +449,7 @@ namespace Api.Database.Context
                 InspectionArea = inspectionAreas[1],
                 MissionId = missionDefinitions[1].Id,
                 Status = MissionStatus.Cancelled,
-                DesiredStartTime = DateTime.UtcNow,
+                CreationTime = DateTime.UtcNow,
                 Tasks = [tasks[0], tasks[3]],
             };
 
@@ -461,7 +461,7 @@ namespace Api.Database.Context
                 InspectionArea = inspectionAreas[1],
                 MissionId = missionDefinitions[1].Id,
                 Status = MissionStatus.Failed,
-                DesiredStartTime = DateTime.UtcNow,
+                CreationTime = DateTime.UtcNow,
                 Tasks = [tasks[0], tasks[1], tasks[2], tasks[3], tasks[4], tasks[5], tasks[6]],
             };
 

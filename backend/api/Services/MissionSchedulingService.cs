@@ -539,7 +539,7 @@ namespace Api.Services
                 {
                     Statuses = [MissionStatus.Ongoing],
                     RobotId = robotId,
-                    OrderBy = "DesiredStartTime",
+                    OrderBy = "CreationTime",
                     PageSize = 100,
                 },
                 readOnly: readOnly

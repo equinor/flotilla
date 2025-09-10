@@ -264,7 +264,7 @@ namespace Api.Services
                     MissionId = missionDefinition.Id,
                     Status = MissionStatus.Pending,
                     MissionRunType = MissionRunType.Normal,
-                    DesiredStartTime = DateTime.UtcNow,
+                    CreationTime = DateTime.UtcNow,
                     Tasks = missionTasks,
                     InstallationCode = missionDefinition.InstallationCode,
                     InspectionArea = missionDefinition.InspectionArea,
