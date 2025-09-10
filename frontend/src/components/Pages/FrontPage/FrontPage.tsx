@@ -142,8 +142,13 @@ export const FrontPage = ({ initialTab }: { initialTab: TabNames }) => {
 
     const activeIndex = tabs.findIndex((t) => t.name === activeTab)
 
-    const goToTab = (index: number) => {
-        const tab = tabs[index]
+    const goToTab = (index: number | string) => {
+        let tab
+        if (typeof index === 'number') tab = tabs[index]
+        else tab = tabs.find((t) => t.name === index)
+
+        if (tab === undefined) return
+
         setActiveTab(tab.name)
         navigate(`${config.FRONTEND_BASE_ROUTE}/front-page-${tab.name}`)
     }
