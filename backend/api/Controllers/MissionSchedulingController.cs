@@ -25,6 +25,199 @@ namespace Api.Controllers
     ) : ControllerBase
     {
         /// <summary>
+        ///     Schedule a mission based on mission loader
+        /// </summary>
+        /// <remarks>
+        ///     <para> This query schedules a new mission and adds it to the database </para>
+        /// </remarks>
+        [HttpPost]
+        [Authorize(Roles = Role.User)]
+        [ProducesResponseType(typeof(MissionRun), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        public async Task<ActionResult<MissionRun>> Create(
+            [FromBody] ScheduledMissionQuery scheduledMissionQuery
+        )
+        {
+            scheduledMissionQuery = Sanitize.SanitizeUserInput(scheduledMissionQuery);
+
+            Robot robot;
+            try
+            {
+                robot = await robotService.GetRobotWithSchedulingPreCheck(
+                    scheduledMissionQuery.RobotId,
+                    readOnly: true
+                );
+            }
+            catch (RobotNotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (RobotPreCheckFailedException e)
+            {
+                return BadRequest(e.Message);
+            }
+            string missionSourceId = scheduledMissionQuery.MissionSourceId.ToString(
+                CultureInfo.CurrentCulture
+            );
+
+            CondensedMissionDefinition? condensedMissionDefinition;
+            try
+            {
+                condensedMissionDefinition = await missionLoader.GetMissionById(missionSourceId);
+                if (condensedMissionDefinition == null)
+                {
+                    return NotFound("Mission not found");
+                }
+            }
+            catch (HttpRequestException e)
+            {
+                if (e.StatusCode.HasValue && (int)e.StatusCode.Value == 404)
+                {
+                    logger.LogWarning("Could not find mission with id={Id}", missionSourceId);
+                    return NotFound("Mission not found");
+                }
+
+                logger.LogError(e, "Error getting mission from mission loader");
+                return StatusCode(StatusCodes.Status502BadGateway, $"{e.Message}");
+            }
+            catch (JsonException e)
+            {
+                const string Message = "Error deserializing mission";
+                logger.LogError(e, "{Message}", Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, Message);
+            }
+            catch (InvalidDataException e)
+            {
+                const string Message =
+                    "Can not schedule mission because Mission is invalid. One or more tasks does not contain a robot pose";
+                logger.LogError(e, "Message: {errorMessage}", Message);
+                return StatusCode(StatusCodes.Status502BadGateway, Message);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Error getting mission from mission loader");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"{e.Message}");
+            }
+
+            var missionTasks = await missionLoader.GetTasksForMission(missionSourceId);
+
+            if (missionTasks == null)
+            {
+                return NotFound("No mission tasks were found for the requested mission");
+            }
+
+            var inspectionAreaForMission =
+                inspectionAreaService.TryFindInspectionAreaForMissionTasks(
+                    missionTasks,
+                    scheduledMissionQuery.InstallationCode
+                );
+            if (inspectionAreaForMission == null)
+            {
+                return BadRequest("No inspection area found for the mission tasks");
+            }
+
+            if (robot.CurrentInspectionAreaId == null)
+            {
+                return BadRequest("Robot does not have an inspection area");
+            }
+
+            if (inspectionAreaForMission.Id != robot.CurrentInspectionAreaId)
+            {
+                return BadRequest(
+                    "The tasks of the mission are not inside the inspection area of the robot"
+                );
+            }
+
+            var source = await sourceService.CheckForExistingSource(
+                scheduledMissionQuery.MissionSourceId
+            );
+            MissionDefinition? existingMissionDefinition = null;
+            if (source == null)
+            {
+                source = await sourceService.Create(
+                    new Source { SourceId = $"{condensedMissionDefinition.Id}" }
+                );
+            }
+            else
+            {
+                existingMissionDefinition = await missionDefinitionService.ReadBySourceId(
+                    source.SourceId,
+                    readOnly: true
+                );
+            }
+
+            var scheduledMissionDefinition =
+                existingMissionDefinition
+                ?? new MissionDefinition
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Source = source,
+                    Name = condensedMissionDefinition.Name,
+                    InspectionFrequency = scheduledMissionQuery.InspectionFrequency,
+                    InstallationCode = scheduledMissionQuery.InstallationCode,
+                    InspectionArea = inspectionAreaForMission,
+                    Map = new MapMetadata(),
+                };
+
+            if (scheduledMissionDefinition.InspectionArea.Id != inspectionAreaForMission.Id)
+            {
+                logger.LogWarning(
+                    "Inspection area for mission definition {Id} was changed from {OldInspectionAreaId} to {NewInspectionAreaId}",
+                    scheduledMissionDefinition.Id,
+                    scheduledMissionDefinition.InspectionArea.Id,
+                    inspectionAreaForMission.Id
+                );
+                scheduledMissionDefinition.InspectionArea = inspectionAreaForMission;
+            }
+
+            var missionRun = new MissionRun
+            {
+                Name = condensedMissionDefinition.Name,
+                Robot = robot,
+                MissionId = scheduledMissionDefinition.Id,
+                Status = MissionStatus.Pending,
+                MissionRunType = MissionRunType.Normal,
+                CreationTime = scheduledMissionQuery.CreationTime ?? DateTime.UtcNow,
+                Tasks = missionTasks,
+                InstallationCode = scheduledMissionQuery.InstallationCode,
+                InspectionArea = scheduledMissionDefinition.InspectionArea,
+            };
+
+            scheduledMissionDefinition.Map = await mapService.ChooseMapFromMissionRunTasks(
+                missionRun
+            );
+
+            if (missionRun.Tasks.Any())
+            {
+                missionRun.SetEstimatedTaskDuration();
+            }
+
+            if (existingMissionDefinition == null)
+            {
+                await missionDefinitionService.Create(scheduledMissionDefinition);
+            }
+
+            MissionRun newMissionRun;
+            try
+            {
+                newMissionRun = await missionRunService.Create(missionRun);
+            }
+            catch (UnsupportedRobotCapabilityException)
+            {
+                return BadRequest(
+                    $"The robot {robot.Name} does not have the necessary sensors to run the mission."
+                );
+            }
+
+            return CreatedAtAction(nameof(Create), new { id = newMissionRun.Id }, newMissionRun);
+        }
+
+        /// <summary>
         ///     Rerun a mission run, running only the parts that did not previously complete
         /// </summary>
         /// <remarks>
@@ -233,198 +426,6 @@ namespace Api.Controllers
             return CreatedAtAction(nameof(Schedule), new { id = newMissionRun.Id }, newMissionRun);
         }
 
-        /// <summary>
-        ///     Schedule a mission based on mission loader
-        /// </summary>
-        /// <remarks>
-        ///     <para> This query schedules a new mission and adds it to the database </para>
-        /// </remarks>
-        [HttpPost]
-        [Authorize(Roles = Role.User)]
-        [ProducesResponseType(typeof(MissionRun), StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        [ProducesResponseType(StatusCodes.Status409Conflict)]
-        public async Task<ActionResult<MissionRun>> Create(
-            [FromBody] ScheduledMissionQuery scheduledMissionQuery
-        )
-        {
-            scheduledMissionQuery = Sanitize.SanitizeUserInput(scheduledMissionQuery);
-
-            Robot robot;
-            try
-            {
-                robot = await robotService.GetRobotWithSchedulingPreCheck(
-                    scheduledMissionQuery.RobotId,
-                    readOnly: true
-                );
-            }
-            catch (RobotNotFoundException e)
-            {
-                return NotFound(e.Message);
-            }
-            catch (RobotPreCheckFailedException e)
-            {
-                return BadRequest(e.Message);
-            }
-            string missionSourceId = scheduledMissionQuery.MissionSourceId.ToString(
-                CultureInfo.CurrentCulture
-            );
-
-            CondensedMissionDefinition? condensedMissionDefinition;
-            try
-            {
-                condensedMissionDefinition = await missionLoader.GetMissionById(missionSourceId);
-                if (condensedMissionDefinition == null)
-                {
-                    return NotFound("Mission not found");
-                }
-            }
-            catch (HttpRequestException e)
-            {
-                if (e.StatusCode.HasValue && (int)e.StatusCode.Value == 404)
-                {
-                    logger.LogWarning("Could not find mission with id={Id}", missionSourceId);
-                    return NotFound("Mission not found");
-                }
-
-                logger.LogError(e, "Error getting mission from mission loader");
-                return StatusCode(StatusCodes.Status502BadGateway, $"{e.Message}");
-            }
-            catch (JsonException e)
-            {
-                const string Message = "Error deserializing mission";
-                logger.LogError(e, "{Message}", Message);
-                return StatusCode(StatusCodes.Status500InternalServerError, Message);
-            }
-            catch (InvalidDataException e)
-            {
-                const string Message =
-                    "Can not schedule mission because Mission is invalid. One or more tasks does not contain a robot pose";
-                logger.LogError(e, "Message: {errorMessage}", Message);
-                return StatusCode(StatusCodes.Status502BadGateway, Message);
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Error getting mission from mission loader");
-                return StatusCode(StatusCodes.Status500InternalServerError, $"{e.Message}");
-            }
-
-            var missionTasks = await missionLoader.GetTasksForMission(missionSourceId);
-
-            if (missionTasks == null)
-            {
-                return NotFound("No mission tasks were found for the requested mission");
-            }
-
-            var inspectionAreaForMission =
-                inspectionAreaService.TryFindInspectionAreaForMissionTasks(
-                    missionTasks,
-                    scheduledMissionQuery.InstallationCode
-                );
-            if (inspectionAreaForMission == null)
-            {
-                return BadRequest("No inspection area found for the mission tasks");
-            }
-
-            if (robot.CurrentInspectionAreaId == null)
-            {
-                return BadRequest("Robot does not have an inspection area");
-            }
-
-            if (inspectionAreaForMission.Id != robot.CurrentInspectionAreaId)
-            {
-                return BadRequest(
-                    "The tasks of the mission are not inside the inspection area of the robot"
-                );
-            }
-
-            var source = await sourceService.CheckForExistingSource(
-                scheduledMissionQuery.MissionSourceId
-            );
-            MissionDefinition? existingMissionDefinition = null;
-            if (source == null)
-            {
-                source = await sourceService.Create(
-                    new Source { SourceId = $"{condensedMissionDefinition.Id}" }
-                );
-            }
-            else
-            {
-                existingMissionDefinition = await missionDefinitionService.ReadBySourceId(
-                    source.SourceId,
-                    readOnly: true
-                );
-            }
-
-            var scheduledMissionDefinition =
-                existingMissionDefinition
-                ?? new MissionDefinition
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    Source = source,
-                    Name = condensedMissionDefinition.Name,
-                    InspectionFrequency = scheduledMissionQuery.InspectionFrequency,
-                    InstallationCode = scheduledMissionQuery.InstallationCode,
-                    InspectionArea = inspectionAreaForMission,
-                    Map = new MapMetadata(),
-                };
-
-            if (scheduledMissionDefinition.InspectionArea.Id != inspectionAreaForMission.Id)
-            {
-                logger.LogWarning(
-                    "Inspection area for mission definition {Id} was changed from {OldInspectionAreaId} to {NewInspectionAreaId}",
-                    scheduledMissionDefinition.Id,
-                    scheduledMissionDefinition.InspectionArea.Id,
-                    inspectionAreaForMission.Id
-                );
-                scheduledMissionDefinition.InspectionArea = inspectionAreaForMission;
-            }
-
-            var missionRun = new MissionRun
-            {
-                Name = condensedMissionDefinition.Name,
-                Robot = robot,
-                MissionId = scheduledMissionDefinition.Id,
-                Status = MissionStatus.Pending,
-                MissionRunType = MissionRunType.Normal,
-                CreationTime = scheduledMissionQuery.CreationTime ?? DateTime.UtcNow,
-                Tasks = missionTasks,
-                InstallationCode = scheduledMissionQuery.InstallationCode,
-                InspectionArea = scheduledMissionDefinition.InspectionArea,
-            };
-
-            scheduledMissionDefinition.Map = await mapService.ChooseMapFromMissionRunTasks(
-                missionRun
-            );
-
-            if (missionRun.Tasks.Any())
-            {
-                missionRun.SetEstimatedTaskDuration();
-            }
-
-            if (existingMissionDefinition == null)
-            {
-                await missionDefinitionService.Create(scheduledMissionDefinition);
-            }
-
-            MissionRun newMissionRun;
-            try
-            {
-                newMissionRun = await missionRunService.Create(missionRun);
-            }
-            catch (UnsupportedRobotCapabilityException)
-            {
-                return BadRequest(
-                    $"The robot {robot.Name} does not have the necessary sensors to run the mission."
-                );
-            }
-
-            return CreatedAtAction(nameof(Create), new { id = newMissionRun.Id }, newMissionRun);
-        }
 
         /// <summary>
         ///     Schedule a custom mission
