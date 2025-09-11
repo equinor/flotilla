@@ -93,7 +93,7 @@ export const MissionStats = () => {
             }
         }
         loadStats()
-    }, [installationCode, enabledRobots, timeSpan])
+    }, [installationCode, timeSpan])
 
     if (loading) return <StyledTypography variant="h4">Loading mission statistics...</StyledTypography>
 
