@@ -39,6 +39,7 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
         public async Task<ActionResult<MissionRun>> Create(
             [FromBody] ScheduledMissionQuery scheduledMissionQuery
         )
@@ -84,6 +85,14 @@ namespace Api.Controllers
 
                 logger.LogError(e, "Error getting mission from mission loader");
                 return StatusCode(StatusCodes.Status502BadGateway, $"{e.Message}");
+            }
+            catch (MissionLoaderUnavailableException e)
+            {
+                logger.LogError(e, "Mission loader unavailable: {message}", e.Message);
+                return StatusCode(
+                    StatusCodes.Status503ServiceUnavailable,
+                    "External API is unavailable"
+                );
             }
             catch (JsonException e)
             {
@@ -425,7 +434,6 @@ namespace Api.Controllers
 
             return CreatedAtAction(nameof(Schedule), new { id = newMissionRun.Id }, newMissionRun);
         }
-
 
         /// <summary>
         ///     Schedule a custom mission

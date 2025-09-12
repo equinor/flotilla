@@ -33,6 +33,7 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status502BadGateway)]
+        [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
         public async Task<ActionResult<IList<CondensedMissionDefinition>>> GetAvailableMissions(
             [FromRoute] string? installationCode
         )
@@ -53,6 +54,14 @@ namespace Api.Controllers
             {
                 logger.LogError(e, "Error retrieving missions from Mission Loader");
                 return StatusCode(StatusCodes.Status502BadGateway);
+            }
+            catch (MissionLoaderUnavailableException e)
+            {
+                logger.LogError(e, "Mission loader unavailable: {message}", e.Message);
+                return StatusCode(
+                    StatusCodes.Status503ServiceUnavailable,
+                    "External API is unavailable"
+                );
             }
             catch (JsonException e)
             {
@@ -130,6 +139,7 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status502BadGateway)]
+        [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
         public async Task<ActionResult<PlantInfo>> GetPlantInfos()
         {
             try
@@ -141,6 +151,14 @@ namespace Api.Controllers
             {
                 logger.LogError(e, "Error getting plant info");
                 return StatusCode(StatusCodes.Status502BadGateway);
+            }
+            catch (MissionLoaderUnavailableException e)
+            {
+                logger.LogError(e, "Mission loader unavailable: {message}", e.Message);
+                return StatusCode(
+                    StatusCodes.Status503ServiceUnavailable,
+                    "External API is unavailable"
+                );
             }
             catch (JsonException e)
             {
@@ -163,6 +181,7 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
         public async Task<ActionResult<IList<PlantInfo>>> GetActivePlants()
         {
             var plants = await robotService.ReadAllActivePlants(readOnly: true);
@@ -190,6 +209,14 @@ namespace Api.Controllers
             {
                 logger.LogError(e, "Error getting plant info");
                 return StatusCode(StatusCodes.Status502BadGateway);
+            }
+            catch (MissionLoaderUnavailableException e)
+            {
+                logger.LogError(e, "Mission loader unavailable: {message}", e.Message);
+                return StatusCode(
+                    StatusCodes.Status503ServiceUnavailable,
+                    "External API is unavailable"
+                );
             }
             catch (JsonException e)
             {

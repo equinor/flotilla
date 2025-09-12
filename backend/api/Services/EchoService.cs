@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Net;
 using System.Text.Json;
 using Api.Controllers.Models;
 using Api.Database.Context;
@@ -50,7 +51,12 @@ namespace Api.Services
                 }
             );
 
-            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new MissionLoaderUnavailableException(
+                    $"Echo API unavailable. Status code: {response.StatusCode}"
+                );
+            }
 
             var echoMissions =
                 await response.Content.ReadFromJsonAsync<List<EchoMissionResponse>>()
@@ -81,7 +87,6 @@ namespace Api.Services
         public async Task<CondensedMissionDefinition?> GetMissionById(string sourceMissionId)
         {
             var echoMission = await GetEchoMission(sourceMissionId);
-
             var mission = await EchoMissionToCondensedMissionDefinition(echoMission);
             return mission;
         }
@@ -99,7 +104,12 @@ namespace Api.Services
                 }
             );
 
-            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new MissionLoaderUnavailableException(
+                    $"Echo API unavailable. Status code: {response.StatusCode}"
+                );
+            }
 
             var echoMission =
                 await response.Content.ReadFromJsonAsync<EchoMissionResponse>()
@@ -152,7 +162,13 @@ namespace Api.Services
                 }
             );
 
-            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new MissionLoaderUnavailableException(
+                    $"Echo API unavailable. Status code: {response.StatusCode}"
+                );
+            }
+
             var echoPlantInfoResponse =
                 await response.Content.ReadFromJsonAsync<List<EchoPlantInfoResponse>>()
                 ?? throw new JsonException("Failed to deserialize plant information from Echo");

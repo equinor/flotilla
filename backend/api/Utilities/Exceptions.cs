@@ -72,7 +72,7 @@
         public int IsarStatusCode { get; set; }
     }
 
-
+    public class MissionLoaderUnavailableException(string message) : Exception(message) { }
 
     public class SourceException(string message) : Exception(message) { }
 
@@ -105,8 +105,7 @@
     public class RobotBusyException(string message) : Exception(message) { }
 
     public class RobotNotInSameInstallationAsMissionException(string message)
-        : Exception(message)
-    { }
+        : Exception(message) { }
 
     public class IsarCommunicationException(string message) : Exception(message) { }
 
