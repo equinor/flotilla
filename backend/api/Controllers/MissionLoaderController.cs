@@ -52,12 +52,12 @@ namespace Api.Controllers
             catch (HttpRequestException e)
             {
                 logger.LogError(e, "Error retrieving missions from Mission Loader");
-                return new StatusCodeResult(StatusCodes.Status502BadGateway);
+                return StatusCode(StatusCodes.Status502BadGateway);
             }
             catch (JsonException e)
             {
                 logger.LogError(e, "Error retrieving missions from MissionLoader");
-                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
 
             return Ok(condensedMissionDefinitions);
@@ -98,12 +98,12 @@ namespace Api.Controllers
                 }
 
                 logger.LogError(e, "Error getting mission from mission loader");
-                return new StatusCodeResult(StatusCodes.Status502BadGateway);
+                return StatusCode(StatusCodes.Status502BadGateway);
             }
             catch (JsonException e)
             {
                 logger.LogError(e, "Error deserializing mission from mission loader");
-                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
             catch (InvalidDataException e)
             {
@@ -115,7 +115,7 @@ namespace Api.Controllers
             catch (Exception e)
             {
                 logger.LogError(e, "Unexpected error while getting mission definition");
-                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
 
@@ -140,12 +140,12 @@ namespace Api.Controllers
             catch (HttpRequestException e)
             {
                 logger.LogError(e, "Error getting plant info");
-                return new StatusCodeResult(StatusCodes.Status502BadGateway);
+                return StatusCode(StatusCodes.Status502BadGateway);
             }
             catch (JsonException e)
             {
                 logger.LogError(e, "Error deserializing plant info response");
-                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
 
@@ -189,12 +189,12 @@ namespace Api.Controllers
             catch (HttpRequestException e)
             {
                 logger.LogError(e, "Error getting plant info");
-                return new StatusCodeResult(StatusCodes.Status502BadGateway);
+                return StatusCode(StatusCodes.Status502BadGateway);
             }
             catch (JsonException e)
             {
                 logger.LogError(e, "Error deserializing plant info response");
-                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
     }
