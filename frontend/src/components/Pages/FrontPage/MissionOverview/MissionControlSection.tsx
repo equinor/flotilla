@@ -85,6 +85,7 @@ const MissionControlCard = ({ robot }: { robot: Robot }) => {
                 <OngoingReturnHomeMissionCard robot={robot} isOpen={isOpen} setIsOpen={setIsOpen} isPaused={true} />
             )
             break
+        case RobotStatus.Paused:
         case RobotStatus.Busy:
             if (ongoingMission)
                 missionCard = <OngoingMissionCard mission={ongoingMission} isOpen={isOpen} setIsOpen={setIsOpen} />
