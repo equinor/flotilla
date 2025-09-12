@@ -473,7 +473,14 @@ namespace Api.Controllers
 
                 var robotResponse = new RobotResponse(robot);
 
-                if (robotStatus == RobotStatus.Available)
+                var startMissionStatuses = new List<RobotStatus>
+                {
+                    RobotStatus.Available,
+                    RobotStatus.Home,
+                    RobotStatus.ReturnHomePaused,
+                    RobotStatus.ReturningHome,
+                };
+                if (startMissionStatuses.Contains(robotStatus))
                     missionSchedulingService.TriggerRobotReadyForMissions(
                         new RobotReadyForMissionsEventArgs(robot)
                     );
@@ -694,7 +701,7 @@ namespace Api.Controllers
                 return NotFound(errorMessage);
             }
 
-            if (robot.Status is not RobotStatus.Available)
+            if (robot.Status is not RobotStatus.Available && robot.Status is not RobotStatus.Home)
             {
                 string errorMessage =
                     $"Robot {robotId} has status ({robot.Status}) and is not available";

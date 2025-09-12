@@ -47,17 +47,17 @@ export const MoveRobotArmSection = ({ robot }: { robot: Robot }) => {
                 <MoveRobotArm
                     robot={robot}
                     armPosition="battery_change"
-                    isRobotReadyForMission={robot.status === RobotStatus.Available}
+                    isRobotReadyForMission={robot.status in [RobotStatus.Available, RobotStatus.Home]}
                 />
                 <MoveRobotArm
                     robot={robot}
                     armPosition="transport"
-                    isRobotReadyForMission={robot.status === RobotStatus.Available}
+                    isRobotReadyForMission={robot.status in [RobotStatus.Available, RobotStatus.Home]}
                 />
                 <MoveRobotArm
                     robot={robot}
                     armPosition="lookout"
-                    isRobotReadyForMission={robot.status === RobotStatus.Available}
+                    isRobotReadyForMission={robot.status in [RobotStatus.Available, RobotStatus.Home]}
                 />
             </RobotArmMovementSection>
         </>

@@ -41,6 +41,7 @@ export const RobotStatusChip = ({ status, flotillaStatus, isarConnected, itemSiz
             iconColor = tokens.colors.interactive.success__resting.hex
             break
         }
+        case RobotStatus.Paused:
         case RobotStatus.Busy: {
             statusIcon = Icons.Ongoing
             iconColor = tokens.colors.text.static_icons__default.hex
