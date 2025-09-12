@@ -83,6 +83,7 @@ namespace Api.Database.Models
                 RobotStatus.Available,
                 RobotStatus.Home,
                 RobotStatus.ReturningHome,
+                RobotStatus.ReturnHomePaused,
             };
             return RobotStatusesWhereRobotCanStartMission.Contains(status);
         }
@@ -140,6 +141,7 @@ namespace Api.Database.Models
         BlockedProtectiveStop,
         ReturningHome,
         ReturnHomePaused,
+        Paused,
         UnknownStatus,
         InterventionNeeded,
         Recharging,
