@@ -4,7 +4,6 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useState } from 'react'
 import { useMissionControlContext } from 'components/Contexts/MissionControlContext'
 import { BackendAPICaller } from 'api/ApiCaller'
-import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
@@ -101,9 +100,8 @@ export const SkipMissionDialog = ({
 
 export const StopRobotDialog = () => {
     const [isStopRobotDialogOpen, setIsStopRobotDialogOpen] = useState<boolean>(false)
-    const { enabledRobots } = useRobotContext()
+    const { enabledRobots, installationCode } = useRobotContext()
     const { TranslateText } = useLanguageContext()
-    const { installationCode } = useInstallationContext()
     const { setAlert, setListAlert } = useAlertContext()
 
     const dockActivated = enabledRobots.find((r) => r.flotillaStatus === RobotFlotillaStatus.Home) !== undefined
