@@ -13,6 +13,7 @@ export enum RobotStatus {
     Recharging = 'Recharging',
     ReturningHome = 'ReturningHome',
     ReturnHomePaused = 'ReturnHomePaused',
+    Paused = 'Paused',
     ConnectionIssues = 'Connection Issues',
     UnknownStatus = 'UnknownStatus',
     InterventionNeeded = 'InterventionNeeded',
