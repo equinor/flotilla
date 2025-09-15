@@ -13,7 +13,11 @@ namespace Api.Services
 
         public Task FreezeMissionRunQueueForRobot(string robotId);
 
-        public Task MoveCurrentMissionRunBackToQueue(string robotId, string? stopReason = null);
+        public Task MoveCurrentMissionRunBackToQueue(
+            string robotId,
+            string? stopReason = null,
+            bool? isOnIsarRestart = false
+        );
 
         public Task<MissionRun> MoveMissionRunBackToQueue(
             string robotId,
@@ -232,7 +236,8 @@ namespace Api.Services
 
         public async Task MoveCurrentMissionRunBackToQueue(
             string robotId,
-            string? stopReason = null
+            string? stopReason = null,
+            bool? isOnIsarRestart = false
         )
         {
             var robot = await robotService.ReadById(robotId, readOnly: true);
@@ -261,10 +266,20 @@ namespace Api.Services
             {
                 foreach (var ongoingMissionRunId in ongoingMissionRunIds)
                 {
-                    logger.LogInformation(
-                        $"Sending request to stop mission with ID {ongoingMissionRunId}"
-                    );
-                    await isarService.StopMission(robot, ongoingMissionRunId);
+                    if (isOnIsarRestart == true)
+                    {
+                        logger.LogInformation(
+                            $"Sending request to stop mission with ID {ongoingMissionRunId}. As ISAR just restarted and is lacking knowledge of this mission, empty ID will be used"
+                        );
+                        await isarService.StopMission(robot, "");
+                    }
+                    else
+                    {
+                        logger.LogInformation(
+                            $"Sending request to stop mission with ID {ongoingMissionRunId}"
+                        );
+                        await isarService.StopMission(robot, ongoingMissionRunId);
+                    }
 
                     if (stopReason is not null)
                     {
