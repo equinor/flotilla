@@ -701,7 +701,7 @@ namespace Api.EventHandlers
             );
             try
             {
-                await MissionScheduling.MoveCurrentMissionRunBackToQueue(robot.Id);
+                await MissionScheduling.MoveCurrentMissionRunBackToQueue(robot.Id, null, true);
             }
             catch (MissionRunNotFoundException)
             {
