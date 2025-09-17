@@ -620,8 +620,13 @@ namespace Api.EventHandlers
         {
             var pressureStatus = (IsarPressureMessage)mqttArgs.Message;
 
+            var robot = await RobotService.ReadByIsarId(pressureStatus.IsarId);
+
+            if (robot == null)
+                return;
+
             await RobotService.SendToSignalROnPropertyUpdate(
-                pressureStatus.IsarId,
+                robot.Id,
                 "pressureLevel",
                 pressureStatus.PressureLevel
             );
@@ -630,9 +635,15 @@ namespace Api.EventHandlers
         private async void OnIsarPoseUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
             var poseStatus = (IsarPoseMessage)mqttArgs.Message;
+
+            var robot = await RobotService.ReadByIsarId(poseStatus.IsarId);
+
+            if (robot == null)
+                return;
+
             var pose = new Pose(poseStatus.Pose);
 
-            await RobotService.SendToSignalROnPropertyUpdate(poseStatus.IsarId, "pose", pose);
+            await RobotService.SendToSignalROnPropertyUpdate(robot.Id, "pose", pose);
         }
 
         private async void OnIsarCloudHealthUpdate(object? sender, MqttReceivedArgs mqttArgs)
