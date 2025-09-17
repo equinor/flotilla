@@ -23,7 +23,7 @@ services:
       - Mqtt__Host=broker
       - ASPNETCORE_ENVIRONMENT=Development
       - AZURE_CLIENT_SECRET=${FLOTILLA_CLIENT_SECRET}
-      - OpenTelemetry__OtelExporterOtlpEndpoint="http://otel-collector:4318"
+      - OpenTelemetry__OtelExporterOtlpEndpoint=http://otel-collector:4318
 
   aspire-dashboard:
     image: mcr.microsoft.com/dotnet/aspire-dashboard
