@@ -6,7 +6,7 @@ import { useRef, useState } from 'react'
 import styled from 'styled-components'
 import { Icons } from 'utils/icons'
 import { AlertListItem } from 'components/Alerts/AlertsListItem'
-import { useAssetContext } from 'components/Contexts/RobotContext'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 
 const Circle = styled.div`
     position: absolute;

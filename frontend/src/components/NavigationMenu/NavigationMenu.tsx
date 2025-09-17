@@ -1,6 +1,6 @@
 import { Button, Icon, Menu } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { useAssetContext } from 'components/Contexts/RobotContext'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 import { config } from 'config'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'

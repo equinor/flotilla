@@ -7,7 +7,7 @@ import { BackendAPICaller } from 'api/ApiCaller'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
-import { useAssetContext } from 'components/Contexts/RobotContext'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 import { RobotFlotillaStatus } from 'models/Robot'
 import { StyledButton } from 'components/Styles/StyledComponents'
 

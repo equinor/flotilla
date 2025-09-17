@@ -1,6 +1,6 @@
 import { BackendAPICaller } from 'api/ApiCaller'
 import { useContext } from 'react'
-import { AssetContext } from './RobotContext'
+import { AssetContext } from './AssetContext'
 import { AuthContext } from './AuthProvider'
 
 type Props = {

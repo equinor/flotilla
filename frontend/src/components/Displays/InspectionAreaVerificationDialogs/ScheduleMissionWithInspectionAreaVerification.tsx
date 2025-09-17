@@ -5,7 +5,7 @@ import {
     ConflictingRobotInspectionAreaDialog,
 } from './ConflictingInspectionAreaDialog'
 import { UnknownInspectionAreaDialog } from './UnknownInspectionAreaDialog'
-import { useAssetContext } from 'components/Contexts/RobotContext'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 import { InspectionArea } from 'models/InspectionArea'
 
 interface IProps {

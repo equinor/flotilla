@@ -11,7 +11,7 @@ import { config } from 'config'
 import assetImage from 'mediaAssets/assetPage.jpg'
 import { useNavigate } from 'react-router-dom'
 import { phone_width } from '../../../utils/constants'
-import { useAssetContext } from 'components/Contexts/RobotContext'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 
 const Centered = styled.div`
     display: flex;
