@@ -7,7 +7,7 @@ import { BackendAPICaller } from 'api/ApiCaller'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
-import { useRobotContext } from 'components/Contexts/RobotContext'
+import { useAssetContext } from 'components/Contexts/RobotContext'
 import { RobotFlotillaStatus } from 'models/Robot'
 import { StyledButton } from 'components/Styles/StyledComponents'
 
@@ -100,7 +100,7 @@ export const SkipMissionDialog = ({
 
 export const StopRobotDialog = () => {
     const [isStopRobotDialogOpen, setIsStopRobotDialogOpen] = useState<boolean>(false)
-    const { enabledRobots, installationCode } = useRobotContext()
+    const { enabledRobots, installationCode } = useAssetContext()
     const { TranslateText } = useLanguageContext()
     const { setAlert, setListAlert } = useAlertContext()
 

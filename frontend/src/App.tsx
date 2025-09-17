@@ -9,7 +9,7 @@ import { MissionRunsProvider } from 'components/Contexts/MissionRunsContext'
 import { AlertProvider } from 'components/Contexts/AlertContext'
 import { AuthProvider } from 'components/Contexts/AuthProvider'
 import { SignalRProvider } from 'components/Contexts/SignalRContext'
-import { RobotProvider } from 'components/Contexts/RobotContext'
+import { AssetProvider } from 'components/Contexts/RobotContext'
 import { config } from 'config'
 import { MissionDefinitionsProvider } from 'components/Contexts/MissionDefinitionsContext'
 import { MediaStreamProvider } from 'components/Contexts/MediaStreamContext'
@@ -34,7 +34,7 @@ const App = () => (
         <LanguageProvider>
             <SignalRProvider>
                 <QueryClientProvider client={queryClient}>
-                    <RobotProvider>
+                    <AssetProvider>
                         <InspectionsProvider>
                             <MissionDefinitionsProvider>
                                 <MissionRunsProvider>
@@ -59,7 +59,7 @@ const App = () => (
                                 </MissionRunsProvider>
                             </MissionDefinitionsProvider>
                         </InspectionsProvider>
-                    </RobotProvider>
+                    </AssetProvider>
                 </QueryClientProvider>
             </SignalRProvider>
         </LanguageProvider>

@@ -8,7 +8,7 @@ import { compareInspections, InspectionAreaOverview } from './InspectionUtilitie
 import { InspectionAreaCards } from './InspectionAreaCards'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
-import { useRobotContext } from 'components/Contexts/RobotContext'
+import { useAssetContext } from 'components/Contexts/RobotContext'
 
 export interface Inspection {
     missionDefinition: MissionDefinition
@@ -26,7 +26,7 @@ interface InspectionAreaAreaTuple {
 
 export const InspectionSection = () => {
     const { ongoingMissions, missionQueue } = useMissionsContext()
-    const { installationInspectionAreas } = useRobotContext()
+    const { installationInspectionAreas } = useAssetContext()
     const { missionDefinitions } = useMissionDefinitionsContext()
     const [selectedMissions, setSelectedMissions] = useState<MissionDefinition[]>()
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)

@@ -20,7 +20,7 @@ import { Button, Icon, Tooltip, Typography } from '@equinor/eds-core-react'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
-import { useRobotContext } from 'components/Contexts/RobotContext'
+import { useAssetContext } from 'components/Contexts/RobotContext'
 
 interface IInspectionAreaCardProps {
     inspectionAreaMissions: InspectionAreaInspectionTuple[]
@@ -44,7 +44,7 @@ const InspectionAreaCard = ({
 }: InspectionAreaCardProps) => {
     const { TranslateText } = useLanguageContext()
     const { ongoingMissions } = useMissionsContext()
-    const { enabledRobots } = useRobotContext()
+    const { enabledRobots } = useAssetContext()
 
     const isScheduleMissionsDisabled = enabledRobots.length === 0 || inspectionAreaData.inspections.length === 0
 

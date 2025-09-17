@@ -5,7 +5,7 @@ import { FailedMissionAlertContent, FailedMissionAlertListContent } from 'compon
 import { BackendAPICaller } from 'api/ApiCaller'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { Alert } from 'models/Alert'
-import { useRobotContext } from './RobotContext'
+import { useAssetContext } from './RobotContext'
 import { RobotFlotillaStatus, RobotStatus } from 'models/Robot'
 import {
     FailedAlertContent,
@@ -80,7 +80,7 @@ export const AlertProvider: FC<Props> = ({ children }) => {
     const [recentFailedMissions, setRecentFailedMissions] = useState<Mission[]>([])
     const { registerEvent, connectionReady } = useSignalRContext()
     const { TranslateText } = useLanguageContext()
-    const { enabledRobots, installationCode } = useRobotContext()
+    const { enabledRobots, installationCode } = useAssetContext()
     const [autoScheduleFailedMissionDict, setAutoScheduleFailedMissionDict] = useState<AutoScheduleFailedMissionDict>(
         JSON.parse(window.localStorage.getItem('autoScheduleFailedMissionDict') || '{}')
     )

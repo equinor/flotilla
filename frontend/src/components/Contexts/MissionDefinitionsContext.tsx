@@ -6,7 +6,7 @@ import { useLanguageContext } from './LanguageContext'
 import { AlertType, useAlertContext } from './AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
-import { useRobotContext } from './RobotContext'
+import { useAssetContext } from './RobotContext'
 
 interface IMissionDefinitionsContext {
     missionDefinitions: MissionDefinition[]
@@ -42,7 +42,7 @@ const fetchMissionDefinitions = (params: {
 const useMissionDefinitions = (): IMissionDefinitionsContext => {
     const [missionDefinitions, setMissionDefinitions] = useState<MissionDefinition[]>([])
     const { registerEvent, connectionReady } = useSignalRContext()
-    const { installationCode } = useRobotContext()
+    const { installationCode } = useAssetContext()
     const { TranslateText } = useLanguageContext()
     const { setAlert, setListAlert } = useAlertContext()
 

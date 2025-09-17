@@ -11,7 +11,7 @@ import { config } from 'config'
 import assetImage from 'mediaAssets/assetPage.jpg'
 import { useNavigate } from 'react-router-dom'
 import { phone_width } from '../../../utils/constants'
-import { useRobotContext } from 'components/Contexts/RobotContext'
+import { useAssetContext } from 'components/Contexts/RobotContext'
 
 const Centered = styled.div`
     display: flex;
@@ -91,7 +91,7 @@ export const findNavigationPage = () => {
 }
 
 const InstallationPicker = () => {
-    const { installationName, switchInstallation, activeInstallations } = useRobotContext()
+    const { installationName, switchInstallation, activeInstallations } = useAssetContext()
     const { TranslateText } = useLanguageContext()
     const [selectedInstallation, setSelectedInstallation] = useState<string>(installationName)
     const navigate = useNavigate()

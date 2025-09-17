@@ -1,6 +1,6 @@
 import { Button, Icon, Menu } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { useRobotContext } from 'components/Contexts/RobotContext'
+import { useAssetContext } from 'components/Contexts/RobotContext'
 import { config } from 'config'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -14,7 +14,7 @@ const StyledButton = styled(Button)`
 
 export const NavigationMenu = () => {
     const { TranslateText } = useLanguageContext()
-    const { installationInspectionAreas } = useRobotContext()
+    const { installationInspectionAreas } = useAssetContext()
     const [isOpen, setIsOpen] = useState(false)
     const [anchorEl, setAnchorEl] = useState(null)
     const openMenu = () => {

@@ -5,7 +5,7 @@ import { placeRobotInMap, placeTagsInMap } from 'utils/MapMarkers'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { TaskStatus } from 'models/Task'
 import { MapCompass } from 'utils/MapCompass'
-import { useRobotContext } from 'components/Contexts/RobotContext'
+import { useAssetContext } from 'components/Contexts/RobotContext'
 import { useQuery } from '@tanstack/react-query'
 import NoMap from 'mediaAssets/NoMap.png'
 
@@ -38,7 +38,7 @@ const getMeta = async (url: string) => {
 }
 
 export const MissionMapView = ({ mission }: MissionProps) => {
-    const { enabledRobots } = useRobotContext()
+    const { enabledRobots } = useAssetContext()
     const [mapCanvas, setMapCanvas] = useState<HTMLCanvasElement>(document.createElement('canvas'))
     const [mapImage, setMapImage] = useState<HTMLImageElement>(document.createElement('img'))
     const [mapContext, setMapContext] = useState<CanvasRenderingContext2D>()

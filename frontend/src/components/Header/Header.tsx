@@ -11,7 +11,7 @@ import { findNavigationPage } from 'components/Pages/AssetSelectionPage/AssetSel
 import { AlertIcon } from 'components/Header/AlertIcon'
 import { useNavigate } from 'react-router-dom'
 import { phone_width } from 'utils/constants'
-import { useRobotContext } from 'components/Contexts/RobotContext'
+import { useAssetContext } from 'components/Contexts/RobotContext'
 
 const StyledTopBar = styled(TopBar)`
     align-items: center;
@@ -58,7 +58,7 @@ const StyledNavigationMenu = styled.div`
 
 export const Header = ({ page }: { page: string }) => {
     const { alerts } = useAlertContext()
-    const { installationName } = useRobotContext()
+    const { installationName } = useAssetContext()
     const navigate = useNavigate()
 
     return (
