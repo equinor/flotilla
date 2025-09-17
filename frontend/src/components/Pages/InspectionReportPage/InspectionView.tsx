@@ -17,7 +17,7 @@ import {
 import { InspectionOverviewDialogView } from './InspectionOverview'
 import { useState } from 'react'
 import { LargeDialogInspectionImage } from './InspectionReportImage'
-import { useRobotContext } from 'components/Contexts/RobotContext'
+import { useAssetContext } from 'components/Contexts/RobotContext'
 interface InspectionDialogViewProps {
     selectedTask: Task
     tasks: Task[]
@@ -25,7 +25,7 @@ interface InspectionDialogViewProps {
 
 export const InspectionDialogView = ({ selectedTask, tasks }: InspectionDialogViewProps) => {
     const { TranslateText } = useLanguageContext()
-    const { installationName } = useRobotContext()
+    const { installationName } = useAssetContext()
     const { switchSelectedInspectionTask } = useInspectionsContext()
     const [switchImageDirection, setSwitchImageDirection] = useState<number>(0)
 

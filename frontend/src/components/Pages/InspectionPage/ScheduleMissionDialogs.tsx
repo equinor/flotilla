@@ -6,7 +6,7 @@ import { Robot, RobotStatus } from 'models/Robot'
 import { MissionDefinition } from 'models/MissionDefinition'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { Icons } from 'utils/icons'
-import { useRobotContext } from 'components/Contexts/RobotContext'
+import { useAssetContext } from 'components/Contexts/RobotContext'
 import { StyledAutoComplete, StyledButton, StyledDialog } from 'components/Styles/StyledComponents'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
@@ -57,7 +57,7 @@ const StyledDangerContent = styled.div`
 
 export const ScheduleMissionDialog = (props: IProps) => {
     const { TranslateText } = useLanguageContext()
-    const { enabledRobots } = useRobotContext()
+    const { enabledRobots } = useAssetContext()
     const { setLoadingRobotMissionSet } = useMissionsContext()
     const { setAlert, setListAlert } = useAlertContext()
     const [isInspectionAreaVerificationDialogOpen, setIsInspectionAreaVerificationDialogOpen] = useState<boolean>(false)

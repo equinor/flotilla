@@ -13,7 +13,7 @@ import { convertUTCDateToLocalDate, getDeadlineInDays } from 'utils/StringFormat
 import { AlreadyScheduledMissionDialog, ScheduleMissionDialog } from './ScheduleMissionDialogs'
 import { useEffect, useState } from 'react'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
-import { useRobotContext } from 'components/Contexts/RobotContext'
+import { useAssetContext } from 'components/Contexts/RobotContext'
 import { FrontPageSectionId } from 'models/FrontPageSectionId'
 import { SmallScreenInfoText } from 'utils/InfoText'
 import { phone_width } from 'utils/constants'
@@ -128,7 +128,7 @@ interface IInspectionRowProps {
 const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialog }: IInspectionRowProps) => {
     const { TranslateText } = useLanguageContext()
     const { ongoingMissions, missionQueue } = useMissionsContext()
-    const { enabledRobots } = useRobotContext()
+    const { enabledRobots } = useAssetContext()
     const navigate = useNavigate()
     const mission = inspection.missionDefinition
     let status

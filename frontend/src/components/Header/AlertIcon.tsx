@@ -6,7 +6,7 @@ import { useRef, useState } from 'react'
 import styled from 'styled-components'
 import { Icons } from 'utils/icons'
 import { AlertListItem } from 'components/Alerts/AlertsListItem'
-import { useRobotContext } from 'components/Contexts/RobotContext'
+import { useAssetContext } from 'components/Contexts/RobotContext'
 
 const Circle = styled.div`
     position: absolute;
@@ -38,7 +38,7 @@ const StyledPopover = styled(Popover)`
 
 export const AlertIcon = () => {
     const { listAlerts } = useAlertContext()
-    const { installationName } = useRobotContext()
+    const { installationName } = useAssetContext()
     const { TranslateText } = useLanguageContext()
     const [isAlertDialogOpen, setIsAlertDialogOpen] = useState<boolean>(false)
 

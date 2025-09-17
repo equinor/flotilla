@@ -21,7 +21,7 @@ interface Props {
     children: React.ReactNode
 }
 
-interface IRobotContext {
+interface IAssetContext {
     enabledRobots: Robot[]
     installationCode: string
     installationName: string
@@ -30,7 +30,7 @@ interface IRobotContext {
     switchInstallation: (selectedName: string) => void
 }
 
-const defaultRobotState = {
+const defaultAssetState = {
     enabledRobots: [],
     installationCode: '',
     installationName: '',
@@ -45,10 +45,10 @@ interface RobotPropertyUpdate {
     propertyValue: any
 }
 
-export const RobotContext = createContext<IRobotContext>(defaultRobotState)
+export const AssetContext = createContext<IAssetContext>(defaultAssetState)
 
-export const RobotProvider: FC<Props> = ({ children }) => {
-    const [enabledRobots, setEnabledRobots] = useState<Robot[]>(defaultRobotState.enabledRobots)
+export const AssetProvider: FC<Props> = ({ children }) => {
+    const [enabledRobots, setEnabledRobots] = useState<Robot[]>(defaultAssetState.enabledRobots)
     const [activeInstallations, setActiveInstallations] = useState<Installation[]>([])
     const [selectedInstallation, setSelectedInstallation] = useState<Installation>(
         JSON.parse(window.localStorage.getItem('installation') ?? '{}')
@@ -247,7 +247,7 @@ export const RobotProvider: FC<Props> = ({ children }) => {
     }, [installationCode, installationInspectionAreas])
 
     return (
-        <RobotContext.Provider
+        <AssetContext.Provider
             value={{
                 enabledRobots: filteredRobots,
                 installationCode,
@@ -258,8 +258,8 @@ export const RobotProvider: FC<Props> = ({ children }) => {
             }}
         >
             {children}
-        </RobotContext.Provider>
+        </AssetContext.Provider>
     )
 }
 
-export const useRobotContext = () => useContext(RobotContext) as IRobotContext
+export const useAssetContext = () => useContext(AssetContext) as IAssetContext

@@ -1,7 +1,7 @@
 import { Card } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { RobotCard, RobotCardPlaceholder } from './RobotCard'
-import { useRobotContext } from 'components/Contexts/RobotContext'
+import { useAssetContext } from 'components/Contexts/RobotContext'
 import { tokens } from '@equinor/eds-tokens'
 import { OngoingMissionCard, OngoingMissionPlaceholderCard, OngoingReturnHomeMissionCard } from './OngoingMissionCard'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
@@ -51,7 +51,7 @@ const OngoingMissionControlCardStyle = styled.div`
 `
 
 export const MissionControlSection = () => {
-    const { enabledRobots } = useRobotContext()
+    const { enabledRobots } = useAssetContext()
 
     const missionControlCards = enabledRobots.map((robot, index) => {
         return <MissionControlCard key={index} robot={robot} />

@@ -9,7 +9,7 @@ import { RobotStatusChip } from 'components/Displays/RobotDisplays/RobotStatusIc
 import { RobotStatus } from 'models/Robot'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { RobotType } from 'models/RobotModel'
-import { useRobotContext } from 'components/Contexts/RobotContext'
+import { useAssetContext } from 'components/Contexts/RobotContext'
 import { StyledButton, StyledPage } from 'components/Styles/StyledComponents'
 import { DocumentationSection } from './Documentation'
 import { useMediaStreamContext } from 'components/Contexts/MediaStreamContext'
@@ -106,7 +106,7 @@ const StyledSmallContainer = styled.div`
 
 export const RobotPage = ({ robotId }: { robotId: string }) => {
     const { TranslateText } = useLanguageContext()
-    const { enabledRobots } = useRobotContext()
+    const { enabledRobots } = useAssetContext()
     const { mediaStreams, addMediaStreamConfigIfItDoesNotExist } = useMediaStreamContext()
     const [videoMediaStreams, setVideoMediaStreams] = useState<MediaStreamTrack[]>([])
     const { ongoingMissions } = useMissionsContext()

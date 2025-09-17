@@ -6,7 +6,7 @@ import { AllInspectionsTable } from './InspectionTable'
 import { getInspectionDeadline } from 'utils/StringFormatting'
 import styled from 'styled-components'
 import { ScheduleMissionDialog } from '../FrontPage/MissionOverview/ScheduleMissionDialog/ScheduleMissionDialog'
-import { useRobotContext } from 'components/Contexts/RobotContext'
+import { useAssetContext } from 'components/Contexts/RobotContext'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { CondensedMissionDefinition } from 'models/CondensedMissionDefinition'
@@ -42,7 +42,7 @@ const AlignedTextButton = styled(StyledButton)`
 
 export const InspectionOverviewSection = () => {
     const { TranslateText } = useLanguageContext()
-    const { enabledRobots, installationCode } = useRobotContext()
+    const { enabledRobots, installationCode } = useAssetContext()
     const { setAlert, setListAlert } = useAlertContext()
     const { missionDefinitions } = useMissionDefinitionsContext()
     const [isFetchingMissions, setIsFetchingMissions] = useState<boolean>(false)

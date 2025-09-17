@@ -5,7 +5,7 @@ import { AlertType, useAlertContext } from './AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { useLanguageContext } from './LanguageContext'
-import { useRobotContext } from './RobotContext'
+import { useAssetContext } from './RobotContext'
 
 interface IMissionControlState {
     isRobotMissionWaitingForResponseDict: { [robotId: string]: boolean }
@@ -32,7 +32,7 @@ const defaultManagementState: IMissionControlState = {
 
 export const MissionControlProvider: FC<Props> = ({ children }) => {
     const { TranslateText } = useLanguageContext()
-    const { enabledRobots } = useRobotContext()
+    const { enabledRobots } = useAssetContext()
     const { setAlert, setListAlert } = useAlertContext()
     const [missionControlState, setMissionControlState] = useState<IMissionControlState>(defaultManagementState)
 
