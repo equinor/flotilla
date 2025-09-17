@@ -8,7 +8,7 @@ import { compareInspections, InspectionAreaOverview } from './InspectionUtilitie
 import { InspectionAreaCards } from './InspectionAreaCards'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
-import { useAssetContext } from 'components/Contexts/RobotContext'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 
 export interface Inspection {
     missionDefinition: MissionDefinition

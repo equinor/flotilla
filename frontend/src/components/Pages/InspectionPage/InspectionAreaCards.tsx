@@ -20,7 +20,7 @@ import { Button, Icon, Tooltip, Typography } from '@equinor/eds-core-react'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
-import { useAssetContext } from 'components/Contexts/RobotContext'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 
 interface IInspectionAreaCardProps {
     inspectionAreaMissions: InspectionAreaInspectionTuple[]

@@ -18,7 +18,7 @@ import { useNavigate } from 'react-router-dom'
 import { config } from 'config'
 import { phone_width } from 'utils/constants'
 import { MissionStats } from '../InstallationStats/InstallationstatsView'
-import { useAssetContext } from 'components/Contexts/RobotContext'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 
 const StyledFrontPage = styled.div`
     display: flex;

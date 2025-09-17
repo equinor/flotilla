@@ -9,7 +9,7 @@ import { RobotStatusChip } from 'components/Displays/RobotDisplays/RobotStatusIc
 import { RobotStatus } from 'models/Robot'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { RobotType } from 'models/RobotModel'
-import { useAssetContext } from 'components/Contexts/RobotContext'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 import { StyledButton, StyledPage } from 'components/Styles/StyledComponents'
 import { DocumentationSection } from './Documentation'
 import { useMediaStreamContext } from 'components/Contexts/MediaStreamContext'

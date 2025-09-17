@@ -6,7 +6,7 @@ import { useLanguageContext } from './LanguageContext'
 import { AlertType, useAlertContext } from './AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
-import { useAssetContext } from './RobotContext'
+import { useAssetContext } from './AssetContext'
 
 interface IMissionDefinitionsContext {
     missionDefinitions: MissionDefinition[]

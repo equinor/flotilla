@@ -1,4 +1,4 @@
-import { useAssetContext } from 'components/Contexts/RobotContext'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 import { config } from 'config'
 
 export function redirectIfNoInstallationSelected() {

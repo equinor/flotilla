@@ -5,7 +5,7 @@ import { placeRobotInMap, placeTagsInMap } from 'utils/MapMarkers'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { TaskStatus } from 'models/Task'
 import { MapCompass } from 'utils/MapCompass'
-import { useAssetContext } from 'components/Contexts/RobotContext'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 import { useQuery } from '@tanstack/react-query'
 import NoMap from 'mediaAssets/NoMap.png'
 

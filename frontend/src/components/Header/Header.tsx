@@ -11,7 +11,7 @@ import { findNavigationPage } from 'components/Pages/AssetSelectionPage/AssetSel
 import { AlertIcon } from 'components/Header/AlertIcon'
 import { useNavigate } from 'react-router-dom'
 import { phone_width } from 'utils/constants'
-import { useAssetContext } from 'components/Contexts/RobotContext'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 
 const StyledTopBar = styled(TopBar)`
     align-items: center;

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { BackendAPICaller } from 'api/ApiCaller'
-import { useAssetContext } from 'components/Contexts/RobotContext'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
