@@ -69,6 +69,7 @@ export const AssetProvider: FC<Props> = ({ children }) => {
                 updatedRobot.batteryLevel = undefined
                 updatedRobot.batteryState = undefined
                 updatedRobot.pressureLevel = undefined
+                updatedRobot.pose = undefined
                 setEnabledRobots((oldRobotList) => {
                     let oldRobotListCopy = [...oldRobotList]
                     oldRobotListCopy = upsertRobotList(oldRobotListCopy, updatedRobot)
@@ -125,6 +126,7 @@ export const AssetProvider: FC<Props> = ({ children }) => {
                         r.batteryLevel = undefined
                         r.batteryState = undefined
                         r.pressureLevel = undefined
+                        r.pose = undefined
                     })
                     setEnabledRobots(robots)
                 })
