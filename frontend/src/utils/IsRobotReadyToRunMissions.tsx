@@ -1,6 +1,6 @@
 import { Typography } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { Robot, RobotFlotillaStatus, RobotStatus } from 'models/Robot'
+import { Robot, RobotStatus } from 'models/Robot'
 
 const isBatteryTooLow = (robot: Robot): boolean => {
     if (robot.batteryLevel == null) return false
@@ -32,7 +32,7 @@ const isRobotPressureTooLow = (robot: Robot): boolean => {
 export const NoMissionReason = ({ robot }: { robot: Robot }) => {
     const { TranslateText } = useLanguageContext()
     let message = undefined
-    if (robot.flotillaStatus === RobotFlotillaStatus.Home) {
+    if (robot.status === RobotStatus.Lockdown || robot.status === RobotStatus.GoingToLockdown) {
         message = TranslateText(
             'Robot is sent to dock and cannot run missions. Queued missions will run when robot is dismissed from dock.'
         )

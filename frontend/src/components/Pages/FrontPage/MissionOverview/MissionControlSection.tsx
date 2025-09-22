@@ -3,7 +3,12 @@ import styled from 'styled-components'
 import { RobotCard, RobotCardPlaceholder } from './RobotCard'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 import { tokens } from '@equinor/eds-tokens'
-import { OngoingMissionCard, OngoingMissionPlaceholderCard, OngoingReturnHomeMissionCard } from './OngoingMissionCard'
+import {
+    OngoingLockdownMissionCard,
+    OngoingMissionCard,
+    OngoingMissionPlaceholderCard,
+    OngoingReturnHomeMissionCard,
+} from './OngoingMissionCard'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { Robot, RobotStatus } from 'models/Robot'
 import { RobotMissionQueueView } from './MissionQueueView'
@@ -79,6 +84,9 @@ const MissionControlCard = ({ robot }: { robot: Robot }) => {
             missionCard = (
                 <OngoingReturnHomeMissionCard robot={robot} isOpen={isOpen} setIsOpen={setIsOpen} isPaused={false} />
             )
+            break
+        case RobotStatus.GoingToLockdown:
+            missionCard = <OngoingLockdownMissionCard robot={robot} isOpen={isOpen} setIsOpen={setIsOpen} />
             break
         case RobotStatus.ReturnHomePaused:
             missionCard = (

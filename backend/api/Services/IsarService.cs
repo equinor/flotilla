@@ -17,12 +17,17 @@ namespace Api.Services
 
         public Task<IsarControlMissionResponse> PauseMission(Robot robot);
 
-        public Task<IsarControlMissionResponse> ResumeMission(Robot robot);
+        public Task<IsarControlMissionResponse?> ResumeMission(Robot robot);
 
         public Task<IsarMission> StartMoveArm(Robot robot, string armPosition);
 
         public Task<MediaConfig?> GetMediaStreamConfig(Robot robot);
+
         public Task ReleaseInterventionNeeded(string robotIsarUri);
+
+        public Task SendToLockdown(string robotIsarUri);
+
+        public Task ReleaseFromLockdown(string robotIsarUri);
     }
 
     public class IsarService(IDownstreamApi isarApi, ILogger<IsarService> logger) : IIsarService
@@ -210,7 +215,7 @@ namespace Api.Services
             return isarMissionResponse;
         }
 
-        public async Task<IsarControlMissionResponse> ResumeMission(Robot robot)
+        public async Task<IsarControlMissionResponse?> ResumeMission(Robot robot)
         {
             logger.LogInformation(
                 "Resuming mission on robot '{Id}' on ISAR at '{Uri}'",
@@ -218,6 +223,15 @@ namespace Api.Services
                 robot.IsarUri
             );
             var response = await CallApi(HttpMethod.Post, robot.IsarUri, "schedule/resume-mission");
+
+            if (response.StatusCode == HttpStatusCode.Conflict)
+            {
+                logger.LogWarning(
+                    "Did not resume robot with Isar Id {id} to dock as it is no longer running a misson",
+                    robot.Id
+                );
+                return null;
+            }
 
             if (!response.IsSuccessStatusCode)
             {
@@ -303,6 +317,91 @@ namespace Api.Services
                     e.Message
                 );
                 throw new IsarCommunicationException(e.Message);
+            }
+
+            if (response.StatusCode == HttpStatusCode.Conflict)
+            {
+                logger.LogWarning(
+                    "Did not release intervention needed for robot with Isar Uri {uri} to dock as it was reported as already doing so",
+                    robotIsarUri
+                );
+                return;
+            }
+
+            if (!response.IsSuccessStatusCode)
+            {
+                (string message, int statusCode) = GetErrorDescriptionForFailedIsarRequest(
+                    response
+                );
+                string errorResponse = await response.Content.ReadAsStringAsync();
+                logger.LogError("{Message}: {ErrorResponse}", message, errorResponse);
+                throw new IsarCommunicationException(message);
+            }
+        }
+
+        public async Task SendToLockdown(string robotIsarUri)
+        {
+            HttpResponseMessage? response;
+            try
+            {
+                response = await CallApi(HttpMethod.Post, robotIsarUri, "schedule/lockdown");
+            }
+            catch (Exception e)
+            {
+                logger.LogError(
+                    "Encountered an exception when making an API call to ISAR: {Message}",
+                    e.Message
+                );
+                throw new IsarCommunicationException(e.Message);
+            }
+
+            if (response.StatusCode == HttpStatusCode.Conflict)
+            {
+                logger.LogWarning(
+                    "Did not send robot with Isar Uri {uri} to lockdown as it was reported as already doing so",
+                    robotIsarUri
+                );
+                return;
+            }
+
+            if (!response.IsSuccessStatusCode)
+            {
+                (string message, int statusCode) = GetErrorDescriptionForFailedIsarRequest(
+                    response
+                );
+                string errorResponse = await response.Content.ReadAsStringAsync();
+                logger.LogError("{Message}: {ErrorResponse}", message, errorResponse);
+                throw new IsarCommunicationException(message);
+            }
+        }
+
+        public async Task ReleaseFromLockdown(string robotIsarUri)
+        {
+            HttpResponseMessage? response;
+            try
+            {
+                response = await CallApi(
+                    HttpMethod.Post,
+                    robotIsarUri,
+                    "schedule/release-lockdown"
+                );
+            }
+            catch (Exception e)
+            {
+                logger.LogError(
+                    "Encountered an exception when making an API call to ISAR: {Message}",
+                    e.Message
+                );
+                throw new IsarCommunicationException(e.Message);
+            }
+
+            if (response.StatusCode == HttpStatusCode.Conflict)
+            {
+                logger.LogWarning(
+                    "Did not release robot with Isar Uri {uri} from lockdown as it was reported as already doing so",
+                    robotIsarUri
+                );
+                return;
             }
 
             if (!response.IsSuccessStatusCode)

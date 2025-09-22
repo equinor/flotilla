@@ -11,8 +11,6 @@ namespace Api.Services
     {
         public Task StartNextMissionRunIfSystemIsAvailable(Robot robot);
 
-        public Task FreezeMissionRunQueueForRobot(string robotId);
-
         public Task MoveCurrentMissionRunBackToQueue(string robotId, string? stopReason = null);
 
         public Task<MissionRun> MoveMissionRunBackToQueue(
@@ -22,8 +20,6 @@ namespace Api.Services
         );
 
         public Task AbortAllScheduledNormalMissions(string robotId, string? abortReason = null);
-
-        public Task UnfreezeMissionRunQueueForRobot(string robotId);
 
         public void TriggerRobotReadyForMissions(RobotReadyForMissionsEventArgs e);
     }
@@ -62,15 +58,6 @@ namespace Api.Services
 
             if (missionRun == null)
                 return;
-
-            if (robot.MissionQueueFrozen && !missionRun.IsEmergencyMission())
-            {
-                logger.LogInformation(
-                    "Robot {robotName} is ready to start a mission but its mission queue is frozen",
-                    robot.Name
-                );
-                return;
-            }
 
             if (robot.CurrentInspectionAreaId == null)
             {
@@ -213,21 +200,6 @@ namespace Api.Services
                 }
             }
             catch (RobotBusyException) { }
-        }
-
-        public async Task FreezeMissionRunQueueForRobot(string robotId)
-        {
-            await robotService.UpdateMissionQueueFrozen(robotId, true);
-            logger.LogInformation("Mission queue was frozen for robot with Id {RobotId}", robotId);
-        }
-
-        public async Task UnfreezeMissionRunQueueForRobot(string robotId)
-        {
-            await robotService.UpdateMissionQueueFrozen(robotId, false);
-            logger.LogInformation(
-                "Mission queue for robot with ID {RobotId} was unfrozen",
-                robotId
-            );
         }
 
         public async Task MoveCurrentMissionRunBackToQueue(
@@ -436,7 +408,7 @@ namespace Api.Services
                 type: MissionRunType.Emergency,
                 readOnly: true
             );
-            if (robot.MissionQueueFrozen == false && missionRun == null)
+            if (missionRun == null)
             {
                 missionRun = await missionRunService.ReadNextScheduledMissionRun(
                     robot.Id,

@@ -133,11 +133,7 @@ export const RobotCard = ({ robot }: { robot: Robot }) => {
                     <HorizontalContent>
                         <VerticalContent>
                             <AttributeTitleTypography>{TranslateText('Status')}</AttributeTitleTypography>
-                            <RobotStatusChip
-                                status={robot.status}
-                                flotillaStatus={robot.flotillaStatus}
-                                isarConnected={robot.isarConnected}
-                            />
+                            <RobotStatusChip status={robot.status} isarConnected={robot.isarConnected} />
                         </VerticalContent>
 
                         {robot.status !== RobotStatus.Offline ? (

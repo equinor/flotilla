@@ -6,7 +6,7 @@ import { BackendAPICaller } from 'api/ApiCaller'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { Alert } from 'models/Alert'
 import { useAssetContext } from './AssetContext'
-import { RobotFlotillaStatus, RobotStatus } from 'models/Robot'
+import { RobotStatus } from 'models/Robot'
 import {
     FailedAlertContent,
     FailedAlertListContent,
@@ -297,7 +297,7 @@ export const AlertProvider: FC<Props> = ({ children }) => {
         }
     }, [connectionReady, autoScheduleFailedMissionDict])
 
-    const robotsWithFrozenQueue = enabledRobots.filter((robot) => robot.flotillaStatus === RobotFlotillaStatus.Home)
+    const robotsWithFrozenQueue = enabledRobots.filter((robot) => robot.status === RobotStatus.Lockdown)
 
     const getActiveSendToDockAlertType = () => {
         if (robotsWithFrozenQueue.length === 0) return undefined

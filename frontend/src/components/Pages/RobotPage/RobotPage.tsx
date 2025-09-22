@@ -193,7 +193,6 @@ export const RobotPage = ({ robotId }: { robotId: string }) => {
                                         <Typography variant="caption">{TranslateText('Status')}</Typography>
                                         <RobotStatusChip
                                             status={selectedRobot.status}
-                                            flotillaStatus={selectedRobot.flotillaStatus}
                                             isarConnected={selectedRobot.isarConnected}
                                             itemSize={24}
                                         />

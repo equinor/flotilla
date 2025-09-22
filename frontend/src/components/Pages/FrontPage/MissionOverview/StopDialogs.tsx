@@ -8,7 +8,7 @@ import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { useAssetContext } from 'components/Contexts/AssetContext'
-import { RobotFlotillaStatus } from 'models/Robot'
+import { RobotStatus } from 'models/Robot'
 import { StyledButton } from 'components/Styles/StyledComponents'
 
 const StyledDisplayButtons = styled.div`
@@ -104,7 +104,7 @@ export const StopRobotDialog = () => {
     const { TranslateText } = useLanguageContext()
     const { setAlert, setListAlert } = useAlertContext()
 
-    const dockActivated = enabledRobots.find((r) => r.flotillaStatus === RobotFlotillaStatus.Home) !== undefined
+    const dockActivated = enabledRobots.find((r) => r.status === RobotStatus.Lockdown) !== undefined
 
     const openDialog = async () => {
         setIsStopRobotDialogOpen(true)

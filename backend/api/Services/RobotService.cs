@@ -28,8 +28,6 @@ namespace Api.Services
         public Task UpdateCurrentMissionId(string robotId, string? missionId);
         public Task UpdateCurrentInspectionAreaId(string robotId, string? inspectionAreaId);
         public Task UpdateDeprecated(string robotId, bool deprecated);
-        public Task UpdateMissionQueueFrozen(string robotId, bool missionQueueFrozen);
-        public Task UpdateFlotillaStatus(string robotId, RobotFlotillaStatus status);
 
         public Task SendToSignalROnPropertyUpdate(
             string robotId,
@@ -294,50 +292,6 @@ namespace Api.Services
             );
 
             await SendToSignalROnPropertyUpdate(robotId, "deprecated", deprecated);
-        }
-
-        public async Task UpdateMissionQueueFrozen(string robotId, bool missionQueueFrozen)
-        {
-            logger.LogInformation(
-                "Setting missionQueueFrozen on robot with id {robotId} to {NewValue}",
-                robotId,
-                missionQueueFrozen
-            );
-
-            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
-            var robotQuery = context.Robots.Where(r =>
-                r.Id == robotId
-                && accessibleInstallationCodes.Result.Contains(
-                    r.CurrentInstallation.InstallationCode.ToUpper()
-                )
-            );
-            await robotQuery.ExecuteUpdateAsync(setters =>
-                setters.SetProperty(r => r.MissionQueueFrozen, missionQueueFrozen)
-            );
-
-            await SendToSignalROnPropertyUpdate(robotId, "missionQueueFrozen", missionQueueFrozen);
-        }
-
-        public async Task UpdateFlotillaStatus(string robotId, RobotFlotillaStatus status)
-        {
-            logger.LogInformation(
-                "Setting flotillaStatus on robot with id {robotId} to {NewValue}",
-                robotId,
-                status
-            );
-
-            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
-            var robotQuery = context.Robots.Where(r =>
-                r.Id == robotId
-                && accessibleInstallationCodes.Result.Contains(
-                    r.CurrentInstallation.InstallationCode.ToUpper()
-                )
-            );
-            await robotQuery.ExecuteUpdateAsync(setters =>
-                setters.SetProperty(r => r.FlotillaStatus, status)
-            );
-
-            await SendToSignalROnPropertyUpdate(robotId, "flotillaStatus", status);
         }
 
         public async Task<IEnumerable<Robot>> ReadAll(bool readOnly = true)

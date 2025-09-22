@@ -66,8 +66,6 @@ public static class TestObjectGenerator
         IList<RobotCapabilitiesEnum>? capabilities = null,
         bool isarConnected = true,
         bool deprecated = false,
-        bool missionQueueFrozen = false,
-        RobotFlotillaStatus flotillaStatus = RobotFlotillaStatus.Normal,
         string? currentMissionId = null
     )
     {
@@ -85,9 +83,7 @@ public static class TestObjectGenerator
             RobotCapabilities = capabilities ?? [],
             IsarConnected = isarConnected,
             Deprecated = deprecated,
-            MissionQueueFrozen = missionQueueFrozen,
             Status = robotStatus,
-            FlotillaStatus = flotillaStatus,
             CurrentMissionId = currentMissionId,
         };
     }

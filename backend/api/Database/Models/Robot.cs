@@ -106,13 +106,7 @@ namespace Api.Database.Models
         public bool Deprecated { get; set; }
 
         [Required]
-        public bool MissionQueueFrozen { get; set; }
-
-        [Required]
         public RobotStatus Status { get; set; }
-
-        [Required]
-        public RobotFlotillaStatus FlotillaStatus { get; set; } = RobotFlotillaStatus.Normal;
 
         public string? CurrentMissionId { get; set; }
 
@@ -145,12 +139,8 @@ namespace Api.Database.Models
         UnknownStatus,
         InterventionNeeded,
         Recharging,
-    }
-
-    public enum RobotFlotillaStatus
-    {
-        Normal,
-        Home,
+        Lockdown,
+        GoingToLockdown,
     }
 
     public enum RobotCapabilitiesEnum

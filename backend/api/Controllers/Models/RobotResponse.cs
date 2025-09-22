@@ -29,8 +29,6 @@ namespace Api.Controllers.Models
 
         public bool Deprecated { get; set; }
 
-        public RobotFlotillaStatus FlotillaStatus { get; set; }
-
         public RobotStatus Status { get; set; }
 
         public string? CurrentMissionId { get; set; }
@@ -59,7 +57,6 @@ namespace Api.Controllers.Models
             Port = robot.Port;
             IsarConnected = robot.IsarConnected;
             Deprecated = robot.Deprecated;
-            FlotillaStatus = robot.FlotillaStatus;
             Status = robot.Status;
             CurrentMissionId = robot.CurrentMissionId;
             IsarUri = robot.IsarUri;
