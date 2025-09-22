@@ -4,35 +4,35 @@ namespace Api.Services
 {
     public interface IEmergencyActionService
     {
-        public void SendRobotToDock(RobotEmergencyEventArgs e);
+        public void LockdownRobot(RobotEmergencyEventArgs e);
 
-        public void ReleaseRobotFromDock(RobotEmergencyEventArgs e);
+        public void ReleaseRobotFromLockdown(RobotEmergencyEventArgs e);
     }
 
     public class EmergencyActionService : IEmergencyActionService
     {
-        public void SendRobotToDock(RobotEmergencyEventArgs e)
+        public void LockdownRobot(RobotEmergencyEventArgs e)
         {
-            OnSendRobotToDockTriggered(e);
+            OnLockdownRobotTriggered(e);
         }
 
-        public void ReleaseRobotFromDock(RobotEmergencyEventArgs e)
+        public void ReleaseRobotFromLockdown(RobotEmergencyEventArgs e)
         {
-            OnReleaseRobotFromDockTriggered(e);
+            OnReleaseRobotFromLockdownTriggered(e);
         }
 
-        public static event EventHandler<RobotEmergencyEventArgs>? SendRobotToDockTriggered;
+        public static event EventHandler<RobotEmergencyEventArgs>? LockdownRobotTriggered;
 
-        protected virtual void OnSendRobotToDockTriggered(RobotEmergencyEventArgs e)
+        protected virtual void OnLockdownRobotTriggered(RobotEmergencyEventArgs e)
         {
-            SendRobotToDockTriggered?.Invoke(this, e);
+            LockdownRobotTriggered?.Invoke(this, e);
         }
 
-        public static event EventHandler<RobotEmergencyEventArgs>? ReleaseRobotFromDockTriggered;
+        public static event EventHandler<RobotEmergencyEventArgs>? ReleaseRobotFromLockdownTriggered;
 
-        protected virtual void OnReleaseRobotFromDockTriggered(RobotEmergencyEventArgs e)
+        protected virtual void OnReleaseRobotFromLockdownTriggered(RobotEmergencyEventArgs e)
         {
-            ReleaseRobotFromDockTriggered?.Invoke(this, e);
+            ReleaseRobotFromLockdownTriggered?.Invoke(this, e);
         }
     }
 }

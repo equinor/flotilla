@@ -17,11 +17,8 @@ export enum RobotStatus {
     ConnectionIssues = 'Connection Issues',
     UnknownStatus = 'UnknownStatus',
     InterventionNeeded = 'InterventionNeeded',
-}
-
-export enum RobotFlotillaStatus {
-    Normal = 'Normal',
-    Home = 'Home',
+    Lockdown = 'Lockdown',
+    GoingToLockdown = 'GoingToLockdown',
 }
 
 export interface Robot {
@@ -44,7 +41,6 @@ export interface Robot {
     documentation?: DocumentInfo[]
     isarUri?: string
     currentInspectionAreaId?: string
-    flotillaStatus?: RobotFlotillaStatus
 }
 export const placeholderRobot: Robot = {
     id: 'placeholderRobotId',

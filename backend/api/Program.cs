@@ -216,6 +216,8 @@ app.UseCors(corsBuilder =>
         .AllowCredentials()
 );
 
+app.UseHttpsRedirection();
+
 app.UseAuthentication();
 app.UseAuthorization();
 

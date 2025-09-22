@@ -41,10 +41,9 @@ namespace Api.Controllers
 
             foreach (var robot in robots)
             {
-                emergencyActionService.SendRobotToDock(
+                emergencyActionService.LockdownRobot(
                     new RobotEmergencyEventArgs(
                         robot,
-                        Database.Models.RobotFlotillaStatus.Home,
                         "Robot couldn't complete mission as 'Send robots to dock'-button was clicked"
                     )
                 );
@@ -77,9 +76,7 @@ namespace Api.Controllers
 
             foreach (var robot in robots)
             {
-                emergencyActionService.ReleaseRobotFromDock(
-                    new RobotEmergencyEventArgs(robot, Database.Models.RobotFlotillaStatus.Normal)
-                );
+                emergencyActionService.ReleaseRobotFromLockdown(new RobotEmergencyEventArgs(robot));
             }
 
             return NoContent();

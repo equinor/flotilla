@@ -42,16 +42,18 @@ namespace Api.EventHandlers
         {
             MissionRunService.MissionRunCreated += OnMissionRunCreated;
             MissionSchedulingService.RobotReadyForMissions += OnRobotReadyForMissions;
-            EmergencyActionService.SendRobotToDockTriggered += OnSendRobotToDockTriggered;
-            EmergencyActionService.ReleaseRobotFromDockTriggered += OnReleaseRobotFromDockTriggered;
+            EmergencyActionService.LockdownRobotTriggered += OnLockdownRobotTriggered;
+            EmergencyActionService.ReleaseRobotFromLockdownTriggered +=
+                OnReleaseRobotFromLockdownTriggered;
         }
 
         public override void Unsubscribe()
         {
             MissionRunService.MissionRunCreated -= OnMissionRunCreated;
             MissionSchedulingService.RobotReadyForMissions -= OnRobotReadyForMissions;
-            EmergencyActionService.SendRobotToDockTriggered -= OnSendRobotToDockTriggered;
-            EmergencyActionService.ReleaseRobotFromDockTriggered -= OnReleaseRobotFromDockTriggered;
+            EmergencyActionService.LockdownRobotTriggered -= OnLockdownRobotTriggered;
+            EmergencyActionService.ReleaseRobotFromLockdownTriggered -=
+                OnReleaseRobotFromLockdownTriggered;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -107,7 +109,7 @@ namespace Api.EventHandlers
             }
         }
 
-        private async void OnSendRobotToDockTriggered(object? sender, RobotEmergencyEventArgs e)
+        private async void OnLockdownRobotTriggered(object? sender, RobotEmergencyEventArgs e)
         {
             var robot = e.Robot;
 
@@ -118,90 +120,16 @@ namespace Api.EventHandlers
 
             try
             {
-                await MissionScheduling.FreezeMissionRunQueueForRobot(robot.Id);
-            }
-            catch (RobotNotFoundException)
-            {
-                return;
-            }
-
-            if (robot.FlotillaStatus == e.RobotFlotillaStatus)
-            {
-                _logger.LogInformation(
-                    "Did not send robot to Dock since robot {RobotId} was already in the correct state",
-                    robot.Id
-                );
-                return;
-            }
-
-            try
-            {
-                await RobotService.UpdateFlotillaStatus(robot.Id, e.RobotFlotillaStatus);
+                await IsarService.SendToLockdown(robot.IsarUri);
             }
             catch (Exception ex)
             {
-                _logger.LogError(
-                    "Was not able to update Robot Flotilla status for robot {RobotId}, {ErrorMessage}",
-                    robot.Id,
-                    ex.Message
-                );
-                return;
-            }
-
-            try
-            {
-                await MissionScheduling.MoveCurrentMissionRunBackToQueue(robot.Id, e.Message);
-            }
-            catch (RobotNotFoundException)
-            {
-                return;
-            }
-            catch (MissionRunNotFoundException)
-            {
-                /* Allow robot to return to dock if there is no ongoing mission */
-            }
-            catch (MissionException ex)
-            {
-                // We want to continue driving to the dock if the isar state is idle
-                if (ex.IsarStatusCode != StatusCodes.Status409Conflict)
-                {
-                    _logger.LogError(
-                        ex,
-                        "Failed to stop the current mission on robot {RobotName} because: {ErrorMessage}",
-                        robot.Name,
-                        ex.Message
-                    );
-                    SignalRService.ReportDockFailureToSignalR(
-                        robot,
-                        $"Failed to stop current mission for robot {robot.Name}"
-                    );
-                    return;
-                }
-            }
-            catch (Exception ex)
-            {
-                const string Message =
-                    "Error in ISAR while stopping current mission, cannot drive to docking station.";
-                SignalRService.ReportDockFailureToSignalR(
-                    robot,
-                    $"Robot {robot.Name} failed to drive to docking station."
-                );
-                _logger.LogError(ex, "{Message}", Message);
-                return;
-            }
-
-            try
-            {
-                await IsarService.ReturnHome(robot);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to send robot {RobotId} to dock", robot.Id);
+                _logger.LogError(ex, "Failed to send robot {RobotId} to lockdown", robot.Id);
                 return;
             }
         }
 
-        private async void OnReleaseRobotFromDockTriggered(
+        private async void OnReleaseRobotFromLockdownTriggered(
             object? sender,
             RobotEmergencyEventArgs e
         )
@@ -209,44 +137,18 @@ namespace Api.EventHandlers
             var robot = e.Robot;
 
             _logger.LogInformation(
-                "Triggered release robot from dock event for robot ID: {RobotId}",
+                "Triggered release robot from lockdown event for robot ID: {RobotId}",
                 e.Robot.Id
             );
 
             try
             {
-                await MissionScheduling.UnfreezeMissionRunQueueForRobot(robot.Id);
-            }
-            catch (RobotNotFoundException)
-            {
-                return;
-            }
-
-            robot.MissionQueueFrozen = false;
-
-            try
-            {
-                await RobotService.UpdateFlotillaStatus(robot.Id, e.RobotFlotillaStatus);
+                await IsarService.ReleaseFromLockdown(robot.IsarUri);
             }
             catch (Exception ex)
             {
-                _logger.LogError(
-                    "Was not able to update Robot Flotilla status for robot {RobotId}, {ErrorMessage}",
-                    robot.Id,
-                    ex.Message
-                );
+                _logger.LogError(ex, "Failed to release robot {RobotId} from lockdown", robot.Id);
                 return;
-            }
-
-            _startMissionSemaphore.WaitOne();
-            try
-            {
-                await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(robot);
-            }
-            catch (MissionRunNotFoundException) { }
-            finally
-            {
-                _startMissionSemaphore.Release();
             }
         }
     }
