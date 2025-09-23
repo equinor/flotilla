@@ -13,6 +13,7 @@ import { InspectionArea } from 'models/InspectionArea'
 import { ApiError, isApiError } from './ApiError'
 import { MediaStreamConfig } from 'models/VideoStream'
 import { CondensedMissionDefinition } from 'models/CondensedMissionDefinition'
+import { PointillaMapInfo } from 'models/PointillaMapInfo'
 
 /** Implements the request sent to the backend api. */
 export class BackendAPICaller {
@@ -322,14 +323,6 @@ export class BackendAPICaller {
         )
     }
 
-    static async getMap(installationCode: string, mapName: string): Promise<Blob> {
-        const path: string = 'missions/' + installationCode + '/' + mapName + '/map'
-
-        return BackendAPICaller.GET<Blob>(path, 'image/png')
-            .then((response) => response.content)
-            .catch(BackendAPICaller.handleError('GET', path))
-    }
-
     static async getInspectionAreas(): Promise<InspectionArea[]> {
         const path: string = 'inspectionAreas'
         const result = await this.GET<InspectionArea[]>(path).catch(BackendAPICaller.handleError('GET', path))
@@ -417,5 +410,44 @@ export class BackendAPICaller {
     static async releaseInterventionNeeded(robotId: string): Promise<void> {
         const path: string = `robots/${robotId}/release-intervention-needed`
         await BackendAPICaller.POST(path, {}).catch(BackendAPICaller.handleError('POST', path))
+    }
+
+    static async getFloorMapTiles(
+        plantCode: string,
+        floorId: string,
+        zoomLevel: number,
+        x: number,
+        y: number
+    ): Promise<Blob> {
+        const path: string = `pointilla/map/tiles/${plantCode}/${floorId}/${zoomLevel}/${x}/${y}`
+        return await BackendAPICaller.GET<Blob>(path)
+            .then((response) => response.content)
+            .catch(BackendAPICaller.handleError('GET', path))
+    }
+
+    static async getFloorMapInfo(plantCode: string, floorId: string): Promise<PointillaMapInfo> {
+        const path: string = `pointilla/map/${plantCode}/${floorId}`
+        return await BackendAPICaller.GET<PointillaMapInfo>(path)
+            .then((response) => response.content)
+            .catch(BackendAPICaller.handleError('GET', path))
+    }
+
+    static async getFloorMapTileByPath(
+        path: string,
+        opts?: { headers?: Record<string, string>; signal?: AbortSignal }
+    ): Promise<Blob> {
+        const url = `${config.BACKEND_URL}/${path}`
+        const headers: Record<string, string> = {
+            Authorization: `Bearer ${BackendAPICaller.accessToken}`,
+            ...(opts?.headers ?? {}),
+        }
+        return await fetch(url, {
+            method: 'GET',
+            headers,
+            mode: 'cors',
+            signal: opts?.signal,
+        })
+            .then((response) => response.blob())
+            .catch(BackendAPICaller.handleError('GET', path))
     }
 }
