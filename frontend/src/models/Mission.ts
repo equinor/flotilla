@@ -51,6 +51,7 @@ export const placeholderMission: Mission = {
         id: 'placeholderInspectionAreaId',
         inspectionAreaName: 'placeholderInspectionArea',
         plantName: 'placeholderPlantName',
+        plantCode: 'placeholderPlantCode',
         installationCode: 'placeholderInstallationCode',
     },
     status: MissionStatus.Pending,
