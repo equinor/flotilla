@@ -3,6 +3,7 @@ using System;
 using Api.Database.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Api.Migrations
 {
     [DbContext(typeof(FlotillaDbContext))]
-    partial class FlotillaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250923115330_RemoveFlotillaStatusAndQueueFrozen")]
+    partial class RemoveFlotillaStatusAndQueueFrozen
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -736,11 +739,93 @@ namespace Api.Migrations
                                 .HasForeignKey("MissionDefinitionId");
                         });
 
+                    b.OwnsOne("Api.Database.Models.MapMetadata", "Map", b1 =>
+                        {
+                            b1.Property<string>("MissionDefinitionId")
+                                .HasColumnType("text");
+
+                            b1.Property<string>("MapName")
+                                .IsRequired()
+                                .HasMaxLength(200)
+                                .HasColumnType("character varying(200)");
+
+                            b1.HasKey("MissionDefinitionId");
+
+                            b1.ToTable("MissionDefinitions");
+
+                            b1.WithOwner()
+                                .HasForeignKey("MissionDefinitionId");
+
+                            b1.OwnsOne("Api.Database.Models.Boundary", "Boundary", b2 =>
+                                {
+                                    b2.Property<string>("MapMetadataMissionDefinitionId")
+                                        .HasColumnType("text");
+
+                                    b2.Property<double>("X1")
+                                        .HasColumnType("double precision");
+
+                                    b2.Property<double>("X2")
+                                        .HasColumnType("double precision");
+
+                                    b2.Property<double>("Y1")
+                                        .HasColumnType("double precision");
+
+                                    b2.Property<double>("Y2")
+                                        .HasColumnType("double precision");
+
+                                    b2.Property<double>("Z1")
+                                        .HasColumnType("double precision");
+
+                                    b2.Property<double>("Z2")
+                                        .HasColumnType("double precision");
+
+                                    b2.HasKey("MapMetadataMissionDefinitionId");
+
+                                    b2.ToTable("MissionDefinitions");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("MapMetadataMissionDefinitionId");
+                                });
+
+                            b1.OwnsOne("Api.Database.Models.TransformationMatrices", "TransformationMatrices", b2 =>
+                                {
+                                    b2.Property<string>("MapMetadataMissionDefinitionId")
+                                        .HasColumnType("text");
+
+                                    b2.Property<double>("C1")
+                                        .HasColumnType("double precision");
+
+                                    b2.Property<double>("C2")
+                                        .HasColumnType("double precision");
+
+                                    b2.Property<double>("D1")
+                                        .HasColumnType("double precision");
+
+                                    b2.Property<double>("D2")
+                                        .HasColumnType("double precision");
+
+                                    b2.HasKey("MapMetadataMissionDefinitionId");
+
+                                    b2.ToTable("MissionDefinitions");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("MapMetadataMissionDefinitionId");
+                                });
+
+                            b1.Navigation("Boundary")
+                                .IsRequired();
+
+                            b1.Navigation("TransformationMatrices")
+                                .IsRequired();
+                        });
+
                     b.Navigation("AutoScheduleFrequency");
 
                     b.Navigation("InspectionArea");
 
                     b.Navigation("LastSuccessfulRun");
+
+                    b.Navigation("Map");
 
                     b.Navigation("Source");
                 });
