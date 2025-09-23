@@ -18,7 +18,6 @@ namespace Api.Controllers
         IInstallationService installationService,
         IMissionLoader missionLoader,
         ILogger<MissionSchedulingController> logger,
-        IMapService mapService,
         IRobotService robotService,
         ISourceService sourceService,
         IInspectionAreaService inspectionAreaService
@@ -170,7 +169,6 @@ namespace Api.Controllers
                     InspectionFrequency = scheduledMissionQuery.InspectionFrequency,
                     InstallationCode = scheduledMissionQuery.InstallationCode,
                     InspectionArea = inspectionAreaForMission,
-                    Map = new MapMetadata(),
                 };
 
             if (scheduledMissionDefinition.InspectionArea.Id != inspectionAreaForMission.Id)
@@ -196,10 +194,6 @@ namespace Api.Controllers
                 InstallationCode = scheduledMissionQuery.InstallationCode,
                 InspectionArea = scheduledMissionDefinition.InspectionArea,
             };
-
-            scheduledMissionDefinition.Map = await mapService.ChooseMapFromMissionRunTasks(
-                missionRun
-            );
 
             if (missionRun.Tasks.Any())
             {
@@ -402,19 +396,6 @@ namespace Api.Controllers
                 InspectionArea = missionDefinition.InspectionArea,
             };
 
-            if (missionDefinition.Map == null)
-            {
-                var newMap = await mapService.ChooseMapFromMissionRunTasks(missionRun);
-                if (newMap != null)
-                {
-                    logger.LogInformation(
-                        $"Assigned map {newMap.MapName} to mission definition with id {missionDefinition.Id}"
-                    );
-                    missionDefinition.Map = newMap;
-                    await missionDefinitionService.Update(missionDefinition);
-                }
-            }
-
             if (missionRun.Tasks.Any())
             {
                 missionRun.SetEstimatedTaskDuration();
@@ -545,20 +526,6 @@ namespace Api.Controllers
                         InstallationCode = customMissionQuery.InstallationCode,
                         InspectionArea = inspectionAreaForMission,
                     };
-
-                try
-                {
-                    customMissionDefinition.Map ??= await mapService.ChooseMapFromPositions(
-                        [.. missionTasks.Select(t => t.RobotPose.Position)],
-                        customMissionQuery.InstallationCode
-                    );
-                }
-                catch (ArgumentOutOfRangeException)
-                {
-                    logger.LogWarning(
-                        $"Could not find a suitable map for mission definition {customMissionDefinition.Id}"
-                    );
-                }
 
                 if (existingMissionDefinition == null)
                 {

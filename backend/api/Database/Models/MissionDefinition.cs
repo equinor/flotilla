@@ -33,8 +33,6 @@ namespace Api.Database.Models
 
         public virtual MissionRun? LastSuccessfulRun { get; set; }
 
-        public MapMetadata? Map { get; set; }
-
         public bool IsDeprecated { get; set; }
     }
 }
