@@ -253,6 +253,8 @@ namespace Api.Services
                 )
                 .Include(missionDefinition => missionDefinition.InspectionArea)
                 .ThenInclude(inspectionArea => inspectionArea!.Plant)
+                .Include(missionDefinition => missionDefinition.InspectionArea)
+                .ThenInclude(inspectionArea => inspectionArea!.Plant)
                 .ThenInclude(plant => plant.Installation)
                 .Include(missionDefinition => missionDefinition.InspectionArea)
                 .ThenInclude(area => area!.Installation)
@@ -263,8 +265,7 @@ namespace Api.Services
                     accessibleInstallationCodes.Result.Contains(
                         m.InspectionArea.Installation.InstallationCode.ToUpper()
                     )
-                )
-                .Include(missionDefinition => missionDefinition.Map);
+                );
             return readOnly ? query.AsNoTracking() : query.AsTracking();
         }
 

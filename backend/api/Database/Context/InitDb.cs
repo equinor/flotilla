@@ -73,7 +73,7 @@ namespace Api.Database.Context
                 Id = Guid.NewGuid().ToString(),
                 Installation = installations[1],
                 Name = "Kårstø",
-                PlantCode = "Kårstø",
+                PlantCode = "kaa",
             };
 
             return new List<Plant>([plant1, plant2]);
@@ -198,8 +198,8 @@ namespace Api.Database.Context
                 Status = RobotStatus.Available,
                 Host = "localhost",
                 Port = 3000,
-                CurrentInstallation = installations[0],
-                CurrentInspectionAreaId = inspectionAreas[0].Id,
+                CurrentInstallation = installations[1],
+                CurrentInspectionAreaId = inspectionAreas[5].Id,
                 Documentation = [],
             };
 

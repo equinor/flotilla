@@ -73,11 +73,6 @@ namespace Api.Database.Context
             modelBuilder.Entity<MissionDefinition>().OwnsOne(m => m.AutoScheduleFrequency);
             modelBuilder
                 .Entity<MissionDefinition>()
-                .OwnsOne(m => m.Map)
-                .OwnsOne(t => t.TransformationMatrices);
-            modelBuilder.Entity<MissionDefinition>().OwnsOne(m => m.Map).OwnsOne(b => b.Boundary);
-            modelBuilder
-                .Entity<MissionDefinition>()
                 .HasOne(m => m.InspectionArea)
                 .WithMany()
                 .OnDelete(DeleteBehavior.Restrict);
