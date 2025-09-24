@@ -60,11 +60,6 @@ namespace Api.Controllers.Models
         /// </summary>
         public List<InspectionType>? InspectionTypes { get; set; }
 
-        /// <summary>
-        /// Filter for a mission run type in the mission equal to any of MissionRunType
-        /// </summary>
-        public MissionRunType? MissionRunType { get; set; }
-
         #region Time Filters
 
         /// <summary>

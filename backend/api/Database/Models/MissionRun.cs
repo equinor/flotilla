@@ -62,9 +62,6 @@ namespace Api.Database.Models
             set => _tasks = value;
         }
 
-        [Required]
-        public MissionRunType MissionRunType { get; set; }
-
         [MaxLength(450)]
         public string? Description { get; set; }
 
@@ -129,11 +126,6 @@ namespace Api.Database.Models
                 EstimatedTaskDuration = (uint)Robot.Model.AverageDurationPerTag;
             }
         }
-
-        public bool IsEmergencyMission()
-        {
-            return MissionRunType == MissionRunType.Emergency;
-        }
     }
 
     public enum MissionStatus
@@ -146,11 +138,5 @@ namespace Api.Database.Models
         Failed,
         Successful,
         PartiallySuccessful,
-    }
-
-    public enum MissionRunType
-    {
-        Normal,
-        Emergency,
     }
 }

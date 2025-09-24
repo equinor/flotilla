@@ -137,11 +137,7 @@ namespace Api.Controllers
         public async Task<ActionResult<IList<MissionRunResponse>>> DeleteAllMissionRuns()
         {
             var pendingMissionRuns = await missionRunService.ReadAll(
-                new MissionRunQueryStringParameters
-                {
-                    Statuses = [MissionStatus.Pending],
-                    MissionRunType = MissionRunType.Normal,
-                }
+                new MissionRunQueryStringParameters { Statuses = [MissionStatus.Pending] }
             );
 
             var missionRunResponse = new List<MissionRunResponse>();

@@ -98,7 +98,6 @@ public static class TestObjectGenerator
         MissionStatus missionStatus = MissionStatus.Pending,
         DateTime? startTime = null,
         IList<MissionTask>? tasks = null,
-        MissionRunType missionRunType = MissionRunType.Normal,
         bool isDeprecated = false
     )
     {
@@ -111,7 +110,6 @@ public static class TestObjectGenerator
             CreationTime = startTime ?? DateTime.UtcNow,
             Robot = robot,
             Tasks = tasks ?? [],
-            MissionRunType = missionRunType,
             InspectionArea = inspectionArea,
             Name = name,
             IsDeprecated = isDeprecated,
