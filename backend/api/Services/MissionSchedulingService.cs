@@ -120,6 +120,7 @@ namespace Api.Services
                         robot.Id
                     );
                 }
+                await StartNextMissionRunIfSystemIsAvailable(robot);
                 return;
             }
 
