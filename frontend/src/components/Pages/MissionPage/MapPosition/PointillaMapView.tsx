@@ -5,10 +5,11 @@ import L from 'leaflet'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { useEffect, useState } from 'react'
 import { PointillaMapInfo } from 'models/PointillaMapInfo'
-import { Task } from 'models/Task'
+import { Task, TaskStatus } from 'models/Task'
 import styled, { createGlobalStyle } from 'styled-components'
 import { MapCompass } from 'utils/MapCompass'
 import { phone_width } from 'utils/constants'
+import { getColorsFromTaskStatus } from 'utils/MarkerStyles'
 
 const LeafletTooltipStyles = createGlobalStyle`
  
@@ -85,24 +86,42 @@ export default function PlantMap({ plantCode, floorId, tasks }: PlantMapProps) {
         loadMap()
     }, [plantCode, floorId, map])
 
+    const orderTasksByDrawOrder = (tasks: Task[]) => {
+        const isOngoing = (task: Task) => task.status === TaskStatus.InProgress || task.status === TaskStatus.Paused
+        const sortedTasks = [...tasks].sort((a, b) => {
+            if (a.status === TaskStatus.NotStarted && b.status === TaskStatus.NotStarted)
+                return b.taskOrder - a.taskOrder
+            else if (isOngoing(a)) return 1
+            else if (isOngoing(b)) return -1
+            else if (a.status === TaskStatus.NotStarted) return 1
+            else if (b.status === TaskStatus.NotStarted) return -1
+            return a.taskOrder - b.taskOrder
+        })
+        return sortedTasks
+    }
+
+    const getMarker = (task: Task) => {
+        let color = getColorsFromTaskStatus(task.status)
+
+        const marker = L.circleMarker([task.robotPose.position.y, task.robotPose.position.x], {
+            radius: 15,
+            fillColor: color.fillColor,
+            color: 'black',
+            weight: 1,
+            fillOpacity: 0.8,
+        })
+            .bindTooltip((task.taskOrder + 1).toString(), {
+                permanent: true,
+                direction: 'center',
+                className: 'circleLabel',
+            })
+            .addTo(map!)
+        return marker
+    }
+
     useEffect(() => {
         if (!tasks?.length || !map) return
-        const markers = tasks.map((task) => {
-            const marker = L.circleMarker([task.robotPose.position.y, task.robotPose.position.x], {
-                radius: 15,
-                fillColor: 'white',
-                color: 'black',
-                weight: 0,
-                fillOpacity: 0.8,
-            })
-                .bindTooltip((task.taskOrder + 1).toString(), {
-                    permanent: true,
-                    direction: 'center',
-                    className: 'circleLabel',
-                })
-                .addTo(map)
-            return marker
-        })
+        const markers = orderTasksByDrawOrder(tasks).map((task) => getMarker(task))
 
         const group = L.featureGroup(markers)
         map.fitBounds(group.getBounds())
