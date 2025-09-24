@@ -37,8 +37,6 @@ namespace Api.Controllers.Models
 
         public IList<MissionTask> Tasks { get; set; }
 
-        public MissionRunType MissionRunType { get; set; }
-
         [JsonConstructor]
 #nullable disable
         public MissionRunResponse() { }
@@ -66,7 +64,6 @@ namespace Api.Controllers.Models
             EndTime = mission.EndTime;
             EstimatedTaskDuration = mission.EstimatedTaskDuration;
             Tasks = mission.Tasks;
-            MissionRunType = mission.MissionRunType;
         }
     }
 }

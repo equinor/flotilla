@@ -347,7 +347,6 @@ namespace Api.Test.EventHandlers
                 robot,
                 inspectionArea,
                 true,
-                MissionRunType.Normal,
                 MissionStatus.Ongoing
             );
             var missionRun2 = await DatabaseUtilities.NewMissionRun(
