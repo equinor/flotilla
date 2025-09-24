@@ -125,9 +125,14 @@ export default function PlantMap({ plantCode, floorId, tasks }: PlantMapProps) {
 
         const group = L.featureGroup(markers)
         map.fitBounds(group.getBounds())
+    }, [mapInfo])
+
+    useEffect(() => {
+        if (!tasks?.length || !map) return
+        const markers = orderTasksByDrawOrder(tasks).map((task) => getMarker(task))
 
         return () => markers.forEach((marker) => marker.remove())
-    }, [tasks, mapInfo])
+    }, [tasks])
 
     return (
         <div className="map-root">
