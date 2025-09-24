@@ -13,9 +13,9 @@ namespace Api.Services
 
         public Task ReturnHome(Robot robot);
 
-        public Task<IsarControlMissionResponse> StopMission(Robot robot, string? missionId = "");
+        public Task<IsarControlMissionResponse?> StopMission(Robot robot, string? missionId = "");
 
-        public Task<IsarControlMissionResponse> PauseMission(Robot robot);
+        public Task<IsarControlMissionResponse?> PauseMission(Robot robot);
 
         public Task<IsarControlMissionResponse?> ResumeMission(Robot robot);
 
@@ -112,6 +112,15 @@ namespace Api.Services
                 throw new IsarCommunicationException(e.Message);
             }
 
+            if (response.StatusCode == HttpStatusCode.Conflict)
+            {
+                logger.LogWarning(
+                    "Could not return robot {id} home as ISAR reported that it was in an invalid state",
+                    robot.Id
+                );
+                return;
+            }
+
             if (!response.IsSuccessStatusCode)
             {
                 if (response.StatusCode == HttpStatusCode.Conflict)
@@ -126,7 +135,7 @@ namespace Api.Services
             }
         }
 
-        public async Task<IsarControlMissionResponse> StopMission(
+        public async Task<IsarControlMissionResponse?> StopMission(
             Robot robot,
             string? missionId = ""
         )
@@ -145,6 +154,15 @@ namespace Api.Services
                 "schedule/stop-mission",
                 content
             );
+
+            if (response.StatusCode == HttpStatusCode.Conflict)
+            {
+                logger.LogWarning(
+                    "Did not stop robot with Id {id} as it reported that it did not have a mission or that it was already stopping",
+                    robot.Id
+                );
+                return null;
+            }
 
             if (!response.IsSuccessStatusCode)
             {
@@ -181,7 +199,7 @@ namespace Api.Services
             return isarMissionResponse;
         }
 
-        public async Task<IsarControlMissionResponse> PauseMission(Robot robot)
+        public async Task<IsarControlMissionResponse?> PauseMission(Robot robot)
         {
             logger.LogInformation(
                 "Pausing mission on robot '{Id}' on ISAR at '{Uri}'",
@@ -189,6 +207,15 @@ namespace Api.Services
                 robot.IsarUri
             );
             var response = await CallApi(HttpMethod.Post, robot.IsarUri, "schedule/pause-mission");
+
+            if (response.StatusCode == HttpStatusCode.Conflict)
+            {
+                logger.LogWarning(
+                    "Did not pause robot with Id {id} as it was either already paused, or did not have a mission",
+                    robot.Id
+                );
+                return null;
+            }
 
             if (!response.IsSuccessStatusCode)
             {
