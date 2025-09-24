@@ -114,8 +114,6 @@ namespace Api.Services
                 );
 
             byte[] png = await response.Content.ReadAsByteArrayAsync();
-            File.WriteAllBytes("image.png", png);
-
             return png;
         }
     }
