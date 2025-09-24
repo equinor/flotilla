@@ -114,7 +114,7 @@ namespace Api.Controllers
                     return NotFound(
                         $"Could not retrieve map for plant {plantCode} floor {floorId} from Pointilla"
                     );
-                return File(pointillaResponse, "image/png", enableRangeProcessing: true);
+                return File(pointillaResponse, "image/png");
             }
             catch (JsonException)
             {
