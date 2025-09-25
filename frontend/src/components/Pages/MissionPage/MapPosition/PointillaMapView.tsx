@@ -1,7 +1,7 @@
 import { MapContainer } from 'react-leaflet'
 import AuthTileLayer from './PointillaMap'
 import 'leaflet/dist/leaflet.css'
-import L from 'leaflet'
+import L, { LatLngBoundsExpression } from 'leaflet'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { useEffect, useState } from 'react'
 import { PointillaMapInfo } from 'models/PointillaMapInfo'
@@ -13,12 +13,23 @@ import { useAssetContext } from 'components/Contexts/AssetContext'
 import { getRobotMarker, getTaskMarkers } from './PointillaMapMarkers'
 
 const LeafletTooltipStyles = createGlobalStyle`
- 
-  .leaflet-tooltip.circleLabel {
+    .leaflet-tooltip.circleLabel {
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
-  }
+    }
+
+    .leaflet-container {
+        font-family: Equinor;
+        font-size: 16px;
+        text-align: center;
+    }
+
+    .leaflet-control-zoom {
+        box-shadow: none;
+        opacity: 0.8;
+    }
+
 `
 
 const StyledElements = styled.div`
@@ -57,35 +68,36 @@ export default function PlantMap({ plantCode, floorId, mission }: PlantMapProps)
         BackendAPICaller.getFloorMapInfo(plantCode, floorId)
             .then((info) => {
                 setMapInfo(info)
-                if (info) {
-                    const mapWidth = info.xMax - info.xMin
-                    const mapHeight = info.yMax - info.yMin
-                    const scaleFactorX = info.tileSize / mapWidth
-                    const scaleFactorY = info.tileSize / mapHeight
-                    const originX = -info.xMin * scaleFactorX
-                    const originY = info.yMin * scaleFactorY
-                    const customTransformation = new L.Transformation(
-                        scaleFactorX,
-                        originX,
-                        -scaleFactorY,
-                        info.tileSize + originY
-                    )
-                    const plantCrs = L.extend({}, L.CRS.Simple, {
-                        transformation: customTransformation,
-                    })
-
-                    map.options.crs = plantCrs
-                    map.fitBounds([
-                        [info.yMin, info.xMin],
-                        [info.yMax, info.xMax],
-                    ])
-                    map.options.minZoom = info.zoomMin
-                    map.options.maxZoom = info.zoomMax
-                }
+                if (info) setMapOptions(map, info)
             })
             .catch((error) => {
                 console.error('Error loading map:', error)
             })
+    }
+
+    const setMapOptions = (map: L.Map, info: PointillaMapInfo) => {
+        const mapWidth = info.xMax - info.xMin
+        const mapHeight = info.yMax - info.yMin
+        const scaleFactorX = info.tileSize / mapWidth
+        const scaleFactorY = info.tileSize / mapHeight
+        const originX = -info.xMin * scaleFactorX
+        const originY = info.yMin * scaleFactorY
+        const customTransformation = new L.Transformation(scaleFactorX, originX, -scaleFactorY, info.tileSize + originY)
+        const plantCrs = L.extend({}, L.CRS.Simple, {
+            transformation: customTransformation,
+        })
+
+        const bounds: LatLngBoundsExpression = [
+            [info.yMin, info.xMin],
+            [info.yMax, info.xMax],
+        ]
+        map.options.crs = plantCrs
+
+        map.fitBounds(bounds)
+        map.setMaxBounds(bounds)
+        map.options.maxBoundsViscosity = 1.0
+        map.options.minZoom = info.zoomMin
+        map.options.maxZoom = info.zoomMax
     }
 
     useEffect(() => {
