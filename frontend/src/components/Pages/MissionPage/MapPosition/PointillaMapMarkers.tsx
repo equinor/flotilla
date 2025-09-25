@@ -27,7 +27,7 @@ const orderTasksByDrawOrder = (tasks: Task[]) => {
 const getTaskMarker = (map: L.Map, task: Task) => {
     const color = getColorsFromTaskStatus(task.status)
 
-    const taskMarker = L.circleMarker([task.robotPose.position.y, task.robotPose.position.x], {
+    const taskMarker = L.circleMarker([task.inspection.inspectionTarget.y, task.inspection.inspectionTarget.x], {
         radius: 15,
         fillColor: color.fillColor,
         color: 'black',
