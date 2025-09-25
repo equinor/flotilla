@@ -49,7 +49,7 @@ export const TaskTableAndMap = ({ mission, missionDefinitionPage }: TaskTableAnd
             <Typography variant="h4">{TranslateText('Tasks')}</Typography>
             <StyledTableAndMap>
                 <TaskTable tasks={mission?.tasks} missionDefinitionPage={missionDefinitionPage} />
-                {plantCode && <PlantMap plantCode={plantCode} floorId="0" tasks={mission?.tasks} />}
+                {plantCode && <PlantMap plantCode={plantCode} floorId="0" mission={mission} />}
             </StyledTableAndMap>
         </TaskAndMapSection>
     )
