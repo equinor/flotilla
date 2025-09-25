@@ -44,9 +44,8 @@ type PlantMapProps = {
 export default function PlantMap({ plantCode, floorId, tasks }: PlantMapProps) {
     const mapRef = useRef<L.Map | null>(null)
     const [mapInfo, setMapInfo] = useState<PointillaMapInfo | undefined>(undefined)
-    const [mapReady, setMapReady] = useState<boolean>(false)
+
     const loadMap = async () => {
-        if (!mapReady) return
         BackendAPICaller.getFloorMapInfo(plantCode, floorId)
             .then((info) => {
                 setMapInfo(info)
@@ -83,8 +82,9 @@ export default function PlantMap({ plantCode, floorId, tasks }: PlantMapProps) {
     }
 
     useEffect(() => {
+        if (mapRef.current !== null) return
         loadMap()
-    }, [plantCode, floorId, mapReady])
+    }, [plantCode, floorId, mapRef.current])
 
     useEffect(() => {
         if (!tasks?.length || !mapRef.current) return
@@ -116,7 +116,7 @@ export default function PlantMap({ plantCode, floorId, tasks }: PlantMapProps) {
             {mapInfo && (
                 <StyledElements>
                     <LeafletTooltipStyles />
-                    <StyledMapContainer whenReady={() => setMapReady(true)} ref={mapRef} attributionControl={false}>
+                    <StyledMapContainer ref={mapRef} attributionControl={false}>
                         <AuthTileLayer mapInfo={mapInfo} />
                     </StyledMapContainer>
                     <MapCompass />
