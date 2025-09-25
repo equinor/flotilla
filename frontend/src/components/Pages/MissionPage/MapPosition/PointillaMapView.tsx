@@ -5,11 +5,12 @@ import L from 'leaflet'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { useEffect, useState } from 'react'
 import { PointillaMapInfo } from 'models/PointillaMapInfo'
-import { Task, TaskStatus } from 'models/Task'
 import styled, { createGlobalStyle } from 'styled-components'
 import { MapCompass } from 'utils/MapCompass'
 import { phone_width } from 'utils/constants'
-import { getColorsFromTaskStatus } from 'utils/MarkerStyles'
+import { Mission } from 'models/Mission'
+import { useAssetContext } from 'components/Contexts/AssetContext'
+import { getRobotMarker, getTaskMarkers } from './PointillaMapMarkers'
 
 const LeafletTooltipStyles = createGlobalStyle`
  
@@ -39,17 +40,23 @@ const StyledMapContainer = styled(MapContainer)`
 type PlantMapProps = {
     plantCode: string
     floorId: string
-    tasks?: Task[]
+    mission: Mission
 }
 
-export default function PlantMap({ plantCode, floorId, tasks }: PlantMapProps) {
-    const [map, setMap] = useState<L.Map | null>(null)
+export default function PlantMap({ plantCode, floorId, mission }: PlantMapProps) {
+    const { enabledRobots } = useAssetContext()
     const [mapInfo, setMapInfo] = useState<PointillaMapInfo | undefined>(undefined)
+    const [map, setMap] = useState<L.Map | null>(null)
+
+    const robot = enabledRobots.find((r) => r.id === mission.robot.id)
+    const tasks = mission?.tasks
+    const updateIntervalRobotAuraInMS = 50
 
     const loadMap = async () => {
         if (!map) return
         BackendAPICaller.getFloorMapInfo(plantCode, floorId)
             .then((info) => {
+                console.log('Fetching map info for', plantCode)
                 setMapInfo(info)
                 if (info) {
                     const mapWidth = info.xMax - info.xMin
@@ -86,53 +93,40 @@ export default function PlantMap({ plantCode, floorId, tasks }: PlantMapProps) {
         loadMap()
     }, [plantCode, floorId, map])
 
-    const orderTasksByDrawOrder = (tasks: Task[]) => {
-        const isOngoing = (task: Task) => task.status === TaskStatus.InProgress || task.status === TaskStatus.Paused
-        const sortedTasks = [...tasks].sort((a, b) => {
-            if (a.status === TaskStatus.NotStarted && b.status === TaskStatus.NotStarted)
-                return b.taskOrder - a.taskOrder
-            else if (isOngoing(a)) return 1
-            else if (isOngoing(b)) return -1
-            else if (a.status === TaskStatus.NotStarted) return 1
-            else if (b.status === TaskStatus.NotStarted) return -1
-            return a.taskOrder - b.taskOrder
-        })
-        return sortedTasks
-    }
-
-    const getMarker = (task: Task) => {
-        let color = getColorsFromTaskStatus(task.status)
-
-        const marker = L.circleMarker([task.robotPose.position.y, task.robotPose.position.x], {
-            radius: 15,
-            fillColor: color.fillColor,
-            color: 'black',
-            weight: 1,
-            fillOpacity: 0.8,
-        })
-            .bindTooltip((task.taskOrder + 1).toString(), {
-                permanent: true,
-                direction: 'center',
-                className: 'circleLabel',
-            })
-            .addTo(map!)
-        return marker
-    }
-
     useEffect(() => {
         if (!tasks?.length || !map) return
-        const markers = orderTasksByDrawOrder(tasks).map((task) => getMarker(task))
+        const taskMarkers = getTaskMarkers(map, tasks)
 
-        const group = L.featureGroup(markers)
+        const group = L.featureGroup(taskMarkers)
         map.fitBounds(group.getBounds())
+
+        return () => {
+            taskMarkers.forEach((marker) => marker.remove())
+        }
     }, [mapInfo])
 
     useEffect(() => {
         if (!tasks?.length || !map) return
-        const markers = orderTasksByDrawOrder(tasks).map((task) => getMarker(task))
+        const taskMarkers = getTaskMarkers(map, tasks)
 
-        return () => markers.forEach((marker) => marker.remove())
+        return () => {
+            taskMarkers.forEach((marker) => marker.remove())
+        }
     }, [tasks])
+
+    useEffect(() => {
+        if (!robot?.pose || !map) return
+        let robotMarkers = getRobotMarker(map, robot.pose)
+        const timer = setInterval(() => {
+            robotMarkers.forEach((marker) => marker?.remove())
+            if (!robot?.pose || !map) return
+            robotMarkers = getRobotMarker(map, robot.pose)
+        }, updateIntervalRobotAuraInMS)
+        return () => {
+            clearInterval(timer)
+            robotMarkers.forEach((marker) => marker?.remove())
+        }
+    }, [robot?.pose])
 
     return (
         <div className="map-root">
