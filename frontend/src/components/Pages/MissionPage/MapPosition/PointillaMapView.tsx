@@ -56,7 +56,6 @@ export default function PlantMap({ plantCode, floorId, mission }: PlantMapProps)
         if (!map) return
         BackendAPICaller.getFloorMapInfo(plantCode, floorId)
             .then((info) => {
-                console.log('Fetching map info for', plantCode)
                 setMapInfo(info)
                 if (info) {
                     const mapWidth = info.xMax - info.xMin

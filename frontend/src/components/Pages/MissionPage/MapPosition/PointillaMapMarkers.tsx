@@ -3,6 +3,7 @@ import { getColorsFromTaskStatus } from 'utils/MarkerStyles'
 import L from 'leaflet'
 import robotPictogram from 'mediaAssets/onshore_drone.svg'
 import { Pose } from 'models/Pose'
+import { tokens } from '@equinor/eds-tokens'
 
 const robotIcon = L.icon({
     iconUrl: robotPictogram,
@@ -12,15 +13,15 @@ const robotIcon = L.icon({
 
 const orderTasksByDrawOrder = (tasks: Task[]) => {
     const isOngoing = (task: Task) => task.status === TaskStatus.InProgress || task.status === TaskStatus.Paused
-    const sortedTasks = [...tasks].sort((a, b) => {
-        if (a.status === TaskStatus.NotStarted && b.status === TaskStatus.NotStarted) return b.taskOrder - a.taskOrder
-        else if (isOngoing(a)) return 1
-        else if (isOngoing(b)) return -1
-        else if (a.status === TaskStatus.NotStarted) return 1
-        else if (b.status === TaskStatus.NotStarted) return -1
+    const rank = (task: Task) => (isOngoing(task) ? 2 : task.status === TaskStatus.NotStarted ? 1 : 0)
+
+    return [...tasks].sort((a, b) => {
+        const ra = rank(a),
+            rb = rank(b)
+        if (ra !== rb) return ra - rb
+        if (ra === 1) return b.taskOrder - a.taskOrder
         return a.taskOrder - b.taskOrder
     })
-    return sortedTasks
 }
 
 const getTaskMarker = (map: L.Map, task: Task) => {
@@ -49,15 +50,15 @@ export const getTaskMarkers = (map: L.Map, tasks: Task[]) => {
 const getRobotAuraMarker = (map: L.Map, robotPose: Pose) => {
     const msFromMinToMax = 2000
     const minPixelRadius = 15
-    const maxPixelRadius = 18
+    const maxPixelRadius = 20
     const currentAuraRadius =
         ((new Date().getTime() % msFromMinToMax) * (maxPixelRadius - minPixelRadius)) / msFromMinToMax + minPixelRadius
 
     const auraMarker = L.circleMarker([robotPose.position.y, robotPose.position.x], {
         radius: currentAuraRadius,
-        fillColor: 'white',
+        fillColor: tokens.colors.interactive.primary__resting.hex,
         weight: 0,
-        fillOpacity: 0.9,
+        fillOpacity: 0.6,
     }).addTo(map)
 
     return auraMarker
@@ -65,9 +66,16 @@ const getRobotAuraMarker = (map: L.Map, robotPose: Pose) => {
 
 export const getRobotMarker = (map: L.Map, robotPose: Pose) => {
     const auraMarker = getRobotAuraMarker(map, robotPose)
+    const backgroundMarker = L.circleMarker([robotPose.position.y, robotPose.position.x], {
+        radius: 15,
+        fillColor: 'white',
+        color: 'black',
+        weight: 1,
+        fillOpacity: 1,
+    }).addTo(map)
     const robotMarker = L.marker([robotPose.position.y, robotPose.position.x], {
         icon: robotIcon,
     }).addTo(map)
 
-    return [robotMarker, auraMarker]
+    return [auraMarker, backgroundMarker, robotMarker]
 }
