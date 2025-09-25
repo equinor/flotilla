@@ -3,7 +3,7 @@ import AuthTileLayer from './PointillaMap'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 import { BackendAPICaller } from 'api/ApiCaller'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { PointillaMapInfo } from 'models/PointillaMapInfo'
 import { Task } from 'models/Task'
 import styled, { createGlobalStyle } from 'styled-components'
@@ -42,10 +42,11 @@ type PlantMapProps = {
 }
 
 export default function PlantMap({ plantCode, floorId, tasks }: PlantMapProps) {
-    const mapRef = useRef<L.Map | null>(null)
+    const [map, setMap] = useState<L.Map | null>(null)
     const [mapInfo, setMapInfo] = useState<PointillaMapInfo | undefined>(undefined)
 
     const loadMap = async () => {
+        if (!map) return
         BackendAPICaller.getFloorMapInfo(plantCode, floorId)
             .then((info) => {
                 setMapInfo(info)
@@ -65,15 +66,14 @@ export default function PlantMap({ plantCode, floorId, tasks }: PlantMapProps) {
                     const plantCrs = L.extend({}, L.CRS.Simple, {
                         transformation: customTransformation,
                     })
-                    if (mapRef.current) {
-                        mapRef.current.options.crs = plantCrs
-                        mapRef.current.fitBounds([
-                            [info.yMin, info.xMin],
-                            [info.yMax, info.xMax],
-                        ])
-                        mapRef.current.options.minZoom = info.zoomMin
-                        mapRef.current.options.maxZoom = info.zoomMax
-                    }
+
+                    map.options.crs = plantCrs
+                    map.fitBounds([
+                        [info.yMin, info.xMin],
+                        [info.yMax, info.xMax],
+                    ])
+                    map.options.minZoom = info.zoomMin
+                    map.options.maxZoom = info.zoomMax
                 }
             })
             .catch((error) => {
@@ -82,12 +82,11 @@ export default function PlantMap({ plantCode, floorId, tasks }: PlantMapProps) {
     }
 
     useEffect(() => {
-        if (mapRef.current !== null) return
         loadMap()
-    }, [plantCode, floorId, mapRef.current])
+    }, [plantCode, floorId, map])
 
     useEffect(() => {
-        if (!tasks?.length || !mapRef.current) return
+        if (!tasks?.length || !map) return
         const markers = tasks.map((task) => {
             const marker = L.circleMarker([task.robotPose.position.y, task.robotPose.position.x], {
                 radius: 15,
@@ -101,27 +100,25 @@ export default function PlantMap({ plantCode, floorId, tasks }: PlantMapProps) {
                     direction: 'center',
                     className: 'circleLabel',
                 })
-                .addTo(mapRef.current!)
+                .addTo(map)
             return marker
         })
 
         const group = L.featureGroup(markers)
-        mapRef.current.fitBounds(group.getBounds())
+        map.fitBounds(group.getBounds())
 
         return () => markers.forEach((marker) => marker.remove())
     }, [tasks, mapInfo])
 
     return (
         <div className="map-root">
-            {mapInfo && (
-                <StyledElements>
-                    <LeafletTooltipStyles />
-                    <StyledMapContainer ref={mapRef} attributionControl={false}>
-                        <AuthTileLayer mapInfo={mapInfo} />
-                    </StyledMapContainer>
-                    <MapCompass />
-                </StyledElements>
-            )}
+            <StyledElements>
+                <LeafletTooltipStyles />
+                <StyledMapContainer ref={setMap} attributionControl={false}>
+                    {mapInfo && <AuthTileLayer mapInfo={mapInfo} />}
+                </StyledMapContainer>
+                <MapCompass />
+            </StyledElements>
         </div>
     )
 }
