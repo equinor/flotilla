@@ -198,8 +198,8 @@ namespace Api.Database.Context
                 Status = RobotStatus.Available,
                 Host = "localhost",
                 Port = 3000,
-                CurrentInstallation = installations[1],
-                CurrentInspectionAreaId = inspectionAreas[5].Id,
+                CurrentInstallation = installations[0],
+                CurrentInspectionAreaId = inspectionAreas[0].Id,
                 Documentation = [],
             };
 
