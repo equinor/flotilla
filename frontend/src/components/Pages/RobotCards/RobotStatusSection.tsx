@@ -1,7 +1,6 @@
 import styled from 'styled-components'
 import { RobotStatusCard, RobotStatusCardPlaceholder } from './RobotStatusCard'
-import { useInstallationContext } from 'components/Contexts/InstallationContext'
-import { useRobotContext } from 'components/Contexts/RobotContext'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 
 const RobotCardSection = styled.div`
     display: flex;
@@ -15,8 +14,7 @@ const RobotView = styled.div`
 `
 
 export const RobotStatusSection = () => {
-    const { installationCode } = useInstallationContext()
-    const { enabledRobots } = useRobotContext()
+    const { enabledRobots, installationCode } = useAssetContext()
 
     const relevantRobots = enabledRobots
         .filter(

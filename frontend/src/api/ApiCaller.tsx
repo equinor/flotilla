@@ -7,12 +7,13 @@ import { MissionDefinitionQueryParameters } from 'models/MissionDefinitionQueryP
 import { PaginatedResponse, PaginationHeader, PaginationHeaderName } from 'models/PaginatedResponse'
 import { timeout } from 'utils/timeout'
 import { tokenReverificationInterval } from 'components/Contexts/AuthProvider'
-import { MissionDefinition, PlantInfo } from 'models/MissionDefinition'
+import { MissionDefinition } from 'models/MissionDefinition'
 import { MissionDefinitionUpdateForm } from 'models/MissionDefinitionUpdateForm'
 import { InspectionArea } from 'models/InspectionArea'
 import { ApiError, isApiError } from './ApiError'
 import { MediaStreamConfig } from 'models/VideoStream'
 import { CondensedMissionDefinition } from 'models/CondensedMissionDefinition'
+import { PointillaMapInfo } from 'models/PointillaMapInfo'
 
 /** Implements the request sent to the backend api. */
 export class BackendAPICaller {
@@ -258,18 +259,6 @@ export class BackendAPICaller {
         return result.content
     }
 
-    static async getPlantInfo(): Promise<PlantInfo[]> {
-        const path: string = 'mission-loader/plants'
-        const result = await BackendAPICaller.GET<PlantInfo[]>(path).catch(BackendAPICaller.handleError('GET', path))
-        return result.content
-    }
-
-    static async getActivePlants(): Promise<PlantInfo[]> {
-        const path: string = 'mission-loader/active-plants'
-        const result = await BackendAPICaller.GET<PlantInfo[]>(path).catch(BackendAPICaller.handleError('GET', path))
-        return result.content
-    }
-
     static async postMission(missionSourceId: string, robotId: string, installationCode: string | null) {
         const path: string = 'missions'
         const robots: Robot[] = await BackendAPICaller.getEnabledRobots()
@@ -332,14 +321,6 @@ export class BackendAPICaller {
         return BackendAPICaller.postControlMissionRequest(path, robotId).catch(
             BackendAPICaller.handleError('POST', path)
         )
-    }
-
-    static async getMap(installationCode: string, mapName: string): Promise<Blob> {
-        const path: string = 'missions/' + installationCode + '/' + mapName + '/map'
-
-        return BackendAPICaller.GET<Blob>(path, 'image/png')
-            .then((response) => response.content)
-            .catch(BackendAPICaller.handleError('GET', path))
     }
 
     static async getInspectionAreas(): Promise<InspectionArea[]> {
@@ -429,5 +410,44 @@ export class BackendAPICaller {
     static async releaseInterventionNeeded(robotId: string): Promise<void> {
         const path: string = `robots/${robotId}/release-intervention-needed`
         await BackendAPICaller.POST(path, {}).catch(BackendAPICaller.handleError('POST', path))
+    }
+
+    static async getFloorMapTiles(
+        plantCode: string,
+        floorId: string,
+        zoomLevel: number,
+        x: number,
+        y: number
+    ): Promise<Blob> {
+        const path: string = `pointilla/map/tiles/${plantCode}/${floorId}/${zoomLevel}/${x}/${y}`
+        return await BackendAPICaller.GET<Blob>(path)
+            .then((response) => response.content)
+            .catch(BackendAPICaller.handleError('GET', path))
+    }
+
+    static async getFloorMapInfo(plantCode: string, floorId: string): Promise<PointillaMapInfo> {
+        const path: string = `pointilla/map/${plantCode}/${floorId}`
+        return await BackendAPICaller.GET<PointillaMapInfo>(path)
+            .then((response) => response.content)
+            .catch(BackendAPICaller.handleError('GET', path))
+    }
+
+    static async getFloorMapTileByPath(
+        path: string,
+        opts?: { headers?: Record<string, string>; signal?: AbortSignal }
+    ): Promise<Blob> {
+        const url = `${config.BACKEND_URL}/${path}`
+        const headers: Record<string, string> = {
+            Authorization: `Bearer ${BackendAPICaller.accessToken}`,
+            ...(opts?.headers ?? {}),
+        }
+        return await fetch(url, {
+            method: 'GET',
+            headers,
+            mode: 'cors',
+            signal: opts?.signal,
+        })
+            .then((response) => response.blob())
+            .catch(BackendAPICaller.handleError('GET', path))
     }
 }

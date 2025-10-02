@@ -7,7 +7,7 @@ import { useLanguageContext } from './LanguageContext'
 import { AlertType, useAlertContext } from './AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
-import { useInstallationContext } from './InstallationContext'
+import { useAssetContext } from './AssetContext'
 
 const upsertMissionList = (list: Mission[], mission: Mission) => {
     const newMissionList = [...list]
@@ -87,7 +87,7 @@ const useMissionRuns = (): IMissionRunsContext => {
     const { registerEvent, connectionReady } = useSignalRContext()
     const { TranslateText } = useLanguageContext()
     const { setAlert, setListAlert } = useAlertContext()
-    const { installationCode } = useInstallationContext()
+    const { installationCode } = useAssetContext()
 
     useEffect(() => {
         if (connectionReady) {

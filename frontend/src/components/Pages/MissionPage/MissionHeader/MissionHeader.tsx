@@ -140,7 +140,6 @@ const getStartUsedAndRemainingTime = (
 export const MissionHeader = ({ mission }: { mission: Mission }) => {
     const { TranslateText } = useLanguageContext()
     const navigate = useNavigate()
-    const barToMillibar = 1000
     const isMissionCompleted = mission.endTime ? true : false
 
     const translatedStartDate = TranslateText('Start date')
@@ -148,8 +147,6 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
     const translatedUsedTime = TranslateText('Time used')
     const translatedEstimatedTimeRemaining = TranslateText('Estimated time remaining')
     const translatedRobot = TranslateText('Robot')
-    const translatedBatteryLevel = TranslateText('Battery level')
-    const translatedPressureLevel = TranslateText('Pressure level')
     const translatedDescription = TranslateText('Description')
     const translatedTasks = TranslateText('Completed Tasks')
     const translatedStatus = TranslateText('Status')
@@ -163,8 +160,6 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
     )
 
     const numberOfCompletedTasks = mission.tasks.filter((task) => task.isCompleted).length
-
-    const batteryValue = mission.robot.batteryLevel ? `${Math.round(mission.robot.batteryLevel)}%` : '---%'
 
     return (
         <>
@@ -214,14 +209,6 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
                     {HeaderText(translatedUsedTime, `${usedTime}`)}
                     {!isMissionCompleted && HeaderText(translatedEstimatedTimeRemaining, `${remainingTime}`)}
                     {HeaderText(translatedRobot, `${mission.robot.name}`)}
-                    {!isMissionCompleted && HeaderText(translatedBatteryLevel, batteryValue)}
-                    {!isMissionCompleted &&
-                        mission.robot.pressureLevel !== undefined &&
-                        mission.robot.pressureLevel !== null &&
-                        HeaderText(
-                            translatedPressureLevel,
-                            `${Math.round(mission.robot.pressureLevel * barToMillibar)}mBar`
-                        )}
                 </InfoSection>
             </StyledMissionHeader>
         </>

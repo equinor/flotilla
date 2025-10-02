@@ -26,7 +26,7 @@ namespace Api.Test.Mocks
             await Task.Run(() => Thread.Sleep(1));
         }
 
-        public async Task<IsarControlMissionResponse> StopMission(
+        public async Task<IsarControlMissionResponse?> StopMission(
             Robot robot,
             string? missionId = null
         )
@@ -35,13 +35,13 @@ namespace Api.Test.Mocks
             return new IsarControlMissionResponse();
         }
 
-        public async Task<IsarControlMissionResponse> PauseMission(Robot robot)
+        public async Task<IsarControlMissionResponse?> PauseMission(Robot robot)
         {
             await Task.Run(() => Thread.Sleep(1));
             return new IsarControlMissionResponse();
         }
 
-        public async Task<IsarControlMissionResponse> ResumeMission(Robot robot)
+        public async Task<IsarControlMissionResponse?> ResumeMission(Robot robot)
         {
             await Task.Run(() => Thread.Sleep(1));
             return new IsarControlMissionResponse();
@@ -69,6 +69,16 @@ namespace Api.Test.Mocks
         }
 
         public async Task ReleaseInterventionNeeded(string robotIsarUri)
+        {
+            await Task.Run(() => Thread.Sleep(1));
+        }
+
+        public async Task SendToLockdown(string robotIsarUri)
+        {
+            await Task.Run(() => Thread.Sleep(1));
+        }
+
+        public async Task ReleaseFromLockdown(string robotIsarUri)
         {
             await Task.Run(() => Thread.Sleep(1));
         }

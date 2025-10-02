@@ -107,7 +107,6 @@ namespace Api.Test.Database
             Robot robot,
             InspectionArea inspectionArea,
             bool writeToDatabase = false,
-            MissionRunType missionRunType = MissionRunType.Normal,
             MissionStatus missionStatus = MissionStatus.Pending,
             MissionTask[] tasks = null!
         )
@@ -127,7 +126,6 @@ namespace Api.Test.Database
                 Name = "testMission",
                 Robot = robot,
                 MissionId = missionDefinition.Id,
-                MissionRunType = missionRunType,
                 Status = missionStatus,
                 CreationTime = DateTime.UtcNow,
                 InspectionArea = inspectionArea,

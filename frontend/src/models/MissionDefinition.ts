@@ -1,6 +1,5 @@
 import { InspectionArea } from './InspectionArea'
 import { Mission } from './Mission'
-import { MapMetadata } from './MapMetadata'
 import { AutoScheduleFrequency } from './AutoScheduleFrequency'
 
 export interface MissionDefinition {
@@ -14,10 +13,4 @@ export interface MissionDefinition {
     inspectionArea: InspectionArea
     isDeprecated: boolean
     sourceId: string
-    map?: MapMetadata
-}
-
-export interface PlantInfo {
-    plantCode: string
-    projectDescription: string
 }

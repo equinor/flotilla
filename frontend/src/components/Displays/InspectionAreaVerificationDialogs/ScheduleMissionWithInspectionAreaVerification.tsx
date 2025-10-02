@@ -5,7 +5,7 @@ import {
     ConflictingRobotInspectionAreaDialog,
 } from './ConflictingInspectionAreaDialog'
 import { UnknownInspectionAreaDialog } from './UnknownInspectionAreaDialog'
-import { useRobotContext } from 'components/Contexts/RobotContext'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 import { InspectionArea } from 'models/InspectionArea'
 
 interface IProps {
@@ -28,7 +28,7 @@ export const ScheduleMissionWithInspectionAreaVerification = ({
     scheduleMissions,
     closeDialog,
 }: IProps) => {
-    const { enabledRobots } = useRobotContext()
+    const { enabledRobots } = useAssetContext()
     const [dialogToOpen, setDialogToOpen] = useState<DialogTypes>(DialogTypes.unknown)
     const [selectedRobot, setSelectedRobot] = useState<Robot>()
 

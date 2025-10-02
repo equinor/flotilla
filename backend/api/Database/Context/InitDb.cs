@@ -73,7 +73,7 @@ namespace Api.Database.Context
                 Id = Guid.NewGuid().ToString(),
                 Installation = installations[1],
                 Name = "Kårstø",
-                PlantCode = "Kårstø",
+                PlantCode = "kaa",
             };
 
             return new List<Plant>([plant1, plant2]);

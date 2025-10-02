@@ -1,5 +1,5 @@
 import { Icon, Typography } from '@equinor/eds-core-react'
-import { RobotFlotillaStatus, RobotStatus } from 'models/Robot'
+import { RobotStatus } from 'models/Robot'
 import { tokens } from '@equinor/eds-tokens'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
@@ -8,7 +8,6 @@ import { styled } from 'styled-components'
 interface StatusProps {
     status?: RobotStatus
     isarConnected: boolean
-    flotillaStatus?: RobotFlotillaStatus
     itemSize?: 24 | 16 | 18 | 32 | 40 | 48 | undefined
 }
 
@@ -27,7 +26,7 @@ const LongTypography = styled(Typography)<{ $fontSize?: 24 | 16 | 18 | 32 | 40 |
     hyphens: auto;
 `
 
-export const RobotStatusChip = ({ status, flotillaStatus, isarConnected, itemSize }: StatusProps) => {
+export const RobotStatusChip = ({ status, isarConnected, itemSize }: StatusProps) => {
     const { TranslateText } = useLanguageContext()
 
     let iconColor = tokens.colors.text.static_icons__default.hex
@@ -41,6 +40,7 @@ export const RobotStatusChip = ({ status, flotillaStatus, isarConnected, itemSiz
             iconColor = tokens.colors.interactive.success__resting.hex
             break
         }
+        case RobotStatus.Paused:
         case RobotStatus.Busy: {
             statusIcon = Icons.Ongoing
             iconColor = tokens.colors.text.static_icons__default.hex
@@ -68,6 +68,18 @@ export const RobotStatusChip = ({ status, flotillaStatus, isarConnected, itemSiz
             status = RobotStatus.Recharging
             break
         }
+        case RobotStatus.Lockdown: {
+            iconColor = tokens.colors.interactive.danger__resting.hex
+            statusIcon = Icons.Warning
+            status = RobotStatus.Home
+            break
+        }
+        case RobotStatus.GoingToLockdown: {
+            iconColor = tokens.colors.interactive.danger__resting.hex
+            statusIcon = Icons.Warning
+            status = RobotStatus.Busy
+            break
+        }
 
         default: {
             iconColor = tokens.colors.text.static_icons__default.hex
@@ -81,12 +93,6 @@ export const RobotStatusChip = ({ status, flotillaStatus, isarConnected, itemSiz
         iconColor = tokens.colors.interactive.disabled__text.hex
         statusIcon = Icons.Info
         status = RobotStatus.ConnectionIssues
-    } else if (
-        flotillaStatus === RobotFlotillaStatus.Home &&
-        (status === RobotStatus.Available || status === RobotStatus.ReturningHome)
-    ) {
-        iconColor = tokens.colors.interactive.danger__resting.hex
-        statusIcon = Icons.Warning
     }
 
     return (

@@ -84,8 +84,8 @@ builder.Services.AddScoped<IMissionSchedulingService, MissionSchedulingService>(
 
 builder.Services.AddScoped<IIsarService, IsarService>();
 builder.Services.AddScoped<IEchoService, EchoService>();
+builder.Services.AddScoped<IPointillaService, PointillaService>();
 
-builder.Services.AddScoped<IMapService, MapService>();
 builder.Services.AddScoped<IBlobService, BlobService>();
 
 builder.Services.AddScoped<IInstallationService, InstallationService>();
@@ -118,7 +118,6 @@ builder.Services.AddHostedService<TeamsMessageEventHandler>();
 builder.Services.AddHostedService<AutoSchedulingHostedService>();
 
 builder.Services.Configure<AzureAdOptions>(builder.Configuration.GetSection("AzureAd"));
-builder.Services.Configure<MapBlobOptions>(builder.Configuration.GetSection("Maps"));
 
 builder.Services.AddHangfire(Configuration => Configuration.UseInMemoryStorage());
 builder.Services.AddHangfireServer();
@@ -142,7 +141,8 @@ builder
     .AddInMemoryTokenCaches()
     .AddDownstreamApi(EchoService.ServiceName, builder.Configuration.GetSection("Echo"))
     .AddDownstreamApi(InspectionService.ServiceName, builder.Configuration.GetSection("SARA"))
-    .AddDownstreamApi(IsarService.ServiceName, builder.Configuration.GetSection("Isar"));
+    .AddDownstreamApi(IsarService.ServiceName, builder.Configuration.GetSection("Isar"))
+    .AddDownstreamApi(PointillaService.ServiceName, builder.Configuration.GetSection("Pointilla"));
 
 builder.Services.Configure<JwtBearerOptions>(
     JwtBearerDefaults.AuthenticationScheme,

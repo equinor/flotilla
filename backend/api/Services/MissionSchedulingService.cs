@@ -11,8 +11,6 @@ namespace Api.Services
     {
         public Task StartNextMissionRunIfSystemIsAvailable(Robot robot);
 
-        public Task FreezeMissionRunQueueForRobot(string robotId);
-
         public Task MoveCurrentMissionRunBackToQueue(string robotId, string? stopReason = null);
 
         public Task<MissionRun> MoveMissionRunBackToQueue(
@@ -21,9 +19,7 @@ namespace Api.Services
             string? stopReason = null
         );
 
-        public Task AbortAllScheduledNormalMissions(string robotId, string? abortReason = null);
-
-        public Task UnfreezeMissionRunQueueForRobot(string robotId);
+        public Task DeleteAllScheduledMissions(string robotId, string? abortReason = null);
 
         public void TriggerRobotReadyForMissions(RobotReadyForMissionsEventArgs e);
     }
@@ -52,7 +48,10 @@ namespace Api.Services
             MissionRun? missionRun;
             try
             {
-                missionRun = await SelectNextMissionRun(robot);
+                missionRun = await missionRunService.ReadNextScheduledMissionRun(
+                    robot.Id,
+                    readOnly: true
+                );
             }
             catch (RobotNotFoundException)
             {
@@ -62,15 +61,6 @@ namespace Api.Services
 
             if (missionRun == null)
                 return;
-
-            if (robot.MissionQueueFrozen && !missionRun.IsEmergencyMission())
-            {
-                logger.LogInformation(
-                    "Robot {robotName} is ready to start a mission but its mission queue is frozen",
-                    robot.Name
-                );
-                return;
-            }
 
             if (robot.CurrentInspectionAreaId == null)
             {
@@ -102,49 +92,46 @@ namespace Api.Services
                 return;
             }
 
-            if (!missionRun.IsEmergencyMission())
-            {
-                missionRun.Tasks = await exclusionAreaService.FilterOutExcludedMissionTasks(
-                    missionRun.Tasks,
-                    missionRun.InstallationCode
-                );
+            missionRun.Tasks = await exclusionAreaService.FilterOutExcludedMissionTasks(
+                missionRun.Tasks,
+                missionRun.InstallationCode
+            );
 
-                if (missionRun.Tasks.Count == 0)
+            if (missionRun.Tasks.Count == 0)
+            {
+                logger.LogWarning(
+                    "MissionRun {RobotName} was not started on robot {RobotId} as all its tasks are in exclusion areas",
+                    missionRun.Id,
+                    robot.Id
+                );
+                try
                 {
-                    logger.LogWarning(
-                        "MissionRun {RobotName} was not started on robot {RobotId} as all its tasks are in exclusion areas",
+                    await AbortMissionRun(
+                        missionRun,
+                        $"Mission run {missionRun.Id} aborted: All tasks are in exclusion areas"
+                    );
+                }
+                catch (RobotNotFoundException)
+                {
+                    logger.LogError(
+                        "Failed to abort scheduled mission {missionRun.Id} for robot {RobotName} with Id {RobotId}",
                         missionRun.Id,
+                        robot.Name,
                         robot.Id
                     );
-                    try
-                    {
-                        await AbortMissionRun(
-                            missionRun,
-                            $"Mission run {missionRun.Id} aborted: All tasks are in exclusion areas"
-                        );
-                    }
-                    catch (RobotNotFoundException)
-                    {
-                        logger.LogError(
-                            "Failed to abort scheduled mission {missionRun.Id} for robot {RobotName} with Id {RobotId}",
-                            missionRun.Id,
-                            robot.Name,
-                            robot.Id
-                        );
-                    }
-                    return;
                 }
-
-                await missionRunService.UpdateMissionRunProperty(
-                    missionRun.Id,
-                    "Tasks",
-                    missionRun.Tasks
-                );
+                await StartNextMissionRunIfSystemIsAvailable(robot);
+                return;
             }
 
+            await missionRunService.UpdateMissionRunProperty(
+                missionRun.Id,
+                "Tasks",
+                missionRun.Tasks
+            );
+
             if (
-                !missionRun.IsEmergencyMission()
-                && !areaPolygonService.MissionTasksAreInsideAreaPolygon(
+                !areaPolygonService.MissionTasksAreInsideAreaPolygon(
                     (List<MissionTask>)missionRun.Tasks,
                     currentInspectionArea.AreaPolygon
                 )
@@ -213,21 +200,6 @@ namespace Api.Services
                 }
             }
             catch (RobotBusyException) { }
-        }
-
-        public async Task FreezeMissionRunQueueForRobot(string robotId)
-        {
-            await robotService.UpdateMissionQueueFrozen(robotId, true);
-            logger.LogInformation("Mission queue was frozen for robot with Id {RobotId}", robotId);
-        }
-
-        public async Task UnfreezeMissionRunQueueForRobot(string robotId)
-        {
-            await robotService.UpdateMissionQueueFrozen(robotId, false);
-            logger.LogInformation(
-                "Mission queue for robot with ID {RobotId} was unfrozen",
-                robotId
-            );
         }
 
         public async Task MoveCurrentMissionRunBackToQueue(
@@ -382,7 +354,7 @@ namespace Api.Services
             );
         }
 
-        public async Task AbortAllScheduledNormalMissions(string robotId, string? abortReason)
+        public async Task DeleteAllScheduledMissions(string robotId, string? abortReason)
         {
             var robot = await robotService.ReadById(robotId, readOnly: true);
             if (robot == null)
@@ -394,7 +366,6 @@ namespace Api.Services
 
             var pendingMissionRuns = await missionRunService.ReadMissionRunQueue(
                 robotId,
-                type: MissionRunType.Normal,
                 readOnly: true
             );
             if (pendingMissionRuns is null)
@@ -411,40 +382,13 @@ namespace Api.Services
 
             foreach (var pendingMissionRun in pendingMissionRuns)
             {
-                await missionRunService.UpdateMissionRunProperty(
-                    pendingMissionRun.Id,
-                    "Status",
-                    MissionStatus.Aborted
-                );
-                await missionRunService.UpdateMissionRunProperty(
-                    pendingMissionRun.Id,
-                    "StatusReason",
-                    abortReason
-                );
+                await missionRunService.Delete(pendingMissionRun.Id);
             }
         }
 
         public void TriggerRobotReadyForMissions(RobotReadyForMissionsEventArgs e)
         {
-            OnRobotReadyForMissions(e);
-        }
-
-        private async Task<MissionRun?> SelectNextMissionRun(Robot robot)
-        {
-            var missionRun = await missionRunService.ReadNextScheduledMissionRun(
-                robot.Id,
-                type: MissionRunType.Emergency,
-                readOnly: true
-            );
-            if (robot.MissionQueueFrozen == false && missionRun == null)
-            {
-                missionRun = await missionRunService.ReadNextScheduledMissionRun(
-                    robot.Id,
-                    type: MissionRunType.Normal,
-                    readOnly: true
-                );
-            }
-            return missionRun;
+            RobotReadyForMissions?.Invoke(this, e);
         }
 
         private async Task MoveInterruptedMissionsToQueue(
@@ -546,11 +490,6 @@ namespace Api.Services
             );
 
             return ongoingMissions;
-        }
-
-        protected virtual void OnRobotReadyForMissions(RobotReadyForMissionsEventArgs e)
-        {
-            RobotReadyForMissions?.Invoke(this, e);
         }
 
         public static event EventHandler<RobotReadyForMissionsEventArgs>? RobotReadyForMissions;

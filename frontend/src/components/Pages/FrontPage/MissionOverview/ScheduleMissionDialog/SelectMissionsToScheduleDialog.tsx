@@ -2,10 +2,9 @@ import { Autocomplete, Button, Card, Dialog, Typography } from '@equinor/eds-cor
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { memo, useState } from 'react'
-import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { Robot, RobotStatus } from 'models/Robot'
 import { CondensedMissionDefinition } from 'models/CondensedMissionDefinition'
-import { useRobotContext } from 'components/Contexts/RobotContext'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
@@ -47,7 +46,7 @@ interface ScheduleDialogProps {
 
 export const SelectMissionsToScheduleDialog = ({ missionsList, closeDialog }: ScheduleDialogProps) => {
     const { TranslateText } = useLanguageContext()
-    const { installationCode } = useInstallationContext()
+    const { installationCode } = useAssetContext()
     const { setAlert, setListAlert } = useAlertContext()
     const { setLoadingRobotMissionSet } = useMissionsContext()
     const [selectedMissions, setSelectedMissions] = useState<CondensedMissionDefinition[]>([])
@@ -162,7 +161,7 @@ const SelectRobotComponent = memo(
         selectedRobot: Robot | undefined
         setSelectedRobot: (r: Robot | undefined) => void
     }) => {
-        const { enabledRobots } = useRobotContext()
+        const { enabledRobots } = useAssetContext()
         const { TranslateText } = useLanguageContext()
 
         return (

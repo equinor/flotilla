@@ -2,21 +2,16 @@ import { useEffect, useState } from 'react'
 import { useIsAuthenticated } from '@azure/msal-react'
 import { useMsal } from '@azure/msal-react'
 import { loginRequest } from 'api/AuthConfig'
-import { Autocomplete, Button, CircularProgress, Typography, Checkbox } from '@equinor/eds-core-react'
+import { Autocomplete, Button, CircularProgress, Typography } from '@equinor/eds-core-react'
 import { IPublicClientApplication } from '@azure/msal-browser'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { useInstallationContext } from 'components/Contexts/InstallationContext'
-import { BackendAPICaller } from 'api/ApiCaller'
-import { PlantInfo } from 'models/MissionDefinition'
 import { Header } from 'components/Header/Header'
 import { config } from 'config'
-import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
-import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
-import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import assetImage from 'mediaAssets/assetPage.jpg'
 import { useNavigate } from 'react-router-dom'
 import { phone_width } from '../../../utils/constants'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 
 const Centered = styled.div`
     display: flex;
@@ -28,9 +23,6 @@ const StyledAssetSelection = styled.div`
     display: flex;
     flex-direction: column;
     gap: 4px;
-`
-const StyledCheckbox = styled(Checkbox)`
-    padding-right: 14px;
 `
 const StyledButton = styled(Button)`
     justify-content: center;
@@ -99,19 +91,10 @@ export const findNavigationPage = () => {
 }
 
 const InstallationPicker = () => {
-    const { installationName, switchInstallation } = useInstallationContext()
+    const { installationName, switchInstallation, activeInstallations } = useAssetContext()
     const { TranslateText } = useLanguageContext()
-    const { setAlert, setListAlert } = useAlertContext()
-    const [allPlantsMap, setAllPlantsMap] = useState<Map<string, string>>(new Map())
     const [selectedInstallation, setSelectedInstallation] = useState<string>(installationName)
-    const [showActivePlants, setShowActivePlants] = useState<boolean>(true)
-    const [updateListOfActivePlants, setUpdateListOfActivePlants] = useState<boolean>(false)
     const navigate = useNavigate()
-
-    const mappedOptions = allPlantsMap ? allPlantsMap : new Map<string, string>()
-
-    const validateInstallation = (installationName: string) =>
-        Array.from(mappedOptions.keys()).includes(installationName)
 
     const handleClick = () => {
         switchInstallation(selectedInstallation)
@@ -119,37 +102,12 @@ const InstallationPicker = () => {
         navigate(target)
     }
 
-    useEffect(() => {
-        if (BackendAPICaller.accessToken) {
-            const plantPromise = showActivePlants ? BackendAPICaller.getActivePlants() : BackendAPICaller.getPlantInfo()
-            plantPromise
-                .then(async (response: PlantInfo[]) => {
-                    const mapping = mapInstallationCodeToName(response)
-                    setAllPlantsMap(mapping)
-                })
-                .catch(() => {
-                    setAlert(
-                        AlertType.RequestFail,
-                        <FailedRequestAlertContent
-                            translatedMessage={TranslateText('Failed to retrieve installations')}
-                        />,
-                        AlertCategory.ERROR
-                    )
-                    setListAlert(
-                        AlertType.RequestFail,
-                        <FailedRequestAlertListContent
-                            translatedMessage={TranslateText('Failed to retrieve installations from Echo')}
-                        />,
-                        AlertCategory.ERROR
-                    )
-                })
-        }
-    }, [showActivePlants, updateListOfActivePlants])
+    const installationNames = activeInstallations.map((i) => i.name)
 
     return (
         <StyledAssetSelection>
             <Autocomplete
-                options={Array.from(mappedOptions.keys()).sort()}
+                options={installationNames.sort()}
                 label=""
                 dropdownHeight={200}
                 initialSelectedOptions={[selectedInstallation]}
@@ -157,33 +115,17 @@ const InstallationPicker = () => {
                 placeholder={TranslateText('Select installation')}
                 onOptionsChange={({ selectedItems }) => {
                     const selectedName = selectedItems[0]
-                    setSelectedInstallation(validateInstallation(selectedName) ? selectedName : '')
+                    setSelectedInstallation(selectedName ?? '')
                 }}
                 onInput={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    setSelectedInstallation(validateInstallation(e.target.value) ? e.target.value : '')
+                    setSelectedInstallation(e.target.value ?? '')
                 }}
                 autoWidth={true}
-                onFocus={(e) => {
-                    e.preventDefault()
-                    setUpdateListOfActivePlants(!updateListOfActivePlants)
-                }}
-            />
-            <StyledCheckbox
-                label={TranslateText('Show only active installations')}
-                checked={showActivePlants}
-                onChange={(e) => setShowActivePlants(e.target.checked)}
+                onFocus={(e) => e.preventDefault()}
             />
             <StyledButton onClick={() => handleClick()} disabled={!selectedInstallation}>
                 {TranslateText('Confirm installation')}
             </StyledButton>
         </StyledAssetSelection>
     )
-}
-
-const mapInstallationCodeToName = (plantInfoArray: PlantInfo[]): Map<string, string> => {
-    const mapping = new Map<string, string>()
-    plantInfoArray.forEach((plantInfo: PlantInfo) => {
-        mapping.set(plantInfo.projectDescription, plantInfo.plantCode)
-    })
-    return mapping
 }

@@ -1,12 +1,12 @@
 import { Button, Icon, Popover, Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import { useAlertContext } from 'components/Contexts/AlertContext'
-import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useRef, useState } from 'react'
 import styled from 'styled-components'
 import { Icons } from 'utils/icons'
 import { AlertListItem } from 'components/Alerts/AlertsListItem'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 
 const Circle = styled.div`
     position: absolute;
@@ -38,7 +38,7 @@ const StyledPopover = styled(Popover)`
 
 export const AlertIcon = () => {
     const { listAlerts } = useAlertContext()
-    const { installationName } = useInstallationContext()
+    const { installationName } = useAssetContext()
     const { TranslateText } = useLanguageContext()
     const [isAlertDialogOpen, setIsAlertDialogOpen] = useState<boolean>(false)
 

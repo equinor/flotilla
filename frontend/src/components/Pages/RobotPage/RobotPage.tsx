@@ -9,7 +9,7 @@ import { RobotStatusChip } from 'components/Displays/RobotDisplays/RobotStatusIc
 import { RobotStatus } from 'models/Robot'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { RobotType } from 'models/RobotModel'
-import { useRobotContext } from 'components/Contexts/RobotContext'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 import { StyledButton, StyledPage } from 'components/Styles/StyledComponents'
 import { DocumentationSection } from './Documentation'
 import { useMediaStreamContext } from 'components/Contexts/MediaStreamContext'
@@ -106,7 +106,7 @@ const StyledSmallContainer = styled.div`
 
 export const RobotPage = ({ robotId }: { robotId: string }) => {
     const { TranslateText } = useLanguageContext()
-    const { enabledRobots } = useRobotContext()
+    const { enabledRobots } = useAssetContext()
     const { mediaStreams, addMediaStreamConfigIfItDoesNotExist } = useMediaStreamContext()
     const [videoMediaStreams, setVideoMediaStreams] = useState<MediaStreamTrack[]>([])
     const { ongoingMissions } = useMissionsContext()
@@ -133,7 +133,7 @@ export const RobotPage = ({ robotId }: { robotId: string }) => {
     }, [mediaStreams, robotId])
 
     const stopButton =
-        selectedRobot && selectedRobot.status === RobotStatus.Busy ? (
+        selectedRobot && selectedRobot.status in [RobotStatus.Busy, RobotStatus.Paused] ? (
             <StyledTextButton variant="contained" onClick={toggleSkipMissionDialog}>
                 <Icon
                     name={Icons.StopButton}
@@ -147,7 +147,7 @@ export const RobotPage = ({ robotId }: { robotId: string }) => {
         )
 
     const skipMissionDialog =
-        selectedRobot && selectedRobot.status === RobotStatus.Busy ? (
+        selectedRobot && selectedRobot.status in [RobotStatus.Busy, RobotStatus.Paused] ? (
             <SkipMissionDialog
                 missionName={mission?.name}
                 robotId={selectedRobot.id}
@@ -193,7 +193,6 @@ export const RobotPage = ({ robotId }: { robotId: string }) => {
                                         <Typography variant="caption">{TranslateText('Status')}</Typography>
                                         <RobotStatusChip
                                             status={selectedRobot.status}
-                                            flotillaStatus={selectedRobot.flotillaStatus}
                                             isarConnected={selectedRobot.isarConnected}
                                             itemSize={24}
                                         />

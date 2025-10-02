@@ -39,6 +39,12 @@ interface ReturnHomeProps {
     isPaused: boolean
 }
 
+interface GoingToLockdownProps {
+    robot: Robot
+    isOpen?: boolean
+    setIsOpen?: (isOpen: boolean | ((prev: boolean) => boolean)) => void
+}
+
 const StyledLargeScreenMissionCard = styled.div`
     display: flex;
     flex-direction: column;
@@ -250,6 +256,52 @@ export const OngoingReturnHomeMissionCard = ({ robot, isOpen, setIsOpen, isPause
                     robotId={robot.id}
                     missionStatus={missionStatus}
                 />
+            </ControlButtonSpacing>
+            <StyledBottomRightButtonWrapper>
+                <MissionQueueButtonView robotId={robot.id} isOpen={isOpen} setIsOpen={setIsOpen} />
+            </StyledBottomRightButtonWrapper>
+        </StyledLargeScreenMissionCard>
+    )
+
+    return (
+        <>
+            {SmallScreenContent}
+            {LargeScreenContent}
+        </>
+    )
+}
+
+export const OngoingLockdownMissionCard = ({ robot, isOpen, setIsOpen }: GoingToLockdownProps) => {
+    const { TranslateText } = useLanguageContext()
+    const missionName = TranslateText('Return robot to home')
+
+    const SmallScreenContent = (
+        <StyledSmallScreenMissionCard>
+            <StyledHeader>
+                <Typography variant="h5" style={{ color: tokens.colors.text.static_icons__default.hex }}>
+                    {missionName}
+                </Typography>
+            </StyledHeader>
+            <ControlButtonSpacing>
+                <Midcontent>
+                    <MissionStatusDisplayWithHeader status={MissionStatus.Ongoing} />
+                </Midcontent>
+            </ControlButtonSpacing>
+            <MissionQueueButtonView robotId={robot.id} isOpen={isOpen} setIsOpen={setIsOpen} />
+        </StyledSmallScreenMissionCard>
+    )
+
+    const LargeScreenContent = (
+        <StyledLargeScreenMissionCard>
+            <ControlButtonSpacing>
+                <LeftSection>
+                    <Typography variant="h5" style={{ color: tokens.colors.text.static_icons__default.hex }}>
+                        {missionName}
+                    </Typography>
+                    <Midcontent>
+                        <MissionStatusDisplayWithHeader status={MissionStatus.Ongoing} />
+                    </Midcontent>
+                </LeftSection>
             </ControlButtonSpacing>
             <StyledBottomRightButtonWrapper>
                 <MissionQueueButtonView robotId={robot.id} isOpen={isOpen} setIsOpen={setIsOpen} />

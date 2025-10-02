@@ -3,9 +3,9 @@ import { tokens } from '@equinor/eds-tokens'
 import styled from 'styled-components'
 import { TaskTable } from './TaskOverview/TaskTable'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { MissionMapView } from './MapPosition/MissionMapView'
 import { Mission } from 'models/Mission'
 import { phone_width } from 'utils/constants'
+import PlantMap from './MapPosition/PointillaMapView'
 
 const TaskAndMapSection = styled.div`
     display: flex;
@@ -42,12 +42,14 @@ interface TaskTableAndMapProps {
 export const TaskTableAndMap = ({ mission, missionDefinitionPage }: TaskTableAndMapProps) => {
     const { TranslateText } = useLanguageContext()
 
+    const plantCode = mission.inspectionArea.plantCode ? mission.inspectionArea.plantCode : undefined
+
     return (
         <TaskAndMapSection>
             <Typography variant="h4">{TranslateText('Tasks')}</Typography>
             <StyledTableAndMap>
                 <TaskTable tasks={mission?.tasks} missionDefinitionPage={missionDefinitionPage} />
-                {mission.missionId && <MissionMapView mission={mission} />}
+                {plantCode && <PlantMap plantCode={plantCode} floorId="0" mission={mission} />}
             </StyledTableAndMap>
         </TaskAndMapSection>
     )

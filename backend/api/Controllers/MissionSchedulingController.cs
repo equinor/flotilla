@@ -18,7 +18,6 @@ namespace Api.Controllers
         IInstallationService installationService,
         IMissionLoader missionLoader,
         ILogger<MissionSchedulingController> logger,
-        IMapService mapService,
         IRobotService robotService,
         ISourceService sourceService,
         IInspectionAreaService inspectionAreaService
@@ -170,7 +169,6 @@ namespace Api.Controllers
                     InspectionFrequency = scheduledMissionQuery.InspectionFrequency,
                     InstallationCode = scheduledMissionQuery.InstallationCode,
                     InspectionArea = inspectionAreaForMission,
-                    Map = new MapMetadata(),
                 };
 
             if (scheduledMissionDefinition.InspectionArea.Id != inspectionAreaForMission.Id)
@@ -190,16 +188,11 @@ namespace Api.Controllers
                 Robot = robot,
                 MissionId = scheduledMissionDefinition.Id,
                 Status = MissionStatus.Pending,
-                MissionRunType = MissionRunType.Normal,
                 CreationTime = scheduledMissionQuery.CreationTime ?? DateTime.UtcNow,
                 Tasks = missionTasks,
                 InstallationCode = scheduledMissionQuery.InstallationCode,
                 InspectionArea = scheduledMissionDefinition.InspectionArea,
             };
-
-            scheduledMissionDefinition.Map = await mapService.ChooseMapFromMissionRunTasks(
-                missionRun
-            );
 
             if (missionRun.Tasks.Any())
             {
@@ -292,7 +285,6 @@ namespace Api.Controllers
                 Robot = robot,
                 MissionId = missionRun.MissionId,
                 Status = MissionStatus.Pending,
-                MissionRunType = MissionRunType.Normal,
                 Tasks = missionTasks,
                 CreationTime = scheduledMissionQuery.CreationTime ?? DateTime.UtcNow,
                 InstallationCode = missionRun.InstallationCode,
@@ -395,25 +387,11 @@ namespace Api.Controllers
                 Robot = robot,
                 MissionId = missionDefinition.Id,
                 Status = MissionStatus.Pending,
-                MissionRunType = MissionRunType.Normal,
                 CreationTime = scheduledMissionQuery.CreationTime ?? DateTime.UtcNow,
                 Tasks = missionTasks,
                 InstallationCode = missionDefinition.InstallationCode,
                 InspectionArea = missionDefinition.InspectionArea,
             };
-
-            if (missionDefinition.Map == null)
-            {
-                var newMap = await mapService.ChooseMapFromMissionRunTasks(missionRun);
-                if (newMap != null)
-                {
-                    logger.LogInformation(
-                        $"Assigned map {newMap.MapName} to mission definition with id {missionDefinition.Id}"
-                    );
-                    missionDefinition.Map = newMap;
-                    await missionDefinitionService.Update(missionDefinition);
-                }
-            }
 
             if (missionRun.Tasks.Any())
             {
@@ -546,20 +524,6 @@ namespace Api.Controllers
                         InspectionArea = inspectionAreaForMission,
                     };
 
-                try
-                {
-                    customMissionDefinition.Map ??= await mapService.ChooseMapFromPositions(
-                        [.. missionTasks.Select(t => t.RobotPose.Position)],
-                        customMissionQuery.InstallationCode
-                    );
-                }
-                catch (ArgumentOutOfRangeException)
-                {
-                    logger.LogWarning(
-                        $"Could not find a suitable map for mission definition {customMissionDefinition.Id}"
-                    );
-                }
-
                 if (existingMissionDefinition == null)
                 {
                     await missionDefinitionService.Create(customMissionDefinition);
@@ -597,7 +561,6 @@ namespace Api.Controllers
                     Comment = customMissionQuery.Comment,
                     Robot = robot,
                     Status = MissionStatus.Pending,
-                    MissionRunType = MissionRunType.Normal,
                     CreationTime = customMissionQuery.CreationTime ?? DateTime.UtcNow,
                     Tasks = missionTasks,
                     InstallationCode = customMissionQuery.InstallationCode,

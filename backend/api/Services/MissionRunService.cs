@@ -25,26 +25,17 @@ namespace Api.Services
 
         public Task<MissionRun?> ReadById(string id, bool readOnly = true);
 
-        public Task<IList<MissionRun>> ReadMissionRunQueue(
-            string robotId,
-            MissionRunType type = MissionRunType.Normal,
-            bool readOnly = true
-        );
+        public Task<IList<MissionRun>> ReadMissionRunQueue(string robotId, bool readOnly = true);
 
         public Task<MissionRun?> ReadNextScheduledRunByMissionId(
             string missionId,
             bool readOnly = true
         );
 
-        public Task<MissionRun?> ReadNextScheduledMissionRun(
-            string robotId,
-            MissionRunType type = MissionRunType.Normal,
-            bool readOnly = true
-        );
+        public Task<MissionRun?> ReadNextScheduledMissionRun(string robotId, bool readOnly = true);
 
         public Task<IList<MissionRun>> ReadMissionRuns(
             string robotId,
-            MissionRunType? missionRunType,
             IList<MissionStatus>? filterStatuses = null,
             bool readOnly = true
         );
@@ -55,11 +46,6 @@ namespace Api.Services
         );
 
         public bool IncludesUnsupportedInspectionType(MissionRun missionRun);
-
-        public Task<MissionRun> UpdateMissionRunType(
-            string missionRunId,
-            MissionRunType missionRunType
-        );
 
         public Task<MissionRun> UpdateMissionRunStatus(
             string missionId,
@@ -184,15 +170,12 @@ namespace Api.Services
 
         public async Task<IList<MissionRun>> ReadMissionRunQueue(
             string robotId,
-            MissionRunType type = MissionRunType.Normal,
             bool readOnly = true
         )
         {
             return await GetMissionRunsWithSubModels(readOnly: readOnly)
                 .Where(missionRun =>
-                    missionRun.Robot.Id == robotId
-                    && missionRun.Status == MissionStatus.Pending
-                    && missionRun.MissionRunType == type
+                    missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Pending
                 )
                 .OrderBy(missionRun => missionRun.CreationTime)
                 .ToListAsync();
@@ -200,22 +183,18 @@ namespace Api.Services
 
         public async Task<MissionRun?> ReadNextScheduledMissionRun(
             string robotId,
-            MissionRunType type = MissionRunType.Normal,
             bool readOnly = true
         )
         {
             return await GetMissionRunsWithSubModels(readOnly: readOnly)
                 .OrderBy(missionRun => missionRun.CreationTime)
                 .FirstOrDefaultAsync(missionRun =>
-                    missionRun.Robot.Id == robotId
-                    && missionRun.Status == MissionStatus.Pending
-                    && missionRun.MissionRunType == type
+                    missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Pending
                 );
         }
 
         public async Task<IList<MissionRun>> ReadMissionRuns(
             string robotId,
-            MissionRunType? missionRunType,
             IList<MissionStatus>? filterStatuses = null,
             bool readOnly = true
         )
@@ -225,7 +204,6 @@ namespace Api.Services
                 {
                     Statuses = filterStatuses as List<MissionStatus> ?? null,
                     RobotId = robotId,
-                    MissionRunType = missionRunType,
                     PageSize = 100,
                 }
             );
@@ -490,10 +468,6 @@ namespace Api.Services
                     missionRun.MissionId != null
                     && missionRun.MissionId.Equals(parameters.MissionId);
 
-            Expression<Func<MissionRun, bool>> missionTypeFilter = parameters.MissionRunType is null
-                ? missionRun => true
-                : missionRun => missionRun.MissionRunType.Equals(parameters.MissionRunType);
-
             Expression<Func<MissionRun, bool>> inspectionTypeFilter = parameters.InspectionTypes
                 is null
                 ? mission => true
@@ -544,22 +518,16 @@ namespace Api.Services
                         Expression.AndAlso(
                             Expression.Invoke(missionIdFilter, missionRun),
                             Expression.AndAlso(
-                                Expression.Invoke(missionTypeFilter, missionRun),
+                                Expression.Invoke(inspectionTypeFilter, missionRun),
                                 Expression.AndAlso(
-                                    Expression.Invoke(inspectionTypeFilter, missionRun),
+                                    Expression.Invoke(creationTimeFilter, missionRun),
                                     Expression.AndAlso(
-                                        Expression.Invoke(creationTimeFilter, missionRun),
+                                        Expression.Invoke(startTimeFilter, missionRun),
                                         Expression.AndAlso(
-                                            Expression.Invoke(startTimeFilter, missionRun),
+                                            Expression.Invoke(endTimeFilter, missionRun),
                                             Expression.AndAlso(
-                                                Expression.Invoke(endTimeFilter, missionRun),
-                                                Expression.AndAlso(
-                                                    Expression.Invoke(robotTypeFilter, missionRun),
-                                                    Expression.Invoke(
-                                                        inspectionAreaFilter,
-                                                        missionRun
-                                                    )
-                                                )
+                                                Expression.Invoke(robotTypeFilter, missionRun),
+                                                Expression.Invoke(inspectionAreaFilter, missionRun)
                                             )
                                         )
                                     )
@@ -575,22 +543,6 @@ namespace Api.Services
         }
 
         #region ISAR Specific methods
-
-        public async Task<MissionRun> UpdateMissionRunType(
-            string missionRunId,
-            MissionRunType missionRunType
-        )
-        {
-            var missionRun = await ReadById(missionRunId, readOnly: true);
-            if (missionRun is null)
-            {
-                string errorMessage = $"Mission with mission Id {missionRunId} was not found";
-                logger.LogError("{Message}", errorMessage);
-                throw new MissionRunNotFoundException(errorMessage);
-            }
-
-            return await UpdateMissionRunProperty(missionRun.Id, "MissionRunType", missionRunType);
-        }
 
         public async Task<MissionRun> UpdateMissionRunStatus(
             string missionId,

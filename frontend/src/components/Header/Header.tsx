@@ -1,6 +1,5 @@
 import { config } from 'config'
 import { Button, Icon, TopBar, Typography } from '@equinor/eds-core-react'
-import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import styled from 'styled-components'
 import { SelectLanguage } from 'components/Header/LanguageSelector'
 import { Icons } from 'utils/icons'
@@ -12,6 +11,7 @@ import { findNavigationPage } from 'components/Pages/AssetSelectionPage/AssetSel
 import { AlertIcon } from 'components/Header/AlertIcon'
 import { useNavigate } from 'react-router-dom'
 import { phone_width } from 'utils/constants'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 
 const StyledTopBar = styled(TopBar)`
     align-items: center;
@@ -58,7 +58,7 @@ const StyledNavigationMenu = styled.div`
 
 export const Header = ({ page }: { page: string }) => {
     const { alerts } = useAlertContext()
-    const { installationName } = useInstallationContext()
+    const { installationName } = useAssetContext()
     const navigate = useNavigate()
 
     return (

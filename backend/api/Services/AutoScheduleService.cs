@@ -263,7 +263,6 @@ namespace Api.Services
                     Robot = robot,
                     MissionId = missionDefinition.Id,
                     Status = MissionStatus.Pending,
-                    MissionRunType = MissionRunType.Normal,
                     CreationTime = DateTime.UtcNow,
                     Tasks = missionTasks,
                     InstallationCode = missionDefinition.InstallationCode,

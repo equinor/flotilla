@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { InspectionArea } from 'models/InspectionArea'
-import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { MissionDefinition } from 'models/MissionDefinition'
 import { ScheduleMissionDialog } from './ScheduleMissionDialogs'
 import { getInspectionDeadline } from 'utils/StringFormatting'
@@ -9,6 +8,7 @@ import { compareInspections, InspectionAreaOverview } from './InspectionUtilitie
 import { InspectionAreaCards } from './InspectionAreaCards'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 
 export interface Inspection {
     missionDefinition: MissionDefinition
@@ -26,7 +26,7 @@ interface InspectionAreaAreaTuple {
 
 export const InspectionSection = () => {
     const { ongoingMissions, missionQueue } = useMissionsContext()
-    const { installationInspectionAreas } = useInstallationContext()
+    const { installationInspectionAreas } = useAssetContext()
     const { missionDefinitions } = useMissionDefinitionsContext()
     const [selectedMissions, setSelectedMissions] = useState<MissionDefinition[]>()
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)

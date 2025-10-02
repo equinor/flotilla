@@ -2,11 +2,11 @@ import { createContext, FC, useContext, useEffect, useState } from 'react'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { MissionDefinition } from 'models/MissionDefinition'
-import { useInstallationContext } from './InstallationContext'
 import { useLanguageContext } from './LanguageContext'
 import { AlertType, useAlertContext } from './AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
+import { useAssetContext } from './AssetContext'
 
 interface IMissionDefinitionsContext {
     missionDefinitions: MissionDefinition[]
@@ -42,7 +42,7 @@ const fetchMissionDefinitions = (params: {
 const useMissionDefinitions = (): IMissionDefinitionsContext => {
     const [missionDefinitions, setMissionDefinitions] = useState<MissionDefinition[]>([])
     const { registerEvent, connectionReady } = useSignalRContext()
-    const { installationCode } = useInstallationContext()
+    const { installationCode } = useAssetContext()
     const { TranslateText } = useLanguageContext()
     const { setAlert, setListAlert } = useAlertContext()
 

@@ -26,8 +26,6 @@ namespace Api.Controllers.Models
 
         public string SourceId { get; set; } = string.Empty;
 
-        public MapMetadata? Map { get; set; }
-
         [JsonConstructor]
         public MissionDefinitionResponse() { }
 
@@ -49,7 +47,6 @@ namespace Api.Controllers.Models
             LastSuccessfulRun = missionDefinition.LastSuccessfulRun;
             IsDeprecated = missionDefinition.IsDeprecated;
             SourceId = missionDefinition.Source.SourceId;
-            Map = missionDefinition.Map;
         }
     }
 
@@ -84,7 +81,5 @@ namespace Api.Controllers.Models
         public InspectionArea InspectionArea { get; } = missionDefinition.InspectionArea;
 
         public bool IsDeprecated { get; } = missionDefinition.IsDeprecated;
-
-        public MapMetadata? Map { get; } = missionDefinition.Map;
     }
 }

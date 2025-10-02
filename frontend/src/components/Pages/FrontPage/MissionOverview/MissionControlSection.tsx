@@ -1,9 +1,14 @@
 import { Card } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { RobotCard, RobotCardPlaceholder } from './RobotCard'
-import { useRobotContext } from 'components/Contexts/RobotContext'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 import { tokens } from '@equinor/eds-tokens'
-import { OngoingMissionCard, OngoingMissionPlaceholderCard, OngoingReturnHomeMissionCard } from './OngoingMissionCard'
+import {
+    OngoingLockdownMissionCard,
+    OngoingMissionCard,
+    OngoingMissionPlaceholderCard,
+    OngoingReturnHomeMissionCard,
+} from './OngoingMissionCard'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { Robot, RobotStatus } from 'models/Robot'
 import { RobotMissionQueueView } from './MissionQueueView'
@@ -51,7 +56,7 @@ const OngoingMissionControlCardStyle = styled.div`
 `
 
 export const MissionControlSection = () => {
-    const { enabledRobots } = useRobotContext()
+    const { enabledRobots } = useAssetContext()
 
     const missionControlCards = enabledRobots.map((robot, index) => {
         return <MissionControlCard key={index} robot={robot} />
@@ -80,11 +85,15 @@ const MissionControlCard = ({ robot }: { robot: Robot }) => {
                 <OngoingReturnHomeMissionCard robot={robot} isOpen={isOpen} setIsOpen={setIsOpen} isPaused={false} />
             )
             break
+        case RobotStatus.GoingToLockdown:
+            missionCard = <OngoingLockdownMissionCard robot={robot} isOpen={isOpen} setIsOpen={setIsOpen} />
+            break
         case RobotStatus.ReturnHomePaused:
             missionCard = (
                 <OngoingReturnHomeMissionCard robot={robot} isOpen={isOpen} setIsOpen={setIsOpen} isPaused={true} />
             )
             break
+        case RobotStatus.Paused:
         case RobotStatus.Busy:
             if (ongoingMission)
                 missionCard = <OngoingMissionCard mission={ongoingMission} isOpen={isOpen} setIsOpen={setIsOpen} />
