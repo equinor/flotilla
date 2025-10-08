@@ -30,7 +30,7 @@ const StyledTimeChips = styled.div`
     flex-direction: row;
     gap: 8px;
 `
-const StyledSummary = styled.div`
+export const StyledSummary = styled.div`
     padding: 16px 8px 0px 8px;
     border-top: 1px solid ${tokens.colors.interactive.disabled__border.hex};
 `
@@ -48,7 +48,7 @@ interface EditAutoScheduleDialogContentProps {
     changedAutoScheduleFrequency: (newAutoScheduleFrequency: AutoScheduleFrequency) => void
 }
 
-const SelectDaysOfWeek = ({ currentAutoScheduleDays, changedAutoScheduleDays }: EditAutoScheduleDaysProps) => {
+export const SelectDaysOfWeek = ({ currentAutoScheduleDays, changedAutoScheduleDays }: EditAutoScheduleDaysProps) => {
     const { TranslateText } = useLanguageContext()
 
     const isAllSelected = currentAutoScheduleDays?.length === allDays.length
@@ -99,7 +99,10 @@ const SelectDaysOfWeek = ({ currentAutoScheduleDays, changedAutoScheduleDays }: 
     )
 }
 
-const SelectTimesOfDay = ({ currentAutoScheduleTimes, changedAutoScheduleTimes }: EditAutoScheduleTimesProps) => {
+export const SelectTimesOfDay = ({
+    currentAutoScheduleTimes,
+    changedAutoScheduleTimes,
+}: EditAutoScheduleTimesProps) => {
     const { TranslateText } = useLanguageContext()
     const [selectedTime, setSelectedTime] = useState<string>() // Format HH:MM:ss
 

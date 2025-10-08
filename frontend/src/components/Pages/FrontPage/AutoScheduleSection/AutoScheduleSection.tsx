@@ -7,12 +7,11 @@ import styled from 'styled-components'
 import { capitalizeFirstLetter } from 'utils/StringFormatting'
 import { Icons } from 'utils/icons'
 import { memo, useState } from 'react'
-import { FormCard } from 'components/Pages/MissionDefinitionPage/MissionDefinitionStyledComponents'
-import { MissionDefinitionEditDialogContent } from 'components/Pages/MissionDefinitionPage/MissionDefinitionPage'
 import { MissionDefinition } from 'models/MissionDefinition'
 import { AutoScheduleMissionTableRow } from './AutoScheduleMissionTableRow'
 import { CalendarPro } from './AutoScheduleCalendar'
 import { phone_width } from 'utils/constants'
+import { MissionSchedulingEditDialog } from 'components/Dialogs/MissionSchedulingEditDialog'
 
 const StyledSection = styled.div`
     display: flex;
@@ -115,22 +114,11 @@ const EditAutoSchedulingButton = () => {
             </TextAlignedButton>
             <StyledDialog open={dialogOpen}>
                 {selectedMissions.length === 1 ? (
-                    <>
-                        <StyledDialog.Header>
-                            <StyledDialog.Title>
-                                <Typography variant="h3">
-                                    {TranslateText('Edit auto scheduling of mission') + ' ' + selectedMissions[0]?.name}
-                                </Typography>
-                            </StyledDialog.Title>
-                        </StyledDialog.Header>
-                        <FormCard>
-                            <MissionDefinitionEditDialogContent
-                                missionDefinition={selectedMissions[0]}
-                                fieldName="autoScheduleFrequency"
-                                closeEditDialog={closeDialog}
-                            />
-                        </FormCard>
-                    </>
+                    <MissionSchedulingEditDialog
+                        mission={selectedMissions[0]}
+                        isOpen={dialogOpen}
+                        onClose={closeDialog}
+                    />
                 ) : (
                     <>
                         <StyledDialog.Header>
