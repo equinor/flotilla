@@ -107,47 +107,6 @@ const EditAutoSchedulingButton = () => {
         setSelectedMissions([])
     }
 
-    const UpdateAutoSchedulingDialogContent = () => (
-        <>
-            <StyledDialog.Header>
-                <StyledDialog.Title>
-                    <Typography variant="h3">
-                        {TranslateText('Edit auto scheduling of mission') + ' ' + selectedMissions[0]?.name}
-                    </Typography>
-                </StyledDialog.Title>
-            </StyledDialog.Header>
-            <FormCard>
-                <MissionDefinitionEditDialogContent
-                    missionDefinition={selectedMissions[0]}
-                    fieldName="autoScheduleFrequency"
-                    closeEditDialog={closeDialog}
-                />
-            </FormCard>
-        </>
-    )
-
-    const SelectMissionDialogContent = () => (
-        <>
-            <StyledDialog.Header>
-                <StyledDialog.Title>
-                    <Typography variant="h3">{TranslateText('Select mission for auto scheduling')}</Typography>
-                </StyledDialog.Title>
-            </StyledDialog.Header>
-            <StyledDialog.CustomContent>
-                <SelectMissionsComponent
-                    missions={missionDefinitions}
-                    selectedMissions={selectedMissions}
-                    setSelectedMissions={setSelectedMissions}
-                    multiple={false}
-                />
-            </StyledDialog.CustomContent>
-            <StyledDialog.Actions>
-                <Button onClick={closeDialog} variant="outlined" color="primary">
-                    {TranslateText('Cancel')}
-                </Button>
-            </StyledDialog.Actions>
-        </>
-    )
     return (
         <>
             <TextAlignedButton onClick={openDialog}>
@@ -155,7 +114,47 @@ const EditAutoSchedulingButton = () => {
                 {TranslateText('Edit auto scheduling')}
             </TextAlignedButton>
             <StyledDialog open={dialogOpen}>
-                {selectedMissions.length === 1 ? <UpdateAutoSchedulingDialogContent /> : <SelectMissionDialogContent />}
+                {selectedMissions.length === 1 ? (
+                    <>
+                        <StyledDialog.Header>
+                            <StyledDialog.Title>
+                                <Typography variant="h3">
+                                    {TranslateText('Edit auto scheduling of mission') + ' ' + selectedMissions[0]?.name}
+                                </Typography>
+                            </StyledDialog.Title>
+                        </StyledDialog.Header>
+                        <FormCard>
+                            <MissionDefinitionEditDialogContent
+                                missionDefinition={selectedMissions[0]}
+                                fieldName="autoScheduleFrequency"
+                                closeEditDialog={closeDialog}
+                            />
+                        </FormCard>
+                    </>
+                ) : (
+                    <>
+                        <StyledDialog.Header>
+                            <StyledDialog.Title>
+                                <Typography variant="h3">
+                                    {TranslateText('Select mission for auto scheduling')}
+                                </Typography>
+                            </StyledDialog.Title>
+                        </StyledDialog.Header>
+                        <StyledDialog.CustomContent>
+                            <SelectMissionsComponent
+                                missions={missionDefinitions}
+                                selectedMissions={selectedMissions}
+                                setSelectedMissions={setSelectedMissions}
+                                multiple={false}
+                            />
+                        </StyledDialog.CustomContent>
+                        <StyledDialog.Actions>
+                            <Button onClick={closeDialog} variant="outlined" color="primary">
+                                {TranslateText('Cancel')}
+                            </Button>
+                        </StyledDialog.Actions>
+                    </>
+                )}
             </StyledDialog>
         </>
     )
