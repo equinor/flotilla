@@ -11,7 +11,7 @@ import { MissionDefinition } from 'models/MissionDefinition'
 import { AutoScheduleMissionTableRow } from './AutoScheduleMissionTableRow'
 import { CalendarPro } from './AutoScheduleCalendar'
 import { phone_width } from 'utils/constants'
-import { MissionSchedulingEditDialog } from 'components/Dialogs/MissionSchedulingEditDialog'
+import { MissionSchedulingEditDialog } from 'components/Dialogs/MissionEditDialog'
 
 const StyledSection = styled.div`
     display: flex;
