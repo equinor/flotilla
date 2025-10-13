@@ -36,11 +36,21 @@ jobs:
       # Checks out to main branch by default, so we need to manually checkout to the PR the comment was made on
       # in order to do the update database on the new migrations.
       # We don't have the ref in the IssueComment trigger so we need to check out the pr number
-      - name: Checkout Pull Request
+      - name: Fetch PR head SHA
         if: ${{ inputs.PullRequestCheckout }}
-        run: gh pr checkout ${{ github.event.issue.number }}
+        id: pr_head_sha
+        run: |
+          PR_SHA=$(gh pr view ${{ github.event.issue.number }} --json headRefOid -q ".headRefOid")
+          echo "pr_head_sha=$PR_SHA" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout Pull Request by SHA
+        if: ${{ inputs.PullRequestCheckout }}
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ steps.pr_head_sha.outputs.pr_head_sha }}
 
       - name: Set up .NET
         uses: actions/setup-dotnet@v4
