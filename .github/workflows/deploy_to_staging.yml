@@ -41,6 +41,7 @@ jobs:
       Registry: ghcr.io
       ImageName: ${{ github.repository }}
       Tag: ${{ github.event.release.tag_name }}
+      SecondaryTag: latest
     secrets:
       RegistryUsername: ${{ github.actor }}
       RegistryPassword: ${{ secrets.GITHUB_TOKEN }}
@@ -57,6 +58,7 @@ jobs:
       Registry: auroraprodacr.azurecr.io
       ImageName: robotics/flotilla
       Tag: ${{ github.event.release.tag_name }}
+      SecondaryTag: latest
     secrets:
       RegistryUsername: ${{ secrets.ROBOTICS_ACRPUSH_DOCKER_APPLICATION_ID }}
       RegistryPassword: ${{ secrets.ROBOTICS_ACRPUSH_DOCKER_SECRET }}

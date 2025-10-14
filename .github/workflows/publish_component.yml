@@ -15,6 +15,10 @@ on:
       ImageName:
         required: true
         type: string
+      SecondaryTag:
+        required: false
+        type: string
+        default: "latest"
     secrets:
       RegistryUsername:
         required: true
@@ -52,5 +56,5 @@ jobs:
           push: true
           tags: |
             ${{ inputs.Registry }}/${{ inputs.ImageName }}-${{ inputs.ComponentName }}:${{ inputs.Tag }}
-            ${{ inputs.Registry }}/${{ inputs.ImageName }}-${{ inputs.ComponentName }}:latest
+            ${{ inputs.Registry }}/${{ inputs.ImageName }}-${{ inputs.ComponentName }}:${{ inputs.SecondaryTag }}
           labels: ${{ steps.meta.outputs.labels }}
