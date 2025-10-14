@@ -45,6 +45,7 @@ jobs:
       # due to the commit hash can be interpreted as an integer if only numbers
       # PS: Needs to match deploy.with.Tag
       Tag: "dev.${{ needs.get-short-sha.outputs.tag }}"
+      SecondaryTag: dev
     secrets:
       RegistryUsername: ${{ github.actor }}
       RegistryPassword: ${{ secrets.GITHUB_TOKEN }}
