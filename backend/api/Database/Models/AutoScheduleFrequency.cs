@@ -10,7 +10,7 @@ namespace Api.Database.Models
     public class AutoScheduleFrequency
     {
         [Required]
-        // In Central European Time
+        // In Central European Time (CET)
         public IList<TimeOnly> TimesOfDayCET { get; set; } = new List<TimeOnly>();
 
         [Required]
