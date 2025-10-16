@@ -13,11 +13,11 @@ namespace Api.Services
 
         public Task ReturnHome(Robot robot);
 
-        public Task<IsarControlMissionResponse?> StopMission(Robot robot, string? missionId = "");
+        public Task StopMission(Robot robot, string? missionId = "");
 
-        public Task<IsarControlMissionResponse?> PauseMission(Robot robot);
+        public Task PauseMission(Robot robot);
 
-        public Task<IsarControlMissionResponse?> ResumeMission(Robot robot);
+        public Task ResumeMission(Robot robot);
 
         public Task<IsarMission> StartMoveArm(Robot robot, string armPosition);
 
@@ -135,10 +135,7 @@ namespace Api.Services
             }
         }
 
-        public async Task<IsarControlMissionResponse?> StopMission(
-            Robot robot,
-            string? missionId = ""
-        )
+        public async Task StopMission(Robot robot, string? missionId = "")
         {
             logger.LogInformation(
                 "Stopping mission on robot '{Id}' on ISAR at '{Uri}'",
@@ -161,7 +158,7 @@ namespace Api.Services
                     "Did not stop robot with Id {id} as it reported that it did not have a mission or that it was already stopping",
                     robot.Id
                 );
-                return null;
+                return;
             }
 
             if (!response.IsSuccessStatusCode)
@@ -182,24 +179,9 @@ namespace Api.Services
                 logger.LogError("{Message}: {ErrorResponse}", message, errorResponse);
                 throw new MissionStoppedException(message, statusCode);
             }
-            if (response.Content is null)
-            {
-                logger.LogError("Could not read content from mission");
-                throw new MissionException("Could not read content from mission");
-            }
-
-            var isarMissionResponse =
-                await response.Content.ReadFromJsonAsync<IsarControlMissionResponse>();
-            if (isarMissionResponse is null)
-            {
-                logger.LogError("Failed to deserialize mission from ISAR");
-                throw new JsonException("Failed to deserialize mission from ISAR");
-            }
-
-            return isarMissionResponse;
         }
 
-        public async Task<IsarControlMissionResponse?> PauseMission(Robot robot)
+        public async Task PauseMission(Robot robot)
         {
             logger.LogInformation(
                 "Pausing mission on robot '{Id}' on ISAR at '{Uri}'",
@@ -214,7 +196,7 @@ namespace Api.Services
                     "Did not pause robot with Id {id} as it was either already paused, or did not have a mission",
                     robot.Id
                 );
-                return null;
+                return;
             }
 
             if (!response.IsSuccessStatusCode)
@@ -226,23 +208,9 @@ namespace Api.Services
                 logger.LogError("{Message}: {ErrorResponse}", message, errorResponse);
                 throw new MissionPauseException(message, statusCode);
             }
-            if (response.Content is null)
-            {
-                logger.LogError("Could not read content from mission");
-                throw new MissionException("Could not read content from mission");
-            }
-
-            var isarMissionResponse =
-                await response.Content.ReadFromJsonAsync<IsarControlMissionResponse>();
-            if (isarMissionResponse is null)
-            {
-                logger.LogError("Failed to deserialize mission from ISAR");
-                throw new JsonException("Failed to deserialize mission from ISAR");
-            }
-            return isarMissionResponse;
         }
 
-        public async Task<IsarControlMissionResponse?> ResumeMission(Robot robot)
+        public async Task ResumeMission(Robot robot)
         {
             logger.LogInformation(
                 "Resuming mission on robot '{Id}' on ISAR at '{Uri}'",
@@ -257,7 +225,7 @@ namespace Api.Services
                     "Did not resume robot with Isar Id {id} to dock as it is no longer running a misson",
                     robot.Id
                 );
-                return null;
+                return;
             }
 
             if (!response.IsSuccessStatusCode)
@@ -269,21 +237,6 @@ namespace Api.Services
                 logger.LogError("{Message}: {ErrorResponse}", message, errorResponse);
                 throw new MissionResumeException(message, statusCode);
             }
-            if (response.Content is null)
-            {
-                logger.LogError("Could not read content from mission");
-                throw new MissionResumeException("Could not read content from mission");
-            }
-
-            var isarMissionResponse =
-                await response.Content.ReadFromJsonAsync<IsarControlMissionResponse>();
-            if (isarMissionResponse is null)
-            {
-                logger.LogError("Failed to deserialize mission from ISAR");
-                throw new JsonException("Failed to deserialize mission from ISAR");
-            }
-
-            return isarMissionResponse;
         }
 
         public async Task<IsarMission> StartMoveArm(Robot robot, string armPosition)
