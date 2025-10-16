@@ -1,8 +1,6 @@
 name: Run integration tests
 
 on:
-  pull_request:
-    branches: [ main ]
   push:
     branches: [ main ]
   release:
@@ -23,8 +21,7 @@ jobs:
     uses: equinor/robotics/.github/workflows/run-integration-tests.yml@main
     with:
       # Pick lane automatically based on event, or honor manual input
-      lane: ${{ github.event_name == 'pull_request' && 'dev'
-            || github.event_name == 'push' && 'dev'
+      lane: ${{ github.event_name == 'push' && 'dev'
             || github.event_name == 'release' && 'latest'
             || github.event_name == 'workflow_dispatch' && inputs.lane
             || 'latest' }}
