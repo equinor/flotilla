@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   run-integration-tests:
-    uses: equinor/robotics/.github/workflows/run_integration_tests.yml@main
+    uses: equinor/armada/.github/workflows/run_integration_tests.yml@main
     with:
       # Pick lane automatically based on event, or honor manual input
       lane: ${{ github.event_name == 'push' && 'dev'
@@ -26,4 +26,5 @@ jobs:
             || github.event_name == 'workflow_dispatch' && inputs.lane
             || 'latest' }}
 
-    secrets: inherit
+    secrets:
+      INTEGRATION_TEST_AZURE_CLIENT_SECRET: ${{ secrets.INTEGRATION_TEST_AZURE_CLIENT_SECRET }}
