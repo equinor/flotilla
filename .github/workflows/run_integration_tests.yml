@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   run-integration-tests:
-    uses: equinor/robotics/.github/workflows/run-integration-tests.yml@main
+    uses: equinor/robotics/.github/workflows/run_integration_tests.yml@main
     with:
       # Pick lane automatically based on event, or honor manual input
       lane: ${{ github.event_name == 'push' && 'dev'
