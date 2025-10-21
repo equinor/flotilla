@@ -1,4 +1,6 @@
 name: Deploy to Staging
+permissions:
+  contents: read
 
 # Only one workflow in a concurrency group may run at a time
 concurrency:
@@ -31,6 +33,9 @@ jobs:
 
   build-and-push-release-to-dev:
     name: Update containers in dev with version tag
+    permissions:
+      contents: read
+      packages: write
     needs: trigger-github-deployment
     strategy:
       matrix:
@@ -48,6 +53,8 @@ jobs:
 
   build-and-push-components:
     name: Build and push containers to auroraprodcr for Staging/Production
+    permissions:
+      contents: read
     needs: [trigger-github-deployment]
     strategy:
       matrix:
@@ -65,6 +72,8 @@ jobs:
 
   deploy:
     name: Update deployment in Staging
+    permissions:
+      contents: read
     needs: [trigger-github-deployment, build-and-push-components]
     uses: ./.github/workflows/update_aurora_deployment.yml
     with:

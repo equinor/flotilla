@@ -1,4 +1,6 @@
 name: Update deployment in aurora
+permissions:
+  contents: read
 
 on:
   workflow_call:

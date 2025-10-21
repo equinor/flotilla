@@ -1,4 +1,7 @@
 name: Deploy to Development
+permissions:
+  contents: read
+
 
 # Only one workflow in a concurrency group may run at a time
 concurrency:
@@ -33,6 +36,9 @@ jobs:
   build-and-push-components:
     name: Build and push containers to ghcr for Development
     needs: [get-short-sha, trigger-github-deployment]
+    permissions:
+      contents: read
+      packages: write
     strategy:
       matrix:
         component: [broker, backend, frontend]
@@ -53,6 +59,8 @@ jobs:
   deploy:
     name: Update deployment in Development
     needs: [build-and-push-components, get-short-sha, trigger-github-deployment]
+    permissions:
+      contents: read
     uses: ./.github/workflows/update_aurora_deployment.yml
     with:
       Environment: development

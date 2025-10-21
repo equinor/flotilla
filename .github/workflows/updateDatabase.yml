@@ -1,4 +1,8 @@
 name: Update database
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
 
 on:
   issue_comment:
@@ -17,6 +21,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
+      issues: write
+      reactions: write
     outputs:
       eyes_id: ${{ fromJson(steps.eyes.outputs.data).id }}
     steps:
@@ -35,6 +41,8 @@ jobs:
   get_review_state:
     needs: base_check
     runs-on: windows-latest
+    permissions:
+      pull-requests: read
     outputs:
       review_approved: ${{ contains(fromJson(steps.get.outputs.data).*.state, 'APPROVED') }}
       eyes_id: ${{ needs.base_check.outputs.eyes_id }}
@@ -53,6 +61,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
+      issues: write
+      reactions: write
     steps:
       - name: Remove 'eyes' reaction
         uses: octokit/request-action@v2.x
@@ -81,6 +91,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
+      issues: write
+      reactions: write
     steps:
       - name: Remove 'eyes' reaction
         uses: octokit/request-action@v2.x
@@ -105,6 +117,8 @@ jobs:
 
   run_migrations:
     needs: database_update_start
+    permissions:
+      contents: read
     uses: ./.github/workflows/runMigrations.yml
     with:
       PullRequestCheckout: true
@@ -118,6 +132,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
+      issues: write
     steps:
       - name: Add comment
         uses: peter-evans/create-or-update-comment@v4
@@ -133,6 +148,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
+      issues: write
     steps:
       - name: Add comment
         uses: peter-evans/create-or-update-comment@v4
