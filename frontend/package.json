@@ -30,7 +30,7 @@
         "react-router-dom": "^7.5.3",
         "styled-components": "^6.1.17",
         "ts-custom-error": "^3.3.1",
-        "vite": "^7.1.5",
+        "vite": "^7.1.11",
         "vite-plugin-svgr": "^4.5.0"
     },
     "scripts": {
