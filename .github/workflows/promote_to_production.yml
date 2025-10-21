@@ -1,4 +1,6 @@
 name: Promote to Production
+permissions:
+  contents: read
 
 # Only one workflow in a concurrency group may run at a time
 concurrency:

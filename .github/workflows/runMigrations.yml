@@ -1,4 +1,7 @@
 name: Run migrations
+permissions:
+  contents: read
+  pull_requests: read
 
 on:
   workflow_call:
