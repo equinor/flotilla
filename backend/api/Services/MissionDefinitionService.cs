@@ -228,7 +228,9 @@ namespace Api.Services
 
         private async Task ApplyDatabaseUpdate(Installation? installation)
         {
-            var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes();
+            var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes(
+                AccessMode.Write
+            );
             if (
                 installation == null
                 || accessibleInstallationCodes.Contains(
@@ -246,7 +248,9 @@ namespace Api.Services
             bool readOnly = true
         )
         {
-            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
+            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes(
+                AccessMode.Read
+            );
             var query = context
                 .MissionDefinitions.Include(missionDefinition =>
                     missionDefinition.AutoScheduleFrequency

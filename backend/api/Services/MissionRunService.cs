@@ -310,7 +310,9 @@ namespace Api.Services
 
         private IQueryable<MissionRun> GetMissionRunsWithSubModels(bool readOnly = true)
         {
-            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
+            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes(
+                AccessMode.Read
+            );
             var query = context
                 .MissionRuns.Include(missionRun => missionRun.InspectionArea)
                 .ThenInclude(inspectionArea => inspectionArea != null ? inspectionArea.Plant : null)
@@ -346,7 +348,9 @@ namespace Api.Services
 
         private async Task ApplyDatabaseUpdate(Installation? installation)
         {
-            var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes();
+            var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes(
+                AccessMode.Write
+            );
             if (
                 installation == null
                 || accessibleInstallationCodes.Contains(
