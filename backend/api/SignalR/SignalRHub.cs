@@ -23,7 +23,8 @@ namespace Api.SignalRHubs
                     .ToList();
 
                 var installationCodes = await accessRoleService.GetAllowedInstallationCodes(
-                    Context.User
+                    Context.User,
+                    AccessMode.Write
                 );
 
                 if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Local")

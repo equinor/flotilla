@@ -172,10 +172,13 @@ namespace Api.Services
                 status
             );
 
-            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
+            var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes(
+                AccessMode.Write
+            );
+
             var robotQuery = context.Robots.Where(r =>
                 r.Id == robotId
-                && accessibleInstallationCodes.Result.Contains(
+                && accessibleInstallationCodes.Contains(
                     r.CurrentInstallation.InstallationCode.ToUpper()
                 )
             );
@@ -193,10 +196,12 @@ namespace Api.Services
                 robotId,
                 isarConnected
             );
-            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
+            var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes(
+                AccessMode.Write
+            );
             var robotQuery = context.Robots.Where(r =>
                 r.Id == robotId
-                && accessibleInstallationCodes.Result.Contains(
+                && accessibleInstallationCodes.Contains(
                     r.CurrentInstallation.InstallationCode.ToUpper()
                 )
             );
@@ -215,7 +220,9 @@ namespace Api.Services
                 currentMissionId
             );
 
-            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
+            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes(
+                AccessMode.Write
+            );
             var robotQuery = context.Robots.Where(r =>
                 r.Id == robotId
                 && accessibleInstallationCodes.Result.Contains(
@@ -254,7 +261,9 @@ namespace Api.Services
                 }
             }
 
-            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
+            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes(
+                AccessMode.Write
+            );
             var robotQuery = context.Robots.Where(r =>
                 r.Id == robotId
                 && accessibleInstallationCodes.Result.Contains(
@@ -280,7 +289,9 @@ namespace Api.Services
                 deprecated
             );
 
-            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
+            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes(
+                AccessMode.Write
+            );
             var robotQuery = context.Robots.Where(r =>
                 r.Id == robotId
                 && accessibleInstallationCodes.Result.Contains(
@@ -368,7 +379,10 @@ namespace Api.Services
 
         private IQueryable<Robot> GetRobotsWithSubModels(bool readOnly = true)
         {
-            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
+            var accessibleInstallationCodes = accessRoleService
+                .GetAllowedInstallationCodes(AccessMode.Read)
+                .Result;
+
             var query = context
                 .Robots.Include(r => r.Documentation)
                 .Include(r => r.Model)
@@ -379,7 +393,7 @@ namespace Api.Services
                     && (
                         r.CurrentInstallation == null
                         || r.CurrentInstallation.InstallationCode == null
-                        || accessibleInstallationCodes.Result.Contains(
+                        || accessibleInstallationCodes.Contains(
                             r.CurrentInstallation.InstallationCode.ToUpper()
                         )
                     )
@@ -390,7 +404,9 @@ namespace Api.Services
 
         private async Task ApplyDatabaseUpdate(Installation? installation)
         {
-            var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes();
+            var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes(
+                AccessMode.Write
+            );
             if (
                 installation == null
                 || accessibleInstallationCodes.Contains(
