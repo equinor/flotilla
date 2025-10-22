@@ -187,7 +187,9 @@ namespace Api.Services
 
         private IQueryable<Plant> GetPlants(bool readOnly = true)
         {
-            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
+            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes(
+                AccessMode.Read
+            );
             var query = context
                 .Plants.Include(i => i.Installation)
                 .Where(p =>
@@ -200,7 +202,9 @@ namespace Api.Services
 
         private async Task ApplyDatabaseUpdate(Installation? installation)
         {
-            var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes();
+            var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes(
+                AccessMode.Write
+            );
             if (
                 installation == null
                 || accessibleInstallationCodes.Contains(

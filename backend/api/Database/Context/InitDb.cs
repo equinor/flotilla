@@ -29,14 +29,21 @@ namespace Api.Database.Context
 
         private static List<AccessRole> GetAccessRoles()
         {
-            var accessRole1 = new AccessRole
+            var userAccessRole = new AccessRole
             {
                 Installation = installations[0],
                 AccessLevel = RoleAccessLevel.ADMIN,
                 RoleName = "Role.User.HUA",
             };
 
-            return new List<AccessRole>([accessRole1]);
+            var readOnlyAccessRole = new AccessRole
+            {
+                Installation = installations[0],
+                AccessLevel = RoleAccessLevel.READ_ONLY,
+                RoleName = "Role.ReadOnly.HUA",
+            };
+
+            return new List<AccessRole>([userAccessRole, readOnlyAccessRole]);
         }
 
         private static List<Installation> GetInstallations()
