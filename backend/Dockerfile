@@ -12,7 +12,12 @@ RUN dotnet publish -c release -o /app
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 COPY --from=build /app ./
-RUN apt-get update && apt-get install -y apt-utils libgdiplus libc6-dev
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+       apt-utils \
+       libgdiplus \
+       libc6-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 EXPOSE 8000
 
