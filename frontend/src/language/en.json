@@ -335,5 +335,7 @@
     "Robot ready for missions": "Robot ready for missions",
     "InterventionNeeded": "Intervention Needed",
     "ReturnHomePaused": "Returning home paused",
-    "Current Inspection Area": "Current Inspection Area"
+    "Current Inspection Area": "Current Inspection Area",
+    "GoingToRecharging": "Returning to recharge",
+    "GoingToLockdown": "Returning due to lockdown"
 }
