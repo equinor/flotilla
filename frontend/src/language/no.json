@@ -335,5 +335,7 @@
     "Robot ready for missions": "Roboten klar for oppdrag",
     "InterventionNeeded": "Intervensjon nødvendig",
     "ReturnHomePaused": "Kjøring hjem pauset",
-    "Current Inspection Area": "Nåværende inspeksjonsområde"
+    "Current Inspection Area": "Nåværende inspeksjonsområde",
+    "GoingToRecharging": "Returnerer for å lade",
+    "GoingToLockdown": "Returnerer på grunn av lockdown"
 }

@@ -4,7 +4,7 @@ import { RobotCard, RobotCardPlaceholder } from './RobotCard'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 import { tokens } from '@equinor/eds-tokens'
 import {
-    OngoingLockdownMissionCard,
+    OngoingEmergencyMissionCard,
     OngoingMissionCard,
     OngoingMissionPlaceholderCard,
     OngoingReturnHomeMissionCard,
@@ -86,7 +86,8 @@ const MissionControlCard = ({ robot }: { robot: Robot }) => {
             )
             break
         case RobotStatus.GoingToLockdown:
-            missionCard = <OngoingLockdownMissionCard robot={robot} isOpen={isOpen} setIsOpen={setIsOpen} />
+        case RobotStatus.GoingToRecharging:
+            missionCard = <OngoingEmergencyMissionCard robot={robot} isOpen={isOpen} setIsOpen={setIsOpen} />
             break
         case RobotStatus.ReturnHomePaused:
             missionCard = (
