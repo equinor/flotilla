@@ -32,6 +32,30 @@ Please see separate installation guides for the [frontend](frontend), [backend](
 Run the [setup.sh](./setup.sh) to automatically set up your dev environment for the components.
 This script will ask you for the `Client Secret` for the backend and the `MQTT broker server key` for the MQTT broker.
 
+## Run with make
+Common commands for the project are in Makefiles. See [frontend makefile](./frontend/Makefile), [backend makefile](./backend/Makefile) and [root makefile](./Makefile).
+This requires the CLI program `make`.
+
+Usage:
+```bash
+make <command-in-makefile> # for example: make run
+```
+
+<details>
+<summary>Installation MacOS</summary>
+
+```bash
+brew install make
+```
+</details>
+<details>
+<summary>Installation Windows</summary>
+
+```bash
+choco install make
+```
+</details>
+
 ## Run with Docker
 
 Install [Docker](https://docs.docker.com/engine/install/ubuntu/) and [Docker Compose](https://docs.docker.com/compose/install/).
