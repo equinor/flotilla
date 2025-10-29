@@ -1,0 +1,13 @@
+name: Execute label synchronization
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  labels:
+    uses: equinor/armada/.github/workflows/synchronize_labels.yml@main
+    secrets:
+      LABEL_SYNC_TOKEN: ${{ secrets.GITHUB_TOKEN }}
