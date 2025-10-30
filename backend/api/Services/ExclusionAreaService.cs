@@ -279,7 +279,7 @@ namespace Api.Services
         private IQueryable<ExclusionArea> GetExclusionAreas(bool readOnly = true)
         {
             var accessibleInstallationCodes = accessRoleService
-                .GetAllowedInstallationCodes()
+                .GetAllowedInstallationCodes(AccessMode.Read)
                 .Result;
             var query = context
                 .ExclusionAreas.Include(p => p.Plant)
@@ -293,7 +293,9 @@ namespace Api.Services
 
         private async Task ApplyDatabaseUpdate(Installation? installation)
         {
-            var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes();
+            var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes(
+                AccessMode.Write
+            );
             if (
                 installation == null
                 || accessibleInstallationCodes.Contains(

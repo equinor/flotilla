@@ -55,7 +55,9 @@ namespace Api.Services
 
         private IQueryable<Installation> GetInstallations(bool readOnly = true)
         {
-            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
+            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes(
+                AccessMode.Read
+            );
             var query = context.Installations.Where(i =>
                 accessibleInstallationCodes.Result.Contains(i.InstallationCode.ToUpper())
             );
@@ -69,7 +71,9 @@ namespace Api.Services
 
         private async Task ApplyDatabaseUpdate(Installation? installation)
         {
-            var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes();
+            var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes(
+                AccessMode.Write
+            );
             if (
                 installation == null
                 || accessibleInstallationCodes.Contains(

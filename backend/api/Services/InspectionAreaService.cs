@@ -282,7 +282,7 @@ namespace Api.Services
         private IQueryable<InspectionArea> GetInspectionAreas(bool readOnly = true)
         {
             var accessibleInstallationCodes = accessRoleService
-                .GetAllowedInstallationCodes()
+                .GetAllowedInstallationCodes(AccessMode.Read)
                 .Result;
             var query = context
                 .InspectionAreas.Include(p => p.Plant)
@@ -296,7 +296,9 @@ namespace Api.Services
 
         private async Task ApplyDatabaseUpdate(Installation? installation)
         {
-            var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes();
+            var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes(
+                AccessMode.Write
+            );
             if (
                 installation == null
                 || accessibleInstallationCodes.Contains(

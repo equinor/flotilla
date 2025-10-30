@@ -1,5 +1,5 @@
 import * as signalR from '@microsoft/signalr'
-import { createContext, FC, useContext, useEffect, useState } from 'react'
+import React, { createContext, FC, useContext, useEffect, useCallback, useState } from 'react'
 import { AuthContext } from './AuthProvider'
 import { config } from 'config'
 
@@ -58,30 +58,64 @@ export const SignalRProvider: FC<Props> = ({ children }) => {
     const [connectionReady, setConnectionReady] = useState<boolean>(defaultSignalRInterface.connectionReady)
     const accessToken = useContext(AuthContext)
 
+    const createConnection = useCallback((token: string) => {
+        console.log('Attempting to create signalR connection...')
+        const newConnection = new signalR.HubConnectionBuilder()
+            .withUrl(URL, {
+                accessTokenFactory: () => token,
+                transport:
+                    signalR.HttpTransportType.WebSockets |
+                    signalR.HttpTransportType.ServerSentEvents |
+                    signalR.HttpTransportType.LongPolling,
+            })
+            .withAutomaticReconnect()
+            .build()
+
+        newConnection.onclose((error) => {
+            console.log('SignalR connection closed:', error)
+            setConnectionReady(false)
+        })
+
+        newConnection.onreconnected(() => {
+            console.log('SignalR reconnected')
+            setConnectionReady(true)
+        })
+
+        newConnection.onreconnecting(() => {
+            console.log('SignalR reconnecting...')
+            setConnectionReady(false)
+        })
+
+        return newConnection
+    }, [])
+
     useEffect(() => {
         if (accessToken) {
-            console.log('Attempting to create signalR connection...')
-            const newConnection = new signalR.HubConnectionBuilder()
-                .withUrl(URL, {
-                    accessTokenFactory: () => accessToken,
-                    transport:
-                        signalR.HttpTransportType.WebSockets |
-                        signalR.HttpTransportType.ServerSentEvents |
-                        signalR.HttpTransportType.LongPolling,
-                })
-                .withAutomaticReconnect()
-                .build()
+            if (connection) {
+                connection.stop()
+            }
+
+            const newConnection = createConnection(accessToken)
+            setConnection(newConnection)
 
             newConnection
                 .start()
                 .then(() => {
                     console.log('SignalR connection made: ', newConnection)
-                    setConnection(newConnection)
                     setConnectionReady(true)
                 })
-                .catch(console.error)
+                .catch((error) => {
+                    console.error('SignalR connection failed:', error)
+                    setConnectionReady(false)
+                })
         }
-    }, [accessToken])
+
+        return () => {
+            if (connection) {
+                connection.stop()
+            }
+        }
+    }, [accessToken, createConnection])
 
     const registerEvent = (eventName: string, onMessageReceived: (username: string, message: string) => void) => {
         if (connection)

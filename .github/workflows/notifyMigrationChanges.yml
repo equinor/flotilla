@@ -14,7 +14,9 @@ jobs:
   Notify_Migration:
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       pull-requests: write
+      issues: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -34,7 +36,9 @@ jobs:
           issue-number: ${{ github.event.number }}
           body: ${{ env.message }}
 
-      - name: Add label
-        uses: actions-ecosystem/action-add-labels@v1
-        with:
-          labels: database-change
+      - name: Add label via GitHub CLI
+        run: gh pr edit "$NUMBER" --add-label "database-change"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.pull_request.number }}

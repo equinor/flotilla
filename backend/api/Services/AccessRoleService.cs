@@ -5,10 +5,19 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Api.Services
 {
+    public enum AccessMode
+    {
+        Read,
+        Write,
+    }
+
     public interface IAccessRoleService
     {
-        public Task<List<string>> GetAllowedInstallationCodes();
-        public Task<List<string>> GetAllowedInstallationCodes(ClaimsPrincipal user);
+        public Task<List<string>> GetAllowedInstallationCodes(AccessMode accessMode);
+        public Task<List<string>> GetAllowedInstallationCodes(
+            ClaimsPrincipal user,
+            AccessMode accessMode
+        );
         public bool IsUserAdmin();
         public bool IsAuthenticationAvailable();
         public Task<AccessRole> Create(
@@ -33,14 +42,17 @@ namespace Api.Services
             return readOnly ? context.AccessRoles.AsNoTracking() : context.AccessRoles.AsTracking();
         }
 
-        public async Task<List<string>> GetAllowedInstallationCodes()
+        public async Task<List<string>> GetAllowedInstallationCodes(AccessMode accessMode)
         {
             var user = httpContextAccessor.HttpContext?.User;
 
-            return await GetAllowedInstallationCodes(user);
+            return await GetAllowedInstallationCodes(user, accessMode);
         }
 
-        public async Task<List<string>> GetAllowedInstallationCodes(ClaimsPrincipal? user)
+        public async Task<List<string>> GetAllowedInstallationCodes(
+            ClaimsPrincipal? user,
+            AccessMode accessMode
+        )
         {
             if (user == null)
                 return await context
@@ -58,18 +70,83 @@ namespace Api.Services
                 .Claims.Where(c => c.Type == ClaimTypes.Role)
                 .Select(c => c.Value)
                 .ToList();
-            return await GetAllowedInstallationCodes(userRoles);
+
+            var allowedInstallationCodes = await GetAllowedInstallationCodes(userRoles, accessMode);
+
+            return allowedInstallationCodes;
         }
 
-        public async Task<List<string>> GetAllowedInstallationCodes(List<string> roles)
+        private async Task<List<string>> EnsureUserRolesExistInDatabase(List<string> roles)
         {
-            return await GetAccessRoles(readOnly: true)
+            var dbRoles = await GetAccessRoles(readOnly: true)
                 .Include(r => r.Installation)
-                .Where(r => roles.Contains(r.RoleName))
-                .Select(r =>
-                    r.Installation != null ? r.Installation.InstallationCode.ToUpperInvariant() : ""
-                )
+                .Select(r => r.RoleName)
                 .ToListAsync();
+
+            var intersection = roles.Intersect(dbRoles, StringComparer.OrdinalIgnoreCase).ToList();
+
+            return intersection;
+        }
+
+        private static List<string> GetInstallationCodesByAccessMode(
+            List<string> roles,
+            AccessMode accessMode
+        )
+        {
+            List<string> permittedInstallationCodes = [];
+
+            foreach (var role in roles)
+            {
+                switch (accessMode)
+                {
+                    case AccessMode.Read:
+                        if (role.StartsWith("Role.ReadOnly.") || role.StartsWith("Role.User."))
+                        {
+                            var installationCode = TryExtractInstallationCode(role);
+                            if (installationCode is null)
+                                continue;
+                            permittedInstallationCodes.Add(installationCode);
+                        }
+                        break;
+
+                    case AccessMode.Write:
+                        if (role.StartsWith("Role.User."))
+                        {
+                            var installationCode = TryExtractInstallationCode(role);
+                            if (installationCode is null)
+                                continue;
+                            permittedInstallationCodes.Add(installationCode);
+                        }
+                        break;
+                }
+            }
+
+            return [.. permittedInstallationCodes.Distinct()];
+        }
+
+        private static string? TryExtractInstallationCode(string role)
+        {
+            var parts = role.Split('.');
+            if (parts.Length != 3)
+                return null;
+
+            var code = parts[2];
+            return code.Length == 3 ? code : null;
+        }
+
+        public async Task<List<string>> GetAllowedInstallationCodes(
+            List<string> roles,
+            AccessMode accessMode
+        )
+        {
+            var rolesInUserAndDb = await EnsureUserRolesExistInDatabase(roles);
+
+            var permittedInstallationCodes = GetInstallationCodesByAccessMode(
+                rolesInUserAndDb,
+                accessMode
+            );
+
+            return permittedInstallationCodes;
         }
 
         private void ThrowExceptionIfNotAdmin()

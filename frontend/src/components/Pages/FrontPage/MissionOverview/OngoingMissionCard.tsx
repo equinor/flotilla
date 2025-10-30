@@ -39,7 +39,7 @@ interface ReturnHomeProps {
     isPaused: boolean
 }
 
-interface GoingToLockdownProps {
+interface OngoingEmergencyMissionCardProps {
     robot: Robot
     isOpen?: boolean
     setIsOpen?: (isOpen: boolean | ((prev: boolean) => boolean)) => void
@@ -271,7 +271,7 @@ export const OngoingReturnHomeMissionCard = ({ robot, isOpen, setIsOpen, isPause
     )
 }
 
-export const OngoingLockdownMissionCard = ({ robot, isOpen, setIsOpen }: GoingToLockdownProps) => {
+export const OngoingEmergencyMissionCard = ({ robot, isOpen, setIsOpen }: OngoingEmergencyMissionCardProps) => {
     const { TranslateText } = useLanguageContext()
     const missionName = TranslateText('Return robot to home')
 

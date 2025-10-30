@@ -1,0 +1,43 @@
+# from https://github.com/equinor/appsec-ghas-examples/blob/main/.github/workflows/trivy-config.yml
+name: Trivy IaC & Dockerfile Scanning
+permissions: {}
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  schedule:
+    - cron: '36 0 * * 3'
+
+jobs:
+  trivy-scan:
+    name: Scan on Main with Trivy
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      security-events: write 
+
+      contents: read
+      actions: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Run Trivy vulnerability Scanner
+        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
+        with:
+          scan-type: 'config'
+          severity: 'CRITICAL,HIGH'
+          limit-severities-for-sarif: true 
+          format: 'sarif'
+          output: 'trivy-results-iac.sarif'
+          exit-code: '0'
+
+      - name: Upload scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results-iac.sarif'
+
