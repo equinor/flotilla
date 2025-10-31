@@ -3,7 +3,7 @@ import { useIsAuthenticated } from '@azure/msal-react'
 import { useMsal } from '@azure/msal-react'
 import { loginRequest } from 'api/AuthConfig'
 import { Autocomplete, Button, CircularProgress, Typography } from '@equinor/eds-core-react'
-import { IPublicClientApplication } from '@azure/msal-browser'
+import { InteractionStatus, IPublicClientApplication } from '@azure/msal-browser'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Header } from 'components/Header/Header'
@@ -52,13 +52,13 @@ const handleLogin = (instance: IPublicClientApplication) => {
 
 export const AssetSelectionPage = () => {
     const isAuthenticated = useIsAuthenticated()
-    const { instance } = useMsal()
+    const { instance, inProgress } = useMsal()
 
     useEffect(() => {
-        if (!isAuthenticated) {
+        if (!isAuthenticated && inProgress === InteractionStatus.None) {
             handleLogin(instance)
         }
-    }, [isAuthenticated, instance])
+    }, [isAuthenticated, inProgress, instance])
 
     return (
         <>
