@@ -18,8 +18,8 @@ export const loginRequest = {
 }
 
 export async function fetchAccessToken(context: IMsalContext): Promise<string> {
-    // Silently acquires an access token which is then attached to a request for Microsoft Graph data
     const account = context.accounts[0]
+
     return context.instance
         .acquireTokenSilent({ ...loginRequest, account })
         .then((response) => {
@@ -27,7 +27,11 @@ export async function fetchAccessToken(context: IMsalContext): Promise<string> {
             return accessToken
         })
         .catch(async (e) => {
-            console.error(e)
+            if (e.errorCode === 'interaction_in_progress') {
+                console.log('Token acquisition already in progress, waiting...')
+                await new Promise((resolve) => setTimeout(resolve, 1000))
+            }
+            console.error('Token acquisition failed:', e)
             await context.instance.acquireTokenRedirect(loginRequest)
             return 'The page should be refreshed automatically.'
         })

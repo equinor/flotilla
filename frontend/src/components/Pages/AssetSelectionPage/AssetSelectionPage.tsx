@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useIsAuthenticated } from '@azure/msal-react'
 import { useMsal } from '@azure/msal-react'
 import { loginRequest } from 'api/AuthConfig'
@@ -45,20 +45,43 @@ const StyledContent = styled.div`
 `
 
 const handleLogin = (instance: IPublicClientApplication) => {
+    const accounts = instance.getAllAccounts()
+    if (accounts.length > 0) {
+        console.log('Active account found, skipping login')
+        return
+    }
+
     instance.loginRedirect(loginRequest).catch((e) => {
-        console.error(e)
+        console.error('Login error:', e)
     })
 }
 
 export const AssetSelectionPage = () => {
     const isAuthenticated = useIsAuthenticated()
     const { instance, inProgress } = useMsal()
+    const loginInitiatedRef = useRef(false)
 
     useEffect(() => {
-        if (!isAuthenticated && inProgress === InteractionStatus.None) {
+        // Trigger login when not authenticated and no interaction is in progress
+        // Use ref to prevent double-triggering in StrictMode
+        if (!isAuthenticated && inProgress === InteractionStatus.None && !loginInitiatedRef.current) {
+            console.log('Not authenticated, initiating login...')
+            loginInitiatedRef.current = true
             handleLogin(instance)
         }
     }, [isAuthenticated, inProgress, instance])
+
+    // Show loading while authentication is in progress
+    if (inProgress !== InteractionStatus.None) {
+        return (
+            <Centered>
+                <Typography variant="body_long_bold" color="primary">
+                    Authentication in progress...
+                </Typography>
+                <CircularProgress size={48} />
+            </Centered>
+        )
+    }
 
     return (
         <>
@@ -73,7 +96,7 @@ export const AssetSelectionPage = () => {
             ) : (
                 <Centered>
                     <Typography variant="body_long_bold" color="primary">
-                        Authentication
+                        Redirecting to login...
                     </Typography>
                     <CircularProgress size={48} />
                 </Centered>
