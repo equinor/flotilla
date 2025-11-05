@@ -49,7 +49,7 @@ const StyledDesktopView = styled.div`
 `
 
 const StyledPhoneView = styled.div`
-    @media (min-width: ${phone_width}) ) {
+    @media (min-width: ${phone_width}) {
         display: none;
     }
 `
