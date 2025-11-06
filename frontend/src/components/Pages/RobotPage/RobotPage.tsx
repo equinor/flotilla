@@ -8,7 +8,6 @@ import { BatteryStatusDisplay } from 'components/Displays/RobotDisplays/BatteryS
 import { RobotStatusChip } from 'components/Displays/RobotDisplays/RobotStatusIcon'
 import { RobotStatus } from 'models/Robot'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { RobotType } from 'models/RobotModel'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 import { StyledButton, StyledPage } from 'components/Styles/StyledComponents'
 import { DocumentationSection } from './Documentation'
@@ -16,7 +15,6 @@ import { useMediaStreamContext } from 'components/Contexts/MediaStreamContext'
 import { VideoStreamSection } from '../MissionPage/MissionPage'
 import { useEffect, useState } from 'react'
 import { VideoStreamWindow } from '../MissionPage/VideoStream/VideoStreamWindow'
-import { MoveRobotArmSection } from './RobotArmMovement'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
 import { SkipMissionDialog } from '../FrontPage/MissionOverview/StopDialogs'
@@ -87,21 +85,6 @@ const StyledStatusElement = styled.div`
     padding: 2px 6px 4px 6px;
     flex-direction: column;
     align-items: flex-start;
-`
-
-const StyledSmallContainer = styled.div`
-    display: flex;
-    padding: 24px;
-    width: 420px;
-    flex-direction: column;
-    align-items: flex-start;
-    border-radius: 6px;
-    border: 1px solid ${tokens.colors.ui.background__medium.hex};
-    background: ${tokens.colors.ui.background__default.hex};
-    margin: 2rem 0rem;
-    @media (max-width: ${phone_width}) {
-        width: 80vw;
-    }
 `
 
 export const RobotPage = ({ robotId }: { robotId: string }) => {
@@ -253,11 +236,6 @@ export const RobotPage = ({ robotId }: { robotId: string }) => {
                             </RobotInfo>
                         </StyledContainer>
                         {skipMissionDialog}
-                        {selectedRobot.model.type === RobotType.TaurobInspector && (
-                            <StyledSmallContainer>
-                                <MoveRobotArmSection robot={selectedRobot} />
-                            </StyledSmallContainer>
-                        )}
                         {selectedRobot.documentation && selectedRobot.documentation.length > 0 && (
                             <DocumentationSection documentation={selectedRobot.documentation} />
                         )}

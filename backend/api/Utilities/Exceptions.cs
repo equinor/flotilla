@@ -58,20 +58,6 @@
         public int IsarStatusCode { get; set; }
     }
 
-    public class MissionArmPositionException : Exception
-    {
-        public MissionArmPositionException(string message)
-            : base(message) { }
-
-        public MissionArmPositionException(string message, int isarStatusCode)
-            : base(message)
-        {
-            IsarStatusCode = isarStatusCode;
-        }
-
-        public int IsarStatusCode { get; set; }
-    }
-
     public class MissionLoaderUnavailableException(string message) : Exception(message) { }
 
     public class SourceException(string message) : Exception(message) { }

@@ -287,11 +287,6 @@ export class BackendAPICaller {
         return result.content
     }
 
-    static async setArmPosition(robotId: string, armPosition: string): Promise<void> {
-        const path: string = `robots/${robotId}/SetArmPosition/${armPosition}`
-        await BackendAPICaller.PUT(path).catch(BackendAPICaller.handleError('PUT', path))
-    }
-
     static async deleteMission(missionId: string) {
         const path: string = 'missions/runs/' + missionId
         return await BackendAPICaller.DELETE(path, '').catch(BackendAPICaller.handleError('DELETE', path))

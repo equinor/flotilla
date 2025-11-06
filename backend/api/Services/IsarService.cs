@@ -19,8 +19,6 @@ namespace Api.Services
 
         public Task ResumeMission(Robot robot);
 
-        public Task<IsarMission> StartMoveArm(Robot robot, string armPosition);
-
         public Task<MediaConfig?> GetMediaStreamConfig(Robot robot);
 
         public Task ReleaseInterventionNeeded(string robotIsarUri);
@@ -237,46 +235,6 @@ namespace Api.Services
                 logger.LogError("{Message}: {ErrorResponse}", message, errorResponse);
                 throw new MissionResumeException(message, statusCode);
             }
-        }
-
-        public async Task<IsarMission> StartMoveArm(Robot robot, string armPosition)
-        {
-            string armPositionPath = $"schedule/move_arm/{armPosition}";
-            var response = await CallApi(HttpMethod.Post, robot.IsarUri, armPositionPath);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                (string message, int statusCode) = GetErrorDescriptionForFailedIsarRequest(
-                    response
-                );
-                string errorResponse = await response.Content.ReadAsStringAsync();
-                logger.LogError("{Message}: {ErrorResponse}", message, errorResponse);
-                throw new MissionArmPositionException(message, statusCode);
-            }
-            if (response.Content is null)
-            {
-                string errorMessage = "Could not read content from start move arm";
-                logger.LogError("{ErrorMessage}", errorMessage);
-                throw new MissionArmPositionException(errorMessage);
-            }
-
-            var isarMissionResponse =
-                await response.Content.ReadFromJsonAsync<IsarStartMissionResponse>();
-            if (isarMissionResponse is null)
-            {
-                string errorMessage = $"Failed to move arm to '{armPosition}' from ISAR";
-                logger.LogError("{ErrorMessage}", errorMessage);
-                throw new JsonException(errorMessage);
-            }
-
-            var isarMission = new IsarMission(isarMissionResponse);
-
-            logger.LogInformation(
-                "ISAR move arm to '{ArmPosition}' started on robot '{RobotId}'",
-                armPosition,
-                robot.Id
-            );
-            return isarMission;
         }
 
         public async Task ReleaseInterventionNeeded(string robotIsarUri)
