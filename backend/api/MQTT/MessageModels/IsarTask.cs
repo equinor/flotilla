@@ -41,7 +41,6 @@ namespace Api.Mqtt.MessageModels
                 "take_thermal_video" => true,
                 "take_co2_measurement" => true,
                 "return_to_home" => false,
-                "move_arm" => false,
 
                 _ => throw new ArgumentException($"ISAR Task type '{isarTaskType}' not supported"),
             };

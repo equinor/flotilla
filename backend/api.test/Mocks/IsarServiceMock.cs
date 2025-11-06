@@ -41,15 +41,6 @@ namespace Api.Test.Mocks
             await Task.Run(() => Thread.Sleep(1));
         }
 
-        public async Task<IsarMission> StartMoveArm(Robot robot, string position)
-        {
-            await Task.Run(() => Thread.Sleep(1));
-            var isarServiceMissionResponse = new IsarMission(
-                new IsarStartMissionResponse { MissionId = "testStartMoveArm", Tasks = [] }
-            );
-            return isarServiceMissionResponse;
-        }
-
         public async Task<MediaConfig?> GetMediaStreamConfig(Robot robot)
         {
             await Task.Run(() => Thread.Sleep(1));
