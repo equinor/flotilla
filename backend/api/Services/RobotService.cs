@@ -214,6 +214,9 @@ namespace Api.Services
 
         public async Task UpdateCurrentMissionId(string robotId, string? currentMissionId)
         {
+            currentMissionId =
+                currentMissionId == null ? null : Sanitize.SanitizeUserInput(currentMissionId);
+
             logger.LogInformation(
                 "Setting currentMissionId on robot with id {robotId} to {NewValue}",
                 robotId,
