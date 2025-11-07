@@ -334,5 +334,8 @@
     "ReturnHomePaused": "Returning home paused",
     "Current Inspection Area": "Current Inspection Area",
     "GoingToRecharging": "Returning to recharge",
-    "GoingToLockdown": "Returning due to lockdown"
+    "GoingToLockdown": "Returning due to lockdown",
+    "Set maintenance mode": "Set maintenance mode",
+    "Maintenance": "Maintenance",
+    "Release maintenance mode": "Release maintenance mode"
 }

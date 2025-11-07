@@ -29,7 +29,7 @@ const StyledRobotPage = styled(StyledPage)`
     background-color: ${tokens.colors.ui.background__light.hex};
     gap: 5px;
 `
-const StyledTextButton = styled(StyledButton)`
+const FullWidthButton = styled(StyledButton)`
     text-align: left;
     align-self: stretch;
 `
@@ -117,14 +117,14 @@ export const RobotPage = ({ robotId }: { robotId: string }) => {
 
     const stopButton =
         selectedRobot && selectedRobot.status in [RobotStatus.Busy, RobotStatus.Paused] ? (
-            <StyledTextButton variant="contained" onClick={toggleSkipMissionDialog}>
+            <FullWidthButton variant="contained" onClick={toggleSkipMissionDialog}>
                 <Icon
                     name={Icons.StopButton}
                     style={{ color: tokens.colors.interactive.icon_on_interactive_colors.rgba }}
                     size={24}
                 />
                 {TranslateText('Stop')} {selectedRobot.name}
-            </StyledTextButton>
+            </FullWidthButton>
         ) : (
             <></>
         )
@@ -169,6 +169,12 @@ export const RobotPage = ({ robotId }: { robotId: string }) => {
                                     {selectedRobot && <ReturnHomeButton robot={selectedRobot} />}
                                     {selectedRobot && selectedRobot.status == RobotStatus.InterventionNeeded && (
                                         <InterventionNeededButton robot={selectedRobot} />
+                                    )}
+                                    {selectedRobot && (
+                                        <MaintenanceButton
+                                            robotId={selectedRobot.id}
+                                            robotStatus={selectedRobot.status}
+                                        />
                                     )}
                                 </StyledLeftContent>
                                 <StatusContent>
@@ -247,6 +253,51 @@ export const RobotPage = ({ robotId }: { robotId: string }) => {
                     </>
                 )}
             </StyledRobotPage>
+        </>
+    )
+}
+
+interface MaintenanceButtonProps {
+    robotId: string
+    robotStatus: RobotStatus
+}
+
+const MaintenanceButton = ({ robotId, robotStatus }: MaintenanceButtonProps) => {
+    const { TranslateText } = useLanguageContext()
+    const [isStoppingDueToMaintenance, setIsStoppingDueToMaintenance] = useState(false)
+
+    const onSetMaintenenceMode = () => {
+        setIsStoppingDueToMaintenance(true)
+
+        BackendAPICaller.setMaintenanceMode(robotId)
+            .then(() => {
+                setIsStoppingDueToMaintenance(false)
+            })
+            .catch(() => {
+                console.log(`Unable to set maintenance mode on robot with id ${robotId}. `)
+                setIsStoppingDueToMaintenance(false)
+            })
+    }
+
+    const onReleaseMaintenanceMode = () => {
+        BackendAPICaller.releaseMaintenanceMode(robotId)
+            .then(() => {})
+            .catch(() => {
+                console.log(`Unable to release maintenance mode on robot with id ${robotId}. `)
+            })
+    }
+
+    return (
+        <>
+            {robotStatus == RobotStatus.Maintenance ? (
+                <FullWidthButton onClick={onReleaseMaintenanceMode}>
+                    {TranslateText(`Release maintenance mode`)}
+                </FullWidthButton>
+            ) : (
+                <FullWidthButton color="danger" disabled={isStoppingDueToMaintenance} onClick={onSetMaintenenceMode}>
+                    {TranslateText('Set maintenance mode')}
+                </FullWidthButton>
+            )}
         </>
     )
 }

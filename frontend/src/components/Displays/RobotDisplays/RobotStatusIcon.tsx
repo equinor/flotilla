@@ -85,6 +85,10 @@ export const RobotStatusChip = ({ status, isarConnected, itemSize }: StatusProps
             status = RobotStatus.Busy
             break
         }
+        case RobotStatus.Maintenance: {
+            statusIcon = Icons.Warning
+            break
+        }
 
         default: {
             iconColor = tokens.colors.text.static_icons__default.hex

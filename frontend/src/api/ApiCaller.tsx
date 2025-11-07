@@ -387,6 +387,28 @@ export class BackendAPICaller {
         return result.content
     }
 
+    static async setMaintenanceMode(robotId: string) {
+        const path: string = `robots/set-maintenance-mode/` + robotId
+        const body = {}
+
+        const result = await BackendAPICaller.POST<unknown, unknown>(path, body).catch((e) => {
+            console.error(`Failed to POST /${path}: ` + e)
+            throw e
+        })
+        return result.content
+    }
+
+    static async releaseMaintenanceMode(robotId: string) {
+        const path: string = `robots/release-maintenance-mode/` + robotId
+        const body = {}
+
+        const result = await BackendAPICaller.POST<unknown, unknown>(path, body).catch((e) => {
+            console.error(`Failed to POST /${path}: ` + e)
+            throw e
+        })
+        return result.content
+    }
+
     static async getInspection(isarInspectionId: string): Promise<Blob> {
         const path: string = 'inspection/' + isarInspectionId
 

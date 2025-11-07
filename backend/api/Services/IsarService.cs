@@ -26,6 +26,10 @@ namespace Api.Services
         public Task SendToLockdown(string robotIsarUri);
 
         public Task ReleaseFromLockdown(string robotIsarUri);
+
+        public Task SetMaintenanceMode(string robotIsarUri);
+
+        public Task ReleaseMaintenanceMode(string robotIsarUri);
     }
 
     public class IsarService(IDownstreamApi isarApi, ILogger<IsarService> logger) : IIsarService
@@ -340,6 +344,68 @@ namespace Api.Services
                     robotIsarUri
                 );
                 return;
+            }
+
+            if (!response.IsSuccessStatusCode)
+            {
+                (string message, int statusCode) = GetErrorDescriptionForFailedIsarRequest(
+                    response
+                );
+                string errorResponse = await response.Content.ReadAsStringAsync();
+                logger.LogError("{Message}: {ErrorResponse}", message, errorResponse);
+                throw new IsarCommunicationException(message);
+            }
+        }
+
+        public async Task SetMaintenanceMode(string robotIsarUri)
+        {
+            HttpResponseMessage? response;
+            try
+            {
+                response = await CallApi(
+                    HttpMethod.Post,
+                    robotIsarUri,
+                    "schedule/maintenance-mode"
+                );
+            }
+            catch (Exception e)
+            {
+                logger.LogError(
+                    "Encountered an exception when making an API call to ISAR: {Message}",
+                    e.Message
+                );
+                throw new IsarCommunicationException(e.Message);
+            }
+
+            if (!response.IsSuccessStatusCode)
+            {
+                (string message, int statusCode) = GetErrorDescriptionForFailedIsarRequest(
+                    response
+                );
+                string errorResponse = await response.Content.ReadAsStringAsync();
+                logger.LogError("{Message}: {ErrorResponse}", message, errorResponse);
+                throw new IsarCommunicationException(message);
+            }
+        }
+
+        public async Task ReleaseMaintenanceMode(string robotIsarUri)
+        {
+            HttpResponseMessage? response;
+            try
+            {
+                response = await CallApi(
+                    HttpMethod.Post,
+                    robotIsarUri,
+                    "schedule/release-maintenance-mode"
+                );
+            }
+            catch (Exception e)
+            {
+                logger.LogError(
+                    "Encountered an exception when making an API call to ISAR: {Message}",
+                    e.Message
+                );
+                throw new IsarCommunicationException(e.Message);
             }
 
             if (!response.IsSuccessStatusCode)
