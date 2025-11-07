@@ -67,5 +67,15 @@ namespace Api.Test.Mocks
         {
             await Task.Run(() => Thread.Sleep(1));
         }
+
+        public async Task SetMaintenanceMode(string robotIsarUri)
+        {
+            await Task.Run(() => Thread.Sleep(1));
+        }
+
+        public async Task ReleaseMaintenanceMode(string robotIsarUri)
+        {
+            await Task.Run(() => Thread.Sleep(1));
+        }
     }
 }

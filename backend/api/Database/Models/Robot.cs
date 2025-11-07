@@ -142,6 +142,7 @@ namespace Api.Database.Models
         Lockdown,
         GoingToLockdown,
         GoingToRecharging,
+        Maintenance,
     }
 
     public enum RobotCapabilitiesEnum

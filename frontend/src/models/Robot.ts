@@ -20,6 +20,7 @@ export enum RobotStatus {
     Lockdown = 'Lockdown',
     GoingToLockdown = 'GoingToLockdown',
     GoingToRecharging = 'GoingToRecharging',
+    Maintenance = 'Maintenance',
 }
 
 export interface Robot {

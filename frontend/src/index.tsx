@@ -14,7 +14,7 @@ await msalInstance.initialize()
 
 // Add event callback to prevent multiple interactions
 msalInstance.addEventCallback((event) => {
-    if (event.eventType === EventType.LOGIN_SUCCESS || event.eventType === EventType.ACQUIRE_TOKEN_SUCCESS) {
+    if (event.eventType === EventType.LOGIN_SUCCESS) {
         console.log('Authentication successful')
     }
 })
