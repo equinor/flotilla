@@ -54,6 +54,7 @@ namespace Api.Services
 
         public async Task<List<PointillaMapResponse>?> GetMap(string plantCode)
         {
+            plantCode = Sanitize.SanitizeUserInput(plantCode);
             string relativePath = $"Map/{plantCode}";
 
             var response = await pointillaApi.CallApiForUserAsync(
