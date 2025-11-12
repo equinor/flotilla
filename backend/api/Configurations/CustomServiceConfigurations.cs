@@ -1,20 +1,27 @@
 ﻿using System.Reflection;
 using Api.Database.Context;
 using Api.Services.MissionLoaders;
+using Azure.Core;
+using Azure.Identity;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Npgsql;
 
 namespace Api.Configurations
 {
     public static class CustomServiceConfigurations
     {
+        private const string AzurePostgresScope =
+            "https://ossrdbms-aad.database.windows.net/.default";
+
         public static IServiceCollection ConfigureDatabase(
             this IServiceCollection services,
             IConfiguration configuration,
             string environmentName
         )
         {
+            Console.WriteLine("Configuring Database...");
             bool useInMemoryDatabase = configuration
                 .GetSection("Database")
                 .GetValue<bool>("UseInMemoryDatabase");
@@ -27,6 +34,7 @@ namespace Api.Configurations
             }
             else if (useInMemoryDatabase)
             {
+                Console.WriteLine("Using InMemory Database");
                 DbContextOptionsBuilder dbBuilder =
                     new DbContextOptionsBuilder<FlotillaDbContext>();
                 string sqlConnectionString = new SqliteConnectionStringBuilder
@@ -58,36 +66,146 @@ namespace Api.Configurations
             }
             else
             {
-                string? connection = configuration["Database:PostgreSqlConnectionString"];
-                int DATABASE_TIMEOUT;
-                var timeoutValue = configuration["Database:Timeout"];
-                if (
-                    !string.IsNullOrEmpty(timeoutValue)
-                    && int.TryParse(timeoutValue, out var parsedTimeout)
-                )
+                try
                 {
-                    DATABASE_TIMEOUT = parsedTimeout;
+                    Console.WriteLine("Trying Managed Identity for PostgreSQL…");
+                    ConfigureDatabaseWithManagedIdentity(services, configuration);
+                    Console.WriteLine("Managed Identity configured successfully.");
                 }
-                else
+                catch (Exception ex)
                 {
-                    DATABASE_TIMEOUT = 30;
+                    Console.WriteLine(
+                        $"Managed Identity failed. Falling back to Key Vault. Reason: {ex.GetType().Name}: {ex.Message}"
+                    );
+                    ConfigureDatabaseWithKeyvaultConnString(services, configuration);
                 }
-                // Setting splitting behavior explicitly to avoid warning
-                services.AddDbContext<FlotillaDbContext>(
-                    options =>
-                        options.UseNpgsql(
-                            connection,
-                            o =>
-                            {
-                                o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery);
-                                o.EnableRetryOnFailure();
-                                o.CommandTimeout(DATABASE_TIMEOUT);
-                            }
-                        ),
-                    ServiceLifetime.Scoped
-                );
             }
             return services;
+        }
+
+        public static void ConfigureDatabaseWithManagedIdentity(
+            this IServiceCollection services,
+            IConfiguration configuration
+        )
+        {
+            var clientId =
+                configuration["ManagedIdentity:ClientId"]
+                ?? throw new InvalidOperationException("Missing ManagedIdentity:ClientId");
+            var server =
+                configuration["Database:Server"]
+                ?? throw new InvalidOperationException("Missing Database:Server");
+            var postgresDb =
+                configuration["Database:PostgresDatabase"]
+                ?? throw new InvalidOperationException("Missing Database:PostgresDatabase");
+            var dbUser =
+                configuration["Database:User"]
+                ?? throw new InvalidOperationException("Missing Database:User");
+
+            Console.WriteLine("Requesting Entra token via ManagedIdentityCredential...");
+            var mi = new ManagedIdentityCredential(clientId);
+            TokenRequestContext context = new([AzurePostgresScope]);
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
+            AccessToken token;
+            try
+            {
+                token = mi.GetToken(context, cts.Token);
+            }
+            catch (OperationCanceledException oce)
+            {
+                throw new TimeoutException("Timed out acquiring Managed Identity token", oce);
+            }
+
+            var baseConnString = new NpgsqlConnectionStringBuilder
+            {
+                Host = $"{server}.postgres.database.azure.com",
+                Database = postgresDb,
+                Username = $"{dbUser}",
+                SslMode = SslMode.VerifyFull,
+            }.ToString();
+
+            int DATABASE_TIMEOUT;
+            var timeoutValue = configuration["Database:Timeout"];
+            if (
+                !string.IsNullOrEmpty(timeoutValue)
+                && int.TryParse(timeoutValue, out var parsedTimeout)
+            )
+            {
+                DATABASE_TIMEOUT = parsedTimeout;
+            }
+            else
+            {
+                DATABASE_TIMEOUT = 30;
+            }
+            // Setting splitting behavior explicitly to avoid warning
+            services.AddDbContext<FlotillaDbContext>(
+                options =>
+                    options.UseNpgsql(
+                        baseConnString,
+                        o =>
+                        {
+                            o.ConfigureDataSource(ds =>
+                            {
+                                var mi = new ManagedIdentityCredential(clientId);
+                                ds.UsePeriodicPasswordProvider(
+                                    async (_, ct) =>
+                                    {
+                                        using var cts = new CancellationTokenSource(
+                                            TimeSpan.FromSeconds(5)
+                                        );
+                                        var token = await mi.GetTokenAsync(
+                                            new TokenRequestContext([AzurePostgresScope]),
+                                            CancellationTokenSource
+                                                .CreateLinkedTokenSource(ct, cts.Token)
+                                                .Token
+                                        );
+                                        return token.Token;
+                                    },
+                                    successRefreshInterval: TimeSpan.FromMinutes(55),
+                                    failureRefreshInterval: TimeSpan.FromSeconds(5)
+                                );
+                            });
+                            o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery);
+                            o.EnableRetryOnFailure();
+                            o.CommandTimeout(DATABASE_TIMEOUT);
+                        }
+                    ),
+                ServiceLifetime.Scoped
+            );
+        }
+
+        public static void ConfigureDatabaseWithKeyvaultConnString(
+            this IServiceCollection services,
+            IConfiguration configuration
+        )
+        {
+            string? connection = configuration["Database:PostgreSqlConnectionString"];
+            int DATABASE_TIMEOUT;
+            var timeoutValue = configuration["Database:Timeout"];
+            if (
+                !string.IsNullOrEmpty(timeoutValue)
+                && int.TryParse(timeoutValue, out var parsedTimeout)
+            )
+            {
+                DATABASE_TIMEOUT = parsedTimeout;
+            }
+            else
+            {
+                DATABASE_TIMEOUT = 30;
+            }
+            // Setting splitting behavior explicitly to avoid warning
+            services.AddDbContext<FlotillaDbContext>(
+                options =>
+                    options.UseNpgsql(
+                        connection,
+                        o =>
+                        {
+                            o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery);
+                            o.EnableRetryOnFailure();
+                            o.CommandTimeout(DATABASE_TIMEOUT);
+                        }
+                    ),
+                ServiceLifetime.Scoped
+            );
         }
 
         public static IServiceCollection ConfigureSwagger(
