@@ -41,6 +41,10 @@ export const RobotStatusChip = ({ status, isarConnected, itemSize }: StatusProps
             break
         }
         case RobotStatus.Paused:
+        case RobotStatus.Pausing:
+        case RobotStatus.PausingReturnHome:
+        case RobotStatus.Stopping:
+        case RobotStatus.StoppingReturnHome:
         case RobotStatus.Busy: {
             statusIcon = Icons.Ongoing
             iconColor = tokens.colors.text.static_icons__default.hex

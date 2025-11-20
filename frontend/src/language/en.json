@@ -340,5 +340,9 @@
     "confirm_word": "Confirm",
     "close_word": "Close",
     "intervention_needed_button_text": "Robot is localized",
-    "intervention_needed_dialog_text": "Are you sure you want to exit the intervention needed state? Be sure that the robot is well localized before doing this!"
+    "intervention_needed_dialog_text": "Are you sure you want to exit the intervention needed state? Be sure that the robot is well localized before doing this!",
+    "Stopping": "Stopping",
+    "Pausing": "Pausing",
+    "StoppingReturnHome": "Stopping return home",
+    "PausingReturnHome": "Pausing return home"
 }
