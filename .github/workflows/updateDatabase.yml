@@ -22,7 +22,6 @@ jobs:
     permissions:
       pull-requests: write
       issues: write
-      reactions: write
     outputs:
       eyes_id: ${{ fromJson(steps.eyes.outputs.data).id }}
     steps:
@@ -62,7 +61,6 @@ jobs:
     permissions:
       pull-requests: write
       issues: write
-      reactions: write
     steps:
       - name: Remove 'eyes' reaction
         uses: octokit/request-action@v2.x
@@ -92,7 +90,6 @@ jobs:
     permissions:
       pull-requests: write
       issues: write
-      reactions: write
     steps:
       - name: Remove 'eyes' reaction
         uses: octokit/request-action@v2.x
