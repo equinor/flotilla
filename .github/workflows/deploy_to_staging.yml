@@ -57,6 +57,7 @@ jobs:
     name: Build and push containers to auroraprodcr for Staging/Production
     permissions:
       contents: read
+      packages: write
     needs: [trigger-github-deployment]
     strategy:
       matrix:
@@ -76,6 +77,7 @@ jobs:
     name: Update deployment in Staging
     permissions:
       contents: read
+      packages: write
     needs: [trigger-github-deployment, build-and-push-components]
     uses: ./.github/workflows/update_aurora_deployment.yml
     with:
