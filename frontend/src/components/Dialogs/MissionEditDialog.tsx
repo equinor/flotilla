@@ -1,4 +1,4 @@
-import { Button, Checkbox, Chip, TextField, Typography } from '@equinor/eds-core-react'
+import { Button, Checkbox, Chip, Textarea, TextField, Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
@@ -220,11 +220,12 @@ export const MissionCommentEditDialog = ({ mission, isOpen, onClose }: MissionEd
         <MissionStyledDialog open={isOpen}>
             <StyledFormCard>
                 <Typography variant="h2">{TranslateText('Edit') + ' ' + TranslateText('comment')}</Typography>
-                <TextField
+                <Textarea
                     id="commentEdit"
+                    rows={2}
                     label={TranslateText('Comment')}
                     value={comment}
-                    onChange={(changes: ChangeEvent<HTMLInputElement>) => setComment(changes.target.value)}
+                    onChange={(changes: ChangeEvent<HTMLTextAreaElement>) => setComment(changes.target.value)}
                 />
                 <ButtonSection>
                     <Button onClick={onClose} variant="outlined" color="primary">
