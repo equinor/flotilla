@@ -1,7 +1,7 @@
 name: Deploy to Development
 permissions:
   contents: read
-
+  pull-requests: read
 
 # Only one workflow in a concurrency group may run at a time
 concurrency:
