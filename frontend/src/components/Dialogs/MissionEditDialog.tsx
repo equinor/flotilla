@@ -222,8 +222,6 @@ export const MissionCommentEditDialog = ({ mission, isOpen, onClose }: MissionEd
                 <Typography variant="h2">{TranslateText('Edit') + ' ' + TranslateText('comment')}</Typography>
                 <TextField
                     id="commentEdit"
-                    multiline
-                    rows={2}
                     label={TranslateText('Comment')}
                     value={comment}
                     onChange={(changes: ChangeEvent<HTMLInputElement>) => setComment(changes.target.value)}
