@@ -1,6 +1,8 @@
 name: Promote to Production
 permissions:
   contents: read
+  pull-requests: read
+  packages: write
 
 # Only one workflow in a concurrency group may run at a time
 concurrency:
