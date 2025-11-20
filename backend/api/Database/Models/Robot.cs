@@ -143,6 +143,10 @@ namespace Api.Database.Models
         GoingToLockdown,
         GoingToRecharging,
         Maintenance,
+        Pausing,
+        PausingReturnHome,
+        Stopping,
+        StoppingReturnHome,
     }
 
     public enum RobotCapabilitiesEnum
