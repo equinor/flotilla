@@ -166,7 +166,9 @@ export const RobotPage = ({ robotId }: { robotId: string }) => {
                                 <StyledLeftContent>
                                     <RobotImage height="350px" robotType={selectedRobot.model.type} />
                                     {stopButton}
-                                    {selectedRobot && <ReturnHomeButton robot={selectedRobot} />}
+                                    {selectedRobot && selectedRobot.status != RobotStatus.InterventionNeeded && (
+                                        <ReturnHomeButton robot={selectedRobot} />
+                                    )}
                                     {selectedRobot && selectedRobot.status == RobotStatus.InterventionNeeded && (
                                         <InterventionNeededButton robot={selectedRobot} />
                                     )}
