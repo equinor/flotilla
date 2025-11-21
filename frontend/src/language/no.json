@@ -329,7 +329,6 @@
     "Error description": "Feilmelding",
     "Statistics": "Statistikk",
     "Unable to release robot {0} from intervention mode": "Kunne ikke frigjøre robot {0} fra intervensjonsmodus",
-    "Robot ready for missions": "Roboten klar for oppdrag",
     "InterventionNeeded": "Intervensjon nødvendig",
     "ReturnHomePaused": "Kjøring hjem pauset",
     "Current Inspection Area": "Nåværende inspeksjonsområde",
@@ -337,5 +336,9 @@
     "GoingToLockdown": "Returnerer på grunn av lockdown",
     "Set maintenance mode": "Sett vedlikeholdsmodus",
     "Maintenance": "Vedlikehold",
-    "Release maintenance mode": "Frigjør fra vedlikeholdsmodus"
+    "Release maintenance mode": "Frigjør fra vedlikeholdsmodus",
+    "confirm_word": "Bekreft",
+    "close_word": "Lukk",
+    "intervention_needed_button_text": "Roboten er lokalisert",
+    "intervention_needed_dialog_text": "Er du sikker på at du vil avslutte intervensjonsmodus? Sørg for at roboten er godt lokalisert før dette gjøres!"
 }

@@ -7,6 +7,7 @@ import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { StyledButton } from 'components/Styles/StyledComponents'
 import styled from 'styled-components'
 import { useState } from 'react'
+import { Button, Dialog, Typography } from '@equinor/eds-core-react'
 
 const StyledTextButton = styled(StyledButton)`
     text-align: left;
@@ -17,6 +18,7 @@ export const InterventionNeededButton = ({ robot }: { robot: Robot }) => {
     const { TranslateText } = useLanguageContext()
     const { setAlert, setListAlert } = useAlertContext()
     const [isDisabled, setIsDisabled] = useState(false)
+    const [isDialogOpen, setIsDialogOpen] = useState(false)
 
     const releaseInterventionNeeded = () => {
         disableButton()
@@ -50,9 +52,47 @@ export const InterventionNeededButton = ({ robot }: { robot: Robot }) => {
         }, 1000)
     }
 
+    const onConfirm = () => {
+        releaseInterventionNeeded()
+        setIsDialogOpen(false)
+    }
+
     return (
-        <StyledTextButton variant="outlined" disabled={isDisabled} onClick={releaseInterventionNeeded}>
-            {TranslateText('Robot ready for missions')}
-        </StyledTextButton>
+        <>
+            <StyledTextButton variant="outlined" disabled={isDisabled} onClick={() => setIsDialogOpen(true)}>
+                {TranslateText('intervention_needed_button_text')}
+            </StyledTextButton>
+            <ReleaseInterventionNeededDialog
+                isOpen={isDialogOpen}
+                onClose={() => setIsDialogOpen(false)}
+                onConfirm={onConfirm}
+            />
+        </>
+    )
+}
+
+interface ReleaseInterventionNeededDialogProps {
+    isOpen: boolean
+    onClose: () => void
+    onConfirm: () => void
+}
+
+const ReleaseInterventionNeededDialog = ({ isOpen, onClose, onConfirm }: ReleaseInterventionNeededDialogProps) => {
+    const { TranslateText } = useLanguageContext()
+
+    return (
+        <Dialog open={isOpen}>
+            <Dialog.CustomContent>
+                <Typography variant="body_short">{TranslateText('intervention_needed_dialog_text')}</Typography>
+            </Dialog.CustomContent>
+            <Dialog.Actions>
+                <Button color="danger" onClick={onConfirm}>
+                    {TranslateText('confirm_word')}
+                </Button>
+                <Button onClick={onClose} variant="ghost">
+                    {TranslateText('close_word')}
+                </Button>
+            </Dialog.Actions>
+        </Dialog>
     )
 }
