@@ -329,7 +329,6 @@
     "Error description": "Error description",
     "Statistics": "Statistics",
     "Unable to release robot {0} from intervention mode": "Unable to release robot {0} from intervention mode",
-    "Robot ready for missions": "Robot ready for missions",
     "InterventionNeeded": "Intervention Needed",
     "ReturnHomePaused": "Returning home paused",
     "Current Inspection Area": "Current Inspection Area",
@@ -337,5 +336,9 @@
     "GoingToLockdown": "Returning due to lockdown",
     "Set maintenance mode": "Set maintenance mode",
     "Maintenance": "Maintenance",
-    "Release maintenance mode": "Release maintenance mode"
+    "Release maintenance mode": "Release maintenance mode",
+    "confirm_word": "Confirm",
+    "close_word": "Close",
+    "intervention_needed_button_text": "Robot is localized",
+    "intervention_needed_dialog_text": "Are you sure you want to exit the intervention needed state? Be sure that the robot is well localized before doing this!"
 }
