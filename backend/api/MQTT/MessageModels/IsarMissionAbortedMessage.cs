@@ -11,8 +11,9 @@ namespace Api.Mqtt.MessageModels
         [JsonPropertyName("robot_name")]
         public string RobotName { get; set; }
 
+#nullable enable
         [JsonPropertyName("mission_id")]
-        public string MissionId { get; set; }
+        public string? MissionId { get; set; }
 
         [JsonPropertyName("can_be_continued")]
         public bool CanBeContinued { get; set; }

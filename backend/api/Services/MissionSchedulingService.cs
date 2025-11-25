@@ -15,7 +15,7 @@ namespace Api.Services
 
         public Task<MissionRun> MoveMissionRunBackToQueue(
             string robotId,
-            string isarMissionRunId,
+            string? isarMissionRunId,
             string? stopReason = null
         );
 
@@ -283,7 +283,7 @@ namespace Api.Services
 
         public async Task<MissionRun> MoveMissionRunBackToQueue(
             string robotId,
-            string isarMissionRunId,
+            string? isarMissionRunId,
             string? stopReason = null
         )
         {
@@ -293,6 +293,18 @@ namespace Api.Services
                 string errorMessage = $"Robot with ID: {robotId} was not found in the database";
                 logger.LogError("{Message}", errorMessage);
                 throw new RobotNotFoundException(errorMessage);
+            }
+
+            if (isarMissionRunId is null)
+            {
+                if (robot.CurrentMissionId is null)
+                {
+                    string errorMessage =
+                        $"Robot {robotId} has no current mission to be moved back to the queue";
+                    logger.LogWarning("{Message}", errorMessage);
+                    throw new MissionRunNotFoundException(errorMessage);
+                }
+                isarMissionRunId = robot.CurrentMissionId;
             }
 
             var missionRun = await missionRunService.ReadById(isarMissionRunId, readOnly: true);
