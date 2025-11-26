@@ -15,7 +15,6 @@ namespace Api.Database.Models
         /// is stored as strings in database
         TaurobInspector,
         TaurobOperator,
-        ExR2,
         Robot,
         Turtlebot,
         AnymalX,

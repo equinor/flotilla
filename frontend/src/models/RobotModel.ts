@@ -1,7 +1,6 @@
 export enum RobotType {
     TaurobInspector = 'TaurobInspector',
     TaurobOperator = 'TaurobOperator',
-    ExR2 = 'ExR2',
     Robot = 'Robot',
     Turtlebot = 'Turtlebot',
     AnymalX = 'AnymalX',

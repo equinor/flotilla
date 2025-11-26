@@ -2,7 +2,6 @@ import { RobotType } from 'models/RobotModel'
 import taurobInspector from 'mediaAssets/taurob_inspector_no_background.png'
 import anymalX from 'mediaAssets/anymal_x.png'
 import anymalD from 'mediaAssets/anymal_d.png'
-import exRobotics from 'mediaAssets/ExRobotics.webp'
 import turtleBot from 'mediaAssets/turtlebot.webp'
 import robot from 'mediaAssets/robot.png'
 import styled from 'styled-components'
@@ -37,10 +36,6 @@ export const RobotImage = ({ robotType, height = '200px' }: TypeProps) => {
     switch (robotType) {
         case RobotType.TaurobInspector: {
             robotImage = taurobInspector
-            break
-        }
-        case RobotType.ExR2: {
-            robotImage = exRobotics
             break
         }
         case RobotType.Turtlebot: {

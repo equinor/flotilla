@@ -53,7 +53,7 @@ public class RobotModelControllerTests : IAsyncLifetime
 
         // Seven models are added by default to the database
         // This number must be changed if new robots are introduced
-        Assert.Equal(7, robotModels!.Count);
+        Assert.Equal(6, robotModels!.Count);
     }
 
     [Fact]
