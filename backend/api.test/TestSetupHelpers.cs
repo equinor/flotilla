@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data.Common;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
@@ -48,6 +49,16 @@ public static class TestSetupHelpers
         var connection = context.Database.GetDbConnection();
         await connection.OpenAsync();
 
+        var rm = context.RobotModels.AsNoTracking();
+        if (rm.ToList().Count == 0)
+        {
+            // If no models in database, add default ones
+            // Robot models are essentially database enums and should just be added to all databases
+            // They can then be modified later with other values if needed
+            InitDb.AddRobotModelsToContext(context);
+            context.SaveChanges();
+            context.ChangeTracker.Clear();
+        }
         return (container, connectionString, connection);
     }
 
