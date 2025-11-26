@@ -26,24 +26,9 @@ namespace Api.Services
         "CA1309:Use ordinal StringComparison",
         Justification = "EF Core refrains from translating string comparison overloads to SQL"
     )]
-    public class RobotModelService : IRobotModelService
+    public class RobotModelService(FlotillaDbContext context) : IRobotModelService
     {
-        private readonly FlotillaDbContext _context;
-
-        public RobotModelService(FlotillaDbContext context)
-        {
-            _context = context;
-
-            if (!ReadAll(readOnly: true).Result.Any())
-            {
-                // If no models in database, add default ones
-                // Robot models are essentially database enums and should just be added to all databases
-                // They can then be modified later with other values if needed
-                InitDb.AddRobotModelsToContext(context);
-                context.SaveChanges();
-                context.ChangeTracker.Clear();
-            }
-        }
+        private readonly FlotillaDbContext _context = context;
 
         public async Task<IEnumerable<RobotModel>> ReadAll(bool readOnly = true)
         {
