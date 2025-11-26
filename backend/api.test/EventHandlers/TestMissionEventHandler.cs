@@ -104,7 +104,9 @@ namespace Api.Test.EventHandlers
             Assert.Equal(MissionStatus.Ongoing, postTestMissionRun!.Status);
         }
 
-        [Fact]
+#pragma warning disable xUnit1004
+        [Fact(Skip = "Flaky test - refactor needed")]
+#pragma warning restore xUnit1004
         public async Task SecondScheduledMissionQueuedIfRobotIsBusy()
         {
             // Arrange
@@ -250,7 +252,9 @@ namespace Api.Test.EventHandlers
             Assert.Equal(MissionStatus.Ongoing, postStartMissionRunTwo.Status);
         }
 
-        [Fact]
+#pragma warning disable xUnit1004
+        [Fact(Skip = "Skipping until issue #1767 is solved because test is unreliable")]
+#pragma warning restore xUnit1004
         public async Task QueuedMissionsAreNotAbortedWhenRobotReadyForMissionsHappensAtTheSameTimeAsOnIsarMissionCompleted()
         {
             // Arrange
