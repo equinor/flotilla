@@ -11,7 +11,7 @@ import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
-import { useMediaStream } from 'components/Contexts/MediaStreamContext'
+import { useMediaStreamContext } from 'components/Contexts/MediaStreamContext'
 import { StyledPage } from 'components/Styles/StyledComponents'
 import { InspectionDialogView } from '../InspectionReportPage/InspectionView'
 import { useInspectionsContext } from 'components/Contexts/InspectionsContext'
@@ -42,7 +42,7 @@ export const MissionPage = ({ missionId }: { missionId: string }) => {
     const [videoMediaStreams, setVideoMediaStreams] = useState<MediaStreamTrack[]>([])
     const [selectedMission, setSelectedMission] = useState<Mission>()
     const { registerEvent, connectionReady } = useSignalRContext()
-    const { mediaStreams, addMediaStreamConfigIfItDoesNotExist } = useMediaStream()
+    const { mediaStreams, addMediaStreamConfigIfItDoesNotExist } = useMediaStreamContext()
     const { selectedInspectionTask } = useInspectionsContext()
 
     useEffect(() => {

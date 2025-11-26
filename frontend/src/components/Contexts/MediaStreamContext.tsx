@@ -72,35 +72,12 @@ export const MediaStreamProvider: FC<Props> = ({ children }) => {
         })
     }
 
-    const isTokenExpired = (token: string): boolean => {
-        try {
-            const payload = JSON.parse(atob(token.split('.')[1]))
-            return Date.now() >= payload.exp * 1000
-        } catch {
-            return true
-        }
-    }
-
     const createLiveKitConnection = async (config: MediaStreamConfig, cachedConfig: boolean = false) => {
-        if (isTokenExpired(config.token)) {
-            console.log('Token expired, refreshing config')
-            if (!cachedConfig) {
-                refreshRobotMediaConfig(config.robotId)
-                return
-            }
-        }
-
         const room = new Room()
 
         window.addEventListener('unload', async () => room.disconnect())
 
         room.on(RoomEvent.TrackSubscribed, (track) => addTrackToConnection(track.mediaStreamTrack, config.robotId))
-
-        room.on(RoomEvent.Disconnected, (reason) => {
-            console.log('LiveKit disconnected:', reason)
-            refreshRobotMediaConfig(config.robotId)
-        })
-
         room.on(RoomEvent.TrackUnpublished, (e) => {
             setMediaStreams((oldStreams) => {
                 const streamsCopy = { ...oldStreams }
@@ -122,24 +99,12 @@ export const MediaStreamProvider: FC<Props> = ({ children }) => {
         })
 
         if (room.state === ConnectionState.Disconnected) {
-            try {
-                await room.connect(config.url, config.token)
-                console.log('LiveKit room status: ', JSON.stringify(room.state))
-            } catch (error) {
-                console.error('Failed to connect to LiveKit room: ', error)
-                if (cachedConfig) {
-                    console.log('Connection failed with cached config, refreshing...')
-                    refreshRobotMediaConfig(config.robotId)
-                } else {
-                    setMediaStreams((oldStreams) => ({
-                        ...oldStreams,
-                        [config.robotId]: {
-                            ...oldStreams[config.robotId],
-                            isLoading: false,
-                        },
-                    }))
-                }
-            }
+            room.connect(config.url, config.token)
+                .then(() => console.log('LiveKit room status: ', JSON.stringify(room.state)))
+                .catch((error) => {
+                    if (cachedConfig) refreshRobotMediaConfig(config.robotId)
+                    else console.error('Failed to connect to LiveKit room: ', error)
+                })
         }
     }
 
@@ -181,14 +146,19 @@ export const MediaStreamProvider: FC<Props> = ({ children }) => {
             .then((conf: MediaStreamConfig | null | undefined) => {
                 if (conf) addConfigToMediaStreams(conf)
             })
-            .catch((error) => console.error('Error refreshing media config:', error))
+            .catch(() => console.log(`No media config found for robot with ID ${robotId}`))
     }
 
     return (
-        <MediaStreamContext.Provider value={{ mediaStreams, addMediaStreamConfigIfItDoesNotExist }}>
+        <MediaStreamContext.Provider
+            value={{
+                mediaStreams,
+                addMediaStreamConfigIfItDoesNotExist,
+            }}
+        >
             {children}
         </MediaStreamContext.Provider>
     )
 }
 
-export const useMediaStream = () => useContext(MediaStreamContext)
+export const useMediaStreamContext = () => useContext(MediaStreamContext)
