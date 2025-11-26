@@ -11,7 +11,7 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 import { StyledButton, StyledPage } from 'components/Styles/StyledComponents'
 import { DocumentationSection } from './Documentation'
-import { useMediaStreamContext } from 'components/Contexts/MediaStreamContext'
+import { useMediaStream } from 'components/Contexts/MediaStreamContext'
 import { VideoStreamSection } from '../MissionPage/MissionPage'
 import { useEffect, useState } from 'react'
 import { VideoStreamWindow } from '../MissionPage/VideoStream/VideoStreamWindow'
@@ -90,7 +90,7 @@ const StyledStatusElement = styled.div`
 export const RobotPage = ({ robotId }: { robotId: string }) => {
     const { TranslateText } = useLanguageContext()
     const { enabledRobots } = useAssetContext()
-    const { mediaStreams, addMediaStreamConfigIfItDoesNotExist } = useMediaStreamContext()
+    const { mediaStreams, addMediaStreamConfigIfItDoesNotExist } = useMediaStream()
     const [videoMediaStreams, setVideoMediaStreams] = useState<MediaStreamTrack[]>([])
     const { ongoingMissions } = useMissionsContext()
 
