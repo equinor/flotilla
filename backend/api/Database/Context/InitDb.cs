@@ -518,7 +518,6 @@ namespace Api.Database.Context
             context.SaveChanges();
             var models = context.RobotModels.AsTracking().AsEnumerable().ToList();
             robots[0].Model = models.Find(model => model.Type == RobotType.TaurobInspector)!;
-            robots[1].Model = models.Find(model => model.Type == RobotType.ExR2)!;
             robots[2].Model = models.Find(model => model.Type == RobotType.AnymalX)!;
             robots[3].Model = models.Find(model => model.Type == RobotType.Robot)!;
 
