@@ -5,7 +5,7 @@ import styled from 'styled-components'
 import { Typography } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useMissionControlContext } from 'components/Contexts/MissionControlContext'
-import { SkipMissionDialog, MissionStatusRequest } from 'components/Pages/FrontPage/MissionOverview/StopDialogs'
+import { SkipMissionDialog, MissionStatusRequest } from 'pages/FrontPage/MissionOverview/StopDialogs'
 import { useState } from 'react'
 
 interface MissionControlButtonsProps {

@@ -10,7 +10,7 @@ import {
     MissionHistoryPage,
     PredefinedMissionsPage,
     RobotStatusPage,
-} from '../NavigationMenu/NavigationMenuPages'
+} from '../components/NavigationMenu/NavigationMenuPages'
 import { InfoPage } from './InfoPage'
 import { PageRouter } from './PageRouter'
 import { PageNotFound } from './NotFoundPage'

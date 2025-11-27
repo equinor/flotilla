@@ -1,6 +1,6 @@
 import { Header } from 'components/Header/Header'
 import styled from 'styled-components'
-import { InspectionOverviewSection } from 'components/Pages/InspectionPage/InspectionOverview'
+import { InspectionOverviewSection } from 'pages/InspectionPage/InspectionOverview'
 import { StopRobotDialog } from './MissionOverview/StopDialogs'
 import { tokens } from '@equinor/eds-tokens'
 import { MissionControlSection } from './MissionOverview/MissionControlSection'

@@ -17,7 +17,8 @@ export default defineConfig({
       'mediaAssets': '/src/mediaAssets',
       'models': '/src/models',
       'utils': '/src/utils',
-      'config': '/src/config'
+      'config': '/src/config',
+      'pages': '/src/pages'
     }
   },
   server: {

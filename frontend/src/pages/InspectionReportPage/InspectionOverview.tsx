@@ -12,7 +12,7 @@ import {
 } from './InspectionStyles'
 import { Typography } from '@equinor/eds-core-react'
 import { formatDateTime } from 'utils/StringFormatting'
-import { SmallInspectionImage } from 'components/Pages/InspectionReportPage/InspectionReportImage'
+import { SmallInspectionImage } from 'pages/InspectionReportPage/InspectionReportImage'
 
 const InspectionOverview = ({ tasks }: { tasks: Task[] }) => {
     const { TranslateText } = useLanguageContext()

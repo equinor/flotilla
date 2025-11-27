@@ -1,10 +1,10 @@
-import { DefaultPage } from 'components/Pages/DefaultPage/DefaultPage'
-import { MissionControlSection } from 'components/Pages/FrontPage/MissionOverview/MissionControlSection'
-import { InspectionSection } from 'components/Pages/InspectionPage/InspectionSection'
-import { InspectionOverviewSection } from 'components/Pages/InspectionPage/InspectionOverview'
-import { MissionHistoryView } from 'components/Pages/MissionHistory/MissionHistoryView'
-import { AutoScheduleSection } from 'components/Pages/FrontPage/AutoScheduleSection/AutoScheduleSection'
-import { RobotStatusSection } from 'components/Pages/RobotCards/RobotStatusSection'
+import { DefaultPage } from 'pages/DefaultPage/DefaultPage'
+import { MissionControlSection } from 'pages/FrontPage/MissionOverview/MissionControlSection'
+import { InspectionSection } from 'pages/InspectionPage/InspectionSection'
+import { InspectionOverviewSection } from 'pages/InspectionPage/InspectionOverview'
+import { MissionHistoryView } from 'pages/MissionHistory/MissionHistoryView'
+import { AutoScheduleSection } from 'pages/FrontPage/AutoScheduleSection/AutoScheduleSection'
+import { RobotStatusSection } from 'pages/RobotCards/RobotStatusSection'
 
 export const MissionControlPage = () => {
     return (
