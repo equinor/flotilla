@@ -10,7 +10,7 @@ import { Header } from 'components/Header/Header'
 import { config } from 'config'
 import assetImage from 'mediaAssets/assetPage.jpg'
 import { useNavigate } from 'react-router-dom'
-import { phone_width } from '../../../utils/constants'
+import { phone_width } from '../../utils/constants'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 
 const Centered = styled.div`

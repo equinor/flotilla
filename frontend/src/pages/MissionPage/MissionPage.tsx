@@ -1,4 +1,4 @@
-import { VideoStreamWindow } from 'components/Pages/MissionPage/VideoStream/VideoStreamWindow'
+import { VideoStreamWindow } from 'pages/MissionPage/VideoStream/VideoStreamWindow'
 import { Mission } from 'models/Mission'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'

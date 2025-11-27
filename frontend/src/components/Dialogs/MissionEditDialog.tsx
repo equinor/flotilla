@@ -9,7 +9,7 @@ import {
     ButtonSection,
     FormCard,
     StyledDialog as MissionStyledDialog,
-} from 'components/Pages/MissionDefinitionPage/MissionDefinitionStyledComponents'
+} from 'pages/MissionDefinitionPage/MissionDefinitionStyledComponents'
 import { StyledDialog } from 'components/Styles/StyledComponents'
 import { config } from 'config'
 import { allDays, DaysOfWeek } from 'models/AutoScheduleFrequency'
