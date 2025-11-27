@@ -34,6 +34,10 @@ namespace Api.Controllers
                 var accessRoles = await accessRoleService.ReadAll();
                 return Ok(accessRoles);
             }
+            catch (HttpRequestException e)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, e.Message);
+            }
             catch (Exception e)
             {
                 logger.LogError(e, "Error during GET of access roles from database");
@@ -93,6 +97,10 @@ namespace Api.Controllers
                     installation.InstallationCode
                 );
                 return newAccessRole;
+            }
+            catch (HttpRequestException e)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, e.Message);
             }
             catch (Exception e)
             {
