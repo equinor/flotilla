@@ -4,10 +4,10 @@ import { Robot } from 'models/Robot'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
-import { StyledButton } from 'components/Styles/StyledComponents'
+import { StyledButton, StyledDialog } from 'components/Styles/StyledComponents'
 import styled from 'styled-components'
 import { useState } from 'react'
-import { Button, Dialog, Typography } from '@equinor/eds-core-react'
+import { Button, Typography } from '@equinor/eds-core-react'
 
 const StyledTextButton = styled(StyledButton)`
     text-align: left;
@@ -81,18 +81,18 @@ const ReleaseInterventionNeededDialog = ({ isOpen, onClose, onConfirm }: Release
     const { TranslateText } = useLanguageContext()
 
     return (
-        <Dialog open={isOpen}>
-            <Dialog.CustomContent>
+        <StyledDialog open={isOpen}>
+            <StyledDialog.CustomContent>
                 <Typography variant="body_short">{TranslateText('intervention_needed_dialog_text')}</Typography>
-            </Dialog.CustomContent>
-            <Dialog.Actions>
+            </StyledDialog.CustomContent>
+            <StyledDialog.Actions>
                 <Button color="danger" onClick={onConfirm}>
                     {TranslateText('confirm_word')}
                 </Button>
-                <Button onClick={onClose} variant="ghost">
+                <Button onClick={onClose} variant="outlined">
                     {TranslateText('close_word')}
                 </Button>
-            </Dialog.Actions>
-        </Dialog>
+            </StyledDialog.Actions>
+        </StyledDialog>
     )
 }
