@@ -10,6 +10,10 @@ export const StyledDialog = styled(Dialog)`
     display: flex;
     flex-direction: column;
 `
+StyledDialog.Actions = styled(Dialog.Actions)`
+    display: flex;
+    gap: 8px;
+`
 export const StyledAutoComplete = styled.div`
     display: flex;
     flex-direction: column;
