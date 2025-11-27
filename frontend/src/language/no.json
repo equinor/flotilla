@@ -339,7 +339,7 @@
     "Release maintenance mode": "Frigjør fra vedlikeholdsmodus",
     "confirm_word": "Bekreft",
     "close_word": "Lukk",
-    "intervention_needed_button_text": "Roboten er lokalisert",
+    "intervention_needed_button_text": "Frigjør fra internvensjonsmodus",
     "intervention_needed_dialog_text": "Er du sikker på at du vil avslutte intervensjonsmodus? Sørg for at roboten er godt lokalisert før dette gjøres!",
     "Stopping": "Stopper",
     "Pausing": "Pauser",
