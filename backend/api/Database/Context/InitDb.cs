@@ -175,18 +175,6 @@ namespace Api.Database.Context
 
             var robot2 = new Robot
             {
-                Name = "Shockwave",
-                IsarId = "c68b679d-308b-460f-9fe0-87eaadbd1234",
-                SerialNumber = "SS79",
-                Status = RobotStatus.Busy,
-                Host = "localhost",
-                Port = 3000,
-                CurrentInstallation = installations[0],
-                Documentation = [],
-            };
-
-            var robot3 = new Robot
-            {
                 Name = "Ultron",
                 IsarId = "c68b679d-308b-460f-9fe0-87eaadbd5678",
                 SerialNumber = "Earth616",
@@ -197,7 +185,7 @@ namespace Api.Database.Context
                 Documentation = [],
             };
 
-            var robot4 = new Robot
+            var robot3 = new Robot
             {
                 Name = "Placebot",
                 IsarId = "00000000-0000-0000-0000-000000000000",
@@ -210,7 +198,7 @@ namespace Api.Database.Context
                 Documentation = [],
             };
 
-            return new List<Robot>([robot1, robot2, robot3, robot4]);
+            return new List<Robot>([robot1, robot2, robot3]);
         }
 
         private static List<MissionDefinition> GetMissionDefinitions()
@@ -518,8 +506,8 @@ namespace Api.Database.Context
             context.SaveChanges();
             var models = context.RobotModels.AsTracking().AsEnumerable().ToList();
             robots[0].Model = models.Find(model => model.Type == RobotType.TaurobInspector)!;
-            robots[2].Model = models.Find(model => model.Type == RobotType.AnymalX)!;
-            robots[3].Model = models.Find(model => model.Type == RobotType.Robot)!;
+            robots[1].Model = models.Find(model => model.Type == RobotType.AnymalX)!;
+            robots[2].Model = models.Find(model => model.Type == RobotType.Robot)!;
 
             context.AddRange(robots);
             context.AddRange(plants);
