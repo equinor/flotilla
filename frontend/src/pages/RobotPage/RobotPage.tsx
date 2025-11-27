@@ -1,4 +1,4 @@
-import { Icon, Typography } from '@equinor/eds-core-react'
+import { Icon, Paper, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { BackButton } from 'utils/BackButton'
 import { Header } from 'components/Header/Header'
@@ -38,7 +38,7 @@ const RobotInfo = styled.div`
     align-items: center;
     gap: 32px;
     align-self: stretch;
-    width: calc(80vw);
+    width: 100%;
     @media (max-width: ${phone_width}) {
         flex-direction: column;
     }
@@ -55,20 +55,9 @@ const StatusContent = styled.div`
         gap: 8px;
     }
 `
-
-const StyledContainer = styled.div`
-    display: flex;
+const StyledContainer = styled(Paper)`
     padding: 24px;
-    width: 910px;
-    @media (max-width: ${phone_width}) {
-        width: 80vw;
-    }
-    flex-direction: column;
-    justify-content: center;
-    align-items: flex-start;
-    border-radius: 6px;
-    border: 1px solid ${tokens.colors.ui.background__medium.hex};
-    background: ${tokens.colors.ui.background__default.hex};
+    max-width: 910px;
 `
 
 const StyledLeftContent = styled.div`
