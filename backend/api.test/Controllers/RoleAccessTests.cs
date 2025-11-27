@@ -47,13 +47,13 @@ namespace Api.Test.Controllers
         public async Task CheckThatRequestingPlantsWithUnauthorizedUserFails()
         {
             // Arrange
-            var installation = await DatabaseUtilities.NewInstallation();
+            var installation = await DatabaseUtilities.NewInstallation(installationCode: "INS");
             var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
 
             var accessRoleQuery = new CreateAccessRoleQuery
             {
                 InstallationCode = installation.InstallationCode,
-                RoleName = "User.TestRole",
+                RoleName = $"Role.User.{installation.InstallationCode}",
                 AccessLevel = RoleAccessLevel.USER,
             };
             var accessRoleContent = new StringContent(
@@ -64,17 +64,23 @@ namespace Api.Test.Controllers
 
             var accessRoleResponse = await Client.PostAsync("/access-roles", accessRoleContent);
 
-            // Restrict ourselves to a user without access
-            HttpContextAccessor.SetHttpContextRoles(["User.TestInstallationAreaTest_Wrong"]);
+            // Restrict ourselves to a user with access
+            HttpContextAccessor.SetHttpContextRoles([$"Role.User.{installation.InstallationCode}"]);
 
             // Act
             string getPlantUrl = $"/plants/{plant.Id}";
+            var plantResponse = await Client.GetAsync(getPlantUrl);
+
+            // Restrict ourselves to a user without access
+            HttpContextAccessor.SetHttpContextRoles(["Role.User.NON"]);
+
+            // Act
             var samePlantResponse = await Client.GetAsync(getPlantUrl);
 
             // Assert
             Assert.True(accessRoleResponse.IsSuccessStatusCode);
-            Assert.False(samePlantResponse.IsSuccessStatusCode);
-            Assert.Equal("NotFound", samePlantResponse.StatusCode.ToString());
+            Assert.True(plantResponse.IsSuccessStatusCode);
+            Assert.Equal(System.Net.HttpStatusCode.NotFound, samePlantResponse.StatusCode);
         }
     }
 }
