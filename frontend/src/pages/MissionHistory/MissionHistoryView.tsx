@@ -6,7 +6,7 @@ import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { PaginationHeader } from 'models/PaginatedResponse'
 import { BackendAPICaller } from 'api/ApiCaller'
-import { useMissionFilterContext, IFilterState } from 'components/Contexts/MissionFilterContext'
+import { useMissionFilterContext, IFilterState, MissionFilterProvider } from 'components/Contexts/MissionFilterContext'
 import { FilterSection } from './FilterSection'
 import { InspectionType } from 'models/Inspection'
 import { tokens } from '@equinor/eds-tokens'
@@ -110,7 +110,13 @@ type RefreshProps = {
     refreshInterval: number
 }
 
-export const MissionHistoryView = ({ refreshInterval }: RefreshProps) => {
+export const MissionHistoryView = ({ refreshInterval }: RefreshProps) => (
+    <MissionFilterProvider>
+        <MissionHistoryViewComponent refreshInterval={refreshInterval} />
+    </MissionFilterProvider>
+)
+
+const MissionHistoryViewComponent = ({ refreshInterval }: RefreshProps) => {
     const { TranslateText } = useLanguageContext()
     const { page, switchPage, filterState, filterIsSet, filterFunctions, filterError, clearFilterError } =
         useMissionFilterContext()
