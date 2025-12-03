@@ -128,13 +128,13 @@ namespace Api.Controllers
         /// </summary>
         [HttpDelete]
         [Authorize(Roles = Role.User)]
-        [Route("")]
+        [Route("pending-missions")]
         [ProducesResponseType(typeof(IList<MissionRunResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<IList<MissionRunResponse>>> DeleteAllMissionRuns()
+        public async Task<ActionResult<IList<MissionRunResponse>>> DeletePendingMissionRuns()
         {
             var pendingMissionRuns = await missionRunService.ReadAll(
                 new MissionRunQueryStringParameters { Statuses = [MissionStatus.Pending] }
