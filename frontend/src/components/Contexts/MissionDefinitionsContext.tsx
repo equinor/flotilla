@@ -33,12 +33,6 @@ const upsertMissionDefinition = (oldQueue: MissionDefinition[], updatedMission: 
     }
 }
 
-const fetchMissionDefinitions = (params: {
-    installationCode: string
-    pageSize: number
-    orderBy: string
-}): Promise<MissionDefinition[]> => BackendAPICaller.getMissionDefinitions(params).then((response) => response.content)
-
 const useMissionDefinitions = (): IMissionDefinitionsContext => {
     const [missionDefinitions, setMissionDefinitions] = useState<MissionDefinition[]>([])
     const { registerEvent, connectionReady } = useSignalRContext()
@@ -73,28 +67,31 @@ const useMissionDefinitions = (): IMissionDefinitionsContext => {
     }, [registerEvent, connectionReady])
 
     useEffect(() => {
-        const fetchAndUpdateMissionDefinitions = async () => {
-            const missionDefinitionsInInstallation = await fetchMissionDefinitions({
-                installationCode: installationCode,
+        const fetchAndUpdateMissionDefinitions = () => {
+            BackendAPICaller.getMissionDefinitions({
                 pageSize: 100,
                 orderBy: 'InstallationCode installationCode',
-            }).catch(() => {
-                setAlert(
-                    AlertType.RequestFail,
-                    <FailedRequestAlertContent
-                        translatedMessage={TranslateText('Failed to retrieve inspection plans')}
-                    />,
-                    AlertCategory.ERROR
-                )
-                setListAlert(
-                    AlertType.RequestFail,
-                    <FailedRequestAlertListContent
-                        translatedMessage={TranslateText('Failed to retrieve inspection plans')}
-                    />,
-                    AlertCategory.ERROR
-                )
             })
-            setMissionDefinitions(missionDefinitionsInInstallation ?? [])
+                .then((response) => {
+                    const missionDefinitionsInInstallation = response.content
+                    setMissionDefinitions(missionDefinitionsInInstallation ?? [])
+                })
+                .catch(() => {
+                    setAlert(
+                        AlertType.RequestFail,
+                        <FailedRequestAlertContent
+                            translatedMessage={TranslateText('Failed to retrieve inspection plans')}
+                        />,
+                        AlertCategory.ERROR
+                    )
+                    setListAlert(
+                        AlertType.RequestFail,
+                        <FailedRequestAlertListContent
+                            translatedMessage={TranslateText('Failed to retrieve inspection plans')}
+                        />,
+                        AlertCategory.ERROR
+                    )
+                })
         }
         if (BackendAPICaller.accessToken) fetchAndUpdateMissionDefinitions()
     }, [BackendAPICaller.accessToken, installationCode])
