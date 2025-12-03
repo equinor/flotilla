@@ -4,7 +4,6 @@ import { AssetSelectionPage } from 'pages/AssetSelectionPage/AssetSelectionPage'
 import { FlotillaSite } from 'pages/FlotillaSite'
 import { LanguageProvider } from 'components/Contexts/LanguageContext'
 import { MissionControlProvider } from 'components/Contexts/MissionControlContext'
-import { MissionFilterProvider } from 'components/Contexts/MissionFilterContext'
 import { MissionRunsProvider } from 'components/Contexts/MissionRunsContext'
 import { AlertProvider } from 'components/Contexts/AlertContext'
 import { AuthProvider } from 'components/Contexts/AuthProvider'
@@ -47,11 +46,9 @@ const App = () => (
                                                     </div>
                                                 </UnauthenticatedTemplate>
                                                 <AuthenticatedTemplate>
-                                                    <MissionFilterProvider>
-                                                        <MediaStreamProvider>
-                                                            <FlotillaSite />
-                                                        </MediaStreamProvider>
-                                                    </MissionFilterProvider>
+                                                    <MediaStreamProvider>
+                                                        <FlotillaSite />
+                                                    </MediaStreamProvider>
                                                 </AuthenticatedTemplate>
                                             </MissionControlProvider>
                                         </MissionRunsProvider>
