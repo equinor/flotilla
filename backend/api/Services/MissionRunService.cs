@@ -674,7 +674,11 @@ namespace Api.Services
 
             missionRun.Status = MissionStatus.Failed;
             missionRun.StatusReason = failureDescription;
-            foreach (var task in missionRun.Tasks.Where(task => !task.IsCompleted))
+            foreach (
+                var task in missionRun.Tasks.Where(task =>
+                    !task.IsCompleted && task.Status != Database.Models.TaskStatus.NotStarted
+                )
+            )
             {
                 task.Status = Database.Models.TaskStatus.Failed;
             }
