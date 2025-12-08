@@ -11,6 +11,7 @@ import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'compon
 import { Mission } from 'models/Mission'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { ScheduleMissionWithInspectionAreaVerification } from '../InspectionAreaVerificationDialogs/ScheduleMissionWithInspectionAreaVerification'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 
 const Centered = styled.div`
     display: flex;
@@ -36,6 +37,7 @@ enum ReRunOptions {
 
 export const MissionRestartButton = ({ mission, hasFailedTasks, smallButton }: MissionProps) => {
     const { TranslateText } = useLanguageContext()
+    const { installationCode } = useAssetContext()
     const { setAlert, setListAlert } = useAlertContext()
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const [isLocationVerificationOpen, setIsLocationVerificationOpen] = useState<boolean>(false)
@@ -44,7 +46,7 @@ export const MissionRestartButton = ({ mission, hasFailedTasks, smallButton }: M
 
     const navigate = useNavigate()
     const navigateToHome = () => {
-        const path = `${config.FRONTEND_BASE_ROUTE}/front-page`
+        const path = `${config.FRONTEND_BASE_ROUTE}/${installationCode}/front-page`
         navigate(path)
     }
 

@@ -105,23 +105,23 @@ export const AssetSelectionPage = () => {
     )
 }
 
-export const findNavigationPage = () => {
+export const findNavigationPage = (installationCode: string) => {
     if (window.innerWidth <= 600) {
-        return `${config.FRONTEND_BASE_ROUTE}/mission-control`
+        return `${config.FRONTEND_BASE_ROUTE}/${installationCode}/mission-control`
     } else {
-        return `${config.FRONTEND_BASE_ROUTE}/front-page`
+        return `${config.FRONTEND_BASE_ROUTE}/${installationCode}/front-page`
     }
 }
 
 const InstallationPicker = () => {
-    const { installationName, switchInstallation, activeInstallations } = useAssetContext()
+    const { installationName, switchInstallation, activeInstallations, installationCode } = useAssetContext()
     const { TranslateText } = useLanguageContext()
     const [selectedInstallation, setSelectedInstallation] = useState<string>(installationName)
     const navigate = useNavigate()
 
     const handleClick = () => {
         switchInstallation(selectedInstallation)
-        const target = findNavigationPage()
+        const target = findNavigationPage(installationCode)
         navigate(target)
     }
 

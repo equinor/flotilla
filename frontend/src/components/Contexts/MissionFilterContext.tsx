@@ -114,10 +114,11 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
     const [filterState, setFilterState] = useState<IMissionFilterContext['filterState']>(mapURLtoFilter(searchParams))
 
     useEffect(() => {
-        setSearchParams([])
+        const newParams = new URLSearchParams()
         Object.entries(filterState).forEach((entry) => {
-            if (entry[1]) setSearchParams({ [entry[0]]: JSON.stringify(entry[1]) })
+            if (entry[1]) newParams.set(entry[0], JSON.stringify(entry[1]))
         })
+        setSearchParams(newParams, { replace: true })
     }, [filterState])
 
     const switchPage = (newPage: number) => {

@@ -58,18 +58,14 @@ const StyledNavigationMenu = styled.div`
 
 export const Header = ({ page }: { page: string }) => {
     const { alerts } = useAlertContext()
-    const { installationName } = useAssetContext()
+    const { installationName, installationCode } = useAssetContext()
     const navigate = useNavigate()
 
     return (
         <>
             <StyledTopBar id={FrontPageSectionId.TopBar}>
                 <StyledWrapper>
-                    <TopBar.Header
-                        onClick={() => {
-                            navigate(findNavigationPage())
-                        }}
-                    >
+                    <TopBar.Header onClick={() => navigate(findNavigationPage(installationCode))}>
                         <StyledTopBarHeader>
                             <HandPointer>
                                 <Typography variant="body_short_bold" color="text-primary">
@@ -85,20 +81,10 @@ export const Header = ({ page }: { page: string }) => {
                 <TopBar.Actions>
                     <IconStyle>
                         {page !== 'root' && <AlertIcon />}
-                        <Button
-                            variant="ghost_icon"
-                            onClick={() => {
-                                navigate(`${config.FRONTEND_BASE_ROUTE}/`)
-                            }}
-                        >
+                        <Button variant="ghost_icon" onClick={() => navigate(`${config.FRONTEND_BASE_ROUTE}/`)}>
                             <Icon name={Icons.Platform} size={24} title="Change Asset" />
                         </Button>
-                        <Button
-                            variant="ghost_icon"
-                            onClick={() => {
-                                navigate(`${config.FRONTEND_BASE_ROUTE}/info`)
-                            }}
-                        >
+                        <Button variant="ghost_icon" onClick={() => navigate(`${config.FRONTEND_BASE_ROUTE}/info`)}>
                             <Icon name={Icons.Info} size={24} title="Info Page" />
                         </Button>
                     </IconStyle>

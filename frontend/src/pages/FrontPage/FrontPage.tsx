@@ -6,7 +6,7 @@ import { tokens } from '@equinor/eds-tokens'
 import { MissionControlSection } from './MissionOverview/MissionControlSection'
 import { redirectIfNoInstallationSelected } from 'utils/RedirectIfNoInstallationSelected'
 import { AutoScheduleSection } from './AutoScheduleSection/AutoScheduleSection'
-import { useState, useMemo, type ReactNode } from 'react'
+import { useMemo, type ReactNode } from 'react'
 import { Icon, Tabs, Typography } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { InspectionSection } from '../InspectionPage/InspectionSection'
@@ -94,10 +94,9 @@ type TabDef = {
     render: () => ReactNode
 }
 
-export const FrontPage = ({ initialTab }: { initialTab: TabNames }) => {
-    const [activeTab, setActiveTab] = useState<TabNames>(initialTab)
+export const FrontPage = ({ activeTab }: { activeTab: TabNames }) => {
     const { TranslateText } = useLanguageContext()
-    const { installationInspectionAreas } = useAssetContext()
+    const { installationInspectionAreas, installationCode } = useAssetContext()
 
     redirectIfNoInstallationSelected()
 
@@ -148,9 +147,7 @@ export const FrontPage = ({ initialTab }: { initialTab: TabNames }) => {
         else tab = tabs.find((t) => t.name === index)
 
         if (tab === undefined) return
-
-        setActiveTab(tab.name)
-        navigate(`${config.FRONTEND_BASE_ROUTE}/front-page-${tab.name}`)
+        navigate(`${config.FRONTEND_BASE_ROUTE}/${installationCode}/front-page-${tab.name}`)
     }
 
     const setActiveTabToMissionControl = () => goToTab(tabs.findIndex((t) => t.name === TabNames.MissionControl))
@@ -171,7 +168,6 @@ export const FrontPage = ({ initialTab }: { initialTab: TabNames }) => {
                             <StopRobotDialog />
                         </StyledTabHeaderRightContent>
                     </StyledTabHeader>
-
                     {tabs[activeIndex]?.render()}
                 </Tabs>
             </StyledFrontPage>
