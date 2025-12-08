@@ -14,43 +14,32 @@ import {
 import { InfoPage } from './InfoPage'
 import { PageRouter } from './PageRouter'
 import { PageNotFound } from './NotFoundPage'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 
 export const FlotillaSite = () => {
     const frontPageTabOptions = Object.values(TabNames)
+    const { installationCode } = useAssetContext()
 
     return (
         <>
             <APIUpdater>
                 <BrowserRouter>
                     <Routes>
+                        <Route path={`${config.FRONTEND_BASE_ROUTE}`} element={<AssetSelectionPage />} />
                         <Route path={`${config.FRONTEND_BASE_ROUTE}/`} element={<AssetSelectionPage />} />
-                        <Route
-                            path={`${config.FRONTEND_BASE_ROUTE}/front-page`}
-                            element={<FrontPage initialTab={frontPageTabOptions[0]} />}
-                        />
-                        {frontPageTabOptions.map((tab) => (
-                            <Route
-                                key={tab}
-                                path={`${config.FRONTEND_BASE_ROUTE}/front-page-${tab}`}
-                                element={<FrontPage initialTab={tab} />}
-                            />
-                        ))}
+                        <Route path={`${config.FRONTEND_BASE_ROUTE}/${installationCode}/`}>
+                            <Route path={`front-page`} element={<FrontPage activeTab={frontPageTabOptions[0]} />} />
+                            {frontPageTabOptions.map((tab) => (
+                                <Route key={tab} path={`front-page-${tab}`} element={<FrontPage activeTab={tab} />} />
+                            ))}
+                            <Route path={`history`} element={<MissionHistoryPage />} />
+                            <Route path={`mission-control`} element={<MissionControlPage />} />
+                            <Route path={`inspection-overview`} element={<AreaOverviewPage />} />
+                            <Route path={`predefined-missions`} element={<PredefinedMissionsPage />} />
+                            <Route path={`auto-schedule`} element={<AutoSchedulePage />} />
+                            <Route path={`robots`} element={<RobotStatusPage />} />
+                        </Route>
                         <Route path={`${config.FRONTEND_BASE_ROUTE}/:page`} element={<PageRouter />} />
-                        <Route path={`${config.FRONTEND_BASE_ROUTE}/history`} element={<MissionHistoryPage />} />
-                        <Route
-                            path={`${config.FRONTEND_BASE_ROUTE}/mission-control`}
-                            element={<MissionControlPage />}
-                        />
-                        <Route
-                            path={`${config.FRONTEND_BASE_ROUTE}/inspection-overview`}
-                            element={<AreaOverviewPage />}
-                        />
-                        <Route
-                            path={`${config.FRONTEND_BASE_ROUTE}/predefined-missions`}
-                            element={<PredefinedMissionsPage />}
-                        />
-                        <Route path={`${config.FRONTEND_BASE_ROUTE}/auto-schedule`} element={<AutoSchedulePage />} />
-                        <Route path={`${config.FRONTEND_BASE_ROUTE}/robots`} element={<RobotStatusPage />} />
                         <Route path={`${config.FRONTEND_BASE_ROUTE}/info`} element={<InfoPage />} />
                         <Route path="*" element={<PageNotFound />} />
                     </Routes>

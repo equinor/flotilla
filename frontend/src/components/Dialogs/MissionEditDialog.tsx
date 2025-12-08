@@ -19,6 +19,7 @@ import { ChangeEvent, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import { formulateAutoScheduleFrequencyAsString } from 'utils/language'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 
 const StyledSummary = styled.div`
     padding: 16px 8px 0px 8px;
@@ -58,6 +59,7 @@ const StyledTimeChips = styled.div`
 const useMissionUpdater = () => {
     const { TranslateText } = useLanguageContext()
     const { setAlert, setListAlert } = useAlertContext()
+    const { installationCode } = useAssetContext()
     const navigate = useNavigate()
 
     const updateMission = (
@@ -76,7 +78,8 @@ const useMissionUpdater = () => {
         BackendAPICaller.updateMissionDefinition(mission.id, form)
             .then((missionDefinition) => {
                 onSuccess()
-                if (missionDefinition.isDeprecated) navigate(`${config.FRONTEND_BASE_ROUTE}/front-page`)
+                if (missionDefinition.isDeprecated)
+                    navigate(`${config.FRONTEND_BASE_ROUTE}/${installationCode}/front-page`)
             })
             .catch(() => {
                 setAlert(

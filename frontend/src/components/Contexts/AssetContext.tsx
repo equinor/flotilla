@@ -235,7 +235,9 @@ export const AssetProvider: FC<Props> = ({ children }) => {
     }, [registerEvent, connectionReady])
 
     const switchInstallation = (selectedName: string) => {
-        const installation = activeInstallations.find((i) => i.name === selectedName)
+        const installation = activeInstallations.find(
+            (i) => i.name === selectedName || i.installationCode === selectedName
+        )
         if (!installation) return
         setSelectedInstallation(installation)
         window.localStorage.setItem('installation', JSON.stringify(installation))
