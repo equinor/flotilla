@@ -409,8 +409,16 @@ export class BackendAPICaller {
         return result.content
     }
 
-    static async getInspection(isarInspectionId: string): Promise<Blob> {
-        const path: string = 'inspection/' + isarInspectionId
+    static async getInspection(inspectionId: string): Promise<Blob> {
+        const path: string = 'inspection/' + inspectionId
+
+        return BackendAPICaller.GET<Blob>(path, 'image/png')
+            .then((response) => response.content)
+            .catch(BackendAPICaller.handleError('GET', path))
+    }
+
+    static async getAnalysis(inspectionId: string): Promise<Blob> {
+        const path: string = 'inspection/analysis/' + inspectionId
 
         return BackendAPICaller.GET<Blob>(path, 'image/png')
             .then((response) => response.content)

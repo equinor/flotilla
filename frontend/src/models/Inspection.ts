@@ -5,11 +5,24 @@ export interface Inspection {
     isarInspectionId: string
     isCompleted: boolean
     inspectionType: InspectionType
+    analysisResult: AnalysisResult
     inspectionTarget: Position
     videoDuration?: number
     inspectionUrl?: string
     startTime?: Date
     endTime?: Date
+}
+
+interface AnalysisResult {
+    inspectionId: string
+    analysisType: string
+    value?: string
+    unit?: string
+    confidence?: number
+    warning?: string
+    storageAccount: string
+    blobContainer: string
+    blobName: string
 }
 
 export enum InspectionType {
@@ -36,11 +49,11 @@ export interface SaraAnalysisResultReady {
     inspectionId: string
     displayText: string
     analysisType: string
-    value: number
-    unit: string
-    class: string
-    confidence: number
-    warning: string
+    value?: number
+    unit?: string
+    class?: string
+    confidence?: number
+    warning?: string
     storageAccount: string
     blobContainer: string
     blobName: string

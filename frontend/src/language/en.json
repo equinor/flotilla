@@ -355,5 +355,11 @@
     "Thu": "Thu",
     "Fri": "Fri",
     "Sat": "Sat",
-    "Sun": "Sun"
+    "Sun": "Sun",
+    "Analysis Result": "Analysis Result",
+    "Result": "Result",
+    "Analysis result for task": "Analysis result for task",
+    "Warning": "Warning",
+    "Confidence": "Confidence",
+    "Analysis": "Analysis"
 }

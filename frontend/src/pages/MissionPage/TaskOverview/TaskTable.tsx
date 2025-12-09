@@ -1,6 +1,7 @@
 import { Button, Chip, Table, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { TaskStatusDisplay } from './TaskStatusDisplay'
+import { TaskAnalysisDisplay } from './TaskAnalysisDisplay'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Task, TaskStatus } from 'models/Task'
 import { tokens } from '@equinor/eds-tokens'
@@ -33,6 +34,9 @@ export const TaskTable = ({ tasks, missionDefinitionPage }: TaskTableProps) => {
                         <>
                             <Table.Cell>{TranslateText('Inspection Types')}</Table.Cell>
                             <Table.Cell>{TranslateText('Status')}</Table.Cell>
+                            {tasks.some((task: Task) => task.inspection.analysisResult) && (
+                                <Table.Cell>{TranslateText('Analysis')}</Table.Cell>
+                            )}
                         </>
                     )}
                 </Table.Row>
@@ -51,8 +55,11 @@ const TaskTableRows = ({ tasks, missionDefinitionPage }: TaskTableProps) => {
         const rowStyle =
             task.status === TaskStatus.InProgress || task.status === TaskStatus.Paused
                 ? { background: tokens.colors.infographic.primary__mist_blue.hex }
-                : {}
+                : task.inspection.analysisResult?.warning
+                  ? { background: tokens.colors.interactive.danger__highlight.hex }
+                  : {}
         const markerColors = getColorsFromTaskStatus(task.status)
+
         return (
             <Table.Row key={task.id} style={rowStyle}>
                 <Table.Cell>
@@ -75,6 +82,9 @@ const TaskTableRows = ({ tasks, missionDefinitionPage }: TaskTableProps) => {
                         </Table.Cell>
                         <Table.Cell>
                             <TaskStatusDisplay status={task.status} errorMessage={task.errorDescription} />
+                        </Table.Cell>
+                        <Table.Cell>
+                            {task.inspection.analysisResult?.warning && <TaskAnalysisDisplay task={task} />}
                         </Table.Cell>
                     </>
                 )}

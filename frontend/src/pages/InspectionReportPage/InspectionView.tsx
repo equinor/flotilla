@@ -18,6 +18,7 @@ import { InspectionOverviewDialogView } from './InspectionOverview'
 import { useState } from 'react'
 import { LargeDialogInspectionImage } from './InspectionReportImage'
 import { useAssetContext } from 'components/Contexts/AssetContext'
+
 interface InspectionDialogViewProps {
     selectedTask: Task
     tasks: Task[]
