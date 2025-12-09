@@ -1,4 +1,4 @@
-import { matchRoutes, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { Button, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import notfound from 'mediaAssets/404notfound.png'
@@ -60,16 +60,17 @@ export const PageNotFound = () => {
 
     useEffect(() => {
         if (activeInstallations) {
-            const route = matchRoutes([{ path: '/:installationCode/*' }], location)
-            if (!route) return
-            const installationCode = route![0].params.installationCode
-            switchInstallation(installationCode!)
+            const matches = new RegExp('/([A-Z]+):').exec(location.pathname)
+            if (!matches || matches.length < 1) return
+
+            const installationCode = matches[1]
+            switchInstallation(installationCode)
         }
     }, [activeInstallations])
 
     useEffect(() => {
         let params = ''
-        if (searchParams) params = `?${searchParams.toString()}`
+        if (searchParams && searchParams.size > 0) params = `?${searchParams.toString()}`
         if (installationCode) navigate(`${config.FRONTEND_BASE_ROUTE}${location.pathname}${params}`)
     }, [installationCode])
 

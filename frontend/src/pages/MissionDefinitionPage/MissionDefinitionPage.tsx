@@ -26,6 +26,7 @@ import {
     MissionSchedulingEditDialog,
 } from 'components/Dialogs/MissionEditDialog'
 import { formulateAutoScheduleFrequencyAsString } from 'utils/language'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 
 const StyledCard = styled(Card)`
     display: flex;
@@ -201,6 +202,7 @@ const MissionDefinitionPageBody = ({ missionDefinition }: { missionDefinition: M
 
 export const MissionDefinitionPage = ({ missionId }: { missionId: string }) => {
     const { missionDefinitions } = useMissionDefinitionsContext()
+    const { installationCode } = useAssetContext()
     const { TranslateText } = useLanguageContext()
     const navigate = useNavigate()
 
@@ -219,7 +221,7 @@ export const MissionDefinitionPage = ({ missionId }: { missionId: string }) => {
                             disabled={!selectedMissionDefinition.lastSuccessfulRun}
                             onClick={() =>
                                 navigate(
-                                    `${config.FRONTEND_BASE_ROUTE}/mission-${selectedMissionDefinition.lastSuccessfulRun!.id}`
+                                    `${config.FRONTEND_BASE_ROUTE}/${installationCode}:mission?id=${selectedMissionDefinition.lastSuccessfulRun!.id}`
                                 )
                             }
                         >

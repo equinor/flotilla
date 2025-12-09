@@ -9,6 +9,7 @@ import { MissionRestartButton } from 'components/Displays/MissionButtons/Mission
 import { TaskStatus } from 'models/Task'
 import { useNavigate } from 'react-router-dom'
 import { formatDateTime } from 'utils/StringFormatting'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 
 enum InspectionTableColumns {
     StatusShort = 'StatusShort',
@@ -43,6 +44,7 @@ const MissionEndTimeDisplay = ({ mission }: MissionProps) => {
 
 export const HistoricMissionCard = ({ index, mission }: IndexedMissionProps) => {
     const navigate = useNavigate()
+    const { installationCode } = useAssetContext()
 
     const missionHasFailedTasks = mission.tasks.some(
         (t) => t.status !== TaskStatus.PartiallySuccessful && t.status !== TaskStatus.Successful
@@ -57,7 +59,12 @@ export const HistoricMissionCard = ({ index, mission }: IndexedMissionProps) => 
                 <MissionStatusDisplay status={mission.status} />
             </Table.Cell>
             <Table.Cell id={InspectionTableColumns.Name}>
-                <Typography link onClick={() => navigate(`${config.FRONTEND_BASE_ROUTE}/mission-${mission.id}`)}>
+                <Typography
+                    link
+                    onClick={() =>
+                        navigate(`${config.FRONTEND_BASE_ROUTE}/${installationCode}:mission?id=${mission.id}`)
+                    }
+                >
                     {mission.name}
                 </Typography>
             </Table.Cell>

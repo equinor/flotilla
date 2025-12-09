@@ -1,41 +1,67 @@
-import { useParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { MissionPage } from './MissionPage/MissionPage'
 import { RobotPage } from './RobotPage/RobotPage'
 import { MissionDefinitionPage } from './MissionDefinitionPage/MissionDefinitionPage'
-import { Typography } from '@equinor/eds-core-react'
-import styled from 'styled-components'
-import { PageNotFound } from './NotFoundPage'
+import { config } from 'config'
+import { useEffect, useState } from 'react'
 
-const StyledTypography = styled(Typography)`
-    text-align: center;
-    gap: 10px;
-`
+enum PageRouterPrefixes {
+    Mission = 'mission',
+    MissionDefinition = 'missiondefinition',
+    Robot = 'robot',
+}
 
-export const PageRouter = () => {
-    const { page } = useParams()
-    if (!page) return InvalidRoute()
+interface PageRouterProps {
+    prefix: PageRouterPrefixes
+}
 
-    const [pageName, id] = page.split(/-(.+)/)
+const PageRouter = ({ prefix }: PageRouterProps) => {
+    const navigate = useNavigate()
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [searchParams, setSearchParams] = useSearchParams()
+    const [id, setId] = useState<string | undefined>(undefined)
 
-    if (!ValidateUUID(id)) return PageNotFound()
+    useEffect(() => {
+        if (!searchParams || searchParams.size < 1) {
+            navigate(`${config.FRONTEND_BASE_ROUTE}/page-not-found`)
+            return
+        }
 
-    switch (pageName) {
-        case 'mission':
+        const id = searchParams.get('id')
+        if (!id || !ValidateUUID(id)) {
+            navigate(`${config.FRONTEND_BASE_ROUTE}/page-not-found`)
+            return
+        }
+        setId(id)
+    }, [searchParams])
+
+    if (!id) return <></>
+
+    switch (prefix) {
+        case PageRouterPrefixes.Mission:
             return <MissionPage missionId={id} />
-        case 'missiondefinition':
+        case PageRouterPrefixes.MissionDefinition:
             return <MissionDefinitionPage missionId={id} />
-        case 'robot':
+        case PageRouterPrefixes.Robot:
             return <RobotPage robotId={id} />
         default:
-            return PageNotFound()
+            return <></>
     }
+}
+
+export const MissionPageRouter = () => {
+    return <PageRouter prefix={PageRouterPrefixes.Mission} />
+}
+
+export const MissionDefinitionPageRouter = () => {
+    return <PageRouter prefix={PageRouterPrefixes.MissionDefinition} />
+}
+
+export const RobotPageRouter = () => {
+    return <PageRouter prefix={PageRouterPrefixes.Robot} />
 }
 
 const ValidateUUID = (id: string) => {
     const regex = /^[\da-f]{8}-([\da-f]{4}-){3}[\da-f]{12}$/i
     return regex.test(id)
-}
-
-const InvalidRoute = () => {
-    return <StyledTypography variant="body_short">Invalid route</StyledTypography>
 }

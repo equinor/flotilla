@@ -147,7 +147,7 @@ export const FrontPage = ({ activeTab }: { activeTab: TabNames }) => {
         else tab = tabs.find((t) => t.name === index)
 
         if (tab === undefined) return
-        navigate(`${config.FRONTEND_BASE_ROUTE}/${installationCode}/front-page-${tab.name}`)
+        navigate(`${config.FRONTEND_BASE_ROUTE}/${installationCode}:front-page-${tab.name}`)
     }
 
     const setActiveTabToMissionControl = () => goToTab(tabs.findIndex((t) => t.name === TabNames.MissionControl))
