@@ -10,6 +10,7 @@ interface IInspectionsContext {
     selectedInspectionTask: Task | undefined
     switchSelectedInspectionTask: (selectedInspectionTask: Task | undefined) => void
     fetchImageData: (inspectionId: string) => any
+    fetchAnalysisData: (inspectionId: string) => any
 }
 
 interface Props {
@@ -20,6 +21,7 @@ const defaultInspectionsContext = {
     selectedInspectionTask: undefined,
     switchSelectedInspectionTask: () => undefined,
     fetchImageData: () => undefined,
+    fetchAnalysisData: () => undefined,
 }
 
 const InspectionsContext = createContext<IInspectionsContext>(defaultInspectionsContext)
@@ -44,7 +46,10 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
         if (connectionReady) {
             registerEvent(SignalREventLabels.analysisResultReady, (username: string, message: string) => {
                 const analysisResultData: SaraAnalysisResultReady = JSON.parse(message)
-                console.log('Received analysis result ', analysisResultData)
+                queryClient.invalidateQueries({
+                    queryKey: ['fetchAnalysisData', analysisResultData.inspectionId],
+                })
+                fetchAnalysisData(analysisResultData.inspectionId)
             })
         }
     }, [registerEvent, connectionReady])
@@ -70,12 +75,29 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
         return { data: result.data, isPending: result.isPending, isError: result.isError }
     }
 
+    const fetchAnalysisData = (
+        inspectionId: string
+    ): { data: string | undefined; isPending: boolean; isError: boolean } => {
+        const result = useQuery({
+            queryKey: ['fetchAnalysisData', inspectionId],
+            queryFn: async () => {
+                const imageBlob = await BackendAPICaller.getAnalysis(inspectionId)
+                return URL.createObjectURL(imageBlob)
+            },
+            retry: 1,
+            staleTime: 10 * 60 * 1000, // If data is received, stale time is 10 min before making new API call
+            enabled: inspectionId !== undefined,
+        })
+        return { data: result.data, isPending: result.isPending, isError: result.isError }
+    }
+
     return (
         <InspectionsContext.Provider
             value={{
                 selectedInspectionTask,
                 switchSelectedInspectionTask,
                 fetchImageData,
+                fetchAnalysisData,
             }}
         >
             {children}

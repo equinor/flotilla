@@ -814,10 +814,8 @@ namespace Api.EventHandlers
             {
                 InspectionId = saraAnalysisResult.InspectionId,
                 AnalysisType = saraAnalysisResult.AnalysisType,
-                DisplayText = saraAnalysisResult.DisplayText,
                 Value = saraAnalysisResult.Value,
                 Unit = saraAnalysisResult.Unit,
-                Class = saraAnalysisResult.Class,
                 Warning = saraAnalysisResult.Warning,
                 Confidence = saraAnalysisResult.Confidence,
                 StorageAccount = saraAnalysisResult.StorageAccount,

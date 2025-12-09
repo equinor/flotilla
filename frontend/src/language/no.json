@@ -355,5 +355,11 @@
     "Thu": "Tor",
     "Fri": "Fre",
     "Sat": "Lør",
-    "Sun": "Søn"
+    "Sun": "Søn",
+    "Analysis Result": "Analyse Resultat",
+    "Result": "Resultat",
+    "Analysis result for task": "Analyseresultat for oppgave",
+    "Warning": "Advarsel",
+    "Confidence": "Treffsikkerhet",
+    "Analysis": "Analyse"
 }
