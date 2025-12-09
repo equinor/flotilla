@@ -14,7 +14,7 @@ const StyledButton = styled(Button)`
 
 export const NavigationMenu = () => {
     const { TranslateText } = useLanguageContext()
-    const { installationInspectionAreas } = useAssetContext()
+    const { installationInspectionAreas, installationCode } = useAssetContext()
     const [isOpen, setIsOpen] = useState(false)
     const [anchorEl, setAnchorEl] = useState(null)
     const openMenu = () => {
@@ -43,11 +43,6 @@ export const NavigationMenu = () => {
               ]
 
     const navigate = useNavigate()
-    const routeChange = (routePath: string) => {
-        const path = `${config.FRONTEND_BASE_ROUTE}/${routePath}`
-        navigate(path)
-        return
-    }
 
     return (
         <>
@@ -66,7 +61,10 @@ export const NavigationMenu = () => {
             </StyledButton>
             <Menu open={isOpen} id="menu" aria-labelledby="menu" onClose={closeMenu} anchorEl={anchorEl}>
                 {paths.map((page) => (
-                    <Menu.Item key={page.label} onClick={() => routeChange(page.path)}>
+                    <Menu.Item
+                        key={page.label}
+                        onClick={() => navigate(`${config.FRONTEND_BASE_ROUTE}/${installationCode}:${page.path}`)}
+                    >
                         {TranslateText(page.label)}
                     </Menu.Item>
                 ))}

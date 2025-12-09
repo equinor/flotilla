@@ -1,6 +1,6 @@
 import { ApplicationInsights } from '@microsoft/applicationinsights-web'
 import { AuthenticatedTemplate, UnauthenticatedTemplate } from '@azure/msal-react'
-import { AssetSelectionPage } from 'pages/AssetSelectionPage/AssetSelectionPage'
+import { LoginPage } from 'pages/LoginPage/LoginPage'
 import { FlotillaSite } from 'pages/FlotillaSite'
 import { LanguageProvider } from 'components/Contexts/LanguageContext'
 import { MissionControlProvider } from 'components/Contexts/MissionControlContext'
@@ -42,7 +42,7 @@ const App = () => (
                                             <MissionControlProvider>
                                                 <UnauthenticatedTemplate>
                                                     <div className="sign-in-page">
-                                                        <AssetSelectionPage></AssetSelectionPage>
+                                                        <LoginPage />
                                                     </div>
                                                 </UnauthenticatedTemplate>
                                                 <AuthenticatedTemplate>

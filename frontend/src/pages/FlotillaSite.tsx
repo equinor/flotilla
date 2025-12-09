@@ -12,7 +12,7 @@ import {
     RobotStatusPage,
 } from '../components/NavigationMenu/NavigationMenuPages'
 import { InfoPage } from './InfoPage'
-import { PageRouter } from './PageRouter'
+import { MissionDefinitionPageRouter, MissionPageRouter, RobotPageRouter } from './PageRouter'
 import { PageNotFound } from './NotFoundPage'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 
@@ -20,26 +20,43 @@ export const FlotillaSite = () => {
     const frontPageTabOptions = Object.values(TabNames)
     const { installationCode } = useAssetContext()
 
+    const installationCodePath = `${config.FRONTEND_BASE_ROUTE}/${installationCode}`
+
+    // This needs to be a normal object so that it isn't interpreted as a non "Route" object
+    const installationSpecificPages = (
+        <>
+            <Route
+                path={`${installationCodePath}:front-page`}
+                element={<FrontPage activeTab={frontPageTabOptions[0]} />}
+            />
+            {frontPageTabOptions.map((tab) => (
+                <Route
+                    key={tab}
+                    path={`${installationCodePath}:front-page-${tab}`}
+                    element={<FrontPage activeTab={tab} />}
+                />
+            ))}
+            <Route path={`${installationCodePath}:history`} element={<MissionHistoryPage />} />
+            <Route path={`${installationCodePath}:mission-control`} element={<MissionControlPage />} />
+            <Route path={`${installationCodePath}:inspection-overview`} element={<AreaOverviewPage />} />
+            <Route path={`${installationCodePath}:predefined-missions`} element={<PredefinedMissionsPage />} />
+            <Route path={`${installationCodePath}:auto-schedule`} element={<AutoSchedulePage />} />
+            <Route path={`${installationCodePath}:robots`} element={<RobotStatusPage />} />
+            <Route path={`${installationCodePath}:mission`} element={<MissionPageRouter />} />
+            <Route path={`${installationCodePath}:missiondefinition`} element={<MissionDefinitionPageRouter />} />
+            <Route path={`${installationCodePath}:robot`} element={<RobotPageRouter />} />
+        </>
+    )
+
     return (
         <>
             <APIUpdater>
                 <BrowserRouter>
                     <Routes>
-                        <Route path={`${config.FRONTEND_BASE_ROUTE}`} element={<AssetSelectionPage />} />
                         <Route path={`${config.FRONTEND_BASE_ROUTE}/`} element={<AssetSelectionPage />} />
-                        <Route path={`${config.FRONTEND_BASE_ROUTE}/${installationCode}/`}>
-                            <Route path={`front-page`} element={<FrontPage activeTab={frontPageTabOptions[0]} />} />
-                            {frontPageTabOptions.map((tab) => (
-                                <Route key={tab} path={`front-page-${tab}`} element={<FrontPage activeTab={tab} />} />
-                            ))}
-                            <Route path={`history`} element={<MissionHistoryPage />} />
-                            <Route path={`mission-control`} element={<MissionControlPage />} />
-                            <Route path={`inspection-overview`} element={<AreaOverviewPage />} />
-                            <Route path={`predefined-missions`} element={<PredefinedMissionsPage />} />
-                            <Route path={`auto-schedule`} element={<AutoSchedulePage />} />
-                            <Route path={`robots`} element={<RobotStatusPage />} />
-                        </Route>
-                        <Route path={`${config.FRONTEND_BASE_ROUTE}/:page`} element={<PageRouter />} />
+
+                        {installationCode ? installationSpecificPages : <></>}
+
                         <Route path={`${config.FRONTEND_BASE_ROUTE}/info`} element={<InfoPage />} />
                         <Route path="*" element={<PageNotFound />} />
                     </Routes>

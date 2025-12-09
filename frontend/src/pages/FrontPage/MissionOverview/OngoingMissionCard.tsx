@@ -13,6 +13,7 @@ import { Icons } from 'utils/icons'
 import { Robot } from 'models/Robot'
 import { NoMissionReason } from 'utils/IsRobotReadyToRunMissions'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 
 interface MissionProps {
     mission: Mission
@@ -142,9 +143,10 @@ const StyledWrapper = styled.div`
 
 export const OngoingMissionCard = ({ mission, isOpen, setIsOpen }: MissionProps) => {
     const { TranslateText } = useLanguageContext()
+    const { installationCode } = useAssetContext()
     const navigate = useNavigate()
     const routeChange = () => {
-        const path = `${config.FRONTEND_BASE_ROUTE}/mission-${mission.id}`
+        const path = `${config.FRONTEND_BASE_ROUTE}/${installationCode}:mission?id=${mission.id}`
         navigate(path)
     }
 

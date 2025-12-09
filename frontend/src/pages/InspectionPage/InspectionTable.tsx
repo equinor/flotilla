@@ -128,7 +128,7 @@ interface IInspectionRowProps {
 const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialog }: IInspectionRowProps) => {
     const { TranslateText } = useLanguageContext()
     const { ongoingMissions, missionQueue } = useMissionsContext()
-    const { enabledRobots } = useAssetContext()
+    const { enabledRobots, installationCode } = useAssetContext()
     const navigate = useNavigate()
     const mission = inspection.missionDefinition
     let status
@@ -190,7 +190,9 @@ const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialo
             <Table.Cell id={InspectionTableColumns.Name}>
                 <Typography
                     link
-                    onClick={() => navigate(`${config.FRONTEND_BASE_ROUTE}/missiondefinition-${mission.id}`)}
+                    onClick={() =>
+                        navigate(`${config.FRONTEND_BASE_ROUTE}/${installationCode}:missiondefinition?id=${mission.id}`)
+                    }
                 >
                     {mission.name}
                 </Typography>

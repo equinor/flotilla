@@ -13,6 +13,7 @@ import { config } from 'config'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Button, Typography } from '@equinor/eds-core-react'
 import { StyledDialog } from 'components/Styles/StyledComponents'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 
 const locales = { nb }
 const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales })
@@ -176,6 +177,7 @@ const legendItems = [
 export const CalendarPro = () => {
     const { missionDefinitions } = useMissionDefinitionsContext()
     const { TranslateText } = useLanguageContext()
+    const { installationCode } = useAssetContext()
     const navigate = useNavigate()
     const [dialogOpen, setDialogOpen] = useState<boolean>(false)
     const [selectedEvent, setSelectedEvent] = useState<any>(null)
@@ -320,7 +322,9 @@ export const CalendarPro = () => {
                         },
                     })}
                     onDoubleClickEvent={(event) =>
-                        navigate(`${config.FRONTEND_BASE_ROUTE}/missiondefinition-${event.metadata.missionId}`)
+                        navigate(
+                            `${config.FRONTEND_BASE_ROUTE}/${installationCode}:missiondefinition?id=${event.metadata.missionId}`
+                        )
                     }
                 />
             </CalendarWrapper>

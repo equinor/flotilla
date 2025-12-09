@@ -7,6 +7,7 @@ import { AlertListContents } from './AlertsListItem'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
 import { AlertContainer, AlertButton } from './AlertStyles'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 
 interface MissionsProps {
     missions: Mission[]
@@ -15,9 +16,10 @@ interface MissionsProps {
 const FailedMission = ({ missions }: MissionsProps) => {
     const mission = missions[0]
     const { TranslateText } = useLanguageContext()
+    const { installationCode } = useAssetContext()
     const navigate = useNavigate()
     const goToMission = () => {
-        const path = `${config.FRONTEND_BASE_ROUTE}/mission-${mission.id}`
+        const path = `${config.FRONTEND_BASE_ROUTE}/${installationCode}:mission?id=${mission.id}`
         navigate(path)
     }
 
@@ -31,9 +33,10 @@ const FailedMission = ({ missions }: MissionsProps) => {
 
 const SeveralFailedMissions = ({ missions }: MissionsProps) => {
     const { TranslateText } = useLanguageContext()
+    const { installationCode } = useAssetContext()
     const navigate = useNavigate()
     const goToHistory = () => {
-        const path = `${config.FRONTEND_BASE_ROUTE}/history`
+        const path = `${config.FRONTEND_BASE_ROUTE}/${installationCode}:history`
         navigate(path)
     }
 

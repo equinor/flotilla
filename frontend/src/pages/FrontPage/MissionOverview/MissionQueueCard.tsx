@@ -9,6 +9,7 @@ import { Icons } from 'utils/icons'
 import { StyledDialog } from 'components/Styles/StyledComponents'
 import { tokens } from '@equinor/eds-tokens'
 import { calculateRemaindingTimeInMinutes } from 'utils/CalculateRemaingingTime'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 
 interface MissionQueueCardProps {
     order: number
@@ -66,8 +67,9 @@ const StyledButton = styled(Button)`
 
 export const MissionQueueCard = ({ order, mission, onDeleteMission }: MissionQueueCardProps) => {
     const navigate = useNavigate()
+    const { installationCode } = useAssetContext()
     const routeChange = () => {
-        const path = `${config.FRONTEND_BASE_ROUTE}/mission-${mission.id}`
+        const path = `${config.FRONTEND_BASE_ROUTE}/${installationCode}:mission?id=${mission.id}`
         navigate(path)
     }
     const [confirmDeleteDialogOpen, setConfirmDeleteDialogOpen] = useState<boolean>(false)

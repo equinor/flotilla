@@ -79,7 +79,7 @@ const useMissionUpdater = () => {
             .then((missionDefinition) => {
                 onSuccess()
                 if (missionDefinition.isDeprecated)
-                    navigate(`${config.FRONTEND_BASE_ROUTE}/${installationCode}/front-page`)
+                    navigate(`${config.FRONTEND_BASE_ROUTE}/${installationCode}:front-page`)
             })
             .catch(() => {
                 setAlert(

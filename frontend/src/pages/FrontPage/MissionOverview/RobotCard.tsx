@@ -12,6 +12,7 @@ import { config } from 'config'
 import { RobotType } from 'models/RobotModel'
 import { StyledButton, AttributeTitleTypography } from 'components/Styles/StyledComponents'
 import { Icons } from 'utils/icons'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 
 const StyledRobotCard = styled.div`
     display: flex;
@@ -100,8 +101,9 @@ const HiddenOnLargeScreen = styled.div`
 export const RobotCard = ({ robot }: { robot: Robot }) => {
     const navigate = useNavigate()
     const { TranslateText } = useLanguageContext()
+    const { installationCode } = useAssetContext()
     const goToRobot = () => {
-        const path = `${config.FRONTEND_BASE_ROUTE}/robot-${robot.id}`
+        const path = `${config.FRONTEND_BASE_ROUTE}/${installationCode}:robot?id=${robot.id}`
         navigate(path)
     }
 

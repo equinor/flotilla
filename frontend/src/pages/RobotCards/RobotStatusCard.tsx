@@ -10,6 +10,7 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { PressureStatusDisplay } from 'components/Displays/RobotDisplays/PressureStatusDisplay'
 import { config } from 'config'
 import { RobotType } from 'models/RobotModel'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 
 interface RobotProps {
     robot: Robot
@@ -67,8 +68,9 @@ const LongTypography = styled(Typography)`
 export const RobotStatusCard = ({ robot }: RobotProps) => {
     const navigate = useNavigate()
     const { TranslateText } = useLanguageContext()
+    const { installationCode } = useAssetContext()
     const goToRobot = () => {
-        const path = `${config.FRONTEND_BASE_ROUTE}/robot-${robot.id}`
+        const path = `${config.FRONTEND_BASE_ROUTE}/${installationCode}:robot?id=${robot.id}`
         navigate(path)
     }
 
