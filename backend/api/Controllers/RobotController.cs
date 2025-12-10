@@ -554,14 +554,6 @@ namespace Api.Controllers
                     return NotFound(e.Message);
                 }
             }
-            try
-            {
-                await robotService.UpdateCurrentMissionId(robotId, null);
-            }
-            catch (RobotNotFoundException e)
-            {
-                return NotFound(e.Message);
-            }
 
             return NoContent();
         }

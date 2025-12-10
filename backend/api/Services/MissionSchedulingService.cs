@@ -224,29 +224,10 @@ namespace Api.Services
                 throw new MissionRunNotFoundException(errorMessage);
             }
 
-            var ongoingMissionRunIds = ongoingMissionRuns
-                .Where(missionRun => missionRun.Id == robot.CurrentMissionId)
-                .Select(missionRun => missionRun.Id)
-                .ToList();
-
             try
             {
-                foreach (var ongoingMissionRunId in ongoingMissionRunIds)
-                {
-                    logger.LogInformation(
-                        $"Sending request to stop mission with ID {ongoingMissionRunId}"
-                    );
-                    await isarService.StopMission(robot, ongoingMissionRunId);
-
-                    if (stopReason is not null)
-                    {
-                        await missionRunService.UpdateMissionRunProperty(
-                            ongoingMissionRunId,
-                            "StatusReason",
-                            stopReason
-                        );
-                    }
-                }
+                logger.LogInformation($"Sending request to stop current mission");
+                await isarService.StopMission(robot);
             }
             catch (HttpRequestException e)
             {
@@ -271,6 +252,11 @@ namespace Api.Services
             {
                 logger.LogWarning("{Message}", $"No mission was running for robot {robot.Id}");
             }
+
+            var ongoingMissionRunIds = ongoingMissionRuns
+                .Where(missionRun => missionRun.Id == robot.CurrentMissionId)
+                .Select(missionRun => missionRun.Id)
+                .ToList();
 
             await MoveInterruptedMissionsToQueue(ongoingMissionRunIds);
 
