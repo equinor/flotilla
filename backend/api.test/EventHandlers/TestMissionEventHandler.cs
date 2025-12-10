@@ -101,7 +101,8 @@ namespace Api.Test.EventHandlers
                 missionRun.Id,
                 readOnly: true
             );
-            Assert.Equal(MissionStatus.Ongoing, postTestMissionRun!.Status);
+            // Status is pending until we get a new status on MQTT
+            Assert.Equal(MissionStatus.Pending, postTestMissionRun!.Status);
         }
 
 #pragma warning disable xUnit1004
@@ -193,7 +194,8 @@ namespace Api.Test.EventHandlers
                 missionRun.Id,
                 readOnly: true
             );
-            Assert.Equal(MissionStatus.Ongoing, postTestMissionRun!.Status);
+            // The mission should be pending until we get a status on MQTT
+            Assert.Equal(MissionStatus.Pending, postTestMissionRun!.Status);
         }
 
         [Fact]
@@ -237,7 +239,8 @@ namespace Api.Test.EventHandlers
                 readOnly: true
             );
             Assert.NotNull(postStartMissionRunOne);
-            Assert.Equal(MissionStatus.Ongoing, postStartMissionRunOne.Status);
+            // Status is pending until we get a new status on MQTT
+            Assert.Equal(MissionStatus.Pending, postStartMissionRunOne.Status);
 
             // Act (Ensure second mission is started for second robot)
             await MissionRunService.Create(missionRunTwo);
@@ -249,7 +252,8 @@ namespace Api.Test.EventHandlers
                 readOnly: true
             );
             Assert.NotNull(postStartMissionRunTwo);
-            Assert.Equal(MissionStatus.Ongoing, postStartMissionRunTwo.Status);
+            // Status is pending until we get a new status on MQTT
+            Assert.Equal(MissionStatus.Pending, postStartMissionRunTwo.Status);
         }
 
 #pragma warning disable xUnit1004
