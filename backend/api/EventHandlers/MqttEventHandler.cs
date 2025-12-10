@@ -451,10 +451,6 @@ namespace Api.EventHandlers
                 return;
             }
 
-            if (flotillaMissionRun.Status == status)
-            {
-                return;
-            }
             if (
                 flotillaMissionRun.Status == MissionStatus.Aborted
                 && status == MissionStatus.Cancelled
@@ -486,9 +482,6 @@ namespace Api.EventHandlers
                 isarMission.IsarId
             );
 
-            if (!updatedFlotillaMissionRun.IsCompleted)
-                return;
-
             var robot = await RobotService.ReadByIsarId(isarMission.IsarId, readOnly: true);
             if (robot is null)
             {
@@ -497,6 +490,12 @@ namespace Api.EventHandlers
                     isarMission.RobotName,
                     isarMission.IsarId
                 );
+                return;
+            }
+
+            if (!updatedFlotillaMissionRun.IsCompleted)
+            {
+                await RobotService.UpdateCurrentMissionId(robot.Id, updatedFlotillaMissionRun.Id);
                 return;
             }
 
