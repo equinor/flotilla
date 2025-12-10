@@ -474,13 +474,6 @@ namespace Api.Services
             }
 
             await missionRunService.UpdateWithIsarInfo(queuedMissionRun.Id, isarMission);
-            await missionRunService.UpdateMissionRunProperty(
-                queuedMissionRun.Id,
-                "Status",
-                MissionStatus.Ongoing
-            );
-
-            await robotService.UpdateCurrentMissionId(robot.Id, queuedMissionRun.Id);
 
             logger.LogInformation("Started mission run '{Id}'", queuedMissionRun.Id);
         }
