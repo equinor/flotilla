@@ -198,7 +198,20 @@ namespace Api.Database.Context
                 Documentation = [],
             };
 
-            return new List<Robot>([robot1, robot2, robot3]);
+            var robot4 = new Robot
+            {
+                Name = "Placebot Klab",
+                IsarId = "00000000-0000-0000-0000-000000000001",
+                SerialNumber = "Placebot Kårstø",
+                Status = RobotStatus.Available,
+                Host = "localhost",
+                Port = 3000,
+                CurrentInstallation = installations[1],
+                CurrentInspectionAreaId = inspectionAreas[5].Id,
+                Documentation = [],
+            };
+
+            return new List<Robot>([robot1, robot2, robot3, robot4]);
         }
 
         private static List<MissionDefinition> GetMissionDefinitions()
@@ -508,6 +521,7 @@ namespace Api.Database.Context
             robots[0].Model = models.Find(model => model.Type == RobotType.TaurobInspector)!;
             robots[1].Model = models.Find(model => model.Type == RobotType.AnymalX)!;
             robots[2].Model = models.Find(model => model.Type == RobotType.Robot)!;
+            robots[3].Model = models.Find(model => model.Type == RobotType.Robot)!;
 
             context.AddRange(robots);
             context.AddRange(plants);
