@@ -293,7 +293,7 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
                 iso = iso.replace('T', ' ')
                 return iso.slice(0, -3) // Removes :00 at the end
             },
-            getFormattedFilter: () => {
+            getFormattedFilter: (): MissionRunQueryParameters => {
                 const localFilter = { ...filterState }
                 // This way we avoid sending an empty filter which allows ongoing missions
                 if (!localFilter.statuses || localFilter.statuses.length === 0)

@@ -1,5 +1,5 @@
 import { CircularProgress, Pagination, Table, Typography, Chip, Button, Dialog } from '@equinor/eds-core-react'
-import { Mission, MissionStatusFilterOptions } from 'models/Mission'
+import { Mission, MissionStatus, MissionStatusFilterOptions } from 'models/Mission'
 import { useCallback, useEffect, useState } from 'react'
 import { HistoricMissionCard } from './HistoricMissionCard'
 import styled from 'styled-components'
@@ -16,6 +16,8 @@ import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'compon
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { StyledTableBody, StyledTableCaption, StyledTableCell } from 'components/Styles/StyledComponents'
 import { phone_width } from 'utils/constants'
+import { SignalREventLabels, useSignalRContext } from 'components/Contexts/SignalRContext'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 
 enum InspectionTableColumns {
     StatusShort = 'StatusShort',
@@ -106,45 +108,42 @@ const flatten = (filters: IFilterState) => {
     return allFilters
 }
 
-type RefreshProps = {
-    refreshInterval: number
-}
-
-export const MissionHistoryView = ({ refreshInterval }: RefreshProps) => (
+export const MissionHistoryView = () => (
     <MissionFilterProvider>
-        <MissionHistoryViewComponent refreshInterval={refreshInterval} />
+        <MissionHistoryViewComponent />
     </MissionFilterProvider>
 )
 
-const MissionHistoryViewComponent = ({ refreshInterval }: RefreshProps) => {
+const MissionHistoryViewComponent = () => {
     const { TranslateText } = useLanguageContext()
+    const { installationCode } = useAssetContext()
     const { page, switchPage, filterState, filterIsSet, filterFunctions, filterError, clearFilterError } =
         useMissionFilterContext()
     const { setAlert, setListAlert } = useAlertContext()
+    const { registerEvent, connectionReady } = useSignalRContext()
     const [filteredMissions, setFilteredMissions] = useState<Mission[]>([])
     const [paginationDetails, setPaginationDetails] = useState<PaginationHeader>()
     const [isLoading, setIsLoading] = useState<boolean>(true)
     const [isResettingPage, setIsResettingPage] = useState<boolean>(false)
+    const [lastChangedMission, setLastChangedMission] = useState<Mission | undefined>(undefined)
     const pageSize: number = 10
     const checkBoxBackgroundColour = tokens.colors.ui.background__info.hex
     const checkBoxBorderColour = tokens.colors.ui.background__info.hex
     const checkBoxWhiteBackgroundColor = tokens.colors.ui.background__default.hex
 
-    const FilterErrorDialog = () => {
-        return (
-            <Dialog open={filterError !== ''} isDismissable onClose={() => clearFilterError()}>
-                <Dialog.Header>
-                    <Dialog.Title>{TranslateText('Filter error')}</Dialog.Title>
-                </Dialog.Header>
-                <Dialog.CustomContent>
-                    <Typography variant="body_short">{filterError}</Typography>
-                </Dialog.CustomContent>
-                <Dialog.Actions>
-                    <Button onClick={() => clearFilterError()}>{TranslateText('Close')}</Button>
-                </Dialog.Actions>
-            </Dialog>
-        )
-    }
+    const FilterErrorDialog = () => (
+        <Dialog open={filterError !== ''} isDismissable onClose={() => clearFilterError()}>
+            <Dialog.Header>
+                <Dialog.Title>{TranslateText('Filter error')}</Dialog.Title>
+            </Dialog.Header>
+            <Dialog.CustomContent>
+                <Typography variant="body_short">{filterError}</Typography>
+            </Dialog.CustomContent>
+            <Dialog.Actions>
+                <Button onClick={() => clearFilterError()}>{TranslateText('Close')}</Button>
+            </Dialog.Actions>
+        </Dialog>
+    )
 
     const toDisplayValue = (
         filterName: string,
@@ -178,7 +177,7 @@ const MissionHistoryViewComponent = ({ refreshInterval }: RefreshProps) => {
     }
 
     const updateFilteredMissions = useCallback(() => {
-        const formattedFilter = filterFunctions.getFormattedFilter()!
+        const formattedFilter = filterFunctions.getFormattedFilter()
         BackendAPICaller.getMissionRuns({
             ...formattedFilter,
             pageSize: pageSize,
@@ -210,7 +209,7 @@ const MissionHistoryViewComponent = ({ refreshInterval }: RefreshProps) => {
                     AlertCategory.ERROR
                 )
             })
-    }, [page, pageSize, switchPage, filterFunctions])
+    }, [page, pageSize, filterFunctions])
 
     useEffect(() => {
         if (isResettingPage) setIsResettingPage(false)
@@ -218,35 +217,53 @@ const MissionHistoryViewComponent = ({ refreshInterval }: RefreshProps) => {
 
     useEffect(() => {
         updateFilteredMissions()
-        const id = setInterval(() => {
+    }, [page, filterState])
+
+    useEffect(() => {
+        if (
+            lastChangedMission &&
+            lastChangedMission.installationCode === installationCode &&
+            !(lastChangedMission.status in [MissionStatus.Pending, MissionStatus.Ongoing])
+        ) {
             updateFilteredMissions()
-        }, refreshInterval)
-        return () => clearInterval(id)
-    }, [refreshInterval, updateFilteredMissions, page])
+        }
+    }, [lastChangedMission])
+
+    useEffect(() => {
+        if (connectionReady) {
+            registerEvent(SignalREventLabels.missionRunCreated, (username: string, message: string) => {
+                setLastChangedMission(JSON.parse(message))
+            })
+            registerEvent(SignalREventLabels.missionRunUpdated, (username: string, message: string) => {
+                setLastChangedMission(JSON.parse(message))
+            })
+            registerEvent(SignalREventLabels.missionRunDeleted, (username: string, message: string) => {
+                setLastChangedMission(JSON.parse(message))
+            })
+        }
+    }, [registerEvent, connectionReady])
 
     const missionsDisplay = filteredMissions.map((mission, index) => (
         <HistoricMissionCard key={index} index={index} mission={mission} />
     ))
 
-    const PaginationComponent = () => {
-        return (
-            <StyledPagination
-                totalItems={paginationDetails!.TotalCount}
-                itemsPerPage={paginationDetails!.PageSize}
-                withItemIndicator
-                defaultPage={page}
-                onChange={(_, newPage) => onPageChange(newPage)}
-            ></StyledPagination>
-        )
-    }
+    const PaginationComponent = () => (
+        <StyledPagination
+            totalItems={paginationDetails!.TotalCount}
+            itemsPerPage={paginationDetails!.PageSize}
+            withItemIndicator
+            defaultPage={page}
+            onChange={(_, newPage) => onPageChange(newPage)}
+        ></StyledPagination>
+    )
 
     const onPageChange = (newPage: number) => {
         setIsLoading(true)
         switchPage(newPage)
     }
 
-    const ActiveFilterContent = () => {
-        return flatten(filterState)
+    const ActiveFilterContent = () =>
+        flatten(filterState)
             .filter((filter) => !filterFunctions.isSet(filter.name, filter.value))
             .map((filter) => {
                 const valueToDisplay = toDisplayValue(filter.name, filter.value!)
@@ -266,7 +283,6 @@ const MissionHistoryViewComponent = ({ refreshInterval }: RefreshProps) => {
                     </Chip>
                 )
             })
-    }
 
     return (
         <TableWithHeader>
@@ -295,10 +311,9 @@ const MissionHistoryViewComponent = ({ refreshInterval }: RefreshProps) => {
                             </StyledTableCaption>
                         )}
                         <StyledTableCaption captionSide={'bottom'}>
-                            {paginationDetails &&
-                                paginationDetails.TotalPages > 1 &&
-                                !isResettingPage &&
-                                PaginationComponent()}
+                            {paginationDetails && paginationDetails.TotalPages > 1 && !isResettingPage && (
+                                <PaginationComponent />
+                            )}
                         </StyledTableCaption>
                         <Table.Head sticky>
                             <Table.Row>

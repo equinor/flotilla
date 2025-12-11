@@ -126,7 +126,7 @@ export const FrontPage = ({ activeTab }: { activeTab: TabNames }) => {
             {
                 name: TabNames.MissionHistory,
                 label: TranslateText('Mission History'),
-                render: () => <MissionHistoryView refreshInterval={1000} />,
+                render: () => <MissionHistoryView />,
             },
             {
                 name: TabNames.AutoScheduling,
