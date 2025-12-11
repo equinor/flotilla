@@ -33,7 +33,7 @@ export const PredefinedMissionsPage = () => {
 export const MissionHistoryPage = () => {
     return (
         <DefaultPage pageName="history">
-            <MissionHistoryView refreshInterval={1000} />
+            <MissionHistoryView />
         </DefaultPage>
     )
 }
