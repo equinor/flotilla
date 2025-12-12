@@ -11,8 +11,6 @@ namespace Api.Services
     {
         public Task StartNextMissionRunIfSystemIsAvailable(Robot robot);
 
-        public Task MoveCurrentMissionRunBackToQueue(string robotId, string? stopReason = null);
-
         public Task<MissionRun> MoveMissionRunBackToQueue(
             string robotId,
             string? isarMissionRunId,
@@ -202,85 +200,6 @@ namespace Api.Services
             catch (RobotBusyException) { }
         }
 
-        public async Task MoveCurrentMissionRunBackToQueue(
-            string robotId,
-            string? stopReason = null
-        )
-        {
-            var robot = await robotService.ReadById(robotId, readOnly: true);
-            if (robot == null)
-            {
-                string errorMessage = $"Robot with ID: {robotId} was not found in the database";
-                logger.LogError("{Message}", errorMessage);
-                throw new RobotNotFoundException(errorMessage);
-            }
-
-            var ongoingMissionRuns = await GetOngoingMissions(robotId, readOnly: true);
-            if (ongoingMissionRuns is null || ongoingMissionRuns.Count == 0)
-            {
-                string errorMessage =
-                    $"There were no ongoing mission runs to stop for robot {robotId}";
-                logger.LogWarning("{Message}", errorMessage);
-                throw new MissionRunNotFoundException(errorMessage);
-            }
-
-            var ongoingMissionRunIds = ongoingMissionRuns
-                .Where(missionRun => missionRun.Id == robot.CurrentMissionId)
-                .Select(missionRun => missionRun.Id)
-                .ToList();
-
-            try
-            {
-                foreach (var ongoingMissionRunId in ongoingMissionRunIds)
-                {
-                    logger.LogInformation(
-                        $"Sending request to stop mission with ID {ongoingMissionRunId}"
-                    );
-                    await isarService.StopMission(robot, ongoingMissionRunId);
-
-                    if (stopReason is not null)
-                    {
-                        await missionRunService.UpdateMissionRunProperty(
-                            ongoingMissionRunId,
-                            "StatusReason",
-                            stopReason
-                        );
-                    }
-                }
-            }
-            catch (HttpRequestException e)
-            {
-                const string Message = "Error connecting to ISAR while stopping mission";
-                logger.LogError(e, "{Message}", Message);
-                await errorHandlingService.HandleLosingConnectionToIsar(robot.Id);
-                throw new MissionException(Message, 0);
-            }
-            catch (MissionException e)
-            {
-                const string Message = "Error while stopping ISAR mission";
-                logger.LogError(e, "{Message}", Message);
-                throw;
-            }
-            catch (JsonException e)
-            {
-                const string Message = "Error while processing the response from ISAR";
-                logger.LogError(e, "{Message}", Message);
-                throw new MissionException(Message, 0);
-            }
-            catch (MissionNotFoundException)
-            {
-                logger.LogWarning("{Message}", $"No mission was running for robot {robot.Id}");
-            }
-
-            await MoveInterruptedMissionsToQueue(ongoingMissionRunIds);
-
-            try
-            {
-                await robotService.UpdateCurrentMissionId(robotId, null);
-            }
-            catch (RobotNotFoundException) { }
-        }
-
         public async Task<MissionRun> MoveMissionRunBackToQueue(
             string robotId,
             string? isarMissionRunId,
@@ -403,39 +322,6 @@ namespace Api.Services
             RobotReadyForMissions?.Invoke(this, e);
         }
 
-        private async Task MoveInterruptedMissionsToQueue(
-            IEnumerable<string> interruptedMissionRunIds
-        )
-        {
-            foreach (string missionRunId in interruptedMissionRunIds)
-            {
-                var missionRun = await missionRunService.ReadById(missionRunId, readOnly: true);
-                if (missionRun is null)
-                {
-                    logger.LogWarning(
-                        "{Message}",
-                        $"Interrupted mission run with Id {missionRunId} could not be found"
-                    );
-                    continue;
-                }
-
-                logger.LogInformation(
-                    "Moving interrupted mission run {MissionRunId} back to the queue",
-                    missionRun.Id
-                );
-                await missionRunService.UpdateMissionRunProperty(
-                    missionRun.Id,
-                    "Status",
-                    MissionStatus.Pending
-                );
-                _ = signalRService.SendMessageAsync(
-                    "Mission run created",
-                    missionRun.InspectionArea.Installation,
-                    new MissionRunResponse(missionRun)
-                );
-            }
-        }
-
         private async Task StartMissionRun(MissionRun queuedMissionRun, Robot robot)
         {
             // Reset status reason in case this is a restarted mission run
@@ -474,13 +360,6 @@ namespace Api.Services
             }
 
             await missionRunService.UpdateWithIsarInfo(queuedMissionRun.Id, isarMission);
-            await missionRunService.UpdateMissionRunProperty(
-                queuedMissionRun.Id,
-                "Status",
-                MissionStatus.Ongoing
-            );
-
-            await robotService.UpdateCurrentMissionId(robot.Id, queuedMissionRun.Id);
 
             logger.LogInformation("Started mission run '{Id}'", queuedMissionRun.Id);
         }

@@ -710,31 +710,6 @@ namespace Api.EventHandlers
                 robot.Name,
                 robot.IsarId
             );
-            try
-            {
-                await MissionScheduling.MoveCurrentMissionRunBackToQueue(robot.Id);
-            }
-            catch (MissionRunNotFoundException)
-            {
-                _logger.LogInformation(
-                    "Tried to restart mission run on isar restarte event. No ongoing mission found."
-                );
-            }
-            catch (MissionException)
-            {
-                _logger.LogError(
-                    "Tried to restart mission run on isar restarte event. Failed to move current mission run back to queue"
-                );
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(
-                    ex,
-                    "Tried to restart mission run on isar restarte event. Failed to move current mission run back to queue for robot {robotName} with ISAR id {isarId} with unexpected exception",
-                    robot.Name,
-                    robot.IsarId
-                );
-            }
         }
 
         private async void OnSaraInspectionResultUpdate(object? sender, MqttReceivedArgs mqttArgs)
