@@ -62,9 +62,9 @@ export const PageNotFound = () => {
         if (activeInstallations) {
             const matches = new RegExp('/([A-Z]+):').exec(location.pathname)
             if (!matches || matches.length < 1) return
-
-            const installationCode = matches[1]
-            switchInstallation(installationCode)
+            const installationCode_ = matches[1]
+            if (installationCode_ === installationCode) return
+            switchInstallation(installationCode_)
         }
     }, [activeInstallations])
 
