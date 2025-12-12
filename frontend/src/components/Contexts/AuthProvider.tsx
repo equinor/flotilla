@@ -6,14 +6,22 @@ type Props = {
     children?: React.ReactNode
 }
 
-export const AuthContext = createContext('')
+const defaultAuthState = {
+    accessToken: undefined,
+}
+
+interface IAuthContext {
+    accessToken: string | undefined
+}
+
+export const AuthContext = createContext<IAuthContext>(defaultAuthState)
 
 // Check for new token every second (Will refresh token if needed)
 export const tokenReverificationInterval: number = 1000
 
 export const AuthProvider = (props: Props) => {
     const msalContext = useMsal()
-    const [accessToken, setAccessToken] = useState('')
+    const [accessToken, setAccessToken] = useState<string | undefined>(undefined)
 
     const VerifyToken = useCallback(() => {
         fetchAccessToken(msalContext)
@@ -32,5 +40,5 @@ export const AuthProvider = (props: Props) => {
         return () => clearInterval(id)
     }, [VerifyToken])
 
-    return <AuthContext.Provider value={accessToken}>{props.children}</AuthContext.Provider>
+    return <AuthContext.Provider value={{ accessToken: accessToken }}>{props.children}</AuthContext.Provider>
 }

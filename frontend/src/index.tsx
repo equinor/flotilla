@@ -1,5 +1,5 @@
 import App from './App'
-import React from 'react'
+import { StrictMode } from 'react'
 import { PublicClientApplication, EventType } from '@azure/msal-browser'
 import { MsalProvider } from '@azure/msal-react'
 import { msalConfig } from 'api/AuthConfig'
@@ -35,9 +35,9 @@ if (!rootElement) throw new Error('Failed to find the root element')
 const root = ReactDOM.createRoot(rootElement)
 
 root.render(
-    <React.StrictMode>
+    <StrictMode>
         <MsalProvider instance={msalInstance}>
             <App />
         </MsalProvider>
-    </React.StrictMode>
+    </StrictMode>
 )

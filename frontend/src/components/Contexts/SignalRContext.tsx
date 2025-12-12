@@ -56,7 +56,7 @@ const SignalRContext = createContext<ISignalRContext>(defaultSignalRInterface)
 export const SignalRProvider: FC<Props> = ({ children }) => {
     const [connection, setConnection] = useState<signalR.HubConnection | undefined>(defaultSignalRInterface.connection)
     const [connectionReady, setConnectionReady] = useState<boolean>(defaultSignalRInterface.connectionReady)
-    const accessToken = useContext(AuthContext)
+    const { accessToken } = useContext(AuthContext)
 
     const createConnection = useCallback((token: string) => {
         console.log('Attempting to create signalR connection...')

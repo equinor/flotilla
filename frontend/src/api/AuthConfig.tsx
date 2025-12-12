@@ -13,7 +13,7 @@ export const msalConfig: Configuration = {
     },
 }
 
-export const loginRequest = {
+const loginRequest = {
     scopes: [config.BACKEND_API_SCOPE],
 }
 
