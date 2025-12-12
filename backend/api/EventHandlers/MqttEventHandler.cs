@@ -778,12 +778,7 @@ namespace Api.EventHandlers
             {
                 InspectionId = saraAnalysisResult.InspectionId,
                 AnalysisType = saraAnalysisResult.AnalysisType,
-                DisplayText = saraAnalysisResult.DisplayText,
-                Value = saraAnalysisResult.Value,
-                Unit = saraAnalysisResult.Unit,
-                Class = saraAnalysisResult.Class,
-                Warning = saraAnalysisResult.Warning,
-                Confidence = saraAnalysisResult.Confidence,
+                DisplayText = string.Empty,
                 StorageAccount = saraAnalysisResult.StorageAccount,
                 BlobContainer = saraAnalysisResult.BlobContainer,
                 BlobName = saraAnalysisResult.BlobName,

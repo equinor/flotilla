@@ -126,5 +126,58 @@ namespace Api.Controllers
                 );
             }
         }
+
+        /// <summary>
+        /// Lookup the inspection image for task with specified isarInspectionId
+        /// </summary>
+        /// <remarks>
+        /// Retrieves the inspection image associated with the given ISAR Inspection ID.
+        /// </remarks>
+        [HttpGet("analysis/{isarInspectionId}")]
+        [Authorize(Roles = Role.User)]
+        [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> GetAnalysisImageByIsarInspectionId(
+            [FromRoute] string isarInspectionId
+        )
+        {
+            isarInspectionId = Sanitize.SanitizeUserInput(isarInspectionId);
+
+            try
+            {
+                byte[]? inspectionStream =
+                    await inspectionService.FetchAnalysisFromIsarInspectionId(
+                        isarInspectionId
+                    );
+
+                if (inspectionStream == null)
+                {
+                    logger.LogError(
+                        "Could not fetch analysis for inspection with ISAR Inspection ID {isarInspectionId}",
+                        isarInspectionId
+                    );
+                    return NotFound(
+                        $"Could not fetch analysis for inspection with ISAR Inspection ID {isarInspectionId}"
+                    );
+                }
+
+                return File(inspectionStream, "image/png");
+            }
+            catch (Exception e)
+            {
+                logger.LogError(
+                    e,
+                    "Could not find inspection image with ISAR Inspection ID {IsarInspectionId}",
+                    isarInspectionId
+                );
+                return NotFound(
+                    $"Could not find inspection image with ISAR Inspection ID{isarInspectionId}."
+                );
+            }
+        }
     }
 }

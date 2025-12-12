@@ -29,7 +29,7 @@ const StyledCircularProgress = styled.div`
     height: 100%;
 `
 
-const LargeImageErrorPlaceholder = ({ errorMessage }: { errorMessage: string }) => {
+export const LargeImageErrorPlaceholder = ({ errorMessage }: { errorMessage: string }) => {
     const { TranslateText } = useLanguageContext()
 
     return (
@@ -51,7 +51,7 @@ const SmallImageErrorPlaceholder = ({ errorMessage }: { errorMessage: string }) 
     )
 }
 
-const LargeImagePendingPlaceholder = () => {
+export const LargeImagePendingPlaceholder = () => {
     const { TranslateText } = useLanguageContext()
 
     return (
