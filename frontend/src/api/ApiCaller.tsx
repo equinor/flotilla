@@ -17,7 +17,7 @@ import { PointillaMapInfo } from 'models/PointillaMapInfo'
 
 /** Implements the request sent to the backend api. */
 export class BackendAPICaller {
-    static accessToken: string
+    static accessToken: string | undefined
     static installationCode: string
 
     /**  API is not ready until access token has been set for the first time */

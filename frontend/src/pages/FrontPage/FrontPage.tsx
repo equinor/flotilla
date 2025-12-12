@@ -4,7 +4,6 @@ import { InspectionOverviewSection } from 'pages/InspectionPage/InspectionOvervi
 import { StopRobotDialog } from './MissionOverview/StopDialogs'
 import { tokens } from '@equinor/eds-tokens'
 import { MissionControlSection } from './MissionOverview/MissionControlSection'
-import { redirectIfNoInstallationSelected } from 'utils/RedirectIfNoInstallationSelected'
 import { AutoScheduleSection } from './AutoScheduleSection/AutoScheduleSection'
 import { useMemo, type ReactNode } from 'react'
 import { Icon, Tabs, Typography } from '@equinor/eds-core-react'
@@ -97,9 +96,6 @@ type TabDef = {
 export const FrontPage = ({ activeTab }: { activeTab: TabNames }) => {
     const { TranslateText } = useLanguageContext()
     const { installationInspectionAreas, installationCode } = useAssetContext()
-
-    redirectIfNoInstallationSelected()
-
     const navigate = useNavigate()
 
     const tabs: TabDef[] = useMemo(() => {
