@@ -359,6 +359,22 @@ namespace Api.EventHandlers
 
             try
             {
+                if (isarAbortedMission.MissionId == "")
+                {
+                    if (robot.CurrentMissionId == null)
+                    {
+                        _logger.LogWarning(
+                            "Received abort mission message with empty string as mission id for robot '{RobotName}'. No action will be taken as robot has no current mission id.",
+                            isarAbortedMission.RobotName
+                        );
+                        return;
+                    }
+                    _logger.LogInformation(
+                        "Received abort mission message with empty string as mission id for robot '{RobotName}'. Will use id of current mission run instead",
+                        isarAbortedMission.RobotName
+                    );
+                    isarAbortedMission.MissionId = robot.CurrentMissionId;
+                }
                 var missionRun = await MissionScheduling.MoveMissionRunBackToQueue(
                     robot.Id,
                     isarAbortedMission.MissionId,
