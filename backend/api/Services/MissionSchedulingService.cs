@@ -364,25 +364,6 @@ namespace Api.Services
             logger.LogInformation("Started mission run '{Id}'", queuedMissionRun.Id);
         }
 
-        private async Task<PagedList<MissionRun>?> GetOngoingMissions(
-            string robotId,
-            bool readOnly = true
-        )
-        {
-            var ongoingMissions = await missionRunService.ReadAll(
-                new MissionRunQueryStringParameters
-                {
-                    Statuses = [MissionStatus.Ongoing],
-                    RobotId = robotId,
-                    OrderBy = "CreationTime",
-                    PageSize = 100,
-                },
-                readOnly: readOnly
-            );
-
-            return ongoingMissions;
-        }
-
         public static event EventHandler<RobotReadyForMissionsEventArgs>? RobotReadyForMissions;
     }
 }
