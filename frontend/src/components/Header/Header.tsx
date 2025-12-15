@@ -88,7 +88,9 @@ export const Header = ({ page }: { page: string }) => {
                             <Icon name={Icons.Info} size={24} title="Info Page" />
                         </Button>
                     </IconStyle>
-                    <SelectLanguageWrapper>{SelectLanguage()}</SelectLanguageWrapper>
+                    <SelectLanguageWrapper>
+                        <SelectLanguage />
+                    </SelectLanguageWrapper>
                 </TopBar.Actions>
             </StyledTopBar>
             <StyledNavigationMenu>
