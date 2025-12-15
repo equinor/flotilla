@@ -96,8 +96,12 @@ const defaultMissionFilterInterface: IMissionFilterContext = {
 const mapURLtoFilter = (searchParams: URLSearchParams): IMissionFilterContext['filterState'] => {
     const newFilter: IMissionFilterContext['filterState'] = defaultMissionFilterInterface.filterState
     searchParams.entries().forEach((searchParam: [string, string]) => {
-        if (searchParam[1] && JSON.parse(searchParam[1]) && searchParam[1] !== '[]') {
-            newFilter[searchParam[0] as keyof typeof newFilter] = JSON.parse(searchParam[1]) as any
+        if (!searchParam[1] || searchParam[1] === '[]') return
+        try {
+            const parsedParams = JSON.parse(searchParam[1])
+            newFilter[searchParam[0] as keyof typeof newFilter] = parsedParams as any
+        } catch {
+            return
         }
     })
     return newFilter
