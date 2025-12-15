@@ -50,9 +50,7 @@ export const AssetContext = createContext<IAssetContext>(defaultAssetState)
 export const AssetProvider: FC<Props> = ({ children }) => {
     const [enabledRobots, setEnabledRobots] = useState<Robot[]>(defaultAssetState.enabledRobots)
     const [activeInstallations, setActiveInstallations] = useState<Installation[]>([])
-    const [selectedInstallation, setSelectedInstallation] = useState<Installation>(
-        JSON.parse(window.localStorage.getItem('installation') ?? '{}')
-    )
+    const [selectedInstallation, setSelectedInstallation] = useState<Installation | undefined>(undefined)
     const [installationInspectionAreas, setInstallationInspectionAreas] = useState<InspectionArea[]>([])
 
     const { registerEvent, connectionReady } = useSignalRContext()
@@ -240,7 +238,6 @@ export const AssetProvider: FC<Props> = ({ children }) => {
         )
         if (!installation) return
         setSelectedInstallation(installation)
-        window.localStorage.setItem('installation', JSON.stringify(installation))
     }
 
     const [filteredInstallationInspectionAreas, setFilteredInstallationInspectionAreas] = useState<InspectionArea[]>([])
