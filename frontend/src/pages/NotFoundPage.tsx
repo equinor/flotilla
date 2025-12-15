@@ -84,7 +84,7 @@ export const PageNotFound = () => {
                         <StyledTypography variant="h3">
                             {"We couldn't find the page you're looking for."}
                         </StyledTypography>
-                        <StyledButton color="secondary" onClick={() => navigate(`${config.FRONTEND_BASE_ROUTE}`)}>
+                        <StyledButton color="secondary" onClick={() => navigate(`${config.FRONTEND_BASE_ROUTE}/`)}>
                             {"Let's go back"}
                         </StyledButton>
                     </StyledActions>
