@@ -24,9 +24,6 @@ namespace Api.EventHandlers
             Subscribe();
         }
 
-        private IRobotService RobotService =>
-            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IRobotService>();
-
         private IMissionSchedulingService MissionScheduling =>
             _scopeFactory
                 .CreateScope()
@@ -34,9 +31,6 @@ namespace Api.EventHandlers
 
         private IIsarService IsarService =>
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IIsarService>();
-
-        private ISignalRService SignalRService =>
-            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ISignalRService>();
 
         public override void Subscribe()
         {
