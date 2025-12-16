@@ -175,7 +175,7 @@ namespace Api.Services
         {
             return await GetMissionRunsWithSubModels(readOnly: readOnly)
                 .Where(missionRun =>
-                    missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Pending
+                    missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Queued
                 )
                 .OrderBy(missionRun => missionRun.CreationTime)
                 .ToListAsync();
@@ -189,7 +189,7 @@ namespace Api.Services
             return await GetMissionRunsWithSubModels(readOnly: readOnly)
                 .OrderBy(missionRun => missionRun.CreationTime)
                 .FirstOrDefaultAsync(missionRun =>
-                    missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Pending
+                    missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Queued
                 );
         }
 

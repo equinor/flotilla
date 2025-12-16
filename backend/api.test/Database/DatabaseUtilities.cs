@@ -107,7 +107,7 @@ namespace Api.Test.Database
             Robot robot,
             InspectionArea inspectionArea,
             bool writeToDatabase = false,
-            MissionStatus missionStatus = MissionStatus.Pending,
+            MissionStatus missionStatus = MissionStatus.Queued,
             MissionTask[] tasks = null!
         )
         {

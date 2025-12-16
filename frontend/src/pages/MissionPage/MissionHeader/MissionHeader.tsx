@@ -156,6 +156,7 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
     const translatedMinutes = TranslateText('minutes')
     const { startTime, startDate, usedTime, remainingTime } = getStartUsedAndRemainingTime(mission, translatedMinutes)
     const isMissionActive = mission.status === MissionStatus.Ongoing || mission.status === MissionStatus.Paused
+    // TODO: if it is the current mission for a robot then it is active
 
     const missionHasFailedTasks = mission.tasks.some(
         (t) => t.status !== TaskStatus.PartiallySuccessful && t.status !== TaskStatus.Successful

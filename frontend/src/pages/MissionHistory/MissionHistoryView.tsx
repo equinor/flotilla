@@ -223,7 +223,7 @@ const MissionHistoryViewComponent = () => {
         if (
             lastChangedMission &&
             lastChangedMission.installationCode === installationCode &&
-            !(lastChangedMission.status in [MissionStatus.Pending, MissionStatus.Ongoing])
+            ![MissionStatus.Pending, MissionStatus.Queued, MissionStatus.Ongoing].includes(lastChangedMission.status)
         ) {
             updateFilteredMissions()
         }

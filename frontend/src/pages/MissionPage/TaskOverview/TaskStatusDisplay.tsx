@@ -16,7 +16,7 @@ const StyledStatusDisplay = styled.div`
 const TaskStatusIcon = ({ status }: { status: TaskStatus }) => {
     switch (status) {
         case TaskStatus.NotStarted: {
-            return <Icon name={Icons.Pending} style={{ color: tokens.colors.text.static_icons__secondary.hex }} />
+            return <Icon name={Icons.Queued} style={{ color: tokens.colors.text.static_icons__secondary.hex }} />
         }
         case TaskStatus.InProgress: {
             return <Icon name={Icons.Ongoing} style={{ color: tokens.colors.text.static_icons__secondary.hex }} />

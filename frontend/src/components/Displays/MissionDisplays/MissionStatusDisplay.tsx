@@ -27,15 +27,16 @@ const StyledIcon = styled(Icon)`
 
 const MissionStatusIcon = ({ status }: StatusProps) => {
     switch (status) {
-        case MissionStatus.Pending: {
+        case MissionStatus.Queued: {
             return (
                 <StyledIcon
-                    name={Icons.Pending}
+                    name={Icons.Queued}
                     style={{ color: tokens.colors.text.static_icons__secondary.hex }}
                     size={18}
                 />
             )
         }
+        case MissionStatus.Pending: // Here we could have a different "mission starting" icon
         case MissionStatus.Ongoing: {
             return <StyledIcon name={Icons.Ongoing} style={{ color: tokens.colors.text.static_icons__secondary.hex }} />
         }

@@ -148,8 +148,8 @@ const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialo
     } else if (isScheduled) {
         status = (
             <StyledContent>
-                <Icon name={Icons.Pending} size={16} />
-                {TranslateText('Pending')}
+                <Icon name={Icons.Queued} size={16} />
+                {TranslateText('Queued')}
             </StyledContent>
         )
     } else if (!mission.lastSuccessfulRun || !mission.lastSuccessfulRun.endTime) {

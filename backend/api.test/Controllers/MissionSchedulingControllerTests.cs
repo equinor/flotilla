@@ -49,7 +49,7 @@ namespace Api.Test.Controllers
         public Task DisposeAsync() => Task.CompletedTask;
 
         [Fact]
-        public async Task CheckThatSchedulingAMissionToBusyRobotSetsMissionToPending()
+        public async Task CheckThatSchedulingAMissionToBusyRobotSetsMissionToQueued()
         {
             // Arrange
             var installation = await DatabaseUtilities.NewInstallation();
@@ -87,7 +87,7 @@ namespace Api.Test.Controllers
             );
 
             Assert.True(response.IsSuccessStatusCode);
-            Assert.Equal(MissionStatus.Pending, missionRun!.Status);
+            Assert.Equal(MissionStatus.Queued, missionRun!.Status);
         }
 
         [Fact]

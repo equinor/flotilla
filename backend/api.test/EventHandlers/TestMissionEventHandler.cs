@@ -101,8 +101,8 @@ namespace Api.Test.EventHandlers
                 missionRun.Id,
                 readOnly: true
             );
-            // Status is pending until we get a new status on MQTT
-            Assert.Equal(MissionStatus.Pending, postTestMissionRun!.Status);
+            // Status is queued until we get a new status on MQTT
+            Assert.Equal(MissionStatus.Queued, postTestMissionRun!.Status);
         }
 
 #pragma warning disable xUnit1004
@@ -148,7 +148,7 @@ namespace Api.Test.EventHandlers
                 readOnly: true
             );
             Assert.Equal(MissionStatus.Ongoing, postTestMissionRunOne!.Status);
-            Assert.Equal(MissionStatus.Pending, postTestMissionRunTwo!.Status);
+            Assert.Equal(MissionStatus.Queued, postTestMissionRunTwo!.Status);
         }
 
         [Fact]
@@ -194,8 +194,8 @@ namespace Api.Test.EventHandlers
                 missionRun.Id,
                 readOnly: true
             );
-            // The mission should be pending until we get a status on MQTT
-            Assert.Equal(MissionStatus.Pending, postTestMissionRun!.Status);
+            // The mission should be queued until we get a status on MQTT
+            Assert.Equal(MissionStatus.Queued, postTestMissionRun!.Status);
         }
 
         [Fact]
@@ -239,8 +239,8 @@ namespace Api.Test.EventHandlers
                 readOnly: true
             );
             Assert.NotNull(postStartMissionRunOne);
-            // Status is pending until we get a new status on MQTT
-            Assert.Equal(MissionStatus.Pending, postStartMissionRunOne.Status);
+            // Status is queued until we get a new status on MQTT
+            Assert.Equal(MissionStatus.Queued, postStartMissionRunOne.Status);
 
             // Act (Ensure second mission is started for second robot)
             await MissionRunService.Create(missionRunTwo);
@@ -252,8 +252,8 @@ namespace Api.Test.EventHandlers
                 readOnly: true
             );
             Assert.NotNull(postStartMissionRunTwo);
-            // Status is pending until we get a new status on MQTT
-            Assert.Equal(MissionStatus.Pending, postStartMissionRunTwo.Status);
+            // Status is queued until we get a new status on MQTT
+            Assert.Equal(MissionStatus.Queued, postStartMissionRunTwo.Status);
         }
 
 #pragma warning disable xUnit1004
@@ -330,7 +330,7 @@ namespace Api.Test.EventHandlers
                 missionRunTwo.Id,
                 readOnly: true
             );
-            Assert.Equal(MissionStatus.Pending, postTestMissionRunTwo!.Status);
+            Assert.Equal(MissionStatus.Queued, postTestMissionRunTwo!.Status);
         }
 
 #pragma warning disable xUnit1004

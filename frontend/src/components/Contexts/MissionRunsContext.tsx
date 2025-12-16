@@ -44,7 +44,7 @@ const updateQueueIfMissionAlreadyQueued = (oldQueue: Mission[], updatedMission: 
     const existingMissionIndex = oldQueue.findIndex((m) => m.id === updatedMission.id)
     if (existingMissionIndex !== -1) {
         // If the mission is already in the queue
-        if (updatedMission.status !== MissionStatus.Pending) oldQueue.splice(existingMissionIndex, 1)
+        if (updatedMission.status !== MissionStatus.Queued) oldQueue.splice(existingMissionIndex, 1)
         else oldQueue[existingMissionIndex] = updatedMission
     }
     return oldQueue
@@ -55,7 +55,7 @@ const anyRemainingTasks = (mission: Mission) =>
 
 const updateOngoingMissionsWithUpdatedMission = (oldMissionList: Mission[], updatedMission: Mission) => {
     const existingMissionIndex = oldMissionList.findIndex((m) => m.id === updatedMission.id)
-    if (updatedMission.status === MissionStatus.Ongoing || updatedMission.status === MissionStatus.Paused) {
+    if ([MissionStatus.Ongoing, MissionStatus.Pending, MissionStatus.Paused].includes(updatedMission.status)) {
         if (existingMissionIndex !== -1) {
             // Mission is ongoing and in the queue
             oldMissionList[existingMissionIndex] = updatedMission
@@ -131,7 +131,7 @@ const useMissionRuns = (): IMissionRunsContext => {
     useEffect(() => {
         const fetchAndUpdateMissions = async () => {
             const ongoing = await fetchMissionRuns({
-                statuses: [MissionStatus.Ongoing, MissionStatus.Paused],
+                statuses: [MissionStatus.Ongoing, MissionStatus.Pending, MissionStatus.Paused],
                 pageSize: 100,
                 orderBy: 'StartTime desc',
             }).catch(() => {
@@ -152,7 +152,7 @@ const useMissionRuns = (): IMissionRunsContext => {
             setOngoingMissions(ongoing ?? [])
 
             const queue = await fetchMissionRuns({
-                statuses: [MissionStatus.Pending],
+                statuses: [MissionStatus.Queued],
                 pageSize: 100,
                 orderBy: 'CreationTime',
             }).catch(() => {
