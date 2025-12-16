@@ -428,9 +428,9 @@ namespace Api.EventHandlers
             );
             if (flotillaMissionRun is null)
             {
-                string errorMessage =
-                    $"Mission with isar mission Id {isarMission.MissionId} was not found";
-                _logger.LogError("{Message}", errorMessage);
+                _logger.LogInformation(
+                    $"Mission with isar mission Id {isarMission.MissionId} was not found. This is expected if the mission is a return home mission."
+                );
 
                 var isarRobot = await RobotService.ReadByIsarId(isarMission.IsarId, readOnly: true);
 
