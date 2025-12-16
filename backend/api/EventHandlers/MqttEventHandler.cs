@@ -424,7 +424,8 @@ namespace Api.EventHandlers
 
             var flotillaMissionRun = await MissionRunService.ReadById(
                 isarMission.MissionId,
-                readOnly: true
+                readOnly: true,
+                includeDeprecated: true
             );
             if (flotillaMissionRun is null)
             {
@@ -455,13 +456,24 @@ namespace Api.EventHandlers
                 flotillaMissionRun.Status == MissionStatus.Aborted
                 && status == MissionStatus.Cancelled
             )
-            {
                 status = MissionStatus.Aborted;
-            }
 
             MissionRun updatedFlotillaMissionRun;
             try
             {
+                if (flotillaMissionRun.IsDeprecated)
+                {
+                    updatedFlotillaMissionRun = await MissionRunService.UpdateMissionRunProperty(
+                        isarMission.MissionId,
+                        "IsDeprecated",
+                        false,
+                        includeDeprecated: true
+                    );
+                    _logger.LogInformation(
+                        $"Mission with isar mission Id {isarMission.MissionId} was deprecated on mission updated, setting to not deprecated."
+                    );
+                }
+
                 updatedFlotillaMissionRun = await MissionRunService.UpdateMissionRunStatus(
                     isarMission.MissionId,
                     status,
