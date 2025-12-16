@@ -6,7 +6,7 @@ namespace Api.Database.Models
 {
     public class MissionRun : SortableRecord
     {
-        private MissionStatus _status;
+        private MissionStatus _status = MissionStatus.Queued;
 
         private IList<MissionTask> _tasks;
 
@@ -138,5 +138,6 @@ namespace Api.Database.Models
         Failed,
         Successful,
         PartiallySuccessful,
+        Queued,
     }
 }

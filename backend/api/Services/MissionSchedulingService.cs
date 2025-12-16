@@ -244,7 +244,7 @@ namespace Api.Services
             await missionRunService.UpdateMissionRunProperty(
                 missionRun.Id,
                 "Status",
-                MissionStatus.Pending
+                MissionStatus.Queued
             );
             _ = signalRService.SendMessageAsync(
                 "Mission run created",
@@ -295,11 +295,11 @@ namespace Api.Services
                 throw new RobotNotFoundException(errorMessage);
             }
 
-            var pendingMissionRuns = await missionRunService.ReadMissionRunQueue(
+            var queuedMissionRuns = await missionRunService.ReadMissionRunQueue(
                 robotId,
                 readOnly: true
             );
-            if (pendingMissionRuns is null)
+            if (queuedMissionRuns is null)
             {
                 string infoMessage =
                     $"There were no mission runs in the queue to abort for robot {robotId}";
@@ -307,13 +307,13 @@ namespace Api.Services
                 return;
             }
 
-            IList<string> pendingMissionRunIds = pendingMissionRuns
+            IList<string> queuedMissionRunIds = queuedMissionRuns
                 .Select(missionRun => missionRun.Id)
                 .ToList();
 
-            foreach (var pendingMissionRun in pendingMissionRuns)
+            foreach (var queuedMissionRunId in queuedMissionRunIds)
             {
-                await missionRunService.Delete(pendingMissionRun.Id);
+                await missionRunService.Delete(queuedMissionRunId);
             }
         }
 

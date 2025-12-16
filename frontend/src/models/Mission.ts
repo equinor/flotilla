@@ -11,6 +11,7 @@ export enum MissionStatus {
     Failed = 'Failed',
     Successful = 'Successful',
     PartiallySuccessful = 'PartiallySuccessful',
+    Queued = 'Queued',
 }
 
 export const missionStatusFilterOptionsIterable = [
@@ -54,7 +55,7 @@ export const placeholderMission: Mission = {
         plantCode: 'placeholderPlantCode',
         installationCode: 'placeholderInstallationCode',
     },
-    status: MissionStatus.Pending,
+    status: MissionStatus.Queued,
     isCompleted: false,
     creationTime: new Date(),
     tasks: [],

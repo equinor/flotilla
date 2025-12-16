@@ -293,7 +293,7 @@ export class BackendAPICaller {
     }
 
     static async deleteAllMissions() {
-        const path: string = 'missions/runs/'
+        const path: string = 'missions/runs/queued-missions'
         return await BackendAPICaller.DELETE(path, '').catch(BackendAPICaller.handleError('DELETE', path))
     }
 

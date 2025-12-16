@@ -105,7 +105,7 @@ export const RobotPage = ({ robotId }: { robotId: string }) => {
     }, [mediaStreams, robotId])
 
     const stopButton =
-        selectedRobot && selectedRobot.status in [RobotStatus.Busy, RobotStatus.Paused] ? (
+        selectedRobot && [RobotStatus.Busy, RobotStatus.Paused].includes(selectedRobot.status) ? (
             <FullWidthButton variant="contained" onClick={toggleSkipMissionDialog}>
                 <Icon
                     name={Icons.StopButton}
@@ -119,7 +119,7 @@ export const RobotPage = ({ robotId }: { robotId: string }) => {
         )
 
     const skipMissionDialog =
-        selectedRobot && selectedRobot.status in [RobotStatus.Busy, RobotStatus.Paused] ? (
+        selectedRobot && [RobotStatus.Busy, RobotStatus.Paused].includes(selectedRobot.status) ? (
             <SkipMissionDialog
                 missionName={mission?.name}
                 robotId={selectedRobot.id}

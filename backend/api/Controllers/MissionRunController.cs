@@ -124,25 +124,25 @@ namespace Api.Controllers
         }
 
         /// <summary>
-        ///     Deletes all pending mission runs from the database.
+        ///     Deletes all queued mission runs from the database.
         /// </summary>
         [HttpDelete]
         [Authorize(Roles = Role.User)]
-        [Route("pending-missions")]
+        [Route("queued-missions")]
         [ProducesResponseType(typeof(IList<MissionRunResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<IList<MissionRunResponse>>> DeletePendingMissionRuns()
+        public async Task<ActionResult<IList<MissionRunResponse>>> DeleteQueuedMissionRuns()
         {
-            var pendingMissionRuns = await missionRunService.ReadAll(
-                new MissionRunQueryStringParameters { Statuses = [MissionStatus.Pending] }
+            var queuedMissionRuns = await missionRunService.ReadAll(
+                new MissionRunQueryStringParameters { Statuses = [MissionStatus.Queued] }
             );
 
             var missionRunResponse = new List<MissionRunResponse>();
 
-            foreach (var missionRun in pendingMissionRuns)
+            foreach (var missionRun in queuedMissionRuns)
             {
                 var deletedMissionRun = await missionRunService.Delete(missionRun.Id);
                 if (deletedMissionRun is null)

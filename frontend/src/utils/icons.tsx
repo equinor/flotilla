@@ -123,7 +123,7 @@ export enum Icons {
     Wait = 'do_not_disturb',
     Successful = 'check_circle_outlined',
     Failed = 'error_outlined',
-    Pending = 'time',
+    Queued = 'time',
     Warning = 'warning_outlined',
     Ongoing = 'autorenew',
     Pause = 'pause_circle_outlined',
