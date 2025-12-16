@@ -23,7 +23,11 @@ namespace Api.Services
             bool readOnly = true
         );
 
-        public Task<MissionRun?> ReadById(string id, bool readOnly = true);
+        public Task<MissionRun?> ReadById(
+            string id,
+            bool readOnly = true,
+            bool includeDeprecated = false
+        );
 
         public Task<IList<MissionRun>> ReadMissionRunQueue(string robotId, bool readOnly = true);
 
@@ -58,7 +62,8 @@ namespace Api.Services
         public Task<MissionRun> UpdateMissionRunProperty(
             string missionRunId,
             string propertyName,
-            object? value
+            object? value,
+            bool includeDeprecated = false
         );
 
         public Task<MissionRun> UpdateWithIsarInfo(string missionRunId, IsarMission isarMission);
@@ -162,9 +167,16 @@ namespace Api.Services
             );
         }
 
-        public async Task<MissionRun?> ReadById(string id, bool readOnly = true)
+        public async Task<MissionRun?> ReadById(
+            string id,
+            bool readOnly = true,
+            bool includeDeprecated = false
+        )
         {
-            return await GetMissionRunsWithSubModels(readOnly: readOnly)
+            return await GetMissionRunsWithSubModels(
+                    readOnly: readOnly,
+                    includeDeprecated: includeDeprecated
+                )
                 .FirstOrDefaultAsync(missionRun => missionRun.Id.Equals(id));
         }
 
@@ -308,7 +320,10 @@ namespace Api.Services
             return missionRun;
         }
 
-        private IQueryable<MissionRun> GetMissionRunsWithSubModels(bool readOnly = true)
+        private IQueryable<MissionRun> GetMissionRunsWithSubModels(
+            bool readOnly = true,
+            bool includeDeprecated = false
+        )
         {
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes(
                 AccessMode.Read
@@ -334,8 +349,11 @@ namespace Api.Services
                     accessibleInstallationCodes.Result.Contains(
                         m.InspectionArea.Installation.InstallationCode.ToUpper()
                     )
-                )
-                .Where(m => m.IsDeprecated == false);
+                );
+
+            if (!includeDeprecated)
+                query = query.Where(m => m.IsDeprecated == false);
+
             return readOnly ? query.AsNoTracking() : query.AsTracking();
         }
 
@@ -592,10 +610,15 @@ namespace Api.Services
         public async Task<MissionRun> UpdateMissionRunProperty(
             string missionRunId,
             string propertyName,
-            object? value
+            object? value,
+            bool includeDeprecated = false
         )
         {
-            var missionRun = await ReadById(missionRunId, readOnly: true);
+            var missionRun = await ReadById(
+                missionRunId,
+                readOnly: true,
+                includeDeprecated: includeDeprecated
+            );
             if (missionRun is null)
             {
                 string errorMessage =
