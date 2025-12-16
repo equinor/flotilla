@@ -721,6 +721,56 @@ namespace Api.EventHandlers
                 robot.Name,
                 robot.IsarId
             );
+
+            var missionToAbort = robot.CurrentMissionId;
+            if (missionToAbort == null)
+            {
+                _logger.LogInformation(
+                    "Robot {robotName} with ISAR id {isarId} has no ongoing mission. No action required.",
+                    robot.Name,
+                    robot.IsarId
+                );
+                return;
+            }
+
+            try
+            {
+                var missionRun = await MissionScheduling.MoveMissionRunBackToQueue(
+                    robot.Id,
+                    missionToAbort,
+                    "Isar restarted during mission"
+                );
+
+                _logger.LogInformation(
+                    "Mission with id '{Id}' was aborted for robot '{RobotName}' due to ISAR restart",
+                    missionRun.Id,
+                    robot.Name
+                );
+            }
+            catch (RobotNotFoundException)
+            {
+                _logger.LogWarning(
+                    "Could not find robot with id {RobotId} when attempting to abort mission '{MissionToAbort}' due to isar restart",
+                    robot.Id,
+                    missionToAbort
+                );
+            }
+            catch (MissionRunNotFoundException)
+            {
+                _logger.LogWarning(
+                    "Could not find mission with id {MissionToAbort} when attempting to abort mission due to isar restart",
+                    missionToAbort
+                );
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(
+                    "An unhandled exception occured when attempting to abort mission with id {MissionToAbort} on robot {RobotId} due to isar restart. Error message: {StackTrace}",
+                    missionToAbort,
+                    robot.Id,
+                    e.StackTrace
+                );
+            }
         }
 
         private async void OnSaraInspectionResultUpdate(object? sender, MqttReceivedArgs mqttArgs)
