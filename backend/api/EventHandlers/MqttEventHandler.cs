@@ -359,15 +359,14 @@ namespace Api.EventHandlers
 
             try
             {
-                var missionRun = await MissionScheduling.MoveMissionRunBackToQueue(
+                await MissionScheduling.MoveMissionRunBackToQueue(
                     robot.Id,
                     isarAbortedMission.MissionId,
                     isarAbortedMission.Reason
                 );
 
                 _logger.LogInformation(
-                    "Mission '{Id}' (ISARMissionID='{IsarMissionId}') was aborted by ISAR for robot '{RobotName}' with ISAR id '{IsarId}': {Reason}",
-                    missionRun.Id,
+                    "Mission '{Id}' was aborted by ISAR for robot '{RobotName}' with ISAR id '{IsarId}': {Reason}",
                     isarAbortedMission.MissionId,
                     isarAbortedMission.RobotName,
                     isarAbortedMission.IsarId,
@@ -735,7 +734,7 @@ namespace Api.EventHandlers
 
             try
             {
-                var missionRun = await MissionScheduling.MoveMissionRunBackToQueue(
+                await MissionScheduling.MoveMissionRunBackToQueue(
                     robot.Id,
                     missionToAbort,
                     "Isar restarted during mission"
@@ -743,7 +742,7 @@ namespace Api.EventHandlers
 
                 _logger.LogInformation(
                     "Mission with id '{Id}' was aborted for robot '{RobotName}' due to ISAR restart",
-                    missionRun.Id,
+                    missionToAbort,
                     robot.Name
                 );
             }
