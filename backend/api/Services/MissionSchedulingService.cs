@@ -11,7 +11,7 @@ namespace Api.Services
     {
         public Task StartNextMissionRunIfSystemIsAvailable(Robot robot);
 
-        public Task<MissionRun> MoveMissionRunBackToQueue(
+        public Task<MissionRun?> MoveMissionRunBackToQueue(
             string robotId,
             string? isarMissionRunId,
             string? stopReason = null
@@ -200,7 +200,7 @@ namespace Api.Services
             catch (RobotBusyException) { }
         }
 
-        public async Task<MissionRun> MoveMissionRunBackToQueue(
+        public async Task<MissionRun?> MoveMissionRunBackToQueue(
             string robotId,
             string? isarMissionRunId,
             string? stopReason = null
@@ -244,12 +244,7 @@ namespace Api.Services
             await missionRunService.UpdateMissionRunProperty(
                 missionRun.Id,
                 "Status",
-                MissionStatus.Queued
-            );
-            _ = signalRService.SendMessageAsync(
-                "Mission run created",
-                missionRun.InspectionArea.Installation,
-                new MissionRunResponse(missionRun)
+                MissionStatus.Aborted
             );
 
             try
@@ -267,6 +262,37 @@ namespace Api.Services
                     missionRun.MissionId
                 );
             }
+
+            var unfinishedTasks = missionRun
+                .Tasks.Where(
+                    (t) =>
+                        t.Status != Database.Models.TaskStatus.Successful
+                        && t.Status != Database.Models.TaskStatus.PartiallySuccessful
+                )
+                .Select((t) => new MissionTask(t))
+                .ToList();
+
+            if (unfinishedTasks.Count < 1)
+                return null;
+
+            var newMissionRun = new MissionRun
+            {
+                Name = missionRun.Name,
+                Robot = robot,
+                MissionId = missionRun.Id,
+                Status = MissionStatus.Queued,
+                CreationTime = missionRun.CreationTime,
+                Tasks = unfinishedTasks,
+                InstallationCode = missionRun.InstallationCode,
+                InspectionArea = missionRun.InspectionArea,
+            };
+            await missionRunService.Create(newMissionRun);
+
+            _ = signalRService.SendMessageAsync(
+                "Mission run created",
+                newMissionRun.InspectionArea.Installation,
+                new MissionRunResponse(newMissionRun)
+            );
 
             return missionRun;
         }
