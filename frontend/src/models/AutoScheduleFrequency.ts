@@ -1,9 +1,13 @@
 import { convertUTCDateToLocalDate } from 'utils/StringFormatting'
 
 export interface AutoScheduleFrequency {
-    timesOfDayCET: string[] // Format HH:mm:ss
-    daysOfWeek: DaysOfWeek[]
+    schedulingTimesCETperWeek: TimeAndDay[]
     autoScheduledJobs?: string
+}
+
+export interface TimeAndDay {
+    dayOfWeek: DaysOfWeek
+    timeOfDay: string // Format HH:mm:ss
 }
 
 export function parseAutoScheduledJobIds(autoScheduledJobs: string): { [key: string]: string } {

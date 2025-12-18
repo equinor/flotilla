@@ -69,8 +69,6 @@ namespace Api.Database.Context
                 .Entity<MissionDefinition>()
                 .Property(m => m.InspectionFrequency)
                 .HasConversion(new TimeSpanToTicksConverter());
-
-            modelBuilder.Entity<MissionDefinition>().OwnsOne(m => m.AutoScheduleFrequency);
             modelBuilder
                 .Entity<MissionDefinition>()
                 .HasOne(m => m.InspectionArea)

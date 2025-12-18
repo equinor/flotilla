@@ -65,18 +65,16 @@ export const NextAutoScheduleMissionView = () => {
     const autoScheduleMissionDefinitions = missionDefinitions.filter((m) => m.autoScheduleFrequency)
     const currentDayOfTheWeek = allDays[allDaysIndexOfToday]
 
-    const missionDefinitionList = autoScheduleMissionDefinitions.filter((m) =>
-        m.autoScheduleFrequency!.daysOfWeek.includes(currentDayOfTheWeek)
-    )
-
-    const timeMissionPairs = missionDefinitionList
+    const timeMissionPairs = autoScheduleMissionDefinitions
         .filter((m) => m.autoScheduleFrequency?.autoScheduledJobs)
         .flatMap((m) =>
             m
-                .autoScheduleFrequency!.timesOfDayCET.filter(
-                    (time) => parseAutoScheduledJobIds(m.autoScheduleFrequency!.autoScheduledJobs!)[time]
+                .autoScheduleFrequency!.schedulingTimesCETperWeek.filter(
+                    (timeAndDay) =>
+                        timeAndDay.dayOfWeek === currentDayOfTheWeek &&
+                        parseAutoScheduledJobIds(m.autoScheduleFrequency!.autoScheduledJobs!)[timeAndDay.timeOfDay]
                 )
-                .map((time) => ({ time, mission: m }))
+                .map((timeAndDay) => ({ time: timeAndDay.timeOfDay, mission: m }))
         )
         .sort((a, b) => (a.time === b.time ? 0 : a.time > b.time ? 1 : -1))
 

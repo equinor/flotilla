@@ -167,8 +167,7 @@ namespace Api.Test.Database
                 LastSuccessfulRun = lastSuccessfulRun,
                 AutoScheduleFrequency = new AutoScheduleFrequency
                 {
-                    TimesOfDayCET = [timeOfDay],
-                    DaysOfWeek = [dateNow.DayOfWeek],
+                    SchedulingTimesCETperWeek = [new TimeAndDay(dateNow.DayOfWeek, timeOfDay)],
                 },
             };
 

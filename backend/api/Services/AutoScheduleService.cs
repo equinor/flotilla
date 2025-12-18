@@ -15,7 +15,7 @@ namespace Api.Services
 
         public Task<AutoScheduleFrequency?> UpdateAutoScheduleFrequency(
             MissionDefinition missionDefinition,
-            AutoScheduleFrequency? newAutoScheduleFrequency
+            IList<TimeAndDay>? newAutoScheduleFrequency
         );
 
         public Task RemoveFromAutoMissionScheduledJobs(
@@ -284,24 +284,29 @@ namespace Api.Services
 
         public async Task<AutoScheduleFrequency?> UpdateAutoScheduleFrequency(
             MissionDefinition missionDefinition,
-            AutoScheduleFrequency? newAutoScheduleFrequency
+            IList<TimeAndDay>? newSchedulingTimesCETperWeek
         )
         {
-            if (missionDefinition.AutoScheduleFrequency is null && newAutoScheduleFrequency is null)
+            if (newSchedulingTimesCETperWeek != null && newSchedulingTimesCETperWeek.Count == 0)
+            {
+                newSchedulingTimesCETperWeek = null;
+            }
+
+            if (
+                missionDefinition.AutoScheduleFrequency is null
+                && newSchedulingTimesCETperWeek is null
+            )
             {
                 return null;
             }
             if (
                 missionDefinition.AutoScheduleFrequency is not null
-                && newAutoScheduleFrequency is not null
+                && newSchedulingTimesCETperWeek is not null
             )
             {
                 if (
-                    missionDefinition.AutoScheduleFrequency.TimesOfDayCET.SequenceEqual(
-                        newAutoScheduleFrequency.TimesOfDayCET
-                    )
-                    && missionDefinition.AutoScheduleFrequency.DaysOfWeek.SequenceEqual(
-                        newAutoScheduleFrequency.DaysOfWeek
+                    missionDefinition.AutoScheduleFrequency.IsUnchanged(
+                        newSchedulingTimesCETperWeek
                     )
                 )
                 {
@@ -315,7 +320,7 @@ namespace Api.Services
             }
 
             MissionDefinition updatedMissionDefinition;
-            if (newAutoScheduleFrequency is null)
+            if (newSchedulingTimesCETperWeek is null)
             {
                 missionDefinition.AutoScheduleFrequency = null;
                 updatedMissionDefinition = await missionDefinitionService.Update(missionDefinition);
@@ -323,10 +328,8 @@ namespace Api.Services
             }
             missionDefinition.AutoScheduleFrequency ??= new AutoScheduleFrequency();
 
-            missionDefinition.AutoScheduleFrequency.TimesOfDayCET =
-                newAutoScheduleFrequency.TimesOfDayCET;
-            missionDefinition.AutoScheduleFrequency.DaysOfWeek =
-                newAutoScheduleFrequency.DaysOfWeek;
+            missionDefinition.AutoScheduleFrequency.SchedulingTimesCETperWeek =
+                newSchedulingTimesCETperWeek;
 
             await StartJobsForMissionDefinition(missionDefinition);
             updatedMissionDefinition = await missionDefinitionService.Update(missionDefinition);
