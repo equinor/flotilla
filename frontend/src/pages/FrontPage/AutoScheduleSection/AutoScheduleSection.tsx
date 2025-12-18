@@ -152,14 +152,14 @@ const DayTable = ({ day, isToday }: { day: DaysOfWeek; isToday: boolean }) => {
     const { TranslateText } = useLanguageContext()
     const { missionDefinitions } = useMissionDefinitionsContext()
 
-    const autoScheduledMissionDefinitionsForDay = missionDefinitions.filter((m) =>
-        m.autoScheduleFrequency?.daysOfWeek.includes(day)
-    )
-    const timeMissionPairs = autoScheduledMissionDefinitionsForDay
+    const timeMissionPairs = missionDefinitions
+        .filter((m) => m.autoScheduleFrequency)
         .map((mission) =>
-            mission.autoScheduleFrequency!.timesOfDayCET.map((time) => {
-                return { time, mission }
-            })
+            mission
+                .autoScheduleFrequency!.schedulingTimesCETperWeek.filter((timeAndDay) => timeAndDay.dayOfWeek === day)
+                .map((timeAndDay) => {
+                    return { time: timeAndDay.timeOfDay, mission }
+                })
         )
         .flat()
         .sort((a, b) => (a.time === b.time ? 0 : a.time > b.time ? 1 : -1))
