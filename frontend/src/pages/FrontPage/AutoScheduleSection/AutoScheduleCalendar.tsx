@@ -196,35 +196,35 @@ export const CalendarPro = () => {
         return missionDefinitions
             .filter((m) => m.autoScheduleFrequency)
             .flatMap((mission) => {
-                return mission.autoScheduleFrequency!.daysOfWeek.flatMap((day) => {
-                    return mission.autoScheduleFrequency!.timesOfDayCET.map((time) => {
-                        const targetDate = getTargetDate(day, time)
-                        const status = selectMissionStatusType(day, time, mission)
-                        const color =
-                            status === MissionStatusType.ScheduledJob
-                                ? CalendarColors.Planned
-                                : status === MissionStatusType.FutureUnstartedJob
-                                  ? CalendarColors.Future
-                                  : status === MissionStatusType.SkippedJob
-                                    ? CalendarColors.Skipped
-                                    : CalendarColors.Passed
+                return mission.autoScheduleFrequency!.schedulingTimesCETperWeek.flatMap((timeAndDay) => {
+                    const day = timeAndDay.dayOfWeek
+                    const time = timeAndDay.timeOfDay
+                    const targetDate = getTargetDate(day, time)
+                    const status = selectMissionStatusType(day, time, mission)
+                    const color =
+                        status === MissionStatusType.ScheduledJob
+                            ? CalendarColors.Planned
+                            : status === MissionStatusType.FutureUnstartedJob
+                              ? CalendarColors.Future
+                              : status === MissionStatusType.SkippedJob
+                                ? CalendarColors.Skipped
+                                : CalendarColors.Passed
 
-                        return {
-                            id: `${mission.id}-${day}-${time}`,
-                            title: `${mission.name}${status === MissionStatusType.SkippedJob ? ' (' + TranslateText('Skipped') + ')' : ''}`,
-                            start: targetDate,
-                            end: new Date(targetDate.getTime() + 59 * 60 * 1000),
-                            skip: status === MissionStatusType.ScheduledJob,
-                            resource: mission.id,
-                            color,
-                            status,
-                            metadata: {
-                                missionName: mission.name,
-                                missionId: mission.id,
-                                time,
-                            },
-                        }
-                    })
+                    return {
+                        id: `${mission.id}-${day}-${time}`,
+                        title: `${mission.name}${status === MissionStatusType.SkippedJob ? ' (' + TranslateText('Skipped') + ')' : ''}`,
+                        start: targetDate,
+                        end: new Date(targetDate.getTime() + 59 * 60 * 1000),
+                        skip: status === MissionStatusType.ScheduledJob,
+                        resource: mission.id,
+                        color,
+                        status,
+                        metadata: {
+                            missionName: mission.name,
+                            missionId: mission.id,
+                            time,
+                        },
+                    }
                 })
             })
     }, [missionDefinitions])

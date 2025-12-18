@@ -119,7 +119,7 @@ const MissionDefinitionPageBody = ({ missionDefinition }: { missionDefinition: M
     const onDeleteAutoSchedule = () => {
         const defaultMissionDefinitionForm: MissionDefinitionUpdateForm = {
             comment: missionDefinition.comment,
-            autoScheduleFrequency: undefined,
+            schedulingTimesCETperWeek: [],
             name: missionDefinition.name,
             isDeprecated: false,
         }

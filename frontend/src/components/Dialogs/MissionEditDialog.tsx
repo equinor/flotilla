@@ -12,13 +12,12 @@ import {
 } from 'pages/MissionDefinitionPage/MissionDefinitionStyledComponents'
 import { StyledDialog } from 'components/Styles/StyledComponents'
 import { config } from 'config'
-import { allDays, DaysOfWeek } from 'models/AutoScheduleFrequency'
+import { allDays, DaysOfWeek, TimeAndDay } from 'models/AutoScheduleFrequency'
 import { MissionDefinition } from 'models/MissionDefinition'
 import { MissionDefinitionUpdateForm } from 'models/MissionDefinitionUpdateForm'
 import { ChangeEvent, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
-import { formulateAutoScheduleFrequencyAsString } from 'utils/language'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 
 const StyledSummary = styled.div`
@@ -69,7 +68,7 @@ const useMissionUpdater = () => {
     ) => {
         const defaultForm: MissionDefinitionUpdateForm = {
             comment: mission.comment,
-            autoScheduleFrequency: mission.autoScheduleFrequency,
+            schedulingTimesCETperWeek: mission.autoScheduleFrequency?.schedulingTimesCETperWeek,
             name: mission.name,
             isDeprecated: false,
         }
@@ -108,25 +107,27 @@ export const MissionSchedulingEditDialog = ({ mission, isOpen, onClose }: Missio
     const { TranslateText } = useLanguageContext()
     const updateMission = useMissionUpdater()
 
-    const [days, setDays] = useState<DaysOfWeek[]>(mission.autoScheduleFrequency?.daysOfWeek ?? [])
-    const [timesOfDay, setTimesOfDay] = useState<string[]>(mission.autoScheduleFrequency?.timesOfDayCET ?? [])
+    const [schedulingTimes, setSchedulingTimes] = useState<TimeAndDay[]>(
+        mission.autoScheduleFrequency?.schedulingTimesCETperWeek ?? []
+    )
 
     const onSubmit = () => {
         updateMission(
             mission,
             {
-                autoScheduleFrequency: {
-                    daysOfWeek: days,
-                    timesOfDayCET: timesOfDay,
-                },
+                schedulingTimesCETperWeek: schedulingTimes,
             },
             onClose
         )
     }
 
+    const removeTimeAndDay = (time: string, day: DaysOfWeek) => {
+        setSchedulingTimes(schedulingTimes.filter((t) => !(t.timeOfDay === time && t.dayOfWeek === day)))
+    }
+
     return (
         <>
-            <StyledDialog open={isOpen}>
+            <StyledDialog open={isOpen} isDismissable={true} onClose={onClose}>
                 <StyledDialog.Header>
                     <StyledDialog.Title>
                         <Typography variant="h3">
@@ -135,35 +136,20 @@ export const MissionSchedulingEditDialog = ({ mission, isOpen, onClose }: Missio
                     </StyledDialog.Title>
                 </StyledDialog.Header>
                 <FormCard>
-                    <SelectDaysOfWeek currentAutoScheduleDays={days} changedAutoScheduleDays={setDays} />
-                    <SelectTimesOfDay currentAutoScheduleTimes={timesOfDay} changedAutoScheduleTimes={setTimesOfDay} />
-                    <StyledSummary>
-                        {days.length === 0 && (
-                            <Typography color="warning">
-                                {TranslateText('No days have been selected. Please select days')}
-                            </Typography>
-                        )}
-                        {timesOfDay.length === 0 && (
-                            <Typography color="warning">
-                                {TranslateText('No times have been selected. Please add time')}
-                            </Typography>
-                        )}
-                        {days.length > 0 && timesOfDay.length > 0 && (
-                            <Typography>
-                                {formulateAutoScheduleFrequencyAsString(
-                                    { daysOfWeek: days, timesOfDayCET: timesOfDay },
-                                    TranslateText
-                                )}
-                            </Typography>
-                        )}
-                    </StyledSummary>
+                    <Typography variant="h6">{TranslateText('Add additional times')}</Typography>
+
+                    <SelectTimesAndDates
+                        currentAutoScheduleTimes={schedulingTimes}
+                        changedAutoScheduleTimes={setSchedulingTimes}
+                    />
+                    <SelectedTimeDaySummary schedulingTimes={schedulingTimes} removeTimeAndDay={removeTimeAndDay} />
                     <ButtonSection>
                         <Button onClick={onClose} variant="outlined" color="primary">
                             {TranslateText('Cancel')}
                         </Button>
                         <Button
                             onClick={onSubmit}
-                            disabled={days.length === 0 || timesOfDay.length === 0}
+                            disabled={schedulingTimes.length === 0}
                             variant="contained"
                             color="primary"
                         >
@@ -284,7 +270,7 @@ const SelectDaysOfWeek = ({ currentAutoScheduleDays, changedAutoScheduleDays }: 
 
     return (
         <StyledSelectSection>
-            <Typography variant="h6">{TranslateText('Select days of the week')}</Typography>
+            <Typography variant="meta">{TranslateText('Select days of the week')}</Typography>
             <StyledDaySelector>
                 {Object.entries(allDays).map(([key, value]) => (
                     <OneLetterDayButton key={key} day={value} />
@@ -299,64 +285,129 @@ const SelectDaysOfWeek = ({ currentAutoScheduleDays, changedAutoScheduleDays }: 
     )
 }
 
-interface SelectTimesOfDayProps {
-    currentAutoScheduleTimes: string[]
-    changedAutoScheduleTimes: (newAutoScheduleTimes: string[]) => void
+const SelectTimesAndDates = ({
+    currentAutoScheduleTimes,
+    changedAutoScheduleTimes,
+}: {
+    currentAutoScheduleTimes: TimeAndDay[]
+    changedAutoScheduleTimes: (newTimes: TimeAndDay[]) => void
+}) => {
+    const addTime = (newTimes: TimeAndDay[]) => {
+        const newAutoScheduleTimes = [...currentAutoScheduleTimes]
+        newTimes.forEach((t) => {
+            if (
+                !newAutoScheduleTimes.find(
+                    (existingTime) => existingTime.dayOfWeek === t.dayOfWeek && existingTime.timeOfDay === t.timeOfDay
+                )
+            ) {
+                newAutoScheduleTimes.push(t)
+            }
+        })
+        changedAutoScheduleTimes(newAutoScheduleTimes)
+    }
+
+    return (
+        <>
+            <AddTimesAndDates addAutoScheduleTimes={addTime} />
+        </>
+    )
 }
 
-const SelectTimesOfDay = ({ currentAutoScheduleTimes, changedAutoScheduleTimes }: SelectTimesOfDayProps) => {
+const AddTimesAndDates = ({ addAutoScheduleTimes }: { addAutoScheduleTimes: (newTimes: TimeAndDay[]) => void }) => {
     const { TranslateText } = useLanguageContext()
+
+    const [selectedDays, setSelectedDays] = useState<DaysOfWeek[]>([])
     const [selectedTime, setSelectedTime] = useState<string>() // Format HH:MM:ss
 
-    const removeTime = (time: string) => {
-        changedAutoScheduleTimes([...currentAutoScheduleTimes.filter((t) => t !== time)])
-    }
-
     const addTime = () => {
-        if (!selectedTime) return
-
-        if (selectedTime && !currentAutoScheduleTimes.includes(selectedTime))
-            changedAutoScheduleTimes([...currentAutoScheduleTimes, selectedTime])
+        if (selectedTime === undefined || selectedDays.length === 0) return
+        addAutoScheduleTimes(selectedDays.map((day) => ({ dayOfWeek: day, timeOfDay: selectedTime })))
     }
 
-    const formatTimeToDisplay = (time: string) => {
-        return time.substring(0, 5)
-    }
+    return (
+        <>
+            <SelectDaysOfWeek currentAutoScheduleDays={selectedDays} changedAutoScheduleDays={setSelectedDays} />
+            <SelectTimeOfDay changedAutoScheduleTime={setSelectedTime} />
+            <Button onClick={addTime} disabled={selectedTime === undefined || selectedDays.length === 0}>
+                {TranslateText('Add time')}
+            </Button>
+        </>
+    )
+}
+
+const SelectTimeOfDay = ({ changedAutoScheduleTime }: { changedAutoScheduleTime: (newTime: string) => void }) => {
+    const { TranslateText } = useLanguageContext()
 
     const formatAsTimeOnly = (time: string) => {
         return time.concat(':00')
     }
 
-    const SelectedTimeChips = () => (
-        <StyledTimeChips>
-            {currentAutoScheduleTimes
-                .sort((a, b) => (a === b ? 0 : a > b ? 1 : -1))
-                .map((time) => (
-                    <Chip key={time} onDelete={() => removeTime(time)}>
-                        {formatTimeToDisplay(time)}
-                    </Chip>
-                ))}
-        </StyledTimeChips>
-    )
-
     return (
         <StyledSelectSection>
-            <Typography variant="h6"> {TranslateText('Select times of the day')}</Typography>
-            <Typography variant="meta">{TranslateText('Add start time')}</Typography>
+            <Typography variant="meta">{TranslateText('Select start time')}</Typography>
             <StyledTimeSelector>
                 <TextField
                     id="time"
                     type="time"
                     onChange={(changes: ChangeEvent<HTMLInputElement>) =>
-                        setSelectedTime(formatAsTimeOnly(changes.target.value))
+                        changedAutoScheduleTime(formatAsTimeOnly(changes.target.value))
                     }
                 />
-                <Button onClick={addTime} disabled={selectedTime === undefined}>
-                    {TranslateText('Add time')}
-                </Button>
             </StyledTimeSelector>
-            <Typography>{TranslateText('Selected start times')}</Typography>
-            <SelectedTimeChips />
         </StyledSelectSection>
+    )
+}
+
+const SelectedTimeDaySummary = ({
+    schedulingTimes,
+    removeTimeAndDay,
+}: {
+    schedulingTimes: TimeAndDay[]
+    removeTimeAndDay: (time: string, day: DaysOfWeek) => void
+}) => {
+    const { TranslateText } = useLanguageContext()
+
+    const timesForSpecificDay = (day: DaysOfWeek) => {
+        return schedulingTimes.filter((t) => t.dayOfWeek === day)
+    }
+
+    return (
+        <StyledSummary>
+            <Typography variant="h6">{TranslateText('Selected times')}</Typography>
+            {schedulingTimes.length === 0 && (
+                <Typography color="warning">{TranslateText('No times have been selected. Please add time')}</Typography>
+            )}
+            {allDays.map((day) => (
+                <div key={`Summary ${day}`}>
+                    {timesForSpecificDay(day).length > 0 && (
+                        <>
+                            <Typography>{TranslateText(day) + ':'}</Typography>
+                            <StyledTimeChips>
+                                {timesForSpecificDay(day).map((timeAndDay) => (
+                                    <SelectedTimeChip
+                                        key={day + timeAndDay.timeOfDay}
+                                        time={timeAndDay.timeOfDay}
+                                        remove={() => {
+                                            removeTimeAndDay(timeAndDay.timeOfDay, timeAndDay.dayOfWeek)
+                                        }}
+                                    />
+                                ))}
+                            </StyledTimeChips>
+                        </>
+                    )}
+                </div>
+            ))}
+        </StyledSummary>
+    )
+}
+
+const SelectedTimeChip = ({ time, remove }: { time: string; remove: () => void }) => {
+    const formatTimeToDisplay = (time: string) => {
+        return time.substring(0, 5)
+    }
+    return (
+        <Chip key={time} onDelete={() => remove()}>
+            {formatTimeToDisplay(time)}
+        </Chip>
     )
 }

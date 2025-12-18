@@ -1,8 +1,8 @@
-import { AutoScheduleFrequency } from './AutoScheduleFrequency'
+import { TimeAndDay } from './AutoScheduleFrequency'
 
 export interface MissionDefinitionUpdateForm {
     comment?: string
-    autoScheduleFrequency?: AutoScheduleFrequency
+    schedulingTimesCETperWeek?: TimeAndDay[]
     name?: string
     isDeprecated?: boolean
 }

@@ -151,7 +151,7 @@ namespace Api.Controllers
                 return BadRequest("Invalid data.");
             }
 
-            var missionDefinition = await missionDefinitionService.ReadById(id, readOnly: true);
+            var missionDefinition = await missionDefinitionService.ReadById(id, readOnly: false);
             if (missionDefinition == null)
             {
                 return NotFound($"Could not find mission definition with id '{id}'");
@@ -162,23 +162,20 @@ namespace Api.Controllers
                 return BadRequest("Name cannot be null.");
             }
 
-            try
-            {
-                missionDefinitionQuery.AutoScheduleFrequency?.ValidateAutoScheduleFrequency();
-            }
-            catch (ArgumentException e)
-            {
-                return BadRequest(e.Message);
-            }
-
             missionDefinition.Name = missionDefinitionQuery.Name;
             missionDefinition.Comment = missionDefinitionQuery.Comment;
             missionDefinition.InspectionFrequency = missionDefinitionQuery.InspectionFrequency;
-            missionDefinition.AutoScheduleFrequency =
-                await autoScheduleService.UpdateAutoScheduleFrequency(
-                    missionDefinition,
-                    missionDefinitionQuery.AutoScheduleFrequency
-                );
+            if (missionDefinitionQuery.SchedulingTimesCETperWeek != null)
+            {
+                var schedulingTimesCETperWeek = missionDefinitionQuery
+                    .SchedulingTimesCETperWeek.Select(s => new TimeAndDay(s.DayOfWeek, s.TimeOfDay))
+                    .ToList();
+                missionDefinition.AutoScheduleFrequency =
+                    await autoScheduleService.UpdateAutoScheduleFrequency(
+                        missionDefinition,
+                        schedulingTimesCETperWeek
+                    );
+            }
 
             var newMissionDefinition = await missionDefinitionService.Update(missionDefinition);
             return new MissionDefinitionResponse(newMissionDefinition);
