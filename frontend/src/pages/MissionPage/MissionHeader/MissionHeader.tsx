@@ -25,6 +25,13 @@ const HeaderSection = styled(Card)`
     box-shadow: none;
     background-color: ${tokens.colors.ui.background__light.hex};
 `
+const StaticHeaderSection = styled(Card)`
+    width: 100%;
+    padding: 15px 0px 15px 0px;
+    z-index: 1;
+    box-shadow: none;
+    background-color: ${tokens.colors.ui.background__light.hex};
+`
 const TitleSection = styled.div`
     display: flex;
     align-items: center;
@@ -156,7 +163,6 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
     const translatedMinutes = TranslateText('minutes')
     const { startTime, startDate, usedTime, remainingTime } = getStartUsedAndRemainingTime(mission, translatedMinutes)
     const isMissionActive = mission.status === MissionStatus.Ongoing || mission.status === MissionStatus.Paused
-    // TODO: if it is the current mission for a robot then it is active
 
     const missionHasFailedTasks = mission.tasks.some(
         (t) => t.status !== TaskStatus.PartiallySuccessful && t.status !== TaskStatus.Successful
@@ -204,6 +210,57 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
                 </Typography>
                 <StatusReason statusReason={mission.statusReason} status={mission.status}></StatusReason>
             </HeaderSection>
+            <StyledMissionHeader>
+                <InfoSection>
+                    <div>
+                        {HeaderText(translatedStatus, '')}
+                        <MissionStatusDisplay status={mission.status} />
+                    </div>
+                    {HeaderText(translatedTasks, `${numberOfCompletedTasks + '/' + mission.tasks.length}`)}
+                    {HeaderText(translatedStartDate, `${startDate}`)}
+                    {HeaderText(translatedStartTime, `${startTime}`)}
+                    {HeaderText(translatedUsedTime, `${usedTime}`)}
+                    {!isMissionCompleted && HeaderText(translatedEstimatedTimeRemaining, `${remainingTime}`)}
+                    {HeaderText(translatedRobot, `${mission.robot.name}`)}
+                </InfoSection>
+            </StyledMissionHeader>
+        </>
+    )
+}
+
+export const SimpleMissionHeader = ({ mission }: { mission: Mission }) => {
+    const { TranslateText } = useLanguageContext()
+    const isMissionCompleted = mission.endTime ? true : false
+
+    const translatedStartDate = TranslateText('Start date')
+    const translatedStartTime = TranslateText('Start time')
+    const translatedUsedTime = TranslateText('Time used')
+    const translatedEstimatedTimeRemaining = TranslateText('Estimated time remaining')
+    const translatedRobot = TranslateText('Robot')
+    const translatedDescription = TranslateText('Description')
+    const translatedTasks = TranslateText('Completed Tasks')
+    const translatedStatus = TranslateText('Status')
+
+    const translatedMinutes = TranslateText('minutes')
+    const { startTime, startDate, usedTime, remainingTime } = getStartUsedAndRemainingTime(mission, translatedMinutes)
+
+    const numberOfCompletedTasks = mission.tasks.filter((task) => task.isCompleted).length
+
+    return (
+        <>
+            <StaticHeaderSection>
+                <TitleSection>
+                    <StyledTypography>{mission.name}</StyledTypography>
+                </TitleSection>
+                <Typography
+                    variant="body_long"
+                    group="paragraph"
+                    color={tokens.colors.text.static_icons__secondary.hex}
+                >
+                    {mission.description && `${translatedDescription}: ${mission.description}`}
+                </Typography>
+                <StatusReason statusReason={mission.statusReason} status={mission.status}></StatusReason>
+            </StaticHeaderSection>
             <StyledMissionHeader>
                 <InfoSection>
                     <div>

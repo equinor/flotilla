@@ -94,7 +94,7 @@ export const SimpleHistoricMissionCard = ({ index, mission }: IndexedMissionProp
                 <Typography
                     link
                     onClick={() =>
-                        navigate(`${config.FRONTEND_BASE_ROUTE}/${installationCode}:mission?id=${mission.id}`)
+                        navigate(`${config.FRONTEND_BASE_ROUTE}/${installationCode}:mission-simple?id=${mission.id}`)
                     }
                 >
                     {mission.name}
