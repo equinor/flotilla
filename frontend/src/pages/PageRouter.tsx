@@ -1,5 +1,5 @@
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { MissionPage } from './MissionPage/MissionPage'
+import { MissionPage, SimpleMissionPage } from './MissionPage/MissionPage'
 import { RobotPage } from './RobotPage/RobotPage'
 import { MissionDefinitionPage } from './MissionDefinitionPage/MissionDefinitionPage'
 import { config } from 'config'
@@ -9,6 +9,7 @@ enum PageRouterPrefixes {
     Mission = 'mission',
     MissionDefinition = 'missiondefinition',
     Robot = 'robot',
+    SimpleMission = 'mission-simple',
 }
 
 interface PageRouterProps {
@@ -38,6 +39,8 @@ const PageRouter = ({ prefix }: PageRouterProps) => {
     if (!id) return <></>
 
     switch (prefix) {
+        case PageRouterPrefixes.SimpleMission:
+            return <SimpleMissionPage missionId={id} />
         case PageRouterPrefixes.Mission:
             return <MissionPage missionId={id} />
         case PageRouterPrefixes.MissionDefinition:
@@ -47,6 +50,10 @@ const PageRouter = ({ prefix }: PageRouterProps) => {
         default:
             return <></>
     }
+}
+
+export const SimpleMissionPageRouter = () => {
+    return <PageRouter prefix={PageRouterPrefixes.SimpleMission} />
 }
 
 export const MissionPageRouter = () => {
