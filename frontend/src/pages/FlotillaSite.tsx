@@ -12,7 +12,7 @@ import {
     RobotStatusPage,
 } from '../components/NavigationMenu/NavigationMenuPages'
 import { InfoPage } from './InfoPage'
-import { MissionDefinitionPageRouter, MissionPageRouter, RobotPageRouter } from './PageRouter'
+import { MissionDefinitionPageRouter, MissionPageRouter, RobotPageRouter, SimpleMissionPageRouter } from './PageRouter'
 import { PageNotFound } from './NotFoundPage'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 import { DataViewPage } from './MissionHistory/DataViewPage'
@@ -44,6 +44,7 @@ export const FlotillaSite = () => {
             <Route path={`${installationCodePath}:auto-schedule`} element={<AutoSchedulePage />} />
             <Route path={`${installationCodePath}:robots`} element={<RobotStatusPage />} />
             <Route path={`${installationCodePath}:mission`} element={<MissionPageRouter />} />
+            <Route path={`${installationCodePath}:mission-simple`} element={<SimpleMissionPageRouter />} />
             <Route path={`${installationCodePath}:missiondefinition`} element={<MissionDefinitionPageRouter />} />
             <Route path={`${installationCodePath}:robot`} element={<RobotPageRouter />} />
             <Route path={`${installationCodePath}:data-view`} element={<DataViewPage />} />
