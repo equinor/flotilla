@@ -80,3 +80,29 @@ export const HistoricMissionCard = ({ index, mission }: IndexedMissionProps) => 
         </Table.Row>
     )
 }
+
+export const SimpleHistoricMissionCard = ({ index, mission }: IndexedMissionProps) => {
+    const navigate = useNavigate()
+    const { installationCode } = useAssetContext()
+
+    return (
+        <Table.Row key={index}>
+            <Table.Cell id={InspectionTableColumns.Status}>
+                <MissionStatusDisplay status={mission.status} />
+            </Table.Cell>
+            <Table.Cell id={InspectionTableColumns.Name}>
+                <Typography
+                    link
+                    onClick={() =>
+                        navigate(`${config.FRONTEND_BASE_ROUTE}/${installationCode}:mission?id=${mission.id}`)
+                    }
+                >
+                    {mission.name}
+                </Typography>
+            </Table.Cell>
+            <Table.Cell id={InspectionTableColumns.CompletionTime}>
+                <MissionEndTimeDisplay mission={mission} />
+            </Table.Cell>
+        </Table.Row>
+    )
+}

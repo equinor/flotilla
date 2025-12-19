@@ -65,7 +65,7 @@ const TableWithHeader = styled.div`
     grid-columns: auto;
     gap: 1rem;
 `
-const StyledLoading = styled.div`
+export const StyledLoading = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -87,7 +87,7 @@ const StyledTable = styled.div`
     overflow-x: auto;
     overflow-y: hidden;
 `
-const StyledPagination = styled(Pagination)`
+export const StyledPagination = styled(Pagination)`
     display: flex;
     height: 48px;
     padding: 0px 8px 0px 16px;
