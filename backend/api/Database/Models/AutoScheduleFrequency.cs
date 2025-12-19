@@ -6,38 +6,48 @@ using Microsoft.EntityFrameworkCore;
 #pragma warning disable CS8618
 namespace Api.Database.Models
 {
-    [Owned]
     public class AutoScheduleFrequency
     {
-        [Required]
-        // In Central European Time
-        public IList<TimeOnly> TimesOfDayCET { get; set; } = new List<TimeOnly>();
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public string Id { get; set; }
 
         [Required]
-        public IList<DayOfWeek> DaysOfWeek { get; set; } = new List<DayOfWeek>();
+        public IList<TimeAndDay> SchedulingTimesCETperWeek { get; set; } = new List<TimeAndDay>();
 
         public string? AutoScheduledJobs { get; set; }
 
         public bool HasValidValue()
         {
-            return TimesOfDayCET.Count != 0 && DaysOfWeek.Count != 0;
+            return SchedulingTimesCETperWeek.Count != 0;
         }
 
-        public void ValidateAutoScheduleFrequency()
+        public bool IsUnchanged(IList<TimeAndDay>? newSchedulingTimesCETperWeek)
         {
-            if (TimesOfDayCET.Count == 0)
+            if (newSchedulingTimesCETperWeek == null || SchedulingTimesCETperWeek == null)
             {
-                throw new ArgumentException(
-                    "AutoScheduleFrequency must have at least one time of day"
-                );
+                return newSchedulingTimesCETperWeek == SchedulingTimesCETperWeek;
             }
 
-            if (DaysOfWeek.Count == 0)
+            if (newSchedulingTimesCETperWeek.Count != SchedulingTimesCETperWeek.Count)
             {
-                throw new ArgumentException(
-                    "AutoScheduleFrequency must have at least one day of week"
-                );
+                return false;
             }
+
+            foreach (var schedulingTime in newSchedulingTimesCETperWeek)
+            {
+                if (
+                    !SchedulingTimesCETperWeek.Any(existingTime =>
+                        existingTime.DayOfWeek == schedulingTime.DayOfWeek
+                        && existingTime.TimeOfDay == schedulingTime.TimeOfDay
+                    )
+                )
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         public IList<(TimeSpan, TimeOnly)>? GetSchedulingTimesUntilMidnight()
@@ -51,15 +61,31 @@ namespace Api.Database.Models
 
             var autoScheduleNext = new List<(TimeSpan, TimeOnly)>();
 
-            if (DaysOfWeek.Contains(nowLocal.DayOfWeek))
-            {
-                autoScheduleNext.AddRange(
-                    TimesOfDayCET
-                        .Where(time => time >= nowLocalTimeOnly)
-                        .Select(time => (time - nowLocalTimeOnly, time))
-                );
-            }
+            autoScheduleNext.AddRange(
+                SchedulingTimesCETperWeek
+                    .Where(schedulingTime => schedulingTime.DayOfWeek == nowLocal.DayOfWeek)
+                    .Where(schedulingTime => schedulingTime.TimeOfDay > nowLocalTimeOnly)
+                    .Select(schedulingTime =>
+                        (schedulingTime.TimeOfDay - nowLocalTimeOnly, schedulingTime.TimeOfDay)
+                    )
+            );
             return autoScheduleNext.Count > 0 ? autoScheduleNext : null;
+        }
+    }
+
+    [Owned]
+    public class TimeAndDay
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public string Id { get; set; }
+        public DayOfWeek DayOfWeek { get; set; }
+        public TimeOnly TimeOfDay { get; set; }
+
+        public TimeAndDay(DayOfWeek dayOfWeek, TimeOnly timeOfDay)
+        {
+            DayOfWeek = dayOfWeek;
+            TimeOfDay = timeOfDay;
         }
     }
 }

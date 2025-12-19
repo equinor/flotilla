@@ -21,8 +21,22 @@ namespace Api.Controllers.Models
 
         /// <summary>
         /// Change the time and day in the automated scheduling frequency
+        /// Will be unchanged if null. Use an empty list to remove all scheduled times.
         /// </summary>
-        public AutoScheduleFrequency? AutoScheduleFrequency { get; set; }
+        public IList<TimeAndDayQuery>? SchedulingTimesCETperWeek { get; set; }
+    }
+
+    public struct TimeAndDayQuery
+    {
+        /// <summary>
+        /// The day of the week to schedule the mission
+        /// </summary>
+        public DayOfWeek DayOfWeek { get; set; }
+
+        /// <summary>
+        /// The time of day to schedule the mission
+        /// </summary>
+        public TimeOnly TimeOfDay { get; set; }
     }
 
     public struct SkipAutoMissionQuery

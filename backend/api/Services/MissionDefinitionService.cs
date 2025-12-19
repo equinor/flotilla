@@ -255,6 +255,9 @@ namespace Api.Services
                 .MissionDefinitions.Include(missionDefinition =>
                     missionDefinition.AutoScheduleFrequency
                 )
+                .ThenInclude(autoScheduleFrequency =>
+                    autoScheduleFrequency!.SchedulingTimesCETperWeek
+                )
                 .Include(missionDefinition => missionDefinition.InspectionArea)
                 .ThenInclude(inspectionArea => inspectionArea!.Plant)
                 .Include(missionDefinition => missionDefinition.InspectionArea)
