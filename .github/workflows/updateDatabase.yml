@@ -116,6 +116,7 @@ jobs:
     needs: database_update_start
     permissions:
       contents: read
+      pull-requests: read
     uses: ./.github/workflows/runMigrations.yml
     with:
       PullRequestCheckout: true
