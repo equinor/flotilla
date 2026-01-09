@@ -11,6 +11,7 @@ import { StyledDialog } from 'components/Styles/StyledComponents'
 import { useRef, useState } from 'react'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 
 const StyledTableRow = styled.div`
     display: grid;
@@ -80,6 +81,7 @@ export const AutoScheduleMissionTableRow = ({
     mission: MissionDefinition
 }) => {
     const { TranslateText } = useLanguageContext()
+    const { installationCode } = useAssetContext()
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
     const referenceElement = useRef<HTMLButtonElement>(null)
     const [isOpen, setIsOpen] = useState(false)
@@ -108,7 +110,7 @@ export const AutoScheduleMissionTableRow = ({
                         <Typography
                             color={typographyColor}
                             as={Link}
-                            to={`${config.FRONTEND_BASE_ROUTE}/missiondefinition?id=${mission.id}`}
+                            to={`${config.FRONTEND_BASE_ROUTE}/${installationCode}:missiondefinition?id=${mission.id}`}
                             link
                         >
                             {mission.name}
