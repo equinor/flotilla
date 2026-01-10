@@ -1,6 +1,7 @@
 import { Button, Chip, Table, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { TaskStatusDisplay } from './TaskStatusDisplay'
+import { TaskAnalysisDisplay } from './TaskAnalysisDisplay'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Task, TaskStatus } from 'models/Task'
 import { tokens } from '@equinor/eds-tokens'
@@ -34,6 +35,9 @@ export const TaskTable = ({ tasks, missionDefinitionPage }: TaskTableProps) => {
                         <>
                             <Table.Cell>{TranslateText('Inspection Types')}</Table.Cell>
                             <Table.Cell>{TranslateText('Status')}</Table.Cell>
+                            {tasks.some((task: Task) => task.inspection.analysisResult) && (
+                                <Table.Cell>{TranslateText('Analysis Result')}</Table.Cell>
+                            )}
                         </>
                     )}
                 </Table.Row>
@@ -77,6 +81,11 @@ const TaskTableRows = ({ tasks, missionDefinitionPage }: TaskTableProps) => {
                         <Table.Cell>
                             <TaskStatusDisplay status={task.status} errorMessage={task.errorDescription} />
                         </Table.Cell>
+                        {task.inspection.analysisResult && (
+                            <Table.Cell>
+                                <TaskAnalysisDisplay inspection={task.inspection} />
+                            </Table.Cell>
+                        )}
                     </>
                 )}
             </Table.Row>

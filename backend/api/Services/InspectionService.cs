@@ -14,6 +14,7 @@ namespace Api.Services
     public interface IInspectionService
     {
         public Task<byte[]?> FetchInspectionImageFromIsarInspectionId(string isarInspectionId);
+        public Task<byte[]?> FetchAnalysisFromIsarInspectionId(string isarInspectionId);
         public Task<Inspection> UpdateInspectionAnalysisResults(
             string inspectionId,
             AnalysisResult analysisResult
@@ -46,6 +47,48 @@ namespace Api.Services
                 inspectionData.BlobContainer,
                 inspectionData.StorageAccount
             );
+        }
+
+        public async Task<byte[]?> FetchAnalysisFromIsarInspectionId(string isarInspectionId)
+        {
+            var inspectionData = await GetAnalysisStorageInfo(isarInspectionId);
+
+            return await blobService.DownloadBlob(
+                inspectionData.BlobName,
+                inspectionData.BlobContainer,
+                inspectionData.StorageAccount
+            );
+        }
+
+        public async Task<SaraAnalysisDataResponse> GetAnalysisStorageInfo(string isarInspectionId)
+        {
+            var inspection = await ReadByIsarInspectionId(isarInspectionId, readOnly: true);
+            if (inspection is null)
+            {
+                string errorMessage =
+                    $"Inspection with task ID {isarInspectionId} could not be found when trying to update analysis result.";
+                logger.LogError("{Message}", errorMessage);
+                throw new InspectionNotFoundException(errorMessage);
+            }
+
+            var existingAnalysisResult = context
+                .AnalysisResults.Where(a => a.InspectionId == inspection.Id)
+                .FirstOrDefault();
+
+            if (existingAnalysisResult == null)
+            {
+                string errorMessage =
+                    $"Analysis result for inspection with isar Id {isarInspectionId} could not be found when trying to fetch analysis data.";
+                logger.LogError("{Message}", errorMessage);
+                throw new InspectionNotFoundException(errorMessage);
+            }
+
+            return new SaraAnalysisDataResponse
+            {
+                StorageAccount = existingAnalysisResult.StorageAccount,
+                BlobContainer = existingAnalysisResult.BlobContainer,
+                BlobName = existingAnalysisResult.BlobName,
+            };
         }
 
         public async Task<Inspection> UpdateInspectionAnalysisResults(
