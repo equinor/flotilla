@@ -31,6 +31,7 @@ namespace Api.Database.Context
         public DbSet<AccessRole> AccessRoles => Set<AccessRole>();
         public DbSet<UserInfo> UserInfos => Set<UserInfo>();
         public DbSet<TagInspectionMetadata> TagInspectionMetadata => Set<TagInspectionMetadata>();
+        public DbSet<AutoScheduleFrequency> AutoScheduleFrequency => Set<AutoScheduleFrequency>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
