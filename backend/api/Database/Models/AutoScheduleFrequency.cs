@@ -13,7 +13,7 @@ namespace Api.Database.Models
         public string Id { get; set; }
 
         [Required]
-        public IList<TimeAndDay> SchedulingTimesCETperWeek { get; set; } = new List<TimeAndDay>();
+        public IList<TimeAndDay> SchedulingTimesCETperWeek { get; set; } = [];
 
         public string? AutoScheduledJobs { get; set; }
 
