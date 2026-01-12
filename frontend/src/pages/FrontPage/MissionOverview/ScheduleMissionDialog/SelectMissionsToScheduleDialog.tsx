@@ -166,7 +166,7 @@ const SelectRobotComponent = memo(
 
         return (
             <Autocomplete
-                optionLabel={(r) => (r ? r.name + ' (' + r.model.type + ')' : '')}
+                optionLabel={(r: Robot) => (r ? r.name + ' (' + r.model.type + ')' : '')}
                 options={enabledRobots.filter(
                     (r) =>
                         (r.status === RobotStatus.Available ||
@@ -177,7 +177,7 @@ const SelectRobotComponent = memo(
                         r.isarConnected
                 )}
                 disabled={!enabledRobots}
-                selectedOptions={[selectedRobot]}
+                selectedOptions={selectedRobot ? [selectedRobot] : []}
                 label={TranslateText('Select robot')}
                 onOptionsChange={(changes) => setSelectedRobot(changes.selectedItems[0])}
                 autoWidth
