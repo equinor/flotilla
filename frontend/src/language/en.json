@@ -344,5 +344,6 @@
     "Stopping": "Stopping",
     "Pausing": "Pausing",
     "StoppingReturnHome": "Stopping return home",
-    "PausingReturnHome": "Pausing return home"
+    "PausingReturnHome": "Pausing return home",
+    "Loading page": "Loading page"
 }
