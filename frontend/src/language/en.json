@@ -319,6 +319,7 @@
     "Show more": "Show more",
     "Show less": "Show less",
     "today": "today",
+    "Today": "Today",
     "Are you sure you want to skip {0} scheduled for today at {1}?": "Are you sure you want to skip {0} scheduled for today at {1}?",
     "Switch to calendar view": "Switch to calendar view",
     "Switch to list view": "Switch to list view",
@@ -345,5 +346,14 @@
     "Pausing": "Pausing",
     "StoppingReturnHome": "Stopping return home",
     "PausingReturnHome": "Pausing return home",
-    "Loading page": "Loading page"
+    "Loading page": "Loading page",
+    "Before": "Before",
+    "Next": "Next",
+    "Mon": "Mon",
+    "Tue": "Tue",
+    "Wed": "Wed",
+    "Thu": "Thu",
+    "Fri": "Fri",
+    "Sat": "Sat",
+    "Sun": "Sun"
 }

@@ -319,6 +319,7 @@
     "Show more": "Vis flere",
     "Show less": "Vis færre",
     "today": "i dag",
+    "Today": "I dag",
     "Are you sure you want to skip {0} scheduled for today at {1}?": "Er du sikker på at du vil hoppe over kjøringen av oppdrag {0} kl {1} i dag?",
     "Switch to calendar view": "Bytt til kalendervisning",
     "Switch to list view": "Bytt til listevisning",
@@ -345,5 +346,14 @@
     "Pausing": "Pauser",
     "StoppingReturnHome": "Stopper kjøring hjem",
     "PausingReturnHome": "Pauser kjøring hjem",
-    "Loading page": "Laster side"
+    "Loading page": "Laster side",
+    "Before": "Forrige",
+    "Next": "Neste",
+    "Mon": "Man",
+    "Tue": "Tir",
+    "Wed": "Ons",
+    "Thu": "Tor",
+    "Fri": "Fre",
+    "Sat": "Lør",
+    "Sun": "Søn"
 }
