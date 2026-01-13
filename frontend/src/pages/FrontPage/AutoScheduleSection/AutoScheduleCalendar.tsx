@@ -45,6 +45,12 @@ const CalendarWrapper = styled.div`
     .rbc-calendar {
         border: none;
     }
+    .rbc-toolbar {
+        justify-content: start;
+    }
+    .rbc-toolbar-label {
+        display: none;
+    }
 
     .rbc-time-view {
         border-left: none;
@@ -288,6 +294,19 @@ export const CalendarPro = () => {
         )
     }
 
+    const weekdayShort = (d: Date) => {
+        const map: Record<number, string> = {
+            0: TranslateText('Sun'),
+            1: TranslateText('Mon'),
+            2: TranslateText('Tue'),
+            3: TranslateText('Wed'),
+            4: TranslateText('Thu'),
+            5: TranslateText('Fri'),
+            6: TranslateText('Sat'),
+        }
+        return map[d.getDay()]
+    }
+
     return (
         <>
             <LegendWrapper>
@@ -312,6 +331,12 @@ export const CalendarPro = () => {
                     formats={{
                         timeGutterFormat: 'HH:mm', // 24-hour format for gutter
                         eventTimeRangeFormat: () => '',
+                        dayFormat: (date) => `${format(date, 'd')} ${weekdayShort(date)}`,
+                    }}
+                    messages={{
+                        today: TranslateText('Today'),
+                        previous: TranslateText('Before'),
+                        next: TranslateText('Next'),
                     }}
                     eventPropGetter={(event) => ({
                         style: {
