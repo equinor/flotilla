@@ -61,7 +61,7 @@ namespace Api.Controllers
         /// Retrieves the inspection image associated with the given ISAR Inspection ID.
         /// </remarks>
         [HttpGet("{isarInspectionId}")]
-        [Authorize(Roles = Role.User)]
+        [Authorize(Roles = Role.Any)]
         [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
