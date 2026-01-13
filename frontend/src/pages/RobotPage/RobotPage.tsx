@@ -57,7 +57,10 @@ const StatusContent = styled.div`
 `
 const StyledContainer = styled(Paper)`
     padding: 24px;
-    max-width: 910px;
+    width: fit-content;
+    @media (max-width: ${phone_width}) {
+        width: 90vw;
+    }
 `
 
 const StyledLeftContent = styled.div`
@@ -74,6 +77,12 @@ const StyledStatusElement = styled.div`
     padding: 2px 6px 4px 6px;
     flex-direction: column;
     align-items: flex-start;
+`
+const StyledWideItem = styled(StyledStatusElement)`
+    grid-column: span 2;
+    @media (max-width: ${phone_width}) {
+        grid-column: span 1;
+    }
 `
 
 export const RobotPage = ({ robotId }: { robotId: string }) => {
@@ -218,14 +227,14 @@ export const RobotPage = ({ robotId }: { robotId: string }) => {
                                                 </StyledStatusElement>
                                             )}
                                             {currentInspectionArea && (
-                                                <StyledStatusElement>
+                                                <StyledWideItem>
                                                     <Typography variant="caption">
                                                         {TranslateText('Current Inspection Area')}
                                                     </Typography>
                                                     <Typography style={{ fontSize: '24px' }}>
                                                         {currentInspectionArea.inspectionAreaName}
                                                     </Typography>
-                                                </StyledStatusElement>
+                                                </StyledWideItem>
                                             )}
                                         </>
                                     )}
