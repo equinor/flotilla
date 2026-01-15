@@ -7,7 +7,6 @@ import { tokens } from '@equinor/eds-tokens'
 import { getColorsFromTaskStatus } from 'utils/MarkerStyles'
 import { ValidInspectionReportInspectionTypes } from 'models/Inspection'
 import { useInspectionsContext } from 'components/Contexts/InspectionsContext'
-import { capitalizeFirstLetter } from 'utils/StringFormatting'
 
 const StyledTable = styled(Table)`
     display: block;
@@ -99,7 +98,7 @@ const TagIdDisplay = ({ task }: { task: Task }) => {
 
 const DescriptionDisplay = ({ task }: { task: Task }) => {
     if (!task.description) return <Typography key={task.id + 'descr'}>{'N/A'}</Typography>
-    return <Typography key={task.id + 'descr'}>{capitalizeFirstLetter(task.description)}</Typography>
+    return <Typography key={task.id + 'descr'}>{task.description}</Typography>
 }
 
 interface InspectionTypesDisplayProps {
