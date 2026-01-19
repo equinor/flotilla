@@ -78,6 +78,15 @@ To run the backend in docker, run the following command in the root folder of fl
 docker compose up --build backend
 ```
 
+### Run locally with SARA
+
+To be able to run Flotilla and SARA locally to get analysis results into the Flotilla frontend the `.env` file needs to be populated with:
+
+```
+SARA__BaseUrl=http://localhost:8100
+SARA__Scopes__0=...
+```
+
 ## Test
 
 To unit test the backend, run the following command in the backend folder:
