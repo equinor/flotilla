@@ -11,8 +11,7 @@ services:
       context: broker
     ports:
       - "1883:1883"
-    environment:
-      - TLS_SERVER_KEY=${FLOTILLA_BROKER_SERVER_KEY}
+    env_file: "broker/.env"
 
   backend:
     build: backend
@@ -22,7 +21,7 @@ services:
       # Overwrites the ip address for the Mqtt service to connect to the Mqtt container:
       - Mqtt__Host=broker
       - ASPNETCORE_ENVIRONMENT=Development
-      - AZURE_CLIENT_SECRET=${FLOTILLA_CLIENT_SECRET}
+      - AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET} # From .env file
       - OpenTelemetry__OtelExporterOtlpEndpoint=http://otel-collector:4318
 
   aspire-dashboard:

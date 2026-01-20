@@ -14,7 +14,6 @@ using Api.SignalRHubs;
 using Api.Utilities;
 using Azure.Identity;
 using Hangfire;
-using Microsoft.ApplicationInsights.Extensibility.Implementation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Rewrite;
