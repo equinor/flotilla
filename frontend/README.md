@@ -81,5 +81,4 @@ These are parsed and defined in [config.ts](./src/config.ts).
 To run locally towards the databases, follow the steps below:
 
 1. Change `UseInMemoryDatabase` to `false` in `appsettings.Local` and set `ASPNETCORE_ENVIRONMENT` to the correct environment in `launchSettings.json`.
-2. Update `AZURE_CLIENT_ID` and `AZURE_CLIENT_SECRET` in the `.env` file located in the `backend/api` folder.
 3. Update `VITE_BACKEND_API_SCOPE` in the `.env` file located in the `frontend` folder.

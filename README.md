@@ -69,9 +69,10 @@ docker compose build
 Set up a .env file in the backend directory with the following environment variables:
 
 ```
-AZURE_CLIENT_ID
-AZURE_TENANT_ID
-AZURE_CLIENT_SECRET
+ASPNETCORE_ENVIRONMENT=Local
+Local__DevUserId=
+SARA__BaseUrl=https://localhost:8100/
+SARA__Scopes__0=
 ```
 
 Start Flotilla by running:

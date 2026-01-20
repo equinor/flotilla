@@ -68,8 +68,9 @@ Read more about the `launchSettings.json` file
 ### Run in Docker
 
 For the backend to work when dockerized, you need to have the client secret exposed as
-an environment variable named `FLOTILLA_CLIENT_SECRET`.
-The best way to do this is to store it in an `.env` file in the root of the flotilla repository.
+an environment variable named `AZURE_CLIENT_SECRET`. 
+Note that if possible to run locally without exposing this secret locally, that is preferred.
+To do this, to store it in an `.env` file in the root of the flotilla repository.
 See [Using the “--env-file” option](https://docs.docker.com/compose/environment-variables/#using-the---env-file--option) for more information.
 
 To run the backend in docker, run the following command in the root folder of flotilla:
