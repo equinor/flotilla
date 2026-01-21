@@ -24,6 +24,7 @@ import { phone_width } from 'utils/constants'
 import { InterventionNeededButton } from './InterventionNeededButton'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { useQuery } from '@tanstack/react-query'
+import { formatDateTime } from 'utils/StringFormatting'
 
 const StyledRobotPage = styled(StyledPage)`
     background-color: ${tokens.colors.ui.background__light.hex};
@@ -237,6 +238,16 @@ export const RobotPage = ({ robotId }: { robotId: string }) => {
                                                 </StyledWideItem>
                                             )}
                                         </>
+                                    )}
+                                    {selectedRobot.isarConnected || !selectedRobot.disconnectTime ? (
+                                        <></>
+                                    ) : (
+                                        <StyledWideItem>
+                                            <Typography variant="caption">{TranslateText('Last seen')}</Typography>
+                                            <Typography style={{ fontSize: '24px' }}>
+                                                {formatDateTime(selectedRobot.disconnectTime!, 'dd.MM.yy - HH:mm')}
+                                            </Typography>
+                                        </StyledWideItem>
                                     )}
                                 </StatusContent>
                             </RobotInfo>

@@ -40,6 +40,7 @@ export interface Robot {
     status: RobotStatus
     robotCapabilities?: RobotCapabilitiesEnum[]
     isarConnected: boolean
+    disconnectTime?: Date
     deprecated: boolean
     host?: string
     logs?: string
@@ -55,6 +56,7 @@ export const placeholderRobot: Robot = {
     status: RobotStatus.Available,
     isarConnected: true,
     deprecated: false,
+    disconnectTime: undefined,
 }
 
 enum RobotCapabilitiesEnum {

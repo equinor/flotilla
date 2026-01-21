@@ -9,7 +9,7 @@ import { config } from 'config'
 import { Icons } from 'utils/icons'
 import { Inspection } from './InspectionSection'
 import { compareInspections } from './InspectionUtilities'
-import { convertUTCDateToLocalDate, getDeadlineInDays } from 'utils/StringFormatting'
+import { convertUTCDateToLocalDate, formatDateString, getDeadlineInDays } from 'utils/StringFormatting'
 import { AlreadyScheduledMissionDialog, ScheduleMissionDialog } from './ScheduleMissionDialogs'
 import { useEffect, useState } from 'react'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
@@ -91,13 +91,6 @@ interface IProps {
 
 interface ITableProps {
     inspections: Inspection[]
-}
-
-const formatDateString = (dateStr: Date | string) => {
-    let newStr = dateStr.toString()
-    newStr = newStr.slice(0, 19)
-    newStr = newStr.replaceAll('T', ' ')
-    return newStr
 }
 
 const getStatusColorAndTextFromDeadline = (deadlineDate: Date): { statusColor: string; statusText: string } => {

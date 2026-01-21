@@ -108,6 +108,8 @@ namespace Api.Database.Models
         [Required]
         public RobotStatus Status { get; set; }
 
+        public DateTime? DisconnectTime { get; set; }
+
         public string? CurrentMissionId { get; set; }
 
         public string IsarUri

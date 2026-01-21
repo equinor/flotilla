@@ -25,6 +25,7 @@ namespace Api.Services
         public Task Update(Robot robot);
         public Task UpdateRobotStatus(string robotId, RobotStatus status);
         public Task UpdateRobotIsarConnected(string robotId, bool isarConnected);
+        public Task UpdateRobotDisconnectTime(string robotId, DateTime? disconnectTime);
         public Task UpdateCurrentMissionId(string robotId, string? missionId);
         public Task UpdateCurrentInspectionAreaId(string robotId, string? inspectionAreaId);
         public Task UpdateDeprecated(string robotId, bool deprecated);
@@ -210,6 +211,29 @@ namespace Api.Services
             );
 
             await SendToSignalROnPropertyUpdate(robotId, "isarConnected", isarConnected);
+        }
+
+        public async Task UpdateRobotDisconnectTime(string robotId, DateTime? disconnectTime)
+        {
+            logger.LogInformation(
+                "Setting disconnect time on robot with id {robotId} to {NewValue}",
+                robotId,
+                disconnectTime
+            );
+            var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes(
+                AccessMode.Write
+            );
+            var robotQuery = context.Robots.Where(r =>
+                r.Id == robotId
+                && accessibleInstallationCodes.Contains(
+                    r.CurrentInstallation.InstallationCode.ToUpper()
+                )
+            );
+            await robotQuery.ExecuteUpdateAsync(setters =>
+                setters.SetProperty(r => r.DisconnectTime, disconnectTime)
+            );
+
+            await SendToSignalROnPropertyUpdate(robotId, "disconnectTime", disconnectTime);
         }
 
         public async Task UpdateCurrentMissionId(string robotId, string? currentMissionId)

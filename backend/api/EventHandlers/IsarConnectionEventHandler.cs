@@ -98,6 +98,7 @@ namespace Api.EventHandlers
             try
             {
                 await RobotService.UpdateRobotIsarConnected(robot.Id, true);
+                await RobotService.UpdateRobotDisconnectTime(robot.Id, null);
             }
             catch (Exception e)
             {
@@ -196,6 +197,7 @@ namespace Api.EventHandlers
                 try
                 {
                     await RobotService.UpdateRobotIsarConnected(robot.Id, false);
+                    await RobotService.UpdateRobotDisconnectTime(robot.Id, DateTime.UtcNow);
                     await RobotService.UpdateCurrentMissionId(robot.Id, null);
                 }
                 catch (RobotNotFoundException)
