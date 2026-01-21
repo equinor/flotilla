@@ -88,9 +88,6 @@ namespace Api.Configurations
             IConfiguration configuration
         )
         {
-            var clientId =
-                configuration["ManagedIdentity:ClientId"]
-                ?? throw new InvalidOperationException("Missing ManagedIdentity:ClientId");
             var server =
                 configuration["Database:Server"]
                 ?? throw new InvalidOperationException("Missing Database:Server");
@@ -101,18 +98,19 @@ namespace Api.Configurations
                 configuration["Database:User"]
                 ?? throw new InvalidOperationException("Missing Database:User");
 
-            Console.WriteLine("Requesting Entra token via ManagedIdentityCredential...");
-            var mi = new ManagedIdentityCredential(clientId);
+            var credential = CreateCredential(configuration);
+
+            Console.WriteLine("Requesting Entra token via Credential...");
             TokenRequestContext context = new([AzurePostgresScope]);
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
             AccessToken token;
             try
             {
-                token = mi.GetToken(context, cts.Token);
+                token = credential.GetToken(context, cts.Token);
             }
             catch (OperationCanceledException oce)
             {
-                throw new TimeoutException("Timed out acquiring Managed Identity token", oce);
+                throw new TimeoutException("Timed out acquiring token", oce);
             }
 
             var baseConnString = new NpgsqlConnectionStringBuilder
@@ -145,14 +143,14 @@ namespace Api.Configurations
                         {
                             o.ConfigureDataSource(ds =>
                             {
-                                var mi = new ManagedIdentityCredential(clientId);
+                                var dbCredential = CreateCredential(configuration);
                                 ds.UsePeriodicPasswordProvider(
                                     async (_, ct) =>
                                     {
                                         using var cts = new CancellationTokenSource(
                                             TimeSpan.FromSeconds(5)
                                         );
-                                        var token = await mi.GetTokenAsync(
+                                        var token = await dbCredential.GetTokenAsync(
                                             new TokenRequestContext([AzurePostgresScope]),
                                             CancellationTokenSource
                                                 .CreateLinkedTokenSource(ct, cts.Token)
@@ -171,6 +169,44 @@ namespace Api.Configurations
                     ),
                 ServiceLifetime.Scoped
             );
+        }
+
+        private static TokenCredential CreateCredential(IConfiguration config)
+        {
+            string? tenantId = config["AzureAd:TenantId"];
+            string? clientId = config["AzureAd:ClientId"];
+            string? clientSecret = config["AzureAd:ClientSecret"];
+
+            tenantId ??= config["AZURE_TENANT_ID"];
+            clientId ??= config["AZURE_CLIENT_ID"];
+            clientSecret ??= config["AZURE_CLIENT_SECRET"];
+
+            var workloadOptions = new WorkloadIdentityCredentialOptions();
+            if (!string.IsNullOrWhiteSpace(clientId))
+                workloadOptions.ClientId = clientId;
+            if (!string.IsNullOrWhiteSpace(tenantId))
+                workloadOptions.TenantId = tenantId;
+
+            var workloadIdentity = new WorkloadIdentityCredential(workloadOptions);
+
+            if (
+                !string.IsNullOrWhiteSpace(tenantId)
+                && !string.IsNullOrWhiteSpace(clientId)
+                && !string.IsNullOrWhiteSpace(clientSecret)
+                && !clientSecret.StartsWith("Fill in", StringComparison.OrdinalIgnoreCase)
+            )
+            {
+                Console.WriteLine(
+                    "Using ChainedTokenCredential: WorkloadIdentityCredential -> ClientSecretCredential"
+                );
+                return new ChainedTokenCredential(
+                    workloadIdentity,
+                    new ClientSecretCredential(tenantId, clientId, clientSecret)
+                );
+            }
+
+            Console.WriteLine("Using WorkloadIdentityCredential only");
+            return workloadIdentity;
         }
 
         public static void ConfigureDatabaseWithKeyvaultConnString(

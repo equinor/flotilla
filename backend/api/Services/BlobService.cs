@@ -1,12 +1,10 @@
 ﻿using System.Globalization;
 using System.Text;
-using Api.Options;
 using Api.Utilities;
 using Azure;
 using Azure.Identity;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
-using Microsoft.Extensions.Options;
 
 namespace Api.Services
 {
@@ -29,8 +27,7 @@ namespace Api.Services
         );
     }
 
-    public class BlobService(ILogger<BlobService> logger, IOptions<AzureAdOptions> azureOptions)
-        : IBlobService
+    public class BlobService(ILogger<BlobService> logger) : IBlobService
     {
         public async Task<byte[]?> DownloadBlob(
             string blobName,
@@ -112,13 +109,11 @@ namespace Api.Services
 
         private BlobContainerClient GetBlobContainerClient(string containerName, string accountName)
         {
+            var credential = new DefaultAzureCredential();
+
             var serviceClient = new BlobServiceClient(
                 new Uri($"https://{accountName}.blob.core.windows.net"),
-                new ClientSecretCredential(
-                    azureOptions.Value.TenantId,
-                    azureOptions.Value.ClientId,
-                    azureOptions.Value.ClientSecret
-                )
+                credential
             );
             var containerClient = serviceClient.GetBlobContainerClient(
                 containerName.ToLower(CultureInfo.CurrentCulture)
