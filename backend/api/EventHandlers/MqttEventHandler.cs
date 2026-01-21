@@ -823,10 +823,12 @@ namespace Api.EventHandlers
                 BlobName = saraAnalysisResult.BlobName,
             };
 
-            var installation = await InstallationService.ReadByInstallationCode(
-                analysisResult.BlobContainer,
+            var missionRun = await MissionRunService.ReadByInspectionId(
+                analysisResult.InspectionId,
                 readOnly: true
             );
+
+            var installation = missionRun?.InspectionArea?.Installation;
 
             if (installation == null)
             {

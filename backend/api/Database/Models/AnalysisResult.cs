@@ -18,13 +18,10 @@ namespace Api.Database.Models
 
         public string? Warning { get; set; }
 
-        [Required]
-        public required string StorageAccount { get; set; }
+        public string? StorageAccount { get; set; }
 
-        [Required]
-        public required string BlobContainer { get; set; }
+        public string? BlobContainer { get; set; }
 
-        [Required]
-        public required string BlobName { get; set; }
+        public string? BlobName { get; set; }
     }
 }

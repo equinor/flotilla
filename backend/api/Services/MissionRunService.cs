@@ -29,6 +29,12 @@ namespace Api.Services
             bool includeDeprecated = false
         );
 
+        public Task<MissionRun?> ReadByInspectionId(
+            string inspectionId,
+            bool readOnly = true,
+            bool includeDeprecated = false
+        );
+
         public Task<IList<MissionRun>> ReadMissionRunQueue(string robotId, bool readOnly = true);
 
         public Task<MissionRun?> ReadNextScheduledRunByMissionId(
@@ -178,6 +184,27 @@ namespace Api.Services
                     includeDeprecated: includeDeprecated
                 )
                 .FirstOrDefaultAsync(missionRun => missionRun.Id.Equals(id));
+        }
+
+        public async Task<MissionRun?> ReadByInspectionId(
+            string inspectionId,
+            bool readOnly = true,
+            bool includeDeprecated = false
+        )
+        {
+            return await GetMissionRunsWithSubModels(
+                    readOnly: readOnly,
+                    includeDeprecated: includeDeprecated
+                )
+                .Where(
+                    (m) =>
+                        m.Tasks.Any(
+                            (t) =>
+                                t.Inspection != null
+                                && t.Inspection.IsarInspectionId == inspectionId
+                        )
+                )
+                .FirstOrDefaultAsync();
         }
 
         public async Task<IList<MissionRun>> ReadMissionRunQueue(

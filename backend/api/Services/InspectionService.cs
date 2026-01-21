@@ -52,7 +52,10 @@ namespace Api.Services
         public async Task<byte[]?> FetchAnalysisFromIsarInspectionId(string isarInspectionId)
         {
             var inspectionData = await GetAnalysisStorageInfo(isarInspectionId);
-
+            if (inspectionData == null)
+            {
+                return null;
+            }
             return await blobService.DownloadBlob(
                 inspectionData.BlobName,
                 inspectionData.BlobContainer,
@@ -60,7 +63,9 @@ namespace Api.Services
             );
         }
 
-        public async Task<SaraAnalysisDataResponse> GetAnalysisStorageInfo(string isarInspectionId)
+        private async Task<SaraAnalysisDataResponse?> GetAnalysisStorageInfo(
+            string isarInspectionId
+        )
         {
             var inspection = await ReadByIsarInspectionId(isarInspectionId, readOnly: true);
             if (inspection is null)
@@ -82,7 +87,14 @@ namespace Api.Services
                 logger.LogError("{Message}", errorMessage);
                 throw new InspectionNotFoundException(errorMessage);
             }
-
+            if (
+                existingAnalysisResult.StorageAccount == null
+                || existingAnalysisResult.BlobContainer == null
+                || existingAnalysisResult.BlobName == null
+            )
+            {
+                return null;
+            }
             return new SaraAnalysisDataResponse
             {
                 StorageAccount = existingAnalysisResult.StorageAccount,
