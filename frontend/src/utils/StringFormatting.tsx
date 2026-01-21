@@ -40,3 +40,10 @@ export const formatDateTime = (dateTime: Date, dateFormat: string): string =>
 export const capitalizeFirstLetter = (str: string) => {
     return str.charAt(0).toUpperCase() + str.slice(1)
 }
+
+export const formatDateString = (dateStr: Date | string) => {
+    let newStr = dateStr.toString()
+    newStr = newStr.slice(0, 19)
+    newStr = newStr.replaceAll('T', ' ')
+    return newStr
+}
