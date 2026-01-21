@@ -5,7 +5,7 @@ export interface Inspection {
     isarInspectionId: string
     isCompleted: boolean
     inspectionType: InspectionType
-    analysisResult: AnalysisResult
+    analysisResult?: AnalysisResult
     inspectionTarget: Position
     videoDuration?: number
     inspectionUrl?: string
@@ -20,9 +20,9 @@ interface AnalysisResult {
     unit?: string
     confidence?: number
     warning?: string
-    storageAccount: string
-    blobContainer: string
-    blobName: string
+    storageAccount?: string
+    blobContainer?: string
+    blobName?: string
 }
 
 export enum InspectionType {

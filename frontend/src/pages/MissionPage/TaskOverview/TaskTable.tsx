@@ -34,7 +34,7 @@ export const TaskTable = ({ tasks, missionDefinitionPage }: TaskTableProps) => {
                         <>
                             <Table.Cell>{TranslateText('Inspection Types')}</Table.Cell>
                             <Table.Cell>{TranslateText('Status')}</Table.Cell>
-                            {tasks.some((task: Task) => task.inspection.analysisResult) && (
+                            {tasks.some((t) => t.inspection.analysisResult) && (
                                 <Table.Cell>{TranslateText('Analysis')}</Table.Cell>
                             )}
                         </>
@@ -84,7 +84,7 @@ const TaskTableRows = ({ tasks, missionDefinitionPage }: TaskTableProps) => {
                             <TaskStatusDisplay status={task.status} errorMessage={task.errorDescription} />
                         </Table.Cell>
                         <Table.Cell>
-                            {task.inspection.analysisResult?.warning && <TaskAnalysisDisplay task={task} />}
+                            {task.inspection.analysisResult ? <TaskAnalysisDisplay task={task} /> : <></>}
                         </Table.Cell>
                     </>
                 )}

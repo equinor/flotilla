@@ -54,7 +54,11 @@ export const AnalysisResultDialogView = ({ selectedTask, onClose }: InspectionDi
                 </StyledDialogHeader>
                 <StyledDialogInspectionView>
                     <div>
-                        <AnalysisImage inspectionId={selectedTask.inspection.isarInspectionId} />
+                        {selectedTask.inspection.analysisResult?.storageAccount ? (
+                            <AnalysisImage inspectionId={selectedTask.inspection.isarInspectionId} />
+                        ) : (
+                            <>{/* No image to display*/}</>
+                        )}
                         <StyledBottomContent>
                             <StyledInfoContent>
                                 <Typography variant="caption">{TranslateText('Tag') + ':'}</Typography>
