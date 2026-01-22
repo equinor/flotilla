@@ -1,8 +1,10 @@
-broker-aspire:
-	docker compose up broker otel-collector aspire-dashboard
+.PHONY: broker broker-aspire compose
 
-compose: 
-	docker compose up
+broker-aspire:
+	docker compose up broker otel-collector aspire-dashboard --build
+
+compose:
+	docker compose up --build
 
 broker:
-	docker compose up broker
+	docker compose up broker --build
