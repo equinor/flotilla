@@ -1,4 +1,4 @@
-import { Robot } from 'models/Robot'
+import { RobotWithoutTelemetry } from 'models/Robot'
 import { useEffect, useState } from 'react'
 import {
     ConflictingMissionInspectionAreasDialog,
@@ -30,7 +30,7 @@ export const ScheduleMissionWithInspectionAreaVerification = ({
 }: IProps) => {
     const { enabledRobots } = useAssetContext()
     const [dialogToOpen, setDialogToOpen] = useState<DialogTypes>(DialogTypes.unknown)
-    const [selectedRobot, setSelectedRobot] = useState<Robot>()
+    const [selectedRobot, setSelectedRobot] = useState<RobotWithoutTelemetry>()
 
     const unikMissionInspectionAreas = missionInspectionAreas.filter(
         (inspectionArea, index, self) => self.findIndex((i) => i.id === inspectionArea.id) === index

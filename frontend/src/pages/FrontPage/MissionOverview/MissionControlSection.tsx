@@ -10,7 +10,7 @@ import {
     OngoingReturnHomeMissionCard,
 } from './OngoingMissionCard'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
-import { Robot, RobotStatus } from 'models/Robot'
+import { RobotWithoutTelemetry, RobotStatus } from 'models/Robot'
 import { RobotMissionQueueView } from './MissionQueueView'
 import { FrontPageSectionId } from 'models/FrontPageSectionId'
 import { NextAutoScheduleMissionView } from '../AutoScheduleSection/NextAutoScheduleMissionView'
@@ -73,7 +73,7 @@ export const MissionControlSection = () => {
     )
 }
 
-const MissionControlCard = ({ robot }: { robot: Robot }) => {
+const MissionControlCard = ({ robot }: { robot: RobotWithoutTelemetry }) => {
     const { ongoingMissions } = useMissionsContext()
     const ongoingMission = ongoingMissions.find((mission) => mission.robot.id === robot.id)
     const [isOpen, setIsOpen] = useState<boolean>(true)

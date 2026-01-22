@@ -1,7 +1,5 @@
-import { BatteryStatus } from './Battery'
 import { DocumentInfo } from './DocumentInfo'
 import { Installation, placeholderInstallation } from './Installation'
-import { Pose } from './Pose'
 
 export enum RobotType {
     TaurobInspector = 'TaurobInspector',
@@ -36,15 +34,11 @@ export enum RobotStatus {
     StoppingReturnHome = 'StoppingReturnHome',
 }
 
-export interface Robot {
+export interface RobotWithoutTelemetry {
     id: string
     name?: string
     serialNumber?: string
     currentInstallation: Installation
-    batteryLevel?: number
-    batteryState?: BatteryStatus
-    pressureLevel?: number
-    pose?: Pose
     status: RobotStatus
     robotCapabilities?: RobotCapabilitiesEnum[]
     isarConnected: boolean
@@ -58,7 +52,7 @@ export interface Robot {
     currentInspectionAreaId?: string
     type: RobotType
 }
-export const placeholderRobot: Robot = {
+export const placeholderRobot: RobotWithoutTelemetry = {
     id: 'placeholderRobotId',
     currentInstallation: placeholderInstallation,
     status: RobotStatus.Available,
@@ -82,4 +76,10 @@ enum RobotCapabilitiesEnum {
 export const getRobotTypeString = (type: RobotType): string => {
     if (type === RobotType.TaurobInspector || type === RobotType.TaurobOperator) return 'Taurob'
     return type.toString()
+}
+
+export interface RobotPropertyUpdate {
+    robotId: string
+    propertyName: string
+    propertyValue: any
 }

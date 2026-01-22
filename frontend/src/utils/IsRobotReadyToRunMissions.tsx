@@ -1,8 +1,8 @@
 import { Typography } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { Robot, RobotStatus } from 'models/Robot'
+import { RobotWithoutTelemetry, RobotStatus } from 'models/Robot'
 
-export const NoMissionReason = ({ robot }: { robot: Robot }) => {
+export const NoMissionReason = ({ robot }: { robot: RobotWithoutTelemetry }) => {
     const { TranslateText } = useLanguageContext()
     let message = undefined
     if (robot.status === RobotStatus.Lockdown || robot.status === RobotStatus.GoingToLockdown) {

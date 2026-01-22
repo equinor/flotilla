@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, FC, useEffect } from 'react'
 import { BackendAPICaller } from 'api/ApiCaller'
-import { Robot } from 'models/Robot'
+import { RobotWithoutTelemetry, RobotPropertyUpdate } from 'models/Robot'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { useLanguageContext } from './LanguageContext'
 import { AlertType, useAlertContext } from './AlertContext'
@@ -9,7 +9,7 @@ import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { Installation } from 'models/Installation'
 import { InspectionArea } from 'models/InspectionArea'
 
-const upsertRobotList = (list: Robot[], robot: Robot) => {
+const upsertRobotList = (list: RobotWithoutTelemetry[], robot: RobotWithoutTelemetry) => {
     const newList = [...list]
     const i = newList.findIndex((e) => e.id === robot.id)
     if (i > -1) newList[i] = robot
@@ -23,7 +23,7 @@ interface Props {
 
 interface IAssetContext {
     isLoading: boolean
-    enabledRobots: Robot[]
+    enabledRobots: RobotWithoutTelemetry[]
     installationCode: string
     installationName: string
     installationInspectionAreas: InspectionArea[]
@@ -41,16 +41,10 @@ const defaultAssetState = {
     switchInstallation: () => {},
 }
 
-interface RobotPropertyUpdate {
-    robotId: string
-    propertyName: string
-    propertyValue: any
-}
-
 export const AssetContext = createContext<IAssetContext>(defaultAssetState)
 
 export const AssetProvider: FC<Props> = ({ children }) => {
-    const [enabledRobots, setEnabledRobots] = useState<Robot[]>(defaultAssetState.enabledRobots)
+    const [enabledRobots, setEnabledRobots] = useState<RobotWithoutTelemetry[]>(defaultAssetState.enabledRobots)
     const [activeInstallations, setActiveInstallations] = useState<Installation[]>([])
     const [selectedInstallation, setSelectedInstallation] = useState<Installation | undefined>(undefined)
     const [installationInspectionAreas, setInstallationInspectionAreas] = useState<InspectionArea[]>([])
@@ -66,11 +60,7 @@ export const AssetProvider: FC<Props> = ({ children }) => {
     useEffect(() => {
         if (connectionReady) {
             registerEvent(SignalREventLabels.robotAdded, (username: string, message: string) => {
-                const updatedRobot: Robot = JSON.parse(message)
-                updatedRobot.batteryLevel = undefined
-                updatedRobot.batteryState = undefined
-                updatedRobot.pressureLevel = undefined
-                updatedRobot.pose = undefined
+                const updatedRobot: RobotWithoutTelemetry = JSON.parse(message)
                 setEnabledRobots((oldRobotList) => {
                     let oldRobotListCopy = [...oldRobotList]
                     oldRobotListCopy = upsertRobotList(oldRobotListCopy, updatedRobot)
@@ -78,7 +68,7 @@ export const AssetProvider: FC<Props> = ({ children }) => {
                 })
             })
             registerEvent(SignalREventLabels.robotUpdated, (username: string, message: string) => {
-                const updatedRobot: Robot = JSON.parse(message)
+                const updatedRobot: RobotWithoutTelemetry = JSON.parse(message)
                 // The check below makes it so that it is not treated as null in the code.
                 if (updatedRobot.type == null) {
                     console.warn('Received robot update with model type null')
@@ -108,7 +98,7 @@ export const AssetProvider: FC<Props> = ({ children }) => {
                 })
             })
             registerEvent(SignalREventLabels.robotDeleted, (username: string, message: string) => {
-                const updatedRobot: Robot = JSON.parse(message)
+                const updatedRobot: RobotWithoutTelemetry = JSON.parse(message)
                 setEnabledRobots((oldRobotList) => {
                     const newRobotList = [...oldRobotList]
                     const index = newRobotList.findIndex((r) => r.id === updatedRobot.id)
@@ -123,12 +113,6 @@ export const AssetProvider: FC<Props> = ({ children }) => {
         if (!enabledRobots || enabledRobots.length === 0)
             BackendAPICaller.getEnabledRobots()
                 .then((robots) => {
-                    robots.forEach((r) => {
-                        r.batteryLevel = undefined
-                        r.batteryState = undefined
-                        r.pressureLevel = undefined
-                        r.pose = undefined
-                    })
                     setEnabledRobots(robots)
                     setIsLoading(false)
                 })
@@ -148,7 +132,7 @@ export const AssetProvider: FC<Props> = ({ children }) => {
                 })
     }, [])
 
-    const [filteredRobots, setFilteredRobots] = useState<Robot[]>([])
+    const [filteredRobots, setFilteredRobots] = useState<RobotWithoutTelemetry[]>([])
 
     useEffect(() => {
         setFilteredRobots(

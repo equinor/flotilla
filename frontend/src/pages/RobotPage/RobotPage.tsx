@@ -6,9 +6,8 @@ import { RobotImage } from 'components/Displays/RobotDisplays/RobotImage'
 import { PressureStatusDisplay } from 'components/Displays/RobotDisplays/PressureStatusDisplay'
 import { BatteryStatusDisplay } from 'components/Displays/RobotDisplays/BatteryStatusDisplay'
 import { RobotStatusChip } from 'components/Displays/RobotDisplays/RobotStatusIcon'
-import { RobotStatus } from 'models/Robot'
+import { RobotStatus, RobotWithoutTelemetry } from 'models/Robot'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { useAssetContext } from 'components/Contexts/AssetContext'
 import { StyledButton, StyledPage } from 'components/Styles/StyledComponents'
 import { DocumentationSection } from './Documentation'
 import { useMediaStreamContext } from 'components/Contexts/MediaStreamContext'
@@ -25,6 +24,7 @@ import { InterventionNeededButton } from './InterventionNeededButton'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { useQuery } from '@tanstack/react-query'
 import { formatDateTime } from 'utils/StringFormatting'
+import { useRobotTelemetry } from 'hooks/useRobotTelemetry'
 
 const StyledRobotPage = styled(StyledPage)`
     background-color: ${tokens.colors.ui.background__light.hex};
@@ -86,53 +86,55 @@ const StyledWideItem = styled(StyledStatusElement)`
     }
 `
 
-export const RobotPage = ({ robotId }: { robotId: string }) => {
+interface RobotPageProps {
+    robot: RobotWithoutTelemetry
+}
+
+export const RobotPage = ({ robot }: RobotPageProps) => {
     const { TranslateText } = useLanguageContext()
-    const { enabledRobots } = useAssetContext()
     const { mediaStreams, addMediaStreamConfigIfItDoesNotExist } = useMediaStreamContext()
     const [videoMediaStreams, setVideoMediaStreams] = useState<MediaStreamTrack[]>([])
     const { ongoingMissions } = useMissionsContext()
+    const { robotBatteryLevel, robotBatteryStatus, robotPressureLevel } = useRobotTelemetry(robot)
 
     useEffect(() => {
-        if (robotId && !Object.keys(mediaStreams).includes(robotId)) addMediaStreamConfigIfItDoesNotExist(robotId)
-    }, [robotId])
-
-    const selectedRobot = enabledRobots.find((robot) => robot.id === robotId)
+        if (robot.id && !Object.keys(mediaStreams).includes(robot.id)) addMediaStreamConfigIfItDoesNotExist(robot.id)
+    }, [robot.id])
 
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const toggleSkipMissionDialog = () => {
         setIsDialogOpen(!isDialogOpen)
     }
 
-    const mission = ongoingMissions.find((mission) => mission.robot.id === selectedRobot?.id)
+    const mission = ongoingMissions.find((mission) => mission.robot.id === robot.id)
 
     useEffect(() => {
-        if (robotId && mediaStreams && Object.keys(mediaStreams).includes(robotId)) {
-            const mediaStreamConfig = mediaStreams[robotId]
+        if (robot.id && mediaStreams && Object.keys(mediaStreams).includes(robot.id)) {
+            const mediaStreamConfig = mediaStreams[robot.id]
             if (mediaStreamConfig && mediaStreamConfig.streams.length > 0)
                 setVideoMediaStreams(mediaStreamConfig.streams)
         }
-    }, [mediaStreams, robotId])
+    }, [mediaStreams, robot.id])
 
     const stopButton =
-        selectedRobot && [RobotStatus.Busy, RobotStatus.Paused].includes(selectedRobot.status) ? (
+        robot && [RobotStatus.Busy, RobotStatus.Paused].includes(robot.status) ? (
             <FullWidthButton variant="contained" onClick={toggleSkipMissionDialog}>
                 <Icon
                     name={Icons.StopButton}
                     style={{ color: tokens.colors.interactive.icon_on_interactive_colors.rgba }}
                     size={24}
                 />
-                {TranslateText('Stop')} {selectedRobot.name}
+                {TranslateText('Stop')} {robot.name}
             </FullWidthButton>
         ) : (
             <></>
         )
 
     const skipMissionDialog =
-        selectedRobot && [RobotStatus.Busy, RobotStatus.Paused].includes(selectedRobot.status) ? (
+        robot && [RobotStatus.Busy, RobotStatus.Paused].includes(robot.status) ? (
             <SkipMissionDialog
                 missionName={mission?.name}
-                robotId={selectedRobot.id}
+                robotId={robot.id}
                 isSkipMissionDialogOpen={isDialogOpen}
                 toggleDialog={toggleSkipMissionDialog}
             />
@@ -141,15 +143,15 @@ export const RobotPage = ({ robotId }: { robotId: string }) => {
         )
 
     const currentInspectionArea = useQuery({
-        queryKey: ['fetchCurrentInspectionArea', robotId],
+        queryKey: ['fetchCurrentInspectionArea', robot.id],
         queryFn: async () => {
-            if (selectedRobot && selectedRobot.currentInspectionAreaId)
-                return await BackendAPICaller.getInspectionAreaById(selectedRobot.currentInspectionAreaId)
+            if (robot && robot.currentInspectionAreaId)
+                return await BackendAPICaller.getInspectionAreaById(robot.currentInspectionAreaId)
             return null
         },
         retry: 2,
         retryDelay: 2000,
-        enabled: selectedRobot && selectedRobot.currentInspectionAreaId != null,
+        enabled: robot && robot.currentInspectionAreaId != null,
     }).data
 
     return (
@@ -157,67 +159,59 @@ export const RobotPage = ({ robotId }: { robotId: string }) => {
             <Header page={'robot'} />
             <StyledRobotPage>
                 <BackButton />
-                {selectedRobot && (
+                {robot && (
                     <>
                         <StyledContainer>
-                            <Typography variant="h1">{selectedRobot.name}</Typography>
+                            <Typography variant="h1">{robot.name}</Typography>
                             <RobotInfo>
                                 <StyledLeftContent>
-                                    <RobotImage height="350px" robotType={selectedRobot.type} />
+                                    <RobotImage height="350px" robotType={robot.type} />
                                     {stopButton}
-                                    {selectedRobot && selectedRobot.status != RobotStatus.InterventionNeeded && (
-                                        <ReturnHomeButton robot={selectedRobot} />
+                                    {robot && robot.status != RobotStatus.InterventionNeeded && (
+                                        <ReturnHomeButton robot={robot} />
                                     )}
-                                    {selectedRobot && selectedRobot.status == RobotStatus.InterventionNeeded && (
-                                        <InterventionNeededButton robot={selectedRobot} />
+                                    {robot && robot.status == RobotStatus.InterventionNeeded && (
+                                        <InterventionNeededButton robot={robot} />
                                     )}
-                                    {selectedRobot && (
-                                        <MaintenanceButton
-                                            robotId={selectedRobot.id}
-                                            robotStatus={selectedRobot.status}
-                                        />
-                                    )}
+                                    {robot && <MaintenanceButton robotId={robot.id} robotStatus={robot.status} />}
                                 </StyledLeftContent>
                                 <StatusContent>
                                     <StyledStatusElement>
                                         <Typography variant="caption">{TranslateText('Status')}</Typography>
                                         <RobotStatusChip
-                                            status={selectedRobot.status}
-                                            isarConnected={selectedRobot.isarConnected}
+                                            status={robot.status}
+                                            isarConnected={robot.isarConnected}
                                             itemSize={24}
                                         />
                                     </StyledStatusElement>
 
-                                    {selectedRobot.status !== RobotStatus.Offline && (
+                                    {robot.status !== RobotStatus.Offline && (
                                         <>
                                             <StyledStatusElement>
                                                 <Typography variant="caption">{TranslateText('Battery')}</Typography>
                                                 <BatteryStatusDisplay
                                                     itemSize={24}
-                                                    batteryLevel={selectedRobot.batteryLevel}
-                                                    batteryState={selectedRobot.batteryState}
+                                                    batteryLevel={robotBatteryLevel}
+                                                    batteryState={robotBatteryStatus}
                                                 />
                                             </StyledStatusElement>
-                                            {selectedRobot.pressureLevel !== null &&
-                                                selectedRobot.pressureLevel !== undefined && (
-                                                    <StyledStatusElement>
-                                                        <Typography variant="caption">
-                                                            {TranslateText('Pressure')}
-                                                        </Typography>
-                                                        <PressureStatusDisplay
-                                                            itemSize={24}
-                                                            pressure={selectedRobot.pressureLevel}
-                                                        />
-                                                    </StyledStatusElement>
-                                                )}
-                                            {selectedRobot.type && (
+                                            {robotPressureLevel !== undefined && (
+                                                <StyledStatusElement>
+                                                    <Typography variant="caption">
+                                                        {TranslateText('Pressure')}
+                                                    </Typography>
+                                                    <PressureStatusDisplay
+                                                        itemSize={24}
+                                                        pressure={robotPressureLevel}
+                                                    />
+                                                </StyledStatusElement>
+                                            )}
+                                            {robot.type && (
                                                 <StyledStatusElement>
                                                     <Typography variant="caption">
                                                         {TranslateText('Robot Model')}
                                                     </Typography>
-                                                    <Typography style={{ fontSize: '24px' }}>
-                                                        {selectedRobot.type}
-                                                    </Typography>
+                                                    <Typography style={{ fontSize: '24px' }}>{robot.type}</Typography>
                                                 </StyledStatusElement>
                                             )}
                                             {currentInspectionArea && (
@@ -232,13 +226,13 @@ export const RobotPage = ({ robotId }: { robotId: string }) => {
                                             )}
                                         </>
                                     )}
-                                    {selectedRobot.isarConnected || !selectedRobot.disconnectTime ? (
+                                    {robot.isarConnected || !robot.disconnectTime ? (
                                         <></>
                                     ) : (
                                         <StyledWideItem>
                                             <Typography variant="caption">{TranslateText('Last seen')}</Typography>
                                             <Typography style={{ fontSize: '24px' }}>
-                                                {formatDateTime(selectedRobot.disconnectTime!, 'dd.MM.yy - HH:mm')}
+                                                {formatDateTime(robot.disconnectTime!, 'dd.MM.yy - HH:mm')}
                                             </Typography>
                                         </StyledWideItem>
                                     )}
@@ -246,8 +240,8 @@ export const RobotPage = ({ robotId }: { robotId: string }) => {
                             </RobotInfo>
                         </StyledContainer>
                         {skipMissionDialog}
-                        {selectedRobot.documentation && selectedRobot.documentation.length > 0 && (
-                            <DocumentationSection documentation={selectedRobot.documentation} />
+                        {robot.documentation && robot.documentation.length > 0 && (
+                            <DocumentationSection documentation={robot.documentation} />
                         )}
                         <VideoStreamSection>
                             {videoMediaStreams && videoMediaStreams.length > 0 && (

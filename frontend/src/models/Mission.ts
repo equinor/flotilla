@@ -1,5 +1,5 @@
 import { InspectionArea } from './InspectionArea'
-import { Robot, placeholderRobot } from './Robot'
+import { RobotWithoutTelemetry, placeholderRobot } from './Robot'
 import { Task } from './Task'
 
 export enum MissionStatus {
@@ -32,7 +32,7 @@ export interface Mission {
     comment?: string
     installationCode: string
     inspectionArea: InspectionArea
-    robot: Robot
+    robot: RobotWithoutTelemetry
     status: MissionStatus
     isCompleted: boolean
     creationTime: Date
