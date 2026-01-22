@@ -7,6 +7,8 @@ export const useRobot = (robotId: string) => {
     const [isFetchingRobot, setIsFetchingRobot] = useState<boolean>(true)
     const [robot, setRobot] = useState<Robot | undefined>(undefined)
     const { registerEvent, connectionReady } = useSignalRContext()
+    let batteryReadingTimer: NodeJS.Timeout
+    let pressureReadingTimer: NodeJS.Timeout
 
     useEffect(() => {
         setIsFetchingRobot(true)
@@ -22,10 +24,32 @@ export const useRobot = (robotId: string) => {
             })
     }, [robotId])
 
+    const clearBatteryLevel = () => {
+        setRobot((oldRobot) => {
+            if (!oldRobot) return oldRobot
+            return {
+                ...oldRobot,
+                batteryLevel: undefined,
+            }
+        })
+    }
+
+    const clearPressureLevel = () => {
+        setRobot((oldRobot) => {
+            if (!oldRobot) return oldRobot
+            return {
+                ...oldRobot,
+                pressureLevel: undefined,
+            }
+        })
+    }
+
     useEffect(() => {
         if (connectionReady && !isFetchingRobot) {
             if (robot === undefined) {
-                console.error(`Not fetching robot, but robot is not fetched ${robotId}:`)
+                console.error(
+                    `We should have fetched the robot, but the robot is not fetched ${robotId}. Might it be deleted?`
+                )
                 return
             }
             registerEvent(SignalREventLabels.robotUpdated, (username: string, message: string) => {
@@ -44,6 +68,14 @@ export const useRobot = (robotId: string) => {
                             [robotPropertyUpdate.propertyName]: robotPropertyUpdate.propertyValue,
                         }
                     })
+
+                    if (robotPropertyUpdate.propertyName === 'batteryLevel') {
+                        clearTimeout(batteryReadingTimer)
+                        batteryReadingTimer = setTimeout(clearBatteryLevel, 30 * 1000) // Time in milliseconds
+                    } else if (robotPropertyUpdate.propertyName === 'pressureLevel') {
+                        clearTimeout(pressureReadingTimer)
+                        pressureReadingTimer = setTimeout(clearPressureLevel, 30 * 1000) // Time in milliseconds
+                    }
                 }
             })
             registerEvent(SignalREventLabels.robotDeleted, (username: string, message: string) => {
