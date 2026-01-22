@@ -18,7 +18,8 @@ export default defineConfig({
       'models': '/src/models',
       'utils': '/src/utils',
       'config': '/src/config',
-      'pages': '/src/pages'
+      'pages': '/src/pages',
+      'hooks': '/src/hooks',
     }
   },
   server: {
