@@ -15,7 +15,6 @@ interface BatteryStatusDisplayProps {
     batteryLevel?: number
     batteryState?: BatteryStatus
     itemSize?: 24 | 16 | 18 | 32 | 40 | 48 | undefined
-    batteryWarningLimit?: number
     textAlignedBottom?: boolean
 }
 
@@ -23,7 +22,6 @@ export const BatteryStatusDisplay = ({
     batteryLevel,
     batteryState,
     itemSize,
-    batteryWarningLimit,
     textAlignedBottom,
 }: BatteryStatusDisplayProps) => {
     let iconColor: string = tokens.colors.text.static_icons__default.hex
@@ -32,11 +30,11 @@ export const BatteryStatusDisplay = ({
         switch (true) {
             case batteryState === BatteryStatus.Charging:
                 return Icons.BatteryCharging
-            case !batteryWarningLimit:
-            case batteryWarningLimit !== undefined && batteryLevel! > batteryWarningLimit:
-                return Icons.Battery
-            case batteryWarningLimit && batteryLevel! <= batteryWarningLimit:
+            case batteryState === BatteryStatus.Critical:
+            case batteryState === BatteryStatus.Error:
                 return Icons.BatteryAlert
+            case batteryState == BatteryStatus.Normal:
+                return Icons.Battery
             case batteryLevel == null:
             default:
                 return Icons.BatteryUnknown

@@ -2,7 +2,6 @@ import { tokens } from '@equinor/eds-tokens'
 import { Icon, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { Icons } from 'utils/icons'
-import { PressureStatus } from 'models/Pressure'
 
 const PressureAlignment = styled.div`
     display: flex;
@@ -15,44 +14,15 @@ const StyledTypography = styled(Typography)<{ $fontSize?: 24 | 16 | 18 | 32 | 40
 interface PressureStatusDisplayProps {
     pressure: number
     itemSize?: 24 | 16 | 18 | 32 | 40 | 48 | undefined
-    upperPressureWarningThreshold?: number
-    lowerPressureWarningThreshold?: number
 }
 
-export const PressureStatusDisplay = ({
-    pressure,
-    itemSize,
-    upperPressureWarningThreshold,
-    lowerPressureWarningThreshold,
-}: PressureStatusDisplayProps) => {
+export const PressureStatusDisplay = ({ pressure, itemSize }: PressureStatusDisplayProps) => {
     const barToMillibar = 1000
     const pressureInMilliBar = `${Math.round(pressure * barToMillibar)}mBar`
-    let icon_color: string = tokens.colors.text.static_icons__default.hex
-    let pressureStatus: PressureStatus
-
-    if (!upperPressureWarningThreshold || !lowerPressureWarningThreshold) {
-        pressureStatus = PressureStatus.Normal
-    } else if (pressure > upperPressureWarningThreshold || pressure < lowerPressureWarningThreshold) {
-        pressureStatus = PressureStatus.Critical
-    } else {
-        pressureStatus = PressureStatus.Normal
-    }
-
-    switch (pressureStatus) {
-        case PressureStatus.Normal:
-            icon_color = tokens.colors.text.static_icons__default.hex
-            break
-        case PressureStatus.Critical:
-            icon_color = tokens.colors.interactive.warning__resting.hex
-            break
-        default:
-            icon_color = tokens.colors.interactive.disabled__text.hex
-            break
-    }
 
     return (
         <PressureAlignment>
-            <Icon name={Icons.Pressure} color={icon_color} size={itemSize} />
+            <Icon name={Icons.Pressure} color={tokens.colors.text.static_icons__default.hex} size={itemSize} />
             <StyledTypography $fontSize={itemSize}>{pressureInMilliBar}</StyledTypography>
         </PressureAlignment>
     )
