@@ -163,7 +163,7 @@ export const RobotPage = ({ robotId }: { robotId: string }) => {
                             <Typography variant="h1">{selectedRobot.name}</Typography>
                             <RobotInfo>
                                 <StyledLeftContent>
-                                    <RobotImage height="350px" robotType={selectedRobot.model.type} />
+                                    <RobotImage height="350px" robotType={selectedRobot.type} />
                                     {stopButton}
                                     {selectedRobot && selectedRobot.status != RobotStatus.InterventionNeeded && (
                                         <ReturnHomeButton robot={selectedRobot} />
@@ -210,13 +210,13 @@ export const RobotPage = ({ robotId }: { robotId: string }) => {
                                                         />
                                                     </StyledStatusElement>
                                                 )}
-                                            {selectedRobot.model.type && (
+                                            {selectedRobot.type && (
                                                 <StyledStatusElement>
                                                     <Typography variant="caption">
                                                         {TranslateText('Robot Model')}
                                                     </Typography>
                                                     <Typography style={{ fontSize: '24px' }}>
-                                                        {selectedRobot.model.type}
+                                                        {selectedRobot.type}
                                                     </Typography>
                                                 </StyledStatusElement>
                                             )}

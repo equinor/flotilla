@@ -22,7 +22,6 @@ namespace Api.Test.Database
         private readonly MissionRunService _missionRunService;
         private readonly MissionDefinitionService _missionDefinitionService;
         private readonly PlantService _plantService;
-        private readonly RobotModelService _robotModelService;
         private readonly RobotService _robotService;
         private readonly UserInfoService _userInfoService;
         private readonly SourceService _sourceService;
@@ -63,11 +62,9 @@ namespace Api.Test.Database
                 new HttpContextAccessor(),
                 new Mock<ILogger<UserInfoService>>().Object
             );
-            _robotModelService = new RobotModelService(context);
             _robotService = new RobotService(
                 context,
                 new Mock<ILogger<RobotService>>().Object,
-                _robotModelService,
                 new MockSignalRService(),
                 _accessRoleService,
                 _installationService,
@@ -242,11 +239,7 @@ namespace Api.Test.Database
                 RobotCapabilities = [RobotCapabilitiesEnum.take_image],
             };
 
-            var robotModel = await _robotModelService.ReadByRobotType(
-                createRobotQuery.RobotType,
-                readOnly: true
-            );
-            var robot = new Robot(createRobotQuery, installation, robotModel!, inspectionAreaId);
+            var robot = new Robot(createRobotQuery, installation, inspectionAreaId);
             return await _robotService.Create(robot);
         }
 

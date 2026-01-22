@@ -1,5 +1,5 @@
 import { Card, Typography } from '@equinor/eds-core-react'
-import { Robot, RobotStatus } from 'models/Robot'
+import { getRobotTypeString, Robot, RobotStatus, RobotType } from 'models/Robot'
 import { tokens } from '@equinor/eds-tokens'
 import { RobotStatusChip } from 'components/Displays/RobotDisplays/RobotStatusIcon'
 import { BatteryStatusDisplay } from 'components/Displays/RobotDisplays/BatteryStatusDisplay'
@@ -9,7 +9,6 @@ import { useNavigate } from 'react-router-dom'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { PressureStatusDisplay } from 'components/Displays/RobotDisplays/PressureStatusDisplay'
 import { config } from 'config'
-import { RobotType } from 'models/RobotModel'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 
 interface RobotProps {
@@ -74,20 +73,13 @@ export const RobotStatusCard = ({ robot }: RobotProps) => {
         navigate(path)
     }
 
-    const getRobotModel = (type: RobotType) => {
-        if (type === RobotType.TaurobInspector || type === RobotType.TaurobOperator) return 'Taurob'
-        return type
-    }
-
     return (
         <HoverableStyledCard style={{ boxShadow: tokens.elevation.raised }} onClick={goToRobot}>
-            <RobotImage robotType={robot.model.type} height="180px" />
+            <RobotImage robotType={robot.type} height="180px" />
             <ButtonCard id="bottomcard">
                 <LongTypography variant="h5">
                     {robot.name}
-                    {' ('}
-                    {getRobotModel(robot.model.type)}
-                    {')'}
+                    {` (${getRobotTypeString(robot.type)})`}
                 </LongTypography>
                 <HorizontalContent>
                     <VerticalContent>

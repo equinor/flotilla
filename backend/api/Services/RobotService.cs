@@ -47,7 +47,6 @@ namespace Api.Services
     public class RobotService(
         FlotillaDbContext context,
         ILogger<RobotService> logger,
-        IRobotModelService robotModelService,
         ISignalRService signalRService,
         IAccessRoleService accessRoleService,
         IInstallationService installationService,
@@ -58,8 +57,6 @@ namespace Api.Services
         {
             if (newRobot.CurrentInstallation != null)
                 context.Entry(newRobot.CurrentInstallation).State = EntityState.Unchanged;
-            if (newRobot.Model != null)
-                context.Entry(newRobot.Model).State = EntityState.Unchanged;
 
             await context.Robots.AddAsync(newRobot);
             await ApplyDatabaseUpdate(newRobot.CurrentInstallation);
@@ -69,47 +66,35 @@ namespace Api.Services
 
         public async Task<Robot> CreateFromQuery(CreateRobotQuery robotQuery)
         {
-            var robotModel = await robotModelService.ReadByRobotType(
-                robotQuery.RobotType,
+            var installation = await installationService.ReadByInstallationCode(
+                robotQuery.CurrentInstallationCode,
                 readOnly: true
             );
-            if (robotModel != null)
+            if (installation is null)
             {
-                var installation = await installationService.ReadByInstallationCode(
-                    robotQuery.CurrentInstallationCode,
-                    readOnly: true
+                logger.LogError(
+                    "Installation {CurrentInstallation} does not exist",
+                    robotQuery.CurrentInstallationCode
                 );
-                if (installation is null)
-                {
-                    logger.LogError(
-                        "Installation {CurrentInstallation} does not exist",
-                        robotQuery.CurrentInstallationCode
-                    );
-                    throw new DbUpdateException(
-                        $"Could not create new robot in database as installation {robotQuery.CurrentInstallationCode} doesn't exist"
-                    );
-                }
-
-                var newRobot = new Robot(robotQuery, installation, robotModel);
-
-                if (newRobot.CurrentInstallation != null)
-                    context.Entry(newRobot.CurrentInstallation).State = EntityState.Unchanged;
-                if (newRobot.Model != null)
-                    context.Entry(newRobot.Model).State = EntityState.Unchanged;
-
-                await context.Robots.AddAsync(newRobot);
-                await ApplyDatabaseUpdate(newRobot.CurrentInstallation);
-                _ = signalRService.SendMessageAsync(
-                    "Robot added",
-                    newRobot!.CurrentInstallation,
-                    new RobotResponse(newRobot!)
+                throw new DbUpdateException(
+                    $"Could not create new robot in database as installation {robotQuery.CurrentInstallationCode} doesn't exist"
                 );
-                DetachTracking(context, newRobot);
-                return newRobot!;
             }
-            throw new DbUpdateException(
-                "Could not create new robot in database as robot model does not exist"
+
+            var newRobot = new Robot(robotQuery, installation);
+
+            if (newRobot.CurrentInstallation != null)
+                context.Entry(newRobot.CurrentInstallation).State = EntityState.Unchanged;
+
+            await context.Robots.AddAsync(newRobot);
+            await ApplyDatabaseUpdate(newRobot.CurrentInstallation);
+            _ = signalRService.SendMessageAsync(
+                "Robot added",
+                newRobot!.CurrentInstallation,
+                new RobotResponse(newRobot!)
             );
+            DetachTracking(context, newRobot);
+            return newRobot!;
         }
 
         public async Task<Robot> GetRobotWithSchedulingPreCheck(
@@ -359,8 +344,6 @@ namespace Api.Services
 
         public async Task Update(Robot robot)
         {
-            context.Entry(robot.Model).State = EntityState.Unchanged;
-
             context.Update(robot);
             await ApplyDatabaseUpdate(robot.CurrentInstallation);
             _ = signalRService.SendMessageAsync(
@@ -412,7 +395,6 @@ namespace Api.Services
 
             var query = context
                 .Robots.Include(r => r.Documentation)
-                .Include(r => r.Model)
                 .Include(r => r.CurrentInstallation)
 #pragma warning disable CA1304
                 .Where(r =>
@@ -455,8 +437,6 @@ namespace Api.Services
                 && context.Entry(robot.CurrentInstallation).State != EntityState.Detached
             )
                 installationService.DetachTracking(context, robot.CurrentInstallation);
-            if (robot.Model != null && context.Entry(robot.Model).State != EntityState.Detached)
-                robotModelService.DetachTracking(context, robot.Model);
         }
     }
 }

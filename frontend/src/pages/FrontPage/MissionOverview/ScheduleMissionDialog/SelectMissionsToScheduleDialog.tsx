@@ -166,7 +166,7 @@ const SelectRobotComponent = memo(
 
         return (
             <Autocomplete
-                optionLabel={(r: Robot) => (r ? r.name + ' (' + r.model.type + ')' : '')}
+                optionLabel={(r: Robot) => (r ? r.name + ' (' + r.type + ')' : '')}
                 options={enabledRobots.filter(
                     (r) =>
                         (r.status === RobotStatus.Available ||

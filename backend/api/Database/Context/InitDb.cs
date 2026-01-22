@@ -169,6 +169,7 @@ namespace Api.Database.Context
                 Status = RobotStatus.Available,
                 Host = "localhost",
                 Port = 3000,
+                Type = RobotType.Turtlebot,
                 CurrentInstallation = installations[0],
                 Documentation = [],
             };
@@ -179,6 +180,7 @@ namespace Api.Database.Context
                 IsarId = "c68b679d-308b-460f-9fe0-87eaadbd5678",
                 SerialNumber = "Earth616",
                 Status = RobotStatus.Available,
+                Type = RobotType.TaurobInspector,
                 Host = "localhost",
                 Port = 3000,
                 CurrentInstallation = installations[0],
@@ -191,6 +193,7 @@ namespace Api.Database.Context
                 IsarId = "00000000-0000-0000-0000-000000000000",
                 SerialNumber = "Placebot1",
                 Status = RobotStatus.Available,
+                Type = RobotType.Robot,
                 Host = "localhost",
                 Port = 3000,
                 CurrentInstallation = installations[0],
@@ -204,6 +207,7 @@ namespace Api.Database.Context
                 IsarId = "00000000-0000-0000-0000-000000000001",
                 SerialNumber = "Placebot Kårstø",
                 Status = RobotStatus.Available,
+                Type = RobotType.AnymalX,
                 Host = "localhost",
                 Port = 3000,
                 CurrentInstallation = installations[1],
@@ -488,15 +492,6 @@ namespace Api.Database.Context
             );
         }
 
-        public static void AddRobotModelsToContext(FlotillaDbContext context)
-        {
-            foreach (var type in Enum.GetValues<RobotType>())
-            {
-                RobotModel model = new() { Type = type };
-                context.Add(model);
-            }
-        }
-
         public static void PopulateDb(FlotillaDbContext context)
         {
             // To make sure we are not trying to initialize database more than once during tests
@@ -507,13 +502,7 @@ namespace Api.Database.Context
 
             context.AddRange(inspections);
             context.AddRange(installations);
-            AddRobotModelsToContext(context);
             context.SaveChanges();
-            var models = context.RobotModels.AsTracking().AsEnumerable().ToList();
-            robots[0].Model = models.Find(model => model.Type == RobotType.TaurobInspector)!;
-            robots[1].Model = models.Find(model => model.Type == RobotType.AnymalX)!;
-            robots[2].Model = models.Find(model => model.Type == RobotType.Robot)!;
-            robots[3].Model = models.Find(model => model.Type == RobotType.Robot)!;
 
             context.AddRange(robots);
             context.AddRange(plants);

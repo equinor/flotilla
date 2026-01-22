@@ -17,7 +17,6 @@ namespace Api.Database.Context
         }
 
         public DbSet<Robot> Robots => Set<Robot>();
-        public DbSet<RobotModel> RobotModels => Set<RobotModel>();
         public DbSet<MissionRun> MissionRuns => Set<MissionRun>();
         public DbSet<MissionTask> MissionTasks => Set<MissionTask>();
         public DbSet<Inspection> Inspections => Set<Inspection>();
@@ -80,9 +79,6 @@ namespace Api.Database.Context
                 .HasOne(m => m.InspectionArea)
                 .WithMany()
                 .OnDelete(DeleteBehavior.Restrict);
-
-            // There can only be one robot model per robot type
-            modelBuilder.Entity<RobotModel>().HasIndex(model => model.Type).IsUnique();
 
             // There can only be one unique installation and plant shortname
             modelBuilder

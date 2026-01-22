@@ -80,7 +80,7 @@ export const AssetProvider: FC<Props> = ({ children }) => {
             registerEvent(SignalREventLabels.robotUpdated, (username: string, message: string) => {
                 const updatedRobot: Robot = JSON.parse(message)
                 // The check below makes it so that it is not treated as null in the code.
-                if (updatedRobot.model.type == null) {
+                if (updatedRobot.type == null) {
                     console.warn('Received robot update with model type null')
                     return
                 }

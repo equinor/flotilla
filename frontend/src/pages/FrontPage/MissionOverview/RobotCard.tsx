@@ -1,5 +1,5 @@
 import { Button, Icon, Typography } from '@equinor/eds-core-react'
-import { Robot, RobotStatus } from 'models/Robot'
+import { getRobotTypeString, Robot, RobotStatus, RobotType } from 'models/Robot'
 import { tokens } from '@equinor/eds-tokens'
 import { RobotStatusChip } from 'components/Displays/RobotDisplays/RobotStatusIcon'
 import { BatteryStatusDisplay } from 'components/Displays/RobotDisplays/BatteryStatusDisplay'
@@ -9,7 +9,6 @@ import { useNavigate } from 'react-router-dom'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { PressureStatusDisplay } from 'components/Displays/RobotDisplays/PressureStatusDisplay'
 import { config } from 'config'
-import { RobotType } from 'models/RobotModel'
 import { StyledButton, AttributeTitleTypography } from 'components/Styles/StyledComponents'
 import { Icons } from 'utils/icons'
 import { useAssetContext } from 'components/Contexts/AssetContext'
@@ -107,24 +106,17 @@ export const RobotCard = ({ robot }: { robot: Robot }) => {
         navigate(path)
     }
 
-    const getRobotModel = (type: RobotType) => {
-        if (type === RobotType.TaurobInspector || type === RobotType.TaurobOperator) return 'Taurob'
-        return type
-    }
-
     return (
         <StyledRobotCard>
             <HiddenOnSmallScreen>
-                <RobotImage robotType={robot.model.type} height="88px" />
+                <RobotImage robotType={robot.type} height="88px" />
             </HiddenOnSmallScreen>
             <StyledNoneImageBody>
                 <StyledMainBody>
                     <StyledHeader onClick={goToRobot}>
                         <LongTypography variant="h5">
                             {robot.name}
-                            {' ('}
-                            {getRobotModel(robot.model.type)}
-                            {')'}
+                            {` (${getRobotTypeString(robot.type)})`}
                         </LongTypography>
                         <HiddenOnLargeScreen>
                             <Button variant="ghost_icon">
