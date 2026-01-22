@@ -1,5 +1,4 @@
-﻿using Api.Controllers.Models;
-using Api.Database.Models;
+﻿using Api.Database.Models;
 
 namespace Api.Services.MissionLoaders
 {
