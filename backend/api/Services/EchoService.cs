@@ -1,5 +1,4 @@
 ﻿using System.Globalization;
-using System.Net;
 using System.Text.Json;
 using Api.Controllers.Models;
 using Api.Database.Context;
@@ -19,16 +18,13 @@ namespace Api.Services
         );
         public Task<CondensedMissionDefinition?> GetMissionById(string sourceMissionId);
         public Task<List<MissionTask>?> GetTasksForMission(string missionSourceId);
-        public Task<TagInspectionMetadata> CreateOrUpdateTagInspectionMetadata(
-            TagInspectionMetadata metadata
-        );
     }
 
     public class EchoService(
         ILogger<EchoService> logger,
         IDownstreamApi echoApi,
         ISourceService sourceService,
-        FlotillaDbContext context
+        IInspectionService inspectionService
     ) : IEchoService
     {
         public const string ServiceName = "EchoApi";
@@ -246,30 +242,7 @@ namespace Api.Services
             }
         }
 
-        private static List<PlantInfo> ProcessEchoPlantInfos(
-            List<EchoPlantInfoResponse> echoPlantInfoResponse
-        )
-        {
-            var echoPlantInfos = new List<PlantInfo>();
-            foreach (var plant in echoPlantInfoResponse)
-            {
-                if (plant.InstallationCode is null || plant.ProjectDescription is null)
-                {
-                    continue;
-                }
-
-                var echoPlantInfo = new PlantInfo
-                {
-                    PlantCode = plant.InstallationCode,
-                    ProjectDescription = plant.ProjectDescription,
-                };
-
-                echoPlantInfos.Add(echoPlantInfo);
-            }
-            return echoPlantInfos;
-        }
-
-        public async Task<IList<MissionTask>> MissionTasksFromEchoTag(EchoTag echoTag)
+        private async Task<IList<MissionTask>> MissionTasksFromEchoTag(EchoTag echoTag)
         {
             var inspections = echoTag
                 .Inspections.Select(inspection => new Inspection(
@@ -293,43 +266,13 @@ namespace Api.Services
                         poseId: echoTag.PoseId,
                         taskOrder: echoTag.PlanOrder,
                         taskDescription: inspection.InspectionTargetName,
-                        zoomDescription: await FindInspectionZoom(echoTag),
+                        zoomDescription: await inspectionService.FindInspectionZoom(echoTag),
                         status: Database.Models.TaskStatus.NotStarted
                     )
                 );
             }
 
             return missionTasks;
-        }
-
-        public async Task<TagInspectionMetadata> CreateOrUpdateTagInspectionMetadata(
-            TagInspectionMetadata metadata
-        )
-        {
-            var existingMetadata = await context
-                .TagInspectionMetadata.Where(e => e.TagId == metadata.TagId)
-                .FirstOrDefaultAsync();
-            if (existingMetadata == null)
-            {
-                await context.TagInspectionMetadata.AddAsync(metadata);
-            }
-            else
-            {
-                existingMetadata.ZoomDescription = metadata.ZoomDescription;
-                context.TagInspectionMetadata.Update(existingMetadata);
-            }
-
-            await context.SaveChangesAsync();
-            return metadata;
-        }
-
-        private async Task<IsarZoomDescription?> FindInspectionZoom(EchoTag echoTag)
-        {
-            return (
-                await context
-                    .TagInspectionMetadata.Where(e => e.TagId == echoTag.TagId)
-                    .FirstOrDefaultAsync()
-            )?.ZoomDescription;
         }
     }
 }

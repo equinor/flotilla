@@ -4,6 +4,7 @@ using System.Net;
 using System.Text.Json;
 using Api.Database.Context;
 using Api.Database.Models;
+using Api.Services.MissionLoaders;
 using Api.Services.Models;
 using Api.Utilities;
 using Microsoft.EntityFrameworkCore;
@@ -21,6 +22,10 @@ namespace Api.Services
         );
         public Task<Inspection?> ReadByInspectionId(string id, bool readOnly = true);
         public Task<Inspection?> ReadByIsarInspectionId(string id, bool readOnly = true);
+        public Task<TagInspectionMetadata> CreateOrUpdateTagInspectionMetadata(
+            TagInspectionMetadata metadata
+        );
+        public Task<IsarZoomDescription?> FindInspectionZoom(EchoTag echoTag);
     }
 
     [SuppressMessage(
@@ -255,6 +260,36 @@ namespace Api.Services
             throw new InspectionNotFoundException(
                 "Unexpected error when trying to get inspection data"
             );
+        }
+
+        public async Task<TagInspectionMetadata> CreateOrUpdateTagInspectionMetadata(
+            TagInspectionMetadata metadata
+        )
+        {
+            var existingMetadata = await context
+                .TagInspectionMetadata.Where(e => e.TagId == metadata.TagId)
+                .FirstOrDefaultAsync();
+            if (existingMetadata == null)
+            {
+                await context.TagInspectionMetadata.AddAsync(metadata);
+            }
+            else
+            {
+                existingMetadata.ZoomDescription = metadata.ZoomDescription;
+                context.TagInspectionMetadata.Update(existingMetadata);
+            }
+
+            await context.SaveChangesAsync();
+            return metadata;
+        }
+
+        public async Task<IsarZoomDescription?> FindInspectionZoom(EchoTag echoTag)
+        {
+            return (
+                await context
+                    .TagInspectionMetadata.Where(e => e.TagId == echoTag.TagId)
+                    .FirstOrDefaultAsync()
+            )?.ZoomDescription;
         }
 
         public void DetachTracking(FlotillaDbContext context, Inspection inspection)

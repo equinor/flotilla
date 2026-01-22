@@ -1,5 +1,4 @@
 ﻿using Api.Controllers.Models;
-using Api.Database.Models;
 using Api.Services;
 using Api.Services.MissionLoaders;
 using Api.Services.Models;
@@ -13,7 +12,6 @@ namespace Api.Controllers
     [Route("inspection")]
     public class InspectionController(
         ILogger<InspectionController> logger,
-        IEchoService echoService,
         IInspectionService inspectionService
     ) : ControllerBase
     {
@@ -43,7 +41,9 @@ namespace Api.Controllers
 
             try
             {
-                var metadata = await echoService.CreateOrUpdateTagInspectionMetadata(newMetadata);
+                var metadata = await inspectionService.CreateOrUpdateTagInspectionMetadata(
+                    newMetadata
+                );
 
                 return metadata;
             }

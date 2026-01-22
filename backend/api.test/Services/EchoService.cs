@@ -40,6 +40,7 @@ namespace Api.Test.Services
             var echoApiMock = new Mock<IDownstreamApi>();
             var logger = new Mock<ILogger<EchoService>>();
             var sourceService = new Mock<ISourceService>();
+            var inspectionService = new Mock<IInspectionService>();
 
             var httpResponse = new HttpResponseMessage(HttpStatusCode.InternalServerError);
 
@@ -58,7 +59,7 @@ namespace Api.Test.Services
                 logger.Object,
                 echoApiMock.Object,
                 sourceService.Object,
-                Context
+                inspectionService.Object
             );
             var installation = await DatabaseUtilities.NewInstallation();
 
@@ -79,6 +80,7 @@ namespace Api.Test.Services
             var echoApiMock = new Mock<IDownstreamApi>();
             var logger = new Mock<ILogger<EchoService>>();
             var sourceService = new Mock<ISourceService>();
+            var inspectionService = new Mock<IInspectionService>();
 
             var httpResponse = new HttpResponseMessage(HttpStatusCode.InternalServerError);
 
@@ -97,7 +99,7 @@ namespace Api.Test.Services
                 logger.Object,
                 echoApiMock.Object,
                 sourceService.Object,
-                Context
+                inspectionService.Object
             );
             var dummyEchoMissionId = "1";
 
