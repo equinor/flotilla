@@ -145,18 +145,13 @@ export const RobotCard = ({ robot }: { robot: Robot }) => {
                                     <BatteryStatusDisplay
                                         batteryLevel={robot.batteryLevel}
                                         batteryState={robot.batteryState}
-                                        batteryWarningLimit={robot.model.batteryWarningThreshold}
                                     />
                                 </VerticalContent>
 
                                 {robot.pressureLevel !== undefined && robot.pressureLevel !== null && (
                                     <VerticalContent>
                                         <AttributeTitleTypography>{TranslateText('Pressure')}</AttributeTitleTypography>
-                                        <PressureStatusDisplay
-                                            pressure={robot.pressureLevel}
-                                            upperPressureWarningThreshold={robot.model.upperPressureWarningThreshold}
-                                            lowerPressureWarningThreshold={robot.model.lowerPressureWarningThreshold}
-                                        />
+                                        <PressureStatusDisplay pressure={robot.pressureLevel} />
                                     </VerticalContent>
                                 )}
                             </>

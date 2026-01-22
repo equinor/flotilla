@@ -196,7 +196,6 @@ export const RobotPage = ({ robotId }: { robotId: string }) => {
                                                     itemSize={24}
                                                     batteryLevel={selectedRobot.batteryLevel}
                                                     batteryState={selectedRobot.batteryState}
-                                                    batteryWarningLimit={selectedRobot.model.batteryWarningThreshold}
                                                 />
                                             </StyledStatusElement>
                                             {selectedRobot.pressureLevel !== null &&
@@ -208,12 +207,6 @@ export const RobotPage = ({ robotId }: { robotId: string }) => {
                                                         <PressureStatusDisplay
                                                             itemSize={24}
                                                             pressure={selectedRobot.pressureLevel}
-                                                            upperPressureWarningThreshold={
-                                                                selectedRobot.model.upperPressureWarningThreshold
-                                                            }
-                                                            lowerPressureWarningThreshold={
-                                                                selectedRobot.model.lowerPressureWarningThreshold
-                                                            }
                                                         />
                                                     </StyledStatusElement>
                                                 )}
