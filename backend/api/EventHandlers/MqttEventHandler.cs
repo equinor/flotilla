@@ -538,7 +538,7 @@ namespace Api.EventHandlers
                 return;
             }
 
-            await TaskDurationService.UpdateAverageDurationPerTask(robot.Model.Type);
+            await TaskDurationService.UpdateAverageDurationPerTask(robot);
         }
 
         private async void OnIsarTaskUpdate(object? sender, MqttReceivedArgs mqttArgs)

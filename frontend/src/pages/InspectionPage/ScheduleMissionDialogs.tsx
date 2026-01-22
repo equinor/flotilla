@@ -154,7 +154,7 @@ export const ScheduleMissionDialog = (props: IProps) => {
                             <Autocomplete
                                 initialSelectedOptions={selectedRobot ? [selectedRobot] : []}
                                 dropdownHeight={200}
-                                optionLabel={(r) => r.name + ' (' + r.model.type + ')'}
+                                optionLabel={(r) => r.name + ' (' + r.type + ')'}
                                 options={filteredRobots}
                                 label={TranslateText('Select robot')}
                                 onOptionsChange={(changes) => onSelectedRobot(changes.selectedItems[0])}

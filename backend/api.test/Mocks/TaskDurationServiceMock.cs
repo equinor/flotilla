@@ -7,7 +7,7 @@ namespace Api.Test.Mocks
 {
     public class MockTaskDurationService : ITaskDurationService
     {
-        public async Task UpdateAverageDurationPerTask(RobotType robotType)
+        public async Task UpdateAverageDurationPerTask(Robot robot)
         {
             await Task.Run(() => Thread.Sleep(1));
         }

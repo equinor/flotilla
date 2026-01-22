@@ -121,9 +121,9 @@ namespace Api.Database.Models
 
         public void SetEstimatedTaskDuration()
         {
-            if (Robot.Model.AverageDurationPerTag is not null)
+            if (Robot.AverageDurationPerTag is not null)
             {
-                EstimatedTaskDuration = (uint)Robot.Model.AverageDurationPerTag;
+                EstimatedTaskDuration = (uint)Robot.AverageDurationPerTag;
             }
         }
     }

@@ -11,8 +11,6 @@ namespace Api.Controllers.Models
 
         public string IsarId { get; set; }
 
-        public virtual RobotModel Model { get; set; }
-
         public string SerialNumber { get; set; }
 
         public Installation CurrentInstallation { get; }
@@ -37,6 +35,8 @@ namespace Api.Controllers.Models
 
         public string IsarUri { get; set; }
 
+        public RobotType Type { get; set; }
+
         public IList<RobotCapabilitiesEnum>? RobotCapabilities { get; set; }
 
         [JsonConstructor]
@@ -50,7 +50,6 @@ namespace Api.Controllers.Models
             Id = robot.Id;
             Name = robot.Name;
             IsarId = robot.IsarId;
-            Model = robot.Model;
             SerialNumber = robot.SerialNumber;
             CurrentInstallation = robot.CurrentInstallation;
             CurrentInspectionAreaId = robot.CurrentInspectionAreaId;
@@ -64,6 +63,7 @@ namespace Api.Controllers.Models
             CurrentMissionId = robot.CurrentMissionId;
             IsarUri = robot.IsarUri;
             RobotCapabilities = robot.RobotCapabilities;
+            Type = robot.Type;
         }
     }
 }

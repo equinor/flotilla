@@ -2,7 +2,16 @@ import { BatteryStatus } from './Battery'
 import { DocumentInfo } from './DocumentInfo'
 import { Installation, placeholderInstallation } from './Installation'
 import { Pose } from './Pose'
-import { RobotModel, placeholderRobotModel } from './RobotModel'
+
+export enum RobotType {
+    TaurobInspector = 'TaurobInspector',
+    TaurobOperator = 'TaurobOperator',
+    Robot = 'Robot',
+    Turtlebot = 'Turtlebot',
+    AnymalX = 'AnymalX',
+    AnymalD = 'AnymalD',
+    NoneType = 'NoneType',
+}
 
 export enum RobotStatus {
     Available = 'Available',
@@ -30,7 +39,6 @@ export enum RobotStatus {
 export interface Robot {
     id: string
     name?: string
-    model: RobotModel
     serialNumber?: string
     currentInstallation: Installation
     batteryLevel?: number
@@ -48,15 +56,16 @@ export interface Robot {
     documentation?: DocumentInfo[]
     isarUri?: string
     currentInspectionAreaId?: string
+    type: RobotType
 }
 export const placeholderRobot: Robot = {
     id: 'placeholderRobotId',
-    model: placeholderRobotModel,
     currentInstallation: placeholderInstallation,
     status: RobotStatus.Available,
     isarConnected: true,
     deprecated: false,
     disconnectTime: undefined,
+    type: RobotType.Robot,
 }
 
 enum RobotCapabilitiesEnum {
@@ -68,4 +77,9 @@ enum RobotCapabilitiesEnum {
     record_audio = 'record_audio',
     auto_return_to_home = 'auto_return_to_home',
     return_to_home = 'return_to_home',
+}
+
+export const getRobotTypeString = (type: RobotType): string => {
+    if (type === RobotType.TaurobInspector || type === RobotType.TaurobOperator) return 'Taurob'
+    return type.toString()
 }

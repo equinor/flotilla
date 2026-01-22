@@ -1,22 +1,21 @@
-﻿using System.Globalization;
-using Api.Controllers.Models;
+﻿using Api.Controllers.Models;
 using Api.Database.Models;
 
 namespace Api.Services.ActionServices
 {
     public interface ITaskDurationService
     {
-        public Task UpdateAverageDurationPerTask(RobotType robotType);
+        public Task UpdateAverageDurationPerTask(Robot robot);
     }
 
     public class TaskDurationService(
         ILogger<TaskDurationService> logger,
         IConfiguration configuration,
-        IRobotModelService robotModelService,
+        IRobotService robotService,
         IMissionRunService missionRunService
     ) : ITaskDurationService
     {
-        public async Task UpdateAverageDurationPerTask(RobotType robotType)
+        public async Task UpdateAverageDurationPerTask(Robot robot)
         {
             int timeRangeInDays = configuration.GetValue<int>(
                 "TimeRangeForMissionDurationEstimationInDays"
@@ -27,47 +26,20 @@ namespace Api.Services.ActionServices
                 new MissionRunQueryStringParameters
                 {
                     MinCreationTime = minEpochTime,
-                    RobotModelType = robotType,
+                    RobotId = robot.Id,
                     PageSize = QueryStringParameters.MaxPageSize,
                 },
                 readOnly: true
             );
 
-            var model = await robotModelService.ReadByRobotType(robotType, readOnly: true);
-            if (model is null)
-            {
-                logger.LogWarning(
-                    "Could not update average duration for robot model {RobotType} as the model was not found",
-                    robotType
-                );
-                return;
-            }
-
-            await UpdateAverageDuration(missionRunsForEstimation, model);
+            await UpdateAverageDuration(missionRunsForEstimation, robot);
         }
 
         private async Task UpdateAverageDuration(
             List<MissionRun> recentMissionRunsForModelType,
-            RobotModel robotModel
+            Robot robot
         )
         {
-            if (
-                recentMissionRunsForModelType.Any(missionRun =>
-                    missionRun.Robot.Model.Type != robotModel.Type
-                )
-            )
-            {
-                throw new ArgumentException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        "{0} should only include missions for this model type ('{1}')",
-                        nameof(recentMissionRunsForModelType),
-                        robotModel.Type
-                    ),
-                    nameof(recentMissionRunsForModelType)
-                );
-            }
-
             // The time spent on each tasks, not including the duration of video/audio recordings
             var timeSpentPerTask = recentMissionRunsForModelType
                 .SelectMany(missionRun =>
@@ -105,14 +77,14 @@ namespace Api.Services.ActionServices
                 )
                 .Average();
 
-            robotModel.AverageDurationPerTag = (float)result;
+            robot.AverageDurationPerTag = (float)result;
 
-            await robotModelService.Update(robotModel);
+            await robotService.Update(robot);
 
             logger.LogInformation(
-                "Robot model '{ModelType}' - Updated average time spent per tag to {AverageTimeSpent}s",
-                robotModel.Type,
-                robotModel.AverageDurationPerTag
+                "Robot '{robotId}' - Updated average time spent per tag to {AverageTimeSpent}s",
+                robot.Id,
+                robot.AverageDurationPerTag
             );
         }
     }

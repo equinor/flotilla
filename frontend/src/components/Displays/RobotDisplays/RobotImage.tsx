@@ -1,4 +1,4 @@
-import { RobotType } from 'models/RobotModel'
+import { RobotType } from 'models/Robot'
 import taurobInspector from 'mediaAssets/taurob_inspector_no_background.png'
 import anymalX from 'mediaAssets/anymal_x.png'
 import anymalD from 'mediaAssets/anymal_d.png'

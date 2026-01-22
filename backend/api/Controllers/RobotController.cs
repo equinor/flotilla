@@ -16,7 +16,6 @@ namespace Api.Controllers
         IRobotService robotService,
         IIsarService isarService,
         IMissionSchedulingService missionSchedulingService,
-        IRobotModelService robotModelService,
         IInspectionAreaService inspectionAreaService,
         IErrorHandlingService errorHandlingService
     ) : ControllerBase
@@ -142,17 +141,6 @@ namespace Api.Controllers
             logger.LogInformation("Creating new robot");
             try
             {
-                var robotModel = await robotModelService.ReadByRobotType(
-                    robotQuery.RobotType,
-                    readOnly: true
-                );
-                if (robotModel == null)
-                {
-                    return BadRequest(
-                        $"No robot model exists with robot type '{robotQuery.RobotType}'"
-                    );
-                }
-
                 var newRobot = await robotService.CreateFromQuery(robotQuery);
                 var robotResponses = new RobotResponse(newRobot);
 

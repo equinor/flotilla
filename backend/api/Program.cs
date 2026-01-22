@@ -69,7 +69,6 @@ else
 builder.Services.AddScoped<IAccessRoleService, AccessRoleService>();
 
 builder.Services.AddScoped<IRobotService, RobotService>();
-builder.Services.AddScoped<IRobotModelService, RobotModelService>();
 
 builder.Services.AddScoped<IMissionRunService, MissionRunService>();
 builder.Services.AddScoped<IMissionDefinitionService, MissionDefinitionService>();

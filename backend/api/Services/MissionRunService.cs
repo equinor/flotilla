@@ -366,7 +366,6 @@ namespace Api.Services
                 .ThenInclude(area => area != null ? area.Installation : null)
                 .Include(missionRun => missionRun.InspectionArea)
                 .Include(missionRun => missionRun.Robot)
-                .ThenInclude(robot => robot.Model)
                 .Include(missionRun => missionRun.Tasks)
                 .ThenInclude(task => task.Inspection)
                 .ThenInclude(inspection => inspection != null ? inspection.AnalysisResult : null)
@@ -461,7 +460,7 @@ namespace Api.Services
         ///     <see cref="MissionRunQueryStringParameters.InspectionArea" />,
         ///     <see cref="MissionRunQueryStringParameters.Statuses" />,
         ///     <see cref="MissionRunQueryStringParameters.RobotId" />,
-        ///     <see cref="MissionRunQueryStringParameters.RobotModelType" />,
+        ///     <see cref="MissionRunQueryStringParameters.RobotType" />,
         ///     <see cref="MissionRunQueryStringParameters.NameSearch" />,
         ///     <see cref="MissionRunQueryStringParameters.RobotNameSearch" />,
         ///     <see cref="MissionRunQueryStringParameters.TagSearch" />,
@@ -503,9 +502,9 @@ namespace Api.Services
                 ? mission => true
                 : mission => parameters.Statuses.Contains(mission.Status);
 
-            Expression<Func<MissionRun, bool>> robotTypeFilter = parameters.RobotModelType is null
+            Expression<Func<MissionRun, bool>> robotTypeFilter = parameters.RobotType is null
                 ? missionRun => true
-                : missionRun => missionRun.Robot.Model.Type.Equals(parameters.RobotModelType);
+                : missionRun => missionRun.Robot.Type.Equals(parameters.RobotType);
 
             Expression<Func<MissionRun, bool>> robotIdFilter = parameters.RobotId is null
                 ? missionRun => true

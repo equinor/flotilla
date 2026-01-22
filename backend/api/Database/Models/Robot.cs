@@ -4,6 +4,23 @@ using Api.Controllers.Models;
 #pragma warning disable CS8618
 namespace Api.Database.Models
 {
+    /// <summary>
+    ///     The type of robot model
+    /// </summary>
+    public enum RobotType
+    {
+        /// WARNING:
+        /// Changing the names of these enum options is the same as changing their value,
+        /// so it will require updating the database with the new names because the enum
+        /// is stored as strings in database
+        TaurobInspector,
+        TaurobOperator,
+        Robot,
+        Turtlebot,
+        AnymalX,
+        AnymalD,
+    }
+
     public class Robot
     {
         public Robot()
@@ -22,7 +39,6 @@ namespace Api.Database.Models
         public Robot(
             CreateRobotQuery createQuery,
             Installation installation,
-            RobotModel model,
             string? inspectionAreaId = null
         )
         {
@@ -49,7 +65,7 @@ namespace Api.Database.Models
             Deprecated = false;
             RobotCapabilities = createQuery.RobotCapabilities;
             Status = createQuery.Status;
-            Model = model;
+            Type = createQuery.RobotType;
         }
 
         [Key]
@@ -63,9 +79,6 @@ namespace Api.Database.Models
         [Required]
         [MaxLength(200)]
         public string IsarId { get; set; }
-
-        [Required]
-        public virtual RobotModel Model { get; set; }
 
         [Required]
         [MaxLength(200)]
@@ -107,6 +120,14 @@ namespace Api.Database.Models
 
         [Required]
         public RobotStatus Status { get; set; }
+
+        [Required]
+        public RobotType Type { get; set; } = RobotType.Robot;
+
+        /// <summary>
+        ///     The average time in seconds spent by this model on a single tag (excluding recording duration for video/audio)
+        /// </summary>
+        public float? AverageDurationPerTag { get; set; }
 
         public DateTime? DisconnectTime { get; set; }
 
