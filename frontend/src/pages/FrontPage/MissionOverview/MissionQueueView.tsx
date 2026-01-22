@@ -7,7 +7,7 @@ import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
-import { Robot } from 'models/Robot'
+import { RobotWithoutTelemetry } from 'models/Robot'
 import { tokens } from '@equinor/eds-tokens'
 import { useEffect, useState } from 'react'
 import { Button, Dialog, Typography } from '@equinor/eds-core-react'
@@ -33,7 +33,7 @@ const StyledWrapper = styled.div`
     gap: 8px;
 `
 
-export const RobotMissionQueueView = ({ robot }: { robot: Robot }) => {
+export const RobotMissionQueueView = ({ robot }: { robot: RobotWithoutTelemetry }) => {
     const { TranslateText } = useLanguageContext()
     const { missionQueue, ongoingMissions, loadingRobotMissionSet, setLoadingRobotMissionSet } = useMissionsContext()
     const { setAlert, setListAlert } = useAlertContext()

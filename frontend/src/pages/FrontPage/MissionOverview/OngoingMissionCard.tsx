@@ -10,7 +10,7 @@ import { MissionControlButtons } from 'components/Displays/MissionButtons/Missio
 import { StyledButton } from 'components/Styles/StyledComponents'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
-import { Robot } from 'models/Robot'
+import { RobotWithoutTelemetry } from 'models/Robot'
 import { NoMissionReason } from 'utils/IsRobotReadyToRunMissions'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { useAssetContext } from 'components/Contexts/AssetContext'
@@ -28,20 +28,20 @@ interface MissionQueueButtonViewProps {
 }
 
 interface PlaceholderProps {
-    robot?: Robot
+    robot?: RobotWithoutTelemetry
     isOpen?: boolean
     setIsOpen?: (isOpen: boolean | ((prev: boolean) => boolean)) => void
 }
 
 interface ReturnHomeProps {
-    robot: Robot
+    robot: RobotWithoutTelemetry
     isOpen?: boolean
     setIsOpen?: (isOpen: boolean | ((prev: boolean) => boolean)) => void
     isPaused: boolean
 }
 
 interface OngoingEmergencyMissionCardProps {
-    robot: Robot
+    robot: RobotWithoutTelemetry
     isOpen?: boolean
     setIsOpen?: (isOpen: boolean | ((prev: boolean) => boolean)) => void
 }

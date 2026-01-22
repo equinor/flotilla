@@ -1,6 +1,6 @@
 import { config } from 'config'
 import { Mission } from 'models/Mission'
-import { Robot } from 'models/Robot'
+import { RobotWithoutTelemetry } from 'models/Robot'
 import { filterRobots } from 'utils/filtersAndSorts'
 import { MissionRunQueryParameters } from 'models/MissionRunQueryParameters'
 import { MissionDefinitionQueryParameters } from 'models/MissionDefinitionQueryParameters'
@@ -129,15 +129,17 @@ export class BackendAPICaller {
         await BackendAPICaller.POST(path, body).catch(BackendAPICaller.handleError('POST', path))
     }
 
-    static async getEnabledRobots(): Promise<Robot[]> {
+    static async getEnabledRobots(): Promise<RobotWithoutTelemetry[]> {
         const path: string = 'robots'
-        const result = await BackendAPICaller.GET<Robot[]>(path).catch(BackendAPICaller.handleError('GET', path))
+        const result = await BackendAPICaller.GET<RobotWithoutTelemetry[]>(path).catch(
+            BackendAPICaller.handleError('GET', path)
+        )
         return result.content.filter((robot) => !robot.deprecated)
     }
 
-    static async getRobotById(robotId: string): Promise<Robot> {
+    static async getRobotById(robotId: string): Promise<RobotWithoutTelemetry> {
         const path: string = 'robots/' + robotId
-        const result = await this.GET<Robot>(path).catch(BackendAPICaller.handleError('GET', path))
+        const result = await this.GET<RobotWithoutTelemetry>(path).catch(BackendAPICaller.handleError('GET', path))
         return result.content
     }
 
@@ -261,7 +263,7 @@ export class BackendAPICaller {
 
     static async postMission(missionSourceId: string, robotId: string, installationCode: string | null) {
         const path: string = 'missions'
-        const robots: Robot[] = await BackendAPICaller.getEnabledRobots()
+        const robots: RobotWithoutTelemetry[] = await BackendAPICaller.getEnabledRobots()
         const desiredRobot = filterRobots(robots, robotId)
         const body = {
             robotId: desiredRobot[0].id,
@@ -276,7 +278,7 @@ export class BackendAPICaller {
 
     static async scheduleMissionDefinition(missionDefinitionId: string, robotId: string): Promise<Mission> {
         const path: string = `missions/schedule/${missionDefinitionId}`
-        const robots: Robot[] = await BackendAPICaller.getEnabledRobots()
+        const robots: RobotWithoutTelemetry[] = await BackendAPICaller.getEnabledRobots()
         const desiredRobot = filterRobots(robots, robotId)
         const body = {
             robotId: desiredRobot[0].id,
