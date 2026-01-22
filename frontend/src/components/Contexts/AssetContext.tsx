@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, FC, useEffect } from 'react'
 import { BackendAPICaller } from 'api/ApiCaller'
-import { Robot } from 'models/Robot'
+import { Robot, RobotPropertyUpdate } from 'models/Robot'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { useLanguageContext } from './LanguageContext'
 import { AlertType, useAlertContext } from './AlertContext'
@@ -39,12 +39,6 @@ const defaultAssetState = {
     installationInspectionAreas: [],
     activeInstallations: [],
     switchInstallation: () => {},
-}
-
-interface RobotPropertyUpdate {
-    robotId: string
-    propertyName: string
-    propertyValue: any
 }
 
 export const AssetContext = createContext<IAssetContext>(defaultAssetState)

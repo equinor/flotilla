@@ -111,7 +111,7 @@ const MissionControlCard = ({ robot }: { robot: Robot }) => {
             style={{ boxShadow: tokens.elevation.raised }}
         >
             <OngoingMissionControlCardStyle>
-                <RobotCard robot={robot} />
+                <RobotCard robotId={robot.id} />
                 {missionCard}
             </OngoingMissionControlCardStyle>
             {isOpen && <RobotMissionQueueView robot={robot} />}

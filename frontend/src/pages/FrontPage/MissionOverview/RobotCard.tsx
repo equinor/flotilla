@@ -1,5 +1,5 @@
-import { Button, Icon, Typography } from '@equinor/eds-core-react'
-import { getRobotTypeString, Robot, RobotStatus, RobotType } from 'models/Robot'
+import { getRobotTypeString, RobotStatus, RobotType } from 'models/Robot'
+import { Button, Icon, Progress, Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import { RobotStatusChip } from 'components/Displays/RobotDisplays/RobotStatusIcon'
 import { BatteryStatusDisplay } from 'components/Displays/RobotDisplays/BatteryStatusDisplay'
@@ -12,6 +12,7 @@ import { config } from 'config'
 import { StyledButton, AttributeTitleTypography } from 'components/Styles/StyledComponents'
 import { Icons } from 'utils/icons'
 import { useAssetContext } from 'components/Contexts/AssetContext'
+import { useRobot } from 'hooks/useRobot'
 
 const StyledRobotCard = styled.div`
     display: flex;
@@ -97,13 +98,19 @@ const HiddenOnLargeScreen = styled.div`
     }
 `
 
-export const RobotCard = ({ robot }: { robot: Robot }) => {
+export const RobotCard = ({ robotId }: { robotId: string }) => {
+    const robot = useRobot(robotId)
+
     const navigate = useNavigate()
     const { TranslateText } = useLanguageContext()
     const { installationCode } = useAssetContext()
     const goToRobot = () => {
-        const path = `${config.FRONTEND_BASE_ROUTE}/${installationCode}:robot?id=${robot.id}`
+        const path = `${config.FRONTEND_BASE_ROUTE}/${installationCode}:robot?id=${robotId}`
         navigate(path)
+    }
+
+    if (robot === undefined) {
+        return <Progress.Circular />
     }
 
     return (
