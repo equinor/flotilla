@@ -8,7 +8,6 @@ import { BatteryStatusDisplay } from 'components/Displays/RobotDisplays/BatteryS
 import { RobotStatusChip } from 'components/Displays/RobotDisplays/RobotStatusIcon'
 import { RobotStatus } from 'models/Robot'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { useAssetContext } from 'components/Contexts/AssetContext'
 import { StyledButton, StyledPage } from 'components/Styles/StyledComponents'
 import { DocumentationSection } from './Documentation'
 import { useMediaStreamContext } from 'components/Contexts/MediaStreamContext'
@@ -25,6 +24,7 @@ import { InterventionNeededButton } from './InterventionNeededButton'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { useQuery } from '@tanstack/react-query'
 import { formatDateTime } from 'utils/StringFormatting'
+import { useRobot } from 'hooks/useRobot'
 
 const StyledRobotPage = styled(StyledPage)`
     background-color: ${tokens.colors.ui.background__light.hex};
@@ -88,16 +88,14 @@ const StyledWideItem = styled(StyledStatusElement)`
 
 export const RobotPage = ({ robotId }: { robotId: string }) => {
     const { TranslateText } = useLanguageContext()
-    const { enabledRobots } = useAssetContext()
     const { mediaStreams, addMediaStreamConfigIfItDoesNotExist } = useMediaStreamContext()
     const [videoMediaStreams, setVideoMediaStreams] = useState<MediaStreamTrack[]>([])
     const { ongoingMissions } = useMissionsContext()
+    const selectedRobot = useRobot(robotId)
 
     useEffect(() => {
         if (robotId && !Object.keys(mediaStreams).includes(robotId)) addMediaStreamConfigIfItDoesNotExist(robotId)
     }, [robotId])
-
-    const selectedRobot = enabledRobots.find((robot) => robot.id === robotId)
 
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const toggleSkipMissionDialog = () => {
