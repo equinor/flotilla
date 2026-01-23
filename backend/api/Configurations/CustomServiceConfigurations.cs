@@ -189,8 +189,11 @@ namespace Api.Configurations
 
             var workloadIdentity = new WorkloadIdentityCredential(workloadOptions);
 
+            bool allowUsingClientSecret = config.GetValue<bool>("AllowUsingClientSecret");
+
             if (
-                !string.IsNullOrWhiteSpace(tenantId)
+                allowUsingClientSecret
+                && !string.IsNullOrWhiteSpace(tenantId)
                 && !string.IsNullOrWhiteSpace(clientId)
                 && !string.IsNullOrWhiteSpace(clientSecret)
                 && !clientSecret.StartsWith("Fill in", StringComparison.OrdinalIgnoreCase)
