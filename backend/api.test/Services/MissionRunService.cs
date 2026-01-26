@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Api.Services;
 using Api.Test.Database;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,7 +14,7 @@ namespace Api.Test.Services
         public required PostgreSqlContainer Container;
         public required IMissionRunService MissionRunService;
 
-        public async Task InitializeAsync()
+        public async ValueTask InitializeAsync()
         {
             (Container, string connectionString, var connection) =
                 await TestSetupHelpers.ConfigurePostgreSqlDatabase();
@@ -28,7 +29,11 @@ namespace Api.Test.Services
             MissionRunService = serviceProvider.GetRequiredService<IMissionRunService>();
         }
 
-        public Task DisposeAsync() => Task.CompletedTask;
+        public ValueTask DisposeAsync()
+        {
+            GC.SuppressFinalize(this);
+            return ValueTask.CompletedTask;
+        }
 
         [Fact]
         public async Task CheckThatReadByIdWithUnknownIdFails()

@@ -136,16 +136,14 @@ namespace Api.Database.Context
                 Name = "K-Lab",
             };
 
-            return new List<InspectionArea>(
-                [
-                    inspectionArea1,
-                    inspectionArea2,
-                    inspectionArea3,
-                    inspectionArea4,
-                    inspectionAreaHuldraMezzanine,
-                    inspectionAreaKLab,
-                ]
-            );
+            return new List<InspectionArea>([
+                inspectionArea1,
+                inspectionArea2,
+                inspectionArea3,
+                inspectionArea4,
+                inspectionAreaHuldraMezzanine,
+                inspectionAreaKLab,
+            ]);
         }
 
         private static List<Source> GetSources()
@@ -295,16 +293,14 @@ namespace Api.Database.Context
                 LastSuccessfulRun = null,
             };
 
-            return new List<MissionDefinition>(
-                [
-                    missionDefinition1,
-                    missionDefinition2,
-                    missionDefinition3,
-                    missionDefinition4,
-                    missionDefinition5,
-                    missionDefinition6,
-                ]
-            );
+            return new List<MissionDefinition>([
+                missionDefinition1,
+                missionDefinition2,
+                missionDefinition3,
+                missionDefinition4,
+                missionDefinition5,
+                missionDefinition6,
+            ]);
         }
 
         private static List<MissionTask> GetMissionTasks()
@@ -479,17 +475,15 @@ namespace Api.Database.Context
 
             missionDefinitions[1].LastSuccessfulRun = missionRun3;
 
-            return new List<MissionRun>(
-                [
-                    missionRun1,
-                    missionRun2,
-                    missionRun3,
-                    missionRun4,
-                    missionRun5,
-                    missionRun6,
-                    missionRun7,
-                ]
-            );
+            return new List<MissionRun>([
+                missionRun1,
+                missionRun2,
+                missionRun3,
+                missionRun4,
+                missionRun5,
+                missionRun6,
+                missionRun7,
+            ]);
         }
 
         public static void PopulateDb(FlotillaDbContext context)

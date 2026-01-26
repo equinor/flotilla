@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services.MissionLoaders;
 
@@ -63,17 +62,16 @@ namespace Api.Test.Mocks
             ),
         ];
 
-        private readonly MissionDefinition _mockMissionDefinition =
-            new()
-            {
-                InspectionArea = new InspectionArea(),
-                Comment = "",
-                Id = "",
-                InstallationCode = "TTT",
-                IsDeprecated = false,
-                Name = "test",
-                Source = new Source { Id = "", SourceId = "" },
-            };
+        private readonly MissionDefinition _mockMissionDefinition = new()
+        {
+            InspectionArea = new InspectionArea(),
+            Comment = "",
+            Id = "",
+            InstallationCode = "TTT",
+            IsDeprecated = false,
+            Name = "test",
+            Source = new Source { Id = "", SourceId = "" },
+        };
 
         public async Task<CondensedMissionDefinition?> GetMissionById(string sourceMissionId)
         {
@@ -86,9 +84,9 @@ namespace Api.Test.Mocks
         )
         {
             await Task.Run(() => Thread.Sleep(1));
-            return new List<CondensedMissionDefinition>(
-                [new CondensedMissionDefinition(_mockMissionDefinition)]
-            ).AsQueryable();
+            return new List<CondensedMissionDefinition>([
+                new CondensedMissionDefinition(_mockMissionDefinition),
+            ]).AsQueryable();
         }
 
         public async Task<List<MissionTask>?> GetTasksForMission(string sourceMissionId)

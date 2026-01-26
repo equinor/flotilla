@@ -1,3 +1,4 @@
+using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Api.Database.Context;
@@ -18,7 +19,7 @@ public class AccessRoleServiceTest : IAsyncLifetime
     public required IAccessRoleService AccessRoleService;
     public required FlotillaDbContext Context;
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         (Container, string cs, var _) = await TestSetupHelpers.ConfigurePostgreSqlDatabase();
 
@@ -48,7 +49,11 @@ public class AccessRoleServiceTest : IAsyncLifetime
         await AccessRoleService.Create(installationHUA, "Role.User.HUA", RoleAccessLevel.USER);
     }
 
-    public Task DisposeAsync() => Task.CompletedTask;
+    public ValueTask DisposeAsync()
+    {
+        GC.SuppressFinalize(this);
+        return ValueTask.CompletedTask;
+    }
 
     [Fact]
     public async Task GetAllowedInstallationCodes_ReadMode_WithReadOnlyRole_ReturnsHUA()

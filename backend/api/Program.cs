@@ -13,6 +13,7 @@ using Api.Services.ActionServices;
 using Api.SignalRHubs;
 using Api.Utilities;
 using Azure.Identity;
+using DotEnv.Core;
 using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Connections;
@@ -20,12 +21,11 @@ using Microsoft.AspNetCore.Rewrite;
 using Microsoft.Identity.Web;
 
 var builder = WebApplication.CreateBuilder(args);
+new EnvLoader().Load();
 
 Console.WriteLine($"\nENVIRONMENT IS SET TO '{builder.Environment.EnvironmentName}'\n");
 
-builder.AddAppSettingsEnvironmentVariables();
-builder.AddDotEnvironmentVariables(Path.Combine(Directory.GetCurrentDirectory(), ".env"));
-
+builder.Configuration.AddEnvironmentVariables();
 if (builder.Configuration.GetSection("KeyVault").GetValue<bool>("UseKeyVault"))
 {
     // The ExcludeSharedTokenCacheCredential option is a recommended workaround by Azure for dockerization
@@ -45,20 +45,20 @@ if (builder.Configuration.GetSection("KeyVault").GetValue<bool>("UseKeyVault"))
         Console.WriteLine("NO KEYVAULT IN CONFIG");
     }
 }
-
 var applicationName = builder.Configuration["AppName"] ?? "FlotillaBackend";
 
-builder.ConfigureLogger();
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
 
 builder.Services.ConfigureDatabase(builder.Configuration, builder.Environment.EnvironmentName);
 
 builder.Services.ConfigureMissionLoader(builder.Configuration);
 
 var openTelemetryEnabled = builder.Configuration.GetValue<bool?>("OpenTelemetry:Enabled") ?? false;
-var otelActivitySource = new ActivitySource(applicationName);
-var otelMeter = new Meter($"{applicationName}.Metrics", "0.0.1");
 if (openTelemetryEnabled)
 {
+    var otelActivitySource = new ActivitySource(applicationName);
+    var otelMeter = new Meter($"{applicationName}.Metrics", "0.0.1");
     builder.AddCustomOpenTelemetry(otelActivitySource, otelMeter);
 }
 else

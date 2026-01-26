@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -7,11 +6,9 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Api.Controllers.Models;
 using Api.Database.Models;
-using Api.Test;
 using Api.Test.Database;
 using Api.Test.Mocks;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Testcontainers.PostgreSql;
 using Xunit;
@@ -28,7 +25,7 @@ namespace Api.Test.Controllers
         private JsonSerializerOptions SerializerOptions = null!;
         private MockHttpContextAccessor HttpContextAccessor = null!;
 
-        public async Task InitializeAsync()
+        public async ValueTask InitializeAsync()
         {
             (Container, string connectionString, var _) =
                 await TestSetupHelpers.ConfigurePostgreSqlDatabase();
@@ -50,13 +47,14 @@ namespace Api.Test.Controllers
             );
         }
 
-        public async Task DisposeAsync()
+        public async ValueTask DisposeAsync()
         {
             if (_factory is not null)
                 await _factory.DisposeAsync();
             Client.Dispose();
             if (Container is not null)
                 await Container.DisposeAsync();
+            GC.SuppressFinalize(this);
         }
 
         [Fact]
@@ -66,7 +64,10 @@ namespace Api.Test.Controllers
             HttpContextAccessor.SetHttpContextRoles([Role.Admin]);
 
             // Act
-            var response = await Client.GetAsync("/access-roles");
+            var response = await Client.GetAsync(
+                "/access-roles",
+                TestContext.Current.CancellationToken
+            );
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -93,7 +94,11 @@ namespace Api.Test.Controllers
             );
 
             // Act
-            var accessRoleResponse = await Client.PostAsync("/access-roles", accessRoleContent);
+            var accessRoleResponse = await Client.PostAsync(
+                "/access-roles",
+                accessRoleContent,
+                TestContext.Current.CancellationToken
+            );
 
             // Assert
             Assert.True(accessRoleResponse.IsSuccessStatusCode);
@@ -101,7 +106,10 @@ namespace Api.Test.Controllers
             HttpContextAccessor.SetHttpContextRoles([$"Role.User.{installation.InstallationCode}"]);
 
             // Act
-            var response = await Client.GetAsync("/access-roles");
+            var response = await Client.GetAsync(
+                "/access-roles",
+                TestContext.Current.CancellationToken
+            );
 
             // Assert
             Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
@@ -128,7 +136,11 @@ namespace Api.Test.Controllers
             );
 
             // Act
-            var response = await Client.PostAsync("/access-roles", content);
+            var response = await Client.PostAsync(
+                "/access-roles",
+                content,
+                TestContext.Current.CancellationToken
+            );
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -154,7 +166,11 @@ namespace Api.Test.Controllers
             );
 
             // Act
-            var accessRoleResponse = await Client.PostAsync("/access-roles", accessRoleContent);
+            var accessRoleResponse = await Client.PostAsync(
+                "/access-roles",
+                accessRoleContent,
+                TestContext.Current.CancellationToken
+            );
 
             // Assert
             Assert.True(accessRoleResponse.IsSuccessStatusCode);
@@ -163,7 +179,10 @@ namespace Api.Test.Controllers
             HttpContextAccessor.SetHttpContextRoles([$"Role.User.{installation.InstallationCode}"]);
 
             // Act
-            var response = await Client.GetAsync("/access-roles");
+            var response = await Client.GetAsync(
+                "/access-roles",
+                TestContext.Current.CancellationToken
+            );
 
             // Assert
             Assert.False(response.IsSuccessStatusCode);

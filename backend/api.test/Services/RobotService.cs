@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Api.Database.Models;
 using Api.Services;
@@ -16,7 +17,7 @@ namespace Api.Test.Services
         public required IRobotService RobotService;
         public required IInstallationService InstallationService;
 
-        public async Task InitializeAsync()
+        public async ValueTask InitializeAsync()
         {
             (Container, string connectionString, var connection) =
                 await TestSetupHelpers.ConfigurePostgreSqlDatabase();
@@ -33,7 +34,11 @@ namespace Api.Test.Services
             InstallationService = serviceProvider.GetRequiredService<IInstallationService>();
         }
 
-        public Task DisposeAsync() => Task.CompletedTask;
+        public ValueTask DisposeAsync()
+        {
+            GC.SuppressFinalize(this);
+            return ValueTask.CompletedTask;
+        }
 
         [Fact]
         public async Task CheckThatReadAllRobotsReturnsCorrectNumberOfRobots()

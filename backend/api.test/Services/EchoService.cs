@@ -21,7 +21,7 @@ namespace Api.Test.Services
         public required PostgreSqlContainer Container;
         public required FlotillaDbContext Context;
 
-        public async Task InitializeAsync()
+        public async ValueTask InitializeAsync()
         {
             (Container, string connectionString, var connection) =
                 await TestSetupHelpers.ConfigurePostgreSqlDatabase();
@@ -31,7 +31,11 @@ namespace Api.Test.Services
             DatabaseUtilities = new DatabaseUtilities(Context);
         }
 
-        public Task DisposeAsync() => Task.CompletedTask;
+        public ValueTask DisposeAsync()
+        {
+            GC.SuppressFinalize(this);
+            return ValueTask.CompletedTask;
+        }
 
         [Fact]
         public async Task TestGetAvailableMissions_WhenServerReturns500_ThrowsException()
@@ -64,8 +68,8 @@ namespace Api.Test.Services
             var installation = await DatabaseUtilities.NewInstallation();
 
             //Act & Assert
-            var exception = await Assert.ThrowsAsync<MissionLoaderUnavailableException>(
-                async () => await echoService.GetAvailableMissions(installation.InstallationCode)
+            var exception = await Assert.ThrowsAsync<MissionLoaderUnavailableException>(async () =>
+                await echoService.GetAvailableMissions(installation.InstallationCode)
             );
             Assert.Equal(
                 "Echo API unavailable. Status code: InternalServerError",
@@ -104,8 +108,8 @@ namespace Api.Test.Services
             var dummyEchoMissionId = "1";
 
             //Act and Assert
-            var exception = await Assert.ThrowsAsync<MissionLoaderUnavailableException>(
-                async () => await echoService.GetMissionById(dummyEchoMissionId)
+            var exception = await Assert.ThrowsAsync<MissionLoaderUnavailableException>(async () =>
+                await echoService.GetMissionById(dummyEchoMissionId)
             );
             Assert.Equal(
                 "Echo API unavailable. Status code: InternalServerError",

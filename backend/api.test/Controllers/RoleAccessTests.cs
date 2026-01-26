@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Net.Http;
-using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Api.Controllers.Models;
@@ -22,7 +21,7 @@ namespace Api.Test.Controllers
         public required JsonSerializerOptions SerializerOptions;
         public required MockHttpContextAccessor HttpContextAccessor;
 
-        public async Task InitializeAsync()
+        public async ValueTask InitializeAsync()
         {
             (Container, string connectionString, var connection) =
                 await TestSetupHelpers.ConfigurePostgreSqlDatabase();
@@ -41,7 +40,11 @@ namespace Api.Test.Controllers
             );
         }
 
-        public Task DisposeAsync() => Task.CompletedTask;
+        public ValueTask DisposeAsync()
+        {
+            GC.SuppressFinalize(this);
+            return ValueTask.CompletedTask;
+        }
 
         [Fact]
         public async Task CheckThatRequestingPlantsWithUnauthorizedUserFails()
@@ -62,20 +65,30 @@ namespace Api.Test.Controllers
                 "application/json"
             );
 
-            var accessRoleResponse = await Client.PostAsync("/access-roles", accessRoleContent);
+            var accessRoleResponse = await Client.PostAsync(
+                "/access-roles",
+                accessRoleContent,
+                TestContext.Current.CancellationToken
+            );
 
             // Restrict ourselves to a user with access
             HttpContextAccessor.SetHttpContextRoles([$"Role.User.{installation.InstallationCode}"]);
 
             // Act
             string getPlantUrl = $"/plants/{plant.Id}";
-            var plantResponse = await Client.GetAsync(getPlantUrl);
+            var plantResponse = await Client.GetAsync(
+                getPlantUrl,
+                TestContext.Current.CancellationToken
+            );
 
             // Restrict ourselves to a user without access
             HttpContextAccessor.SetHttpContextRoles(["Role.User.NON"]);
 
             // Act
-            var samePlantResponse = await Client.GetAsync(getPlantUrl);
+            var samePlantResponse = await Client.GetAsync(
+                getPlantUrl,
+                TestContext.Current.CancellationToken
+            );
 
             // Assert
             Assert.True(accessRoleResponse.IsSuccessStatusCode);

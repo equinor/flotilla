@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Api.Services;
 using Api.Test.Database;
@@ -15,7 +16,7 @@ namespace Api.Test.Services
 
         public required IMissionRunService MissionRunService;
 
-        public async Task InitializeAsync()
+        public async ValueTask InitializeAsync()
         {
             (Container, string connectionString, var connection) =
                 await TestSetupHelpers.ConfigurePostgreSqlDatabase();
@@ -32,6 +33,10 @@ namespace Api.Test.Services
             MissionRunService = serviceProvider.GetRequiredService<IMissionRunService>();
         }
 
-        public Task DisposeAsync() => Task.CompletedTask;
+        public ValueTask DisposeAsync()
+        {
+            GC.SuppressFinalize(this);
+            return ValueTask.CompletedTask;
+        }
     }
 }

@@ -17,7 +17,7 @@ namespace Api.Test.Controllers
 
         public required IInstallationService InstallationService;
 
-        public async Task InitializeAsync()
+        public async ValueTask InitializeAsync()
         {
             (Container, string connectionString, var connection) =
                 await TestSetupHelpers.ConfigurePostgreSqlDatabase();
@@ -30,7 +30,11 @@ namespace Api.Test.Controllers
             InstallationService = serviceProvider.GetRequiredService<IInstallationService>();
         }
 
-        public Task DisposeAsync() => Task.CompletedTask;
+        public ValueTask DisposeAsync()
+        {
+            GC.SuppressFinalize(this);
+            return ValueTask.CompletedTask;
+        }
 
         [Fact]
         public async Task TestCreateInstallationEndpoint()
@@ -50,7 +54,11 @@ namespace Api.Test.Controllers
 
             // Act
             const string Url = "/installations";
-            var response = await Client.PostAsync(Url, content);
+            var response = await Client.PostAsync(
+                Url,
+                content,
+                TestContext.Current.CancellationToken
+            );
 
             // Assert
             var installation = await InstallationService.ReadByInstallationCode(

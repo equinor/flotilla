@@ -255,16 +255,16 @@ namespace Api.Services
                 .MissionDefinitions.Include(missionDefinition =>
                     missionDefinition.AutoScheduleFrequency
                 )
-                .ThenInclude(autoScheduleFrequency =>
-                    autoScheduleFrequency!.SchedulingTimesCETperWeek
-                )
+                    .ThenInclude(autoScheduleFrequency =>
+                        autoScheduleFrequency!.SchedulingTimesCETperWeek
+                    )
                 .Include(missionDefinition => missionDefinition.InspectionArea)
-                .ThenInclude(inspectionArea => inspectionArea!.Plant)
+                    .ThenInclude(inspectionArea => inspectionArea!.Plant)
                 .Include(missionDefinition => missionDefinition.InspectionArea)
-                .ThenInclude(inspectionArea => inspectionArea!.Plant)
-                .ThenInclude(plant => plant.Installation)
+                    .ThenInclude(inspectionArea => inspectionArea!.Plant)
+                        .ThenInclude(plant => plant.Installation)
                 .Include(missionDefinition => missionDefinition.InspectionArea)
-                .ThenInclude(area => area!.Installation)
+                    .ThenInclude(area => area!.Installation)
                 .Include(missionDefinition => missionDefinition.Source)
                 .Include(missionDefinition => missionDefinition.LastSuccessfulRun)
                 .Include(missionDefinition => missionDefinition.InspectionArea)

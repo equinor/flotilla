@@ -286,7 +286,7 @@ namespace Api.Services
                 .Result;
             var query = context
                 .InspectionAreas.Include(p => p.Plant)
-                .ThenInclude(p => p.Installation)
+                    .ThenInclude(p => p.Installation)
                 .Include(i => i.Installation)
                 .Where(d =>
                     accessibleInstallationCodes.Contains(d.Installation.InstallationCode.ToUpper())

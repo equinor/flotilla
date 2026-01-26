@@ -28,7 +28,7 @@ namespace Api.Test.HostedServices
 
         private AutoSchedulingHostedService? _service;
 
-        public async Task InitializeAsync()
+        public async ValueTask InitializeAsync()
         {
             (Container, ConnectionString, var connection) =
                 await TestSetupHelpers.ConfigurePostgreSqlDatabase();
@@ -61,7 +61,7 @@ namespace Api.Test.HostedServices
             );
         }
 
-        public async Task DisposeAsync()
+        public static async ValueTask DisposeAsync()
         {
             await Task.CompletedTask;
         }
@@ -69,6 +69,7 @@ namespace Api.Test.HostedServices
         async ValueTask IAsyncDisposable.DisposeAsync()
         {
             await Task.CompletedTask;
+            GC.SuppressFinalize(this);
         }
 
         private FlotillaDbContext CreateContext()
