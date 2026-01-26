@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, FC, useEffect } from 'react'
 import { BackendAPICaller } from 'api/ApiCaller'
-import { Robot, RobotPropertyUpdate } from 'models/Robot'
+import { Robot } from 'models/Robot'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { useLanguageContext } from './LanguageContext'
 import { AlertType, useAlertContext } from './AlertContext'
@@ -81,23 +81,6 @@ export const AssetProvider: FC<Props> = ({ children }) => {
                 setEnabledRobots((oldRobotList) => {
                     let oldRobotListCopy = [...oldRobotList]
                     oldRobotListCopy = upsertRobotList(oldRobotListCopy, updatedRobot)
-                    return [...oldRobotListCopy]
-                })
-            })
-            registerEvent(SignalREventLabels.robotPropertyUpdated, (username: string, message: string) => {
-                const robotPropertyUpdate: RobotPropertyUpdate = JSON.parse(message)
-                setEnabledRobots((oldRobotList) => {
-                    const oldRobotListCopy = [...oldRobotList]
-                    const index = oldRobotListCopy.findIndex((r) => r.id === robotPropertyUpdate.robotId)
-                    if (index > -1) {
-                        const robot = oldRobotListCopy[index]
-                        if (robotPropertyUpdate.propertyName in robot) {
-                            ;(robot as any)[robotPropertyUpdate.propertyName] = robotPropertyUpdate.propertyValue
-                            oldRobotListCopy[index] = robot
-                        } else {
-                            console.warn(`Property ${robotPropertyUpdate.propertyName} does not exist on Robot`)
-                        }
-                    }
                     return [...oldRobotListCopy]
                 })
             })
