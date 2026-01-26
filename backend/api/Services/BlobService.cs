@@ -1,10 +1,14 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
+using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using Api.Utilities;
 using Azure;
 using Azure.Identity;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using Microsoft.Extensions.Logging;
 
 namespace Api.Services
 {
@@ -61,7 +65,8 @@ namespace Api.Services
             var blobContainerClient = GetBlobContainerClient(containerName, accountName);
             try
             {
-                return blobContainerClient.GetBlobsAsync(BlobTraits.Metadata);
+                GetBlobsOptions blobOptions = new() { Traits = BlobTraits.Metadata };
+                return blobContainerClient.GetBlobsAsync(options: blobOptions);
             }
             catch (RequestFailedException e)
             {

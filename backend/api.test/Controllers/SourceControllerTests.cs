@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -6,7 +7,6 @@ using System.Threading.Tasks;
 using Api.Database.Models;
 using Api.Services;
 using Api.Test.Database;
-using Microsoft.Extensions.DependencyInjection;
 using Testcontainers.PostgreSql;
 using Xunit;
 
@@ -21,7 +21,7 @@ public class SourceControllerTests : IAsyncLifetime
 
     public required ISourceService SourceService;
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         (Container, var connectionString, var connection) =
             await TestSetupHelpers.ConfigurePostgreSqlDatabase();
@@ -36,7 +36,11 @@ public class SourceControllerTests : IAsyncLifetime
         );
     }
 
-    public Task DisposeAsync() => Task.CompletedTask;
+    public ValueTask DisposeAsync()
+    {
+        GC.SuppressFinalize(this);
+        return ValueTask.CompletedTask;
+    }
 
     [Fact]
     public async Task CheckThatListAllSourcesWorksAsExpected()
@@ -46,8 +50,11 @@ public class SourceControllerTests : IAsyncLifetime
         var sourceTwo = await DatabaseUtilities.NewSource(sourceId: "TestIdTwo");
 
         // Act
-        var response = await Client.GetAsync("/sources");
-        var sources = await response.Content.ReadFromJsonAsync<List<Source>>(SerializerOptions);
+        var response = await Client.GetAsync("/sources", TestContext.Current.CancellationToken);
+        var sources = await response.Content.ReadFromJsonAsync<List<Source>>(
+            SerializerOptions,
+            cancellationToken: TestContext.Current.CancellationToken
+        );
 
         // Assert
         Assert.Equal(2, sources!.Count);
@@ -59,9 +66,13 @@ public class SourceControllerTests : IAsyncLifetime
     public async Task CheckThatLookupSourceByIdWorksAsExpected()
     {
         var source = await DatabaseUtilities.NewSource();
-        var response = await Client.GetAsync($"/sources/{source.Id}");
+        var response = await Client.GetAsync(
+            $"/sources/{source.Id}",
+            TestContext.Current.CancellationToken
+        );
         var sourceFromResponse = await response.Content.ReadFromJsonAsync<Source>(
-            SerializerOptions
+            SerializerOptions,
+            cancellationToken: TestContext.Current.CancellationToken
         );
         Assert.Equal(source.Id, sourceFromResponse!.Id);
     }

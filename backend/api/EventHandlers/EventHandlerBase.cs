@@ -1,4 +1,7 @@
-﻿namespace Api.EventHandlers
+﻿using System;
+using Microsoft.Extensions.Hosting;
+
+namespace Api.EventHandlers
 {
     /// <summary>
     /// A wrapper for Event handlers that properly unsubscribe to events when the background service is disposed

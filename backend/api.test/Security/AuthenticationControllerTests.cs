@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -17,7 +18,7 @@ namespace Api.Test.Security
         public required HttpClient Client;
         public required EndpointDataSource DataSource;
 
-        public async Task InitializeAsync()
+        public async ValueTask InitializeAsync()
         {
             (_, string connectionString, _) = await TestSetupHelpers.ConfigurePostgreSqlDatabase();
 
@@ -35,7 +36,11 @@ namespace Api.Test.Security
             );
         }
 
-        public Task DisposeAsync() => Task.CompletedTask;
+        public ValueTask DisposeAsync()
+        {
+            GC.SuppressFinalize(this);
+            return ValueTask.CompletedTask;
+        }
 
         private static string ReplaceRouteParamsWithDefaults(string route)
         {
@@ -102,7 +107,10 @@ namespace Api.Test.Security
             foreach (var (method, url) in testRoutes)
             {
                 var request = new HttpRequestMessage(new HttpMethod(method), url);
-                var response = await Client.SendAsync(request);
+                var response = await Client.SendAsync(
+                    request,
+                    TestContext.Current.CancellationToken
+                );
 
                 Assert.True(
                     response.StatusCode is HttpStatusCode.Forbidden or HttpStatusCode.Unauthorized,

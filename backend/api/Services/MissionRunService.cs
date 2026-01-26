@@ -357,20 +357,24 @@ namespace Api.Services
             );
             var query = context
                 .MissionRuns.Include(missionRun => missionRun.InspectionArea)
-                .ThenInclude(inspectionArea => inspectionArea != null ? inspectionArea.Plant : null)
-                .ThenInclude(plant => plant != null ? plant.Installation : null)
+                    .ThenInclude(inspectionArea =>
+                        inspectionArea != null ? inspectionArea.Plant : null
+                    )
+                        .ThenInclude(plant => plant != null ? plant.Installation : null)
                 .Include(missionRun => missionRun.InspectionArea)
-                .ThenInclude(area => area != null ? area.Plant : null)
-                .ThenInclude(plant => plant != null ? plant.Installation : null)
+                    .ThenInclude(area => area != null ? area.Plant : null)
+                        .ThenInclude(plant => plant != null ? plant.Installation : null)
                 .Include(missionRun => missionRun.InspectionArea)
-                .ThenInclude(area => area != null ? area.Installation : null)
+                    .ThenInclude(area => area != null ? area.Installation : null)
                 .Include(missionRun => missionRun.InspectionArea)
                 .Include(missionRun => missionRun.Robot)
                 .Include(missionRun => missionRun.Tasks)
-                .ThenInclude(task => task.Inspection)
-                .ThenInclude(inspection => inspection != null ? inspection.AnalysisResult : null)
+                    .ThenInclude(task => task.Inspection)
+                        .ThenInclude(inspection =>
+                            inspection != null ? inspection.AnalysisResult : null
+                        )
                 .Include(missionRun => missionRun.Robot)
-                .ThenInclude(robot => robot.CurrentInstallation)
+                    .ThenInclude(robot => robot.CurrentInstallation)
                 .Where(m =>
                     accessibleInstallationCodes.Result.Contains(
                         m.InspectionArea.Installation.InstallationCode.ToUpper()

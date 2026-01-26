@@ -16,6 +16,8 @@ namespace Api.Test;
 
 public static class TestSetupHelpers
 {
+    private const string PostgresVersion = "postgres:17.6";
+
     public static async Task<(string, DbConnection)> ConfigureSqLiteDatabase(string databaseName)
     {
         string connectionString = new SqliteConnectionStringBuilder
@@ -39,7 +41,7 @@ public static class TestSetupHelpers
         DbConnection
     )> ConfigurePostgreSqlDatabase()
     {
-        var container = new PostgreSqlBuilder().Build();
+        var container = new PostgreSqlBuilder(PostgresVersion).Build();
         await container.StartAsync();
 
         string? connectionString = container.GetConnectionString();

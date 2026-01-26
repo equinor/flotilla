@@ -68,7 +68,7 @@ Read more about the `launchSettings.json` file
 ### Run in Docker
 
 For the backend to work when dockerized, you need to have the client secret exposed as
-an environment variable named `AZURE_CLIENT_SECRET`. 
+an environment variable named `AZURE_CLIENT_SECRET`.
 Note that if possible to run locally without exposing this secret locally, that is preferred.
 To do this, to store it in an `.env` file in the root of the flotilla repository.
 See [Using the “--env-file” option](https://docs.docker.com/compose/environment-variables/#using-the---env-file--option) for more information.
@@ -244,7 +244,7 @@ psql -U Username -d postgres -h host_name_or_address -p port -f output_file_name
 The formatting of the backend is defined in the [.editorconfig file](../.editorconfig).
 
 In everyday development we use [CSharpier](https://csharpier.com/) to auto-format code on save. Installation procedure is described [here](https://csharpier.com/docs/About). No configuration should be required. To run CSharpier locally, go to the backend folder and run:
-`dotnet csharpier . --check`
+`csharpier check .`
 
 ## SignalR
 

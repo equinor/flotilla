@@ -1,4 +1,6 @@
-﻿namespace Api.Utilities
+﻿using System;
+
+namespace Api.Utilities
 {
     public class ConfigException(string message) : Exception(message) { }
 

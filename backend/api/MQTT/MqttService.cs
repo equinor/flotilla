@@ -1,9 +1,16 @@
-﻿using System.Text;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
 using Api.Mqtt.Events;
 using Api.Mqtt.MessageModels;
 using Api.Utilities;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Extensions.ManagedClient;
@@ -28,8 +35,10 @@ namespace Api.Mqtt
         private readonly int _serverPort;
         private readonly bool _shouldFailOnMaxRetries;
 
-        private static readonly JsonSerializerOptions serializerOptions =
-            new() { Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) } };
+        private static readonly JsonSerializerOptions serializerOptions = new()
+        {
+            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
+        };
 
         private CancellationToken _cancellationToken;
         private int _reconnectAttempts;
@@ -96,7 +105,7 @@ namespace Api.Mqtt
             _cancellationToken = stoppingToken;
             _logger.LogInformation("MQTT client STARTED");
             await _mqttClient.StartAsync(_options);
-            await _cancellationToken;
+            await Task.Delay(Timeout.Infinite, stoppingToken);
             await _mqttClient.StopAsync();
             _logger.LogInformation("MQTT client STOPPED");
         }
@@ -166,7 +175,7 @@ namespace Api.Mqtt
                 default:
                     _logger.LogWarning(
                         "No callback defined for MQTT message type '{type}'",
-                        messageType.Name
+                        (messageType as Type)?.Name ?? "Unknown"
                     );
                     break;
             }

@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
-using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
 using Api.Test.Database;
@@ -20,7 +18,7 @@ namespace Api.Test.Services
         public required IInspectionAreaService InspectionAreaService;
         public required IAreaPolygonService AreaPolygonService;
 
-        public async Task InitializeAsync()
+        public async ValueTask InitializeAsync()
         {
             (Container, string connectionString, var connection) =
                 await TestSetupHelpers.ConfigurePostgreSqlDatabase();
@@ -37,7 +35,11 @@ namespace Api.Test.Services
             AreaPolygonService = serviceProvider.GetRequiredService<IAreaPolygonService>();
         }
 
-        public Task DisposeAsync() => Task.CompletedTask;
+        public ValueTask DisposeAsync()
+        {
+            GC.SuppressFinalize(this);
+            return ValueTask.CompletedTask;
+        }
 
         [Fact]
         public void TestTasksInsidePolygon()

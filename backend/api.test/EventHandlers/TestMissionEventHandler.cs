@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
 using Api.Mqtt;
@@ -36,7 +34,7 @@ namespace Api.Test.EventHandlers
 
         public required MqttService MqttService;
 
-        public async Task InitializeAsync()
+        public async ValueTask InitializeAsync()
         {
             (Container, ConnectionString, var connection) =
                 await TestSetupHelpers.ConfigurePostgreSqlDatabase();
@@ -56,7 +54,7 @@ namespace Api.Test.EventHandlers
             MqttService = new MqttService(mqttServiceLogger, Factory.Configuration!);
         }
 
-        public async Task DisposeAsync()
+        public static async ValueTask DisposeAsync()
         {
             await Task.CompletedTask;
         }
@@ -64,6 +62,7 @@ namespace Api.Test.EventHandlers
         async ValueTask IAsyncDisposable.DisposeAsync()
         {
             await Task.CompletedTask;
+            GC.SuppressFinalize(this);
         }
 
         private FlotillaDbContext CreateContext()

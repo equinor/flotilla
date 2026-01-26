@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -27,7 +26,7 @@ namespace Api.Test.Controllers
         public required IMissionRunService MissionRunService;
         public required IMissionDefinitionService MissionDefinitionService;
 
-        public async Task InitializeAsync()
+        public async ValueTask InitializeAsync()
         {
             (Container, string connectionString, var connection) =
                 await TestSetupHelpers.ConfigurePostgreSqlDatabase();
@@ -49,7 +48,11 @@ namespace Api.Test.Controllers
                 serviceProvider.GetRequiredService<IMissionDefinitionService>();
         }
 
-        public Task DisposeAsync() => Task.CompletedTask;
+        public ValueTask DisposeAsync()
+        {
+            GC.SuppressFinalize(this);
+            return ValueTask.CompletedTask;
+        }
 
         [Fact]
         public async Task CheckThatInspectionAreaIsCorrectlyCreatedThroughEndpoint()
@@ -73,7 +76,11 @@ namespace Api.Test.Controllers
 
             // Act
             const string Url = "/inspectionAreas";
-            var response = await Client.PostAsync(Url, content);
+            var response = await Client.PostAsync(
+                Url,
+                content,
+                TestContext.Current.CancellationToken
+            );
 
             // Assert
             var inspectionArea = await InspectionAreaService.ReadByInstallationAndPlantAndName(
@@ -133,12 +140,18 @@ namespace Api.Test.Controllers
             );
 
             // Act
-            var missionResponse = await Client.PostAsync("/missions/custom", missionContent);
+            var missionResponse = await Client.PostAsync(
+                "/missions/custom",
+                missionContent,
+                TestContext.Current.CancellationToken
+            );
             var userMissionResponse = await missionResponse.Content.ReadFromJsonAsync<MissionRun>(
-                SerializerOptions
+                SerializerOptions,
+                cancellationToken: TestContext.Current.CancellationToken
             );
             var inspectionAreaMissionResponse = await Client.GetAsync(
-                $"/inspectionAreas/{inspectionArea.Id}/mission-definitions"
+                $"/inspectionAreas/{inspectionArea.Id}/mission-definitions",
+                TestContext.Current.CancellationToken
             );
 
             // Assert
@@ -150,9 +163,8 @@ namespace Api.Test.Controllers
             Assert.True(missionResponse.IsSuccessStatusCode);
             Assert.True(inspectionAreaMissionResponse.IsSuccessStatusCode);
             Assert.Single(
-                missionDefinitions.Where(m =>
-                    m.Id.Equals(mission!.MissionId, StringComparison.Ordinal)
-                )
+                missionDefinitions,
+                m => m.Id.Equals(mission!.MissionId, StringComparison.Ordinal)
             );
         }
 
@@ -187,10 +199,12 @@ namespace Api.Test.Controllers
             // Act
             var response = await Client.PatchAsync(
                 $"/inspectionAreas/{inspectionArea.Id}/area-polygon",
-                content
+                content,
+                TestContext.Current.CancellationToken
             );
             var inspectionAreaResponse = await response.Content.ReadFromJsonAsync<InspectionArea>(
-                SerializerOptions
+                SerializerOptions,
+                cancellationToken: TestContext.Current.CancellationToken
             );
 
             // Assert
@@ -226,7 +240,8 @@ namespace Api.Test.Controllers
             var content = new StringContent(jsonString, null, "application/json");
             var response = await Client.PatchAsync(
                 $"/inspectionAreas/{inspectionArea.Id}/area-polygon",
-                content
+                content,
+                TestContext.Current.CancellationToken
             );
 
             Assert.True(response.IsSuccessStatusCode);
@@ -264,7 +279,11 @@ namespace Api.Test.Controllers
             );
 
             // Act
-            var missionResponse = await Client.PostAsync("/missions/custom", missionContent);
+            var missionResponse = await Client.PostAsync(
+                "/missions/custom",
+                missionContent,
+                TestContext.Current.CancellationToken
+            );
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, missionResponse.StatusCode);

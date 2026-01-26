@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Api.Test.Database;
 using Testcontainers.PostgreSql;
@@ -12,7 +13,7 @@ namespace Api.Test.Controllers
         public required PostgreSqlContainer Container;
         public required HttpClient Client;
 
-        public async Task InitializeAsync()
+        public async ValueTask InitializeAsync()
         {
             (Container, string connectionString, var connection) =
                 await TestSetupHelpers.ConfigurePostgreSqlDatabase();
@@ -26,7 +27,11 @@ namespace Api.Test.Controllers
             );
         }
 
-        public Task DisposeAsync() => Task.CompletedTask;
+        public ValueTask DisposeAsync()
+        {
+            GC.SuppressFinalize(this);
+            return ValueTask.CompletedTask;
+        }
 
         [Fact]
         public async Task EmergencyDockTest()
@@ -38,7 +43,11 @@ namespace Api.Test.Controllers
             // Act
             string goToDockingPositionUrl =
                 $"/emergency-action/{installationCode}/abort-current-missions-and-send-all-robots-to-safe-zone";
-            var missionResponse = await Client.PostAsync(goToDockingPositionUrl, null);
+            var missionResponse = await Client.PostAsync(
+                goToDockingPositionUrl,
+                null,
+                TestContext.Current.CancellationToken
+            );
 
             // Assert
             Assert.True(missionResponse.IsSuccessStatusCode);

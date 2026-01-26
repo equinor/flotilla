@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -23,7 +24,7 @@ namespace Api.Test.Controllers
         public required IMissionDefinitionService MissionDefinitionService;
         public required ISourceService SourceService;
 
-        public async Task InitializeAsync()
+        public async ValueTask InitializeAsync()
         {
             (Container, string connectionString, var connection) =
                 await TestSetupHelpers.ConfigurePostgreSqlDatabase();
@@ -44,7 +45,11 @@ namespace Api.Test.Controllers
             SourceService = serviceProvider.GetRequiredService<ISourceService>();
         }
 
-        public async Task DisposeAsync() => await Task.CompletedTask;
+        public async ValueTask DisposeAsync()
+        {
+            GC.SuppressFinalize(this);
+            await Task.CompletedTask;
+        }
 
         [Fact]
         public async Task CheckThatListAllMissionDefinitionsEndpointReturnsSuccess()
@@ -71,12 +76,15 @@ namespace Api.Test.Controllers
             _ = await MissionDefinitionService.Create(missionDefinition);
 
             // Act
-            var response = await Client.GetAsync("missions/definitions");
+            var response = await Client.GetAsync(
+                "missions/definitions",
+                TestContext.Current.CancellationToken
+            );
 
             // Assert
             var missionDefinitions = await response.Content.ReadFromJsonAsync<
                 List<MissionDefinitionResponse>
-            >(SerializerOptions);
+            >(SerializerOptions, cancellationToken: TestContext.Current.CancellationToken);
 
             Assert.Single(missionDefinitions!);
         }
@@ -84,11 +92,14 @@ namespace Api.Test.Controllers
         [Fact]
         public async Task CheckThatListAllMissionDefinitionsSucceedWhenThereAreNoMissionDefinitions()
         {
-            var response = await Client.GetAsync("missions/definitions");
+            var response = await Client.GetAsync(
+                "missions/definitions",
+                TestContext.Current.CancellationToken
+            );
 
             var missionDefinitions = await response.Content.ReadFromJsonAsync<
                 List<MissionDefinitionResponse>
-            >(SerializerOptions);
+            >(SerializerOptions, cancellationToken: TestContext.Current.CancellationToken);
 
             Assert.Empty(missionDefinitions!);
         }

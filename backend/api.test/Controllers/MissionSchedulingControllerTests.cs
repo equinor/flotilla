@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
-using Api.Services.Models;
 using Api.Test.Database;
 using Microsoft.Extensions.DependencyInjection;
 using Testcontainers.PostgreSql;
@@ -27,7 +26,7 @@ namespace Api.Test.Controllers
 
         public required IMissionDefinitionService MissionDefinitionService;
 
-        public async Task InitializeAsync()
+        public async ValueTask InitializeAsync()
         {
             (Container, string connectionString, var _) =
                 await TestSetupHelpers.ConfigurePostgreSqlDatabase();
@@ -46,7 +45,11 @@ namespace Api.Test.Controllers
                 serviceProvider.GetRequiredService<IMissionDefinitionService>();
         }
 
-        public Task DisposeAsync() => Task.CompletedTask;
+        public ValueTask DisposeAsync()
+        {
+            GC.SuppressFinalize(this);
+            return ValueTask.CompletedTask;
+        }
 
         [Fact]
         public async Task CheckThatSchedulingAMissionToBusyRobotSetsMissionToQueued()
@@ -79,11 +82,16 @@ namespace Api.Test.Controllers
                 "application/json"
             );
 
-            var response = await Client.PostAsync(missionsUrl, content);
+            var response = await Client.PostAsync(
+                missionsUrl,
+                content,
+                TestContext.Current.CancellationToken
+            );
 
             // Assert
             var missionRun = await response.Content.ReadFromJsonAsync<MissionRun>(
-                SerializerOptions
+                SerializerOptions,
+                cancellationToken: TestContext.Current.CancellationToken
             );
 
             Assert.True(response.IsSuccessStatusCode);
@@ -121,25 +129,43 @@ namespace Api.Test.Controllers
             );
 
             const string MissionsUrl = "/missions";
-            _ = await Client.PostAsync(MissionsUrl, content);
+            _ = await Client.PostAsync(MissionsUrl, content, TestContext.Current.CancellationToken);
 
-            var responseMissionOne = await Client.PostAsync(MissionsUrl, content);
+            var responseMissionOne = await Client.PostAsync(
+                MissionsUrl,
+                content,
+                TestContext.Current.CancellationToken
+            );
             var missionRunOne = await responseMissionOne.Content.ReadFromJsonAsync<MissionRun>(
-                SerializerOptions
+                SerializerOptions,
+                cancellationToken: TestContext.Current.CancellationToken
             );
-            var responseMissionTwo = await Client.PostAsync(MissionsUrl, content);
+            var responseMissionTwo = await Client.PostAsync(
+                MissionsUrl,
+                content,
+                TestContext.Current.CancellationToken
+            );
             var missionRunTwo = await responseMissionTwo.Content.ReadFromJsonAsync<MissionRun>(
-                SerializerOptions
+                SerializerOptions,
+                cancellationToken: TestContext.Current.CancellationToken
             );
-            var responseMissionThree = await Client.PostAsync(MissionsUrl, content);
+            var responseMissionThree = await Client.PostAsync(
+                MissionsUrl,
+                content,
+                TestContext.Current.CancellationToken
+            );
             var missionRunThree = await responseMissionThree.Content.ReadFromJsonAsync<MissionRun>(
-                SerializerOptions
+                SerializerOptions,
+                cancellationToken: TestContext.Current.CancellationToken
             );
 
-            var responseActiveMissionRuns = await Client.GetAsync("/missions/runs?pageSize=50");
+            var responseActiveMissionRuns = await Client.GetAsync(
+                "/missions/runs?pageSize=50",
+                TestContext.Current.CancellationToken
+            );
             var missionRuns = await responseActiveMissionRuns.Content.ReadFromJsonAsync<
                 List<MissionRun>
-            >(SerializerOptions);
+            >(SerializerOptions, cancellationToken: TestContext.Current.CancellationToken);
 
             // Assert
             Assert.True(responseMissionOne.IsSuccessStatusCode);
@@ -156,7 +182,7 @@ namespace Api.Test.Controllers
         {
             const string MissionId = "ThisMissionDoesNotExist";
             const string Url = "/missions/runs/" + MissionId;
-            var response = await Client.GetAsync(Url);
+            var response = await Client.GetAsync(Url, TestContext.Current.CancellationToken);
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
@@ -165,7 +191,7 @@ namespace Api.Test.Controllers
         {
             const string MissionId = "ThisMissionDoesNotExist";
             const string Url = "/missions/runs/" + MissionId;
-            var response = await Client.DeleteAsync(Url);
+            var response = await Client.DeleteAsync(Url, TestContext.Current.CancellationToken);
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
@@ -194,14 +220,24 @@ namespace Api.Test.Controllers
 
             // Act
             const string CustomMissionsUrl = "/missions/custom";
-            var responseMissionOne = await Client.PostAsync(CustomMissionsUrl, content);
+            var responseMissionOne = await Client.PostAsync(
+                CustomMissionsUrl,
+                content,
+                TestContext.Current.CancellationToken
+            );
             var missionRunOne = await responseMissionOne.Content.ReadFromJsonAsync<MissionRun>(
-                SerializerOptions
+                SerializerOptions,
+                cancellationToken: TestContext.Current.CancellationToken
             );
 
-            var responseMissionTwo = await Client.PostAsync(CustomMissionsUrl, content);
+            var responseMissionTwo = await Client.PostAsync(
+                CustomMissionsUrl,
+                content,
+                TestContext.Current.CancellationToken
+            );
             var missionRunTwo = await responseMissionTwo.Content.ReadFromJsonAsync<MissionRun>(
-                SerializerOptions
+                SerializerOptions,
+                cancellationToken: TestContext.Current.CancellationToken
             );
 
             // Assert
@@ -237,9 +273,14 @@ namespace Api.Test.Controllers
             );
 
             const string CustomMissionsUrl = "/missions/custom";
-            var response = await Client.PostAsync(CustomMissionsUrl, content);
+            var response = await Client.PostAsync(
+                CustomMissionsUrl,
+                content,
+                TestContext.Current.CancellationToken
+            );
             var activeMissionRun = await response.Content.ReadFromJsonAsync<MissionRun>(
-                SerializerOptions
+                SerializerOptions,
+                cancellationToken: TestContext.Current.CancellationToken
             );
 
             var scheduleQuery = new ScheduleMissionQuery
@@ -257,37 +298,47 @@ namespace Api.Test.Controllers
 
             var missionRunOneResponse = await Client.PostAsync(
                 scheduleMissionsUrl,
-                scheduleContent
+                scheduleContent,
+                TestContext.Current.CancellationToken
             );
             var missionRunOne = await missionRunOneResponse.Content.ReadFromJsonAsync<MissionRun>(
-                SerializerOptions
+                SerializerOptions,
+                cancellationToken: TestContext.Current.CancellationToken
             );
 
             var missionRunTwoResponse = await Client.PostAsync(
                 scheduleMissionsUrl,
-                scheduleContent
+                scheduleContent,
+                TestContext.Current.CancellationToken
             );
             var missionRunTwo = await missionRunTwoResponse.Content.ReadFromJsonAsync<MissionRun>(
-                SerializerOptions
+                SerializerOptions,
+                cancellationToken: TestContext.Current.CancellationToken
             );
 
             var missionRunThreeResponse = await Client.PostAsync(
                 scheduleMissionsUrl,
-                scheduleContent
+                scheduleContent,
+                TestContext.Current.CancellationToken
             );
             var missionRunThree =
                 await missionRunThreeResponse.Content.ReadFromJsonAsync<MissionRun>(
-                    SerializerOptions
+                    SerializerOptions,
+                    cancellationToken: TestContext.Current.CancellationToken
                 );
 
             Thread.Sleep(1000);
             // Act
             string nextMissionUrl = $"missions/definitions/{activeMissionRun.MissionId}/next-run";
-            var nextMissionResponse = await Client.GetAsync(nextMissionUrl);
+            var nextMissionResponse = await Client.GetAsync(
+                nextMissionUrl,
+                TestContext.Current.CancellationToken
+            );
 
             // Assert
             var nextMissionRun = await nextMissionResponse.Content.ReadFromJsonAsync<MissionRun>(
-                SerializerOptions
+                SerializerOptions,
+                cancellationToken: TestContext.Current.CancellationToken
             );
 
             // Next mission can be any of these three missions due to timing
@@ -333,7 +384,11 @@ namespace Api.Test.Controllers
 
             // Act
             const string CustomMissionsUrl = "/missions/custom";
-            var response = await Client.PostAsync(CustomMissionsUrl, content);
+            var response = await Client.PostAsync(
+                CustomMissionsUrl,
+                content,
+                TestContext.Current.CancellationToken
+            );
             Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
         }
 
@@ -398,7 +453,11 @@ namespace Api.Test.Controllers
 
             // Act
             const string CustomMissionsUrl = "/missions/custom";
-            var missionResponse = await Client.PostAsync(CustomMissionsUrl, content);
+            var missionResponse = await Client.PostAsync(
+                CustomMissionsUrl,
+                content,
+                TestContext.Current.CancellationToken
+            );
             Assert.Equal(HttpStatusCode.BadRequest, missionResponse.StatusCode);
         }
 

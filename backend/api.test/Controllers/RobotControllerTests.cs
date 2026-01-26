@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Test.Database;
-using Microsoft.EntityFrameworkCore;
 using Testcontainers.PostgreSql;
 using Xunit;
 
@@ -21,7 +20,7 @@ namespace Api.Test.Controllers
         public required HttpClient Client;
         public required JsonSerializerOptions SerializerOptions;
 
-        public async Task InitializeAsync()
+        public async ValueTask InitializeAsync()
         {
             (Container, string connectionString, var connection) =
                 await TestSetupHelpers.ConfigurePostgreSqlDatabase();
@@ -36,7 +35,11 @@ namespace Api.Test.Controllers
             );
         }
 
-        public Task DisposeAsync() => Task.CompletedTask;
+        public ValueTask DisposeAsync()
+        {
+            GC.SuppressFinalize(this);
+            return ValueTask.CompletedTask;
+        }
 
         [Fact]
         public async Task CheckThatReadAllRobotsEndpointIsSuccessful()
@@ -49,9 +52,10 @@ namespace Api.Test.Controllers
             _ = await DatabaseUtilities.NewRobot(RobotStatus.Offline, installation);
 
             // Act
-            var response = await Client.GetAsync("/robots");
+            var response = await Client.GetAsync("/robots", TestContext.Current.CancellationToken);
             var robots = await response.Content.ReadFromJsonAsync<List<RobotResponse>>(
-                SerializerOptions
+                SerializerOptions,
+                cancellationToken: TestContext.Current.CancellationToken
             );
 
             // Assert
@@ -64,7 +68,7 @@ namespace Api.Test.Controllers
         {
             const string RobotId = "IAmAnUnknownRobot";
             const string Url = "/robots/" + RobotId;
-            var response = await Client.GetAsync(Url);
+            var response = await Client.GetAsync(Url, TestContext.Current.CancellationToken);
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
@@ -76,9 +80,13 @@ namespace Api.Test.Controllers
             var robot = await DatabaseUtilities.NewRobot(RobotStatus.Available, installation);
 
             // Act
-            var robotResponse = await Client.GetAsync("/robots/" + robot.Id);
+            var robotResponse = await Client.GetAsync(
+                "/robots/" + robot.Id,
+                TestContext.Current.CancellationToken
+            );
             var receivedRobot = await robotResponse.Content.ReadFromJsonAsync<RobotResponse>(
-                SerializerOptions
+                SerializerOptions,
+                cancellationToken: TestContext.Current.CancellationToken
             );
 
             // Assert

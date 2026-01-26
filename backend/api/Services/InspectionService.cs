@@ -173,7 +173,7 @@ namespace Api.Services
 
             var missionRun = await context
                 .MissionRuns.Include(missionRun => missionRun.InspectionArea)
-                .ThenInclude(area => area != null ? area.Installation : null)
+                    .ThenInclude(area => area != null ? area.Installation : null)
                 .Include(missionRun => missionRun.Robot)
                 .Where(missionRun =>
                     missionRun.Tasks.Any(missionTask =>

@@ -19,7 +19,7 @@ namespace Api.Test.Controllers
 
         public required IPlantService PlantService;
 
-        public async Task InitializeAsync()
+        public async ValueTask InitializeAsync()
         {
             (Container, string connectionString, var connection) =
                 await TestSetupHelpers.ConfigurePostgreSqlDatabase();
@@ -36,7 +36,11 @@ namespace Api.Test.Controllers
             PlantService = serviceProvider.GetRequiredService<IPlantService>();
         }
 
-        public Task DisposeAsync() => Task.CompletedTask;
+        public ValueTask DisposeAsync()
+        {
+            GC.SuppressFinalize(this);
+            return ValueTask.CompletedTask;
+        }
 
         [Fact]
         public async Task CheckThatPlantIsCorrectlyCreatedThroughEndpoint()
@@ -59,7 +63,11 @@ namespace Api.Test.Controllers
 
             // Act
             const string Url = "/plants";
-            var response = await Client.PostAsync(Url, content);
+            var response = await Client.PostAsync(
+                Url,
+                content,
+                TestContext.Current.CancellationToken
+            );
 
             // Assert
             var plant = await PlantService.ReadByInstallationAndPlantCode(
