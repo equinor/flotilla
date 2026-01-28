@@ -33,7 +33,7 @@ export const RobotStatusSection = () => {
                     : -1
         )
 
-    const robotDisplay = relevantRobots.map((robot) => <RobotStatusCard key={robot.id} robot={robot} />)
+    const robotDisplay = relevantRobots.map((robot) => <RobotStatusCard key={robot.id} robotId={robot.id} />)
 
     return (
         <RobotView>

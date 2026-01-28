@@ -41,12 +41,6 @@ const defaultAssetState = {
     switchInstallation: () => {},
 }
 
-interface RobotPropertyUpdate {
-    robotId: string
-    propertyName: string
-    propertyValue: any
-}
-
 export const AssetContext = createContext<IAssetContext>(defaultAssetState)
 
 export const AssetProvider: FC<Props> = ({ children }) => {
@@ -87,23 +81,6 @@ export const AssetProvider: FC<Props> = ({ children }) => {
                 setEnabledRobots((oldRobotList) => {
                     let oldRobotListCopy = [...oldRobotList]
                     oldRobotListCopy = upsertRobotList(oldRobotListCopy, updatedRobot)
-                    return [...oldRobotListCopy]
-                })
-            })
-            registerEvent(SignalREventLabels.robotPropertyUpdated, (username: string, message: string) => {
-                const robotPropertyUpdate: RobotPropertyUpdate = JSON.parse(message)
-                setEnabledRobots((oldRobotList) => {
-                    const oldRobotListCopy = [...oldRobotList]
-                    const index = oldRobotListCopy.findIndex((r) => r.id === robotPropertyUpdate.robotId)
-                    if (index > -1) {
-                        const robot = oldRobotListCopy[index]
-                        if (robotPropertyUpdate.propertyName in robot) {
-                            ;(robot as any)[robotPropertyUpdate.propertyName] = robotPropertyUpdate.propertyValue
-                            oldRobotListCopy[index] = robot
-                        } else {
-                            console.warn(`Property ${robotPropertyUpdate.propertyName} does not exist on Robot`)
-                        }
-                    }
                     return [...oldRobotListCopy]
                 })
             })

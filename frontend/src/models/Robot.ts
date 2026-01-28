@@ -83,3 +83,9 @@ export const getRobotTypeString = (type: RobotType): string => {
     if (type === RobotType.TaurobInspector || type === RobotType.TaurobOperator) return 'Taurob'
     return type.toString()
 }
+
+export interface RobotPropertyUpdate {
+    robotId: string
+    propertyName: string
+    propertyValue: any
+}
