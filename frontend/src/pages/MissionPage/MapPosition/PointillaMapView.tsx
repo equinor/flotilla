@@ -1,4 +1,4 @@
-import { MapContainer } from 'react-leaflet'
+import { MapContainer, Polygon } from 'react-leaflet'
 import AuthTileLayer from './PointillaMap'
 import 'leaflet/dist/leaflet.css'
 import L, { LatLngBoundsExpression } from 'leaflet'
@@ -11,6 +11,8 @@ import { phone_width } from 'utils/constants'
 import { Mission } from 'models/Mission'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 import { getRobotMarker, getTaskMarkers } from './PointillaMapMarkers'
+import { PolygonPoint } from 'models/InspectionArea'
+import 'utils/leaflet-overrides.css'
 
 const LeafletTooltipStyles = createGlobalStyle`
     .leaflet-tooltip.circleLabel {
@@ -51,15 +53,16 @@ const StyledMapContainer = styled(MapContainer)`
 type PlantMapProps = {
     plantCode: string
     floorId: string
-    mission: Mission
+    mission?: Mission
+    polygon?: PolygonPoint[]
 }
 
-export default function PlantMap({ plantCode, floorId, mission }: PlantMapProps) {
+export default function PlantMap({ plantCode, floorId, mission, polygon }: PlantMapProps) {
     const { enabledRobots } = useAssetContext()
     const [mapInfo, setMapInfo] = useState<PointillaMapInfo | undefined>(undefined)
     const [map, setMap] = useState<L.Map | null>(null)
 
-    const robot = enabledRobots.find((r) => r.id === mission.robot.id)
+    const robot = enabledRobots.find((r) => r.id === mission?.robot.id)
     const tasks = mission?.tasks
     const updateIntervalRobotAuraInMS = 50
 
@@ -100,6 +103,10 @@ export default function PlantMap({ plantCode, floorId, mission }: PlantMapProps)
         map.options.maxZoom = info.zoomMax
     }
 
+    const toLeafletPositions = (positions: PolygonPoint[]): [number, number][] => positions.map((p) => [p.y, p.x])
+
+    const positions = polygon ? toLeafletPositions(polygon) : undefined
+
     useEffect(() => {
         loadMap()
     }, [plantCode, floorId, map])
@@ -139,11 +146,28 @@ export default function PlantMap({ plantCode, floorId, mission }: PlantMapProps)
         }
     }, [robot?.pose])
 
+    useEffect(() => {
+        if (!positions || positions.length < 3 || !map) return
+
+        const bounds = L.latLngBounds(positions)
+        map.fitBounds(bounds)
+    }, [map, positions])
+
     return (
         <div className="map-root">
             <StyledElements>
                 <LeafletTooltipStyles />
                 <StyledMapContainer ref={setMap} attributionControl={false}>
+                    {polygon && positions && (
+                        <Polygon
+                            positions={positions}
+                            pathOptions={{
+                                color: 'red',
+                                fillOpacity: 0.2,
+                                weight: 1,
+                            }}
+                        />
+                    )}
                     {mapInfo && <AuthTileLayer mapInfo={mapInfo} />}
                 </StyledMapContainer>
                 <MapCompass />
