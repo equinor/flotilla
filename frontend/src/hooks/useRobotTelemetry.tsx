@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { RobotWithoutTelemetry, RobotPropertyUpdate } from 'models/Robot'
+import { RobotWithoutTelemetry, RobotTelemetryPropertyUpdate } from 'models/Robot'
 import { SignalREventLabels, useSignalRContext } from 'components/Contexts/SignalRContext'
 import { Pose } from 'models/Pose'
 import { BatteryStatus } from 'models/Battery'
@@ -26,20 +26,20 @@ export const useRobotTelemetry = (robotWithoutDetails: RobotWithoutTelemetry) =>
     useEffect(() => {
         if (connectionReady) {
             registerEvent(SignalREventLabels.robotPropertyUpdated, (username: string, message: string) => {
-                const robotPropertyUpdate: RobotPropertyUpdate = JSON.parse(message)
+                const robotPropertyUpdate: RobotTelemetryPropertyUpdate = JSON.parse(message)
                 if (robotPropertyUpdate.robotId === robotId) {
                     if (robotPropertyUpdate.propertyName === 'batteryLevel') {
-                        setRobotBatteryLevel(robotPropertyUpdate.propertyValue)
+                        setRobotBatteryLevel(robotPropertyUpdate.propertyValue as number)
                         clearTimeout(batteryReadingTimer)
                         batteryReadingTimer = setTimeout(clearBatteryLevel, 30 * 1000) // Time in milliseconds
                     } else if (robotPropertyUpdate.propertyName === 'pressureLevel') {
-                        setRobotPressureLevel(robotPropertyUpdate.propertyValue)
+                        setRobotPressureLevel(robotPropertyUpdate.propertyValue as number)
                         clearTimeout(pressureReadingTimer)
                         pressureReadingTimer = setTimeout(clearPressureLevel, 30 * 1000) // Time in milliseconds
                     } else if (robotPropertyUpdate.propertyName === 'batteryState') {
-                        setRobotBatteryStatus(robotPropertyUpdate.propertyValue)
+                        setRobotBatteryStatus(robotPropertyUpdate.propertyValue as BatteryStatus)
                     } else if (robotPropertyUpdate.propertyName === 'pose') {
-                        setRobotPose(robotPropertyUpdate.propertyValue)
+                        setRobotPose(robotPropertyUpdate.propertyValue as Pose)
                     }
                 }
             })
