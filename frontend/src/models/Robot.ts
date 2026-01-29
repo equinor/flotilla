@@ -1,5 +1,7 @@
+import { BatteryStatus } from './Battery'
 import { DocumentInfo } from './DocumentInfo'
 import { Installation, placeholderInstallation } from './Installation'
+import { Pose } from './Pose'
 
 export enum RobotType {
     TaurobInspector = 'TaurobInspector',
@@ -52,6 +54,13 @@ export interface RobotWithoutTelemetry {
     currentInspectionAreaId?: string
     type: RobotType
 }
+interface RobotTelemetry {
+    batteryLevel: number
+    batteryState: BatteryStatus
+    pressureLevel: number
+    pose: Pose
+}
+export const robotTelemetryPropsList = ['batteryLevel', 'batteryState', 'pressureLevel', 'pose']
 export const placeholderRobot: RobotWithoutTelemetry = {
     id: 'placeholderRobotId',
     currentInstallation: placeholderInstallation,
@@ -80,6 +89,11 @@ export const getRobotTypeString = (type: RobotType): string => {
 
 export interface RobotPropertyUpdate {
     robotId: string
-    propertyName: string
+    propertyName: keyof RobotWithoutTelemetry
     propertyValue: any
+}
+export interface RobotTelemetryPropertyUpdate {
+    robotId: string
+    propertyName: keyof RobotTelemetry
+    propertyValue: number | BatteryStatus | Pose
 }
