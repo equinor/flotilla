@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, FC, useEffect } from 'react'
 import { BackendAPICaller } from 'api/ApiCaller'
-import { RobotWithoutTelemetry, RobotPropertyUpdate } from 'models/Robot'
+import { RobotPropertyUpdate, RobotWithoutTelemetry, robotTelemetryPropsList } from 'models/Robot'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { useLanguageContext } from './LanguageContext'
 import { AlertType, useAlertContext } from './AlertContext'
@@ -82,20 +82,22 @@ export const AssetProvider: FC<Props> = ({ children }) => {
             })
             registerEvent(SignalREventLabels.robotPropertyUpdated, (username: string, message: string) => {
                 const robotPropertyUpdate: RobotPropertyUpdate = JSON.parse(message)
-                setEnabledRobots((oldRobotList) => {
-                    const oldRobotListCopy = [...oldRobotList]
-                    const index = oldRobotListCopy.findIndex((r) => r.id === robotPropertyUpdate.robotId)
-                    if (index > -1) {
-                        const robot = oldRobotListCopy[index]
-                        if (robotPropertyUpdate.propertyName in robot) {
-                            ;(robot as any)[robotPropertyUpdate.propertyName] = robotPropertyUpdate.propertyValue
-                            oldRobotListCopy[index] = robot
-                        } else {
-                            console.warn(`Property ${robotPropertyUpdate.propertyName} does not exist on Robot`)
+                if (!robotTelemetryPropsList.includes(robotPropertyUpdate.propertyName)) {
+                    setEnabledRobots((oldRobotList) => {
+                        const oldRobotListCopy = [...oldRobotList]
+                        const index = oldRobotListCopy.findIndex((r) => r.id === robotPropertyUpdate.robotId)
+                        if (index > -1) {
+                            const robot = oldRobotListCopy[index]
+                            if (robotPropertyUpdate.propertyName in robot) {
+                                ;(robot as any)[robotPropertyUpdate.propertyName] = robotPropertyUpdate.propertyValue
+                                oldRobotListCopy[index] = robot
+                            } else {
+                                console.warn(`Property ${robotPropertyUpdate.propertyName} does not exist on Robot`)
+                            }
                         }
-                    }
-                    return [...oldRobotListCopy]
-                })
+                        return [...oldRobotListCopy]
+                    })
+                }
             })
             registerEvent(SignalREventLabels.robotDeleted, (username: string, message: string) => {
                 const updatedRobot: RobotWithoutTelemetry = JSON.parse(message)
