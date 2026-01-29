@@ -1,5 +1,4 @@
-import { createContext, FC, useContext, useEffect, useState } from 'react'
-import { Task } from 'models/Task'
+import { createContext, FC, useContext, useEffect } from 'react'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { SaraAnalysisResultReady, SaraInspectionVisualizationReady } from 'models/Inspection'
 import { useQuery } from '@tanstack/react-query'
@@ -7,8 +6,6 @@ import { BackendAPICaller } from 'api/ApiCaller'
 import { queryClient } from '../../App'
 
 interface IInspectionsContext {
-    selectedInspectionTask: Task | undefined
-    switchSelectedInspectionTask: (selectedInspectionTask: Task | undefined) => void
     fetchImageData: (inspectionId: string) => any
     fetchAnalysisData: (inspectionId: string) => any
 }
@@ -18,8 +15,6 @@ interface Props {
 }
 
 const defaultInspectionsContext = {
-    selectedInspectionTask: undefined,
-    switchSelectedInspectionTask: () => undefined,
     fetchImageData: () => undefined,
     fetchAnalysisData: () => undefined,
 }
@@ -28,7 +23,6 @@ const InspectionsContext = createContext<IInspectionsContext>(defaultInspections
 
 export const InspectionsProvider: FC<Props> = ({ children }) => {
     const { registerEvent, connectionReady } = useSignalRContext()
-    const [selectedInspectionTask, setSelectedInspectionTask] = useState<Task>()
 
     useEffect(() => {
         if (connectionReady) {
@@ -53,10 +47,6 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
             })
         }
     }, [registerEvent, connectionReady])
-
-    const switchSelectedInspectionTask = (selectedTask: Task | undefined) => {
-        setSelectedInspectionTask(selectedTask)
-    }
 
     const fetchImageData = (
         inspectionId: string
@@ -94,8 +84,6 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
     return (
         <InspectionsContext.Provider
             value={{
-                selectedInspectionTask,
-                switchSelectedInspectionTask,
                 fetchImageData,
                 fetchAnalysisData,
             }}
