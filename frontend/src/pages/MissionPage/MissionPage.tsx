@@ -16,6 +16,7 @@ import { StyledPage } from 'components/Styles/StyledComponents'
 import { InspectionDialogView } from '../InspectionReportPage/InspectionView'
 import { InspectionOverviewSection } from '../InspectionReportPage/InspectionOverview'
 import { TaskTableAndMap } from './TaskTableAndMap'
+import { AnalysisResultDialogView } from './AnalysisResultView'
 
 const StyledMissionPageContent = styled.div`
     display: flex;
@@ -35,7 +36,15 @@ export const VideoStreamSection = styled.div`
     gap: 1rem;
 `
 
-export const MissionPage = ({ missionId, inspectionId }: { missionId: string; inspectionId: string | undefined }) => {
+export const MissionPage = ({
+    missionId,
+    inspectionId,
+    analysisId,
+}: {
+    missionId: string
+    inspectionId: string | undefined
+    analysisId: string | undefined
+}) => {
     const { TranslateText } = useLanguageContext()
     const { setAlert, setListAlert } = useAlertContext()
     const [videoMediaStreams, setVideoMediaStreams] = useState<MediaStreamTrack[]>([])
@@ -110,6 +119,12 @@ export const MissionPage = ({ missionId, inspectionId }: { missionId: string; in
                                     tasks={selectedMission.tasks}
                                 />
                             )}
+                            {analysisId && (
+                                <AnalysisResultDialogView
+                                    selectedAnalysisId={analysisId}
+                                    tasks={selectedMission.tasks}
+                                />
+                            )}
                             <InspectionOverviewSection tasks={selectedMission.tasks} />
                         </StyledCardsWidth>
                     </StyledMissionPageContent>
@@ -122,9 +137,11 @@ export const MissionPage = ({ missionId, inspectionId }: { missionId: string; in
 export const SimpleMissionPage = ({
     missionId,
     inspectionId,
+    analysisId,
 }: {
     missionId: string
     inspectionId: string | undefined
+    analysisId: string | undefined
 }) => {
     const { TranslateText } = useLanguageContext()
     const { setAlert } = useAlertContext()
@@ -187,6 +204,9 @@ export const SimpleMissionPage = ({
                         </VideoStreamSection>
                         {inspectionId && (
                             <InspectionDialogView selectedInspectionId={inspectionId} tasks={selectedMission.tasks} />
+                        )}
+                        {analysisId && (
+                            <AnalysisResultDialogView selectedAnalysisId={analysisId} tasks={selectedMission.tasks} />
                         )}
                         <InspectionOverviewSection tasks={selectedMission.tasks} />
                     </StyledCardsWidth>

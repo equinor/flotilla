@@ -22,6 +22,7 @@ const PageRouter = ({ prefix }: PageRouterProps) => {
     const [searchParams, setSearchParams] = useSearchParams()
     const [id, setId] = useState<string | undefined>(undefined)
     const [inspectionId, setInspectionId] = useState<string | undefined>(undefined)
+    const [analysisId, setAnalysisId] = useState<string | undefined>(undefined)
 
     useEffect(() => {
         if (!searchParams || searchParams.size < 1) {
@@ -31,6 +32,7 @@ const PageRouter = ({ prefix }: PageRouterProps) => {
 
         const id = searchParams.get('id')
         const inspectionId = searchParams.get('inspectionId')
+        const analysisId = searchParams.get('analysisId')
         if (!id || !ValidateUUID(id)) {
             navigate(`${config.FRONTEND_BASE_ROUTE}/page-not-found`)
             return
@@ -44,6 +46,15 @@ const PageRouter = ({ prefix }: PageRouterProps) => {
         } else {
             setInspectionId(undefined)
         }
+        if (analysisId) {
+            if (!ValidateUUID(analysisId)) {
+                navigate(`${config.FRONTEND_BASE_ROUTE}/page-not-found`)
+                return
+            }
+            setAnalysisId(analysisId)
+        } else {
+            setAnalysisId(undefined)
+        }
         setId(id)
     }, [searchParams])
 
@@ -51,9 +62,9 @@ const PageRouter = ({ prefix }: PageRouterProps) => {
 
     switch (prefix) {
         case PageRouterPrefixes.SimpleMission:
-            return <SimpleMissionPage missionId={id} inspectionId={inspectionId} />
+            return <SimpleMissionPage missionId={id} inspectionId={inspectionId} analysisId={analysisId} />
         case PageRouterPrefixes.Mission:
-            return <MissionPage missionId={id} inspectionId={inspectionId} />
+            return <MissionPage missionId={id} inspectionId={inspectionId} analysisId={analysisId} />
         case PageRouterPrefixes.MissionDefinition:
             return <MissionDefinitionPage missionId={id} />
         case PageRouterPrefixes.Robot:
