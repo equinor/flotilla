@@ -18,10 +18,11 @@ import {
     LargeImagePendingPlaceholder,
 } from 'pages/InspectionReportPage/InspectionReportImage'
 import styled from 'styled-components'
+import { useInspectionId } from 'pages/InspectionReportPage/SetInspectionIdHook'
 
 interface InspectionDialogViewProps {
-    selectedTask: Task
-    onClose: () => void
+    selectedAnalysisId: string
+    tasks: Task[]
 }
 const StyledImage = styled.img<{ $otherContentHeight?: string }>`
     max-height: calc(60vh - ${(props) => props.$otherContentHeight});
@@ -38,15 +39,32 @@ const AnalysisImage = ({ inspectionId }: { inspectionId: string }) => {
     return <StyledImage $otherContentHeight="0px" src={data} />
 }
 
-export const AnalysisResultDialogView = ({ selectedTask, onClose }: InspectionDialogViewProps) => {
+export const AnalysisResultDialogView = ({ selectedAnalysisId, tasks }: InspectionDialogViewProps) => {
     const { TranslateText } = useLanguageContext()
+    const { switchSelectedAnalysisId } = useInspectionId()
+
+    const onClose = () => switchSelectedAnalysisId(undefined)
+
+    const currentTask = tasks.find((t) => t.inspection.id == selectedAnalysisId)
+
+    if (!currentTask) {
+        return (
+            <StyledDialog open={true} isDismissable onClose={onClose}>
+                <StyledDialogContent>
+                    <StyledDialogInspectionView>
+                        <LargeImageErrorPlaceholder errorMessage="No analysis could be found" />
+                    </StyledDialogInspectionView>
+                </StyledDialogContent>
+            </StyledDialog>
+        )
+    }
 
     return (
         <StyledDialog open={true} isDismissable onClose={onClose}>
             <StyledDialogContent>
                 <StyledDialogHeader>
                     <Typography variant="accordion_header" group="ui">
-                        {TranslateText('Analysis result for task') + ' ' + (selectedTask.taskOrder + 1)}
+                        {TranslateText('Analysis result for task') + ' ' + (currentTask.taskOrder + 1)}
                     </Typography>
                     <StyledCloseButton variant="ghost" onClick={onClose}>
                         <Icon name={Icons.Clear} size={24} />
@@ -54,44 +72,44 @@ export const AnalysisResultDialogView = ({ selectedTask, onClose }: InspectionDi
                 </StyledDialogHeader>
                 <StyledDialogInspectionView>
                     <div>
-                        {selectedTask.inspection.analysisResult?.storageAccount ? (
-                            <AnalysisImage inspectionId={selectedTask.inspection.isarInspectionId} />
+                        {currentTask.inspection.analysisResult?.storageAccount ? (
+                            <AnalysisImage inspectionId={currentTask.inspection.isarInspectionId} />
                         ) : (
                             <>{/* No image to display*/}</>
                         )}
                         <StyledBottomContent>
                             <StyledInfoContent>
                                 <Typography variant="caption">{TranslateText('Tag') + ':'}</Typography>
-                                <Typography variant="body_short">{selectedTask.tagId}</Typography>
+                                <Typography variant="body_short">{currentTask.tagId}</Typography>
                             </StyledInfoContent>
-                            {selectedTask.description && (
+                            {currentTask.description && (
                                 <StyledInfoContent>
                                     <Typography variant="caption">{TranslateText('Description') + ':'}</Typography>
-                                    <Typography variant="body_short">{selectedTask.description}</Typography>
+                                    <Typography variant="body_short">{currentTask.description}</Typography>
                                 </StyledInfoContent>
                             )}
-                            {selectedTask.endTime && (
+                            {currentTask.endTime && (
                                 <StyledInfoContent>
                                     <Typography variant="caption">{TranslateText('Timestamp') + ':'}</Typography>
                                     <Typography variant="body_short">
-                                        {formatDateTime(selectedTask.endTime, 'dd.MM.yy - HH:mm')}
+                                        {formatDateTime(currentTask.endTime, 'dd.MM.yy - HH:mm')}
                                     </Typography>
                                 </StyledInfoContent>
                             )}
-                            {selectedTask.inspection.analysisResult?.warning && (
+                            {currentTask.inspection.analysisResult?.warning && (
                                 <StyledInfoContent>
                                     <Typography variant="caption">{TranslateText('Warning') + ':'}</Typography>
                                     <Typography variant="body_short">
-                                        {selectedTask.inspection.analysisResult.warning}
+                                        {currentTask.inspection.analysisResult.warning}
                                     </Typography>
                                 </StyledInfoContent>
                             )}
-                            {selectedTask.inspection.analysisResult?.confidence &&
-                                selectedTask.inspection.analysisResult?.unit && (
+                            {currentTask.inspection.analysisResult?.confidence &&
+                                currentTask.inspection.analysisResult?.unit && (
                                     <StyledInfoContent>
                                         <Typography variant="caption">{TranslateText('Confidence') + ':'}</Typography>
                                         <Typography variant="body_short">
-                                            {selectedTask.inspection.analysisResult.confidence + '%'}
+                                            {currentTask.inspection.analysisResult.confidence + '%'}
                                         </Typography>
                                     </StyledInfoContent>
                                 )}

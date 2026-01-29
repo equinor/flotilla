@@ -1,9 +1,8 @@
 import { Button, Typography } from '@equinor/eds-core-react'
-import { useState } from 'react'
 import { Task } from 'models/Task'
-import { AnalysisResultDialogView } from '../AnalysisResultView'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import styled from 'styled-components'
+import { useInspectionId } from 'pages/InspectionReportPage/SetInspectionIdHook'
 
 const Styledbutton = styled(Button)`
     &:hover {
@@ -13,24 +12,24 @@ const Styledbutton = styled(Button)`
 `
 
 export const TaskAnalysisDisplay = ({ task }: { task: Task }) => {
-    const [dialogOpen, setDialogOpen] = useState(false)
     const { TranslateText } = useLanguageContext()
+    const { switchSelectedAnalysisId } = useInspectionId()
 
     const analysis = task.inspection.analysisResult
-
-    const handleOpenDialog = () => setDialogOpen(true)
-    const handleCloseDialog = () => setDialogOpen(false)
 
     return (
         <>
             {analysis?.analysisType && (
-                <Styledbutton variant="ghost" color="danger" onClick={handleOpenDialog}>
+                <Styledbutton
+                    variant="ghost"
+                    color="danger"
+                    onClick={() => switchSelectedAnalysisId(task.inspection.id)}
+                >
                     <Typography link color="danger">
                         {TranslateText('Result')}
                     </Typography>
                 </Styledbutton>
             )}
-            {dialogOpen && <AnalysisResultDialogView selectedTask={task} onClose={handleCloseDialog} />}
         </>
     )
 }
