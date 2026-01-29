@@ -1,4 +1,3 @@
-import { useInspectionsContext } from 'components/Contexts/InspectionsContext'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Task, TaskStatus } from 'models/Task'
 import {
@@ -13,10 +12,11 @@ import {
 import { Typography } from '@equinor/eds-core-react'
 import { formatDateTime } from 'utils/StringFormatting'
 import { SmallInspectionImage } from 'pages/InspectionReportPage/InspectionReportImage'
+import { useInspectionId } from './SetInspectionIdHook'
 
 const InspectionOverview = ({ tasks }: { tasks: Task[] }) => {
     const { TranslateText } = useLanguageContext()
-    const { switchSelectedInspectionTask } = useInspectionsContext()
+    const { switchSelectedInspectionId } = useInspectionId()
 
     return (
         <StyledImagesSection>
@@ -25,7 +25,10 @@ const InspectionOverview = ({ tasks }: { tasks: Task[] }) => {
                     tasks.map(
                         (task) =>
                             task.status === TaskStatus.Successful && (
-                                <StyledImageCard key={task.id} onClick={() => switchSelectedInspectionTask(task)}>
+                                <StyledImageCard
+                                    key={task.id}
+                                    onClick={() => switchSelectedInspectionId(task.inspection.id)}
+                                >
                                     <SmallInspectionImage task={task} />
                                     <StyledInspectionData>
                                         {task.tagId && (

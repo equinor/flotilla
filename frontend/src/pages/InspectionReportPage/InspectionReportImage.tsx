@@ -83,7 +83,7 @@ const InspectionImageWithPlaceholder = ({ task, isLargeImage }: { task: Task; is
         ) : (
             <SmallImageErrorPlaceholder errorMessage={errorMsg} />
         )
-    } else if (isError) {
+    } else if (isError || !data) {
         const errorMsg = 'No inspection could be found'
         return isLargeImage ? (
             <LargeImageErrorPlaceholder errorMessage={errorMsg} />

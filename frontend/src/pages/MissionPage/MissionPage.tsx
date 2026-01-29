@@ -14,7 +14,6 @@ import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { useMediaStreamContext } from 'components/Contexts/MediaStreamContext'
 import { StyledPage } from 'components/Styles/StyledComponents'
 import { InspectionDialogView } from '../InspectionReportPage/InspectionView'
-import { useInspectionsContext } from 'components/Contexts/InspectionsContext'
 import { InspectionOverviewSection } from '../InspectionReportPage/InspectionOverview'
 import { TaskTableAndMap } from './TaskTableAndMap'
 
@@ -36,14 +35,13 @@ export const VideoStreamSection = styled.div`
     gap: 1rem;
 `
 
-export const MissionPage = ({ missionId }: { missionId: string }) => {
+export const MissionPage = ({ missionId, inspectionId }: { missionId: string; inspectionId: string | undefined }) => {
     const { TranslateText } = useLanguageContext()
     const { setAlert, setListAlert } = useAlertContext()
     const [videoMediaStreams, setVideoMediaStreams] = useState<MediaStreamTrack[]>([])
     const [selectedMission, setSelectedMission] = useState<Mission>()
     const { registerEvent, connectionReady } = useSignalRContext()
     const { mediaStreams, addMediaStreamConfigIfItDoesNotExist } = useMediaStreamContext()
-    const { selectedInspectionTask } = useInspectionsContext()
 
     useEffect(() => {
         if (selectedMission && !Object.keys(mediaStreams).includes(selectedMission?.robot.id))
@@ -106,9 +104,9 @@ export const MissionPage = ({ missionId }: { missionId: string }) => {
                                     <VideoStreamWindow videoStreams={videoMediaStreams} />
                                 )}
                             </VideoStreamSection>
-                            {selectedInspectionTask && selectedInspectionTask.id && (
+                            {inspectionId && (
                                 <InspectionDialogView
-                                    selectedTask={selectedInspectionTask}
+                                    selectedInspectionId={inspectionId}
                                     tasks={selectedMission.tasks}
                                 />
                             )}
@@ -121,14 +119,19 @@ export const MissionPage = ({ missionId }: { missionId: string }) => {
     )
 }
 
-export const SimpleMissionPage = ({ missionId }: { missionId: string }) => {
+export const SimpleMissionPage = ({
+    missionId,
+    inspectionId,
+}: {
+    missionId: string
+    inspectionId: string | undefined
+}) => {
     const { TranslateText } = useLanguageContext()
     const { setAlert } = useAlertContext()
     const [videoMediaStreams, setVideoMediaStreams] = useState<MediaStreamTrack[]>([])
     const [selectedMission, setSelectedMission] = useState<Mission>()
     const { registerEvent, connectionReady } = useSignalRContext()
     const { mediaStreams, addMediaStreamConfigIfItDoesNotExist } = useMediaStreamContext()
-    const { selectedInspectionTask } = useInspectionsContext()
 
     useEffect(() => {
         if (selectedMission && !Object.keys(mediaStreams).includes(selectedMission?.robot.id))
@@ -182,8 +185,8 @@ export const SimpleMissionPage = ({ missionId }: { missionId: string }) => {
                                 <VideoStreamWindow videoStreams={videoMediaStreams} />
                             )}
                         </VideoStreamSection>
-                        {selectedInspectionTask && selectedInspectionTask.id && (
-                            <InspectionDialogView selectedTask={selectedInspectionTask} tasks={selectedMission.tasks} />
+                        {inspectionId && (
+                            <InspectionDialogView selectedInspectionId={inspectionId} tasks={selectedMission.tasks} />
                         )}
                         <InspectionOverviewSection tasks={selectedMission.tasks} />
                     </StyledCardsWidth>

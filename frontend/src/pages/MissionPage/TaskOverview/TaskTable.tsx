@@ -7,7 +7,7 @@ import { Task, TaskStatus } from 'models/Task'
 import { tokens } from '@equinor/eds-tokens'
 import { getColorsFromTaskStatus } from 'utils/MarkerStyles'
 import { ValidInspectionReportInspectionTypes } from 'models/Inspection'
-import { useInspectionsContext } from 'components/Contexts/InspectionsContext'
+import { useInspectionId } from 'pages/InspectionReportPage/SetInspectionIdHook'
 
 const StyledTable = styled(Table)`
     display: block;
@@ -117,7 +117,7 @@ interface InspectionTypesDisplayProps {
 
 const InspectionTypesDisplay = ({ task }: InspectionTypesDisplayProps) => {
     const { TranslateText } = useLanguageContext()
-    const { switchSelectedInspectionTask } = useInspectionsContext()
+    const { switchSelectedInspectionId } = useInspectionId()
 
     return (
         <>
@@ -127,7 +127,7 @@ const InspectionTypesDisplay = ({ task }: InspectionTypesDisplayProps) => {
                     <Button
                         key={task.id + task.inspection.id + 'insp'}
                         variant="ghost"
-                        onClick={() => switchSelectedInspectionTask(task)}
+                        onClick={() => switchSelectedInspectionId(task.inspection.id)}
                         style={{ padding: 0 }}
                     >
                         <Typography variant="body_short_link">

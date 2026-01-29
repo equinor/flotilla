@@ -21,6 +21,7 @@ const PageRouter = ({ prefix }: PageRouterProps) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [searchParams, setSearchParams] = useSearchParams()
     const [id, setId] = useState<string | undefined>(undefined)
+    const [inspectionId, setInspectionId] = useState<string | undefined>(undefined)
 
     useEffect(() => {
         if (!searchParams || searchParams.size < 1) {
@@ -29,9 +30,19 @@ const PageRouter = ({ prefix }: PageRouterProps) => {
         }
 
         const id = searchParams.get('id')
+        const inspectionId = searchParams.get('inspectionId')
         if (!id || !ValidateUUID(id)) {
             navigate(`${config.FRONTEND_BASE_ROUTE}/page-not-found`)
             return
+        }
+        if (inspectionId) {
+            if (!ValidateUUID(inspectionId)) {
+                navigate(`${config.FRONTEND_BASE_ROUTE}/page-not-found`)
+                return
+            }
+            setInspectionId(inspectionId)
+        } else {
+            setInspectionId(undefined)
         }
         setId(id)
     }, [searchParams])
@@ -40,9 +51,9 @@ const PageRouter = ({ prefix }: PageRouterProps) => {
 
     switch (prefix) {
         case PageRouterPrefixes.SimpleMission:
-            return <SimpleMissionPage missionId={id} />
+            return <SimpleMissionPage missionId={id} inspectionId={inspectionId} />
         case PageRouterPrefixes.Mission:
-            return <MissionPage missionId={id} />
+            return <MissionPage missionId={id} inspectionId={inspectionId} />
         case PageRouterPrefixes.MissionDefinition:
             return <MissionDefinitionPage missionId={id} />
         case PageRouterPrefixes.Robot:
