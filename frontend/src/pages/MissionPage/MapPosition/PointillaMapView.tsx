@@ -9,8 +9,8 @@ import styled, { createGlobalStyle } from 'styled-components'
 import { MapCompass } from 'utils/MapCompass'
 import { phone_width } from 'utils/constants'
 import { Mission } from 'models/Mission'
-import { useAssetContext } from 'components/Contexts/AssetContext'
 import { getRobotMarker, getTaskMarkers } from './PointillaMapMarkers'
+import { useRobotTelemetry } from 'hooks/useRobotTelemetry'
 
 const LeafletTooltipStyles = createGlobalStyle`
     .leaflet-tooltip.circleLabel {
@@ -55,11 +55,10 @@ type PlantMapProps = {
 }
 
 export default function PlantMap({ plantCode, floorId, mission }: PlantMapProps) {
-    const { enabledRobots } = useAssetContext()
     const [mapInfo, setMapInfo] = useState<PointillaMapInfo | undefined>(undefined)
     const [map, setMap] = useState<L.Map | null>(null)
+    const { robotPose } = useRobotTelemetry(mission.robot)
 
-    const robot = enabledRobots.find((r) => r.id === mission.robot.id)
     const tasks = mission?.tasks
     const updateIntervalRobotAuraInMS = 50
 
@@ -126,18 +125,18 @@ export default function PlantMap({ plantCode, floorId, mission }: PlantMapProps)
     }, [tasks])
 
     useEffect(() => {
-        if (!robot?.pose || !map) return
-        let robotMarkers = getRobotMarker(map, robot.pose)
+        if (!robotPose || !map) return
+        let robotMarkers = getRobotMarker(map, robotPose)
         const timer = setInterval(() => {
             robotMarkers.forEach((marker) => marker?.remove())
-            if (!robot?.pose || !map) return
-            robotMarkers = getRobotMarker(map, robot.pose)
+            if (!robotPose || !map) return
+            robotMarkers = getRobotMarker(map, robotPose)
         }, updateIntervalRobotAuraInMS)
         return () => {
             clearInterval(timer)
             robotMarkers.forEach((marker) => marker?.remove())
         }
-    }, [robot?.pose])
+    }, [robotPose])
 
     return (
         <div className="map-root">

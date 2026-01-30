@@ -2,7 +2,7 @@ import { Autocomplete, Dialog, Typography, Icon } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useState } from 'react'
-import { Robot, RobotStatus } from 'models/Robot'
+import { RobotWithoutTelemetry, RobotStatus } from 'models/Robot'
 import { MissionDefinition } from 'models/MissionDefinition'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { Icons } from 'utils/icons'
@@ -71,11 +71,11 @@ export const ScheduleMissionDialog = (props: IProps) => {
                 r.status === RobotStatus.Recharging) &&
             r.isarConnected
     )
-    const [selectedRobot, setSelectedRobot] = useState<Robot | undefined>(
+    const [selectedRobot, setSelectedRobot] = useState<RobotWithoutTelemetry | undefined>(
         filteredRobots.length === 1 ? filteredRobots[0] : undefined
     )
 
-    const onSelectedRobot = (selectedRobot: Robot) => {
+    const onSelectedRobot = (selectedRobot: RobotWithoutTelemetry) => {
         if (filteredRobots) setSelectedRobot(selectedRobot)
     }
 

@@ -1,5 +1,5 @@
+import { getRobotTypeString, RobotWithoutTelemetry, RobotStatus, RobotType } from 'models/Robot'
 import { Button, Icon, Typography } from '@equinor/eds-core-react'
-import { getRobotTypeString, Robot, RobotStatus, RobotType } from 'models/Robot'
 import { tokens } from '@equinor/eds-tokens'
 import { RobotStatusChip } from 'components/Displays/RobotDisplays/RobotStatusIcon'
 import { BatteryStatusDisplay } from 'components/Displays/RobotDisplays/BatteryStatusDisplay'
@@ -12,6 +12,7 @@ import { config } from 'config'
 import { StyledButton, AttributeTitleTypography } from 'components/Styles/StyledComponents'
 import { Icons } from 'utils/icons'
 import { useAssetContext } from 'components/Contexts/AssetContext'
+import { useRobotTelemetry } from 'hooks/useRobotTelemetry'
 
 const StyledRobotCard = styled.div`
     display: flex;
@@ -97,7 +98,13 @@ const HiddenOnLargeScreen = styled.div`
     }
 `
 
-export const RobotCard = ({ robot }: { robot: Robot }) => {
+interface RobotCardProps {
+    robot: RobotWithoutTelemetry
+}
+
+export const RobotCard = ({ robot }: RobotCardProps) => {
+    const { robotBatteryLevel, robotBatteryStatus, robotPressureLevel } = useRobotTelemetry(robot)
+
     const navigate = useNavigate()
     const { TranslateText } = useLanguageContext()
     const { installationCode } = useAssetContext()
@@ -135,15 +142,15 @@ export const RobotCard = ({ robot }: { robot: Robot }) => {
                                 <VerticalContent>
                                     <AttributeTitleTypography>{TranslateText('Battery')}</AttributeTitleTypography>
                                     <BatteryStatusDisplay
-                                        batteryLevel={robot.batteryLevel}
-                                        batteryState={robot.batteryState}
+                                        batteryLevel={robotBatteryLevel}
+                                        batteryState={robotBatteryStatus}
                                     />
                                 </VerticalContent>
 
-                                {robot.pressureLevel !== undefined && robot.pressureLevel !== null && (
+                                {robotPressureLevel !== undefined && (
                                     <VerticalContent>
                                         <AttributeTitleTypography>{TranslateText('Pressure')}</AttributeTitleTypography>
-                                        <PressureStatusDisplay pressure={robot.pressureLevel} />
+                                        <PressureStatusDisplay pressure={robotPressureLevel} />
                                     </VerticalContent>
                                 )}
                             </>
