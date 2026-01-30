@@ -9,6 +9,8 @@ import { InspectionAreaCards } from './InspectionAreaCards'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
 import { useAssetContext } from 'components/Contexts/AssetContext'
+import PlantMap from 'pages/MissionPage/MapPosition/PointillaMapView'
+import { Typography } from '@equinor/eds-core-react'
 
 export interface Inspection {
     missionDefinition: MissionDefinition
@@ -106,15 +108,31 @@ export const InspectionSection = () => {
     return (
         <>
             <InspectionAreaOverview>
-                {installationInspectionAreas.length !== 1 && <InspectionAreaSelection />}
-                {inspectionArea && inspections && (
-                    <InspectionTable
-                        inspectionArea={inspectionArea}
-                        scrollOnToggle={scrollOnToggle}
-                        openDialog={() => setIsDialogOpen(true)}
-                        setSelectedMissions={setSelectedMissions}
-                        inspections={inspections}
-                    />
+                {installationInspectionAreas.length !== 1 && (
+                    <>
+                        <InspectionAreaSelection />
+                        {inspectionArea && inspections && (
+                            <InspectionTable
+                                inspectionArea={inspectionArea}
+                                scrollOnToggle={scrollOnToggle}
+                                openDialog={() => setIsDialogOpen(true)}
+                                setSelectedMissions={setSelectedMissions}
+                                inspections={inspections}
+                            />
+                        )}{' '}
+                    </>
+                )}
+                {inspectionArea?.plantCode && inspectionArea.areaPolygon?.positions && (
+                    <>
+                        <Typography variant="h3" style={{ marginTop: '10px' }}>
+                            {inspectionArea?.inspectionAreaName}
+                        </Typography>
+                        <PlantMap
+                            plantCode={inspectionArea.plantCode}
+                            floorId={'0'}
+                            polygon={inspectionArea.areaPolygon.positions}
+                        />{' '}
+                    </>
                 )}
             </InspectionAreaOverview>
             {isDialogOpen && (
