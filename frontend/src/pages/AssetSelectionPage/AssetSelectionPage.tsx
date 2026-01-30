@@ -87,9 +87,6 @@ const InstallationPicker = () => {
                     const selectedName = selectedItems[0]
                     setSelectedInstallation(selectedName ?? '')
                 }}
-                onInput={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    setSelectedInstallation(e.target.value ?? '')
-                }}
                 autoWidth={true}
                 onFocus={(e) => e.preventDefault()}
             />
