@@ -30,7 +30,6 @@ namespace Api.Database.Models
             Name = "defaultId";
             SerialNumber = "defaultSerialNumber";
             Status = RobotStatus.Offline;
-            IsarConnected = true;
             Deprecated = false;
             Host = "localhost";
             Port = 3000;
@@ -61,7 +60,6 @@ namespace Api.Database.Models
             Documentation = documentation;
             Host = createQuery.Host;
             Port = createQuery.Port;
-            IsarConnected = true;
             Deprecated = false;
             RobotCapabilities = createQuery.RobotCapabilities;
             Status = createQuery.Status;
@@ -113,9 +111,6 @@ namespace Api.Database.Models
         public IList<RobotCapabilitiesEnum>? RobotCapabilities { get; set; }
 
         [Required]
-        public bool IsarConnected { get; set; }
-
-        [Required]
         public bool Deprecated { get; set; }
 
         [Required]
@@ -128,8 +123,6 @@ namespace Api.Database.Models
         ///     The average time in seconds spent by this model on a single tag (excluding recording duration for video/audio)
         /// </summary>
         public float? AverageDurationPerTag { get; set; }
-
-        public DateTime? DisconnectTime { get; set; }
 
         public string? CurrentMissionId { get; set; }
 

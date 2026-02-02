@@ -169,12 +169,11 @@ const SelectRobotComponent = memo(
                 optionLabel={(r: RobotWithoutTelemetry) => (r ? r.name + ' (' + r.type + ')' : '')}
                 options={enabledRobots.filter(
                     (r) =>
-                        (r.status === RobotStatus.Available ||
-                            r.status === RobotStatus.Home ||
-                            r.status === RobotStatus.ReturningHome ||
-                            r.status === RobotStatus.Busy ||
-                            r.status === RobotStatus.Recharging) &&
-                        r.isarConnected
+                        r.status === RobotStatus.Available ||
+                        r.status === RobotStatus.Home ||
+                        r.status === RobotStatus.ReturningHome ||
+                        r.status === RobotStatus.Busy ||
+                        r.status === RobotStatus.Recharging
                 )}
                 disabled={!enabledRobots}
                 selectedOptions={selectedRobot ? [selectedRobot] : []}

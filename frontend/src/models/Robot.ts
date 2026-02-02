@@ -43,8 +43,6 @@ export interface RobotWithoutTelemetry {
     currentInstallation: Installation
     status: RobotStatus
     robotCapabilities?: RobotCapabilitiesEnum[]
-    isarConnected: boolean
-    disconnectTime?: Date
     deprecated: boolean
     host?: string
     logs?: string
@@ -65,9 +63,7 @@ export const placeholderRobot: RobotWithoutTelemetry = {
     id: 'placeholderRobotId',
     currentInstallation: placeholderInstallation,
     status: RobotStatus.Available,
-    isarConnected: true,
     deprecated: false,
-    disconnectTime: undefined,
     type: RobotType.Robot,
 }
 

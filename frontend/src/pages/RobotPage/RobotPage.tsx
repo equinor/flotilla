@@ -23,7 +23,6 @@ import { phone_width } from 'utils/constants'
 import { InterventionNeededButton } from './InterventionNeededButton'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { useQuery } from '@tanstack/react-query'
-import { formatDateTime } from 'utils/StringFormatting'
 import { useRobotTelemetry } from 'hooks/useRobotTelemetry'
 
 const StyledRobotPage = styled(StyledPage)`
@@ -178,11 +177,7 @@ export const RobotPage = ({ robot }: RobotPageProps) => {
                                 <StatusContent>
                                     <StyledStatusElement>
                                         <Typography variant="caption">{TranslateText('Status')}</Typography>
-                                        <RobotStatusChip
-                                            status={robot.status}
-                                            isarConnected={robot.isarConnected}
-                                            itemSize={24}
-                                        />
+                                        <RobotStatusChip status={robot.status} itemSize={24} />
                                     </StyledStatusElement>
 
                                     {robot.status !== RobotStatus.Offline && (
@@ -225,16 +220,6 @@ export const RobotPage = ({ robot }: RobotPageProps) => {
                                                 </StyledWideItem>
                                             )}
                                         </>
-                                    )}
-                                    {robot.isarConnected || !robot.disconnectTime ? (
-                                        <></>
-                                    ) : (
-                                        <StyledWideItem>
-                                            <Typography variant="caption">{TranslateText('Last seen')}</Typography>
-                                            <Typography style={{ fontSize: '24px' }}>
-                                                {formatDateTime(robot.disconnectTime!, 'dd.MM.yy - HH:mm')}
-                                            </Typography>
-                                        </StyledWideItem>
                                     )}
                                 </StatusContent>
                             </RobotInfo>
