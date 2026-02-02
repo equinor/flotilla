@@ -1,5 +1,4 @@
-﻿using Api.Database.Models;
-using Api.Utilities;
+﻿using Api.Utilities;
 
 namespace Api.Services
 {
@@ -20,7 +19,6 @@ namespace Api.Services
             {
                 await missionRunService.UpdateCurrentRobotMissionToFailed(robotId);
                 await robotService.UpdateCurrentMissionId(robotId, null);
-                await robotService.UpdateRobotIsarConnected(robotId, false);
             }
             catch (RobotNotFoundException)
             {

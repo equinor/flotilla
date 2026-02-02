@@ -23,10 +23,6 @@ namespace Api.Controllers.Models
 
         public int Port { get; set; }
 
-        public bool IsarConnected { get; set; }
-
-        public DateTime? DisconnectTime { get; set; }
-
         public bool Deprecated { get; set; }
 
         public RobotStatus Status { get; set; }
@@ -56,8 +52,6 @@ namespace Api.Controllers.Models
             Documentation = robot.Documentation;
             Host = robot.Host;
             Port = robot.Port;
-            IsarConnected = robot.IsarConnected;
-            DisconnectTime = robot.DisconnectTime;
             Deprecated = robot.Deprecated;
             Status = robot.Status;
             CurrentMissionId = robot.CurrentMissionId;

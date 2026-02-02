@@ -64,12 +64,11 @@ export const ScheduleMissionDialog = (props: IProps) => {
     const [missionsToSchedule, setMissionsToSchedule] = useState<MissionDefinition[]>()
     const filteredRobots = enabledRobots.filter(
         (r) =>
-            (r.status === RobotStatus.Available ||
-                r.status === RobotStatus.Home ||
-                r.status === RobotStatus.ReturningHome ||
-                r.status === RobotStatus.Busy ||
-                r.status === RobotStatus.Recharging) &&
-            r.isarConnected
+            r.status === RobotStatus.Available ||
+            r.status === RobotStatus.Home ||
+            r.status === RobotStatus.ReturningHome ||
+            r.status === RobotStatus.Busy ||
+            r.status === RobotStatus.Recharging
     )
     const [selectedRobot, setSelectedRobot] = useState<RobotWithoutTelemetry | undefined>(
         filteredRobots.length === 1 ? filteredRobots[0] : undefined

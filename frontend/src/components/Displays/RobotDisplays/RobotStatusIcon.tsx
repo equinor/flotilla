@@ -7,7 +7,6 @@ import { styled } from 'styled-components'
 
 interface StatusProps {
     status?: RobotStatus
-    isarConnected: boolean
     itemSize?: 24 | 16 | 18 | 32 | 40 | 48 | undefined
 }
 
@@ -26,7 +25,7 @@ const LongTypography = styled(Typography)<{ $fontSize?: 24 | 16 | 18 | 32 | 40 |
     hyphens: auto;
 `
 
-export const RobotStatusChip = ({ status, isarConnected, itemSize }: StatusProps) => {
+export const RobotStatusChip = ({ status, itemSize }: StatusProps) => {
     const { TranslateText } = useLanguageContext()
 
     let iconColor = tokens.colors.text.static_icons__default.hex
@@ -100,12 +99,6 @@ export const RobotStatusChip = ({ status, isarConnected, itemSize }: StatusProps
             status = RobotStatus.Offline
             break
         }
-    }
-
-    if (!isarConnected) {
-        iconColor = tokens.colors.interactive.disabled__text.hex
-        statusIcon = Icons.Info
-        status = RobotStatus.ConnectionIssues
     }
 
     return (

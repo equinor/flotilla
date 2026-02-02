@@ -87,7 +87,7 @@ export const RobotStatusCard = ({ robot }: RobotStatusCardProps) => {
                 <HorizontalContent>
                     <VerticalContent>
                         <Typography variant="meta">{TranslateText('Status')}</Typography>
-                        <RobotStatusChip status={robot.status} isarConnected={robot.isarConnected} />
+                        <RobotStatusChip status={robot.status} />
                     </VerticalContent>
 
                     {robot.status !== RobotStatus.Offline ? (
@@ -125,7 +125,7 @@ export const RobotStatusCardPlaceholder = () => {
                 {TranslateText('No robot connected')}
             </Typography>
             <HorizontalContent>
-                <RobotStatusChip isarConnected={true} />
+                <RobotStatusChip />
             </HorizontalContent>
         </StyledCard>
     )

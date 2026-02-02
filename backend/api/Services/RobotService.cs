@@ -24,8 +24,6 @@ namespace Api.Services
         );
         public Task Update(Robot robot);
         public Task UpdateRobotStatus(string robotId, RobotStatus status);
-        public Task UpdateRobotIsarConnected(string robotId, bool isarConnected);
-        public Task UpdateRobotDisconnectTime(string robotId, DateTime? disconnectTime);
         public Task UpdateCurrentMissionId(string robotId, string? missionId);
         public Task UpdateCurrentInspectionAreaId(string robotId, string? inspectionAreaId);
         public Task UpdateDeprecated(string robotId, bool deprecated);
@@ -118,14 +116,6 @@ namespace Api.Services
                 throw new RobotPreCheckFailedException(errorMessage);
             }
 
-            if (robot.IsarConnected == false)
-            {
-                string errorMessage =
-                    $"The robot with ID {robotId} has connection issues. Isar not connected.";
-                logger.LogError("{Message}", errorMessage);
-                throw new RobotPreCheckFailedException(errorMessage);
-            }
-
             return robot;
         }
 
@@ -173,52 +163,6 @@ namespace Api.Services
             );
 
             await SendToSignalROnPropertyUpdate(robotId, "status", status);
-        }
-
-        public async Task UpdateRobotIsarConnected(string robotId, bool isarConnected)
-        {
-            logger.LogInformation(
-                "Setting isarConnected on robot with id {robotId} to {NewValue}",
-                robotId,
-                isarConnected
-            );
-            var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes(
-                AccessMode.Write
-            );
-            var robotQuery = context.Robots.Where(r =>
-                r.Id == robotId
-                && accessibleInstallationCodes.Contains(
-                    r.CurrentInstallation.InstallationCode.ToUpper()
-                )
-            );
-            await robotQuery.ExecuteUpdateAsync(setters =>
-                setters.SetProperty(r => r.IsarConnected, isarConnected)
-            );
-
-            await SendToSignalROnPropertyUpdate(robotId, "isarConnected", isarConnected);
-        }
-
-        public async Task UpdateRobotDisconnectTime(string robotId, DateTime? disconnectTime)
-        {
-            logger.LogInformation(
-                "Setting disconnect time on robot with id {robotId} to {NewValue}",
-                robotId,
-                disconnectTime
-            );
-            var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes(
-                AccessMode.Write
-            );
-            var robotQuery = context.Robots.Where(r =>
-                r.Id == robotId
-                && accessibleInstallationCodes.Contains(
-                    r.CurrentInstallation.InstallationCode.ToUpper()
-                )
-            );
-            await robotQuery.ExecuteUpdateAsync(setters =>
-                setters.SetProperty(r => r.DisconnectTime, disconnectTime)
-            );
-
-            await SendToSignalROnPropertyUpdate(robotId, "disconnectTime", disconnectTime);
         }
 
         public async Task UpdateCurrentMissionId(string robotId, string? currentMissionId)
@@ -337,7 +281,7 @@ namespace Api.Services
         public async Task<IEnumerable<string>> ReadAllActivePlants(bool readOnly = true)
         {
             return await GetRobotsWithSubModels(readOnly: readOnly)
-                .Where(r => r.IsarConnected && r.CurrentInstallation != null)
+                .Where(r => r.CurrentInstallation != null)
                 .Select(r => r.CurrentInstallation!.InstallationCode)
                 .ToListAsync();
         }
