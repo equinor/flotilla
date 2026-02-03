@@ -25,21 +25,21 @@ export const useRobotTelemetry = (robotWithoutDetails: RobotWithoutTelemetry) =>
 
     useEffect(() => {
         if (connectionReady) {
-            registerEvent(SignalREventLabels.robotPropertyUpdated, (username: string, message: string) => {
+            registerEvent(SignalREventLabels.robotTelemetryUpdated, (username: string, message: string) => {
                 const robotPropertyUpdate: RobotTelemetryPropertyUpdate = JSON.parse(message)
                 if (robotPropertyUpdate.robotId === robotId) {
-                    if (robotPropertyUpdate.propertyName === 'batteryLevel') {
-                        setRobotBatteryLevel(robotPropertyUpdate.propertyValue as number)
+                    if (robotPropertyUpdate.telemetryName === 'batteryLevel') {
+                        setRobotBatteryLevel(robotPropertyUpdate.telemetryValue as number)
                         clearTimeout(batteryReadingTimer)
                         batteryReadingTimer = setTimeout(clearBatteryLevel, 30 * 1000) // Time in milliseconds
-                    } else if (robotPropertyUpdate.propertyName === 'pressureLevel') {
-                        setRobotPressureLevel(robotPropertyUpdate.propertyValue as number)
+                    } else if (robotPropertyUpdate.telemetryName === 'pressureLevel') {
+                        setRobotPressureLevel(robotPropertyUpdate.telemetryValue as number)
                         clearTimeout(pressureReadingTimer)
                         pressureReadingTimer = setTimeout(clearPressureLevel, 30 * 1000) // Time in milliseconds
-                    } else if (robotPropertyUpdate.propertyName === 'batteryState') {
-                        setRobotBatteryStatus(robotPropertyUpdate.propertyValue as BatteryStatus)
-                    } else if (robotPropertyUpdate.propertyName === 'pose') {
-                        setRobotPose(robotPropertyUpdate.propertyValue as Pose)
+                    } else if (robotPropertyUpdate.telemetryName === 'batteryState') {
+                        setRobotBatteryStatus(robotPropertyUpdate.telemetryValue as BatteryStatus)
+                    } else if (robotPropertyUpdate.telemetryName === 'pose') {
+                        setRobotPose(robotPropertyUpdate.telemetryValue as Pose)
                     }
                 }
             })

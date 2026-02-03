@@ -5,14 +5,14 @@ using Api.Database.Models;
 using Api.Services.Models;
 using Api.SignalRHubs;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Configuration;
 
 namespace Api.Services
 {
     public interface ISignalRService
     {
         public Task SendMessageAsync<T>(string label, Installation? installation, T messageObject);
-        public Task SendMessageAsync(string label, Installation? installation, string message);
+        public Task SendMessageAsync<T>(string label, string? installationCode, T messageObject);
+        public Task SendMessageAsync(string label, string? installationCode, string message);
         public void ReportDockFailureToSignalR(Robot robot, string message);
         public void ReportGeneralFailToSignalR(Robot robot, string title, string message);
         public void ReportAutoScheduleToSignalR(
@@ -44,10 +44,20 @@ namespace Api.Services
         )
         {
             string json = JsonSerializer.Serialize(messageObject, _serializerOptions);
-            await SendMessageAsync(label, installation, json);
+            await SendMessageAsync(label, installation?.InstallationCode, json);
         }
 
-        public async Task SendMessageAsync(string label, Installation? installation, string message)
+        public async Task SendMessageAsync<T>(
+            string label,
+            string? installationCode,
+            T messageObject
+        )
+        {
+            string json = JsonSerializer.Serialize(messageObject, _serializerOptions);
+            await SendMessageAsync(label, installationCode, json);
+        }
+
+        public async Task SendMessageAsync(string label, string? installationCode, string message)
         {
             if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Local")
             {
@@ -57,11 +67,10 @@ namespace Api.Services
                 if (localDevUser is null || localDevUser.Equals("", StringComparison.Ordinal))
                     return;
 
-                if (installation != null)
+                if (installationCode != null)
                     await _signalRHub
                         .Clients.Group(
-                            localDevUser
-                                + installation.InstallationCode.ToUpper(CultureInfo.CurrentCulture)
+                            localDevUser + installationCode.ToUpper(CultureInfo.CurrentCulture)
                         )
                         .SendAsync(label, "all", message);
                 else
@@ -69,11 +78,9 @@ namespace Api.Services
             }
             else
             {
-                if (installation != null)
+                if (installationCode != null)
                     await _signalRHub
-                        .Clients.Group(
-                            installation.InstallationCode.ToUpper(CultureInfo.CurrentCulture)
-                        )
+                        .Clients.Group(installationCode.ToUpper(CultureInfo.CurrentCulture))
                         .SendAsync(label, "all", message);
                 else
                     await _signalRHub.Clients.All.SendAsync(label, "all", message);
@@ -106,7 +113,7 @@ namespace Api.Services
         {
             _ = SendMessageAsync(
                 "Alert",
-                null,
+                (string?)null,
                 new AlertResponse(type, missionDefinitionId, message, installationCode, null)
             );
         }

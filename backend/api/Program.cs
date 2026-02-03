@@ -50,6 +50,7 @@ var applicationName = builder.Configuration["AppName"] ?? "FlotillaBackend";
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 
+builder.Services.AddMemoryCache();
 builder.Services.ConfigureDatabase(builder.Configuration, builder.Environment.EnvironmentName);
 
 builder.Services.ConfigureMissionLoader(builder.Configuration);
