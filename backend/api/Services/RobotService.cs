@@ -27,12 +27,6 @@ namespace Api.Services
         public Task UpdateCurrentMissionId(string robotId, string? missionId);
         public Task UpdateCurrentInspectionAreaId(string robotId, string? inspectionAreaId);
         public Task UpdateDeprecated(string robotId, bool deprecated);
-
-        public Task SendToSignalROnPropertyUpdate(
-            string robotId,
-            string propertyName,
-            object? propertyValue
-        );
         public Task<Robot?> Delete(string id);
         public void DetachTracking(FlotillaDbContext context, Robot robot);
     }
@@ -119,7 +113,7 @@ namespace Api.Services
             return robot;
         }
 
-        public async Task SendToSignalROnPropertyUpdate(
+        private async Task SendToSignalROnPropertyUpdate(
             string robotId,
             string propertyName,
             object? propertyValue

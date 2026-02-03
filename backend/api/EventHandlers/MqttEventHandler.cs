@@ -694,14 +694,24 @@ namespace Api.EventHandlers
         {
             var poseStatus = (IsarPoseMessage)mqttArgs.Message;
 
-            var robot = await RobotService.ReadByIsarId(poseStatus.IsarId);
+            (string installationCode, string robotId)? installationCodeAndId =
+                await GetRobotInstallationCodeAndId(poseStatus.IsarId);
 
-            if (robot == null)
+            if (installationCodeAndId == null)
                 return;
 
             var pose = new Pose(poseStatus.Pose);
 
-            await RobotService.SendToSignalROnPropertyUpdate(robot.Id, "pose", pose);
+            await SignalRService.SendMessageAsync(
+                "Robot telemetry updated",
+                installationCodeAndId.Value.installationCode,
+                new UpdateRobotTelemetryMessage
+                {
+                    RobotId = installationCodeAndId.Value.robotId,
+                    TelemetryName = "pose",
+                    TelemetryValue = pose,
+                }
+            );
         }
 
         private async void OnIsarCloudHealthUpdate(object? sender, MqttReceivedArgs mqttArgs)
