@@ -1,5 +1,4 @@
 services:
-
   frontend:
     build: frontend
     ports:
@@ -36,7 +35,7 @@ services:
     image: otel/opentelemetry-collector-contrib:0.132.3
     command: ["--config=/conf/config.yaml"]
     ports:
-      - "4317:4317"  # OTLP gRPC
-      - "4318:4318"  # OTLP HTTP
+      - "4317:4317" # OTLP gRPC
+      - "4318:4318" # OTLP HTTP
     volumes:
       - ./config/otel-collector-config.yaml:/conf/config.yaml:ro

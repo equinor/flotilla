@@ -97,9 +97,7 @@ namespace Api.EventHandlers
 
             var keyVault = new SecretClient(
                 new Uri(keyVaultUri),
-                new DefaultAzureCredential(
-                    new DefaultAzureCredentialOptions { ExcludeSharedTokenCacheCredential = true }
-                )
+                new DefaultAzureCredential(new DefaultAzureCredentialOptions())
             );
 
             string webhookURL = keyVault.GetSecret(secretName).Value.Value;

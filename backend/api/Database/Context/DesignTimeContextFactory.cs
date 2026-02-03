@@ -37,9 +37,7 @@ namespace Api.Database.Context
             // Connect to keyvault
             var keyVault = new SecretClient(
                 new Uri(keyVaultUri),
-                new DefaultAzureCredential(
-                    new DefaultAzureCredentialOptions { ExcludeSharedTokenCacheCredential = true }
-                )
+                new DefaultAzureCredential(new DefaultAzureCredentialOptions())
             );
 
             // Get connection string

@@ -3,10 +3,12 @@ using Api.Database.Context;
 using Api.Services.MissionLoaders;
 using Azure.Core;
 using Azure.Identity;
+using Microsoft.Azure.StackExchangeRedis;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using Npgsql;
+using StackExchange.Redis;
 
 namespace Api.Configurations
 {
@@ -317,6 +319,47 @@ namespace Api.Configurations
                     "The specified class does not implement IMissionLoader or could not be found."
                 );
             }
+
+            return services;
+        }
+
+        public static IServiceCollection ConfigureRedisCache(
+            this IServiceCollection services,
+            IConfiguration configuration
+        )
+        {
+            services.AddStackExchangeRedisCache(async options =>
+            {
+                var redisHostName = configuration["Redis:HostName"];
+                var redisPort = configuration.GetValue<int>("Redis:Port");
+                var useSsl = configuration.GetValue<bool>("Redis:UseSsl");
+
+                if (string.IsNullOrEmpty(redisHostName))
+                {
+                    throw new InvalidOperationException(
+                        "Redis:HostName configuration is required for Entra authentication"
+                    );
+                }
+
+                var configurationOptions = new ConfigurationOptions
+                {
+                    EndPoints = { { redisHostName, redisPort } },
+                    Ssl = useSsl,
+                    AbortOnConnectFail = false,
+                };
+
+                await configurationOptions.ConfigureForAzureWithServicePrincipalAsync(
+                    clientId: configuration["AzureAd:ClientId"]!,
+                    tenantId: configuration["AzureAd:TenantId"]!,
+                    secret: configuration["AzureAd:ClientSecret"]!
+                );
+
+                options.ConfigurationOptions = configurationOptions;
+                options.InstanceName = configuration.GetValue<string>(
+                    "Redis:InstanceName",
+                    "FlotillaCache"
+                );
+            });
 
             return services;
         }
