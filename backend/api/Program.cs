@@ -35,9 +35,7 @@ if (builder.Configuration.GetSection("KeyVault").GetValue<bool>("UseKeyVault"))
     {
         builder.Configuration.AddAzureKeyVault(
             new Uri(vaultUri),
-            new DefaultAzureCredential(
-                new DefaultAzureCredentialOptions { ExcludeSharedTokenCacheCredential = true }
-            )
+            new DefaultAzureCredential(new DefaultAzureCredentialOptions())
         );
     }
     else
@@ -132,15 +130,38 @@ builder
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.ConfigureSwagger(builder.Configuration);
 
-builder
-    .Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"))
-    .EnableTokenAcquisitionToCallDownstreamApi()
-    .AddInMemoryTokenCaches()
-    .AddDownstreamApi(EchoService.ServiceName, builder.Configuration.GetSection("Echo"))
-    .AddDownstreamApi(InspectionService.ServiceName, builder.Configuration.GetSection("SARA"))
-    .AddDownstreamApi(IsarService.ServiceName, builder.Configuration.GetSection("Isar"))
-    .AddDownstreamApi(PointillaService.ServiceName, builder.Configuration.GetSection("Pointilla"));
+// Configure Redis with Microsoft Entra Authentication
+if (builder.Configuration.GetSection("Redis").GetValue<bool>("UseRedis"))
+{
+    builder.Services.ConfigureRedisCache(builder.Configuration);
+    builder
+        .Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"))
+        .EnableTokenAcquisitionToCallDownstreamApi()
+        .AddDistributedTokenCaches()
+        .AddDownstreamApi(EchoService.ServiceName, builder.Configuration.GetSection("Echo"))
+        .AddDownstreamApi(InspectionService.ServiceName, builder.Configuration.GetSection("SARA"))
+        .AddDownstreamApi(IsarService.ServiceName, builder.Configuration.GetSection("Isar"))
+        .AddDownstreamApi(
+            PointillaService.ServiceName,
+            builder.Configuration.GetSection("Pointilla")
+        );
+}
+else
+{
+    builder
+        .Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"))
+        .EnableTokenAcquisitionToCallDownstreamApi()
+        .AddInMemoryTokenCaches()
+        .AddDownstreamApi(EchoService.ServiceName, builder.Configuration.GetSection("Echo"))
+        .AddDownstreamApi(InspectionService.ServiceName, builder.Configuration.GetSection("SARA"))
+        .AddDownstreamApi(IsarService.ServiceName, builder.Configuration.GetSection("Isar"))
+        .AddDownstreamApi(
+            PointillaService.ServiceName,
+            builder.Configuration.GetSection("Pointilla")
+        );
+}
 
 builder.Services.Configure<JwtBearerOptions>(
     JwtBearerDefaults.AuthenticationScheme,
