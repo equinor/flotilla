@@ -12,8 +12,8 @@ export const useRobotTelemetry = (robotWithoutDetails: RobotWithoutTelemetry) =>
     const [robotPose, setRobotPose] = useState<Pose | undefined>(undefined)
 
     const robotId = robotWithoutDetails.id
-    let batteryReadingTimer: NodeJS.Timeout
-    let pressureReadingTimer: NodeJS.Timeout
+    let batteryReadingTimerId: number
+    let pressureReadingTimerId: number
 
     const clearBatteryLevel = () => {
         setRobotBatteryLevel(undefined)
@@ -30,12 +30,12 @@ export const useRobotTelemetry = (robotWithoutDetails: RobotWithoutTelemetry) =>
                 if (robotPropertyUpdate.robotId === robotId) {
                     if (robotPropertyUpdate.telemetryName === 'batteryLevel') {
                         setRobotBatteryLevel(robotPropertyUpdate.telemetryValue as number)
-                        clearTimeout(batteryReadingTimer)
-                        batteryReadingTimer = setTimeout(clearBatteryLevel, 30 * 1000) // Time in milliseconds
+                        clearTimeout(batteryReadingTimerId)
+                        batteryReadingTimerId = setTimeout(clearBatteryLevel, 30 * 1000) // Time in milliseconds
                     } else if (robotPropertyUpdate.telemetryName === 'pressureLevel') {
                         setRobotPressureLevel(robotPropertyUpdate.telemetryValue as number)
-                        clearTimeout(pressureReadingTimer)
-                        pressureReadingTimer = setTimeout(clearPressureLevel, 30 * 1000) // Time in milliseconds
+                        clearTimeout(pressureReadingTimerId)
+                        pressureReadingTimerId = setTimeout(clearPressureLevel, 30 * 1000) // Time in milliseconds
                     } else if (robotPropertyUpdate.telemetryName === 'batteryState') {
                         setRobotBatteryStatus(robotPropertyUpdate.telemetryValue as BatteryStatus)
                     } else if (robotPropertyUpdate.telemetryName === 'pose') {
