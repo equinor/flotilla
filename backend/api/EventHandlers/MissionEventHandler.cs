@@ -8,9 +8,6 @@ namespace Api.EventHandlers
     {
         private readonly ILogger<MissionEventHandler> _logger;
 
-        // The mutex is used to ensure multiple missions aren't attempted scheduled simultaneously whenever multiple mission runs are created
-        private readonly Semaphore _startMissionSemaphore = new(1, 1);
-
         private readonly IServiceScopeFactory _scopeFactory;
 
         public MissionEventHandler(
@@ -64,8 +61,6 @@ namespace Api.EventHandlers
                 missionRun.Id
             );
 
-            _startMissionSemaphore.WaitOne();
-
             try
             {
                 await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(missionRun.Robot);
@@ -77,15 +72,10 @@ namespace Api.EventHandlers
                     missionRun.Robot.Id
                 );
             }
-            finally
-            {
-                _startMissionSemaphore.Release();
-            }
         }
 
         private async void OnRobotReadyForMissions(object? sender, RobotReadyForMissionsEventArgs e)
         {
-            _startMissionSemaphore.WaitOne();
             try
             {
                 await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(e.Robot);
@@ -96,10 +86,6 @@ namespace Api.EventHandlers
                     "Mission run not found for robot ID: {RobotId} when excecuting OnRobotReadyForMissions",
                     e.Robot.Id
                 );
-            }
-            finally
-            {
-                _startMissionSemaphore.Release();
             }
         }
 
