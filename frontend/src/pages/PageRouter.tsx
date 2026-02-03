@@ -4,6 +4,7 @@ import { RobotPage } from './RobotPage/RobotPage'
 import { MissionDefinitionPage } from './MissionDefinitionPage/MissionDefinitionPage'
 import { config } from 'config'
 import { useEffect, useState } from 'react'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 
 enum PageRouterPrefixes {
     Mission = 'mission',
@@ -23,6 +24,8 @@ const PageRouter = ({ prefix }: PageRouterProps) => {
     const [id, setId] = useState<string | undefined>(undefined)
     const [inspectionId, setInspectionId] = useState<string | undefined>(undefined)
     const [analysisId, setAnalysisId] = useState<string | undefined>(undefined)
+    const { enabledRobots } = useAssetContext()
+    const selectedRobot = enabledRobots.find((robot) => robot.id === id)
 
     useEffect(() => {
         if (!searchParams || searchParams.size < 1) {
@@ -68,7 +71,10 @@ const PageRouter = ({ prefix }: PageRouterProps) => {
         case PageRouterPrefixes.MissionDefinition:
             return <MissionDefinitionPage missionId={id} />
         case PageRouterPrefixes.Robot:
-            return <RobotPage robotId={id} />
+            if (!selectedRobot) {
+                return <>Loading robot...</>
+            }
+            return <RobotPage robot={selectedRobot} />
         default:
             return <></>
     }
