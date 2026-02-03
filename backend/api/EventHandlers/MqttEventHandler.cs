@@ -22,8 +22,6 @@ namespace Api.EventHandlers
 
         private readonly IServiceScopeFactory _scopeFactory;
 
-        private readonly Semaphore _updateRobotSemaphore = new(1, 1);
-
         private readonly IMemoryCache _cache;
 
         public MqttEventHandler(
@@ -132,14 +130,8 @@ namespace Api.EventHandlers
                 robot.CurrentInspectionAreaId
             );
 
-            _updateRobotSemaphore.WaitOne();
-            _logger.LogDebug("Semaphore acquired for updating robot status");
-
             await RobotService.UpdateRobotStatus(robot.Id, isarStatus.Status);
             robot.Status = isarStatus.Status;
-
-            _updateRobotSemaphore.Release();
-            _logger.LogDebug("Semaphore released after updating robot status");
 
             _logger.LogInformation(
                 "Updated status for robot {Name} to {Status}",
@@ -234,47 +226,31 @@ namespace Api.EventHandlers
                     CreateRobot(isarRobotInfo, installation);
                     return;
                 }
+                List<string> updatedFields = [];
 
-                try
-                {
-                    _updateRobotSemaphore.WaitOne();
-                    _logger.LogDebug("Semaphore acquired for updating robot");
+                if (isarRobotInfo.Host is not null)
+                    UpdateHostIfChanged(isarRobotInfo.Host, ref robot, ref updatedFields);
 
-                    List<string> updatedFields = [];
+                UpdatePortIfChanged(isarRobotInfo.Port, ref robot, ref updatedFields);
 
-                    if (isarRobotInfo.Host is not null)
-                        UpdateHostIfChanged(isarRobotInfo.Host, ref robot, ref updatedFields);
-
-                    UpdatePortIfChanged(isarRobotInfo.Port, ref robot, ref updatedFields);
-
-                    if (isarRobotInfo.CurrentInstallation is not null)
-                        UpdateCurrentInstallationIfChanged(
-                            installation,
-                            ref robot,
-                            ref updatedFields
-                        );
-                    if (isarRobotInfo.Capabilities is not null)
-                        UpdateRobotCapabilitiesIfChanged(
-                            isarRobotInfo.Capabilities,
-                            ref robot,
-                            ref updatedFields
-                        );
-                    if (updatedFields.Count < 1)
-                        return;
-
-                    await RobotService.Update(robot);
-                    _logger.LogInformation(
-                        "Updated robot '{Id}' ('{RobotName}') in database: {Updates}",
-                        robot.Id,
-                        robot.Name,
-                        updatedFields
+                if (isarRobotInfo.CurrentInstallation is not null)
+                    UpdateCurrentInstallationIfChanged(installation, ref robot, ref updatedFields);
+                if (isarRobotInfo.Capabilities is not null)
+                    UpdateRobotCapabilitiesIfChanged(
+                        isarRobotInfo.Capabilities,
+                        ref robot,
+                        ref updatedFields
                     );
-                }
-                finally
-                {
-                    _updateRobotSemaphore.Release();
-                    _logger.LogDebug("Semaphore released after updating robot");
-                }
+                if (updatedFields.Count < 1)
+                    return;
+
+                await RobotService.Update(robot);
+                _logger.LogInformation(
+                    "Updated robot '{Id}' ('{RobotName}') in database: {Updates}",
+                    robot.Id,
+                    robot.Name,
+                    updatedFields
+                );
             }
             catch (DbUpdateException e)
             {
