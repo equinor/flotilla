@@ -15,7 +15,16 @@ namespace Api.Test.Mocks
             await Task.CompletedTask;
         }
 
-        public async Task SendMessageAsync(string label, Installation? installation, string message)
+        public async Task SendMessageAsync<T>(
+            string label,
+            string? installationCode,
+            T messageObject
+        )
+        {
+            await Task.CompletedTask;
+        }
+
+        public async Task SendMessageAsync(string label, string? installationCode, string message)
         {
             await Task.CompletedTask;
         }

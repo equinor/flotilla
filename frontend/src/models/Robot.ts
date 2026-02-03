@@ -90,6 +90,6 @@ export interface RobotPropertyUpdate {
 }
 export interface RobotTelemetryPropertyUpdate {
     robotId: string
-    propertyName: keyof RobotTelemetry
-    propertyValue: number | BatteryStatus | Pose
+    telemetryName: keyof RobotTelemetry
+    telemetryValue: number | BatteryStatus | Pose
 }

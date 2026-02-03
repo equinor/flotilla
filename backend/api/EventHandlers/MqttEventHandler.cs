@@ -9,6 +9,7 @@ using Api.Services.Events;
 using Api.Services.Models;
 using Api.Utilities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Api.EventHandlers
 {
@@ -23,11 +24,18 @@ namespace Api.EventHandlers
 
         private readonly Semaphore _updateRobotSemaphore = new(1, 1);
 
-        public MqttEventHandler(ILogger<MqttEventHandler> logger, IServiceScopeFactory scopeFactory)
+        private readonly IMemoryCache _cache;
+
+        public MqttEventHandler(
+            ILogger<MqttEventHandler> logger,
+            IServiceScopeFactory scopeFactory,
+            IMemoryCache cache
+        )
         {
             _logger = logger;
             // Reason for using factory: https://www.thecodebuzz.com/using-dbcontext-instance-in-ihostedservice/
             _scopeFactory = scopeFactory;
+            _cache = cache;
 
             Subscribe();
         }
@@ -606,24 +614,57 @@ namespace Api.EventHandlers
             );
         }
 
+        private async Task<(string, string)?> GetRobotInstallationCodeAndId(string robotIsarId)
+        {
+            if (!_cache.TryGetValue(robotIsarId, out (string, string)? installationCodeAndId))
+            {
+                var robot = await RobotService.ReadByIsarId(robotIsarId);
+
+                if (robot == null)
+                    return null;
+                var cacheEntryOptions = new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(1),
+                };
+                _cache.Set(
+                    robotIsarId,
+                    (robot.CurrentInstallation.InstallationCode, robot.Id),
+                    cacheEntryOptions
+                );
+                installationCodeAndId = (robot.CurrentInstallation.InstallationCode, robot.Id);
+            }
+            return installationCodeAndId;
+        }
+
         private async void OnIsarBatteryUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
             var batteryStatus = (IsarBatteryMessage)mqttArgs.Message;
 
-            var robot = await RobotService.ReadByIsarId(batteryStatus.IsarId);
+            (string installationCode, string robotId)? installationCodeAndId =
+                await GetRobotInstallationCodeAndId(batteryStatus.IsarId);
 
-            if (robot == null)
+            if (installationCodeAndId == null)
                 return;
 
-            await RobotService.SendToSignalROnPropertyUpdate(
-                robot.Id,
-                "batteryState",
-                batteryStatus.BatteryState
+            await SignalRService.SendMessageAsync(
+                "Robot telemetry updated",
+                installationCodeAndId.Value.installationCode,
+                new UpdateRobotTelemetryMessage
+                {
+                    RobotId = installationCodeAndId.Value.robotId,
+                    TelemetryName = "batteryState",
+                    TelemetryValue = batteryStatus.BatteryState,
+                }
             );
-            await RobotService.SendToSignalROnPropertyUpdate(
-                robot.Id,
-                "batteryLevel",
-                batteryStatus.BatteryLevel
+            await SignalRService.SendMessageAsync(
+                "Robot telemetry updated",
+                installationCodeAndId.Value.installationCode,
+                new UpdateRobotTelemetryMessage
+                {
+                    RobotId = installationCodeAndId.Value.robotId,
+                    TelemetryName = "batteryLevel",
+                    TelemetryValue = batteryStatus.BatteryLevel,
+                }
             );
         }
 
@@ -631,15 +672,21 @@ namespace Api.EventHandlers
         {
             var pressureStatus = (IsarPressureMessage)mqttArgs.Message;
 
-            var robot = await RobotService.ReadByIsarId(pressureStatus.IsarId);
+            (string installationCode, string robotId)? installationCodeAndId =
+                await GetRobotInstallationCodeAndId(pressureStatus.IsarId);
 
-            if (robot == null)
+            if (installationCodeAndId == null)
                 return;
 
-            await RobotService.SendToSignalROnPropertyUpdate(
-                robot.Id,
-                "pressureLevel",
-                pressureStatus.PressureLevel
+            await SignalRService.SendMessageAsync(
+                "Robot telemetry updated",
+                installationCodeAndId.Value.installationCode,
+                new UpdateRobotTelemetryMessage
+                {
+                    RobotId = installationCodeAndId.Value.robotId,
+                    TelemetryName = "pressureLevel",
+                    TelemetryValue = pressureStatus.PressureLevel,
+                }
             );
         }
 

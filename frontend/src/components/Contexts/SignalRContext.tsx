@@ -157,6 +157,7 @@ export enum SignalREventLabels {
     robotAdded = 'Robot added',
     robotUpdated = 'Robot updated',
     robotPropertyUpdated = 'Robot property updated',
+    robotTelemetryUpdated = 'Robot telemetry updated',
     robotDeleted = 'Robot deleted',
     inspectionUpdated = 'Inspection updated',
     alert = 'Alert',
