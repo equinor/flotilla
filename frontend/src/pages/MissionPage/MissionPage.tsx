@@ -36,15 +36,7 @@ export const VideoStreamSection = styled.div`
     gap: 1rem;
 `
 
-export const MissionPage = ({
-    missionId,
-    inspectionId,
-    analysisId,
-}: {
-    missionId: string
-    inspectionId: string | undefined
-    analysisId: string | undefined
-}) => {
+export const useMissionSelector = (missionId: string) => {
     const { TranslateText } = useLanguageContext()
     const { setAlert, setListAlert } = useAlertContext()
     const [videoMediaStreams, setVideoMediaStreams] = useState<MediaStreamTrack[]>([])
@@ -98,6 +90,20 @@ export const MissionPage = ({
                 })
     }, [missionId])
 
+    return { selectedMission, videoMediaStreams }
+}
+
+export const MissionPage = ({
+    missionId,
+    inspectionId,
+    analysisId,
+}: {
+    missionId: string
+    inspectionId: string | undefined
+    analysisId: string | undefined
+}) => {
+    const { selectedMission, videoMediaStreams } = useMissionSelector(missionId)
+
     return (
         <>
             <Header page={'mission'} />
@@ -143,51 +149,7 @@ export const SimpleMissionPage = ({
     inspectionId: string | undefined
     analysisId: string | undefined
 }) => {
-    const { TranslateText } = useLanguageContext()
-    const { setAlert } = useAlertContext()
-    const [videoMediaStreams, setVideoMediaStreams] = useState<MediaStreamTrack[]>([])
-    const [selectedMission, setSelectedMission] = useState<Mission>()
-    const { registerEvent, connectionReady } = useSignalRContext()
-    const { mediaStreams, addMediaStreamConfigIfItDoesNotExist } = useMediaStreamContext()
-
-    useEffect(() => {
-        if (selectedMission && !Object.keys(mediaStreams).includes(selectedMission?.robot.id))
-            addMediaStreamConfigIfItDoesNotExist(selectedMission?.robot.id)
-    }, [selectedMission])
-
-    useEffect(() => {
-        if (connectionReady) {
-            registerEvent(SignalREventLabels.missionRunUpdated, (username: string, message: string) => {
-                const updatedMission: Mission = JSON.parse(message)
-                setSelectedMission((oldMission) => (updatedMission.id === oldMission?.id ? updatedMission : oldMission))
-            })
-        }
-    }, [connectionReady])
-
-    useEffect(() => {
-        if (selectedMission && mediaStreams && Object.keys(mediaStreams).includes(selectedMission?.robot.id)) {
-            const mediaStreamConfig = mediaStreams[selectedMission?.robot.id]
-            if (mediaStreamConfig && mediaStreamConfig.streams.length > 0)
-                setVideoMediaStreams(mediaStreamConfig.streams)
-        }
-    }, [selectedMission, mediaStreams])
-
-    useEffect(() => {
-        if (missionId)
-            BackendAPICaller.getMissionRunById(missionId)
-                .then((mission) => {
-                    setSelectedMission(mission)
-                })
-                .catch(() => {
-                    setAlert(
-                        AlertType.RequestFail,
-                        <FailedRequestAlertContent
-                            translatedMessage={TranslateText('Failed to find mission with ID {0}', [missionId])}
-                        />,
-                        AlertCategory.ERROR
-                    )
-                })
-    }, [missionId])
+    const { selectedMission, videoMediaStreams } = useMissionSelector(missionId)
 
     return (
         <StyledPage>
