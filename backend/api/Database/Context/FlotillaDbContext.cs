@@ -102,6 +102,15 @@ namespace Api.Database.Context
                 .HasOne(p => p.Installation)
                 .WithMany()
                 .OnDelete(DeleteBehavior.Restrict);
+
+            var polygonPointsComparer = new ValueComparer<List<PolygonPoint>?>(
+                (c1, c2) =>
+                    (c1 == null && c2 == null)
+                    || (c1 != null && c2 != null && c1.SequenceEqual(c2)),
+                c => c == null ? 0 : c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                c => c == null ? null : c.ToList()
+            );
+
             modelBuilder
                 .Entity<InspectionArea>()
                 .OwnsOne(
@@ -119,7 +128,8 @@ namespace Api.Database.Context
                                         v,
                                         (JsonSerializerOptions?)null
                                     )
-                            );
+                            )
+                            .Metadata.SetValueComparer(polygonPointsComparer);
 #pragma warning restore CS8603
                     }
                 );
@@ -140,7 +150,8 @@ namespace Api.Database.Context
                                         v,
                                         (JsonSerializerOptions?)null
                                     )
-                            );
+                            )
+                            .Metadata.SetValueComparer(polygonPointsComparer);
 #pragma warning restore CS8603
                     }
                 );
