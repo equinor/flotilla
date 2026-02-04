@@ -856,7 +856,7 @@ namespace Api.EventHandlers
                 BlobName = saraAnalysisResult.BlobName,
             };
 
-            var missionRun = await MissionRunService.ReadByInspectionId(
+            var missionRun = await MissionRunService.ReadByIsarInspectionId(
                 analysisResult.InspectionId,
                 readOnly: true
             );

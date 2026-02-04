@@ -101,6 +101,31 @@ namespace Api.Controllers
         }
 
         /// <summary>
+        ///     Lookup mission run by specified id.
+        /// </summary>
+        [HttpGet]
+        [Authorize(Roles = Role.Any)]
+        [Route("inspection/{id}")]
+        [ProducesResponseType(typeof(MissionRunResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<MissionRunResponse>> GetMissionRunByInspectionId(
+            [FromRoute] string id
+        )
+        {
+            var missionRun = await missionRunService.ReadByInspectionId(id, readOnly: true);
+            if (missionRun == null)
+            {
+                return NotFound($"Could not find mission run with inspection with id {id}");
+            }
+
+            var missionRunResponse = new MissionRunResponse(missionRun);
+            return Ok(missionRunResponse);
+        }
+
+        /// <summary>
         ///     Deletes the mission run with the specified id from the database.
         /// </summary>
         [HttpDelete]

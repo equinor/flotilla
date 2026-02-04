@@ -6,35 +6,23 @@ import { config } from 'config'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 
 export const SimpleMissionPageRouter = () => {
-    const navigate = useNavigate()
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [searchParams, setSearchParams] = useSearchParams()
 
     const id = searchParams.get('id') ?? undefined
     const inspectionId = searchParams.get('inspectionId') ?? undefined
     const analysisId = searchParams.get('analysisId') ?? undefined
-
-    if (!id) {
-        navigate(`${config.FRONTEND_BASE_ROUTE}/page-not-found`)
-        return <></>
-    }
 
     return <SimpleMissionPage missionId={id} inspectionId={inspectionId} analysisId={analysisId} />
 }
 
 export const MissionPageRouter = () => {
-    const navigate = useNavigate()
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [searchParams, setSearchParams] = useSearchParams()
 
     const id = searchParams.get('id') ?? undefined
     const inspectionId = searchParams.get('inspectionId') ?? undefined
     const analysisId = searchParams.get('analysisId') ?? undefined
-
-    if (!id) {
-        navigate(`${config.FRONTEND_BASE_ROUTE}/page-not-found`)
-        return <></>
-    }
 
     return <MissionPage missionId={id} inspectionId={inspectionId} analysisId={analysisId} />
 }

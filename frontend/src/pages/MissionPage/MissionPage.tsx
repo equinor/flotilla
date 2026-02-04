@@ -17,6 +17,8 @@ import { InspectionDialogView } from '../InspectionReportPage/InspectionView'
 import { InspectionOverviewSection } from '../InspectionReportPage/InspectionOverview'
 import { TaskTableAndMap } from './TaskTableAndMap'
 import { AnalysisResultDialogView } from './AnalysisResultView'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { config } from 'config'
 
 const StyledMissionPageContent = styled.div`
     display: flex;
@@ -36,7 +38,10 @@ export const VideoStreamSection = styled.div`
     gap: 1rem;
 `
 
-export const useMissionSelector = (missionId: string) => {
+const useMissionSelector = (missionId: string | undefined, inspectionId: string | undefined) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [searchParams, setSearchParams] = useSearchParams()
+    const navigate = useNavigate()
     const { TranslateText } = useLanguageContext()
     const { setAlert, setListAlert } = useAlertContext()
     const [videoMediaStreams, setVideoMediaStreams] = useState<MediaStreamTrack[]>([])
@@ -88,6 +93,24 @@ export const useMissionSelector = (missionId: string) => {
                         AlertCategory.ERROR
                     )
                 })
+        else if (inspectionId) {
+            BackendAPICaller.getMissionRunByInspectionId(inspectionId)
+                .then((mission) => {
+                    setSearchParams(
+                        (prev) => {
+                            prev.set('id', mission.id)
+                            return prev
+                        },
+                        { replace: true }
+                    )
+                    setSelectedMission(mission)
+                })
+                .catch(() => {
+                    navigate(`${config.FRONTEND_BASE_ROUTE}/page-not-found`)
+                })
+        } else {
+            navigate(`${config.FRONTEND_BASE_ROUTE}/page-not-found`)
+        }
     }, [missionId])
 
     return { selectedMission, videoMediaStreams }
@@ -98,11 +121,11 @@ export const MissionPage = ({
     inspectionId,
     analysisId,
 }: {
-    missionId: string
+    missionId: string | undefined
     inspectionId: string | undefined
     analysisId: string | undefined
 }) => {
-    const { selectedMission, videoMediaStreams } = useMissionSelector(missionId)
+    const { selectedMission, videoMediaStreams } = useMissionSelector(missionId, inspectionId ?? analysisId)
 
     return (
         <>
@@ -145,11 +168,11 @@ export const SimpleMissionPage = ({
     inspectionId,
     analysisId,
 }: {
-    missionId: string
+    missionId: string | undefined
     inspectionId: string | undefined
     analysisId: string | undefined
 }) => {
-    const { selectedMission, videoMediaStreams } = useMissionSelector(missionId)
+    const { selectedMission, videoMediaStreams } = useMissionSelector(missionId, inspectionId ?? analysisId)
 
     return (
         <StyledPage>
