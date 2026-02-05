@@ -261,7 +261,7 @@ export class BackendAPICaller {
         return result.content
     }
 
-    static async getMissionRunByInspectionId(inspectionId: string): Promise<Mission> {
+    static async getMissionRunByIsarInspectionId(inspectionId: string): Promise<Mission> {
         const path: string = 'missions/runs/inspection/' + inspectionId
         const result = await BackendAPICaller.GET<Mission>(path).catch(BackendAPICaller.handleError('GET', path))
         return result.content

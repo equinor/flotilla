@@ -125,9 +125,9 @@ const InspectionTypesDisplay = ({ task }: InspectionTypesDisplayProps) => {
                 (ValidInspectionReportInspectionTypes.includes(task.inspection.inspectionType) &&
                 task.status === TaskStatus.Successful ? (
                     <Button
-                        key={task.id + task.inspection.id + 'insp'}
+                        key={task.id + task.inspection.isarInspectionId + 'insp'}
                         variant="ghost"
-                        onClick={() => switchSelectedInspectionId(task.inspection.id)}
+                        onClick={() => switchSelectedInspectionId(task.inspection.isarInspectionId)}
                         style={{ padding: 0 }}
                     >
                         <Typography variant="body_short_link">
@@ -135,7 +135,7 @@ const InspectionTypesDisplay = ({ task }: InspectionTypesDisplayProps) => {
                         </Typography>
                     </Button>
                 ) : (
-                    <Typography key={task.id + task.inspection.id + 'insp'}>
+                    <Typography key={task.id + task.inspection.isarInspectionId + 'insp'}>
                         {TranslateText(task.inspection.inspectionType as string)}
                     </Typography>
                 ))}

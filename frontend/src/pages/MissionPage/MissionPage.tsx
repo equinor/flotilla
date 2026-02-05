@@ -94,7 +94,7 @@ const useMissionSelector = (missionId: string | undefined, inspectionId: string 
                     )
                 })
         else if (inspectionId) {
-            BackendAPICaller.getMissionRunByInspectionId(inspectionId)
+            BackendAPICaller.getMissionRunByIsarInspectionId(inspectionId)
                 .then((mission) => {
                     setSearchParams(
                         (prev) => {

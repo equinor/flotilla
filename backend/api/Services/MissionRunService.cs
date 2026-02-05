@@ -29,12 +29,6 @@ namespace Api.Services
             bool includeDeprecated = false
         );
 
-        public Task<MissionRun?> ReadByInspectionId(
-            string inspectionId,
-            bool readOnly = true,
-            bool includeDeprecated = false
-        );
-
         public Task<MissionRun?> ReadByIsarInspectionId(
             string isarInspectionId,
             bool readOnly = true,
@@ -209,23 +203,6 @@ namespace Api.Services
                                 t.Inspection != null
                                 && t.Inspection.IsarInspectionId == isarInspectionId
                         )
-                )
-                .FirstOrDefaultAsync();
-        }
-
-        public async Task<MissionRun?> ReadByInspectionId(
-            string inspectionId,
-            bool readOnly = true,
-            bool includeDeprecated = false
-        )
-        {
-            return await GetMissionRunsWithSubModels(
-                    readOnly: readOnly,
-                    includeDeprecated: includeDeprecated
-                )
-                .Where(
-                    (m) =>
-                        m.Tasks.Any((t) => t.Inspection != null && t.Inspection.Id == inspectionId)
                 )
                 .FirstOrDefaultAsync();
         }

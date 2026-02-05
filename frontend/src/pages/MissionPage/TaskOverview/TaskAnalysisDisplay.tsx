@@ -23,7 +23,7 @@ export const TaskAnalysisDisplay = ({ task }: { task: Task }) => {
                 <Styledbutton
                     variant="ghost"
                     color="danger"
-                    onClick={() => switchSelectedAnalysisId(task.inspection.id)}
+                    onClick={() => switchSelectedAnalysisId(task.inspection.isarInspectionId)}
                 >
                     <Typography link color="danger">
                         {TranslateText('Result')}
