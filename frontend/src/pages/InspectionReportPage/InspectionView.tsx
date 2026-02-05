@@ -30,7 +30,7 @@ export const InspectionDialogView = ({ selectedInspectionId, tasks }: Inspection
     const [switchImageDirection, setSwitchImageDirection] = useState<number>(0)
     const { switchSelectedInspectionId } = useInspectionId()
 
-    const currentTask = tasks.find((t) => t.inspection.id == selectedInspectionId)
+    const currentTask = tasks.find((t) => t.inspection.isarInspectionId == selectedInspectionId)
 
     const closeDialog = () => {
         switchSelectedInspectionId(undefined)
@@ -65,7 +65,7 @@ export const InspectionDialogView = ({ selectedInspectionId, tasks }: Inspection
         ) {
             const nextTask = successfullyCompletedTasks.indexOf(currentTask) + switchImageDirection
             if (nextTask >= 0 && nextTask < successfullyCompletedTasks.length) {
-                switchSelectedInspectionId(successfullyCompletedTasks[nextTask].inspection.id)
+                switchSelectedInspectionId(successfullyCompletedTasks[nextTask].inspection.isarInspectionId)
             }
             setSwitchImageDirection(0)
         }

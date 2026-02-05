@@ -45,7 +45,7 @@ export const AnalysisResultDialogView = ({ selectedAnalysisId, tasks }: Inspecti
 
     const onClose = () => switchSelectedAnalysisId(undefined)
 
-    const currentTask = tasks.find((t) => t.inspection.id == selectedAnalysisId)
+    const currentTask = tasks.find((t) => t.inspection.isarInspectionId == selectedAnalysisId)
 
     if (!currentTask) {
         return (
