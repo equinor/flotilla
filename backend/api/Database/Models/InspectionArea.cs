@@ -21,5 +21,7 @@ namespace Api.Database.Models
         public string Name { get; set; }
 
         public AreaPolygon? AreaPolygon { get; set; }
+
+        public bool IsDeprecated { get; set; } = false;
     }
 }

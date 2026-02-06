@@ -268,8 +268,8 @@ namespace Api.Services
                 return null;
             }
 
-            context.InspectionAreas.Remove(inspectionArea);
-            await ApplyDatabaseUpdate(inspectionArea.Installation);
+            inspectionArea.IsDeprecated = true;
+            await Update(inspectionArea);
             _ = signalRService.SendMessageAsync(
                 "InspectionArea deleted",
                 inspectionArea.Installation,
@@ -288,8 +288,11 @@ namespace Api.Services
                 .InspectionAreas.Include(p => p.Plant)
                     .ThenInclude(p => p.Installation)
                 .Include(i => i.Installation)
-                .Where(d =>
-                    accessibleInstallationCodes.Contains(d.Installation.InstallationCode.ToUpper())
+                .Where(i =>
+                    !i.IsDeprecated
+                    && accessibleInstallationCodes.Contains(
+                        i.Installation.InstallationCode.ToUpper()
+                    )
                 );
             return readOnly ? query.AsNoTracking() : query.AsTracking();
         }
