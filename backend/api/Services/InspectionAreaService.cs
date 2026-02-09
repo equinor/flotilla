@@ -152,18 +152,31 @@ namespace Api.Services
                     && a.Installation.InstallationCode.ToLower().Equals(installationCode.ToLower())
                 )
                 .ToList();
+
+            if (inspectionAreas.Count == 1 && inspectionAreas.First().AreaPolygon == null)
+            {
+                return inspectionAreas.First();
+            }
+
             inspectionAreas =
             [
                 .. inspectionAreas.Where(a =>
-                    areaPolygonService.MissionTasksAreInsideAreaPolygon(missionTasks, a.AreaPolygon)
+                    a.AreaPolygon != null
+                    && areaPolygonService.MissionTasksAreInsideAreaPolygon(
+                        missionTasks,
+                        a.AreaPolygon
+                    )
                 ),
             ];
 
             if (inspectionAreas.Count > 1)
             {
-                logger.LogWarning(
+                logger.LogError(
                     "Multiple inspection areas found for mission tasks in installation {installationCode}",
                     installationCode
+                );
+                throw new MultipleInspectionAreasFoundException(
+                    $"Multiple inspection areas found for mission tasks"
                 );
             }
             return inspectionAreas.FirstOrDefault();

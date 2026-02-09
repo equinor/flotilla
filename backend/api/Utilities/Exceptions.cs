@@ -102,4 +102,6 @@ namespace Api.Utilities
     public class InvalidPolygonException(string message) : Exception(message) { }
 
     public class FailedToRemoveAutoSchedulingException(string message) : Exception(message) { }
+
+    public class MultipleInspectionAreasFoundException(string message) : Exception(message) { }
 }

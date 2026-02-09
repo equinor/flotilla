@@ -119,11 +119,20 @@ namespace Api.Controllers
                 return NotFound("No mission tasks were found for the requested mission");
             }
 
-            var inspectionAreaForMission =
-                inspectionAreaService.TryFindInspectionAreaForMissionTasks(
-                    missionTasks,
-                    scheduledMissionQuery.InstallationCode
-                );
+            InspectionArea? inspectionAreaForMission = null;
+            try
+            {
+                inspectionAreaForMission =
+                    inspectionAreaService.TryFindInspectionAreaForMissionTasks(
+                        missionTasks,
+                        scheduledMissionQuery.InstallationCode
+                    );
+            }
+            catch (MultipleInspectionAreasFoundException e)
+            {
+                return BadRequest(e.Message);
+            }
+
             if (inspectionAreaForMission == null)
             {
                 return BadRequest("No inspection area found for the mission tasks");
@@ -528,6 +537,10 @@ namespace Api.Controllers
                 {
                     await missionDefinitionService.Create(customMissionDefinition);
                 }
+            }
+            catch (MultipleInspectionAreasFoundException e)
+            {
+                return BadRequest(e.Message);
             }
             catch (SourceException e)
             {
