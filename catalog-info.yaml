@@ -20,6 +20,16 @@ metadata:
   annotations:
     github.com/project-slug: equinor/flotilla
     github.com/team-slug: equinor/eq-robot-developer
+  links:
+    - url: https://shared.dev.aurora.equinor.com/robotics-frontend/
+      title: Flotilla Frontend Dev
+      icon: public
+    - url: https://shared.aurora.equinor.com/robotics-staging-frontend/
+      title: Flotilla Frontend Staging
+      icon: public
+    - url: https://shared.aurora.equinor.com/robotics-prod-frontend/
+      title: Flotilla Frontend Prod
+      icon: public
 spec:
   type: website
   lifecycle: production
@@ -38,11 +48,23 @@ metadata:
   annotations:
     github.com/project-slug: equinor/flotilla
     github.com/team-slug: equinor/eq-robot-developer
+  links:
+    - url: https://shared.dev.aurora.equinor.com/robotics-backend/swagger
+      title: Flotilla Backend Dev
+      icon: public
+    - url: https://shared.aurora.equinor.com/robotics-staging-backend/swagger
+      title: Flotilla Backend Staging
+      icon: public
+    - url: https://shared.aurora.equinor.com/robotics-prod-backend/swagger
+      title: Flotilla Backend Prod
+      icon: public
 spec:
   type: service
   lifecycle: production
   owner: eq-robot-developer
   system: system:default/flotilla
+  dependsOn:
+    - component:flotilla-broker
 
 ---
 
