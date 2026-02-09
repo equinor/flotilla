@@ -1,10 +1,61 @@
 apiVersion: backstage.io/v1alpha1
-kind: Component
+kind: System
 metadata:
   name: flotilla
+  description: Software system enabling autonomous inspection in industrial facilities using a fleet of robots.
+  annotations:
+      github.com/team-slug: equinor/eq-robot-developer
+spec:
+  owner: eq-robot-developer
+  type: product
+  lifecycle: production
+
+---
+
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: flotilla-frontend
+  description: The user interface for the Flotilla system, providing access to data and control of the robot fleet.
   annotations:
     github.com/project-slug: equinor/flotilla
+    github.com/team-slug: equinor/eq-robot-developer
 spec:
-  type: other
-  lifecycle: unknown
-  owner: eq-robot
+  type: website
+  lifecycle: production
+  owner: eq-robot-developer
+  system: system:default/flotilla
+  dependsOn:
+    - component:flotilla-backend
+
+---
+
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: flotilla-backend
+  description: The backend services for the Flotilla system, robot control, mission execution data and integration with external systems.
+  annotations:
+    github.com/project-slug: equinor/flotilla
+    github.com/team-slug: equinor/eq-robot-developer
+spec:
+  type: service
+  lifecycle: production
+  owner: eq-robot-developer
+  system: system:default/flotilla
+
+---
+
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: flotilla-broker
+  description: The message broker for the Flotilla system, enabling communication between the frontend, backend, and robot fleet.
+  annotations:
+    github.com/project-slug: equinor/flotilla
+    github.com/team-slug: equinor/eq-robot-developer
+spec:
+  type: service
+  lifecycle: production
+  owner: eq-robot-developer
+  system: system:default/flotilla
