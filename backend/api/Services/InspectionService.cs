@@ -126,27 +126,22 @@ namespace Api.Services
                 .AnalysisResults.Where(a => a.InspectionId == inspectionId)
                 .FirstOrDefault();
 
-            if (existingAnalysisResult == null)
+            if (
+                existingAnalysisResult != null
+                && inspection.AnalysisResult.InspectionId == existingAnalysisResult.InspectionId
+            )
             {
                 context.AnalysisResults.Add(analysisResult);
                 inspection.AnalysisResult = analysisResult;
                 await Update(inspection);
+                context.AnalysisResults.Remove(existingAnalysisResult);
                 return inspection;
             }
-            else if (
-                inspection.AnalysisResult == null
-                || inspection.AnalysisResult.InspectionId == existingAnalysisResult.InspectionId
-            )
-            {
-                inspection.AnalysisResult = existingAnalysisResult;
-                context.Update(inspection.AnalysisResult);
-                await Update(inspection);
-                return inspection;
-            }
-            else
-            {
-                return inspection;
-            }
+
+            context.AnalysisResults.Add(analysisResult);
+            inspection.AnalysisResult = analysisResult;
+            await Update(inspection);
+            return inspection;
         }
 
         private async Task ApplyDatabaseUpdate(Installation? installation)
