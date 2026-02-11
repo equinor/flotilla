@@ -1,4 +1,4 @@
-import { MapContainer } from 'react-leaflet'
+import { MapContainer, Polygon } from 'react-leaflet'
 import AuthTileLayer from './PointillaMap'
 import 'leaflet/dist/leaflet.css'
 import L, { LatLngBoundsExpression } from 'leaflet'
@@ -11,6 +11,8 @@ import { phone_width } from 'utils/constants'
 import { Mission } from 'models/Mission'
 import { getRobotMarker, getTaskMarkers } from './PointillaMapMarkers'
 import { useRobotTelemetry } from 'hooks/useRobotTelemetry'
+import { PolygonPoint } from 'models/InspectionArea'
+import 'utils/leaflet-overrides.css'
 
 const LeafletTooltipStyles = createGlobalStyle`
     .leaflet-tooltip.circleLabel {
@@ -31,7 +33,6 @@ const LeafletTooltipStyles = createGlobalStyle`
     }
 
 `
-
 const StyledElements = styled.div`
     display: flex;
     flex-direction: columns;
@@ -54,7 +55,38 @@ type PlantMapProps = {
     mission: Mission
 }
 
-export default function PlantMap({ plantCode, floorId, mission }: PlantMapProps) {
+type PlantPolygonMapProps = {
+    plantCode: string
+    floorId: string
+    polygon: PolygonPoint[]
+}
+
+const setMapOptions = (map: L.Map, info: PointillaMapInfo) => {
+    const mapWidth = info.xMax - info.xMin
+    const mapHeight = info.yMax - info.yMin
+    const scaleFactorX = info.tileSize / mapWidth
+    const scaleFactorY = info.tileSize / mapHeight
+    const originX = -info.xMin * scaleFactorX
+    const originY = info.yMin * scaleFactorY
+    const customTransformation = new L.Transformation(scaleFactorX, originX, -scaleFactorY, info.tileSize + originY)
+    const plantCrs = L.extend({}, L.CRS.Simple, {
+        transformation: customTransformation,
+    })
+
+    const bounds: LatLngBoundsExpression = [
+        [info.yMin, info.xMin],
+        [info.yMax, info.xMax],
+    ]
+    map.options.crs = plantCrs
+
+    map.fitBounds(bounds)
+    map.setMaxBounds(bounds)
+    map.options.maxBoundsViscosity = 1.0
+    map.options.minZoom = info.zoomMin
+    map.options.maxZoom = info.zoomMax
+}
+
+export function PlantMap({ plantCode, floorId, mission }: PlantMapProps) {
     const [mapInfo, setMapInfo] = useState<PointillaMapInfo | undefined>(undefined)
     const [map, setMap] = useState<L.Map | null>(null)
     const { robotPose } = useRobotTelemetry(mission.robot)
@@ -72,31 +104,6 @@ export default function PlantMap({ plantCode, floorId, mission }: PlantMapProps)
             .catch((error) => {
                 console.error('Error loading map:', error)
             })
-    }
-
-    const setMapOptions = (map: L.Map, info: PointillaMapInfo) => {
-        const mapWidth = info.xMax - info.xMin
-        const mapHeight = info.yMax - info.yMin
-        const scaleFactorX = info.tileSize / mapWidth
-        const scaleFactorY = info.tileSize / mapHeight
-        const originX = -info.xMin * scaleFactorX
-        const originY = info.yMin * scaleFactorY
-        const customTransformation = new L.Transformation(scaleFactorX, originX, -scaleFactorY, info.tileSize + originY)
-        const plantCrs = L.extend({}, L.CRS.Simple, {
-            transformation: customTransformation,
-        })
-
-        const bounds: LatLngBoundsExpression = [
-            [info.yMin, info.xMin],
-            [info.yMax, info.xMax],
-        ]
-        map.options.crs = plantCrs
-
-        map.fitBounds(bounds)
-        map.setMaxBounds(bounds)
-        map.options.maxBoundsViscosity = 1.0
-        map.options.minZoom = info.zoomMin
-        map.options.maxZoom = info.zoomMax
     }
 
     useEffect(() => {
@@ -143,6 +150,60 @@ export default function PlantMap({ plantCode, floorId, mission }: PlantMapProps)
             <StyledElements>
                 <LeafletTooltipStyles />
                 <StyledMapContainer ref={setMap} attributionControl={false}>
+                    {mapInfo && <AuthTileLayer mapInfo={mapInfo} />}
+                </StyledMapContainer>
+                <MapCompass />
+            </StyledElements>
+        </div>
+    )
+}
+
+export function PlantPolygonMap({ plantCode, floorId, polygon }: PlantPolygonMapProps) {
+    const [mapInfo, setMapInfo] = useState<PointillaMapInfo | undefined>(undefined)
+    const [map, setMap] = useState<L.Map | null>(null)
+
+    const loadMap = async () => {
+        if (!map) return
+        BackendAPICaller.getFloorMapInfo(plantCode, floorId)
+            .then((info) => {
+                setMapInfo(info)
+                if (info) setMapOptions(map, info)
+            })
+            .catch((error) => {
+                console.error('Error loading map:', error)
+            })
+    }
+
+    const toLeafletPositions = (positions: PolygonPoint[]): [number, number][] => positions.map((p) => [p.y, p.x])
+
+    const positions = polygon ? toLeafletPositions(polygon) : undefined
+
+    useEffect(() => {
+        loadMap()
+    }, [plantCode, floorId, map])
+
+    useEffect(() => {
+        if (!positions || positions.length < 3 || !map) return
+
+        const bounds = L.latLngBounds(positions)
+        map.fitBounds(bounds)
+    }, [map, positions])
+
+    return (
+        <div className="map-root">
+            <StyledElements>
+                <LeafletTooltipStyles />
+                <StyledMapContainer ref={setMap} attributionControl={false}>
+                    {polygon && positions && (
+                        <Polygon
+                            positions={positions}
+                            pathOptions={{
+                                color: 'blue',
+                                fillOpacity: 0.2,
+                                weight: 1,
+                            }}
+                        />
+                    )}
                     {mapInfo && <AuthTileLayer mapInfo={mapInfo} />}
                 </StyledMapContainer>
                 <MapCompass />
