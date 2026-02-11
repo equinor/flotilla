@@ -104,7 +104,9 @@ export const StopRobotDialog = () => {
     const { TranslateText } = useLanguageContext()
     const { setAlert, setListAlert } = useAlertContext()
 
-    const dockActivated = enabledRobots.find((r) => r.status === RobotStatus.Lockdown) !== undefined
+    const dockActivated =
+        enabledRobots.find((r) => r.status === RobotStatus.Lockdown || r.status === RobotStatus.GoingToLockdown) !==
+        undefined
 
     const openDialog = async () => {
         setIsStopRobotDialogOpen(true)
