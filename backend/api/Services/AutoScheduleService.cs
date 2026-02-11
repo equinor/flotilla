@@ -48,6 +48,7 @@ namespace Api.Services
         IRobotService robotService,
         IMissionLoader missionLoader,
         IMissionRunService missionRunService,
+        IMissionSchedulingService missionSchedulingService,
         ISignalRService signalRService
     ) : IAutoScheduleService
     {
@@ -275,6 +276,9 @@ namespace Api.Services
                 }
 
                 await missionRunService.Create(missionRun);
+                await missionSchedulingService.StartNextMissionRunIfSystemIsAvailable(
+                    missionRun.Robot
+                );
             }
             catch (Exception e)
             {

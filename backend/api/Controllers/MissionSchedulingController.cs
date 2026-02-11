@@ -15,6 +15,7 @@ namespace Api.Controllers
     public class MissionSchedulingController(
         IMissionDefinitionService missionDefinitionService,
         IMissionRunService missionRunService,
+        IMissionSchedulingService missionSchedulingService,
         IInstallationService installationService,
         IMissionLoader missionLoader,
         ILogger<MissionSchedulingController> logger,
@@ -225,6 +226,23 @@ namespace Api.Controllers
                 );
             }
 
+            try
+            {
+                await missionSchedulingService.StartNextMissionRunIfSystemIsAvailable(
+                    newMissionRun.Robot
+                );
+            }
+            catch (MissionRunNotFoundException e)
+            {
+                logger.LogError(
+                    $"Mission run created but then not found for robot ID: {newMissionRun.Robot.Id}. Exception: {e.Message}"
+                );
+                return StatusCode(
+                    StatusCodes.Status500InternalServerError,
+                    "Not able to create mission run. "
+                );
+            }
+
             return CreatedAtAction(nameof(Create), new { id = newMissionRun.Id }, newMissionRun);
         }
 
@@ -315,6 +333,23 @@ namespace Api.Controllers
             {
                 return BadRequest(
                     $"The robot {robot.Name} does not have the necessary sensors to run the mission."
+                );
+            }
+
+            try
+            {
+                await missionSchedulingService.StartNextMissionRunIfSystemIsAvailable(
+                    newMissionRun.Robot
+                );
+            }
+            catch (MissionRunNotFoundException e)
+            {
+                logger.LogError(
+                    $"Mission run created but then not found for robot ID: {newMissionRun.Robot.Id}. Exception: {e.Message}"
+                );
+                return StatusCode(
+                    StatusCodes.Status500InternalServerError,
+                    "Not able to create mission run. "
                 );
             }
 
@@ -416,6 +451,23 @@ namespace Api.Controllers
             {
                 return BadRequest(
                     $"The robot {robot.Name} does not have the necessary sensors to run the mission."
+                );
+            }
+
+            try
+            {
+                await missionSchedulingService.StartNextMissionRunIfSystemIsAvailable(
+                    newMissionRun.Robot
+                );
+            }
+            catch (MissionRunNotFoundException e)
+            {
+                logger.LogError(
+                    $"Mission run created but then not found for robot ID: {newMissionRun.Robot.Id}. Exception: {e.Message}"
+                );
+                return StatusCode(
+                    StatusCodes.Status500InternalServerError,
+                    "Not able to create mission run. "
                 );
             }
 
@@ -599,6 +651,23 @@ namespace Api.Controllers
             {
                 return BadRequest(
                     $"The robot {robot.Name} does not have the necessary sensors to run the mission."
+                );
+            }
+
+            try
+            {
+                await missionSchedulingService.StartNextMissionRunIfSystemIsAvailable(
+                    newMissionRun.Robot
+                );
+            }
+            catch (MissionRunNotFoundException e)
+            {
+                logger.LogError(
+                    $"Mission run created but then not found for robot ID: {newMissionRun.Robot.Id}. Exception: {e.Message}"
+                );
+                return StatusCode(
+                    StatusCodes.Status500InternalServerError,
+                    "Not able to create mission run. "
                 );
             }
 

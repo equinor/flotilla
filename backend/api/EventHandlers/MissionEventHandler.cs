@@ -35,9 +35,6 @@ namespace Api.EventHandlers
 
         public override void Subscribe()
         {
-            _eventAggregatorSingletonService.Subscribe<MissionRunCreatedEventArgs>(
-                OnMissionRunCreated
-            );
             _eventAggregatorSingletonService.Subscribe<RobotReadyForMissionsEventArgs>(
                 OnRobotReadyForMissions
             );
@@ -54,28 +51,6 @@ namespace Api.EventHandlers
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             await stoppingToken;
-        }
-
-        private async void OnMissionRunCreated(MissionRunCreatedEventArgs e)
-        {
-            MissionRun missionRun = e.MissionRun;
-
-            _logger.LogInformation(
-                "Triggered MissionRunCreated event for mission run ID: {MissionRunId}",
-                missionRun.Id
-            );
-
-            try
-            {
-                await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(missionRun.Robot);
-            }
-            catch (MissionRunNotFoundException)
-            {
-                _logger.LogWarning(
-                    "Mission run not found for robot ID: {RobotId} when exceuting OnMissionRunCreated",
-                    missionRun.Robot.Id
-                );
-            }
         }
 
         private async void OnRobotReadyForMissions(RobotReadyForMissionsEventArgs e)
