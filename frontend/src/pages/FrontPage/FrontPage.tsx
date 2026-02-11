@@ -34,6 +34,7 @@ const StyledFrontPage = styled.div`
 const StyledTabHeader = styled.div`
     display: flex;
     justify-content: space-between;
+    padding-bottom: 10px;
 `
 const StyledTabHeaderRightContent = styled.div`
     display: flex;
@@ -105,15 +106,11 @@ export const FrontPage = ({ activeTab }: { activeTab: TabNames }) => {
                 label: TranslateText('Mission Control'),
                 render: () => <MissionControlSection />,
             },
-            ...(installationInspectionAreas.length > 1
-                ? [
-                      {
-                          name: TabNames.InspectionPlan,
-                          label: TranslateText('Area Overview'),
-                          render: () => <InspectionSection />,
-                      },
-                  ]
-                : []),
+            {
+                name: TabNames.InspectionPlan,
+                label: TranslateText('Area Overview'),
+                render: () => <InspectionSection />,
+            },
             {
                 name: TabNames.PredefinedMissions,
                 label: TranslateText('Predefined Missions'),

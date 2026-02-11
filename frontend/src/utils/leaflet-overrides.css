@@ -1,0 +1,23 @@
+/* Force override of tooltip box for task labels */
+.leaflet-tooltip-pane .leaflet-tooltip.circleLabel {
+    background: none !important;
+    background-color: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+
+    padding: 0 !important;
+    margin: 0 !important;
+
+    border-radius: 0 !important;
+
+    min-width: 0 !important;
+    min-height: 0 !important;
+
+    pointer-events: none !important;
+}
+
+.leaflet-tooltip-pane .leaflet-tooltip.circleLabel:before,
+.leaflet-tooltip-pane .leaflet-tooltip.circleLabel::before {
+    display: none !important;
+    content: none !important;
+}

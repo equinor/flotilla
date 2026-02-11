@@ -5,7 +5,7 @@ import { TaskTable } from './TaskOverview/TaskTable'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Mission } from 'models/Mission'
 import { phone_width } from 'utils/constants'
-import PlantMap from './MapPosition/PointillaMapView'
+import { PlantMap } from './MapPosition/PointillaMapView'
 
 const TaskAndMapSection = styled.div`
     display: flex;

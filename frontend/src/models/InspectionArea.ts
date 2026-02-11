@@ -4,4 +4,16 @@ export interface InspectionArea {
     plantName: string
     plantCode: string
     installationCode: string
+    areaPolygon?: AreaPolygon
+}
+
+interface AreaPolygon {
+    zmin: number
+    zmax: number
+    positions: PolygonPoint[]
+}
+
+export interface PolygonPoint {
+    x: number
+    y: number
 }
