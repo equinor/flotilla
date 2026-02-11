@@ -18,8 +18,8 @@ namespace Api.Test.Database
         private readonly MissionTaskService _missionTaskService;
         private readonly InspectionAreaService _inspectionAreaService;
         private readonly InstallationService _installationService;
-        private readonly EventAggregatorSingletonService _eventAggregatorSingletonService;
         private readonly MissionRunService _missionRunService;
+        private readonly MissionSchedulingService _missionSchedulingService;
         private readonly MissionDefinitionService _missionDefinitionService;
         private readonly PlantService _plantService;
         private readonly RobotService _robotService;
@@ -27,6 +27,8 @@ namespace Api.Test.Database
         private readonly SourceService _sourceService;
         private readonly AutoScheduleService _autoScheduleService;
         private readonly AreaPolygonService _areaPolygonService;
+        private readonly ErrorHandlingService _errorHandlingService;
+        private readonly ExclusionAreaService _exclusionAreaService;
         private readonly string _testInstallationCode = "InstCode";
         private readonly string _testInstallationName = "Installation";
         private readonly string _testPlantCode = "PlantCode";
@@ -70,7 +72,6 @@ namespace Api.Test.Database
                 _installationService,
                 _inspectionAreaService
             );
-            _eventAggregatorSingletonService = new EventAggregatorSingletonService();
             _missionRunService = new MissionRunService(
                 context,
                 new MockSignalRService(),
@@ -79,8 +80,31 @@ namespace Api.Test.Database
                 _missionTaskService,
                 _inspectionAreaService,
                 _robotService,
-                _userInfoService,
-                _eventAggregatorSingletonService
+                _userInfoService
+            );
+            _errorHandlingService = new ErrorHandlingService(
+                new Mock<ILogger<ErrorHandlingService>>().Object,
+                _robotService,
+                _missionRunService
+            );
+            _exclusionAreaService = new ExclusionAreaService(
+                context,
+                _installationService,
+                _plantService,
+                _accessRoleService,
+                new MockSignalRService(),
+                _areaPolygonService
+            );
+            _missionSchedulingService = new MissionSchedulingService(
+                new Mock<ILogger<MissionSchedulingService>>().Object,
+                _missionRunService,
+                _robotService,
+                new MockIsarService(),
+                new MockSignalRService(),
+                _errorHandlingService,
+                _inspectionAreaService,
+                _areaPolygonService,
+                _exclusionAreaService
             );
             _sourceService = new SourceService(context, new Mock<ILogger<SourceService>>().Object);
             _missionDefinitionService = new MissionDefinitionService(
@@ -97,6 +121,7 @@ namespace Api.Test.Database
                 _robotService,
                 new MockMissionLoader(),
                 _missionRunService,
+                _missionSchedulingService,
                 new MockSignalRService()
             );
         }
@@ -135,7 +160,7 @@ namespace Api.Test.Database
             missionRun.Tasks = [new(new Pose())];
             if (writeToDatabase)
             {
-                return await _missionRunService.Create(missionRun, false);
+                return await _missionRunService.Create(missionRun);
             }
             return missionRun;
         }

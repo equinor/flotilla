@@ -102,6 +102,7 @@ namespace Api.Test.EventHandlers
 
             // Act
             await MissionRunService.Create(missionRun);
+            await MissionSchedulingService.StartNextMissionRunIfSystemIsAvailable(robot);
             Thread.Sleep(1000);
 
             // Assert
@@ -130,7 +131,8 @@ namespace Api.Test.EventHandlers
                 inspectionArea,
                 missionStatus: MissionStatus.Ongoing
             );
-            await MissionRunService.Create(missionRunOne, triggerCreatedMissionRunEvent: false);
+            await MissionRunService.Create(missionRunOne);
+            await MissionSchedulingService.StartNextMissionRunIfSystemIsAvailable(robot);
 
             // Act
             var missionRunTwo = await DatabaseUtilities.NewMissionRun(
@@ -139,6 +141,7 @@ namespace Api.Test.EventHandlers
                 inspectionArea
             );
             await MissionRunService.Create(missionRunTwo);
+            await MissionSchedulingService.StartNextMissionRunIfSystemIsAvailable(robot);
 
             // Assert
             await TestSetupHelpers.WaitFor(async () =>
@@ -176,6 +179,7 @@ namespace Api.Test.EventHandlers
             );
 
             await MissionRunService.Create(missionRun);
+            await MissionSchedulingService.StartNextMissionRunIfSystemIsAvailable(robot);
             Thread.Sleep(100);
 
             var isarStatusMessage = new IsarStatusMessage
@@ -232,6 +236,9 @@ namespace Api.Test.EventHandlers
 
             // Act (Ensure first mission is started)
             await MissionRunService.Create(missionRunOne);
+            await MissionSchedulingService.StartNextMissionRunIfSystemIsAvailable(
+                missionRunOne.Robot
+            );
             Thread.Sleep(1000);
 
             // Assert
@@ -245,6 +252,9 @@ namespace Api.Test.EventHandlers
 
             // Act (Ensure second mission is started for second robot)
             await MissionRunService.Create(missionRunTwo);
+            await MissionSchedulingService.StartNextMissionRunIfSystemIsAvailable(
+                missionRunTwo.Robot
+            );
             Thread.Sleep(1000);
 
             // Assert
@@ -281,7 +291,7 @@ namespace Api.Test.EventHandlers
                 true
             );
 
-            EventAggregatorSingletonService.Publish(new MissionRunCreatedEventArgs(missionRunOne));
+            await MissionSchedulingService.StartNextMissionRunIfSystemIsAvailable(robot);
             Thread.Sleep(1000);
 
             var missionRunOnePostCreation = await MissionRunService.ReadById(

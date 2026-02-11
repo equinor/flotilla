@@ -4,7 +4,6 @@ using System.Linq.Expressions;
 using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
-using Api.Services.Events;
 using Api.Services.Models;
 using Api.Utilities;
 using Microsoft.EntityFrameworkCore;
@@ -13,10 +12,7 @@ namespace Api.Services
 {
     public interface IMissionRunService
     {
-        public Task<MissionRun> Create(
-            MissionRun missionRun,
-            bool triggerCreatedMissionRunEvent = true
-        );
+        public Task<MissionRun> Create(MissionRun missionRun);
 
         public Task<PagedList<MissionRun>> ReadAll(
             MissionRunQueryStringParameters parameters,
@@ -102,14 +98,10 @@ namespace Api.Services
         IMissionTaskService missionTaskService,
         IInspectionAreaService inspectionAreaService,
         IRobotService robotService,
-        IUserInfoService userInfoService,
-        EventAggregatorSingletonService eventAggregatorSingletonService
+        IUserInfoService userInfoService
     ) : IMissionRunService
     {
-        public async Task<MissionRun> Create(
-            MissionRun missionRun,
-            bool triggerCreatedMissionRunEvent = true
-        )
+        public async Task<MissionRun> Create(MissionRun missionRun)
         {
             missionRun.Id ??= Guid.NewGuid().ToString(); // Useful for signalR messages
 
@@ -135,11 +127,6 @@ namespace Api.Services
             );
 
             DetachTracking(context, missionRun);
-
-            if (triggerCreatedMissionRunEvent)
-            {
-                eventAggregatorSingletonService.Publish(new MissionRunCreatedEventArgs(missionRun));
-            }
 
             var userInfo = await userInfoService.GetRequestedUserInfo();
             if (userInfo != null)
