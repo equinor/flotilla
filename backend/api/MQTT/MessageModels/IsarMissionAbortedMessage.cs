@@ -15,9 +15,6 @@ namespace Api.Mqtt.MessageModels
         [JsonPropertyName("mission_id")]
         public string? MissionId { get; set; }
 
-        [JsonPropertyName("can_be_continued")]
-        public bool CanBeContinued { get; set; }
-
         [JsonPropertyName("timestamp")]
         public DateTime Timestamp { get; set; }
 
