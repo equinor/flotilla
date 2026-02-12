@@ -38,20 +38,18 @@ const App = () => (
                             <MissionDefinitionsProvider>
                                 <MissionRunsProvider>
                                     <AlertProvider>
-                                        <MissionRunsProvider>
-                                            <MissionControlProvider>
-                                                <UnauthenticatedTemplate>
-                                                    <div className="sign-in-page">
-                                                        <LoginPage />
-                                                    </div>
-                                                </UnauthenticatedTemplate>
-                                                <AuthenticatedTemplate>
-                                                    <MediaStreamProvider>
-                                                        <FlotillaSite />
-                                                    </MediaStreamProvider>
-                                                </AuthenticatedTemplate>
-                                            </MissionControlProvider>
-                                        </MissionRunsProvider>
+                                        <MissionControlProvider>
+                                            <UnauthenticatedTemplate>
+                                                <div className="sign-in-page">
+                                                    <LoginPage />
+                                                </div>
+                                            </UnauthenticatedTemplate>
+                                            <AuthenticatedTemplate>
+                                                <MediaStreamProvider>
+                                                    <FlotillaSite />
+                                                </MediaStreamProvider>
+                                            </AuthenticatedTemplate>
+                                        </MissionControlProvider>
                                     </AlertProvider>
                                 </MissionRunsProvider>
                             </MissionDefinitionsProvider>

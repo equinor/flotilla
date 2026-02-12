@@ -2,6 +2,8 @@ import { useMsal } from '@azure/msal-react'
 import { CircularProgress, Typography } from '@equinor/eds-core-react'
 import { InteractionStatus } from '@azure/msal-browser'
 import styled from 'styled-components'
+import { useEffect, useRef } from 'react'
+import { loginRequest } from 'api/AuthConfig'
 
 const Centered = styled.div`
     display: flex;
@@ -11,7 +13,19 @@ const Centered = styled.div`
 `
 
 export const LoginPage = () => {
-    const { inProgress } = useMsal()
+    const { instance, accounts, inProgress } = useMsal()
+    const didRedirect = useRef(false)
+
+    useEffect(() => {
+        if (accounts.length > 0 || instance.getActiveAccount()) return
+
+        if (inProgress !== InteractionStatus.None) return
+
+        if (didRedirect.current) return
+        didRedirect.current = true
+
+        instance.loginRedirect(loginRequest)
+    }, [accounts.length, inProgress, instance])
 
     return (
         <Centered>

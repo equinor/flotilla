@@ -1,5 +1,4 @@
 import { createContext, FC, useContext, useEffect, useState } from 'react'
-import { BackendAPICaller } from 'api/ApiCaller'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { MissionDefinition } from 'models/MissionDefinition'
 import { useLanguageContext } from './LanguageContext'
@@ -7,6 +6,7 @@ import { AlertType, useAlertContext } from './AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { useAssetContext } from './AssetContext'
+import { useBackendApi } from 'api/UseBackendApi'
 
 interface IMissionDefinitionsContext {
     missionDefinitions: MissionDefinition[]
@@ -39,6 +39,7 @@ const useMissionDefinitions = (): IMissionDefinitionsContext => {
     const { installationCode } = useAssetContext()
     const { TranslateText } = useLanguageContext()
     const { setAlert, setListAlert } = useAlertContext()
+    const backendApi = useBackendApi()
 
     useEffect(() => {
         if (connectionReady) {
@@ -68,10 +69,11 @@ const useMissionDefinitions = (): IMissionDefinitionsContext => {
 
     useEffect(() => {
         const fetchAndUpdateMissionDefinitions = () => {
-            BackendAPICaller.getMissionDefinitions({
-                pageSize: 100,
-                orderBy: 'InstallationCode installationCode',
-            })
+            backendApi
+                .getMissionDefinitions({
+                    pageSize: 100,
+                    orderBy: 'InstallationCode installationCode',
+                })
                 .then((response) => {
                     const missionDefinitionsInInstallation = response.content
                     setMissionDefinitions(missionDefinitionsInInstallation ?? [])
@@ -93,8 +95,8 @@ const useMissionDefinitions = (): IMissionDefinitionsContext => {
                     )
                 })
         }
-        if (BackendAPICaller.accessToken) fetchAndUpdateMissionDefinitions()
-    }, [BackendAPICaller.accessToken, installationCode])
+        if (installationCode) fetchAndUpdateMissionDefinitions()
+    }, [installationCode])
 
     const [filteredMissionDefinitions, setFilteredMissionDefinitions] = useState<MissionDefinition[]>([])
 

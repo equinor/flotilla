@@ -2,7 +2,6 @@ import { createContext, FC, ReactNode, useContext, useEffect, useState } from 'r
 import { addMinutes, max } from 'date-fns'
 import { Mission, MissionStatus } from 'models/Mission'
 import { FailedMissionAlertContent, FailedMissionAlertListContent } from 'components/Alerts/FailedMissionAlert'
-import { BackendAPICaller } from 'api/ApiCaller'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { Alert } from 'models/Alert'
 import { useAssetContext } from './AssetContext'
@@ -18,6 +17,8 @@ import { DockAlertContent, DockAlertListContent } from 'components/Alerts/DockAl
 import { useLanguageContext } from './LanguageContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { InfoAlertContent, InfoAlertListContent } from 'components/Alerts/InfoAlertContent'
+import { useBackendApi } from 'api/UseBackendApi'
+import { AuthContext } from './AuthContext'
 
 export enum AlertType {
     MissionFail,
@@ -84,6 +85,8 @@ export const AlertProvider: FC<Props> = ({ children }) => {
     const [autoScheduleFailedMissionDict, setAutoScheduleFailedMissionDict] = useState<AutoScheduleFailedMissionDict>(
         JSON.parse(window.localStorage.getItem('autoScheduleFailedMissionDict') || '{}')
     )
+    const backendApi = useBackendApi()
+    const { isAuthenticated } = useContext(AuthContext)
 
     const pageSize: number = 100
     // The default amount of minutes in the past for failed missions to generate an alert
@@ -164,9 +167,11 @@ export const AlertProvider: FC<Props> = ({ children }) => {
 
     // Set the initial failed missions when loading the page or changing installations
     useEffect(() => {
+        if (!isAuthenticated) return
         const updateRecentFailedMissions = () => {
             const lastDismissTime: Date = getLastDismissalTime()
-            BackendAPICaller.getMissionRuns({ statuses: [MissionStatus.Failed], pageSize: pageSize })
+            backendApi
+                .getMissionRuns({ statuses: [MissionStatus.Failed], pageSize: pageSize })
                 .then((missions) => {
                     const newRecentFailedMissions = missions.content.filter(
                         (m) =>

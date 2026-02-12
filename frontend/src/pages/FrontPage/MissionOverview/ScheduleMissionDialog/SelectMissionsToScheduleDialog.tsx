@@ -5,12 +5,12 @@ import { memo, useState } from 'react'
 import { RobotWithoutTelemetry, RobotStatus } from 'models/Robot'
 import { CondensedMissionDefinition } from 'models/CondensedMissionDefinition'
 import { useAssetContext } from 'components/Contexts/AssetContext'
-import { BackendAPICaller } from 'api/ApiCaller'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { phone_width } from 'utils/constants'
+import { useBackendApi } from 'api/UseBackendApi'
 
 const StyledMissionDialog = styled.div`
     display: flex;
@@ -51,12 +51,13 @@ export const SelectMissionsToScheduleDialog = ({ missionsList, closeDialog }: Sc
     const { setLoadingRobotMissionSet } = useMissionsContext()
     const [selectedMissions, setSelectedMissions] = useState<CondensedMissionDefinition[]>([])
     const [selectedRobot, setSelectedRobot] = useState<RobotWithoutTelemetry | undefined>(undefined)
+    const backendApi = useBackendApi()
 
     const onScheduleButtonPress = () => {
         if (!selectedRobot) return
 
         selectedMissions.forEach((mission: CondensedMissionDefinition) => {
-            BackendAPICaller.postMission(mission.sourceId, selectedRobot.id, installationCode).catch((e) => {
+            backendApi.postMission(mission.sourceId, selectedRobot.id, installationCode).catch((e) => {
                 setAlert(
                     AlertType.RequestFail,
                     <FailedRequestAlertContent

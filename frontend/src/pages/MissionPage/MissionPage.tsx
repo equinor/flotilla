@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { MissionHeader, SimpleMissionHeader } from './MissionHeader/MissionHeader'
 import { BackButton } from 'utils/BackButton'
-import { BackendAPICaller } from 'api/ApiCaller'
 import { Header } from 'components/Header/Header'
 import { SignalREventLabels, useSignalRContext } from 'components/Contexts/SignalRContext'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
@@ -19,6 +18,7 @@ import { TaskTableAndMap } from './TaskTableAndMap'
 import { AnalysisResultDialogView } from './AnalysisResultView'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { config } from 'config'
+import { useBackendApi } from 'api/UseBackendApi'
 
 const StyledMissionPageContent = styled.div`
     display: flex;
@@ -48,6 +48,7 @@ const useMissionSelector = (missionId: string | undefined, inspectionId: string 
     const [selectedMission, setSelectedMission] = useState<Mission>()
     const { registerEvent, connectionReady } = useSignalRContext()
     const { mediaStreams, addMediaStreamConfigIfItDoesNotExist } = useMediaStreamContext()
+    const backendApi = useBackendApi()
 
     useEffect(() => {
         if (selectedMission && !Object.keys(mediaStreams).includes(selectedMission?.robot.id))
@@ -73,7 +74,8 @@ const useMissionSelector = (missionId: string | undefined, inspectionId: string 
 
     useEffect(() => {
         if (missionId)
-            BackendAPICaller.getMissionRunById(missionId)
+            backendApi
+                .getMissionRunById(missionId)
                 .then((mission) => {
                     setSelectedMission(mission)
                 })
@@ -94,7 +96,8 @@ const useMissionSelector = (missionId: string | undefined, inspectionId: string 
                     )
                 })
         else if (inspectionId) {
-            BackendAPICaller.getMissionRunByIsarInspectionId(inspectionId)
+            backendApi
+                .getMissionRunByIsarInspectionId(inspectionId)
                 .then((mission) => {
                     setSearchParams(
                         (prev) => {

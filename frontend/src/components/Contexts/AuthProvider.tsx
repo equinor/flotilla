@@ -1,44 +1,50 @@
 import { useMsal } from '@azure/msal-react'
-import { fetchAccessToken } from 'api/AuthConfig'
-import { createContext, useCallback, useEffect, useState } from 'react'
+import { useCallback, useMemo } from 'react'
+import { loginRequest } from 'api/AuthConfig'
+import { AuthContext } from './AuthContext'
+import { InteractionRequiredAuthError } from '@azure/msal-browser'
 
 type Props = {
     children?: React.ReactNode
 }
 
-const defaultAuthState = {
-    accessToken: undefined,
-}
+export const AuthProvider = ({ children }: Props) => {
+    const { instance, accounts, inProgress } = useMsal()
 
-interface IAuthContext {
-    accessToken: string | undefined
-}
+    const isAuthenticated = !!(instance.getActiveAccount() ?? accounts[0])
 
-export const AuthContext = createContext<IAuthContext>(defaultAuthState)
+    const getAccessToken = useCallback(async () => {
+        const account = instance.getActiveAccount() ?? accounts[0]
+        if (!account) throw new Error('No signed-in account found.')
 
-// Check for new token every second (Will refresh token if needed)
-export const tokenReverificationInterval: number = 1000
+        try {
+            const resp = await instance.acquireTokenSilent({ ...loginRequest, account })
+            return resp.accessToken
+        } catch (e: any) {
+            // 1) If MSAL is already doing an interactive flow, do NOT start another
+            if (e?.errorCode === 'interaction_in_progress' || inProgress !== 'none') {
+                throw e
+            }
 
-export const AuthProvider = (props: Props) => {
-    const msalContext = useMsal()
-    const [accessToken, setAccessToken] = useState<string | undefined>(undefined)
+            // 2) If an interactive login/consent is required, trigger redirect once
+            const interactionRequired =
+                e instanceof InteractionRequiredAuthError ||
+                e?.errorCode === 'interaction_required' ||
+                e?.errorCode === 'consent_required' ||
+                e?.errorCode === 'login_required'
 
-    const VerifyToken = useCallback(() => {
-        fetchAccessToken(msalContext)
-            .then((accessToken) => {
-                setAccessToken(accessToken)
-            })
-            .catch((error) => {
-                console.error('Failed to fetch access token:', error)
-            })
-    }, [msalContext])
+            if (interactionRequired) {
+                await instance.acquireTokenRedirect({ ...loginRequest, account })
+                // Redirect navigates away; this is mostly to satisfy TS control flow
+                throw e
+            }
 
-    useEffect(() => {
-        const id = setInterval(() => {
-            VerifyToken()
-        }, tokenReverificationInterval)
-        return () => clearInterval(id)
-    }, [VerifyToken])
+            // 3) Otherwise bubble up
+            throw e
+        }
+    }, [accounts, inProgress, instance])
 
-    return <AuthContext.Provider value={{ accessToken: accessToken }}>{props.children}</AuthContext.Provider>
+    const value = useMemo(() => ({ getAccessToken, isAuthenticated }), [getAccessToken, isAuthenticated])
+
+    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

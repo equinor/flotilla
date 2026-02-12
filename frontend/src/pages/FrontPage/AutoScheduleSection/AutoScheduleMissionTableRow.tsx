@@ -5,13 +5,13 @@ import { config } from 'config'
 import styled from 'styled-components'
 import { convertUTCDateToLocalDate } from 'utils/StringFormatting'
 import { MissionDefinition } from 'models/MissionDefinition'
-import { BackendAPICaller } from 'api/ApiCaller'
 import { Link } from 'react-router-dom'
 import { StyledDialog } from 'components/Styles/StyledComponents'
 import { useRef, useState } from 'react'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
 import { useAssetContext } from 'components/Contexts/AssetContext'
+import { useBackendApi } from 'api/UseBackendApi'
 
 const StyledTableRow = styled.div`
     display: grid;
@@ -38,7 +38,8 @@ const StyledButton = styled(Button)`
 `
 
 export const skipAutoScheduledMission = async (missionId: string, timeOfDay: string) => {
-    await BackendAPICaller.skipAutoScheduledMission(missionId, timeOfDay)
+    const backendApi = useBackendApi()
+    await backendApi.skipAutoScheduledMission(missionId, timeOfDay)
 }
 
 export enum MissionStatusType {

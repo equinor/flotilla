@@ -1,6 +1,5 @@
 import { createContext, FC, useContext, useEffect, useState } from 'react'
 import { Mission, MissionStatus } from 'models/Mission'
-import { BackendAPICaller } from 'api/ApiCaller'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { TaskStatus } from 'models/Task'
 import { useLanguageContext } from './LanguageContext'
@@ -8,6 +7,8 @@ import { AlertType, useAlertContext } from './AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { useAssetContext } from './AssetContext'
+import { useBackendApi } from 'api/UseBackendApi'
+import { AuthContext } from './AuthContext'
 
 const upsertMissionList = (list: Mission[], mission: Mission) => {
     const newMissionList = [...list]
@@ -74,11 +75,15 @@ const updateOngoingMissionsWithUpdatedMission = (oldMissionList: Mission[], upda
     return oldMissionList
 }
 
-const fetchMissionRuns = (params: {
+const fetchMissionRuns = async (params: {
     statuses: MissionStatus[]
     pageSize: number
     orderBy: string
-}): Promise<Mission[]> => BackendAPICaller.getMissionRuns(params).then((response) => response.content)
+}): Promise<Mission[]> => {
+    const backendApi = useBackendApi()
+    const response = await backendApi.getMissionRuns(params)
+    return response.content
+}
 
 const useMissionRuns = (): IMissionRunsContext => {
     const [ongoingMissions, setOngoingMissions] = useState<Mission[]>([])
@@ -88,6 +93,7 @@ const useMissionRuns = (): IMissionRunsContext => {
     const { TranslateText } = useLanguageContext()
     const { setAlert, setListAlert } = useAlertContext()
     const { installationCode } = useAssetContext()
+    const { isAuthenticated } = useContext(AuthContext)
 
     useEffect(() => {
         if (connectionReady) {
@@ -129,6 +135,7 @@ const useMissionRuns = (): IMissionRunsContext => {
     }, [registerEvent, connectionReady])
 
     useEffect(() => {
+        if (!isAuthenticated) return
         const fetchAndUpdateMissions = async () => {
             const ongoing = await fetchMissionRuns({
                 statuses: [MissionStatus.Ongoing, MissionStatus.Pending, MissionStatus.Paused],
@@ -172,8 +179,8 @@ const useMissionRuns = (): IMissionRunsContext => {
 
             setMissionQueue(queue ?? [])
         }
-        if (BackendAPICaller.accessToken) fetchAndUpdateMissions()
-    }, [BackendAPICaller.accessToken])
+        fetchAndUpdateMissions()
+    }, [fetchMissionRuns, installationCode])
 
     const [filteredMissionQueue, setFilteredMissionQueue] = useState<Mission[]>([])
     const [filteredOngoingMissions, setFilteredOngoingMissions] = useState<Mission[]>([])

@@ -1,7 +1,7 @@
 import { createContext, FC, useContext, useEffect, useState } from 'react'
 import { ConnectionState, Room, RoomEvent } from 'livekit-client'
 import { MediaConnectionType, MediaStreamConfig } from 'models/VideoStream'
-import { BackendAPICaller } from 'api/ApiCaller'
+import { useBackendApi } from 'api/UseBackendApi'
 
 type MediaStreamDictionaryType = {
     [robotId: string]: { isLoading: boolean } & MediaStreamConfig & { streams: MediaStreamTrack[] }
@@ -34,6 +34,7 @@ export const MediaStreamProvider: FC<Props> = ({ children }) => {
     const [cachedConfigs] = useState<MediaStreamConfigDictionaryType>(
         JSON.parse(window.localStorage.getItem('mediaConfigs') ?? '{}')
     )
+    const backendApi = useBackendApi()
 
     useEffect(() => {
         // Here we maintain the localstorage with the connection details
@@ -142,7 +143,8 @@ export const MediaStreamProvider: FC<Props> = ({ children }) => {
     }
 
     const refreshRobotMediaConfig = (robotId: string) => {
-        BackendAPICaller.getRobotMediaConfig(robotId)
+        backendApi
+            .getRobotMediaConfig(robotId)
             .then((conf: MediaStreamConfig | null | undefined) => {
                 if (conf) addConfigToMediaStreams(conf)
             })

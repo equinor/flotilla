@@ -2,7 +2,6 @@ import { MapContainer, Polygon } from 'react-leaflet'
 import AuthTileLayer from './PointillaMap'
 import 'leaflet/dist/leaflet.css'
 import L, { LatLngBoundsExpression } from 'leaflet'
-import { BackendAPICaller } from 'api/ApiCaller'
 import { useEffect, useState } from 'react'
 import { PointillaMapInfo } from 'models/PointillaMapInfo'
 import styled, { createGlobalStyle } from 'styled-components'
@@ -13,6 +12,7 @@ import { getRobotMarker, getTaskMarkers } from './PointillaMapMarkers'
 import { useRobotTelemetry } from 'hooks/useRobotTelemetry'
 import { PolygonPoint } from 'models/InspectionArea'
 import 'utils/leaflet-overrides.css'
+import { useBackendApi } from 'api/UseBackendApi'
 
 const LeafletTooltipStyles = createGlobalStyle`
     .leaflet-tooltip.circleLabel {
@@ -90,13 +90,15 @@ export function PlantMap({ plantCode, floorId, mission }: PlantMapProps) {
     const [mapInfo, setMapInfo] = useState<PointillaMapInfo | undefined>(undefined)
     const [map, setMap] = useState<L.Map | null>(null)
     const { robotPose } = useRobotTelemetry(mission.robot)
+    const backendApi = useBackendApi()
 
     const tasks = mission?.tasks
     const updateIntervalRobotAuraInMS = 50
 
     const loadMap = async () => {
         if (!map) return
-        BackendAPICaller.getFloorMapInfo(plantCode, floorId)
+        backendApi
+            .getFloorMapInfo(plantCode, floorId)
             .then((info) => {
                 setMapInfo(info)
                 if (info) setMapOptions(map, info)
@@ -161,10 +163,12 @@ export function PlantMap({ plantCode, floorId, mission }: PlantMapProps) {
 export function PlantPolygonMap({ plantCode, floorId, polygon }: PlantPolygonMapProps) {
     const [mapInfo, setMapInfo] = useState<PointillaMapInfo | undefined>(undefined)
     const [map, setMap] = useState<L.Map | null>(null)
+    const backendApi = useBackendApi()
 
     const loadMap = async () => {
         if (!map) return
-        BackendAPICaller.getFloorMapInfo(plantCode, floorId)
+        backendApi
+            .getFloorMapInfo(plantCode, floorId)
             .then((info) => {
                 setMapInfo(info)
                 if (info) setMapOptions(map, info)

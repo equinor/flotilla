@@ -1,4 +1,3 @@
-import { BackendAPICaller } from 'api/ApiCaller'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { RobotWithoutTelemetry } from 'models/Robot'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
@@ -8,6 +7,7 @@ import { StyledButton, StyledDialog } from 'components/Styles/StyledComponents'
 import styled from 'styled-components'
 import { useState } from 'react'
 import { Button, Typography } from '@equinor/eds-core-react'
+import { useBackendApi } from 'api/UseBackendApi'
 
 const StyledTextButton = styled(StyledButton)`
     text-align: left;
@@ -19,11 +19,12 @@ export const InterventionNeededButton = ({ robot }: { robot: RobotWithoutTelemet
     const { setAlert, setListAlert } = useAlertContext()
     const [isDisabled, setIsDisabled] = useState(false)
     const [isDialogOpen, setIsDialogOpen] = useState(false)
+    const backendApi = useBackendApi()
 
     const releaseInterventionNeeded = () => {
         disableButton()
 
-        BackendAPICaller.releaseInterventionNeeded(robot.id).catch(() => {
+        backendApi.releaseInterventionNeeded(robot.id).catch(() => {
             setAlert(
                 AlertType.RequestFail,
                 <FailedRequestAlertContent

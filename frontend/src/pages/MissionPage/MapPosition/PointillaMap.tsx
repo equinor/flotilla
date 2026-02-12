@@ -1,9 +1,9 @@
 import { useEffect, useRef } from 'react'
 import { useMap } from 'react-leaflet'
 import { DoneCallback, TileLayerOptions, TileLayer, Coords } from 'leaflet'
-import { BackendAPICaller } from 'api/ApiCaller'
 import 'leaflet/dist/leaflet.css'
 import { PointillaMapInfo } from 'models/PointillaMapInfo'
+import { useBackendApi } from 'api/UseBackendApi'
 /* eslint-disable react/prop-types */
 
 interface TileLayerHeadersOptions extends TileLayerOptions {
@@ -82,6 +82,7 @@ interface AuthTileLayerProps {
 const AuthTileLayer: React.FC<AuthTileLayerProps> = ({ mapInfo }) => {
     const map = useMap()
     const tileLayerRef = useRef<TileLayerHeaders | null>(null)
+    const backendApi = useBackendApi()
 
     useEffect(() => {
         if (tileLayerRef.current) {
@@ -101,7 +102,7 @@ const AuthTileLayer: React.FC<AuthTileLayerProps> = ({ mapInfo }) => {
                 minZoom: mapInfo.zoomMin,
                 maxZoom: mapInfo.zoomMax,
                 tileSize: mapInfo.tileSize,
-                getBlob: getBlobViaBackend,
+                getBlob: getBlobViaBackend(backendApi),
             }
         )
 
@@ -118,14 +119,14 @@ const AuthTileLayer: React.FC<AuthTileLayerProps> = ({ mapInfo }) => {
     return null
 }
 
-function getBlobViaBackend(
-    url: string,
-    opts?: { headers?: Record<string, string>; signal?: AbortSignal }
-): Promise<Blob> {
-    const path = url.replace(/^https?:\/\/[^/]+\//, '')
-    return BackendAPICaller.getFloorMapTileByPath(path, {
-        signal: opts?.signal,
-        headers: opts?.headers,
-    })
+function getBlobViaBackend(backendApi: ReturnType<typeof useBackendApi>) {
+    return (url: string, opts?: { headers?: Record<string, string>; signal?: AbortSignal }): Promise<Blob> => {
+        const path = url.replace(/^https?:\/\/[^/]+\//, '')
+        return backendApi.getFloorMapTileByPath(path, {
+            signal: opts?.signal,
+            headers: opts?.headers,
+        })
+    }
 }
+
 export default AuthTileLayer

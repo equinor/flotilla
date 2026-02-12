@@ -21,9 +21,9 @@ import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { ReturnHomeButton } from './ReturnHomeButton'
 import { phone_width } from 'utils/constants'
 import { InterventionNeededButton } from './InterventionNeededButton'
-import { BackendAPICaller } from 'api/ApiCaller'
 import { useQuery } from '@tanstack/react-query'
 import { useRobotTelemetry } from 'hooks/useRobotTelemetry'
+import { useBackendApi } from 'api/UseBackendApi'
 
 const StyledRobotPage = styled(StyledPage)`
     background-color: ${tokens.colors.ui.background__light.hex};
@@ -95,6 +95,7 @@ export const RobotPage = ({ robot }: RobotPageProps) => {
     const [videoMediaStreams, setVideoMediaStreams] = useState<MediaStreamTrack[]>([])
     const { ongoingMissions } = useMissionsContext()
     const { robotBatteryLevel, robotBatteryStatus, robotPressureLevel } = useRobotTelemetry(robot)
+    const backendApi = useBackendApi()
 
     useEffect(() => {
         if (robot.id && !Object.keys(mediaStreams).includes(robot.id)) addMediaStreamConfigIfItDoesNotExist(robot.id)
@@ -145,7 +146,7 @@ export const RobotPage = ({ robot }: RobotPageProps) => {
         queryKey: ['fetchCurrentInspectionArea', robot.id],
         queryFn: async () => {
             if (robot && robot.currentInspectionAreaId)
-                return await BackendAPICaller.getInspectionAreaById(robot.currentInspectionAreaId)
+                return await backendApi.getInspectionAreaById(robot.currentInspectionAreaId)
             return null
         },
         retry: 2,
@@ -248,11 +249,13 @@ interface MaintenanceButtonProps {
 const MaintenanceButton = ({ robotId, robotStatus }: MaintenanceButtonProps) => {
     const { TranslateText } = useLanguageContext()
     const [isStoppingDueToMaintenance, setIsStoppingDueToMaintenance] = useState(false)
+    const backendApi = useBackendApi()
 
     const onSetMaintenenceMode = () => {
         setIsStoppingDueToMaintenance(true)
 
-        BackendAPICaller.setMaintenanceMode(robotId)
+        backendApi
+            .setMaintenanceMode(robotId)
             .then(() => {
                 setIsStoppingDueToMaintenance(false)
             })
@@ -263,7 +266,8 @@ const MaintenanceButton = ({ robotId, robotStatus }: MaintenanceButtonProps) => 
     }
 
     const onReleaseMaintenanceMode = () => {
-        BackendAPICaller.releaseMaintenanceMode(robotId)
+        backendApi
+            .releaseMaintenanceMode(robotId)
             .then(() => {})
             .catch(() => {
                 console.log(`Unable to release maintenance mode on robot with id ${robotId}. `)

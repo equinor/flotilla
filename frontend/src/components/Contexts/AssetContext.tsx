@@ -1,5 +1,4 @@
 import { createContext, useContext, useState, FC, useEffect } from 'react'
-import { BackendAPICaller } from 'api/ApiCaller'
 import { RobotPropertyUpdate, RobotWithoutTelemetry, robotTelemetryPropsList } from 'models/Robot'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { useLanguageContext } from './LanguageContext'
@@ -8,6 +7,7 @@ import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'compon
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { Installation } from 'models/Installation'
 import { InspectionArea } from 'models/InspectionArea'
+import { useBackendApi } from 'api/UseBackendApi'
 
 const upsertRobotList = (list: RobotWithoutTelemetry[], robot: RobotWithoutTelemetry) => {
     const newList = [...list]
@@ -56,6 +56,8 @@ export const AssetProvider: FC<Props> = ({ children }) => {
 
     const installationCode = selectedInstallation?.installationCode ?? ''
     const installationName = selectedInstallation?.name ?? ''
+
+    const backendApi = useBackendApi()
 
     useEffect(() => {
         if (connectionReady) {
@@ -113,7 +115,8 @@ export const AssetProvider: FC<Props> = ({ children }) => {
 
     useEffect(() => {
         if (!enabledRobots || enabledRobots.length === 0)
-            BackendAPICaller.getEnabledRobots()
+            backendApi
+                .getEnabledRobots()
                 .then((robots) => {
                     setEnabledRobots(robots)
                     setIsLoading(false)
@@ -155,7 +158,8 @@ export const AssetProvider: FC<Props> = ({ children }) => {
 
     useEffect(() => {
         if (installationCode)
-            BackendAPICaller.getInspectionAreasByInstallationCode(installationCode)
+            backendApi
+                .getInspectionAreasByInstallationCode(installationCode)
                 .then((inspectionAreas: InspectionArea[]) => {
                     setInstallationInspectionAreas(inspectionAreas)
                 })

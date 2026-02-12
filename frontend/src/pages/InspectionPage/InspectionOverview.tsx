@@ -1,7 +1,6 @@
 import { Icon, Typography } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useRef, useState } from 'react'
-import { BackendAPICaller } from 'api/ApiCaller'
 import { AllInspectionsTable } from './InspectionTable'
 import { getInspectionDeadline } from 'utils/StringFormatting'
 import styled from 'styled-components'
@@ -16,6 +15,7 @@ import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinit
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { Placeholder } from './InspectionUtilities'
 import { phone_width } from 'utils/constants'
+import { useBackendApi } from 'api/UseBackendApi'
 
 const StyledContent = styled.div`
     display: flex;
@@ -48,6 +48,7 @@ export const InspectionOverviewSection = () => {
     const [isFetchingMissions, setIsFetchingMissions] = useState<boolean>(false)
     const [isScheduleMissionDialogOpen, setIsScheduleMissionDialogOpen] = useState<boolean>(false)
     const [missions, setMissions] = useState<CondensedMissionDefinition[]>([])
+    const backendApi = useBackendApi()
 
     const isScheduleButtonDisabled = enabledRobots.length === 0 || installationCode === ''
 
@@ -64,7 +65,8 @@ export const InspectionOverviewSection = () => {
 
     const fetchMissions = () => {
         setIsFetchingMissions(true)
-        BackendAPICaller.getAvailableMissions(installationCode as string)
+        backendApi
+            .getAvailableMissions(installationCode as string)
             .then((missions) => {
                 setMissions(missions)
                 setIsFetchingMissions(false)

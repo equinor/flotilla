@@ -1,7 +1,8 @@
 import * as signalR from '@microsoft/signalr'
 import React, { createContext, FC, useContext, useEffect, useCallback, useState } from 'react'
-import { AuthContext } from './AuthProvider'
+import { AuthContext } from './AuthContext'
 import { config } from 'config'
+import { useMsal } from '@azure/msal-react'
 
 /**
  * SignalR provides asynchronous communication between backend and frontend. This
@@ -56,13 +57,21 @@ const SignalRContext = createContext<ISignalRContext>(defaultSignalRInterface)
 export const SignalRProvider: FC<Props> = ({ children }) => {
     const [connection, setConnection] = useState<signalR.HubConnection | undefined>(defaultSignalRInterface.connection)
     const [connectionReady, setConnectionReady] = useState<boolean>(defaultSignalRInterface.connectionReady)
-    const { accessToken } = useContext(AuthContext)
+    const { getAccessToken } = useContext(AuthContext)
+    const { accounts, inProgress } = useMsal()
 
-    const createConnection = useCallback((token: string) => {
+    const createConnection = useCallback(() => {
         console.log('Attempting to create signalR connection...')
         const newConnection = new signalR.HubConnectionBuilder()
             .withUrl(URL, {
-                accessTokenFactory: () => token,
+                accessTokenFactory: async () => {
+                    try {
+                        return await getAccessToken()
+                    } catch (e) {
+                        console.error('Failed to acquire access token for SignalR:', e)
+                        return '' // causes auth to fail; connection will error/retry
+                    }
+                },
                 transport:
                     signalR.HttpTransportType.WebSockets |
                     signalR.HttpTransportType.ServerSentEvents |
@@ -87,35 +96,29 @@ export const SignalRProvider: FC<Props> = ({ children }) => {
         })
 
         return newConnection
-    }, [])
+    }, [getAccessToken])
 
     useEffect(() => {
-        if (accessToken) {
-            if (connection) {
-                connection.stop()
-            }
+        if (!accounts[0] || inProgress !== 'none') return
 
-            const newConnection = createConnection(accessToken)
-            setConnection(newConnection)
+        const newConnection = createConnection()
+        setConnection(newConnection)
 
-            newConnection
-                .start()
-                .then(() => {
-                    console.log('SignalR connection made: ', newConnection)
-                    setConnectionReady(true)
-                })
-                .catch((error) => {
-                    console.error('SignalR connection failed:', error)
-                    setConnectionReady(false)
-                })
-        }
+        newConnection
+            .start()
+            .then(() => {
+                console.log('SignalR connection made: ', newConnection)
+                setConnectionReady(true)
+            })
+            .catch((error) => {
+                console.error('SignalR connection failed:', error)
+                setConnectionReady(false)
+            })
 
         return () => {
-            if (connection) {
-                connection.stop()
-            }
+            newConnection.stop()
         }
-    }, [accessToken, createConnection])
+    }, [accounts.length, inProgress, createConnection])
 
     const registerEvent = (eventName: string, onMessageReceived: (username: string, message: string) => void) => {
         if (connection)

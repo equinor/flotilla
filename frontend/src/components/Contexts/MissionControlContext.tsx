@@ -1,11 +1,11 @@
 import { createContext, useContext, useState, FC } from 'react'
-import { BackendAPICaller } from 'api/ApiCaller'
 import { AlertType, useAlertContext } from './AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { useLanguageContext } from './LanguageContext'
 import { useAssetContext } from './AssetContext'
 import { MissionStatusRequest } from 'pages/FrontPage/MissionOverview/StopDialogs'
+import { useBackendApi } from 'api/UseBackendApi'
 
 interface IMissionControlState {
     isRobotMissionWaitingForResponseDict: { [robotId: string]: boolean }
@@ -35,6 +35,7 @@ export const MissionControlProvider: FC<Props> = ({ children }) => {
     const { enabledRobots } = useAssetContext()
     const { setAlert, setListAlert } = useAlertContext()
     const [missionControlState, setMissionControlState] = useState<IMissionControlState>(defaultManagementState)
+    const backendApi = useBackendApi()
 
     const setIsWaitingForResponse = (robotId: string, isWaiting: boolean) => {
         const updatedDict = { ...missionControlState.isRobotMissionWaitingForResponseDict }
@@ -66,7 +67,8 @@ export const MissionControlProvider: FC<Props> = ({ children }) => {
         switch (newState) {
             case MissionStatusRequest.Pause: {
                 setIsWaitingForResponse(robotId, true)
-                BackendAPICaller.pauseMission(robotId)
+                backendApi
+                    .pauseMission(robotId)
                     .catch(() => {
                         setAlert(
                             AlertType.RequestFail,
@@ -90,7 +92,8 @@ export const MissionControlProvider: FC<Props> = ({ children }) => {
             }
             case MissionStatusRequest.Resume: {
                 setIsWaitingForResponse(robotId, true)
-                BackendAPICaller.resumeMission(robotId)
+                backendApi
+                    .resumeMission(robotId)
                     .catch(() => {
                         setAlert(
                             AlertType.RequestFail,
@@ -114,7 +117,8 @@ export const MissionControlProvider: FC<Props> = ({ children }) => {
             }
             case MissionStatusRequest.Stop: {
                 setIsWaitingForResponse(robotId, true)
-                BackendAPICaller.stopMission(robotId)
+                backendApi
+                    .stopMission(robotId)
                     .catch(() => {
                         setAlert(
                             AlertType.RequestFail,

@@ -1,6 +1,5 @@
 import { Button, Checkbox, Chip, Textarea, TextField, Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
-import { BackendAPICaller } from 'api/ApiCaller'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
@@ -19,6 +18,7 @@ import { ChangeEvent, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import { useAssetContext } from 'components/Contexts/AssetContext'
+import { useBackendApi } from 'api/UseBackendApi'
 
 const StyledSummary = styled.div`
     padding: 16px 8px 0px 8px;
@@ -60,6 +60,7 @@ const useMissionUpdater = () => {
     const { setAlert, setListAlert } = useAlertContext()
     const { installationCode } = useAssetContext()
     const navigate = useNavigate()
+    const backendApi = useBackendApi()
 
     const updateMission = (
         mission: MissionDefinition,
@@ -74,7 +75,8 @@ const useMissionUpdater = () => {
         }
         const form: MissionDefinitionUpdateForm = { ...defaultForm, ...partialForm }
 
-        BackendAPICaller.updateMissionDefinition(mission.id, form)
+        backendApi
+            .updateMissionDefinition(mission.id, form)
             .then((missionDefinition) => {
                 onSuccess()
                 if (missionDefinition.isDeprecated)
