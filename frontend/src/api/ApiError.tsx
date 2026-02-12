@@ -65,6 +65,15 @@ export class ApiError extends CustomError {
     }
 }
 
-export function isApiError(err: any): err is ApiError {
+function isApiError(err: any): err is ApiError {
     return err instanceof ApiError
+}
+
+export const handleError = (requestType: string, path: string) => (e: unknown) => {
+    if (isApiError(e)) {
+        console.error(`Failed to ${requestType} /${path}: ` + e.message)
+        throw new Error(e.message)
+    }
+    console.error(`Failed to ${requestType} /${path}: `, e)
+    throw e
 }

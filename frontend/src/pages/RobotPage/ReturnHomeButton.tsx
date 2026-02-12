@@ -1,4 +1,3 @@
-import { BackendAPICaller } from 'api/ApiCaller'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { RobotWithoutTelemetry } from 'models/Robot'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
@@ -7,6 +6,7 @@ import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { StyledButton } from 'components/Styles/StyledComponents'
 import styled from 'styled-components'
 import { useState } from 'react'
+import { useBackendApi } from 'api/UseBackendApi'
 
 const StyledTextButton = styled(StyledButton)`
     text-align: left;
@@ -17,11 +17,12 @@ export const ReturnHomeButton = ({ robot }: { robot: RobotWithoutTelemetry }) =>
     const { TranslateText } = useLanguageContext()
     const { setAlert, setListAlert } = useAlertContext()
     const [isDisabled, setIsDisabled] = useState(false)
+    const backendApi = useBackendApi()
 
     const returnRobotToHome = () => {
         disableButton()
 
-        BackendAPICaller.returnRobotToHome(robot.id).catch(() => {
+        backendApi.returnRobotToHome(robot.id).catch(() => {
             setAlert(
                 AlertType.RequestFail,
                 <FailedRequestAlertContent

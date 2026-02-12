@@ -1,7 +1,6 @@
 import { config } from 'config'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { FrontPage, TabNames } from './FrontPage/FrontPage'
-import { APIUpdater } from 'components/Contexts/APIUpdater'
 import { AssetSelectionPage } from './AssetSelectionPage/AssetSelectionPage'
 import {
     AutoSchedulePage,
@@ -54,18 +53,16 @@ export const FlotillaSite = () => {
 
     return (
         <>
-            <APIUpdater>
-                <BrowserRouter>
-                    <Routes>
-                        <Route path={`${config.FRONTEND_BASE_ROUTE}/`} element={<AssetSelectionPage />} />
+            <BrowserRouter>
+                <Routes>
+                    <Route path={`${config.FRONTEND_BASE_ROUTE}/`} element={<AssetSelectionPage />} />
 
-                        {installationCode ? installationSpecificPages : <></>}
+                    {installationCode ? installationSpecificPages : <></>}
 
-                        <Route path={`${config.FRONTEND_BASE_ROUTE}/info`} element={<InfoPage />} />
-                        <Route path="*" element={isLoading ? <PageLoading /> : <PageNotFound />} />
-                    </Routes>
-                </BrowserRouter>
-            </APIUpdater>
+                    <Route path={`${config.FRONTEND_BASE_ROUTE}/info`} element={<InfoPage />} />
+                    <Route path="*" element={isLoading ? <PageLoading /> : <PageNotFound />} />
+                </Routes>
+            </BrowserRouter>
         </>
     )
 }

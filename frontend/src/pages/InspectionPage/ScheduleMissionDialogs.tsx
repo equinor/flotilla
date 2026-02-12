@@ -4,7 +4,6 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useState } from 'react'
 import { RobotWithoutTelemetry, RobotStatus } from 'models/Robot'
 import { MissionDefinition } from 'models/MissionDefinition'
-import { BackendAPICaller } from 'api/ApiCaller'
 import { Icons } from 'utils/icons'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 import { StyledAutoComplete, StyledButton, StyledDialog } from 'components/Styles/StyledComponents'
@@ -14,6 +13,7 @@ import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { ScheduleMissionWithInspectionAreaVerification } from 'components/Displays/InspectionAreaVerificationDialogs/ScheduleMissionWithInspectionAreaVerification'
 import { phone_width } from 'utils/constants'
+import { useBackendApi } from 'api/UseBackendApi'
 
 interface IProps {
     selectedMissions: MissionDefinition[]
@@ -62,6 +62,7 @@ export const ScheduleMissionDialog = (props: IProps) => {
     const { setAlert, setListAlert } = useAlertContext()
     const [isInspectionAreaVerificationDialogOpen, setIsInspectionAreaVerificationDialogOpen] = useState<boolean>(false)
     const [missionsToSchedule, setMissionsToSchedule] = useState<MissionDefinition[]>()
+    const backendApi = useBackendApi()
     const filteredRobots = enabledRobots.filter(
         (r) =>
             r.status === RobotStatus.Available ||
@@ -91,7 +92,7 @@ export const ScheduleMissionDialog = (props: IProps) => {
         if (!selectedRobot || !missionsToSchedule) return
 
         missionsToSchedule.forEach((mission) => {
-            BackendAPICaller.scheduleMissionDefinition(mission.id, selectedRobot.id).catch((e) => {
+            backendApi.scheduleMissionDefinition(mission.id, selectedRobot.id).catch((e) => {
                 setAlert(
                     AlertType.RequestFail,
                     <FailedRequestAlertContent

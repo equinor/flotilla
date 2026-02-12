@@ -3,13 +3,13 @@ import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useState } from 'react'
 import { useMissionControlContext } from 'components/Contexts/MissionControlContext'
-import { BackendAPICaller } from 'api/ApiCaller'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 import { RobotStatus } from 'models/Robot'
 import { StyledButton } from 'components/Styles/StyledComponents'
+import { useBackendApi } from 'api/UseBackendApi'
 
 const StyledDisplayButtons = styled.div`
     display: flex;
@@ -103,6 +103,7 @@ export const StopRobotDialog = () => {
     const { enabledRobots, installationCode } = useAssetContext()
     const { TranslateText } = useLanguageContext()
     const { setAlert, setListAlert } = useAlertContext()
+    const backendApi = useBackendApi()
 
     const dockActivated =
         enabledRobots.find((r) => r.status === RobotStatus.Lockdown || r.status === RobotStatus.GoingToLockdown) !==
@@ -117,7 +118,7 @@ export const StopRobotDialog = () => {
     }
 
     const stopAll = () => {
-        BackendAPICaller.sendRobotsToDockingPosition(installationCode).catch(() => {
+        backendApi.sendRobotsToDockingPosition(installationCode).catch(() => {
             setAlert(
                 AlertType.RequestFail,
                 <FailedRequestAlertContent translatedMessage={TranslateText('Failed to send robots to a dock')} />,
@@ -134,7 +135,7 @@ export const StopRobotDialog = () => {
     }
 
     const resetRobots = () => {
-        BackendAPICaller.clearEmergencyState(installationCode).catch(() => {
+        backendApi.clearEmergencyState(installationCode).catch(() => {
             setAlert(
                 AlertType.RequestFail,
                 <FailedRequestAlertContent translatedMessage={TranslateText('Failed to release robots from dock')} />,

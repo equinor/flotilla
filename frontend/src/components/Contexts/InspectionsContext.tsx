@@ -2,8 +2,8 @@ import { createContext, FC, useContext, useEffect } from 'react'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { SaraAnalysisResultReady, SaraInspectionVisualizationReady } from 'models/Inspection'
 import { useQuery } from '@tanstack/react-query'
-import { BackendAPICaller } from 'api/ApiCaller'
 import { queryClient } from '../../App'
+import { useBackendApi } from 'api/UseBackendApi'
 
 interface IInspectionsContext {
     fetchImageData: (inspectionId: string) => any
@@ -23,6 +23,7 @@ const InspectionsContext = createContext<IInspectionsContext>(defaultInspections
 
 export const InspectionsProvider: FC<Props> = ({ children }) => {
     const { registerEvent, connectionReady } = useSignalRContext()
+    const backendApi = useBackendApi()
 
     useEffect(() => {
         if (connectionReady) {
@@ -54,7 +55,7 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
         const result = useQuery({
             queryKey: ['fetchInspectionData', inspectionId],
             queryFn: async () => {
-                const imageBlob = await BackendAPICaller.getInspection(inspectionId)
+                const imageBlob = await backendApi.getInspection(inspectionId)
                 return URL.createObjectURL(imageBlob)
             },
             retry: 1,
@@ -71,7 +72,7 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
         const result = useQuery({
             queryKey: ['fetchAnalysisData', inspectionId],
             queryFn: async () => {
-                const imageBlob = await BackendAPICaller.getAnalysis(inspectionId)
+                const imageBlob = await backendApi.getAnalysis(inspectionId)
                 return URL.createObjectURL(imageBlob)
             },
             retry: 1,

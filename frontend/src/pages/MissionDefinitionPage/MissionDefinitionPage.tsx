@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MissionDefinitionHeader } from './MissionDefinitionHeader/MissionDefinitionHeader'
 import { BackButton } from 'utils/BackButton'
-import { BackendAPICaller } from 'api/ApiCaller'
 import { Header } from 'components/Header/Header'
 import { MissionDefinition } from 'models/MissionDefinition'
 import { Button, Typography, Icon, Card } from '@equinor/eds-core-react'
@@ -27,6 +26,7 @@ import {
 } from 'components/Dialogs/MissionEditDialog'
 import { formulateAutoScheduleFrequencyAsString } from 'utils/language'
 import { useAssetContext } from 'components/Contexts/AssetContext'
+import { useBackendApi } from 'api/UseBackendApi'
 
 const StyledCard = styled(Card)`
     display: flex;
@@ -101,6 +101,7 @@ const MetadataItem = ({
 const MissionDefinitionPageBody = ({ missionDefinition }: { missionDefinition: MissionDefinition }) => {
     const { TranslateText } = useLanguageContext()
     const { setAlert, setListAlert } = useAlertContext()
+    const backendApi = useBackendApi()
 
     const [isEditingName, setIsEditingName] = useState<boolean>(false)
     const [isEditingComment, setIsEditingComment] = useState<boolean>(false)
@@ -109,7 +110,7 @@ const MissionDefinitionPageBody = ({ missionDefinition }: { missionDefinition: M
     const lastMissionRun = useQuery({
         queryKey: ['fetchMissionRun', missionDefinition.lastSuccessfulRun?.id],
         queryFn: async () => {
-            return await BackendAPICaller.getMissionRunById(missionDefinition.lastSuccessfulRun!.id)
+            return await backendApi.getMissionRunById(missionDefinition.lastSuccessfulRun!.id)
         },
         retry: 2,
         retryDelay: 2000,
@@ -123,7 +124,7 @@ const MissionDefinitionPageBody = ({ missionDefinition }: { missionDefinition: M
             name: missionDefinition.name,
             isDeprecated: false,
         }
-        BackendAPICaller.updateMissionDefinition(missionDefinition.id, defaultMissionDefinitionForm).catch(() => {
+        backendApi.updateMissionDefinition(missionDefinition.id, defaultMissionDefinitionForm).catch(() => {
             setAlert(
                 AlertType.RequestFail,
                 <FailedRequestAlertContent

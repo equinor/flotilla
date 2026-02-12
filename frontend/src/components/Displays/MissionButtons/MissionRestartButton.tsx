@@ -1,6 +1,5 @@
 import { Button, EdsProvider, Icon, Menu } from '@equinor/eds-core-react'
 import { Icons } from 'utils/icons'
-import { BackendAPICaller } from 'api/ApiCaller'
 import { config } from 'config'
 import { useNavigate } from 'react-router-dom'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
@@ -12,6 +11,7 @@ import { Mission } from 'models/Mission'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { ScheduleMissionWithInspectionAreaVerification } from '../InspectionAreaVerificationDialogs/ScheduleMissionWithInspectionAreaVerification'
 import { useAssetContext } from 'components/Contexts/AssetContext'
+import { useBackendApi } from 'api/UseBackendApi'
 
 const Centered = styled.div`
     display: flex;
@@ -49,9 +49,11 @@ export const MissionRestartButton = ({ mission, hasFailedTasks, smallButton }: M
         const path = `${config.FRONTEND_BASE_ROUTE}/${installationCode}:front-page`
         navigate(path)
     }
+    const backendApi = useBackendApi()
 
     const startReRun = (option: ReRunOptions) => {
-        BackendAPICaller.reRunMission(mission.id, option === ReRunOptions.ReRunFailed)
+        backendApi
+            .reRunMission(mission.id, option === ReRunOptions.ReRunFailed)
             .then(() => navigateToHome())
             .catch(() => {
                 setAlert(

@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react'
-import { BackendAPICaller } from 'api/ApiCaller'
+import { useEffect, useState } from 'react'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
@@ -8,6 +7,7 @@ import { computeMissionStats, GroupedStats } from './InstallationStats'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Table, Typography, ButtonGroup, Button } from '@equinor/eds-core-react'
 import styled from 'styled-components'
+import { useBackendApi } from 'api/UseBackendApi'
 
 const StyledButtonGroup = styled(ButtonGroup)`
     margin-bottom: 2rem;
@@ -61,6 +61,7 @@ export const MissionStats = () => {
     const { enabledRobots, installationCode } = useAssetContext()
     const { setAlert, setListAlert } = useAlertContext()
     const { TranslateText } = useLanguageContext()
+    const backendApi = useBackendApi()
 
     useEffect(() => {
         const pageSize: number = 100
@@ -68,7 +69,7 @@ export const MissionStats = () => {
             setLoading(true)
             try {
                 const { min } = getEpochRangeFromTimeSpan(timeSpan)
-                const missions = await BackendAPICaller.getMissionRuns({
+                const missions = await backendApi.getMissionRuns({
                     pageSize: pageSize,
                     minCreationTime: min,
                 })

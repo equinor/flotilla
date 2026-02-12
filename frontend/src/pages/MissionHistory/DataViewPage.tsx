@@ -5,12 +5,12 @@ import { SimpleHistoricMissionCard } from './HistoricMissionCard'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { PaginationHeader } from 'models/PaginatedResponse'
-import { BackendAPICaller } from 'api/ApiCaller'
 import { useMissionFilterContext, MissionFilterProvider } from 'components/Contexts/MissionFilterContext'
 import { StyledTableBody, StyledTableCaption, StyledTableCell } from 'components/Styles/StyledComponents'
 import { SignalREventLabels, useSignalRContext } from 'components/Contexts/SignalRContext'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 import { StyledLoading, StyledPagination } from './MissionHistoryView'
+import { useBackendApi } from 'api/UseBackendApi'
 
 enum InspectionTableColumns {
     Status = 'Status',
@@ -48,15 +48,17 @@ const DataViewComponent = () => {
     const [isResettingPage, setIsResettingPage] = useState<boolean>(false)
     const [lastChangedMission, setLastChangedMission] = useState<Mission | undefined>(undefined)
     const pageSize: number = 20
+    const backendApi = useBackendApi()
 
     const updateFilteredMissions = useCallback(() => {
         const formattedFilter = filterFunctions.getFormattedFilter()
-        BackendAPICaller.getMissionRuns({
-            ...formattedFilter,
-            pageSize: pageSize,
-            pageNumber: page ?? 1,
-            orderBy: 'EndTime desc, Name',
-        })
+        backendApi
+            .getMissionRuns({
+                ...formattedFilter,
+                pageSize: pageSize,
+                pageNumber: page ?? 1,
+                orderBy: 'EndTime desc, Name',
+            })
             .then((paginatedMissions) => {
                 setFilteredMissions(paginatedMissions.content)
                 setPaginationDetails(paginatedMissions.pagination)

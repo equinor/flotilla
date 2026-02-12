@@ -5,7 +5,6 @@ import { HistoricMissionCard } from './HistoricMissionCard'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { PaginationHeader } from 'models/PaginatedResponse'
-import { BackendAPICaller } from 'api/ApiCaller'
 import { useMissionFilterContext, IFilterState, MissionFilterProvider } from 'components/Contexts/MissionFilterContext'
 import { FilterSection } from './FilterSection'
 import { InspectionType } from 'models/Inspection'
@@ -18,6 +17,7 @@ import { StyledTableBody, StyledTableCaption, StyledTableCell } from 'components
 import { phone_width } from 'utils/constants'
 import { SignalREventLabels, useSignalRContext } from 'components/Contexts/SignalRContext'
 import { useAssetContext } from 'components/Contexts/AssetContext'
+import { useBackendApi } from 'api/UseBackendApi'
 
 enum InspectionTableColumns {
     StatusShort = 'StatusShort',
@@ -130,6 +130,7 @@ const MissionHistoryViewComponent = () => {
     const checkBoxBackgroundColour = tokens.colors.ui.background__info.hex
     const checkBoxBorderColour = tokens.colors.ui.background__info.hex
     const checkBoxWhiteBackgroundColor = tokens.colors.ui.background__default.hex
+    const backendApi = useBackendApi()
 
     const FilterErrorDialog = () => (
         <Dialog open={filterError !== ''} isDismissable onClose={() => clearFilterError()}>
@@ -178,12 +179,13 @@ const MissionHistoryViewComponent = () => {
 
     const updateFilteredMissions = useCallback(() => {
         const formattedFilter = filterFunctions.getFormattedFilter()
-        BackendAPICaller.getMissionRuns({
-            ...formattedFilter,
-            pageSize: pageSize,
-            pageNumber: page ?? 1,
-            orderBy: 'EndTime desc, Name',
-        })
+        backendApi
+            .getMissionRuns({
+                ...formattedFilter,
+                pageSize: pageSize,
+                pageNumber: page ?? 1,
+                orderBy: 'EndTime desc, Name',
+            })
             .then((paginatedMissions) => {
                 setFilteredMissions(paginatedMissions.content)
                 setPaginationDetails(paginatedMissions.pagination)

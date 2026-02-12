@@ -1,6 +1,5 @@
 import styled from 'styled-components'
 import { MissionQueueCard, PlaceholderMissionCard } from './MissionQueueCard'
-import { BackendAPICaller } from 'api/ApiCaller'
 import { Mission, placeholderMission } from 'models/Mission'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
@@ -12,6 +11,7 @@ import { tokens } from '@equinor/eds-tokens'
 import { useEffect, useState } from 'react'
 import { Button, Dialog, Typography } from '@equinor/eds-core-react'
 import { StyledDialog } from 'components/Styles/StyledComponents'
+import { useBackendApi } from 'api/UseBackendApi'
 
 const StyledMissionView = styled.div`
     display: flex;
@@ -44,9 +44,10 @@ export const RobotMissionQueueView = ({ robot }: { robot: RobotWithoutTelemetry 
     const robotLoadingMissions = Array.from(loadingRobotMissionSet).filter((robotMissionName) =>
         robotMissionName.includes(robot.id)
     )
+    const backendApi = useBackendApi()
 
     const onDeleteMission = (mission: Mission) =>
-        BackendAPICaller.deleteMission(mission.id).catch(() => {
+        backendApi.deleteMission(mission.id).catch(() => {
             setAlert(
                 AlertType.RequestFail,
                 <FailedRequestAlertContent translatedMessage={TranslateText('Failed to delete mission from queue')} />,
@@ -62,7 +63,7 @@ export const RobotMissionQueueView = ({ robot }: { robot: RobotWithoutTelemetry 
         })
 
     const onDeleteAllMissions = () =>
-        BackendAPICaller.deleteAllMissions().catch(() => {
+        backendApi.deleteAllMissions().catch(() => {
             setAlert(
                 AlertType.RequestFail,
                 <FailedRequestAlertContent
