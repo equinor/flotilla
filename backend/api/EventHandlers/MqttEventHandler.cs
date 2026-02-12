@@ -1,4 +1,6 @@
-﻿using Api.Controllers.Models;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics.Metrics;
+using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Mqtt;
 using Api.Mqtt.Events;
@@ -24,16 +26,61 @@ namespace Api.EventHandlers
 
         private readonly IMemoryCache _cache;
 
+        private readonly ConcurrentDictionary<string, RobotMetricData> _batteryMetrics = new();
+        private readonly ConcurrentDictionary<string, RobotMetricData> _pressureMetrics = new();
+
+        private record RobotMetricData(
+            float Value,
+            string RobotId,
+            string InstallationCode,
+            DateTimeOffset Timestamp
+        );
+
         public MqttEventHandler(
             ILogger<MqttEventHandler> logger,
             IServiceScopeFactory scopeFactory,
-            IMemoryCache cache
+            IMemoryCache cache,
+            Meter meter
         )
         {
             _logger = logger;
             // Reason for using factory: https://www.thecodebuzz.com/using-dbcontext-instance-in-ihostedservice/
             _scopeFactory = scopeFactory;
             _cache = cache;
+
+            meter.CreateObservableGauge(
+                "robot.battery.level",
+                () =>
+                {
+                    return _batteryMetrics.Select(kvp => new Measurement<float>(
+                        kvp.Value.Value,
+                        new KeyValuePair<string, object?>("robot.id", kvp.Value.RobotId),
+                        new KeyValuePair<string, object?>(
+                            "installation.code",
+                            kvp.Value.InstallationCode
+                        )
+                    ));
+                },
+                unit: "%",
+                description: "Current battery level of the robot"
+            );
+
+            meter.CreateObservableGauge(
+                "robot.pressure.level",
+                () =>
+                {
+                    return _pressureMetrics.Select(kvp => new Measurement<float>(
+                        kvp.Value.Value,
+                        new KeyValuePair<string, object?>("robot.id", kvp.Value.RobotId),
+                        new KeyValuePair<string, object?>(
+                            "installation.code",
+                            kvp.Value.InstallationCode
+                        )
+                    ));
+                },
+                unit: "bar",
+                description: "Current pressure level of the robot"
+            );
 
             Subscribe();
         }
@@ -622,6 +669,13 @@ namespace Api.EventHandlers
             if (installationCodeAndId == null)
                 return;
 
+            _batteryMetrics[batteryStatus.IsarId] = new RobotMetricData(
+                batteryStatus.BatteryLevel,
+                installationCodeAndId.Value.robotId,
+                installationCodeAndId.Value.installationCode,
+                DateTimeOffset.UtcNow
+            );
+
             await SignalRService.SendMessageAsync(
                 "Robot telemetry updated",
                 installationCodeAndId.Value.installationCode,
@@ -653,6 +707,13 @@ namespace Api.EventHandlers
 
             if (installationCodeAndId == null)
                 return;
+
+            _pressureMetrics[pressureStatus.IsarId] = new RobotMetricData(
+                pressureStatus.PressureLevel,
+                installationCodeAndId.Value.robotId,
+                installationCodeAndId.Value.installationCode,
+                DateTimeOffset.UtcNow
+            );
 
             await SignalRService.SendMessageAsync(
                 "Robot telemetry updated",
