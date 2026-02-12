@@ -53,11 +53,13 @@ builder.Services.ConfigureDatabase(builder.Configuration, builder.Environment.En
 
 builder.Services.ConfigureMissionLoader(builder.Configuration);
 
+var otelMeter = new Meter($"{applicationName}.Metrics", "0.0.1");
+builder.Services.AddSingleton(otelMeter);
+
 var openTelemetryEnabled = builder.Configuration.GetValue<bool?>("OpenTelemetry:Enabled") ?? false;
 if (openTelemetryEnabled)
 {
     var otelActivitySource = new ActivitySource(applicationName);
-    var otelMeter = new Meter($"{applicationName}.Metrics", "0.0.1");
     builder.AddCustomOpenTelemetry(otelActivitySource, otelMeter);
 }
 else
