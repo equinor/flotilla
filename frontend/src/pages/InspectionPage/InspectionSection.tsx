@@ -129,11 +129,7 @@ export const InspectionSection = () => {
                                 {inspectionArea?.inspectionAreaName}
                             </Typography>
                         )}
-                        <PlantPolygonMap
-                            plantCode={inspectionArea.plantCode}
-                            floorId={'0'}
-                            polygon={inspectionArea.areaPolygon.positions}
-                        />{' '}
+                        <PlantPolygonMap inspectionArea={inspectionArea} floorId={'0'} />{' '}
                     </>
                 )}
             </InspectionAreaOverview>
