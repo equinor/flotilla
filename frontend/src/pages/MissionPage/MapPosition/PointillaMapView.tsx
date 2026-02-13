@@ -10,9 +10,10 @@ import { phone_width } from 'utils/constants'
 import { Mission } from 'models/Mission'
 import { getRobotMarker, getTaskMarkers } from './PointillaMapMarkers'
 import { useRobotTelemetry } from 'hooks/useRobotTelemetry'
-import { PolygonPoint } from 'models/InspectionArea'
+import { InspectionArea, PolygonPoint } from 'models/InspectionArea'
 import 'utils/leaflet-overrides.css'
 import { useBackendApi } from 'api/UseBackendApi'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 
 const LeafletTooltipStyles = createGlobalStyle`
     .leaflet-tooltip.circleLabel {
@@ -56,9 +57,8 @@ type PlantMapProps = {
 }
 
 type PlantPolygonMapProps = {
-    plantCode: string
+    inspectionArea: InspectionArea
     floorId: string
-    polygon: PolygonPoint[]
 }
 
 const setMapOptions = (map: L.Map, info: PointillaMapInfo) => {
@@ -86,6 +86,8 @@ const setMapOptions = (map: L.Map, info: PointillaMapInfo) => {
     map.options.maxZoom = info.zoomMax
 }
 
+const updateIntervalRobotAuraInMS = 50
+
 export function PlantMap({ plantCode, floorId, mission }: PlantMapProps) {
     const [mapInfo, setMapInfo] = useState<PointillaMapInfo | undefined>(undefined)
     const [map, setMap] = useState<L.Map | null>(null)
@@ -93,7 +95,6 @@ export function PlantMap({ plantCode, floorId, mission }: PlantMapProps) {
     const backendApi = useBackendApi()
 
     const tasks = mission?.tasks
-    const updateIntervalRobotAuraInMS = 50
 
     const loadMap = async () => {
         if (!map) return
@@ -160,10 +161,17 @@ export function PlantMap({ plantCode, floorId, mission }: PlantMapProps) {
     )
 }
 
-export function PlantPolygonMap({ plantCode, floorId, polygon }: PlantPolygonMapProps) {
+export function PlantPolygonMap({ inspectionArea, floorId }: PlantPolygonMapProps) {
     const [mapInfo, setMapInfo] = useState<PointillaMapInfo | undefined>(undefined)
     const [map, setMap] = useState<L.Map | null>(null)
     const backendApi = useBackendApi()
+
+    const { enabledRobots } = useAssetContext()
+    const robots = enabledRobots.filter((r) => r.currentInspectionAreaId === inspectionArea.id)
+    const robotPoses = robots.map((robot) => useRobotTelemetry(robot).robotPose)
+
+    const plantCode = inspectionArea.plantCode
+    const polygon = inspectionArea.areaPolygon?.positions ?? []
 
     const loadMap = async () => {
         if (!map) return
@@ -183,15 +191,34 @@ export function PlantPolygonMap({ plantCode, floorId, polygon }: PlantPolygonMap
     const positions = polygon ? toLeafletPositions(polygon) : undefined
 
     useEffect(() => {
+        if (robotPoses.length < 1 || !map) return
+        let robotMarkers = robotPoses
+            .filter((robotPose) => robotPose != undefined)
+            .map((robotPose) => getRobotMarker(map, robotPose))
+            .flat()
+        const timer = setInterval(() => {
+            robotMarkers.forEach((marker) => marker?.remove())
+            if (robotPoses.length < 1 || !map) return
+            robotMarkers = robotPoses
+                .filter((robotPose) => robotPose != undefined)
+                .map((robotPose) => getRobotMarker(map, robotPose))
+                .flat()
+        }, updateIntervalRobotAuraInMS)
+        return () => {
+            clearInterval(timer)
+            robotMarkers.forEach((marker) => marker?.remove())
+        }
+    }, [robotPoses, map])
+
+    useEffect(() => {
         loadMap()
     }, [plantCode, floorId, map])
 
     useEffect(() => {
         if (!positions || positions.length < 3 || !map) return
-
         const bounds = L.latLngBounds(positions)
         map.fitBounds(bounds)
-    }, [map, positions])
+    }, [inspectionArea, mapInfo])
 
     return (
         <div className="map-root">
