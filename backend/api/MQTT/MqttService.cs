@@ -93,6 +93,7 @@ namespace Api.Mqtt
         public static event EventHandler<MqttReceivedArgs>? MqttIsarBatteryReceived;
         public static event EventHandler<MqttReceivedArgs>? MqttIsarPressureReceived;
         public static event EventHandler<MqttReceivedArgs>? MqttIsarPoseReceived;
+        public static event EventHandler<MqttReceivedArgs>? MqttIsarGenericFloatReceived;
         public static event EventHandler<MqttReceivedArgs>? MqttIsarCloudHealthReceived;
         public static event EventHandler<MqttReceivedArgs>? MqttIsarInterventionNeededReceived;
         public static event EventHandler<MqttReceivedArgs>? MqttIsarStartupReceived;
@@ -153,6 +154,9 @@ namespace Api.Mqtt
                     break;
                 case Type type when type == typeof(IsarPoseMessage):
                     OnIsarTopicReceived<IsarPoseMessage>(content);
+                    break;
+                case Type type when type == typeof(IsarGenericFloatMessage):
+                    OnIsarTopicReceived<IsarGenericFloatMessage>(content);
                     break;
                 case Type type when type == typeof(IsarCloudHealthMessage):
                     OnIsarTopicReceived<IsarCloudHealthMessage>(content);
@@ -316,6 +320,7 @@ namespace Api.Mqtt
                     _ when type == typeof(IsarBatteryMessage) => MqttIsarBatteryReceived,
                     _ when type == typeof(IsarPressureMessage) => MqttIsarPressureReceived,
                     _ when type == typeof(IsarPoseMessage) => MqttIsarPoseReceived,
+                    _ when type == typeof(IsarGenericFloatMessage) => MqttIsarGenericFloatReceived,
                     _ when type == typeof(IsarCloudHealthMessage) => MqttIsarCloudHealthReceived,
                     _ when type == typeof(IsarInterventionNeededMessage) =>
                         MqttIsarInterventionNeededReceived,

@@ -28,6 +28,7 @@ namespace Api.EventHandlers
 
         private readonly ConcurrentDictionary<string, RobotMetricData> _batteryMetrics = new();
         private readonly ConcurrentDictionary<string, RobotMetricData> _pressureMetrics = new();
+        private readonly ConcurrentDictionary<string, RobotMetricData> _temperatureMetrics = new();
 
         private record RobotMetricData(
             float Value,
@@ -82,6 +83,23 @@ namespace Api.EventHandlers
                 description: "Current pressure level of the robot"
             );
 
+            meter.CreateObservableGauge(
+                "robot.temperature.level",
+                () =>
+                {
+                    return _pressureMetrics.Select(kvp => new Measurement<float>(
+                        kvp.Value.Value,
+                        new KeyValuePair<string, object?>("robot.id", kvp.Value.RobotId),
+                        new KeyValuePair<string, object?>(
+                            "installation.code",
+                            kvp.Value.InstallationCode
+                        )
+                    ));
+                },
+                unit: "°C",
+                description: "Current temperature level of the robot"
+            );
+
             Subscribe();
         }
 
@@ -119,6 +137,7 @@ namespace Api.EventHandlers
             MqttService.MqttIsarBatteryReceived += OnIsarBatteryUpdate;
             MqttService.MqttIsarPressureReceived += OnIsarPressureUpdate;
             MqttService.MqttIsarPoseReceived += OnIsarPoseUpdate;
+            MqttService.MqttIsarGenericFloatReceived += OnIsarGenericFloatUpdate;
             MqttService.MqttIsarCloudHealthReceived += OnIsarCloudHealthUpdate;
             MqttService.MqttIsarInterventionNeededReceived += OnIsarInterventionNeededUpdate;
             MqttService.MqttIsarStartupReceived += OnIsarStartup;
@@ -136,6 +155,7 @@ namespace Api.EventHandlers
             MqttService.MqttIsarBatteryReceived -= OnIsarBatteryUpdate;
             MqttService.MqttIsarPressureReceived -= OnIsarPressureUpdate;
             MqttService.MqttIsarPoseReceived -= OnIsarPoseUpdate;
+            MqttService.MqttIsarGenericFloatReceived -= OnIsarGenericFloatUpdate;
             MqttService.MqttIsarCloudHealthReceived -= OnIsarCloudHealthUpdate;
             MqttService.MqttIsarInterventionNeededReceived -= OnIsarInterventionNeededUpdate;
             MqttService.MqttSaraInspectionResultReceived -= OnSaraInspectionResultUpdate;
@@ -749,6 +769,26 @@ namespace Api.EventHandlers
                     TelemetryValue = pose,
                 }
             );
+        }
+
+        private async void OnIsarGenericFloatUpdate(object? sender, MqttReceivedArgs mqttArgs)
+        {
+            var floatStatus = (IsarGenericFloatMessage)mqttArgs.Message;
+
+            (string installationCode, string robotId)? installationCodeAndId =
+                await GetRobotInstallationCodeAndId(floatStatus.IsarId);
+
+            if (installationCodeAndId == null)
+                return;
+            if (floatStatus.Name == "temperature")
+            {
+                _temperatureMetrics[floatStatus.IsarId] = new RobotMetricData(
+                    floatStatus.Value,
+                    installationCodeAndId.Value.robotId,
+                    installationCodeAndId.Value.installationCode,
+                    DateTimeOffset.UtcNow
+                );
+            }
         }
 
         private async void OnIsarCloudHealthUpdate(object? sender, MqttReceivedArgs mqttArgs)
