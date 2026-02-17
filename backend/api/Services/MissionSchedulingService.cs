@@ -18,8 +18,6 @@ namespace Api.Services
         );
 
         public Task DeleteAllScheduledMissions(string robotId, string? abortReason = null);
-
-        public void TriggerRobotReadyForMissions(RobotReadyForMissionsEventArgs e);
     }
 
     public class MissionSchedulingService(
@@ -317,11 +315,6 @@ namespace Api.Services
             }
         }
 
-        public void TriggerRobotReadyForMissions(RobotReadyForMissionsEventArgs e)
-        {
-            RobotReadyForMissions?.Invoke(this, e);
-        }
-
         private async Task StartMissionRun(MissionRun queuedMissionRun, Robot robot)
         {
             // Reset status reason in case this is a restarted mission run
@@ -363,7 +356,5 @@ namespace Api.Services
 
             logger.LogInformation("Started mission run '{Id}'", queuedMissionRun.Id);
         }
-
-        public static event EventHandler<RobotReadyForMissionsEventArgs>? RobotReadyForMissions;
     }
 }

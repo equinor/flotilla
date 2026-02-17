@@ -4,6 +4,7 @@ using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
 using Api.Services;
+using Api.Services.Events;
 using Api.Test.Mocks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -17,6 +18,7 @@ namespace Api.Test.Database
         private readonly MissionTaskService _missionTaskService;
         private readonly InspectionAreaService _inspectionAreaService;
         private readonly InstallationService _installationService;
+        private readonly EventAggregatorSingletonService _eventAggregatorSingletonService;
         private readonly MissionRunService _missionRunService;
         private readonly MissionDefinitionService _missionDefinitionService;
         private readonly PlantService _plantService;
@@ -68,6 +70,7 @@ namespace Api.Test.Database
                 _installationService,
                 _inspectionAreaService
             );
+            _eventAggregatorSingletonService = new EventAggregatorSingletonService();
             _missionRunService = new MissionRunService(
                 context,
                 new MockSignalRService(),
@@ -76,7 +79,8 @@ namespace Api.Test.Database
                 _missionTaskService,
                 _inspectionAreaService,
                 _robotService,
-                _userInfoService
+                _userInfoService,
+                _eventAggregatorSingletonService
             );
             _sourceService = new SourceService(context, new Mock<ILogger<SourceService>>().Object);
             _missionDefinitionService = new MissionDefinitionService(

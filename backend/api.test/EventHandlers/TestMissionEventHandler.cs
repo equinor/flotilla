@@ -33,6 +33,7 @@ namespace Api.Test.EventHandlers
         public required IMissionSchedulingService MissionSchedulingService;
 
         public required MqttService MqttService;
+        public required EventAggregatorSingletonService EventAggregatorSingletonService;
 
         public async ValueTask InitializeAsync()
         {
@@ -51,7 +52,12 @@ namespace Api.Test.EventHandlers
                 ServiceProvider.GetRequiredService<IMissionSchedulingService>();
 
             var mqttServiceLogger = new Mock<ILogger<MqttService>>().Object;
-            MqttService = new MqttService(mqttServiceLogger, Factory.Configuration!);
+            EventAggregatorSingletonService = new EventAggregatorSingletonService();
+            MqttService = new MqttService(
+                mqttServiceLogger,
+                Factory.Configuration!,
+                EventAggregatorSingletonService
+            );
         }
 
         public static async ValueTask DisposeAsync()
@@ -174,18 +180,16 @@ namespace Api.Test.EventHandlers
             await MissionRunService.Create(missionRun);
             Thread.Sleep(100);
 
-            var mqttEventArgs = new MqttReceivedArgs(
-                new IsarStatusMessage
-                {
-                    RobotName = robot.Name,
-                    IsarId = robot.IsarId,
-                    Status = RobotStatus.Available,
-                    Timestamp = DateTime.UtcNow,
-                }
-            );
+            var isarStatusMessage = new IsarStatusMessage
+            {
+                RobotName = robot.Name,
+                IsarId = robot.IsarId,
+                Status = RobotStatus.Available,
+                Timestamp = DateTime.UtcNow,
+            };
 
             // Act
-            MqttService.RaiseEvent(nameof(MqttService.MqttIsarStatusReceived), mqttEventArgs);
+            EventAggregatorSingletonService.Publish(isarStatusMessage);
             Thread.Sleep(5000); // When running all tests in VS code the test occasionally fails when this sleep too short
 
             // Assert
@@ -281,11 +285,7 @@ namespace Api.Test.EventHandlers
                 true
             );
 
-            var missionRunCreatedEventArgs = new MissionRunCreatedEventArgs(missionRunOne);
-            MissionRunService.RaiseEvent(
-                nameof(Api.Services.MissionRunService.MissionRunCreated),
-                missionRunCreatedEventArgs
-            );
+            EventAggregatorSingletonService.Publish(new MissionRunCreatedEventArgs(missionRunOne));
             Thread.Sleep(1000);
 
             var missionRunOnePostCreation = await MissionRunService.ReadById(
@@ -295,27 +295,17 @@ namespace Api.Test.EventHandlers
             Assert.NotNull(missionRunOnePostCreation);
 
             // Act
-            var mqttIsarMissionEventArgs = new MqttReceivedArgs(
-                new IsarMissionMessage
-                {
-                    RobotName = robot.Name,
-                    IsarId = robot.IsarId,
-                    MissionId = missionRunOnePostCreation.Id,
-                    Status = "successful",
-                    Timestamp = DateTime.UtcNow,
-                }
-            );
+            var isarMissionMessage = new IsarMissionMessage
+            {
+                RobotName = robot.Name,
+                IsarId = robot.IsarId,
+                MissionId = missionRunOnePostCreation.Id,
+                Status = "successful",
+                Timestamp = DateTime.UtcNow,
+            };
 
-            var RobotReadyForMissionsEventArgs = new RobotReadyForMissionsEventArgs(robot);
-
-            MqttService.RaiseEvent(
-                nameof(MqttService.MqttIsarMissionReceived),
-                mqttIsarMissionEventArgs
-            );
-            MissionSchedulingService.RaiseEvent(
-                nameof(Api.Services.MissionSchedulingService.RobotReadyForMissions),
-                RobotReadyForMissionsEventArgs
-            );
+            EventAggregatorSingletonService.Publish(isarMissionMessage);
+            EventAggregatorSingletonService.Publish(new RobotReadyForMissionsEventArgs(robot));
 
             Thread.Sleep(100);
 
@@ -364,43 +354,27 @@ namespace Api.Test.EventHandlers
             );
             Thread.Sleep(100);
 
-            var missionRunCreatedEventArgs = new MissionRunCreatedEventArgs(missionRun1);
-            MissionRunService.RaiseEvent(
-                nameof(Api.Services.MissionRunService.MissionRunCreated),
-                missionRunCreatedEventArgs
-            );
+            EventAggregatorSingletonService.Publish(new MissionRunCreatedEventArgs(missionRun1));
             Thread.Sleep(100);
 
             // Act
-            var mqttIsarMissionEventArgs = new MqttReceivedArgs(
-                new IsarMissionMessage
-                {
-                    RobotName = robot.Name,
-                    IsarId = robot.IsarId,
-                    MissionId = missionRun1.Id,
-                    Status = "successful",
-                    Timestamp = DateTime.UtcNow,
-                }
-            );
-
-            var mqttIsarStatusEventArgs = new MqttReceivedArgs(
-                new IsarStatusMessage
-                {
-                    RobotName = robot.Name,
-                    IsarId = robot.IsarId,
-                    Status = RobotStatus.Available,
-                    Timestamp = DateTime.UtcNow,
-                }
-            );
-
-            MqttService.RaiseEvent(
-                nameof(MqttService.MqttIsarMissionReceived),
-                mqttIsarMissionEventArgs
-            );
-            MqttService.RaiseEvent(
-                nameof(MqttService.MqttIsarStatusReceived),
-                mqttIsarStatusEventArgs
-            );
+            var isarMissionMessage = new IsarMissionMessage
+            {
+                RobotName = robot.Name,
+                IsarId = robot.IsarId,
+                MissionId = missionRun1.Id,
+                Status = "successful",
+                Timestamp = DateTime.UtcNow,
+            };
+            var isarStatusMessage = new IsarStatusMessage
+            {
+                RobotName = robot.Name,
+                IsarId = robot.IsarId,
+                Status = RobotStatus.Available,
+                Timestamp = DateTime.UtcNow,
+            };
+            EventAggregatorSingletonService.Publish(isarMissionMessage);
+            EventAggregatorSingletonService.Publish(isarStatusMessage);
             Thread.Sleep(2500); // Accommodate for sleep in OnIsarStatus
 
             // Assert

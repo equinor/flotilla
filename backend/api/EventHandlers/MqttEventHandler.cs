@@ -25,6 +25,7 @@ namespace Api.EventHandlers
         private readonly IServiceScopeFactory _scopeFactory;
 
         private readonly IMemoryCache _cache;
+        private EventAggregatorSingletonService _eventAggregatorSingletonService;
 
         private readonly ConcurrentDictionary<string, RobotMetricData> _batteryMetrics = new();
         private readonly ConcurrentDictionary<string, RobotMetricData> _pressureMetrics = new();
@@ -40,13 +41,15 @@ namespace Api.EventHandlers
             ILogger<MqttEventHandler> logger,
             IServiceScopeFactory scopeFactory,
             IMemoryCache cache,
-            Meter meter
+            Meter meter,
+            EventAggregatorSingletonService eventAggregatorSingletonService
         )
         {
             _logger = logger;
             // Reason for using factory: https://www.thecodebuzz.com/using-dbcontext-instance-in-ihostedservice/
             _scopeFactory = scopeFactory;
             _cache = cache;
+            _eventAggregatorSingletonService = eventAggregatorSingletonService;
 
             meter.CreateObservableGauge(
                 "robot.battery.level",
@@ -112,47 +115,40 @@ namespace Api.EventHandlers
 
         public override void Subscribe()
         {
-            MqttService.MqttIsarStatusReceived += OnIsarStatus;
-            MqttService.MqttIsarRobotInfoReceived += OnIsarRobotInfo;
-            MqttService.MqttIsarMissionReceived += OnIsarMissionUpdate;
-            MqttService.MqttIsarTaskReceived += OnIsarTaskUpdate;
-            MqttService.MqttIsarBatteryReceived += OnIsarBatteryUpdate;
-            MqttService.MqttIsarPressureReceived += OnIsarPressureUpdate;
-            MqttService.MqttIsarPoseReceived += OnIsarPoseUpdate;
-            MqttService.MqttIsarCloudHealthReceived += OnIsarCloudHealthUpdate;
-            MqttService.MqttIsarInterventionNeededReceived += OnIsarInterventionNeededUpdate;
-            MqttService.MqttIsarStartupReceived += OnIsarStartup;
-            MqttService.MqttIsarMissionAborted += OnIsarMissionAborted;
-            MqttService.MqttSaraInspectionResultReceived += OnSaraInspectionResultUpdate;
-            MqttService.MqttSaraAnalysisResultMessage += OnSaraAnalysisResultMessage;
+            _eventAggregatorSingletonService.Subscribe<IsarStatusMessage>(OnIsarStatus);
+            _eventAggregatorSingletonService.Subscribe<IsarRobotInfoMessage>(OnIsarRobotInfo);
+            _eventAggregatorSingletonService.Subscribe<IsarMissionMessage>(OnIsarMissionUpdate);
+            _eventAggregatorSingletonService.Subscribe<IsarTaskMessage>(OnIsarTaskUpdate);
+            _eventAggregatorSingletonService.Subscribe<IsarBatteryMessage>(OnIsarBatteryUpdate);
+            _eventAggregatorSingletonService.Subscribe<IsarPressureMessage>(OnIsarPressureUpdate);
+            _eventAggregatorSingletonService.Subscribe<IsarPoseMessage>(OnIsarPoseUpdate);
+            _eventAggregatorSingletonService.Subscribe<IsarCloudHealthMessage>(
+                OnIsarCloudHealthUpdate
+            );
+            _eventAggregatorSingletonService.Subscribe<IsarInterventionNeededMessage>(
+                OnIsarInterventionNeededUpdate
+            );
+            _eventAggregatorSingletonService.Subscribe<IsarStartupMessage>(OnIsarStartup);
+            _eventAggregatorSingletonService.Subscribe<IsarMissionAbortedMessage>(
+                OnIsarMissionAborted
+            );
+            _eventAggregatorSingletonService.Subscribe<SaraInspectionResultMessage>(
+                OnSaraInspectionResultUpdate
+            );
+            _eventAggregatorSingletonService.Subscribe<SaraAnalysisResultMessage>(
+                OnSaraAnalysisResultMessage
+            );
         }
 
-        public override void Unsubscribe()
-        {
-            MqttService.MqttIsarStatusReceived -= OnIsarStatus;
-            MqttService.MqttIsarRobotInfoReceived -= OnIsarRobotInfo;
-            MqttService.MqttIsarMissionReceived -= OnIsarMissionUpdate;
-            MqttService.MqttIsarTaskReceived -= OnIsarTaskUpdate;
-            MqttService.MqttIsarBatteryReceived -= OnIsarBatteryUpdate;
-            MqttService.MqttIsarPressureReceived -= OnIsarPressureUpdate;
-            MqttService.MqttIsarPoseReceived -= OnIsarPoseUpdate;
-            MqttService.MqttIsarCloudHealthReceived -= OnIsarCloudHealthUpdate;
-            MqttService.MqttIsarInterventionNeededReceived -= OnIsarInterventionNeededUpdate;
-            MqttService.MqttSaraInspectionResultReceived -= OnSaraInspectionResultUpdate;
-            MqttService.MqttIsarStartupReceived -= OnIsarStartup;
-            MqttService.MqttIsarMissionAborted -= OnIsarMissionAborted;
-            MqttService.MqttSaraAnalysisResultMessage -= OnSaraAnalysisResultMessage;
-        }
+        public override void Unsubscribe() { }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             await stoppingToken;
         }
 
-        private async void OnIsarStatus(object? sender, MqttReceivedArgs mqttArgs)
+        private async void OnIsarStatus(IsarStatusMessage isarStatus)
         {
-            var isarStatus = (IsarStatusMessage)mqttArgs.Message;
-
             var robot = await RobotService.ReadByIsarId(isarStatus.IsarId, readOnly: true);
 
             if (robot == null)
@@ -195,9 +191,7 @@ namespace Api.EventHandlers
 
             if (Robot.IsStatusThatCanReceiveMissions(isarStatus.Status))
             {
-                MissionScheduling.TriggerRobotReadyForMissions(
-                    new RobotReadyForMissionsEventArgs(robot)
-                );
+                _eventAggregatorSingletonService.Publish(new RobotReadyForMissionsEventArgs(robot));
             }
         }
 
@@ -244,10 +238,8 @@ namespace Api.EventHandlers
             }
         }
 
-        private async void OnIsarRobotInfo(object? sender, MqttReceivedArgs mqttArgs)
+        private async void OnIsarRobotInfo(IsarRobotInfoMessage isarRobotInfo)
         {
-            var isarRobotInfo = (IsarRobotInfoMessage)mqttArgs.Message;
-
             var installation = await InstallationService.ReadByInstallationCode(
                 isarRobotInfo.CurrentInstallation,
                 readOnly: true
@@ -373,10 +365,8 @@ namespace Api.EventHandlers
             robot.RobotCapabilities = newRobotCapabilities;
         }
 
-        private async void OnIsarMissionAborted(object? sender, MqttReceivedArgs mqttArgs)
+        private async void OnIsarMissionAborted(IsarMissionAbortedMessage isarAbortedMission)
         {
-            var isarAbortedMission = (IsarMissionAbortedMessage)mqttArgs.Message;
-
             var robot = await RobotService.ReadByIsarId(isarAbortedMission.IsarId, readOnly: true);
             if (robot is null)
             {
@@ -434,10 +424,8 @@ namespace Api.EventHandlers
             }
         }
 
-        private async void OnIsarMissionUpdate(object? sender, MqttReceivedArgs mqttArgs)
+        private async void OnIsarMissionUpdate(IsarMissionMessage isarMission)
         {
-            var isarMission = (IsarMissionMessage)mqttArgs.Message;
-
             MissionStatus status;
             try
             {
@@ -572,10 +560,8 @@ namespace Api.EventHandlers
             await TaskDurationService.UpdateAverageDurationPerTask(robot);
         }
 
-        private async void OnIsarTaskUpdate(object? sender, MqttReceivedArgs mqttArgs)
+        private async void OnIsarTaskUpdate(IsarTaskMessage task)
         {
-            var task = (IsarTaskMessage)mqttArgs.Message;
-
             IsarTaskStatus status;
             try
             {
@@ -659,10 +645,8 @@ namespace Api.EventHandlers
             return installationCodeAndId;
         }
 
-        private async void OnIsarBatteryUpdate(object? sender, MqttReceivedArgs mqttArgs)
+        private async void OnIsarBatteryUpdate(IsarBatteryMessage batteryStatus)
         {
-            var batteryStatus = (IsarBatteryMessage)mqttArgs.Message;
-
             (string installationCode, string robotId)? installationCodeAndId =
                 await GetRobotInstallationCodeAndId(batteryStatus.IsarId);
 
@@ -698,10 +682,8 @@ namespace Api.EventHandlers
             );
         }
 
-        private async void OnIsarPressureUpdate(object? sender, MqttReceivedArgs mqttArgs)
+        private async void OnIsarPressureUpdate(IsarPressureMessage pressureStatus)
         {
-            var pressureStatus = (IsarPressureMessage)mqttArgs.Message;
-
             (string installationCode, string robotId)? installationCodeAndId =
                 await GetRobotInstallationCodeAndId(pressureStatus.IsarId);
 
@@ -727,10 +709,8 @@ namespace Api.EventHandlers
             );
         }
 
-        private async void OnIsarPoseUpdate(object? sender, MqttReceivedArgs mqttArgs)
+        private async void OnIsarPoseUpdate(IsarPoseMessage poseStatus)
         {
-            var poseStatus = (IsarPoseMessage)mqttArgs.Message;
-
             (string installationCode, string robotId)? installationCodeAndId =
                 await GetRobotInstallationCodeAndId(poseStatus.IsarId);
 
@@ -751,10 +731,8 @@ namespace Api.EventHandlers
             );
         }
 
-        private async void OnIsarCloudHealthUpdate(object? sender, MqttReceivedArgs mqttArgs)
+        private async void OnIsarCloudHealthUpdate(IsarCloudHealthMessage cloudHealthStatus)
         {
-            var cloudHealthStatus = (IsarCloudHealthMessage)mqttArgs.Message;
-
             var robot = await RobotService.ReadByIsarId(cloudHealthStatus.IsarId, readOnly: true);
             if (robot == null)
             {
@@ -771,10 +749,10 @@ namespace Api.EventHandlers
             TeamsMessageService.TriggerTeamsMessageReceived(new TeamsMessageEventArgs(message));
         }
 
-        private async void OnIsarInterventionNeededUpdate(object? sender, MqttReceivedArgs mqttArgs)
+        private async void OnIsarInterventionNeededUpdate(
+            IsarInterventionNeededMessage interventionNeededMessage
+        )
         {
-            var interventionNeededMessage = (IsarInterventionNeededMessage)mqttArgs.Message;
-
             var robot = await RobotService.ReadByIsarId(
                 interventionNeededMessage.IsarId,
                 readOnly: true
@@ -796,10 +774,8 @@ namespace Api.EventHandlers
             TeamsMessageService.TriggerTeamsMessageReceived(new TeamsMessageEventArgs(message));
         }
 
-        private async void OnIsarStartup(object? sender, MqttReceivedArgs mqttArgs)
+        private async void OnIsarStartup(IsarStartupMessage startupMessage)
         {
-            var startupMessage = (IsarStartupMessage)mqttArgs.Message;
-
             var robot = await RobotService.ReadByIsarId(startupMessage.IsarId, readOnly: true);
             if (robot == null)
             {
@@ -867,10 +843,10 @@ namespace Api.EventHandlers
             }
         }
 
-        private async void OnSaraInspectionResultUpdate(object? sender, MqttReceivedArgs mqttArgs)
+        private async void OnSaraInspectionResultUpdate(
+            SaraInspectionResultMessage inspectionResult
+        )
         {
-            var inspectionResult = (SaraInspectionResultMessage)mqttArgs.Message;
-
             var inspectionResultMessage = new InspectionResultMessage
             {
                 InspectionId = inspectionResult.InspectionId,
@@ -900,10 +876,8 @@ namespace Api.EventHandlers
             );
         }
 
-        private async void OnSaraAnalysisResultMessage(object? sender, MqttReceivedArgs mqttArgs)
+        private async void OnSaraAnalysisResultMessage(SaraAnalysisResultMessage saraAnalysisResult)
         {
-            var saraAnalysisResult = (SaraAnalysisResultMessage)mqttArgs.Message;
-
             var analysisResult = new AnalysisResult
             {
                 InspectionId = saraAnalysisResult.InspectionId,

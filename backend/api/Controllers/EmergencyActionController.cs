@@ -10,7 +10,7 @@ namespace Api.Controllers
     [Route("emergency-action")]
     public class EmergencyActionController(
         IRobotService robotService,
-        IEmergencyActionService emergencyActionService
+        EventAggregatorSingletonService eventAggregatorSingletonService
     ) : ControllerBase
     {
         /// <summary>
@@ -41,7 +41,7 @@ namespace Api.Controllers
 
             foreach (var robot in robots)
             {
-                emergencyActionService.LockdownRobot(
+                eventAggregatorSingletonService.Publish(
                     new RobotEmergencyEventArgs(
                         robot,
                         "Robot couldn't complete mission as 'Send robots to dock'-button was clicked"
@@ -76,7 +76,7 @@ namespace Api.Controllers
 
             foreach (var robot in robots)
             {
-                emergencyActionService.ReleaseRobotFromLockdown(new RobotEmergencyEventArgs(robot));
+                eventAggregatorSingletonService.Publish(new RobotEmergencyEventArgs(robot));
             }
 
             return NoContent();

@@ -10,6 +10,7 @@ using Api.Mqtt;
 using Api.Options;
 using Api.Services;
 using Api.Services.ActionServices;
+using Api.Services.Events;
 using Api.SignalRHubs;
 using Api.Utilities;
 using Azure.Identity;
@@ -95,7 +96,6 @@ builder.Services.AddScoped<IAreaPolygonService, AreaPolygonService>();
 builder.Services.AddScoped<IErrorHandlingService, ErrorHandlingService>();
 builder.Services.AddScoped<ITaskDurationService, TaskDurationService>();
 builder.Services.AddScoped<ILastMissionRunService, LastMissionRunService>();
-builder.Services.AddScoped<IEmergencyActionService, EmergencyActionService>();
 builder.Services.AddScoped<ITeamsMessageService, TeamsMessageService>();
 
 bool useInMemoryDatabase = builder
@@ -108,6 +108,8 @@ builder.Services.AddScoped<IUserInfoService, UserInfoService>();
 builder.Services.AddScoped<IAutoScheduleService, AutoScheduleService>();
 
 builder.Services.AddTransient<ISignalRService, SignalRService>();
+
+builder.Services.AddSingleton<EventAggregatorSingletonService>();
 
 builder.Services.AddHostedService<MqttEventHandler>();
 builder.Services.AddHostedService<MissionEventHandler>();
