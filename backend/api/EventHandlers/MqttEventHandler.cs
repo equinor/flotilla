@@ -2,8 +2,6 @@
 using System.Diagnostics.Metrics;
 using Api.Controllers.Models;
 using Api.Database.Models;
-using Api.Mqtt;
-using Api.Mqtt.Events;
 using Api.Mqtt.MessageModels;
 using Api.Services;
 using Api.Services.ActionServices;
@@ -110,8 +108,6 @@ namespace Api.EventHandlers
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ISignalRService>();
         private ITaskDurationService TaskDurationService =>
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ITaskDurationService>();
-        private ITeamsMessageService TeamsMessageService =>
-            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ITeamsMessageService>();
 
         public override void Subscribe()
         {
@@ -746,7 +742,7 @@ namespace Api.EventHandlers
 
             string message = $"Failed telemetry request for robot {cloudHealthStatus.RobotName}.";
 
-            TeamsMessageService.TriggerTeamsMessageReceived(new TeamsMessageEventArgs(message));
+            _eventAggregatorSingletonService.Publish(new TeamsMessageEventArgs(message));
         }
 
         private async void OnIsarInterventionNeededUpdate(
@@ -771,7 +767,7 @@ namespace Api.EventHandlers
                 $"Intervention needed for robot {interventionNeededMessage.RobotName}. "
                 + $"Reason: {interventionNeededMessage.Reason}";
 
-            TeamsMessageService.TriggerTeamsMessageReceived(new TeamsMessageEventArgs(message));
+            _eventAggregatorSingletonService.Publish(new TeamsMessageEventArgs(message));
         }
 
         private async void OnIsarStartup(IsarStartupMessage startupMessage)

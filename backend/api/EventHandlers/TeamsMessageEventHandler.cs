@@ -2,7 +2,6 @@
 using System.Net.Http.Headers;
 using System.Text;
 using AdaptiveCards.Templating;
-using Api.Services;
 using Api.Services.Events;
 using Api.Utilities;
 using Azure.Identity;
@@ -14,42 +13,46 @@ namespace Api.EventHandlers
     {
         private readonly IConfiguration _configuration;
         private readonly ILogger<TeamsMessageEventHandler> _logger;
+        private EventAggregatorSingletonService _eventAggregatorSingletonService;
 
         public TeamsMessageEventHandler(
             IConfiguration configuration,
-            ILogger<TeamsMessageEventHandler> logger
+            ILogger<TeamsMessageEventHandler> logger,
+            EventAggregatorSingletonService eventAggregatorSingletonService
         )
         {
             _configuration = configuration;
             _logger = logger;
+            _eventAggregatorSingletonService = eventAggregatorSingletonService;
 
             Subscribe();
         }
 
         public override void Subscribe()
         {
-            TeamsMessageService.TeamsMessage += OnTeamsMessageReceived;
+            _eventAggregatorSingletonService.Subscribe<TeamsMessageEventArgs>(
+                OnTeamsMessageReceived
+            );
         }
 
-        public override void Unsubscribe()
-        {
-            TeamsMessageService.TeamsMessage -= OnTeamsMessageReceived;
-        }
+        public override void Unsubscribe() { }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             await stoppingToken;
         }
 
-        private async void OnTeamsMessageReceived(object? sender, TeamsMessageEventArgs e)
+        private async void OnTeamsMessageReceived(TeamsMessageEventArgs e)
         {
+            string teamsMessage = e.TeamsMessage;
+
             string url = GetWebhookURL(_configuration, "TeamsSystemStatusNotification");
             var client = new HttpClient();
             client.DefaultRequestHeaders.Accept.Add(
                 new MediaTypeWithQualityHeaderValue("application/json")
             );
 
-            var content = CreateTeamsMessageCard(e.TeamsMessage);
+            var content = CreateTeamsMessageCard(teamsMessage);
             HttpResponseMessage? response;
             try
             {
