@@ -50,9 +50,10 @@ namespace Api.Test.EventHandlers
             RobotService = ServiceProvider.GetRequiredService<IRobotService>();
             MissionSchedulingService =
                 ServiceProvider.GetRequiredService<IMissionSchedulingService>();
+            EventAggregatorSingletonService =
+                ServiceProvider.GetRequiredService<EventAggregatorSingletonService>();
 
             var mqttServiceLogger = new Mock<ILogger<MqttService>>().Object;
-            EventAggregatorSingletonService = new EventAggregatorSingletonService();
             MqttService = new MqttService(
                 mqttServiceLogger,
                 Factory.Configuration!,
@@ -259,9 +260,7 @@ namespace Api.Test.EventHandlers
             Assert.Equal(MissionStatus.Queued, postStartMissionRunTwo.Status);
         }
 
-#pragma warning disable xUnit1004
-        [Fact(Skip = "Skipping until issue #1767 is solved because test is unreliable")]
-#pragma warning restore xUnit1004
+        [Fact]
         public async Task QueuedMissionsAreNotAbortedWhenRobotReadyForMissionsHappensAtTheSameTimeAsOnIsarMissionCompleted()
         {
             // Arrange
@@ -310,16 +309,23 @@ namespace Api.Test.EventHandlers
             Thread.Sleep(100);
 
             // Assert
-            var postTestMissionRunOne = await MissionRunService.ReadById(
-                missionRunOne.Id,
-                readOnly: true
-            );
-            Assert.Equal(MissionStatus.Successful, postTestMissionRunOne!.Status);
-            var postTestMissionRunTwo = await MissionRunService.ReadById(
-                missionRunTwo.Id,
-                readOnly: true
-            );
-            Assert.Equal(MissionStatus.Queued, postTestMissionRunTwo!.Status);
+            await TestSetupHelpers.WaitFor(async () =>
+            {
+                var postTestMissionRunOne = await MissionRunService.ReadById(
+                    missionRunOne.Id,
+                    readOnly: true
+                );
+                return postTestMissionRunOne!.Status == MissionStatus.Successful;
+            });
+
+            await TestSetupHelpers.WaitFor(async () =>
+            {
+                var postTestMissionRunTwo = await MissionRunService.ReadById(
+                    missionRunTwo.Id,
+                    readOnly: true
+                );
+                return postTestMissionRunTwo!.Status == MissionStatus.Queued;
+            });
         }
 
 #pragma warning disable xUnit1004
