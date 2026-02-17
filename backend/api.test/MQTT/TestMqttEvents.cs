@@ -83,17 +83,11 @@ namespace Api.Test.MQTT
 
             await MqttService.PublishMessageBasedOnTopic($"isar/{robot.Id}/status", messageString);
 
-            latestRobot = await RobotService.ReadById(robot.Id);
-            DateTime startTime = DateTime.UtcNow;
-            while (DateTime.UtcNow < startTime.AddSeconds(5))
+            await TestSetupHelpers.WaitFor(async () =>
             {
                 latestRobot = await RobotService.ReadById(robot.Id);
-                if (latestRobot!.Status == RobotStatus.Available)
-                    break;
-                var cts = new CancellationTokenSource();
-                await Task.Delay(1000, cts.Token);
-            }
-            Assert.Equal(RobotStatus.Available, latestRobot!.Status);
+                return latestRobot!.Status == RobotStatus.Available;
+            });
         }
     }
 }

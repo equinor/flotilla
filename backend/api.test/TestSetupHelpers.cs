@@ -1,16 +1,18 @@
 ﻿using System;
 using System.Data.Common;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading;
 using System.Threading.Tasks;
 using Api.Database.Context;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Testcontainers.PostgreSql;
+using Xunit;
+using Xunit.Sdk;
 
 namespace Api.Test;
 
@@ -139,5 +141,26 @@ public static class TestSetupHelpers
         );
 
         return client;
+    }
+
+    public static async Task<bool> WaitFor(
+        Func<Task<bool>> workFunction,
+        float waitPeriodSeconds = 5,
+        float waitIncrementSeconds = 1
+    )
+    {
+        DateTime startTime = DateTime.UtcNow;
+        while (DateTime.UtcNow < startTime.AddSeconds(waitPeriodSeconds))
+        {
+            var isDone = await workFunction();
+            if (isDone)
+                return true;
+            var cts = new CancellationTokenSource();
+            await Task.Delay((int)(waitIncrementSeconds * 1000), cts.Token);
+        }
+        throw TrueException.ForNonTrueValue(
+            $"Waited for something that never happened within {waitPeriodSeconds} seconds. ",
+            false
+        );
     }
 }
