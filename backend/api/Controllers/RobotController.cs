@@ -15,9 +15,9 @@ namespace Api.Controllers
         ILogger<RobotController> logger,
         IRobotService robotService,
         IIsarService isarService,
-        IMissionSchedulingService missionSchedulingService,
         IInspectionAreaService inspectionAreaService,
-        IErrorHandlingService errorHandlingService
+        IErrorHandlingService errorHandlingService,
+        EventAggregatorSingletonService eventAggregatorSingletonService
     ) : ControllerBase
     {
         /// <summary>
@@ -469,7 +469,7 @@ namespace Api.Controllers
                     RobotStatus.ReturningHome,
                 };
                 if (startMissionStatuses.Contains(robotStatus))
-                    missionSchedulingService.TriggerRobotReadyForMissions(
+                    eventAggregatorSingletonService.Publish(
                         new RobotReadyForMissionsEventArgs(robot)
                     );
 

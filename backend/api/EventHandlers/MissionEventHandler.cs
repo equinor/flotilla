@@ -1,4 +1,5 @@
-﻿using Api.Services;
+﻿using Api.Database.Models;
+using Api.Services;
 using Api.Services.Events;
 using Api.Utilities;
 
@@ -9,14 +10,17 @@ namespace Api.EventHandlers
         private readonly ILogger<MissionEventHandler> _logger;
 
         private readonly IServiceScopeFactory _scopeFactory;
+        private EventAggregatorSingletonService _eventAggregatorSingletonService;
 
         public MissionEventHandler(
             ILogger<MissionEventHandler> logger,
-            IServiceScopeFactory scopeFactory
+            IServiceScopeFactory scopeFactory,
+            EventAggregatorSingletonService eventAggregatorSingletonService
         )
         {
             _logger = logger;
             _scopeFactory = scopeFactory;
+            _eventAggregatorSingletonService = eventAggregatorSingletonService;
 
             Subscribe();
         }
@@ -31,30 +35,30 @@ namespace Api.EventHandlers
 
         public override void Subscribe()
         {
-            MissionRunService.MissionRunCreated += OnMissionRunCreated;
-            MissionSchedulingService.RobotReadyForMissions += OnRobotReadyForMissions;
-            EmergencyActionService.LockdownRobotTriggered += OnLockdownRobotTriggered;
-            EmergencyActionService.ReleaseRobotFromLockdownTriggered +=
-                OnReleaseRobotFromLockdownTriggered;
+            _eventAggregatorSingletonService.Subscribe<MissionRunCreatedEventArgs>(
+                OnMissionRunCreated
+            );
+            _eventAggregatorSingletonService.Subscribe<RobotReadyForMissionsEventArgs>(
+                OnRobotReadyForMissions
+            );
+            _eventAggregatorSingletonService.Subscribe<RobotEmergencyEventArgs>(
+                OnLockdownRobotTriggered
+            );
+            _eventAggregatorSingletonService.Subscribe<RobotEmergencyEventArgs>(
+                OnReleaseRobotFromLockdownTriggered
+            );
         }
 
-        public override void Unsubscribe()
-        {
-            MissionRunService.MissionRunCreated -= OnMissionRunCreated;
-            MissionSchedulingService.RobotReadyForMissions -= OnRobotReadyForMissions;
-            EmergencyActionService.LockdownRobotTriggered -= OnLockdownRobotTriggered;
-            EmergencyActionService.ReleaseRobotFromLockdownTriggered -=
-                OnReleaseRobotFromLockdownTriggered;
-        }
+        public override void Unsubscribe() { }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             await stoppingToken;
         }
 
-        private async void OnMissionRunCreated(object? sender, MissionRunCreatedEventArgs e)
+        private async void OnMissionRunCreated(MissionRunCreatedEventArgs e)
         {
-            var missionRun = e.MissionRun;
+            MissionRun missionRun = e.MissionRun;
 
             _logger.LogInformation(
                 "Triggered MissionRunCreated event for mission run ID: {MissionRunId}",
@@ -74,24 +78,25 @@ namespace Api.EventHandlers
             }
         }
 
-        private async void OnRobotReadyForMissions(object? sender, RobotReadyForMissionsEventArgs e)
+        private async void OnRobotReadyForMissions(RobotReadyForMissionsEventArgs e)
         {
+            Robot robot = e.Robot;
             try
             {
-                await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(e.Robot);
+                await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(robot);
             }
             catch (MissionRunNotFoundException)
             {
                 _logger.LogWarning(
                     "Mission run not found for robot ID: {RobotId} when excecuting OnRobotReadyForMissions",
-                    e.Robot.Id
+                    robot.Id
                 );
             }
         }
 
-        private async void OnLockdownRobotTriggered(object? sender, RobotEmergencyEventArgs e)
+        private async void OnLockdownRobotTriggered(RobotEmergencyEventArgs e)
         {
-            var robot = e.Robot;
+            Robot robot = e.Robot;
 
             _logger.LogInformation(
                 "Triggered RobotEmergencyEvent for robot ID: {RobotId}",
@@ -109,12 +114,9 @@ namespace Api.EventHandlers
             }
         }
 
-        private async void OnReleaseRobotFromLockdownTriggered(
-            object? sender,
-            RobotEmergencyEventArgs e
-        )
+        private async void OnReleaseRobotFromLockdownTriggered(RobotEmergencyEventArgs e)
         {
-            var robot = e.Robot;
+            Robot robot = e.Robot;
 
             _logger.LogInformation(
                 "Triggered release robot from lockdown event for robot ID: {RobotId}",

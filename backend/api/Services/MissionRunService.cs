@@ -102,7 +102,8 @@ namespace Api.Services
         IMissionTaskService missionTaskService,
         IInspectionAreaService inspectionAreaService,
         IRobotService robotService,
-        IUserInfoService userInfoService
+        IUserInfoService userInfoService,
+        EventAggregatorSingletonService eventAggregatorSingletonService
     ) : IMissionRunService
     {
         public async Task<MissionRun> Create(
@@ -137,8 +138,7 @@ namespace Api.Services
 
             if (triggerCreatedMissionRunEvent)
             {
-                var args = new MissionRunCreatedEventArgs(missionRun);
-                OnMissionRunCreated(args);
+                eventAggregatorSingletonService.Publish(new MissionRunCreatedEventArgs(missionRun));
             }
 
             var userInfo = await userInfoService.GetRequestedUserInfo();
@@ -386,13 +386,6 @@ namespace Api.Services
 
             return readOnly ? query.AsNoTracking() : query.AsTracking();
         }
-
-        protected virtual void OnMissionRunCreated(MissionRunCreatedEventArgs e)
-        {
-            MissionRunCreated?.Invoke(this, e);
-        }
-
-        public static event EventHandler<MissionRunCreatedEventArgs>? MissionRunCreated;
 
         private async Task ApplyDatabaseUpdate(Installation? installation)
         {

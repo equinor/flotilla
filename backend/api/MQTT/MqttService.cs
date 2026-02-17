@@ -1,16 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading;
-using System.Threading.Tasks;
-using Api.Mqtt.Events;
-using Api.Mqtt.MessageModels;
-using Api.Utilities;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using Api.Services.Events;
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Extensions.ManagedClient;
@@ -42,13 +33,19 @@ namespace Api.Mqtt
 
         private CancellationToken _cancellationToken;
         private int _reconnectAttempts;
+        private EventAggregatorSingletonService _eventAggregatorSingletonService;
 
-        public MqttService(ILogger<MqttService> logger, IConfiguration config)
+        public MqttService(
+            ILogger<MqttService> logger,
+            IConfiguration config,
+            EventAggregatorSingletonService eventAggregatorSingletonService
+        )
         {
             _reconnectAttempts = 0;
             _logger = logger;
             var mqttFactory = new MqttFactory();
             _mqttClient = mqttFactory.CreateManagedMqttClient();
+            _eventAggregatorSingletonService = eventAggregatorSingletonService;
 
             /*_notProduction = !(
                 config.GetValue<string?>("ASPNETCORE_ENVIRONMENT") ?? "Production"
@@ -85,21 +82,6 @@ namespace Api.Mqtt
             SubscribeToTopics(topics);
         }
 
-        public static event EventHandler<MqttReceivedArgs>? MqttIsarStatusReceived;
-        public static event EventHandler<MqttReceivedArgs>? MqttIsarRobotInfoReceived;
-        public static event EventHandler<MqttReceivedArgs>? MqttIsarRobotHeartbeatReceived;
-        public static event EventHandler<MqttReceivedArgs>? MqttIsarMissionReceived;
-        public static event EventHandler<MqttReceivedArgs>? MqttIsarTaskReceived;
-        public static event EventHandler<MqttReceivedArgs>? MqttIsarBatteryReceived;
-        public static event EventHandler<MqttReceivedArgs>? MqttIsarPressureReceived;
-        public static event EventHandler<MqttReceivedArgs>? MqttIsarPoseReceived;
-        public static event EventHandler<MqttReceivedArgs>? MqttIsarCloudHealthReceived;
-        public static event EventHandler<MqttReceivedArgs>? MqttIsarInterventionNeededReceived;
-        public static event EventHandler<MqttReceivedArgs>? MqttIsarStartupReceived;
-        public static event EventHandler<MqttReceivedArgs>? MqttIsarMissionAborted;
-        public static event EventHandler<MqttReceivedArgs>? MqttSaraInspectionResultReceived;
-        public static event EventHandler<MqttReceivedArgs>? MqttSaraAnalysisResultMessage;
-
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             _cancellationToken = stoppingToken;
@@ -118,7 +100,13 @@ namespace Api.Mqtt
         {
             string content = messageReceivedEvent.ApplicationMessage.ConvertPayloadToString();
             string topic = messageReceivedEvent.ApplicationMessage.Topic;
+            PublishMessageBasedOnTopic(topic, content);
 
+            return Task.CompletedTask;
+        }
+
+        public Task PublishMessageBasedOnTopic(string topic, string content)
+        {
             var messageType = MqttTopics.TopicsToMessages.GetItemByTopic(topic);
             if (messageType is null)
             {
@@ -128,57 +116,13 @@ namespace Api.Mqtt
 
             _logger.LogDebug("Topic: {topic} - Message received: \n{payload}", topic, content);
 
-            switch (messageType)
+            var options = new JsonSerializerOptions
             {
-                case Type type when type == typeof(IsarStatusMessage):
-                    OnIsarTopicReceived<IsarStatusMessage>(content);
-                    break;
-                case Type type when type == typeof(IsarRobotInfoMessage):
-                    OnIsarTopicReceived<IsarRobotInfoMessage>(content);
-                    break;
-                case Type type when type == typeof(IsarRobotHeartbeatMessage):
-                    OnIsarTopicReceived<IsarRobotHeartbeatMessage>(content);
-                    break;
-                case Type type when type == typeof(IsarMissionMessage):
-                    OnIsarTopicReceived<IsarMissionMessage>(content);
-                    break;
-                case Type type when type == typeof(IsarTaskMessage):
-                    OnIsarTopicReceived<IsarTaskMessage>(content);
-                    break;
-                case Type type when type == typeof(IsarBatteryMessage):
-                    OnIsarTopicReceived<IsarBatteryMessage>(content);
-                    break;
-                case Type type when type == typeof(IsarPressureMessage):
-                    OnIsarTopicReceived<IsarPressureMessage>(content);
-                    break;
-                case Type type when type == typeof(IsarPoseMessage):
-                    OnIsarTopicReceived<IsarPoseMessage>(content);
-                    break;
-                case Type type when type == typeof(IsarCloudHealthMessage):
-                    OnIsarTopicReceived<IsarCloudHealthMessage>(content);
-                    break;
-                case Type type when type == typeof(IsarInterventionNeededMessage):
-                    OnIsarTopicReceived<IsarInterventionNeededMessage>(content);
-                    break;
-                case Type type when type == typeof(IsarStartupMessage):
-                    OnIsarTopicReceived<IsarStartupMessage>(content);
-                    break;
-                case Type type when type == typeof(IsarMissionAbortedMessage):
-                    OnIsarTopicReceived<IsarMissionAbortedMessage>(content);
-                    break;
-                case Type type when type == typeof(SaraInspectionResultMessage):
-                    OnSaraTopicReceived<SaraInspectionResultMessage>(content);
-                    break;
-                case Type type when type == typeof(SaraAnalysisResultMessage):
-                    OnSaraTopicReceived<SaraAnalysisResultMessage>(content);
-                    break;
-                default:
-                    _logger.LogWarning(
-                        "No callback defined for MQTT message type '{type}'",
-                        (messageType as Type)?.Name ?? "Unknown"
-                    );
-                    break;
-            }
+                Converters = { new JsonStringEnumConverter() }, // Needed for enums becoming their names in strings, such as "Charging" instead of "1".
+            };
+            var contentObject = JsonSerializer.Deserialize(content, messageType, options);
+
+            _eventAggregatorSingletonService.Publish(contentObject); // The type of this object determines what subscribers are being published to.
 
             return Task.CompletedTask;
         }
@@ -277,112 +221,6 @@ namespace Api.Mqtt
             });
             _logger.LogInformation("{topicContent}", sb.ToString());
             _mqttClient.SubscribeAsync(topicFilters).Wait();
-        }
-
-        private void OnIsarTopicReceived<T>(string content)
-            where T : MqttMessage
-        {
-            T? message;
-
-            try
-            {
-                message = JsonSerializer.Deserialize<T>(content, serializerOptions);
-                if (message is null)
-                {
-                    throw new JsonException();
-                }
-            }
-            catch (Exception ex)
-                when (ex is JsonException or NotSupportedException or ArgumentException)
-            {
-                _logger.LogError(
-                    "Could not create '{className}' object from MQTT message json",
-                    typeof(T).Name
-                );
-                return;
-            }
-
-            var type = typeof(T);
-            try
-            {
-                var raiseEvent = type switch
-                {
-                    _ when type == typeof(IsarStatusMessage) => MqttIsarStatusReceived,
-                    _ when type == typeof(IsarRobotInfoMessage) => MqttIsarRobotInfoReceived,
-                    _ when type == typeof(IsarRobotHeartbeatMessage) =>
-                        MqttIsarRobotHeartbeatReceived,
-                    _ when type == typeof(IsarMissionMessage) => MqttIsarMissionReceived,
-                    _ when type == typeof(IsarTaskMessage) => MqttIsarTaskReceived,
-                    _ when type == typeof(IsarBatteryMessage) => MqttIsarBatteryReceived,
-                    _ when type == typeof(IsarPressureMessage) => MqttIsarPressureReceived,
-                    _ when type == typeof(IsarPoseMessage) => MqttIsarPoseReceived,
-                    _ when type == typeof(IsarCloudHealthMessage) => MqttIsarCloudHealthReceived,
-                    _ when type == typeof(IsarInterventionNeededMessage) =>
-                        MqttIsarInterventionNeededReceived,
-                    _ when type == typeof(IsarStartupMessage) => MqttIsarStartupReceived,
-                    _ when type == typeof(IsarMissionAbortedMessage) => MqttIsarMissionAborted,
-                    _ => throw new NotImplementedException(
-                        $"No event defined for message type '{typeof(T).Name}'"
-                    ),
-                };
-                // Event will be null if there are no subscribers
-                if (raiseEvent is not null)
-                {
-                    raiseEvent(this, new MqttReceivedArgs(message));
-                }
-            }
-            catch (NotImplementedException e)
-            {
-                _logger.LogWarning("{msg}", e.Message);
-            }
-        }
-
-        private void OnSaraTopicReceived<T>(string content)
-            where T : MqttMessage
-        {
-            T? message;
-
-            try
-            {
-                message = JsonSerializer.Deserialize<T>(content, serializerOptions);
-                if (message is null)
-                {
-                    throw new JsonException();
-                }
-            }
-            catch (Exception ex)
-                when (ex is JsonException or NotSupportedException or ArgumentException)
-            {
-                _logger.LogError(
-                    "Could not create '{className}' object from MQTT message json",
-                    typeof(T).Name
-                );
-                return;
-            }
-
-            var type = typeof(T);
-            try
-            {
-                var raiseEvent = type switch
-                {
-                    _ when type == typeof(SaraInspectionResultMessage) =>
-                        MqttSaraInspectionResultReceived,
-                    _ when type == typeof(SaraAnalysisResultMessage) =>
-                        MqttSaraAnalysisResultMessage,
-                    _ => throw new NotImplementedException(
-                        $"No event defined for message type '{typeof(T).Name}'"
-                    ),
-                };
-                // Event will be null if there are no subscribers
-                if (raiseEvent is not null)
-                {
-                    raiseEvent(this, new MqttReceivedArgs(message));
-                }
-            }
-            catch (NotImplementedException e)
-            {
-                _logger.LogWarning("{msg}", e.Message);
-            }
         }
     }
 }
