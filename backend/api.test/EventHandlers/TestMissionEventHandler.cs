@@ -325,10 +325,8 @@ namespace Api.Test.EventHandlers
             });
         }
 
-#pragma warning disable xUnit1004
-        [Fact(Skip = "Skipping until issue #1767 is solved because test is unreliable")]
-#pragma warning restore xUnit1004
-        public async Task QueuedContinuesWhenOnIsarStatusHappensAtTheSameTimeAsOnIsarMissionCompleted()
+        [Fact]
+        public async Task IsarStatusTriggersNextMissionEvenIfOtherMissionIsOngoing()
         {
             // Arrange
             var installation = await DatabaseUtilities.NewInstallation();
@@ -338,7 +336,7 @@ namespace Api.Test.EventHandlers
                 plant.PlantCode
             );
             var robot = await DatabaseUtilities.NewRobot(
-                RobotStatus.Available,
+                RobotStatus.Busy,
                 installation,
                 inspectionArea.Id
             );
@@ -346,29 +344,19 @@ namespace Api.Test.EventHandlers
                 installation.InstallationCode,
                 robot,
                 inspectionArea,
-                true,
-                MissionStatus.Ongoing
+                writeToDatabase: true,
+                missionStatus: MissionStatus.Ongoing
             );
             var missionRun2 = await DatabaseUtilities.NewMissionRun(
                 installation.InstallationCode,
                 robot,
                 inspectionArea,
-                true
+                writeToDatabase: true
             );
-            Thread.Sleep(100);
-
-            EventAggregatorSingletonService.Publish(new MissionRunCreatedEventArgs(missionRun1));
-            Thread.Sleep(100);
+            Assert.False(IsarService.isStartCalled);
+            Assert.False(IsarService.isStarted);
 
             // Act
-            var isarMissionMessage = new IsarMissionMessage
-            {
-                RobotName = robot.Name,
-                IsarId = robot.IsarId,
-                MissionId = missionRun1.Id,
-                Status = "successful",
-                Timestamp = DateTime.UtcNow,
-            };
             var isarStatusMessage = new IsarStatusMessage
             {
                 RobotName = robot.Name,
@@ -376,24 +364,61 @@ namespace Api.Test.EventHandlers
                 Status = RobotStatus.Available,
                 Timestamp = DateTime.UtcNow,
             };
-            EventAggregatorSingletonService.Publish(isarMissionMessage);
             EventAggregatorSingletonService.Publish(isarStatusMessage);
-            Thread.Sleep(2500); // Accommodate for sleep in OnIsarStatus
+            // EventAggregatorSingletonService.Publish(new RobotReadyForMissionsEventArgs(robot)); // Should be called by isarStatusMessage
 
             // Assert
-            var postTestMissionRun1 = await MissionRunService.ReadById(
-                missionRun1.Id,
-                readOnly: true
+            await TestSetupHelpers.WaitFor(async () =>
+            {
+                return IsarService.isStarted;
+            });
+            Assert.True(IsarService.isStartCalled);
+            Assert.True(IsarService.isStarted);
+        }
+
+        [Fact]
+        public async Task MissionStatusUpdate()
+        {
+            // Arrange
+            var installation = await DatabaseUtilities.NewInstallation();
+            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
+            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
+                installation.InstallationCode,
+                plant.PlantCode
             );
-            Assert.Equal(
-                Api.Database.Models.TaskStatus.Successful,
-                postTestMissionRun1!.Tasks[0].Status
+            var robot = await DatabaseUtilities.NewRobot(
+                RobotStatus.Busy,
+                installation,
+                inspectionArea.Id
             );
-            var postTestMissionRun2 = await MissionRunService.ReadById(
-                missionRun2.Id,
-                readOnly: true
+            var missionRun = await DatabaseUtilities.NewMissionRun(
+                installation.InstallationCode,
+                robot,
+                inspectionArea,
+                writeToDatabase: true,
+                missionStatus: MissionStatus.Ongoing
             );
-            Assert.Equal(MissionStatus.Ongoing, postTestMissionRun2!.Status);
+
+            // Act
+            var isarMissionMessage = new IsarMissionMessage
+            {
+                RobotName = robot.Name,
+                IsarId = robot.IsarId,
+                MissionId = missionRun.Id,
+                Status = "successful",
+                Timestamp = DateTime.UtcNow,
+            };
+            EventAggregatorSingletonService.Publish(isarMissionMessage);
+
+            // Assert
+            await TestSetupHelpers.WaitFor(async () =>
+            {
+                var postTestMissionRun = await MissionRunService.ReadById(
+                    missionRun.Id,
+                    readOnly: true
+                );
+                return postTestMissionRun!.Status == MissionStatus.Successful;
+            });
         }
     }
 }
