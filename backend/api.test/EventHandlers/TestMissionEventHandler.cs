@@ -109,9 +109,7 @@ namespace Api.Test.EventHandlers
             Assert.True(IsarService.isStarted);
         }
 
-#pragma warning disable xUnit1004
-        [Fact(Skip = "Flaky test - refactor needed")]
-#pragma warning restore xUnit1004
+        [Fact]
         public async Task SecondScheduledMissionQueuedIfRobotIsBusy()
         {
             // Arrange
@@ -122,36 +120,37 @@ namespace Api.Test.EventHandlers
                 plant.PlantCode
             );
             var robot = await DatabaseUtilities.NewRobot(
-                RobotStatus.Available,
+                RobotStatus.Busy,
                 installation,
                 inspectionArea.Id
             );
             var missionRunOne = await DatabaseUtilities.NewMissionRun(
                 installation.InstallationCode,
                 robot,
-                inspectionArea
+                inspectionArea,
+                missionStatus: MissionStatus.Ongoing
             );
+            await MissionRunService.Create(missionRunOne, triggerCreatedMissionRunEvent: false);
+
+            // Act
             var missionRunTwo = await DatabaseUtilities.NewMissionRun(
                 installation.InstallationCode,
                 robot,
                 inspectionArea
             );
-
-            // Act
-            await MissionRunService.Create(missionRunOne);
-            Thread.Sleep(100);
             await MissionRunService.Create(missionRunTwo);
 
             // Assert
-            var postTestMissionRunOne = await MissionRunService.ReadById(
-                missionRunOne.Id,
-                readOnly: true
-            );
+            await TestSetupHelpers.WaitFor(async () =>
+            {
+                return IsarService.isStartCalled;
+            });
+            Thread.Sleep(100);
+            Assert.False(IsarService.isStarted);
             var postTestMissionRunTwo = await MissionRunService.ReadById(
                 missionRunTwo.Id,
                 readOnly: true
             );
-            Assert.Equal(MissionStatus.Ongoing, postTestMissionRunOne!.Status);
             Assert.Equal(MissionStatus.Queued, postTestMissionRunTwo!.Status);
         }
 
