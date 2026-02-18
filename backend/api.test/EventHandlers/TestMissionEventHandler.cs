@@ -4,11 +4,11 @@ using System.Threading.Tasks;
 using Api.Database.Context;
 using Api.Database.Models;
 using Api.Mqtt;
-using Api.Mqtt.Events;
 using Api.Mqtt.MessageModels;
 using Api.Services;
 using Api.Services.Events;
 using Api.Test.Database;
+using Api.Test.Mocks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -34,6 +34,7 @@ namespace Api.Test.EventHandlers
 
         public required MqttService MqttService;
         public required EventAggregatorSingletonService EventAggregatorSingletonService;
+        public required MockIsarService IsarService;
 
         public async ValueTask InitializeAsync()
         {
@@ -52,6 +53,7 @@ namespace Api.Test.EventHandlers
                 ServiceProvider.GetRequiredService<IMissionSchedulingService>();
             EventAggregatorSingletonService =
                 ServiceProvider.GetRequiredService<EventAggregatorSingletonService>();
+            IsarService = (MockIsarService)ServiceProvider.GetRequiredService<IIsarService>();
 
             var mqttServiceLogger = new Mock<ILogger<MqttService>>().Object;
             MqttService = new MqttService(
@@ -103,12 +105,8 @@ namespace Api.Test.EventHandlers
             Thread.Sleep(1000);
 
             // Assert
-            var postTestMissionRun = await MissionRunService.ReadById(
-                missionRun.Id,
-                readOnly: true
-            );
-            // Status is queued until we get a new status on MQTT
-            Assert.Equal(MissionStatus.Queued, postTestMissionRun!.Status);
+            Assert.True(IsarService.isStartCalled);
+            Assert.True(IsarService.isStarted);
         }
 
 #pragma warning disable xUnit1004

@@ -12,6 +12,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Moq;
 
 namespace Api.Test
 {
@@ -22,6 +23,9 @@ namespace Api.Test
         where TProgram : class
     {
         public IConfiguration? Configuration;
+        public MockIsarService MockIsarService = new();
+        private readonly string? sqLiteDatabaseName = sqLiteDatabaseName;
+        private readonly string? postgresConnectionString = postgresConnectionString;
 
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
@@ -73,7 +77,7 @@ namespace Api.Test
                 }
 
                 services.AddScoped<IAccessRoleService, AccessRoleService>();
-                services.AddScoped<IIsarService, MockIsarService>();
+                services.AddScoped<IIsarService, MockIsarService>(_ => MockIsarService);
                 services.AddSingleton<IHttpContextAccessor, MockHttpContextAccessor>();
                 services.AddScoped<IBlobService, MockBlobService>();
                 services.AddScoped<IMissionLoader, MockMissionLoader>();
