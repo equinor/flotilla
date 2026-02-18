@@ -169,7 +169,6 @@ namespace Api.Services
                 when (ex
                         is MissionException
                             or RobotNotFoundException
-                            or RobotNotAvailableException
                             or MissionRunNotFoundException
                             or IsarCommunicationException
                 )

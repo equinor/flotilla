@@ -88,8 +88,6 @@ namespace Api.Utilities
 
     public class ExclusionAreaExistsException(string message) : Exception(message) { }
 
-    public class RobotNotAvailableException(string message) : Exception(message) { }
-
     public class RobotBusyException(string message) : Exception(message) { }
 
     public class RobotNotInSameInstallationAsMissionException(string message)
