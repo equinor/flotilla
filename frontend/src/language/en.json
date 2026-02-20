@@ -362,5 +362,6 @@
     "Warning": "Warning",
     "Confidence": "Confidence",
     "Analysis": "Analysis",
-    "Last seen": "Last seen"
+    "Last seen": "Last seen",
+    "CO2 consentration: {0}%": "CO2 consentration: {0}%"
 }

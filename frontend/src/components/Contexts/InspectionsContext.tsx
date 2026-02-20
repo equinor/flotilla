@@ -8,6 +8,7 @@ import { useBackendApi } from 'api/UseBackendApi'
 interface IInspectionsContext {
     fetchImageData: (inspectionId: string) => any
     fetchAnalysisData: (inspectionId: string) => any
+    fetchValueData: (inspectionId: string) => any
 }
 
 interface Props {
@@ -17,6 +18,7 @@ interface Props {
 const defaultInspectionsContext = {
     fetchImageData: () => undefined,
     fetchAnalysisData: () => undefined,
+    fetchValueData: () => undefined,
 }
 
 const InspectionsContext = createContext<IInspectionsContext>(defaultInspectionsContext)
@@ -82,11 +84,28 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
         return { data: result.data, isPending: result.isPending, isError: result.isError }
     }
 
+    const fetchValueData = (
+        inspectionId: string
+    ): { data: number | undefined; isPending: boolean; isError: boolean } => {
+        const result = useQuery({
+            queryKey: ['fetchValueData', inspectionId],
+            queryFn: async () => {
+                const value = await backendApi.getValue(inspectionId)
+                return value
+            },
+            retry: 1,
+            staleTime: 10 * 60 * 1000, // If data is received, stale time is 10 min before making new API call
+            enabled: inspectionId !== undefined,
+        })
+        return { data: result.data, isPending: result.isPending, isError: result.isError }
+    }
+
     return (
         <InspectionsContext.Provider
             value={{
                 fetchImageData,
                 fetchAnalysisData,
+                fetchValueData,
             }}
         >
             {children}

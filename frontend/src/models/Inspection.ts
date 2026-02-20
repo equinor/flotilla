@@ -31,12 +31,28 @@ export enum InspectionType {
     Video = 'Video',
     ThermalVideo = 'ThermalVideo',
     Audio = 'Audio',
+    CO2Measurement = 'CO2Measurement',
+}
+
+export enum DisplayMethod {
+    Image = 'Image',
+    Number = 'Number',
+    None = 'None',
 }
 
 export const ValidInspectionReportInspectionTypes: InspectionType[] = [
     InspectionType.Image,
     InspectionType.ThermalImage,
 ]
+
+export const InspectionTypeToDisplayMethod: { [inspectionType in InspectionType]: DisplayMethod } = {
+    [InspectionType.Image]: DisplayMethod.Image,
+    [InspectionType.ThermalImage]: DisplayMethod.Image,
+    [InspectionType.CO2Measurement]: DisplayMethod.Number,
+    [InspectionType.Video]: DisplayMethod.None,
+    [InspectionType.ThermalVideo]: DisplayMethod.None,
+    [InspectionType.Audio]: DisplayMethod.None,
+}
 
 export interface SaraInspectionVisualizationReady {
     inspectionId: string
