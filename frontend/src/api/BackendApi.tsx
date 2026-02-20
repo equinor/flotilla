@@ -272,7 +272,7 @@ export class BackendApi {
     }
 
     async getInspection(inspectionId: string): Promise<Blob> {
-        const path: string = 'inspection/' + inspectionId
+        const path: string = 'inspection/image/' + inspectionId
 
         return this.api
             .GET<Blob>(path, 'image/png')
@@ -285,6 +285,15 @@ export class BackendApi {
 
         return this.api
             .GET<Blob>(path, 'image/png')
+            .then((response) => response.content)
+            .catch(handleError('GET', path))
+    }
+
+    async getValue(inspectionId: string): Promise<number> {
+        const path: string = 'inspection/value/' + inspectionId
+
+        return this.api
+            .GET<number>(path)
             .then((response) => response.content)
             .catch(handleError('GET', path))
     }
