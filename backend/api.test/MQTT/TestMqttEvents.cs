@@ -218,5 +218,56 @@ namespace Api.Test.MQTT
                 return postTestMissionRun!.Status == MissionStatus.Successful;
             });
         }
+
+        [Fact]
+        public async Task TestMQTTTask()
+        {
+            var installation = await DatabaseUtilities.NewInstallation();
+            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
+            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
+                installation.InstallationCode,
+                plant.PlantCode
+            );
+            var robot = await DatabaseUtilities.NewRobot(
+                RobotStatus.Busy,
+                installation,
+                inspectionArea.Id
+            );
+            MissionTask task = new MissionTask { RobotPose = new Pose { } };
+            var missionRun = await DatabaseUtilities.NewMissionRun(
+                installation.InstallationCode,
+                robot,
+                inspectionArea,
+                writeToDatabase: true,
+                missionStatus: MissionStatus.Ongoing,
+                tasks: new MissionTask[] { task }
+            );
+            task = (await MissionRunService.ReadById(missionRun.Id))!.Tasks[0];
+            var message = new IsarTaskMessage
+            {
+                RobotName = robot.Name,
+                IsarId = robot.IsarId,
+                MissionId = missionRun.Id,
+                Timestamp = DateTime.UtcNow,
+                Status = "successful",
+                TaskId = task.Id,
+                TaskType = "take_image",
+            };
+            var messageString = JsonSerializer.Serialize(message);
+            await MqttService.PublishMessageBasedOnTopic(
+                $"isar/{robot.Id}/task/{task.Id}",
+                messageString
+            );
+
+            await TestSetupHelpers.WaitFor(async () =>
+            {
+                var postTestMissionRun = await MissionRunService.ReadById(
+                    missionRun.Id,
+                    readOnly: true
+                );
+                return postTestMissionRun!.Tasks[0].Status
+                    == Api.Database.Models.TaskStatus.Successful;
+            });
+        }
     }
 }
