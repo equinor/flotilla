@@ -27,6 +27,7 @@ namespace Api.Test.MQTT
         public required MqttService MqttService;
         public required DatabaseUtilities DatabaseUtilities;
         public required IRobotService RobotService;
+        public required IMissionRunService MissionRunService;
 
         public async ValueTask InitializeAsync()
         {
@@ -48,6 +49,7 @@ namespace Api.Test.MQTT
                 EventAggregatorSingletonService
             );
             RobotService = ServiceProvider.GetRequiredService<IRobotService>();
+            MissionRunService = ServiceProvider.GetRequiredService<IMissionRunService>();
         }
 
         public async ValueTask DisposeAsync()
@@ -123,6 +125,51 @@ namespace Api.Test.MQTT
             {
                 latestRobot = await RobotService.ReadByIsarId(robot.IsarId);
                 return latestRobot != null;
+            });
+        }
+
+        [Fact]
+        public async Task TestMQTTMissionAborted()
+        {
+            var installation = await DatabaseUtilities.NewInstallation();
+            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
+            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
+                installation.InstallationCode,
+                plant.PlantCode
+            );
+            var robot = await DatabaseUtilities.NewRobot(
+                RobotStatus.Busy,
+                installation,
+                inspectionArea.Id
+            );
+            var missionRun = await DatabaseUtilities.NewMissionRun(
+                installation.InstallationCode,
+                robot,
+                inspectionArea,
+                writeToDatabase: true,
+                missionStatus: MissionStatus.Ongoing
+            );
+
+            var message = new IsarMissionAbortedMessage
+            {
+                RobotName = robot.Name,
+                IsarId = robot.IsarId,
+                MissionId = missionRun.Id,
+                Timestamp = DateTime.UtcNow,
+            };
+            var messageString = JsonSerializer.Serialize(message);
+            await MqttService.PublishMessageBasedOnTopic(
+                $"isar/{robot.Id}/aborted_mission",
+                messageString
+            );
+
+            await TestSetupHelpers.WaitFor(async () =>
+            {
+                var postTestMissionRun = await MissionRunService.ReadById(
+                    missionRun.Id,
+                    readOnly: true
+                );
+                return postTestMissionRun!.Status == MissionStatus.Queued;
             });
         }
     }
