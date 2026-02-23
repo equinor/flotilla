@@ -172,5 +172,51 @@ namespace Api.Test.MQTT
                 return postTestMissionRun!.Status == MissionStatus.Queued;
             });
         }
+
+        [Fact]
+        public async Task TestMQTTMissionStatus()
+        {
+            var installation = await DatabaseUtilities.NewInstallation();
+            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
+            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
+                installation.InstallationCode,
+                plant.PlantCode
+            );
+            var robot = await DatabaseUtilities.NewRobot(
+                RobotStatus.Busy,
+                installation,
+                inspectionArea.Id
+            );
+            var missionRun = await DatabaseUtilities.NewMissionRun(
+                installation.InstallationCode,
+                robot,
+                inspectionArea,
+                writeToDatabase: true,
+                missionStatus: MissionStatus.Ongoing
+            );
+
+            var message = new IsarMissionMessage
+            {
+                RobotName = robot.Name,
+                IsarId = robot.IsarId,
+                MissionId = missionRun.Id,
+                Timestamp = DateTime.UtcNow,
+                Status = "successful",
+            };
+            var messageString = JsonSerializer.Serialize(message);
+            await MqttService.PublishMessageBasedOnTopic(
+                $"isar/{robot.Id}/mission/{missionRun.Id}",
+                messageString
+            );
+
+            await TestSetupHelpers.WaitFor(async () =>
+            {
+                var postTestMissionRun = await MissionRunService.ReadById(
+                    missionRun.Id,
+                    readOnly: true
+                );
+                return postTestMissionRun!.Status == MissionStatus.Successful;
+            });
+        }
     }
 }
