@@ -28,7 +28,7 @@ namespace Api.Mqtt
 
         private static readonly JsonSerializerOptions serializerOptions = new()
         {
-            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
+            Converters = { new JsonStringEnumConverter() }, // Needed for enums becoming their names in strings, such as "Charging" instead of "1".
         };
 
         private CancellationToken _cancellationToken;
@@ -116,11 +116,7 @@ namespace Api.Mqtt
 
             _logger.LogDebug("Topic: {topic} - Message received: \n{payload}", topic, content);
 
-            var options = new JsonSerializerOptions
-            {
-                Converters = { new JsonStringEnumConverter() }, // Needed for enums becoming their names in strings, such as "Charging" instead of "1".
-            };
-            var contentObject = JsonSerializer.Deserialize(content, messageType, options);
+            var contentObject = JsonSerializer.Deserialize(content, messageType, serializerOptions);
 
             _eventAggregatorSingletonService.Publish(contentObject); // The type of this object determines what subscribers are being published to.
 
