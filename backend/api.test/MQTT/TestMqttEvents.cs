@@ -1,6 +1,5 @@
 using System;
 using System.Text.Json;
-using System.Threading;
 using System.Threading.Tasks;
 using Api.Database.Context;
 using Api.Database.Models;
@@ -87,6 +86,43 @@ namespace Api.Test.MQTT
             {
                 latestRobot = await RobotService.ReadById(robot.Id);
                 return latestRobot!.Status == RobotStatus.Available;
+            });
+        }
+
+        [Fact]
+        public async Task TestMQTTUpdateRobotInfo()
+        {
+            var installation = await DatabaseUtilities.NewInstallation();
+            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
+            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
+                installation.InstallationCode,
+                plant.PlantCode
+            );
+            var robot = new Robot { Name = "TestRobot", IsarId = Guid.NewGuid().ToString() };
+            var latestRobot = await RobotService.ReadById(robot.Id);
+            Assert.Null(latestRobot);
+
+            IsarRobotInfoMessage message = new()
+            {
+                RobotName = robot.Name,
+                IsarId = robot.IsarId,
+                Timestamp = DateTime.UtcNow,
+                CurrentInstallation = installation.InstallationCode,
+                DocumentationQueries = [],
+                SerialNumber = robot.SerialNumber,
+                Host = robot.Host,
+                Port = robot.Port,
+            };
+            var messageString = JsonSerializer.Serialize(message);
+            await MqttService.PublishMessageBasedOnTopic(
+                $"isar/{robot.Id}/robot_info",
+                messageString
+            );
+
+            await TestSetupHelpers.WaitFor(async () =>
+            {
+                latestRobot = await RobotService.ReadByIsarId(robot.IsarId);
+                return latestRobot != null;
             });
         }
     }
