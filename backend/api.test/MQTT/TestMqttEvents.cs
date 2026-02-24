@@ -527,5 +527,56 @@ namespace Api.Test.MQTT
                 return result.InspectionId == message.InspectionId;
             });
         }
+
+        [Fact]
+        public async Task TestMQTTSaraAnalysisResult()
+        {
+            var installation = await DatabaseUtilities.NewInstallation();
+            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
+            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
+                installation.InstallationCode,
+                plant.PlantCode
+            );
+            var robot = await DatabaseUtilities.NewRobot(
+                RobotStatus.Busy,
+                installation,
+                inspectionArea.Id
+            );
+            MissionTask task = new MissionTask { RobotPose = new Pose { } };
+            var missionRun = await DatabaseUtilities.NewMissionRun(
+                installation.InstallationCode,
+                robot,
+                inspectionArea,
+                writeToDatabase: true,
+                missionStatus: MissionStatus.Ongoing,
+                tasks: new MissionTask[] { task }
+            );
+            var isarInspectionId = missionRun.Tasks[0].Inspection!.IsarInspectionId;
+
+            const string VALUE = "testvalue";
+            var message = new SaraAnalysisResultMessage
+            {
+                InspectionId = isarInspectionId,
+                AnalysisType = "test_analysis",
+                StorageAccount = "testaccount",
+                BlobContainer = installation.InstallationCode,
+                BlobName = "testblob",
+                Value = VALUE,
+            };
+            var messageString = JsonSerializer.Serialize(message);
+            await MqttService.PublishMessageBasedOnTopic(
+                $"sara/analysis_result_available",
+                messageString
+            );
+
+            await TestSetupHelpers.WaitFor(async () =>
+            {
+                var inspection = await InspectionService.ReadByIsarInspectionId(
+                    isarInspectionId,
+                    readOnly: true
+                );
+                return inspection?.AnalysisResult?.Value == VALUE;
+            });
+        }
     }
 }
