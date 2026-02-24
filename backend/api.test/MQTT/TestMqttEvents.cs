@@ -383,5 +383,72 @@ namespace Api.Test.MQTT
                 return (float)telemetry.TelemetryValue! == PRESSURE_LEVEL;
             });
         }
+
+        [Fact]
+        public async Task TestMQTTPose()
+        {
+            var installation = await DatabaseUtilities.NewInstallation();
+            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
+            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
+                installation.InstallationCode,
+                plant.PlantCode
+            );
+            var robot = await DatabaseUtilities.NewRobot(
+                RobotStatus.Busy,
+                installation,
+                inspectionArea.Id
+            );
+
+            Thread.Sleep(5);
+            Assert.Single(Factory.MockSignalRService.LatestMessages);
+            Assert.Equal(
+                "InspectionArea created",
+                (Factory.MockSignalRService.LatestMessages[0] as dynamic).Label
+            );
+
+            var frame = new IsarFrame { Name = "map" };
+            var pose = new IsarPoseMqtt
+            {
+                Position = new Api.Mqtt.MessageModels.IsarPosition
+                {
+                    X = 1,
+                    Y = 2,
+                    Z = 3,
+                    Frame = frame,
+                },
+                Orientation = new Api.Mqtt.MessageModels.IsarOrientation
+                {
+                    X = 0,
+                    Y = 0,
+                    Z = 0,
+                    W = 1,
+                    Frame = frame,
+                },
+                Frame = frame,
+            };
+            var message = new IsarPoseMessage
+            {
+                RobotName = robot.Name,
+                IsarId = robot.IsarId,
+                Timestamp = DateTime.UtcNow,
+                Pose = pose,
+            };
+            var messageString = JsonSerializer.Serialize(message);
+            await MqttService.PublishMessageBasedOnTopic($"isar/{robot.Id}/pose", messageString);
+
+            await TestSetupHelpers.WaitFor(async () =>
+            {
+                var latestMessages = Factory.MockSignalRService.LatestMessages;
+                if (latestMessages.Count != 2)
+                    return false;
+                var m = (dynamic)latestMessages[1];
+                if (m.Label != "Robot telemetry updated")
+                    return false;
+                var telemetry = (UpdateRobotTelemetryMessage)m.Message;
+
+                var readPose = (Pose)telemetry.TelemetryValue!;
+                return readPose.Position.Z == 3;
+            });
+        }
     }
 }
