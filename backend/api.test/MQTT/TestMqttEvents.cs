@@ -30,6 +30,7 @@ namespace Api.Test.MQTT
         public required DatabaseUtilities DatabaseUtilities;
         public required IRobotService RobotService;
         public required IMissionRunService MissionRunService;
+        public required IInspectionService InspectionService;
 
         public async ValueTask InitializeAsync()
         {
@@ -52,6 +53,7 @@ namespace Api.Test.MQTT
             );
             RobotService = ServiceProvider.GetRequiredService<IRobotService>();
             MissionRunService = ServiceProvider.GetRequiredService<IMissionRunService>();
+            InspectionService = ServiceProvider.GetRequiredService<IInspectionService>();
         }
 
         public async ValueTask DisposeAsync()
@@ -491,6 +493,38 @@ namespace Api.Test.MQTT
                 Robot postTestRobot = (await RobotService.ReadById(robot.Id))!;
                 return postTestMissionRun!.Status == MissionStatus.Queued
                     && postTestRobot.CurrentMissionId == null;
+            });
+        }
+
+        [Fact]
+        public async Task TestMQTTSaraInspectionResult()
+        {
+            var installation = await DatabaseUtilities.NewInstallation();
+
+            var message = new SaraInspectionResultMessage
+            {
+                InspectionId = Guid.NewGuid().ToString(),
+                StorageAccount = "testaccount",
+                BlobContainer = installation.InstallationCode,
+                BlobName = "testblob",
+            };
+            var messageString = JsonSerializer.Serialize(message);
+            await MqttService.PublishMessageBasedOnTopic(
+                $"sara/visualization_available",
+                messageString
+            );
+
+            await TestSetupHelpers.WaitFor(async () =>
+            {
+                var latestMessages = Factory.MockSignalRService.LatestMessages;
+                if (latestMessages.Count != 1)
+                    return false;
+                var m = (dynamic)latestMessages[0];
+                if (m.Label != "Inspection Visulization Ready")
+                    return false;
+                var result = (InspectionResultMessage)m.Message;
+
+                return result.InspectionId == message.InspectionId;
             });
         }
     }
