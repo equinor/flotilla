@@ -55,7 +55,8 @@ namespace Api.Test.Database
             missionRun.Tasks = [new(new Pose())];
             if (writeToDatabase)
             {
-                return await _missionRunService.Create(missionRun);
+                missionRun = await _missionRunService.Create(missionRun);
+                await _robotService.UpdateCurrentMissionId(robot.Id, missionRun.Id);
             }
             return missionRun;
         }
