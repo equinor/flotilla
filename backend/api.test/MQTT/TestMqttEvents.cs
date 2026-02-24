@@ -1,5 +1,6 @@
 using System;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using Api.Database.Context;
 using Api.Database.Models;
@@ -7,6 +8,7 @@ using Api.Mqtt;
 using Api.Mqtt.MessageModels;
 using Api.Services;
 using Api.Services.Events;
+using Api.Services.Models;
 using Api.Test.Database;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -267,6 +269,68 @@ namespace Api.Test.MQTT
                 );
                 return postTestMissionRun!.Tasks[0].Status
                     == Api.Database.Models.TaskStatus.Successful;
+            });
+        }
+
+        [Fact]
+        public async Task TestMQTTBattery()
+        {
+            var installation = await DatabaseUtilities.NewInstallation();
+            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
+            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
+                installation.InstallationCode,
+                plant.PlantCode
+            );
+            var robot = await DatabaseUtilities.NewRobot(
+                RobotStatus.Busy,
+                installation,
+                inspectionArea.Id
+            );
+
+            Thread.Sleep(5);
+            Assert.Single(Factory.MockSignalRService.LatestMessages);
+            Assert.Equal(
+                "InspectionArea created",
+                (Factory.MockSignalRService.LatestMessages[0] as dynamic).Label
+            );
+
+            var message = new IsarBatteryMessage
+            {
+                RobotName = robot.Name,
+                IsarId = robot.IsarId,
+                Timestamp = DateTime.UtcNow,
+                BatteryLevel = 0.5f,
+                BatteryState = BatteryState.Charging,
+            };
+            var messageString = JsonSerializer.Serialize(message);
+            await MqttService.PublishMessageBasedOnTopic($"isar/{robot.Id}/battery", messageString);
+
+            await TestSetupHelpers.WaitFor(async () =>
+            {
+                var latestMessages = Factory.MockSignalRService.LatestMessages;
+                if (latestMessages.Count != 3)
+                    return false;
+                var m1 = (dynamic)latestMessages[1];
+                var m2 = (dynamic)latestMessages[2];
+                if (m1.Label != "Robot telemetry updated" || m2.Label != "Robot telemetry updated")
+                    return false;
+                var telemetry1 = (UpdateRobotTelemetryMessage)m1.Message;
+                var telemetry2 = (UpdateRobotTelemetryMessage)m2.Message;
+                UpdateRobotTelemetryMessage batteryStateMessage;
+                UpdateRobotTelemetryMessage batteryLevelMessage;
+                if (telemetry1.TelemetryName == "batteryState")
+                {
+                    batteryStateMessage = telemetry1;
+                    batteryLevelMessage = telemetry2;
+                }
+                else
+                {
+                    batteryStateMessage = telemetry2;
+                    batteryLevelMessage = telemetry1;
+                }
+
+                return (float)batteryLevelMessage.TelemetryValue! == 0.5f
+                    && (BatteryState)batteryStateMessage.TelemetryValue! == BatteryState.Charging;
             });
         }
     }

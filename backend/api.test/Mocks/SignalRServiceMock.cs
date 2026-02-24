@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Api.Database.Models;
 using Api.Services;
 
@@ -6,12 +7,15 @@ namespace Api.Test.Mocks
 {
     public class MockSignalRService : ISignalRService
     {
+        public List<object> LatestMessages { get; set; } = [];
+
         public async Task SendMessageAsync<T>(
             string label,
             Installation? installation,
             T messageObject
         )
         {
+            LatestMessages.Add(new { Label = label, Message = messageObject });
             await Task.CompletedTask;
         }
 
@@ -21,6 +25,7 @@ namespace Api.Test.Mocks
             T messageObject
         )
         {
+            LatestMessages.Add(new { Label = label, Message = messageObject });
             await Task.CompletedTask;
         }
 
