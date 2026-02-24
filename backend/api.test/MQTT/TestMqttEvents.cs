@@ -450,5 +450,48 @@ namespace Api.Test.MQTT
                 return readPose.Position.Z == 3;
             });
         }
+
+        [Fact]
+        public async Task TestMQTTStartup()
+        {
+            var installation = await DatabaseUtilities.NewInstallation();
+            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
+            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
+                installation.InstallationCode,
+                plant.PlantCode
+            );
+            var robot = await DatabaseUtilities.NewRobot(
+                RobotStatus.Busy,
+                installation,
+                inspectionArea.Id
+            );
+            var missionRun = await DatabaseUtilities.NewMissionRun(
+                installation.InstallationCode,
+                robot,
+                inspectionArea,
+                writeToDatabase: true,
+                missionStatus: MissionStatus.Ongoing
+            );
+
+            var message = new IsarStartupMessage
+            {
+                IsarId = robot.IsarId,
+                InstallationCode = installation.InstallationCode,
+                Timestamp = DateTime.UtcNow,
+            };
+            var messageString = JsonSerializer.Serialize(message);
+            await MqttService.PublishMessageBasedOnTopic($"isar/{robot.Id}/startup", messageString);
+
+            await TestSetupHelpers.WaitFor(async () =>
+            {
+                var postTestMissionRun = await MissionRunService.ReadById(
+                    missionRun.Id,
+                    readOnly: true
+                );
+                Robot postTestRobot = (await RobotService.ReadById(robot.Id))!;
+                return postTestMissionRun!.Status == MissionStatus.Queued
+                    && postTestRobot.CurrentMissionId == null;
+            });
+        }
     }
 }
