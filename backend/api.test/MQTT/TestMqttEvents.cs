@@ -333,5 +333,55 @@ namespace Api.Test.MQTT
                     && (BatteryState)batteryStateMessage.TelemetryValue! == BatteryState.Charging;
             });
         }
+
+        [Fact]
+        public async Task TestMQTTPressure()
+        {
+            var installation = await DatabaseUtilities.NewInstallation();
+            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
+            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
+                installation.InstallationCode,
+                plant.PlantCode
+            );
+            var robot = await DatabaseUtilities.NewRobot(
+                RobotStatus.Busy,
+                installation,
+                inspectionArea.Id
+            );
+
+            Thread.Sleep(5);
+            Assert.Single(Factory.MockSignalRService.LatestMessages);
+            Assert.Equal(
+                "InspectionArea created",
+                (Factory.MockSignalRService.LatestMessages[0] as dynamic).Label
+            );
+
+            const float PRESSURE_LEVEL = 20.1f;
+            var message = new IsarPressureMessage
+            {
+                RobotName = robot.Name,
+                IsarId = robot.IsarId,
+                Timestamp = DateTime.UtcNow,
+                PressureLevel = PRESSURE_LEVEL,
+            };
+            var messageString = JsonSerializer.Serialize(message);
+            await MqttService.PublishMessageBasedOnTopic(
+                $"isar/{robot.Id}/pressure",
+                messageString
+            );
+
+            await TestSetupHelpers.WaitFor(async () =>
+            {
+                var latestMessages = Factory.MockSignalRService.LatestMessages;
+                if (latestMessages.Count != 2)
+                    return false;
+                var m = (dynamic)latestMessages[1];
+                if (m.Label != "Robot telemetry updated")
+                    return false;
+                var telemetry = (UpdateRobotTelemetryMessage)m.Message;
+
+                return (float)telemetry.TelemetryValue! == PRESSURE_LEVEL;
+            });
+        }
     }
 }
