@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Autocomplete, Button } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
@@ -8,6 +8,7 @@ import assetImage from 'mediaAssets/assetPage.jpg'
 import { useNavigate } from 'react-router-dom'
 import { phone_width } from '../../utils/constants'
 import { useAssetContext } from 'components/Contexts/AssetContext'
+import { Installation } from 'models/Installation'
 
 const StyledAssetSelection = styled.div`
     display: flex;
@@ -53,44 +54,41 @@ export const findNavigationPage = (installationCode: string) => {
 }
 
 const InstallationPicker = () => {
-    const { installationName, switchInstallation, activeInstallations, installationCode } = useAssetContext()
+    const { installationName, switchInstallation, activeInstallations } = useAssetContext()
     const { TranslateText } = useLanguageContext()
-    const [selectedInstallation, setSelectedInstallation] = useState<string>(installationName)
-    const [shouldNavigate, setShouldNavigate] = useState<boolean>(false)
+    const [selectedInstallationName, setSelectedInstallationName] = useState<string>(installationName)
     const navigate = useNavigate()
 
     const handleClick = () => {
-        switchInstallation(selectedInstallation)
-        setShouldNavigate(true)
-    }
-
-    useEffect(() => {
-        if (shouldNavigate) {
-            setShouldNavigate(false)
-            const target = findNavigationPage(installationCode)
+        const selectedInstallation: Installation | undefined = activeInstallations.find(
+            (i) => i.name === selectedInstallationName
+        )
+        if (selectedInstallation) {
+            switchInstallation(selectedInstallation.id)
+            const target = findNavigationPage(selectedInstallation.installationCode)
             navigate(target)
         }
-    }, [shouldNavigate, installationCode])
+    }
 
     const installationNames = activeInstallations.map((i) => i.name)
 
     return (
         <StyledAssetSelection>
             <Autocomplete
-                options={installationNames.sort()}
+                options={installationNames}
                 label=""
                 dropdownHeight={200}
-                initialSelectedOptions={[selectedInstallation]}
-                selectedOptions={[selectedInstallation]}
+                initialSelectedOptions={[selectedInstallationName]}
+                selectedOptions={[selectedInstallationName]}
                 placeholder={TranslateText('Select installation')}
                 onOptionsChange={({ selectedItems }) => {
                     const selectedName = selectedItems[0]
-                    setSelectedInstallation(selectedName ?? '')
+                    setSelectedInstallationName(selectedName ?? '')
                 }}
                 autoWidth={true}
                 onFocus={(e) => e.preventDefault()}
             />
-            <StyledButton onClick={() => handleClick()} disabled={!selectedInstallation}>
+            <StyledButton onClick={() => handleClick()} disabled={!selectedInstallationName}>
                 {TranslateText('Confirm installation')}
             </StyledButton>
         </StyledAssetSelection>

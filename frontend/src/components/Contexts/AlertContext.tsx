@@ -228,6 +228,8 @@ export const AlertProvider: FC<Props> = ({ children }) => {
         if (connectionReady) {
             registerEvent(SignalREventLabels.alert, (username: string, message: string) => {
                 const backendAlert: Alert = JSON.parse(message)
+                if (backendAlert.installationCode.toLocaleLowerCase() !== installationCode.toLocaleLowerCase()) return
+
                 const alertType = alertTypeEnumMap[backendAlert.alertCode]
 
                 if (backendAlert.robotId !== null && !enabledRobots.filter((r) => r.id === backendAlert.robotId)) return
@@ -270,7 +272,7 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                 }
             })
         }
-    }, [registerEvent, connectionReady, installationCode, enabledRobots, autoScheduleFailedMissionDict])
+    }, [registerEvent, connectionReady, installationCode, enabledRobots])
 
     useEffect(() => {
         if (recentFailedMissions.length > 0) {
