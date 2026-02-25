@@ -25,9 +25,7 @@ namespace Api.Test.Services
             );
             var serviceProvider = TestSetupHelpers.ConfigureServiceProvider(factory);
 
-            DatabaseUtilities = new DatabaseUtilities(
-                TestSetupHelpers.ConfigurePostgreSqlContext(connectionString)
-            );
+            DatabaseUtilities = serviceProvider.GetRequiredService<DatabaseUtilities>();
             MissionSchedulingService =
                 serviceProvider.GetRequiredService<IMissionSchedulingService>();
             MissionRunService = serviceProvider.GetRequiredService<IMissionRunService>();

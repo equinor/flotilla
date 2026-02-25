@@ -36,9 +36,7 @@ namespace Api.Test.Controllers
             Client = TestSetupHelpers.ConfigureHttpClient(factory);
             SerializerOptions = TestSetupHelpers.ConfigureJsonSerializerOptions();
 
-            DatabaseUtilities = new DatabaseUtilities(
-                TestSetupHelpers.ConfigurePostgreSqlContext(connectionString)
-            );
+            DatabaseUtilities = serviceProvider.GetRequiredService<DatabaseUtilities>();
 
             MissionDefinitionService =
                 serviceProvider.GetRequiredService<IMissionDefinitionService>();

@@ -28,7 +28,7 @@ namespace Api.Test.Services
 
             Context = TestSetupHelpers.ConfigurePostgreSqlContext(connectionString);
 
-            DatabaseUtilities = new DatabaseUtilities(Context);
+            DatabaseUtilities = TestSetupHelpers.CreateIsolatedDatabaseUtilities(Context);
         }
 
         public ValueTask DisposeAsync()

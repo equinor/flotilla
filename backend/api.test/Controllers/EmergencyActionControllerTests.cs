@@ -2,6 +2,7 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 using Api.Test.Database;
+using Microsoft.Extensions.DependencyInjection;
 using Testcontainers.PostgreSql;
 using Xunit;
 
@@ -22,9 +23,7 @@ namespace Api.Test.Controllers
             );
             Client = TestSetupHelpers.ConfigureHttpClient(factory);
 
-            DatabaseUtilities = new DatabaseUtilities(
-                TestSetupHelpers.ConfigurePostgreSqlContext(connectionString)
-            );
+            DatabaseUtilities = factory.Services.GetRequiredService<DatabaseUtilities>();
         }
 
         public ValueTask DisposeAsync()

@@ -42,9 +42,7 @@ namespace Api.Test.Controllers
             HttpContextAccessor = (MockHttpContextAccessor)
                 serviceProvider.GetService<IHttpContextAccessor>()!;
 
-            DatabaseUtilities = new DatabaseUtilities(
-                TestSetupHelpers.ConfigurePostgreSqlContext(connectionString)
-            );
+            DatabaseUtilities = serviceProvider.GetRequiredService<DatabaseUtilities>();
         }
 
         public async ValueTask DisposeAsync()

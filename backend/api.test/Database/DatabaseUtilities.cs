@@ -1,130 +1,25 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Api.Controllers.Models;
-using Api.Database.Context;
 using Api.Database.Models;
 using Api.Services;
-using Api.Services.Events;
-using Api.Test.Mocks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using Moq;
 
 namespace Api.Test.Database
 {
-    public class DatabaseUtilities
+    public class DatabaseUtilities(
+        IMissionRunService _missionRunService,
+        ISourceService _sourceService,
+        IMissionDefinitionService _missionDefinitionService,
+        IInstallationService _installationService,
+        IPlantService _plantService,
+        IInspectionAreaService _inspectionAreaService,
+        IRobotService _robotService
+    )
     {
-        private readonly AccessRoleService _accessRoleService;
-        private readonly MissionTaskService _missionTaskService;
-        private readonly InspectionAreaService _inspectionAreaService;
-        private readonly InstallationService _installationService;
-        private readonly MissionRunService _missionRunService;
-        private readonly MissionSchedulingService _missionSchedulingService;
-        private readonly MissionDefinitionService _missionDefinitionService;
-        private readonly PlantService _plantService;
-        private readonly RobotService _robotService;
-        private readonly UserInfoService _userInfoService;
-        private readonly SourceService _sourceService;
-        private readonly AutoScheduleService _autoScheduleService;
-        private readonly AreaPolygonService _areaPolygonService;
-        private readonly ErrorHandlingService _errorHandlingService;
-        private readonly ExclusionAreaService _exclusionAreaService;
         private readonly string _testInstallationCode = "InstCode";
         private readonly string _testInstallationName = "Installation";
         private readonly string _testPlantCode = "PlantCode";
         private readonly string _testInspectionAreaName = "InspectionArea";
-
-        public DatabaseUtilities(FlotillaDbContext context)
-        {
-            _accessRoleService = new AccessRoleService(context, new HttpContextAccessor());
-            _installationService = new InstallationService(
-                context,
-                _accessRoleService,
-                new Mock<ILogger<InstallationService>>().Object
-            );
-            _missionTaskService = new MissionTaskService(
-                context,
-                new Mock<ILogger<MissionTaskService>>().Object
-            );
-            _plantService = new PlantService(context, _installationService, _accessRoleService);
-            _areaPolygonService = new AreaPolygonService(
-                new Mock<ILogger<AreaPolygonService>>().Object
-            );
-            _inspectionAreaService = new InspectionAreaService(
-                context,
-                _installationService,
-                _plantService,
-                _accessRoleService,
-                new MockSignalRService(),
-                _areaPolygonService,
-                new Mock<ILogger<InspectionAreaService>>().Object
-            );
-            _userInfoService = new UserInfoService(
-                context,
-                new HttpContextAccessor(),
-                new Mock<ILogger<UserInfoService>>().Object
-            );
-            _robotService = new RobotService(
-                context,
-                new Mock<ILogger<RobotService>>().Object,
-                new MockSignalRService(),
-                _accessRoleService,
-                _installationService,
-                _inspectionAreaService
-            );
-            _missionRunService = new MissionRunService(
-                context,
-                new MockSignalRService(),
-                new Mock<ILogger<MissionRunService>>().Object,
-                _accessRoleService,
-                _missionTaskService,
-                _inspectionAreaService,
-                _robotService,
-                _userInfoService
-            );
-            _errorHandlingService = new ErrorHandlingService(
-                new Mock<ILogger<ErrorHandlingService>>().Object,
-                _robotService,
-                _missionRunService
-            );
-            _exclusionAreaService = new ExclusionAreaService(
-                context,
-                _installationService,
-                _plantService,
-                _accessRoleService,
-                new MockSignalRService(),
-                _areaPolygonService
-            );
-            _missionSchedulingService = new MissionSchedulingService(
-                new Mock<ILogger<MissionSchedulingService>>().Object,
-                _missionRunService,
-                _robotService,
-                new MockIsarService(),
-                new MockSignalRService(),
-                _errorHandlingService,
-                _inspectionAreaService,
-                _areaPolygonService,
-                _exclusionAreaService
-            );
-            _sourceService = new SourceService(context, new Mock<ILogger<SourceService>>().Object);
-            _missionDefinitionService = new MissionDefinitionService(
-                context,
-                new MockSignalRService(),
-                _accessRoleService,
-                new Mock<ILogger<MissionDefinitionService>>().Object,
-                _missionRunService,
-                _sourceService
-            );
-            _autoScheduleService = new AutoScheduleService(
-                new Mock<ILogger<AutoScheduleService>>().Object,
-                _missionDefinitionService,
-                _robotService,
-                new MockMissionLoader(),
-                _missionRunService,
-                _missionSchedulingService,
-                new MockSignalRService()
-            );
-        }
 
         public async Task<MissionRun> NewMissionRun(
             string installationCode,

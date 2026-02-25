@@ -7,11 +7,16 @@ using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Api.Database.Context;
+using Api.Services;
+using Api.Test.Database;
+using Api.Test.Mocks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Moq;
 using Testcontainers.PostgreSql;
-using Xunit;
 using Xunit.Sdk;
 
 namespace Api.Test;
@@ -141,6 +146,113 @@ public static class TestSetupHelpers
         );
 
         return client;
+    }
+
+    /// <summary>
+    /// Create an instance of DatabaseUutilities. It should only be used when the Application Factory is not used.
+    /// It is called Isolated since it creates a new instance of all services.
+    /// </summary>
+    public static DatabaseUtilities CreateIsolatedDatabaseUtilities(FlotillaDbContext context)
+    {
+        var _accessRoleService = new AccessRoleService(context, new HttpContextAccessor());
+        var _installationService = new InstallationService(
+            context,
+            _accessRoleService,
+            new Mock<ILogger<InstallationService>>().Object
+        );
+        var _missionTaskService = new MissionTaskService(
+            context,
+            new Mock<ILogger<MissionTaskService>>().Object
+        );
+        var _plantService = new PlantService(context, _installationService, _accessRoleService);
+        var _areaPolygonService = new AreaPolygonService(
+            new Mock<ILogger<AreaPolygonService>>().Object
+        );
+        var signalRService = new MockSignalRService();
+        var _inspectionAreaService = new InspectionAreaService(
+            context,
+            _installationService,
+            _plantService,
+            _accessRoleService,
+            signalRService,
+            _areaPolygonService,
+            new Mock<ILogger<InspectionAreaService>>().Object
+        );
+        var _userInfoService = new UserInfoService(
+            context,
+            new HttpContextAccessor(),
+            new Mock<ILogger<UserInfoService>>().Object
+        );
+        var _robotService = new RobotService(
+            context,
+            new Mock<ILogger<RobotService>>().Object,
+            signalRService,
+            _accessRoleService,
+            _installationService,
+            _inspectionAreaService
+        );
+        var _missionRunService = new MissionRunService(
+            context,
+            signalRService,
+            new Mock<ILogger<MissionRunService>>().Object,
+            _accessRoleService,
+            _missionTaskService,
+            _inspectionAreaService,
+            _robotService,
+            _userInfoService
+        );
+        var _errorHandlingService = new ErrorHandlingService(
+            new Mock<ILogger<ErrorHandlingService>>().Object,
+            _robotService,
+            _missionRunService
+        );
+        var _exclusionAreaService = new ExclusionAreaService(
+            context,
+            _installationService,
+            _plantService,
+            _accessRoleService,
+            signalRService,
+            _areaPolygonService
+        );
+        var _missionSchedulingService = new MissionSchedulingService(
+            new Mock<ILogger<MissionSchedulingService>>().Object,
+            _missionRunService,
+            _robotService,
+            new MockIsarService(),
+            signalRService,
+            _errorHandlingService,
+            _inspectionAreaService,
+            _areaPolygonService,
+            _exclusionAreaService
+        );
+        var _sourceService = new SourceService(context, new Mock<ILogger<SourceService>>().Object);
+        var _missionDefinitionService = new MissionDefinitionService(
+            context,
+            signalRService,
+            _accessRoleService,
+            new Mock<ILogger<MissionDefinitionService>>().Object,
+            _missionRunService,
+            _sourceService
+        );
+        var _autoScheduleService = new AutoScheduleService(
+            new Mock<ILogger<AutoScheduleService>>().Object,
+            _missionDefinitionService,
+            _robotService,
+            new MockMissionLoader(),
+            _missionRunService,
+            _missionSchedulingService,
+            signalRService
+        );
+        var databaseUtilities = new DatabaseUtilities(
+            _missionRunService,
+            _sourceService,
+            _missionDefinitionService,
+            _installationService,
+            _plantService,
+            _inspectionAreaService,
+            _robotService
+        );
+        return databaseUtilities;
     }
 
     public static async Task<bool> WaitFor(

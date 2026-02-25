@@ -38,7 +38,7 @@ namespace Api.Test.HostedServices
 
             ServiceProvider = TestSetupHelpers.ConfigureServiceProvider(Factory);
 
-            DatabaseUtilities = new DatabaseUtilities(Context);
+            DatabaseUtilities = ServiceProvider.GetRequiredService<DatabaseUtilities>();
 
             // Create a scope to resolve services
             using var scope = ServiceProvider.CreateScope();

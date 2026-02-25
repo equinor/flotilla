@@ -31,9 +31,7 @@ namespace Api.Test.Security
             using var scope = factory.Services.CreateScope();
             DataSource = scope.ServiceProvider.GetRequiredService<EndpointDataSource>();
 
-            DatabaseUtilities = new DatabaseUtilities(
-                TestSetupHelpers.ConfigurePostgreSqlContext(connectionString)
-            );
+            DatabaseUtilities = scope.ServiceProvider.GetRequiredService<DatabaseUtilities>();
         }
 
         public ValueTask DisposeAsync()

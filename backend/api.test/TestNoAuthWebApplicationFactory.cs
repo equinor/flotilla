@@ -1,5 +1,6 @@
 using System.IO;
 using Api.Database.Context;
+using Api.Test.Database;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
@@ -62,6 +63,7 @@ namespace Api.Test
                         ServiceLifetime.Transient
                     );
                 }
+                services.AddScoped<DatabaseUtilities>();
             });
         }
     }
