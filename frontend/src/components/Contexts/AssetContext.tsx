@@ -26,6 +26,7 @@ interface IAssetContext {
     enabledRobots: RobotWithoutTelemetry[]
     installationCode: string
     installationName: string
+    installationId: string
     installationInspectionAreas: InspectionArea[]
     activeInstallations: Installation[]
     switchInstallation: (selectedName: string) => void
@@ -36,6 +37,7 @@ const defaultAssetState = {
     enabledRobots: [],
     installationCode: '',
     installationName: '',
+    installationId: '',
     installationInspectionAreas: [],
     activeInstallations: [],
     switchInstallation: () => {},
@@ -50,12 +52,18 @@ export const AssetProvider: FC<Props> = ({ children }) => {
     const [installationInspectionAreas, setInstallationInspectionAreas] = useState<InspectionArea[]>([])
     const [isLoading, setIsLoading] = useState<boolean>(true)
 
-    const { registerEvent, connectionReady } = useSignalRContext()
+    const { registerEvent, connectionReady, resetConnection } = useSignalRContext()
     const { TranslateText } = useLanguageContext()
     const { setAlert, setListAlert } = useAlertContext()
 
-    const installationCode = selectedInstallation?.installationCode ?? ''
-    const installationName = selectedInstallation?.name ?? ''
+    const [installationCode, setInstallationCode] = useState<string>(selectedInstallation?.installationCode ?? '')
+    const [installationName, setInstallationName] = useState<string>(selectedInstallation?.name ?? '')
+    const [installationId, setInstallationId] = useState<string>(selectedInstallation?.id ?? '')
+    useEffect(() => {
+        setInstallationCode(selectedInstallation?.installationCode ?? '')
+        setInstallationName(selectedInstallation?.name ?? '')
+        setInstallationId(selectedInstallation?.id ?? '')
+    }, [selectedInstallation])
 
     const backendApi = useBackendApi()
 
@@ -226,11 +234,10 @@ export const AssetProvider: FC<Props> = ({ children }) => {
         }
     }, [registerEvent, connectionReady])
 
-    const switchInstallation = (selectedName: string) => {
-        const installation = activeInstallations.find(
-            (i) => i.name === selectedName || i.installationCode === selectedName
-        )
+    const switchInstallation = (selectedId: string) => {
+        const installation = activeInstallations.find((i) => i.id === selectedId)
         if (!installation) return
+        resetConnection()
         setSelectedInstallation(installation)
     }
 
@@ -248,6 +255,7 @@ export const AssetProvider: FC<Props> = ({ children }) => {
                 enabledRobots: filteredRobots,
                 installationCode,
                 installationName,
+                installationId,
                 installationInspectionAreas: filteredInstallationInspectionAreas,
                 activeInstallations: activeInstallations,
                 switchInstallation,

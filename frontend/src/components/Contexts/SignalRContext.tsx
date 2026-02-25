@@ -35,9 +35,9 @@ import { useMsal } from '@azure/msal-react'
  */
 
 interface ISignalRContext {
-    connection: signalR.HubConnection | undefined
     registerEvent: (eventName: string, onMessageReceived: (username: string, message: string) => void) => void
     connectionReady: boolean
+    resetConnection: () => void
 }
 
 interface Props {
@@ -45,9 +45,9 @@ interface Props {
 }
 
 const defaultSignalRInterface = {
-    connection: undefined,
     registerEvent: () => {},
     connectionReady: false,
+    resetConnection: () => {},
 }
 
 const URL = config.BACKEND_API_SIGNALR_URL
@@ -55,7 +55,7 @@ const URL = config.BACKEND_API_SIGNALR_URL
 const SignalRContext = createContext<ISignalRContext>(defaultSignalRInterface)
 
 export const SignalRProvider: FC<Props> = ({ children }) => {
-    const [connection, setConnection] = useState<signalR.HubConnection | undefined>(defaultSignalRInterface.connection)
+    const [connection, setConnection] = useState<signalR.HubConnection | undefined>(undefined)
     const [connectionReady, setConnectionReady] = useState<boolean>(defaultSignalRInterface.connectionReady)
     const { getAccessToken } = useContext(AuthContext)
     const { accounts, inProgress } = useMsal()
@@ -98,8 +98,10 @@ export const SignalRProvider: FC<Props> = ({ children }) => {
         return newConnection
     }, [getAccessToken])
 
-    useEffect(() => {
-        if (!accounts[0] || inProgress !== 'none') return
+    const resetConnection = () => {
+        if (connection) {
+            connection.stop()
+        }
 
         const newConnection = createConnection()
         setConnection(newConnection)
@@ -114,11 +116,18 @@ export const SignalRProvider: FC<Props> = ({ children }) => {
                 console.error('SignalR connection failed:', error)
                 setConnectionReady(false)
             })
+        return newConnection
+    }
+
+    useEffect(() => {
+        if (!accounts[0] || inProgress !== 'none') return
+
+        const newConnection = resetConnection()
 
         return () => {
             newConnection.stop()
         }
-    }, [accounts.length, inProgress, createConnection])
+    }, [accounts, inProgress])
 
     const registerEvent = (eventName: string, onMessageReceived: (username: string, message: string) => void) => {
         if (connection)
@@ -134,9 +143,9 @@ export const SignalRProvider: FC<Props> = ({ children }) => {
     return (
         <SignalRContext.Provider
             value={{
-                connection,
                 registerEvent,
                 connectionReady,
+                resetConnection,
             }}
         >
             {children}

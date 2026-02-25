@@ -8,6 +8,7 @@ import { Header } from 'components/Header/Header'
 import { phone_width } from 'utils/constants'
 import { useEffect } from 'react'
 import { useAssetContext } from 'components/Contexts/AssetContext'
+import { Installation } from 'models/Installation'
 
 const StyledPageContent = styled.div`
     position: absolute;
@@ -64,7 +65,12 @@ export const PageNotFound = () => {
             if (!matches || matches.length < 1) return
             const installationCode_ = matches[1]
             if (installationCode_ === installationCode) return
-            switchInstallation(installationCode_)
+            const installation_: Installation | undefined = activeInstallations.find(
+                (i) => i.installationCode === installationCode_
+            )
+            if (installation_) {
+                switchInstallation(installation_.id)
+            }
         }
     }, [activeInstallations])
 
