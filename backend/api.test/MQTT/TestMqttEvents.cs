@@ -39,7 +39,7 @@ namespace Api.Test.MQTT
             ServiceProvider = TestSetupHelpers.ConfigureServiceProvider(Factory);
             Context = TestSetupHelpers.ConfigurePostgreSqlContext(ConnectionString);
 
-            DatabaseUtilities = new DatabaseUtilities(Context);
+            DatabaseUtilities = ServiceProvider.GetRequiredService<DatabaseUtilities>();
             var mqttServiceLogger = new Mock<ILogger<MqttService>>().Object;
             EventAggregatorSingletonService =
                 ServiceProvider.GetRequiredService<EventAggregatorSingletonService>();

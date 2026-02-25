@@ -29,9 +29,7 @@ namespace Api.Test.Controllers
             var serviceProvider = TestSetupHelpers.ConfigureServiceProvider(factory);
 
             Client = TestSetupHelpers.ConfigureHttpClient(factory);
-            DatabaseUtilities = new DatabaseUtilities(
-                TestSetupHelpers.ConfigurePostgreSqlContext(connectionString)
-            );
+            DatabaseUtilities = serviceProvider.GetRequiredService<DatabaseUtilities>();
 
             PlantService = serviceProvider.GetRequiredService<IPlantService>();
         }

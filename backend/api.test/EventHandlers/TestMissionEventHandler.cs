@@ -46,7 +46,7 @@ namespace Api.Test.EventHandlers
 
             ServiceProvider = TestSetupHelpers.ConfigureServiceProvider(Factory);
 
-            DatabaseUtilities = new DatabaseUtilities(Context);
+            DatabaseUtilities = ServiceProvider.GetRequiredService<DatabaseUtilities>();
             MissionRunService = ServiceProvider.GetRequiredService<IMissionRunService>();
             RobotService = ServiceProvider.GetRequiredService<IRobotService>();
             MissionSchedulingService =

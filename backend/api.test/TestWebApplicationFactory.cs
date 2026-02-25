@@ -2,6 +2,7 @@
 using Api.Database.Context;
 using Api.Services;
 using Api.Services.MissionLoaders;
+using Api.Test.Database;
 using Api.Test.Mocks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
@@ -12,7 +13,6 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Moq;
 
 namespace Api.Test
 {
@@ -24,6 +24,7 @@ namespace Api.Test
     {
         public IConfiguration? Configuration;
         public MockIsarService MockIsarService = new();
+        public MockSignalRService MockSignalRService = new();
         private readonly string? sqLiteDatabaseName = sqLiteDatabaseName;
         private readonly string? postgresConnectionString = postgresConnectionString;
 
@@ -78,6 +79,8 @@ namespace Api.Test
 
                 services.AddScoped<IAccessRoleService, AccessRoleService>();
                 services.AddScoped<IIsarService, MockIsarService>(_ => MockIsarService);
+                services.AddSingleton<ISignalRService, MockSignalRService>(_ => MockSignalRService);
+                services.AddScoped<DatabaseUtilities>();
                 services.AddSingleton<IHttpContextAccessor, MockHttpContextAccessor>();
                 services.AddScoped<IBlobService, MockBlobService>();
                 services.AddScoped<IMissionLoader, MockMissionLoader>();

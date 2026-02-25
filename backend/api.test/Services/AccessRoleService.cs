@@ -29,7 +29,7 @@ public class AccessRoleServiceTest : IAsyncLifetime
         var sp = TestSetupHelpers.ConfigureServiceProvider(factory);
 
         Context = TestSetupHelpers.ConfigurePostgreSqlContext(cs);
-        DatabaseUtilities = new DatabaseUtilities(Context);
+        DatabaseUtilities = sp.GetRequiredService<DatabaseUtilities>();
         AccessRoleService = sp.GetRequiredService<IAccessRoleService>();
 
         var http = sp.GetRequiredService<IHttpContextAccessor>();

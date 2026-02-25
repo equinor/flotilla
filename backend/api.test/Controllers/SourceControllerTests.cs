@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Api.Database.Models;
 using Api.Services;
 using Api.Test.Database;
+using Microsoft.Extensions.DependencyInjection;
 using Testcontainers.PostgreSql;
 using Xunit;
 
@@ -31,9 +32,7 @@ public class SourceControllerTests : IAsyncLifetime
 
         Client = TestSetupHelpers.ConfigureHttpClient(factory);
         SerializerOptions = TestSetupHelpers.ConfigureJsonSerializerOptions();
-        DatabaseUtilities = new DatabaseUtilities(
-            TestSetupHelpers.ConfigurePostgreSqlContext(connectionString)
-        );
+        DatabaseUtilities = factory.Services.GetRequiredService<DatabaseUtilities>();
     }
 
     public ValueTask DisposeAsync()
