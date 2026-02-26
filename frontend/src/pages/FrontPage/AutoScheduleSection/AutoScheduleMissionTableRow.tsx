@@ -37,11 +37,6 @@ const StyledButton = styled(Button)`
     }
 `
 
-export const skipAutoScheduledMission = async (missionId: string, timeOfDay: string) => {
-    const backendApi = useBackendApi()
-    await backendApi.skipAutoScheduledMission(missionId, timeOfDay)
-}
-
 export enum MissionStatusType {
     ScheduledJob = 'ScheduledJob',
     SkippedJob = 'SkippedJob',
@@ -82,6 +77,7 @@ export const AutoScheduleMissionTableRow = ({
     mission: MissionDefinition
 }) => {
     const { TranslateText } = useLanguageContext()
+    const backendApi = useBackendApi()
     const { installationCode } = useAssetContext()
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
     const referenceElement = useRef<HTMLButtonElement>(null)
@@ -99,6 +95,11 @@ export const AutoScheduleMissionTableRow = ({
     }
     const handleClose = () => {
         setIsOpen(false)
+    }
+
+    const handleAutoScheduleSkip = () => {
+        backendApi.skipAutoScheduledMission(mission.id, time)
+        setIsDialogOpen(false)
     }
 
     return (
@@ -173,11 +174,7 @@ export const AutoScheduleMissionTableRow = ({
                             <Button onClick={() => setIsDialogOpen(false)} variant="outlined" color="primary">
                                 {TranslateText('Close')}
                             </Button>
-                            <Button
-                                onClick={() => skipAutoScheduledMission(mission.id, time)}
-                                variant="outlined"
-                                color="danger"
-                            >
+                            <Button onClick={handleAutoScheduleSkip} variant="outlined" color="danger">
                                 {TranslateText('SkipAutoMission')}
                             </Button>
                         </StyledDialogActions>
