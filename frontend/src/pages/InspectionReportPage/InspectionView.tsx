@@ -15,7 +15,7 @@ import {
 } from './InspectionStyles'
 import { InspectionOverviewDialogView } from './InspectionOverview'
 import { useState } from 'react'
-import { LargeDialogInspectionImage, LargeImageTextPlaceholder } from './InspectionReportImage'
+import { LargeDialogInspectionResult, TextAsImage } from './InspectionReportImage'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 import { useInspectionId } from './SetInspectionIdHook'
 
@@ -41,7 +41,7 @@ export const InspectionDialogView = ({ selectedInspectionId, tasks }: Inspection
             <StyledDialog open={true} isDismissable onClose={closeDialog}>
                 <StyledDialogContent>
                     <StyledDialogInspectionView>
-                        <LargeImageTextPlaceholder errorMessage="No inspection could be found" />
+                        <TextAsImage isLargeImage={true} text="No inspection could be found" />
                     </StyledDialogInspectionView>
                 </StyledDialogContent>
             </StyledDialog>
@@ -84,7 +84,7 @@ export const InspectionDialogView = ({ selectedInspectionId, tasks }: Inspection
                 </StyledDialogHeader>
                 <StyledDialogInspectionView>
                     <div>
-                        <LargeDialogInspectionImage task={currentTask} />
+                        <LargeDialogInspectionResult task={currentTask} />
                         <StyledBottomContent>
                             <StyledInfoContent>
                                 <Typography variant="caption">{TranslateText('Installation') + ':'}</Typography>

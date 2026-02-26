@@ -29,44 +29,50 @@ const StyledCircularProgress = styled.div`
     height: 100%;
 `
 
-export const LargeImageTextPlaceholder = ({ errorMessage, args }: { errorMessage: string; args?: string[] }) => {
+export const TextAsImage = ({
+    isLargeImage,
+    text,
+    textArgs,
+}: {
+    isLargeImage: boolean
+    text: string
+    textArgs?: string[]
+}) => {
     const { TranslateText } = useLanguageContext()
 
-    return (
-        <StyledLargeImagePlaceholder>
-            <Typography variant="h3" color={tokens.colors.text.static_icons__tertiary.hex}>
-                {TranslateText(errorMessage, args)}
-            </Typography>
-        </StyledLargeImagePlaceholder>
-    )
-}
-
-const SmallImageTextPlaceholder = ({ errorMessage, args }: { errorMessage: string; args?: string[] }) => {
-    const { TranslateText } = useLanguageContext()
+    if (isLargeImage) {
+        return (
+            <StyledLargeImagePlaceholder>
+                <Typography variant="h3" color={tokens.colors.text.static_icons__tertiary.hex}>
+                    {TranslateText(text, textArgs)}
+                </Typography>
+            </StyledLargeImagePlaceholder>
+        )
+    }
 
     return (
         <StyledSmallImagePlaceholder>
             <Typography color={tokens.colors.text.static_icons__tertiary.hex}>
-                {TranslateText(errorMessage, args)}
+                {TranslateText(text, textArgs)}
             </Typography>
         </StyledSmallImagePlaceholder>
     )
 }
 
-export const LargeImagePendingPlaceholder = () => {
+export const PendingResultPlaceholder = ({ isLargeImage }: { isLargeImage: boolean }) => {
     const { TranslateText } = useLanguageContext()
 
-    return (
-        <StyledLargeImagePlaceholder>
-            <Typography variant="h3" color={tokens.colors.text.static_icons__tertiary.hex}>
-                {TranslateText('Waiting for inspection result')}
-            </Typography>
-            <CircularProgress size={48} />
-        </StyledLargeImagePlaceholder>
-    )
-}
+    if (isLargeImage) {
+        return (
+            <StyledLargeImagePlaceholder>
+                <Typography variant="h3" color={tokens.colors.text.static_icons__tertiary.hex}>
+                    {TranslateText('Waiting for inspection result')}
+                </Typography>
+                <CircularProgress size={48} />
+            </StyledLargeImagePlaceholder>
+        )
+    }
 
-const SmallImagePendingPlaceholder = () => {
     return (
         <StyledCircularProgress>
             <CircularProgress />
@@ -75,58 +81,50 @@ const SmallImagePendingPlaceholder = () => {
 }
 
 const InspectionImageWithPlaceholder = ({ task, isLargeImage }: { task: Task; isLargeImage: boolean }) => {
-    const { fetchImageData, fetchValueData } = useInspectionsContext()
-
-    if (InspectionTypeToDisplayMethod[task.inspection.inspectionType] === DisplayMethod.None) {
-        const errorMsg = 'Viewing of the inspection type is not supported'
+    const { fetchImageData } = useInspectionsContext()
+    const { data, isPending, isError } = fetchImageData(task.inspection.isarInspectionId)
+    if (isError || !data) {
+        const errorMsg = 'No inspection could be found'
+        return <TextAsImage isLargeImage={isLargeImage} text={errorMsg} />
+    } else if (isPending) {
+        return <PendingResultPlaceholder isLargeImage={isLargeImage} />
+    } else
         return isLargeImage ? (
-            <LargeImageTextPlaceholder errorMessage={errorMsg} />
+            <StyledInspection $otherContentHeight={'174px'} src={data} />
         ) : (
-            <SmallImageTextPlaceholder errorMessage={errorMsg} />
+            <StyledInspectionImage src={data} />
         )
-    } else if (InspectionTypeToDisplayMethod[task.inspection.inspectionType] === DisplayMethod.Number) {
-        const { data, isPending, isError } = fetchValueData(task.inspection.isarInspectionId)
+}
 
-        if (isError || data === undefined) {
-            const errorMsg = 'No inspection could be found'
-            return isLargeImage ? (
-                <LargeImageTextPlaceholder errorMessage={errorMsg} />
-            ) : (
-                <SmallImageTextPlaceholder errorMessage={errorMsg} />
-            )
-        } else if (isPending) {
-            return isLargeImage ? <LargeImagePendingPlaceholder /> : <SmallImagePendingPlaceholder />
-        } else {
-            return isLargeImage ? (
-                <LargeImageTextPlaceholder errorMessage={`CO2 consentration: {0}%`} args={[data]} />
-            ) : (
-                <SmallImageTextPlaceholder errorMessage={`CO2 consentration: {0}%`} args={[data]} />
-            )
-        }
-    } else if (InspectionTypeToDisplayMethod[task.inspection.inspectionType] === DisplayMethod.Image) {
-        const { data, isPending, isError } = fetchImageData(task.inspection.isarInspectionId)
-        if (isError || !data) {
-            const errorMsg = 'No inspection could be found'
-            return isLargeImage ? (
-                <LargeImageTextPlaceholder errorMessage={errorMsg} />
-            ) : (
-                <SmallImageTextPlaceholder errorMessage={errorMsg} />
-            )
-        } else if (isPending) {
-            return isLargeImage ? <LargeImagePendingPlaceholder /> : <SmallImagePendingPlaceholder />
-        } else
-            return isLargeImage ? (
-                <StyledInspection $otherContentHeight={'174px'} src={data} />
-            ) : (
-                <StyledInspectionImage src={data} />
-            )
+const InspectionValueWithPlaceholder = ({ task, isLargeImage }: { task: Task; isLargeImage: boolean }) => {
+    const { fetchValueData } = useInspectionsContext()
+    const { data, isPending, isError } = fetchValueData(task.inspection.isarInspectionId)
+
+    if (isError || data === undefined) {
+        const errorMsg = 'No inspection could be found'
+        return <TextAsImage isLargeImage={isLargeImage} text={errorMsg} />
+    } else if (isPending) {
+        return <PendingResultPlaceholder isLargeImage={isLargeImage} />
+    } else {
+        return <TextAsImage isLargeImage={isLargeImage} text={`CO2 consentration: {0}%`} textArgs={[data]} />
     }
 }
 
-export const LargeDialogInspectionImage = ({ task }: { task: Task }) => {
-    return <InspectionImageWithPlaceholder task={task} isLargeImage={true} />
+const InspectionResultWithPlaceholder = ({ task, isLargeImage }: { task: Task; isLargeImage: boolean }) => {
+    if (InspectionTypeToDisplayMethod[task.inspection.inspectionType] === DisplayMethod.None) {
+        const errorMsg = 'Viewing of the inspection type is not supported'
+        return <TextAsImage isLargeImage={isLargeImage} text={errorMsg} />
+    } else if (InspectionTypeToDisplayMethod[task.inspection.inspectionType] === DisplayMethod.Number) {
+        return <InspectionValueWithPlaceholder task={task} isLargeImage={isLargeImage} />
+    } else if (InspectionTypeToDisplayMethod[task.inspection.inspectionType] === DisplayMethod.Image) {
+        return <InspectionImageWithPlaceholder task={task} isLargeImage={isLargeImage} />
+    }
 }
 
-export const SmallInspectionImage = ({ task }: { task: Task }) => {
-    return <InspectionImageWithPlaceholder task={task} isLargeImage={false} />
+export const LargeDialogInspectionResult = ({ task }: { task: Task }) => {
+    return <InspectionResultWithPlaceholder task={task} isLargeImage={true} />
+}
+
+export const SmallInspectionResult = ({ task }: { task: Task }) => {
+    return <InspectionResultWithPlaceholder task={task} isLargeImage={false} />
 }

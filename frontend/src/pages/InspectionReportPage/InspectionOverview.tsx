@@ -11,7 +11,7 @@ import {
 } from './InspectionStyles'
 import { Typography } from '@equinor/eds-core-react'
 import { formatDateTime } from 'utils/StringFormatting'
-import { SmallInspectionImage } from 'pages/InspectionReportPage/InspectionReportImage'
+import { SmallInspectionResult } from 'pages/InspectionReportPage/InspectionReportImage'
 import { useInspectionId } from './SetInspectionIdHook'
 
 const InspectionOverview = ({ tasks }: { tasks: Task[] }) => {
@@ -29,7 +29,7 @@ const InspectionOverview = ({ tasks }: { tasks: Task[] }) => {
                                     key={task.id}
                                     onClick={() => switchSelectedInspectionId(task.inspection.isarInspectionId)}
                                 >
-                                    <SmallInspectionImage task={task} />
+                                    <SmallInspectionResult task={task} />
                                     <StyledInspectionData>
                                         {task.tagId && (
                                             <StyledInspectionContent>

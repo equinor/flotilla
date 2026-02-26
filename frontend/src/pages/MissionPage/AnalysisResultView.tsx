@@ -13,10 +13,7 @@ import {
     StyledDialogInspectionView,
     StyledInfoContent,
 } from 'pages/InspectionReportPage/InspectionStyles'
-import {
-    LargeImageTextPlaceholder,
-    LargeImagePendingPlaceholder,
-} from 'pages/InspectionReportPage/InspectionReportImage'
+import { TextAsImage, PendingResultPlaceholder } from 'pages/InspectionReportPage/InspectionReportImage'
 import styled from 'styled-components'
 import { useInspectionId } from 'pages/InspectionReportPage/SetInspectionIdHook'
 
@@ -33,8 +30,8 @@ const AnalysisImage = ({ inspectionId }: { inspectionId: string }) => {
     const { fetchAnalysisData } = useInspectionsContext()
     const { data, isPending } = fetchAnalysisData(inspectionId)
 
-    if (isPending) return <LargeImagePendingPlaceholder />
-    if (!data) return <LargeImageTextPlaceholder errorMessage="No inspection could be found" />
+    if (isPending) return <PendingResultPlaceholder isLargeImage={true} />
+    if (!data) return <TextAsImage isLargeImage={true} text="No inspection could be found" />
 
     return <StyledImage $otherContentHeight="0px" src={data} />
 }
@@ -52,7 +49,7 @@ export const AnalysisResultDialogView = ({ selectedAnalysisId, tasks }: Inspecti
             <StyledDialog open={true} isDismissable onClose={onClose}>
                 <StyledDialogContent>
                     <StyledDialogInspectionView>
-                        <LargeImageTextPlaceholder errorMessage="No analysis could be found" />
+                        <TextAsImage isLargeImage={true} text="No analysis could be found" />
                     </StyledDialogInspectionView>
                 </StyledDialogContent>
             </StyledDialog>
