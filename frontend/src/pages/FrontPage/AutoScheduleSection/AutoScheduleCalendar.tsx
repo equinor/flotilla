@@ -6,7 +6,7 @@ import styled from 'styled-components'
 import { useMemo, useState } from 'react'
 import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
 import { allDaysStartingSunday, DaysOfWeek } from 'models/AutoScheduleFrequency'
-import { MissionStatusType, selectMissionStatusType, skipAutoScheduledMission } from './AutoScheduleMissionTableRow'
+import { MissionStatusType, selectMissionStatusType } from './AutoScheduleMissionTableRow'
 import { tokens } from '@equinor/eds-tokens'
 import { useNavigate } from 'react-router-dom'
 import { config } from 'config'
@@ -14,6 +14,7 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Button, Typography } from '@equinor/eds-core-react'
 import { StyledDialog } from 'components/Styles/StyledComponents'
 import { useAssetContext } from 'components/Contexts/AssetContext'
+import { useBackendApi } from 'api/UseBackendApi'
 
 const locales = { nb }
 const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales })
@@ -184,6 +185,7 @@ export const CalendarPro = () => {
     const { missionDefinitions } = useMissionDefinitionsContext()
     const { TranslateText } = useLanguageContext()
     const { installationCode } = useAssetContext()
+    const backendApi = useBackendApi()
     const navigate = useNavigate()
     const [dialogOpen, setDialogOpen] = useState<boolean>(false)
     const [selectedEvent, setSelectedEvent] = useState<any>(null)
@@ -244,6 +246,14 @@ export const CalendarPro = () => {
         setDialogOpen(true)
     }
 
+    const handleAutoScheduleSkip = () => {
+        if (selectedEvent) {
+            backendApi.skipAutoScheduledMission(selectedEvent.metadata.missionId, selectedEvent.metadata.time)
+        }
+        setDialogOpen(false)
+        setSelectedEvent(null)
+    }
+
     const renderDialog = () => (
         <StyledDialog open={dialogOpen} onClose={handleCloseDialog}>
             <StyledDialog.Header>
@@ -261,20 +271,7 @@ export const CalendarPro = () => {
                 <Button onClick={handleCloseDialog} variant="outlined" color="primary">
                     {TranslateText('Cancel')}
                 </Button>
-                <Button
-                    onClick={async () => {
-                        if (selectedEvent) {
-                            await skipAutoScheduledMission(
-                                selectedEvent.metadata.missionId,
-                                selectedEvent.metadata.time
-                            )
-                        }
-                        setDialogOpen(false)
-                        setSelectedEvent(null)
-                    }}
-                    variant="outlined"
-                    color="danger"
-                >
+                <Button onClick={handleAutoScheduleSkip} variant="outlined" color="danger">
                     {TranslateText('SkipAutoMission')}
                 </Button>
             </StyledDialogActions>
