@@ -75,16 +75,6 @@ const updateOngoingMissionsWithUpdatedMission = (oldMissionList: Mission[], upda
     return oldMissionList
 }
 
-const fetchMissionRuns = async (params: {
-    statuses: MissionStatus[]
-    pageSize: number
-    orderBy: string
-}): Promise<Mission[]> => {
-    const backendApi = useBackendApi()
-    const response = await backendApi.getMissionRuns(params)
-    return response.content
-}
-
 const useMissionRuns = (): IMissionRunsContext => {
     const [ongoingMissions, setOngoingMissions] = useState<Mission[]>([])
     const [missionQueue, setMissionQueue] = useState<Mission[]>([])
@@ -94,6 +84,16 @@ const useMissionRuns = (): IMissionRunsContext => {
     const { setAlert, setListAlert } = useAlertContext()
     const { installationCode } = useAssetContext()
     const { isAuthenticated } = useContext(AuthContext)
+    const backendApi = useBackendApi()
+
+    const fetchMissionRuns = async (params: {
+        statuses: MissionStatus[]
+        pageSize: number
+        orderBy: string
+    }): Promise<Mission[]> => {
+        const response = await backendApi.getMissionRuns(params)
+        return response.content
+    }
 
     useEffect(() => {
         if (connectionReady) {
@@ -180,7 +180,7 @@ const useMissionRuns = (): IMissionRunsContext => {
             setMissionQueue(queue ?? [])
         }
         fetchAndUpdateMissions()
-    }, [fetchMissionRuns, installationCode])
+    }, [installationCode])
 
     const [filteredMissionQueue, setFilteredMissionQueue] = useState<Mission[]>([])
     const [filteredOngoingMissions, setFilteredOngoingMissions] = useState<Mission[]>([])
