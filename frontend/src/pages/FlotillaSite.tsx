@@ -15,11 +15,10 @@ import { MissionDefinitionPageRouter, MissionPageRouter, RobotPageRouter, Simple
 import { PageNotFound } from './NotFoundPage'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 import { DataViewPage } from './MissionHistory/DataViewPage'
-import { PageLoading } from './LoadingPage'
 
 export const FlotillaSite = () => {
     const frontPageTabOptions = Object.values(TabNames)
-    const { isLoading, installationCode } = useAssetContext()
+    const { installationCode } = useAssetContext()
 
     const installationCodePath = `${config.FRONTEND_BASE_ROUTE}/${installationCode}`
 
@@ -60,7 +59,7 @@ export const FlotillaSite = () => {
                     {installationCode ? installationSpecificPages : <></>}
 
                     <Route path={`${config.FRONTEND_BASE_ROUTE}/info`} element={<InfoPage />} />
-                    <Route path="*" element={isLoading ? <PageLoading /> : <PageNotFound />} />
+                    <Route path="*" element={<PageNotFound />} />
                 </Routes>
             </BrowserRouter>
         </>
