@@ -3,6 +3,7 @@ import { RobotWithoutTelemetry, RobotTelemetryPropertyUpdate } from 'models/Robo
 import { SignalREventLabels, useSignalRContext } from 'components/Contexts/SignalRContext'
 import { Pose } from 'models/Pose'
 import { BatteryStatus } from 'models/Battery'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 
 export const useRobotTelemetry = (robotWithoutDetails: RobotWithoutTelemetry) => {
     const { registerEvent, connectionReady } = useSignalRContext()
@@ -47,4 +48,35 @@ export const useRobotTelemetry = (robotWithoutDetails: RobotWithoutTelemetry) =>
     }, [connectionReady, robotWithoutDetails])
 
     return { robotBatteryLevel, robotBatteryStatus, robotPressureLevel, robotPose }
+}
+
+interface RobotIdAndPose {
+    robotId: string
+    pose: Pose
+}
+
+export const useAllRobotPosesTelemetry = () => {
+    const { registerEvent, connectionReady } = useSignalRContext()
+    const { enabledRobots } = useAssetContext()
+
+    const [robotIdAndPoses, setRobotIdAndPoses] = useState<RobotIdAndPose[]>([])
+
+    useEffect(() => {
+        if (connectionReady) {
+            registerEvent(SignalREventLabels.robotTelemetryUpdated, (username: string, message: string) => {
+                const robotPropertyUpdate: RobotTelemetryPropertyUpdate = JSON.parse(message)
+                if (
+                    robotPropertyUpdate.telemetryName === 'pose' &&
+                    enabledRobots.map((r) => r.id).includes(robotPropertyUpdate.robotId)
+                ) {
+                    setRobotIdAndPoses((prev) => [
+                        ...prev.filter((r) => r.robotId !== robotPropertyUpdate.robotId),
+                        { robotId: robotPropertyUpdate.robotId, pose: robotPropertyUpdate.telemetryValue as Pose },
+                    ])
+                }
+            })
+        }
+    }, [connectionReady, enabledRobots])
+
+    return { robotIdAndPoses }
 }
