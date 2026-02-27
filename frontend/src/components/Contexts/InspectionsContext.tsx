@@ -5,10 +5,20 @@ import { useQuery } from '@tanstack/react-query'
 import { queryClient } from '../../App'
 import { useBackendApi } from 'api/UseBackendApi'
 
+interface IImageData {
+    data: string | undefined
+    isPending: boolean
+    isError: boolean
+}
+interface IValueData {
+    data: number | undefined
+    isPending: boolean
+    isError: boolean
+}
 interface IInspectionsContext {
-    fetchImageData: (inspectionId: string) => any
-    fetchAnalysisData: (inspectionId: string) => any
-    fetchValueData: (inspectionId: string) => any
+    fetchImageData: (inspectionId: string) => IImageData
+    fetchAnalysisData: (inspectionId: string) => IImageData
+    fetchValueData: (inspectionId: string) => IValueData
 }
 
 interface Props {
@@ -16,9 +26,9 @@ interface Props {
 }
 
 const defaultInspectionsContext = {
-    fetchImageData: () => undefined,
-    fetchAnalysisData: () => undefined,
-    fetchValueData: () => undefined,
+    fetchImageData: () => ({ data: undefined, isPending: false, isError: true }),
+    fetchAnalysisData: () => ({ data: undefined, isPending: false, isError: true }),
+    fetchValueData: () => ({ data: undefined, isPending: false, isError: true }),
 }
 
 const InspectionsContext = createContext<IInspectionsContext>(defaultInspectionsContext)
@@ -51,9 +61,7 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
         }
     }, [registerEvent, connectionReady])
 
-    const fetchImageData = (
-        inspectionId: string
-    ): { data: string | undefined; isPending: boolean; isError: boolean } => {
+    const fetchImageData = (inspectionId: string): IImageData => {
         const result = useQuery({
             queryKey: ['fetchInspectionData', inspectionId],
             queryFn: async () => {
@@ -68,9 +76,7 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
         return { data: result.data, isPending: result.isPending, isError: result.isError }
     }
 
-    const fetchAnalysisData = (
-        inspectionId: string
-    ): { data: string | undefined; isPending: boolean; isError: boolean } => {
+    const fetchAnalysisData = (inspectionId: string): IImageData => {
         const result = useQuery({
             queryKey: ['fetchAnalysisData', inspectionId],
             queryFn: async () => {
@@ -84,9 +90,7 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
         return { data: result.data, isPending: result.isPending, isError: result.isError }
     }
 
-    const fetchValueData = (
-        inspectionId: string
-    ): { data: number | undefined; isPending: boolean; isError: boolean } => {
+    const fetchValueData = (inspectionId: string): IValueData => {
         const result = useQuery({
             queryKey: ['fetchValueData', inspectionId],
             queryFn: async () => {
