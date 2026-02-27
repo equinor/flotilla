@@ -9,7 +9,7 @@ import { MapCompass } from 'utils/MapCompass'
 import { phone_width } from 'utils/constants'
 import { Mission } from 'models/Mission'
 import { getRobotMarker, getTaskMarkers } from './PointillaMapMarkers'
-import { useRobotTelemetry } from 'hooks/useRobotTelemetry'
+import { useAllRobotPosesTelemetry, useRobotTelemetry } from 'hooks/useRobotTelemetry'
 import { InspectionArea, PolygonPoint } from 'models/InspectionArea'
 import 'utils/leaflet-overrides.css'
 import { useBackendApi } from 'api/UseBackendApi'
@@ -167,8 +167,8 @@ export function PlantPolygonMap({ inspectionArea, floorId }: PlantPolygonMapProp
     const backendApi = useBackendApi()
 
     const { enabledRobots } = useAssetContext()
-    const robots = enabledRobots.filter((r) => r.currentInspectionAreaId === inspectionArea.id)
-    const robotPoses = robots.map((robot) => useRobotTelemetry(robot).robotPose)
+    const robotIdsInArea = enabledRobots.filter((r) => r.currentInspectionAreaId === inspectionArea.id).map((r) => r.id)
+    const { robotIdAndPoses } = useAllRobotPosesTelemetry()
 
     const plantCode = inspectionArea.plantCode
     const polygon = inspectionArea.areaPolygon?.positions ?? []
@@ -191,6 +191,9 @@ export function PlantPolygonMap({ inspectionArea, floorId }: PlantPolygonMapProp
     const positions = polygon ? toLeafletPositions(polygon) : undefined
 
     useEffect(() => {
+        const robotPoses = robotIdAndPoses
+            .filter((IdAndPose) => robotIdsInArea.includes(IdAndPose.robotId))
+            .map((IdAndPose) => IdAndPose.pose)
         if (robotPoses.length < 1 || !map) return
         let robotMarkers = robotPoses
             .filter((robotPose) => robotPose != undefined)
@@ -208,7 +211,7 @@ export function PlantPolygonMap({ inspectionArea, floorId }: PlantPolygonMapProp
             clearInterval(timer)
             robotMarkers.forEach((marker) => marker?.remove())
         }
-    }, [robotPoses, map])
+    }, [robotIdAndPoses, map])
 
     useEffect(() => {
         loadMap()
