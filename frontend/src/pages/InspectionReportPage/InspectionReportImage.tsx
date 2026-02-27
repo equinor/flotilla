@@ -106,7 +106,13 @@ const InspectionValueWithPlaceholder = ({ task, isLargeImage }: { task: Task; is
     } else if (isPending) {
         return <PendingResultPlaceholder isLargeImage={isLargeImage} />
     } else {
-        return <TextAsImage isLargeImage={isLargeImage} text={`CO2 consentration: {0}%`} textArgs={[data]} />
+        return (
+            <TextAsImage
+                isLargeImage={isLargeImage}
+                text={`CO2 consentration: {0}%`}
+                textArgs={[(Math.round(data * 1000) / 1000).toString()]}
+            />
+        )
     }
 }
 
