@@ -1,5 +1,6 @@
 import { useMsal } from '@azure/msal-react'
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
+import { InteractionStatus } from '@azure/msal-browser'
 import { loginRequest } from 'api/AuthConfig'
 import { AuthContext } from './AuthContext'
 import { InteractionRequiredAuthError } from '@azure/msal-browser'
@@ -43,6 +44,14 @@ export const AuthProvider = ({ children }: Props) => {
             throw e
         }
     }, [accounts, inProgress, instance])
+
+    useEffect(() => {
+        if (accounts.length > 0 || instance.getActiveAccount()) return
+
+        if (inProgress !== InteractionStatus.None) return
+
+        instance.loginRedirect(loginRequest)
+    }, [accounts.length, inProgress, instance])
 
     const value = useMemo(() => ({ getAccessToken, isAuthenticated }), [getAccessToken, isAuthenticated])
 

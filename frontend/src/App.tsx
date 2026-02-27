@@ -1,6 +1,5 @@
 import { ApplicationInsights } from '@microsoft/applicationinsights-web'
 import { AuthenticatedTemplate, UnauthenticatedTemplate } from '@azure/msal-react'
-import { LoginPage } from 'pages/LoginPage/LoginPage'
 import { FlotillaSite } from 'pages/FlotillaSite'
 import { LanguageProvider } from 'components/Contexts/LanguageContext'
 import { MissionControlProvider } from 'components/Contexts/MissionControlContext'
@@ -30,34 +29,30 @@ export const queryClient = new QueryClient()
 
 const App = () => (
     <AuthProvider>
-        <LanguageProvider>
-            <SignalRProvider>
-                <QueryClientProvider client={queryClient}>
-                    <AssetProvider>
-                        <InspectionsProvider>
-                            <MissionDefinitionsProvider>
-                                <MissionRunsProvider>
-                                    <AlertProvider>
-                                        <MissionControlProvider>
-                                            <UnauthenticatedTemplate>
-                                                <div className="sign-in-page">
-                                                    <LoginPage />
-                                                </div>
-                                            </UnauthenticatedTemplate>
-                                            <AuthenticatedTemplate>
+        <UnauthenticatedTemplate />
+        <AuthenticatedTemplate>
+            <LanguageProvider>
+                <SignalRProvider>
+                    <QueryClientProvider client={queryClient}>
+                        <AssetProvider>
+                            <InspectionsProvider>
+                                <MissionDefinitionsProvider>
+                                    <MissionRunsProvider>
+                                        <AlertProvider>
+                                            <MissionControlProvider>
                                                 <MediaStreamProvider>
                                                     <FlotillaSite />
                                                 </MediaStreamProvider>
-                                            </AuthenticatedTemplate>
-                                        </MissionControlProvider>
-                                    </AlertProvider>
-                                </MissionRunsProvider>
-                            </MissionDefinitionsProvider>
-                        </InspectionsProvider>
-                    </AssetProvider>
-                </QueryClientProvider>
-            </SignalRProvider>
-        </LanguageProvider>
+                                            </MissionControlProvider>
+                                        </AlertProvider>
+                                    </MissionRunsProvider>
+                                </MissionDefinitionsProvider>
+                            </InspectionsProvider>
+                        </AssetProvider>
+                    </QueryClientProvider>
+                </SignalRProvider>
+            </LanguageProvider>
+        </AuthenticatedTemplate>
     </AuthProvider>
 )
 
