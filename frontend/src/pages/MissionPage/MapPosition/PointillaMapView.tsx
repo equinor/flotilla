@@ -9,7 +9,7 @@ import { MapCompass } from 'utils/MapCompass'
 import { phone_width } from 'utils/constants'
 import { Mission } from 'models/Mission'
 import { getRobotMarker, getTaskMarkers } from './PointillaMapMarkers'
-import { useRobotTelemetry } from 'hooks/useRobotTelemetry'
+import { useAllRobotPosesTelemetry, useRobotTelemetry } from 'hooks/useRobotTelemetry'
 import { InspectionArea, PolygonPoint } from 'models/InspectionArea'
 import 'utils/leaflet-overrides.css'
 import { useBackendApi } from 'api/UseBackendApi'
@@ -167,8 +167,11 @@ export function PlantPolygonMap({ inspectionArea, floorId }: PlantPolygonMapProp
     const backendApi = useBackendApi()
 
     const { enabledRobots } = useAssetContext()
-    const robots = enabledRobots.filter((r) => r.currentInspectionAreaId === inspectionArea.id)
-    const robotPoses = robots.map((robot) => useRobotTelemetry(robot).robotPose)
+    const robotIdsInArea = enabledRobots.filter((r) => r.currentInspectionAreaId === inspectionArea.id).map((r) => r.id)
+    const { robotIdAndPoses } = useAllRobotPosesTelemetry()
+    const robotPoses = robotIdAndPoses
+        .filter((IdAndPose) => robotIdsInArea.includes(IdAndPose.robotId))
+        .map((IdAndPose) => IdAndPose.pose)
 
     const plantCode = inspectionArea.plantCode
     const polygon = inspectionArea.areaPolygon?.positions ?? []
