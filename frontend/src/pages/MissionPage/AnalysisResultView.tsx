@@ -101,15 +101,24 @@ export const AnalysisResultDialogView = ({ selectedAnalysisId, tasks }: Inspecti
                                     </Typography>
                                 </StyledInfoContent>
                             )}
-                            {currentTask.inspection.analysisResult?.confidence &&
+                            {currentTask.inspection.analysisResult?.value &&
                                 currentTask.inspection.analysisResult?.unit && (
                                     <StyledInfoContent>
-                                        <Typography variant="caption">{TranslateText('Confidence') + ':'}</Typography>
+                                        <Typography variant="caption">{TranslateText('Value') + ':'}</Typography>
                                         <Typography variant="body_short">
-                                            {Math.round(currentTask.inspection.analysisResult.confidence * 100) + '%'}
+                                            {currentTask.inspection.analysisResult.value}
+                                            {currentTask.inspection.analysisResult.unit}
                                         </Typography>
                                     </StyledInfoContent>
                                 )}
+                            {currentTask.inspection.analysisResult?.confidence && (
+                                <StyledInfoContent>
+                                    <Typography variant="caption">{TranslateText('Confidence') + ':'}</Typography>
+                                    <Typography variant="body_short">
+                                        {Math.round(currentTask.inspection.analysisResult.confidence * 100) + '%'}
+                                    </Typography>
+                                </StyledInfoContent>
+                            )}
                         </StyledBottomContent>
                     </div>
                 </StyledDialogInspectionView>
