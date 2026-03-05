@@ -22,7 +22,6 @@ interface Props {
 }
 
 interface IAssetContext {
-    isLoading: boolean
     enabledRobots: RobotWithoutTelemetry[]
     installationCode: string
     installationName: string
@@ -33,7 +32,6 @@ interface IAssetContext {
 }
 
 const defaultAssetState = {
-    isLoading: true,
     enabledRobots: [],
     installationCode: '',
     installationName: '',
@@ -50,7 +48,6 @@ export const AssetProvider: FC<Props> = ({ children }) => {
     const [activeInstallations, setActiveInstallations] = useState<Installation[]>([])
     const [selectedInstallation, setSelectedInstallation] = useState<Installation | undefined>(undefined)
     const [installationInspectionAreas, setInstallationInspectionAreas] = useState<InspectionArea[]>([])
-    const [isLoading, setIsLoading] = useState<boolean>(true)
 
     const { registerEvent, connectionReady, resetConnection } = useSignalRContext()
     const { TranslateText } = useLanguageContext()
@@ -127,7 +124,6 @@ export const AssetProvider: FC<Props> = ({ children }) => {
                 .getEnabledRobots()
                 .then((robots) => {
                     setEnabledRobots(robots)
-                    setIsLoading(false)
                 })
                 .catch(() => {
                     setAlert(
@@ -251,7 +247,6 @@ export const AssetProvider: FC<Props> = ({ children }) => {
     return (
         <AssetContext.Provider
             value={{
-                isLoading,
                 enabledRobots: filteredRobots,
                 installationCode,
                 installationName,
