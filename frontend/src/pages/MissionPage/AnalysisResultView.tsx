@@ -106,7 +106,7 @@ export const AnalysisResultDialogView = ({ selectedAnalysisId, tasks }: Inspecti
                                     <StyledInfoContent>
                                         <Typography variant="caption">{TranslateText('Confidence') + ':'}</Typography>
                                         <Typography variant="body_short">
-                                            {Math.round(currentTask.inspection.analysisResult.confidence * 100) + '%'}
+                                            {Math.round(currentTask.inspection.analysisResult.confidence) + '%'}
                                         </Typography>
                                     </StyledInfoContent>
                                 )}
