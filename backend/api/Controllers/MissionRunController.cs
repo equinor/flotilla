@@ -169,6 +169,17 @@ namespace Api.Controllers
 
             foreach (var missionRun in queuedMissionRuns)
             {
+                if (missionRun.StartTime != null)
+                {
+                    logger.LogInformation(
+                        "Mission run with id {missionRunId} is queued but has a start time. The mission will be cancelled instead of deleted.",
+                        missionRun.Id
+                    );
+                    var cancelledMissionRun = await missionRunService.SetMissionRunToCancelled(
+                        missionRun.Id
+                    );
+                    continue;
+                }
                 var deletedMissionRun = await missionRunService.Delete(missionRun.Id);
                 if (deletedMissionRun is null)
                 {
