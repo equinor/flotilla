@@ -75,6 +75,8 @@ namespace Api.Services
             string failureDescription
         );
 
+        public Task<MissionRun> SetMissionRunToCancelled(string robotId);
+
         public Task UpdateCurrentRobotMissionToFailed(string robotId);
 
         public void DetachTracking(FlotillaDbContext context, MissionRun missionRun);
@@ -721,6 +723,20 @@ namespace Api.Services
                 missionRun.InspectionArea.Installation,
                 new MissionRunResponse(missionRun)
             );
+
+            await Update(missionRun);
+            return missionRun;
+        }
+
+        public async Task<MissionRun> SetMissionRunToCancelled(string missionRunId)
+        {
+            var missionRun =
+                await ReadById(missionRunId, readOnly: true)
+                ?? throw new MissionRunNotFoundException(
+                    $"Could not find mission run with ID {missionRunId}"
+                );
+
+            missionRun.Status = MissionStatus.Cancelled;
 
             await Update(missionRun);
             return missionRun;
