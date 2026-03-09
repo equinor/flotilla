@@ -47,7 +47,7 @@ if (builder.Configuration.GetSection("KeyVault").GetValue<bool>("UseKeyVault"))
 var applicationName = builder.Configuration["AppName"] ?? "FlotillaBackend";
 
 builder.Logging.ClearProviders();
-builder.Logging.AddConsole();
+builder.ConfigureLogger();
 
 builder.Services.AddMemoryCache();
 builder.Services.ConfigureDatabase(builder.Configuration, builder.Environment.EnvironmentName);
