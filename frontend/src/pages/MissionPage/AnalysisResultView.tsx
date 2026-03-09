@@ -101,16 +101,14 @@ export const AnalysisResultDialogView = ({ selectedAnalysisId, tasks }: Inspecti
                                     </Typography>
                                 </StyledInfoContent>
                             )}
-                            {currentTask.inspection.analysisResult?.value &&
-                                currentTask.inspection.analysisResult?.unit && (
-                                    <StyledInfoContent>
-                                        <Typography variant="caption">{TranslateText('Value') + ':'}</Typography>
-                                        <Typography variant="body_short">
-                                            {currentTask.inspection.analysisResult.value}
-                                            {currentTask.inspection.analysisResult.unit}
-                                        </Typography>
-                                    </StyledInfoContent>
-                                )}
+                            {currentTask.inspection.analysisResult?.value && (
+                                <StyledInfoContent>
+                                    <Typography variant="caption">{TranslateText('Value') + ':'}</Typography>
+                                    <Typography variant="body_short">
+                                        {currentTask.inspection.analysisResult.value}
+                                    </Typography>
+                                </StyledInfoContent>
+                            )}
                             {currentTask.inspection.analysisResult?.confidence && (
                                 <StyledInfoContent>
                                     <Typography variant="caption">{TranslateText('Confidence') + ':'}</Typography>
