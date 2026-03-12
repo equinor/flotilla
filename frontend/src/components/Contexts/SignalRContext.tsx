@@ -76,6 +76,7 @@ export const SignalRProvider: FC<Props> = ({ children }) => {
                     signalR.HttpTransportType.LongPolling,
             })
             .withAutomaticReconnect()
+            .configureLogging(signalR.LogLevel.Error)
             .build()
 
         newConnection.onclose((error) => {
