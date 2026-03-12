@@ -15,7 +15,7 @@
     "Please select installation": "Vennligst velg anlegg",
     "This installation does not have missions. Please create mission.": "Dette anlegget har ingen oppdrag. Vennligst lag oppdrag.",
     "Cancel": "Avbryt",
-    "Add predefined mission": "Legg til forhåndsdefinert oppdrag",
+    "Add predefined mission to queue": "Legg til forhåndsdefinert oppdrag i kø",
     "Select missions": "Velg oppdrag",
     "Select robot": "Velg robot",
     "Tasks": "Oppgaver",
