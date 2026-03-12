@@ -94,7 +94,7 @@ export const InspectionOverviewSection = () => {
     const AddPredefinedMissionsButton = () => (
         <AlignedTextButton onClick={onClickScheduleMission} disabled={isScheduleButtonDisabled} ref={anchorRef}>
             <Icon name={Icons.Add} size={16} />
-            {TranslateText('Add predefined mission')}
+            {TranslateText('Add predefined mission to queue')}
         </AlignedTextButton>
     )
 
