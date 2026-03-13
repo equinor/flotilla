@@ -10,10 +10,13 @@ import { MissionStatusType, selectMissionStatusType } from './AutoScheduleMissio
 import { tokens } from '@equinor/eds-tokens'
 import { useNavigate } from 'react-router-dom'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { Button, Typography } from '@equinor/eds-core-react'
+import { Button, Icon, Typography } from '@equinor/eds-core-react'
 import { StyledDialog } from 'components/Styles/StyledComponents'
 import { useBackendApi } from 'api/UseBackendApi'
 import { InstallationContext } from 'components/Contexts/InstallationContext'
+import { Icons } from 'utils/icons'
+import { MissionSchedulingEditDialog } from 'components/Dialogs/MissionEditDialog'
+import { MissionDefinition } from 'models/MissionDefinition'
 
 const locales = { nb }
 const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales })
@@ -173,6 +176,13 @@ const StyledDialogActions = styled(StyledDialog.Actions)`
     gap: 6px;
 `
 
+const StyledEditButton = styled(Button)`
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    height: 25px;
+`
+
 const legendItems = [
     { color: CalendarColors.Planned, label: 'Planned today' },
     { color: CalendarColors.Future, label: 'Future missions' },
@@ -186,7 +196,8 @@ export const CalendarPro = () => {
     const { installation } = useContext(InstallationContext)
     const backendApi = useBackendApi()
     const navigate = useNavigate()
-    const [dialogOpen, setDialogOpen] = useState<boolean>(false)
+    const [skipDialogOpen, setSkipDialogOpen] = useState<boolean>(false)
+    const [selectedMissionToEdit, setSelectedMissionToEdit] = useState<MissionDefinition>()
     const [selectedEvent, setSelectedEvent] = useState<any>(null)
 
     const getTargetDate = (day: DaysOfWeek, time: string) => {
@@ -238,25 +249,29 @@ export const CalendarPro = () => {
             })
     }, [missionDefinitions])
 
-    const handleCloseDialog = () => {
-        setDialogOpen(false)
+    const handleCloseSkipDialog = () => {
+        setSkipDialogOpen(false)
     }
 
-    const handleSelectEvent = (event: any) => {
+    const handleSelectSkipEvent = (event: any) => {
         setSelectedEvent(event)
-        setDialogOpen(true)
+        setSkipDialogOpen(true)
+    }
+
+    const handleSelectEditEvent = (event: any) => {
+        setSelectedMissionToEdit(missionDefinitions.find((m) => m.id === event.metadata.missionId))
     }
 
     const handleAutoScheduleSkip = () => {
         if (selectedEvent) {
             backendApi.skipAutoScheduledMission(selectedEvent.metadata.missionId, selectedEvent.metadata.time)
         }
-        setDialogOpen(false)
+        setSkipDialogOpen(false)
         setSelectedEvent(null)
     }
 
-    const renderDialog = () => (
-        <StyledDialog open={dialogOpen} onClose={handleCloseDialog}>
+    const renderSkipDialog = () => (
+        <StyledDialog open={skipDialogOpen} onClose={handleCloseSkipDialog}>
             <StyledDialog.Header>
                 <Typography variant="h3">
                     {TranslateText('SkipAutoMission') + ' ' + TranslateText('Mission')}
@@ -269,7 +284,7 @@ export const CalendarPro = () => {
                 ])}
             </StyledDialog.Content>
             <StyledDialogActions>
-                <Button onClick={handleCloseDialog} variant="outlined" color="primary">
+                <Button onClick={handleCloseSkipDialog} variant="outlined" color="primary">
                     {TranslateText('Cancel')}
                 </Button>
                 <Button onClick={handleAutoScheduleSkip} variant="outlined" color="danger">
@@ -283,8 +298,11 @@ export const CalendarPro = () => {
         return (
             <StyledEvent>
                 <span>{event.title}</span>
+                <StyledEditButton variant="ghost_icon" onClick={() => handleSelectEditEvent(event)}>
+                    <Icon name={Icons.Edit} size={16} />
+                </StyledEditButton>
                 {event.skip && (
-                    <StyledSkipButton onClick={() => handleSelectEvent(event)}>
+                    <StyledSkipButton onClick={() => handleSelectSkipEvent(event)}>
                         {TranslateText('SkipAutoMission')}
                     </StyledSkipButton>
                 )}
@@ -349,7 +367,14 @@ export const CalendarPro = () => {
                     }
                 />
             </CalendarWrapper>
-            {dialogOpen && renderDialog()}
+            {skipDialogOpen && renderSkipDialog()}
+            {selectedMissionToEdit && (
+                <MissionSchedulingEditDialog
+                    mission={selectedMissionToEdit}
+                    isOpen={!!selectedMissionToEdit}
+                    onClose={() => setSelectedMissionToEdit(undefined)}
+                />
+            )}
         </>
     )
 }
