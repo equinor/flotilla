@@ -12,12 +12,13 @@ import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 import { useBackendApi } from 'api/UseBackendApi'
+import { MissionSchedulingEditDialog } from 'components/Dialogs/MissionEditDialog'
 
 const StyledTableRow = styled.div`
     display: grid;
     align-items: center;
     gap: 1rem;
-    grid-template-columns: 100px auto 100px;
+    grid-template-columns: 100px auto 16px 100px;
 `
 
 const StyledDialogActions = styled(StyledDialog.Actions)`
@@ -79,7 +80,8 @@ export const AutoScheduleMissionTableRow = ({
     const { TranslateText } = useLanguageContext()
     const backendApi = useBackendApi()
     const { installationCode } = useAssetContext()
-    const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
+    const [isSkipDialogOpen, setIsSkipDialogOpen] = useState<boolean>(false)
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState<boolean>(false)
     const referenceElement = useRef<HTMLButtonElement>(null)
     const [isOpen, setIsOpen] = useState(false)
 
@@ -99,7 +101,7 @@ export const AutoScheduleMissionTableRow = ({
 
     const handleAutoScheduleSkip = () => {
         backendApi.skipAutoScheduledMission(mission.id, time)
-        setIsDialogOpen(false)
+        setIsSkipDialogOpen(false)
     }
 
     return (
@@ -143,20 +145,27 @@ export const AutoScheduleMissionTableRow = ({
                             </>
                         )}
                     </StyledMissionInfo>
+                    <Button
+                        style={{ maxWidth: '100px' }}
+                        variant="ghost_icon"
+                        onClick={() => setIsEditDialogOpen(true)}
+                    >
+                        <Icon name={Icons.Edit} size={16} color={typographyColor} />
+                    </Button>
                     {(missionStatusType === MissionStatusType.ScheduledJob ||
                         missionStatusType === MissionStatusType.SkippedJob) && (
                         <Button
                             style={{ maxWidth: '100px' }}
                             variant="ghost"
                             disabled={missionStatusType === MissionStatusType.SkippedJob}
-                            onClick={() => setIsDialogOpen(true)}
+                            onClick={() => setIsSkipDialogOpen(true)}
                         >
                             {missionStatusType === MissionStatusType.ScheduledJob
                                 ? TranslateText('SkipAutoMission')
                                 : TranslateText('Skipped')}
                         </Button>
                     )}
-                    <StyledDialog open={isDialogOpen}>
+                    <StyledDialog open={isSkipDialogOpen}>
                         <StyledDialog.Header>
                             <StyledDialog.Title>
                                 {TranslateText('SkipAutoMission') + ' ' + TranslateText('Mission')}
@@ -171,7 +180,7 @@ export const AutoScheduleMissionTableRow = ({
                             </Typography>
                         </StyledDialog.CustomContent>
                         <StyledDialogActions>
-                            <Button onClick={() => setIsDialogOpen(false)} variant="outlined" color="primary">
+                            <Button onClick={() => setIsSkipDialogOpen(false)} variant="outlined" color="primary">
                                 {TranslateText('Close')}
                             </Button>
                             <Button onClick={handleAutoScheduleSkip} variant="outlined" color="danger">
@@ -179,6 +188,11 @@ export const AutoScheduleMissionTableRow = ({
                             </Button>
                         </StyledDialogActions>
                     </StyledDialog>
+                    <MissionSchedulingEditDialog
+                        mission={mission}
+                        isOpen={isEditDialogOpen}
+                        onClose={() => setIsEditDialogOpen(false)}
+                    />
                 </StyledTableRow>
             </Table.Cell>
         </Table.Row>
