@@ -363,5 +363,13 @@
     "Confidence": "Confidence",
     "Analysis": "Analysis",
     "Last seen": "Last seen",
-    "CO2 consentration: {0}%": "CO2 consentration: {0}%"
+    "CO2 consentration: {0}%": "CO2 consentration: {0}%",
+    "Statistics info text": "Calculation explanation: The mission success rate is based only on the ratio of successful to failed missions. Partially successful and cancelled missions are not included. The task success rate also only considers this ratio. Note that the task statistics include all tasks that were completed, including tasks from cancelled missions.",
+    "Successful Missions": "Successful Missions",
+    "Partially Successful Missions": "Partially Successful Missions",
+    "Failed Missions": "Failed Missions",
+    "Mission Success Rate": "Mission Success Rate",
+    "Successful Tasks": "Successful Tasks",
+    "Failed Tasks": "Failed Tasks",
+    "Task Success Rate": "Suksessrate for oppgaver"
 }

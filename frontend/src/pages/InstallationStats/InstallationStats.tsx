@@ -3,6 +3,7 @@ import { TaskStatus } from 'models/Task'
 
 interface MissionStats {
     successCount: number
+    partiallySuccessfulCount: number
     failureCount: number
     totalTasksSuccess: number
     totalTasksFailure: number
@@ -21,6 +22,7 @@ export function computeMissionStats(missions: Mission[]): GroupedStats {
         if (!byRobot[robotKey]) {
             byRobot[robotKey] = {
                 successCount: 0,
+                partiallySuccessfulCount: 0,
                 failureCount: 0,
                 totalTasksSuccess: 0,
                 totalTasksFailure: 0,
@@ -29,7 +31,9 @@ export function computeMissionStats(missions: Mission[]): GroupedStats {
 
         if (mission.status === MissionStatus.Successful) {
             byRobot[robotKey].successCount++
-        } else if (mission.status === MissionStatus.Failed) {
+        } else if (mission.status === MissionStatus.PartiallySuccessful) {
+            byRobot[robotKey].partiallySuccessfulCount++
+        } else if (mission.status === MissionStatus.Failed || mission.status === MissionStatus.Aborted) {
             byRobot[robotKey].failureCount++
         }
 
