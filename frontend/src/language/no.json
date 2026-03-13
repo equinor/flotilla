@@ -364,5 +364,13 @@
     "Value": "Verdi",
     "Analysis": "Analyse",
     "Last seen": "Sist sett",
-    "CO2 consentration: {0}%": "CO2 konsentrasjon: {0}%"
+    "CO2 consentration: {0}%": "CO2 konsentrasjon: {0}%",
+    "Statistics info text": "Utregningsforklaring: Suksessraten for oppdrag baserer seg kun på forholdet mellom vellykkede og mislykkede oppdrag.  Delvis vellykkede og kansellerte oppdrag inkluderes ikke. Suksessraten til oppgavene ser også kun på dette forholdet. Merk at oppgavestatistikken inkluderer alle oppgaver som ble fullført, inkludert oppgaver fra kansellerte oppdrag.",
+    "Successful Missions": "Vellykkede oppdrag",
+    "Partially Successful Missions": "Delvis vellykkede oppdrag",
+    "Failed Missions": "Mislykkede oppdrag",
+    "Mission Success Rate": "Suksessrate for oppdrag",
+    "Successful Tasks": "Vellykkede oppgaver",
+    "Failed Tasks": "Mislykkede oppgaver",
+    "Task Success Rate": "Suksessrate for oppgaver"
 }
