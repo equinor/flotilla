@@ -147,12 +147,7 @@ export const MissionSchedulingEditDialog = ({ mission, isOpen, onClose }: Missio
                         <Button onClick={onClose} variant="outlined" color="primary">
                             {TranslateText('Cancel')}
                         </Button>
-                        <Button
-                            onClick={onSubmit}
-                            disabled={schedulingTimes.length === 0}
-                            variant="contained"
-                            color="primary"
-                        >
+                        <Button onClick={onSubmit} variant="contained" color="primary">
                             {TranslateText('Update')}
                         </Button>
                     </ButtonSection>
@@ -375,7 +370,7 @@ const SelectedTimeDaySummary = ({
         <StyledSummary>
             <Typography variant="h6">{TranslateText('Selected times')}</Typography>
             {schedulingTimes.length === 0 && (
-                <Typography color="warning">{TranslateText('No times have been selected. Please add time')}</Typography>
+                <Typography color="warning">{TranslateText('No times have been selected')}</Typography>
             )}
             {allDays.map((day) => (
                 <div key={`Summary ${day}`}>
