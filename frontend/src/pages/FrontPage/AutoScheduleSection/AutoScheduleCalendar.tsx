@@ -195,7 +195,9 @@ export const CalendarPro = () => {
         const offset = (allDaysStartingSunday.indexOf(day) - today.getDay() + 7) % 7
         const targetDate = new Date(today)
         targetDate.setDate(today.getDate() + offset)
-        const [hours, minutes] = time.split(':').map(Number)
+        const hours = time.split(':').map(Number)[0]
+        let minutes = time.split(':').map(Number)[1]
+        if (hours === 23) minutes = 0 // To prevent wrapping over to next day
         targetDate.setHours(hours, minutes, 0, 0)
         return targetDate
     }
