@@ -15,7 +15,6 @@ const StyledButtonGroup = styled(ButtonGroup)`
 `
 
 const StyledTable = styled(Table)`
-    width: 70%;
     margin-bottom: 2rem;
 `
 
@@ -96,30 +95,38 @@ export const MissionStats = () => {
 
     if (loading) return <StyledTypography variant="h4">Loading mission statistics...</StyledTypography>
 
-    const renderStatsTable = (stats: GroupedStats) => (
+    const StatsTable = ({ stats }: { stats: GroupedStats }) => (
         <StyledTable>
             <Table.Head>
                 <Table.Row>
-                    <Table.Cell>Robot</Table.Cell>
-                    <Table.Cell>Successful Missions</Table.Cell>
-                    <Table.Cell>Failed Missions</Table.Cell>
-                    <Table.Cell>Success %</Table.Cell>
-                    <Table.Cell>Successful Tasks</Table.Cell>
-                    <Table.Cell>Failed Tasks</Table.Cell>
+                    <Table.Cell>{TranslateText('Robot')}</Table.Cell>
+                    <Table.Cell>{TranslateText('Successful Missions')}</Table.Cell>
+                    <Table.Cell>{TranslateText('Partially Successful Missions')}</Table.Cell>
+                    <Table.Cell>{TranslateText('Failed Missions')}</Table.Cell>
+                    <Table.Cell>{TranslateText('Mission Success Rate')}</Table.Cell>
+                    <Table.Cell>{TranslateText('Successful Tasks')}</Table.Cell>
+                    <Table.Cell>{TranslateText('Failed Tasks')}</Table.Cell>
+                    <Table.Cell>{TranslateText('Task Success Rate')}</Table.Cell>
                 </Table.Row>
             </Table.Head>
             <Table.Body>
                 {Object.entries(stats).map(([key, stat]) => {
                     const totalMissions = stat.successCount + stat.failureCount
-                    const successPercentage = totalMissions > 0 ? (stat.successCount / totalMissions) * 100 + '%' : '—'
+                    const successPercentage =
+                        totalMissions > 0 ? ((stat.successCount / totalMissions) * 100).toFixed(1) + '%' : '—'
+                    const totalTasks = stat.totalTasksSuccess + stat.totalTasksFailure
+                    const taskSuccessPercentage =
+                        totalTasks > 0 ? ((stat.totalTasksSuccess / totalTasks) * 100).toFixed(1) + '%' : '—'
                     return (
                         <Table.Row key={key}>
                             <Table.Cell>{key}</Table.Cell>
                             <Table.Cell>{stat.successCount}</Table.Cell>
+                            <Table.Cell>{stat.partiallySuccessfulCount}</Table.Cell>
                             <Table.Cell>{stat.failureCount}</Table.Cell>
                             <Table.Cell>{successPercentage}</Table.Cell>
                             <Table.Cell>{stat.totalTasksSuccess}</Table.Cell>
                             <Table.Cell>{stat.totalTasksFailure}</Table.Cell>
+                            <Table.Cell>{taskSuccessPercentage}</Table.Cell>
                         </Table.Row>
                     )
                 })}
@@ -129,6 +136,9 @@ export const MissionStats = () => {
 
     return (
         <>
+            <StyledTypography variant="body_short" color="text_secondary">
+                {TranslateText('Statistics info text')}
+            </StyledTypography>
             <StyledButtonGroup>
                 {timeSpans.map((option) => (
                     <Button
@@ -140,7 +150,7 @@ export const MissionStats = () => {
                     </Button>
                 ))}
             </StyledButtonGroup>
-            {renderStatsTable(robotStats)}
+            <StatsTable stats={robotStats} />
         </>
     )
 }
