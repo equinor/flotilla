@@ -95,16 +95,26 @@ const defaultMissionFilterInterface: IMissionFilterContext = {
 
 const mapURLtoFilter = (searchParams: URLSearchParams): IMissionFilterContext['filterState'] => {
     const newFilter: IMissionFilterContext['filterState'] = defaultMissionFilterInterface.filterState
-    searchParams.entries().forEach((searchParam: [string, string]) => {
-        if (!searchParam[1] || searchParam[1] === '[]') return
-        try {
-            const parsedParams = JSON.parse(searchParam[1])
-            newFilter[searchParam[0] as keyof typeof newFilter] = parsedParams as any
-        } catch {
-            return
-        }
-    })
+    searchParams
+        .entries()
+        .filter(
+            (searchParam: [string, string]) => searchParam[0] !== 'page' && searchParam[1] && searchParam[1] !== '[]'
+        )
+        .forEach((searchParam: [string, string]) => {
+            try {
+                const parsedParams = JSON.parse(searchParam[1])
+                newFilter[searchParam[0] as keyof typeof newFilter] = parsedParams as any
+            } catch {
+                return
+            }
+        })
     return newFilter
+}
+
+const mapURLtoPage = (searchParams: URLSearchParams): IMissionFilterContext['page'] => {
+    const newPage = searchParams.entries().find((searchParam: [string, string]) => searchParam[0] == 'page')
+    if (!newPage || !parseInt(newPage[1])) return defaultMissionFilterInterface.page
+    return parseInt(newPage[1])
 }
 
 const MissionFilterContext = createContext<IMissionFilterContext>(defaultMissionFilterInterface)
@@ -112,20 +122,31 @@ const MissionFilterContext = createContext<IMissionFilterContext>(defaultMission
 export const MissionFilterProvider: FC<Props> = ({ children }) => {
     const { TranslateText } = useLanguageContext()
     const [searchParams, setSearchParams] = useSearchParams()
-    const [page, setPage] = useState<number>(defaultMissionFilterInterface.page)
+    const [page, setPage] = useState<number>(mapURLtoPage(searchParams))
     const [filterError, setFilterError] = useState<string>(defaultMissionFilterInterface.filterError)
     const [filterIsSet, setFilterIsSet] = useState<boolean>(defaultMissionFilterInterface.filterIsSet)
     const [filterState, setFilterState] = useState<IMissionFilterContext['filterState']>(mapURLtoFilter(searchParams))
 
     useEffect(() => {
-        const newParams = new URLSearchParams()
-        Object.entries(filterState).forEach((entry) => {
-            if (entry[1]) newParams.set(entry[0], JSON.stringify(entry[1]))
-        })
-        setSearchParams(newParams, { replace: true })
+        setSearchParams(
+            (oldParams) => {
+                Object.entries(filterState).forEach((entry) => {
+                    if (entry[1]) oldParams.set(entry[0], JSON.stringify(entry[1]))
+                })
+                return oldParams
+            },
+            { replace: true }
+        )
     }, [filterState])
 
     const switchPage = (newPage: number) => {
+        setSearchParams(
+            (oldParams) => {
+                oldParams.set('page', JSON.stringify(newPage))
+                return oldParams
+            },
+            { replace: true }
+        )
         setPage(newPage)
     }
 
