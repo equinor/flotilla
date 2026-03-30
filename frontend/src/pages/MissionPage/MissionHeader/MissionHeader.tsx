@@ -19,7 +19,7 @@ import { useAssetContext } from 'components/Contexts/AssetContext'
 const HeaderSection = styled(Card)`
     width: 100%;
     padding: 15px 0px 15px 0px;
-    top: 60px;
+    top: 58px;
     position: sticky;
     z-index: 1;
     box-shadow: none;
