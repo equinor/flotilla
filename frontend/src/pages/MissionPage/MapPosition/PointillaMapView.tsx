@@ -43,6 +43,8 @@ const StyledElements = styled.div`
 const StyledMapContainer = styled(MapContainer)`
     height: 500px;
     width: 500px;
+    position: relative;
+    z-index: 0;
 
     @media (max-width: ${phone_width}) {
         height: 500px;
