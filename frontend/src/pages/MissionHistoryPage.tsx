@@ -187,6 +187,7 @@ const MissionHistoryViewComponent = () => {
         backendApi
             .getMissionRuns({
                 ...formattedFilter,
+                installationCode: installationCode,
                 pageSize: pageSize,
                 pageNumber: page ?? 1,
                 orderBy: 'EndTime desc, Name',

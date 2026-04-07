@@ -71,6 +71,7 @@ const useMissionDefinitions = (): IMissionDefinitionsContext => {
         const fetchAndUpdateMissionDefinitions = () => {
             backendApi
                 .getMissionDefinitions({
+                    installationCode: installationCode,
                     pageSize: 100,
                     orderBy: 'InstallationCode installationCode',
                 })

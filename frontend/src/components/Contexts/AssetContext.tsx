@@ -41,7 +41,7 @@ const defaultAssetState = {
     switchInstallation: () => {},
 }
 
-export const AssetContext = createContext<IAssetContext>(defaultAssetState)
+const AssetContext = createContext<IAssetContext>(defaultAssetState)
 
 export const AssetProvider: FC<Props> = ({ children }) => {
     const [enabledRobots, setEnabledRobots] = useState<RobotWithoutTelemetry[]>(defaultAssetState.enabledRobots)

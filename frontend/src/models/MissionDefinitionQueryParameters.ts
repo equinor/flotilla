@@ -1,4 +1,5 @@
 export interface MissionDefinitionQueryParameters {
+    installationCode: string
     nameSearch?: string
     robotNameSearch?: string
     inspectionArea?: string

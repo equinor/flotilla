@@ -171,7 +171,11 @@ export const AlertProvider: FC<Props> = ({ children }) => {
         const updateRecentFailedMissions = () => {
             const lastDismissTime: Date = getLastDismissalTime()
             backendApi
-                .getMissionRuns({ statuses: [MissionStatus.Failed], pageSize: pageSize })
+                .getMissionRuns({
+                    installationCode: installationCode,
+                    statuses: [MissionStatus.Failed],
+                    pageSize: pageSize,
+                })
                 .then((missions) => {
                     const newRecentFailedMissions = missions.content.filter(
                         (m) =>

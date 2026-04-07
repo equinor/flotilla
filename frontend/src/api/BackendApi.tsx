@@ -15,10 +15,7 @@ import { PointillaMapInfo } from 'models/PointillaMapInfo'
 import { Installation } from 'models/Installation'
 
 export class BackendApi {
-    constructor(
-        private readonly api: BackendAPICaller,
-        private readonly installationCode: string | null
-    ) {}
+    constructor(private readonly api: BackendAPICaller) {}
 
     async postControlMissionRequest(path: string, robotId: string): Promise<void> {
         const body = { robotId: robotId }
@@ -46,7 +43,7 @@ export class BackendApi {
         let path: string = 'missions/runs?'
 
         // Always filter by currently selected installation
-        if (this.installationCode) path = path + 'InstallationCode=' + this.installationCode + '&'
+        path = path + 'InstallationCode=' + parameters.installationCode + '&'
 
         if (parameters.statuses) {
             parameters.statuses.forEach((status) => {
@@ -83,7 +80,7 @@ export class BackendApi {
         return { pagination: pagination, content: result.content }
     }
 
-    async getAvailableMissions(installationCode: string = ''): Promise<CondensedMissionDefinition[]> {
+    async getAvailableMissions(installationCode: string): Promise<CondensedMissionDefinition[]> {
         const path: string = 'mission-loader/available-missions/' + installationCode
         const result = await this.api.GET<MissionDefinition[]>(path).catch(handleError('GET', path))
         return result.content
@@ -95,7 +92,7 @@ export class BackendApi {
         let path: string = 'missions/definitions?'
 
         // Always filter by currently selected installation
-        if (this.installationCode) path = path + 'InstallationCode=' + this.installationCode + '&'
+        path = path + 'InstallationCode=' + parameters.installationCode + '&'
 
         if (parameters.inspectionArea) path = path + 'InspectionArea=' + parameters.inspectionArea + '&'
         if (parameters.sourceId) path = path + 'SourceId=' + parameters.sourceId + '&'
