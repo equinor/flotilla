@@ -87,6 +87,7 @@ const useMissionRuns = (): IMissionRunsContext => {
     const backendApi = useBackendApi()
 
     const fetchMissionRuns = async (params: {
+        installationCode: string
         statuses: MissionStatus[]
         pageSize: number
         orderBy: string
@@ -138,6 +139,7 @@ const useMissionRuns = (): IMissionRunsContext => {
         if (!isAuthenticated) return
         const fetchAndUpdateMissions = async () => {
             const ongoing = await fetchMissionRuns({
+                installationCode: installationCode,
                 statuses: [MissionStatus.Ongoing, MissionStatus.Pending, MissionStatus.Paused],
                 pageSize: 100,
                 orderBy: 'StartTime desc',
@@ -159,6 +161,7 @@ const useMissionRuns = (): IMissionRunsContext => {
             setOngoingMissions(ongoing ?? [])
 
             const queue = await fetchMissionRuns({
+                installationCode: installationCode,
                 statuses: [MissionStatus.Queued],
                 pageSize: 100,
                 orderBy: 'CreationTime',

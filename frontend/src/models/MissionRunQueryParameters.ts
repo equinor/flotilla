@@ -2,6 +2,7 @@ import { InspectionType } from './Inspection'
 import { MissionStatus } from './Mission'
 
 export interface MissionRunQueryParameters {
+    installationCode: string
     statuses?: MissionStatus[]
     missionId?: string
     robotId?: string
