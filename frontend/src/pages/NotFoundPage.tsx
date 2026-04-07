@@ -1,14 +1,10 @@
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Button, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import notfound from 'mediaAssets/404notfound.png'
-import { config } from 'config'
 import { StyledPage } from 'components/Styles/StyledComponents'
 import { Header } from 'components/Header/Header'
 import { phone_width } from 'utils/constants'
-import { useEffect } from 'react'
-import { useAssetContext } from 'components/Contexts/AssetContext'
-import { Installation } from 'models/Installation'
 
 const StyledPageContent = styled.div`
     position: absolute;
@@ -54,35 +50,10 @@ const StyledButton = styled(Button)`
 
 export const PageNotFound = () => {
     const navigate = useNavigate()
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [searchParams, setSearchParams] = useSearchParams()
-    const location = useLocation()
-    const { switchInstallation, installationCode, activeInstallations } = useAssetContext()
-
-    useEffect(() => {
-        if (activeInstallations) {
-            const matches = new RegExp('/([A-Z]+):').exec(location.pathname)
-            if (!matches || matches.length < 1) return
-            const installationCode_ = matches[1]
-            if (installationCode_ === installationCode) return
-            const installation_: Installation | undefined = activeInstallations.find(
-                (i) => i.installationCode === installationCode_
-            )
-            if (installation_) {
-                switchInstallation(installation_.id)
-            }
-        }
-    }, [activeInstallations])
-
-    useEffect(() => {
-        let params = ''
-        if (searchParams && searchParams.size > 0) params = `?${searchParams.toString()}`
-        if (installationCode) navigate(`${config.FRONTEND_BASE_ROUTE}${location.pathname}${params}`)
-    }, [installationCode])
 
     return (
         <>
-            <Header page={'404'} />
+            <Header />
             <StyledPage>
                 <StyledPageContent>
                     <StyledImage src={notfound} />
@@ -90,7 +61,7 @@ export const PageNotFound = () => {
                         <StyledTypography variant="h3">
                             {"We couldn't find the page you're looking for."}
                         </StyledTypography>
-                        <StyledButton color="secondary" onClick={() => navigate(`${config.FRONTEND_BASE_ROUTE}/`)}>
+                        <StyledButton color="secondary" onClick={() => navigate(`/`)}>
                             {"Let's go back"}
                         </StyledButton>
                     </StyledActions>

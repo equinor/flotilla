@@ -1,13 +1,11 @@
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MissionDefinitionHeader } from './MissionDefinitionHeader/MissionDefinitionHeader'
-import { BackButton } from 'utils/BackButton'
 import { Header } from 'components/Header/Header'
 import { MissionDefinition } from 'models/MissionDefinition'
 import { Button, Typography, Icon, Card } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { MissionDefinitionUpdateForm } from 'models/MissionDefinitionUpdateForm'
-import { config } from 'config'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
 import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
@@ -25,8 +23,8 @@ import {
     MissionSchedulingEditDialog,
 } from 'components/Dialogs/MissionEditDialog'
 import { formulateAutoScheduleFrequencyAsString } from 'utils/language'
-import { useAssetContext } from 'components/Contexts/AssetContext'
 import { useBackendApi } from 'api/UseBackendApi'
+import { InstallationContext } from 'components/Contexts/InstallationContext'
 
 const StyledCard = styled(Card)`
     display: flex;
@@ -203,18 +201,18 @@ const MissionDefinitionPageBody = ({ missionDefinition }: { missionDefinition: M
 
 export const MissionDefinitionPage = ({ missionId }: { missionId: string }) => {
     const { missionDefinitions } = useMissionDefinitionsContext()
-    const { installationCode } = useAssetContext()
+    const { installation } = useContext(InstallationContext)
     const { TranslateText } = useLanguageContext()
+    const { alerts } = useAlertContext()
     const navigate = useNavigate()
 
     const selectedMissionDefinition = missionDefinitions.find((m) => m.id === missionId)
 
     return (
         <>
-            <Header page={'mission'} />
+            <Header alertDict={alerts} installation={installation} />
             {selectedMissionDefinition !== undefined && (
                 <StyledPage>
-                    <BackButton />
                     <StyledTopComponents>
                         <MissionDefinitionHeader missionDefinition={selectedMissionDefinition} />
                         <StyledButton
@@ -222,7 +220,7 @@ export const MissionDefinitionPage = ({ missionId }: { missionId: string }) => {
                             disabled={!selectedMissionDefinition.lastSuccessfulRun}
                             onClick={() =>
                                 navigate(
-                                    `${config.FRONTEND_BASE_ROUTE}/${installationCode}:mission?id=${selectedMissionDefinition.lastSuccessfulRun!.id}`
+                                    `/${installation.installationCode}/mission/${selectedMissionDefinition.lastSuccessfulRun!.id}`
                                 )
                             }
                         >

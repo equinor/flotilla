@@ -1,5 +1,4 @@
 import { Button, Card, Dialog, Icon, Typography, DotProgress } from '@equinor/eds-core-react'
-import { config } from 'config'
 import { Mission } from 'models/Mission'
 import styled from 'styled-components'
 import { useNavigate } from 'react-router-dom'
@@ -69,7 +68,7 @@ export const MissionQueueCard = ({ order, mission, onDeleteMission }: MissionQue
     const navigate = useNavigate()
     const { installationCode } = useAssetContext()
     const routeChange = () => {
-        const path = `${config.FRONTEND_BASE_ROUTE}/${installationCode}:mission?id=${mission.id}`
+        const path = `/${installationCode}/mission/${mission.id}`
         navigate(path)
     }
     const [confirmDeleteDialogOpen, setConfirmDeleteDialogOpen] = useState<boolean>(false)

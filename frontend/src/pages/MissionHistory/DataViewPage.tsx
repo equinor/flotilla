@@ -6,10 +6,15 @@ import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { PaginationHeader } from 'models/PaginatedResponse'
 import { useMissionFilterContext, MissionFilterProvider } from 'components/Contexts/MissionFilterContext'
-import { StyledTableBody, StyledTableCaption, StyledTableCell } from 'components/Styles/StyledComponents'
+import {
+    StyledLoading,
+    StyledPagination,
+    StyledTableBody,
+    StyledTableCaption,
+    StyledTableCell,
+} from 'components/Styles/StyledComponents'
 import { SignalREventLabels, useSignalRContext } from 'components/Contexts/SignalRContext'
 import { useAssetContext } from 'components/Contexts/AssetContext'
-import { StyledLoading, StyledPagination } from './MissionHistoryView'
 import { useBackendApi } from 'api/UseBackendApi'
 
 enum InspectionTableColumns {

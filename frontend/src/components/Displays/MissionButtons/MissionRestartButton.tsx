@@ -1,6 +1,5 @@
 import { Button, EdsProvider, Icon, Menu } from '@equinor/eds-core-react'
 import { Icons } from 'utils/icons'
-import { config } from 'config'
 import { useNavigate } from 'react-router-dom'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import styled from 'styled-components'
@@ -46,7 +45,7 @@ export const MissionRestartButton = ({ mission, hasFailedTasks, smallButton }: M
 
     const navigate = useNavigate()
     const navigateToHome = () => {
-        const path = `${config.FRONTEND_BASE_ROUTE}/${installationCode}:front-page`
+        const path = `/${installationCode}`
         navigate(path)
     }
     const backendApi = useBackendApi()

@@ -5,7 +5,6 @@ import { InspectionArea } from 'models/InspectionArea'
 import { tokens } from '@equinor/eds-tokens'
 import { MissionDefinition } from 'models/MissionDefinition'
 import { useNavigate } from 'react-router-dom'
-import { config } from 'config'
 import { Icons } from 'utils/icons'
 import { Inspection } from './InspectionSection'
 import { compareInspections } from './InspectionUtilities'
@@ -181,12 +180,7 @@ const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialo
         <Table.Row key={mission.id}>
             <Table.Cell id={InspectionTableColumns.Status}>{status}</Table.Cell>
             <Table.Cell id={InspectionTableColumns.Name}>
-                <Typography
-                    link
-                    onClick={() =>
-                        navigate(`${config.FRONTEND_BASE_ROUTE}/${installationCode}:missiondefinition?id=${mission.id}`)
-                    }
-                >
+                <Typography link onClick={() => navigate(`/${installationCode}/missiondefinition/${mission.id}`)}>
                     {mission.name}
                 </Typography>
             </Table.Cell>

@@ -1,4 +1,3 @@
-import { config } from 'config'
 import { Mission, MissionStatus } from 'models/Mission'
 import { MissionStatusDisplay } from 'components/Displays/MissionDisplays/MissionStatusDisplay'
 import { useNavigate } from 'react-router-dom'
@@ -19,7 +18,7 @@ const FailedMission = ({ missions }: MissionsProps) => {
     const { installationCode } = useAssetContext()
     const navigate = useNavigate()
     const goToMission = () => {
-        const path = `${config.FRONTEND_BASE_ROUTE}/${installationCode}:mission?id=${mission.id}`
+        const path = `/${installationCode}/mission/${mission.id}`
         navigate(path)
     }
 
@@ -36,7 +35,7 @@ const SeveralFailedMissions = ({ missions }: MissionsProps) => {
     const { installationCode } = useAssetContext()
     const navigate = useNavigate()
     const goToHistory = () => {
-        const path = `${config.FRONTEND_BASE_ROUTE}/${installationCode}:history`
+        const path = `/${installationCode}/history`
         navigate(path)
     }
 

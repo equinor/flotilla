@@ -8,7 +8,6 @@ import { RobotImage } from 'components/Displays/RobotDisplays/RobotImage'
 import { useNavigate } from 'react-router-dom'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { PressureStatusDisplay } from 'components/Displays/RobotDisplays/PressureStatusDisplay'
-import { config } from 'config'
 import { StyledButton, AttributeTitleTypography } from 'components/Styles/StyledComponents'
 import { Icons } from 'utils/icons'
 import { useAssetContext } from 'components/Contexts/AssetContext'
@@ -109,7 +108,7 @@ export const RobotCard = ({ robot }: RobotCardProps) => {
     const { TranslateText } = useLanguageContext()
     const { installationCode } = useAssetContext()
     const goToRobot = () => {
-        const path = `${config.FRONTEND_BASE_ROUTE}/${installationCode}:robot?id=${robot.id}`
+        const path = `/${installationCode}/robot/${robot.id}`
         navigate(path)
     }
 

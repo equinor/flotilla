@@ -1,9 +1,8 @@
 import { VideoStreamWindow } from 'pages/MissionPage/VideoStream/VideoStreamWindow'
 import { Mission } from 'models/Mission'
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { MissionHeader, SimpleMissionHeader } from './MissionHeader/MissionHeader'
-import { BackButton } from 'utils/BackButton'
 import { Header } from 'components/Header/Header'
 import { SignalREventLabels, useSignalRContext } from 'components/Contexts/SignalRContext'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
@@ -17,8 +16,8 @@ import { InspectionOverviewSection } from '../InspectionReportPage/InspectionOve
 import { TaskTableAndMap } from './TaskTableAndMap'
 import { AnalysisResultDialogView } from './AnalysisResultView'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { config } from 'config'
 import { useBackendApi } from 'api/UseBackendApi'
+import { InstallationContext } from 'components/Contexts/InstallationContext'
 
 const StyledMissionPageContent = styled.div`
     display: flex;
@@ -109,10 +108,10 @@ const useMissionSelector = (missionId: string | undefined, inspectionId: string 
                     setSelectedMission(mission)
                 })
                 .catch(() => {
-                    navigate(`${config.FRONTEND_BASE_ROUTE}/page-not-found`)
+                    navigate(`/not-found`)
                 })
         } else {
-            navigate(`${config.FRONTEND_BASE_ROUTE}/page-not-found`)
+            navigate(`/not-found`)
         }
     }, [missionId])
 
@@ -128,13 +127,14 @@ export const MissionPage = ({
     inspectionId: string | undefined
     analysisId: string | undefined
 }) => {
-    const { selectedMission, videoMediaStreams } = useMissionSelector(missionId, inspectionId ?? analysisId)
+    const { selectedMission, videoMediaStreams } = useMissionSelector(missionId, undefined)
+    const { alerts } = useAlertContext()
+    const { installation } = useContext(InstallationContext)
 
     return (
         <>
-            <Header page={'mission'} />
+            <Header alertDict={alerts} installation={installation} />
             <StyledPage>
-                <BackButton />
                 {selectedMission !== undefined && (
                     <StyledMissionPageContent>
                         <StyledCardsWidth>
@@ -179,7 +179,6 @@ export const SimpleMissionPage = ({
 
     return (
         <StyledPage>
-            <BackButton />
             {selectedMission !== undefined && (
                 <StyledMissionPageContent>
                     <StyledCardsWidth>

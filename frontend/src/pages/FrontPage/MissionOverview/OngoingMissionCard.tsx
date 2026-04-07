@@ -1,5 +1,4 @@
 import { Button, Icon, Typography } from '@equinor/eds-core-react'
-import { config } from 'config'
 import { tokens } from '@equinor/eds-tokens'
 import { Mission, MissionStatus } from 'models/Mission'
 import styled from 'styled-components'
@@ -146,7 +145,7 @@ export const OngoingMissionCard = ({ mission, isOpen, setIsOpen }: MissionProps)
     const { installationCode } = useAssetContext()
     const navigate = useNavigate()
     const routeChange = () => {
-        const path = `${config.FRONTEND_BASE_ROUTE}/${installationCode}:mission?id=${mission.id}`
+        const path = `/${installationCode}/mission/${mission.id}`
         navigate(path)
     }
 

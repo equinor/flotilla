@@ -1,23 +1,33 @@
-import { CircularProgress, Pagination, Table, Typography, Chip, Button, Dialog } from '@equinor/eds-core-react'
+import { InstallationContext } from 'components/Contexts/InstallationContext'
+import { Header } from 'components/Header/Header'
+import { NavBar } from 'components/Header/NavBar'
+import { useContext } from 'react'
+import { CircularProgress, Table, Typography, Chip, Button, Dialog } from '@equinor/eds-core-react'
 import { Mission, MissionStatus, MissionStatusFilterOptions } from 'models/Mission'
 import { useCallback, useEffect, useState } from 'react'
-import { HistoricMissionCard } from './HistoricMissionCard'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { PaginationHeader } from 'models/PaginatedResponse'
 import { useMissionFilterContext, IFilterState, MissionFilterProvider } from 'components/Contexts/MissionFilterContext'
-import { FilterSection } from './FilterSection'
 import { InspectionType } from 'models/Inspection'
 import { tokens } from '@equinor/eds-tokens'
 import { SmallScreenInfoText } from 'utils/InfoText'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
-import { StyledTableBody, StyledTableCaption, StyledTableCell } from 'components/Styles/StyledComponents'
+import {
+    StyledLoading,
+    StyledPagination,
+    StyledTableBody,
+    StyledTableCaption,
+    StyledTableCell,
+} from 'components/Styles/StyledComponents'
 import { phone_width } from 'utils/constants'
 import { SignalREventLabels, useSignalRContext } from 'components/Contexts/SignalRContext'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 import { useBackendApi } from 'api/UseBackendApi'
+import { HistoricMissionCard } from './MissionHistory/HistoricMissionCard'
+import { FilterSection } from './MissionHistory/FilterSection'
 
 enum InspectionTableColumns {
     StatusShort = 'StatusShort',
@@ -65,14 +75,6 @@ const TableWithHeader = styled.div`
     grid-columns: auto;
     gap: 1rem;
 `
-export const StyledLoading = styled.div`
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding-top: 1rem;
-    padding-bottom: 1rem;
-    gap: 1rem;
-`
 const ActiveFilterList = styled.div`
     display: flex;
     gap: 0.7rem;
@@ -86,12 +88,6 @@ const StyledTable = styled.div`
     display: grid;
     overflow-x: auto;
     overflow-y: hidden;
-`
-export const StyledPagination = styled(Pagination)`
-    display: flex;
-    height: 48px;
-    padding: 0px 8px 0px 16px;
-    background-color: ${tokens.colors.ui.background__default.hex};
 `
 const StyledActiveFilterList = styled.div`
     display: flex;
@@ -108,11 +104,20 @@ const flatten = (filters: IFilterState) => {
     return allFilters
 }
 
-export const MissionHistoryView = () => (
-    <MissionFilterProvider>
-        <MissionHistoryViewComponent />
-    </MissionFilterProvider>
-)
+export const MissionHistoryPage = () => {
+    const { alerts } = useAlertContext()
+    const { installation } = useContext(InstallationContext)
+
+    return (
+        <>
+            <Header alertDict={alerts} installation={installation} />
+            <NavBar />
+            <MissionFilterProvider>
+                <MissionHistoryViewComponent />
+            </MissionFilterProvider>
+        </>
+    )
+}
 
 const MissionHistoryViewComponent = () => {
     const { TranslateText } = useLanguageContext()

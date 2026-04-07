@@ -1,7 +1,6 @@
 import { Button, Icon, Popover, Table, Typography } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { allDays, allDaysIndexOfToday, DaysOfWeek, parseAutoScheduledJobIds } from 'models/AutoScheduleFrequency'
-import { config } from 'config'
 import styled from 'styled-components'
 import { convertUTCDateToLocalDate } from 'utils/StringFormatting'
 import { MissionDefinition } from 'models/MissionDefinition'
@@ -112,7 +111,7 @@ export const AutoScheduleMissionTableRow = ({
                         <Typography
                             color={typographyColor}
                             as={Link}
-                            to={`${config.FRONTEND_BASE_ROUTE}/${installationCode}:missiondefinition?id=${mission.id}`}
+                            to={`/${installationCode}/missiondefinition/${mission.id}`}
                             link
                         >
                             {mission.name}

@@ -1,4 +1,4 @@
-import { Button, Dialog, Table, Typography } from '@equinor/eds-core-react'
+import { Button, Dialog, Pagination, Table, Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import styled from 'styled-components'
 import { phone_width } from 'utils/constants'
@@ -43,6 +43,20 @@ export const StyledPage = styled.div`
     }
     min-height: calc(100vh - 65px);
     background-color: ${tokens.colors.ui.background__light.hex};
+`
+export const StyledLoading = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    gap: 1rem;
+`
+export const StyledPagination = styled(Pagination)`
+    display: flex;
+    height: 48px;
+    padding: 0px 8px 0px 16px;
+    background-color: ${tokens.colors.ui.background__default.hex};
 `
 export const AttributeTitleTypography = styled(Typography)`
     variant: meta;

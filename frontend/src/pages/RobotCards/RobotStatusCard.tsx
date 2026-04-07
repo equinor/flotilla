@@ -8,7 +8,6 @@ import { RobotImage } from 'components/Displays/RobotDisplays/RobotImage'
 import { useNavigate } from 'react-router-dom'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { PressureStatusDisplay } from 'components/Displays/RobotDisplays/PressureStatusDisplay'
-import { config } from 'config'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 import { useRobotTelemetry } from 'hooks/useRobotTelemetry'
 
@@ -72,7 +71,7 @@ export const RobotStatusCard = ({ robot }: RobotStatusCardProps) => {
     const { robotBatteryLevel, robotBatteryStatus, robotPressureLevel } = useRobotTelemetry(robot)
 
     const goToRobot = () => {
-        const path = `${config.FRONTEND_BASE_ROUTE}/${installationCode}:robot?id=${robot.id}`
+        const path = `/${installationCode}/robot/${robot.id}`
         navigate(path)
     }
 
