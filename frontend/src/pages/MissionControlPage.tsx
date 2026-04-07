@@ -1,20 +1,25 @@
+import { useAlertContext } from 'components/Contexts/AlertContext'
+import { InstallationContext } from 'components/Contexts/InstallationContext'
+import { Header } from 'components/Header/Header'
+import { NavBar } from 'components/Header/NavBar'
+import { useContext } from 'react'
 import { Card } from '@equinor/eds-core-react'
 import styled from 'styled-components'
-import { RobotCard, RobotCardPlaceholder } from './RobotCard'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 import { tokens } from '@equinor/eds-tokens'
+import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
+import { RobotWithoutTelemetry, RobotStatus } from 'models/Robot'
+import { FrontPageSectionId } from 'models/FrontPageSectionId'
+import { useState } from 'react'
+import { NextAutoScheduleMissionView } from './FrontPage/AutoScheduleSection/NextAutoScheduleMissionView'
 import {
     OngoingEmergencyMissionCard,
     OngoingMissionCard,
     OngoingMissionPlaceholderCard,
     OngoingReturnHomeMissionCard,
-} from './OngoingMissionCard'
-import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
-import { RobotWithoutTelemetry, RobotStatus } from 'models/Robot'
-import { RobotMissionQueueView } from './MissionQueueView'
-import { FrontPageSectionId } from 'models/FrontPageSectionId'
-import { NextAutoScheduleMissionView } from '../AutoScheduleSection/NextAutoScheduleMissionView'
-import { useState } from 'react'
+} from './FrontPage/MissionOverview/OngoingMissionCard'
+import { RobotCard, RobotCardPlaceholder } from './FrontPage/MissionOverview/RobotCard'
+import { RobotMissionQueueView } from './FrontPage/MissionOverview/MissionQueueView'
 
 const MissionControlStyle = styled.div`
     display: flex;
@@ -55,7 +60,9 @@ const OngoingMissionControlCardStyle = styled.div`
     }
 `
 
-export const MissionControlSection = () => {
+export const MissionControlPage = () => {
+    const { alerts } = useAlertContext()
+    const { installation } = useContext(InstallationContext)
     const { enabledRobots } = useAssetContext()
 
     const missionControlCards = enabledRobots.map((robot, index) => {
@@ -63,13 +70,17 @@ export const MissionControlSection = () => {
     })
 
     return (
-        <MissionControlStyle>
-            <MissionControlBody>
-                {enabledRobots.length > 0 && missionControlCards}
-                {enabledRobots.length === 0 && <MissionControlPlaceholderCard />}
-            </MissionControlBody>
-            <NextAutoScheduleMissionView />
-        </MissionControlStyle>
+        <>
+            <Header alertDict={alerts} installation={installation} />
+            <NavBar />
+            <MissionControlStyle>
+                <MissionControlBody>
+                    {enabledRobots.length > 0 && missionControlCards}
+                    {enabledRobots.length === 0 && <MissionControlPlaceholderCard />}
+                </MissionControlBody>
+                <NextAutoScheduleMissionView />
+            </MissionControlStyle>
+        </>
     )
 }
 

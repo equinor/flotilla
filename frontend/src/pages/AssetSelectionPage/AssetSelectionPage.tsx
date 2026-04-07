@@ -3,7 +3,6 @@ import { Autocomplete, Button } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Header } from 'components/Header/Header'
-import { config } from 'config'
 import assetImage from 'mediaAssets/assetPage.jpg'
 import { useNavigate } from 'react-router-dom'
 import { phone_width } from '../../utils/constants'
@@ -37,21 +36,13 @@ const StyledContent = styled.div`
 
 export const AssetSelectionPage = () => (
     <>
-        <Header page={'root'} />
+        <Header />
         <StyledContent>
             <InstallationPicker />
             <StyledImage src={assetImage} />
         </StyledContent>
     </>
 )
-
-export const findNavigationPage = (installationCode: string) => {
-    if (window.innerWidth <= 600) {
-        return `${config.FRONTEND_BASE_ROUTE}/${installationCode}:mission-control`
-    } else {
-        return `${config.FRONTEND_BASE_ROUTE}/${installationCode}:front-page`
-    }
-}
 
 const InstallationPicker = () => {
     const { installationName, switchInstallation, activeInstallations } = useAssetContext()
@@ -65,8 +56,7 @@ const InstallationPicker = () => {
         )
         if (selectedInstallation) {
             switchInstallation(selectedInstallation.id)
-            const target = findNavigationPage(selectedInstallation.installationCode)
-            navigate(target)
+            navigate(selectedInstallation.installationCode)
         }
     }
 

@@ -10,7 +10,6 @@ import {
     StyledDialog as MissionStyledDialog,
 } from 'pages/MissionDefinitionPage/MissionDefinitionStyledComponents'
 import { StyledDialog } from 'components/Styles/StyledComponents'
-import { config } from 'config'
 import { allDays, DaysOfWeek, TimeAndDay } from 'models/AutoScheduleFrequency'
 import { MissionDefinition } from 'models/MissionDefinition'
 import { MissionDefinitionUpdateForm } from 'models/MissionDefinitionUpdateForm'
@@ -79,8 +78,7 @@ const useMissionUpdater = () => {
             .updateMissionDefinition(mission.id, form)
             .then((missionDefinition) => {
                 onSuccess()
-                if (missionDefinition.isDeprecated)
-                    navigate(`${config.FRONTEND_BASE_ROUTE}/${installationCode}:front-page`)
+                if (missionDefinition.isDeprecated) navigate(`/${installationCode}`)
             })
             .catch(() => {
                 setAlert(

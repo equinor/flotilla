@@ -11,5 +11,5 @@ export function useBackendApi() {
     return useMemo(() => {
         const api = new BackendAPICaller(getAccessToken)
         return new BackendApi(api, installationCode ?? null)
-    }, [getAccessToken, installationCode])
+    }, [installationCode])
 }

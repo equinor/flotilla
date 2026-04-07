@@ -12,7 +12,6 @@ import { TaskStatus } from 'models/Task'
 import { convertUTCDateToLocalDate, formatDateTime } from 'utils/StringFormatting'
 import { calculateRemaindingTimeInMinutes } from 'utils/CalculateRemaingingTime'
 import { useNavigate } from 'react-router-dom'
-import { config } from 'config'
 import { phone_width } from 'utils/constants'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 
@@ -192,11 +191,7 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
                     )}
                     <Button
                         variant="outlined"
-                        onClick={() =>
-                            navigate(
-                                `${config.FRONTEND_BASE_ROUTE}/${installationCode}:missiondefinition?id=${mission.missionId}`
-                            )
-                        }
+                        onClick={() => navigate(`/${installationCode}/missiondefinition/${mission.missionId}`)}
                     >
                         {TranslateText('View mission definition')}
                     </Button>

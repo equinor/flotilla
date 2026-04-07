@@ -1,6 +1,5 @@
 import { Icon, Paper, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
-import { BackButton } from 'utils/BackButton'
 import { Header } from 'components/Header/Header'
 import { RobotImage } from 'components/Displays/RobotDisplays/RobotImage'
 import { PressureStatusDisplay } from 'components/Displays/RobotDisplays/PressureStatusDisplay'
@@ -12,7 +11,7 @@ import { StyledButton, StyledPage } from 'components/Styles/StyledComponents'
 import { DocumentationSection } from './Documentation'
 import { useMediaStreamContext } from 'components/Contexts/MediaStreamContext'
 import { VideoStreamSection } from '../MissionPage/MissionPage'
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { VideoStreamWindow } from '../MissionPage/VideoStream/VideoStreamWindow'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
@@ -24,6 +23,8 @@ import { InterventionNeededButton } from './InterventionNeededButton'
 import { useQuery } from '@tanstack/react-query'
 import { useRobotTelemetry } from 'hooks/useRobotTelemetry'
 import { useBackendApi } from 'api/UseBackendApi'
+import { InstallationContext } from 'components/Contexts/InstallationContext'
+import { useAlertContext } from 'components/Contexts/AlertContext'
 
 const StyledRobotPage = styled(StyledPage)`
     background-color: ${tokens.colors.ui.background__light.hex};
@@ -96,6 +97,8 @@ export const RobotPage = ({ robot }: RobotPageProps) => {
     const { ongoingMissions } = useMissionsContext()
     const { robotBatteryLevel, robotBatteryStatus, robotPressureLevel } = useRobotTelemetry(robot)
     const backendApi = useBackendApi()
+    const { alerts } = useAlertContext()
+    const { installation } = useContext(InstallationContext)
 
     useEffect(() => {
         if (robot.id && !Object.keys(mediaStreams).includes(robot.id)) addMediaStreamConfigIfItDoesNotExist(robot.id)
@@ -156,9 +159,8 @@ export const RobotPage = ({ robot }: RobotPageProps) => {
 
     return (
         <>
-            <Header page={'robot'} />
+            <Header alertDict={alerts} installation={installation} />
             <StyledRobotPage>
-                <BackButton />
                 {robot && (
                     <>
                         <StyledContainer>

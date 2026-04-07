@@ -1,5 +1,4 @@
 import { Table, Typography } from '@equinor/eds-core-react'
-import { config } from 'config'
 import { Mission } from 'models/Mission'
 import {
     MissionStatusDisplay,
@@ -59,12 +58,7 @@ export const HistoricMissionCard = ({ index, mission }: IndexedMissionProps) => 
                 <MissionStatusDisplay status={mission.status} />
             </Table.Cell>
             <Table.Cell id={InspectionTableColumns.Name}>
-                <Typography
-                    link
-                    onClick={() =>
-                        navigate(`${config.FRONTEND_BASE_ROUTE}/${installationCode}:mission?id=${mission.id}`)
-                    }
-                >
+                <Typography link onClick={() => navigate(`/${installationCode}/mission/${mission.id}`)}>
                     {mission.name}
                 </Typography>
             </Table.Cell>
@@ -91,12 +85,7 @@ export const SimpleHistoricMissionCard = ({ index, mission }: IndexedMissionProp
                 <MissionStatusDisplay status={mission.status} />
             </Table.Cell>
             <Table.Cell id={InspectionTableColumns.Name}>
-                <Typography
-                    link
-                    onClick={() =>
-                        navigate(`${config.FRONTEND_BASE_ROUTE}/${installationCode}:mission-simple?id=${mission.id}`)
-                    }
-                >
+                <Typography link onClick={() => navigate(`/${installationCode}/mission-simple/${mission.id}`)}>
                     {mission.name}
                 </Typography>
             </Table.Cell>

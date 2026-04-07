@@ -39,7 +39,7 @@ const alertTypeEnumMap: { [key: string]: AlertType } = {
     skipAutoMission: AlertType.InfoAlert,
 }
 
-type AlertDictionaryType = {
+export type AlertDictionaryType = {
     [key in AlertType]?: { content: ReactNode | undefined; dismissFunction: () => void; alertCategory: AlertCategory }
 }
 

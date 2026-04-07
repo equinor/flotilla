@@ -9,7 +9,6 @@ import { allDaysStartingSunday, DaysOfWeek } from 'models/AutoScheduleFrequency'
 import { MissionStatusType, selectMissionStatusType } from './AutoScheduleMissionTableRow'
 import { tokens } from '@equinor/eds-tokens'
 import { useNavigate } from 'react-router-dom'
-import { config } from 'config'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Button, Typography } from '@equinor/eds-core-react'
 import { StyledDialog } from 'components/Styles/StyledComponents'
@@ -346,9 +345,7 @@ export const CalendarPro = () => {
                         },
                     })}
                     onDoubleClickEvent={(event) =>
-                        navigate(
-                            `${config.FRONTEND_BASE_ROUTE}/${installationCode}:missiondefinition?id=${event.metadata.missionId}`
-                        )
+                        navigate(`/${installationCode}/missiondefinition/${event.metadata.missionId}`)
                     }
                 />
             </CalendarWrapper>

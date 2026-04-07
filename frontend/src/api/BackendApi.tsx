@@ -12,6 +12,7 @@ import { InspectionArea } from 'models/InspectionArea'
 import { MissionDefinitionUpdateForm } from 'models/MissionDefinitionUpdateForm'
 import { filterRobots } from 'utils/filtersAndSorts'
 import { PointillaMapInfo } from 'models/PointillaMapInfo'
+import { Installation } from 'models/Installation'
 
 export class BackendApi {
     constructor(
@@ -213,6 +214,12 @@ export class BackendApi {
     async getInspectionAreaById(id: string): Promise<InspectionArea> {
         const path: string = 'inspectionAreas/' + id
         const result = await this.api.GET<InspectionArea>(path).catch(handleError('GET', path))
+        return result.content
+    }
+
+    async getInstallations(): Promise<Installation[]> {
+        const path: string = 'installations'
+        const result = await this.api.GET<Installation[]>(path).catch(handleError('GET', path))
         return result.content
     }
 

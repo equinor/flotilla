@@ -84,7 +84,7 @@ export const InfoPage = () => {
 
     return (
         <>
-            <Header page={'info'} />
+            <Header />
             <StyledInfoPAge>
                 <StyledAboutSection>
                     <Typography variant="h1">{TranslateText('About Flotilla')}</Typography>

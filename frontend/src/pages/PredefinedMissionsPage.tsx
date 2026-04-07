@@ -1,10 +1,12 @@
+import { InstallationContext } from 'components/Contexts/InstallationContext'
+import { Header } from 'components/Header/Header'
+import { NavBar } from 'components/Header/NavBar'
+import { useContext } from 'react'
 import { Icon, Typography } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useRef, useState } from 'react'
-import { AllInspectionsTable } from './InspectionTable'
 import { getInspectionDeadline } from 'utils/StringFormatting'
 import styled from 'styled-components'
-import { ScheduleMissionDialog } from '../FrontPage/MissionOverview/ScheduleMissionDialog/ScheduleMissionDialog'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
@@ -13,9 +15,11 @@ import { Icons } from 'utils/icons'
 import { StyledButton } from 'components/Styles/StyledComponents'
 import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
-import { Placeholder } from './InspectionUtilities'
 import { phone_width } from 'utils/constants'
 import { useBackendApi } from 'api/UseBackendApi'
+import { AllInspectionsTable } from './InspectionPage/InspectionTable'
+import { Placeholder } from './InspectionPage/InspectionUtilities'
+import { ScheduleMissionDialog } from './FrontPage/MissionOverview/ScheduleMissionDialog/ScheduleMissionDialog'
 
 const StyledContent = styled.div`
     display: flex;
@@ -40,17 +44,19 @@ const AlignedTextButton = styled(StyledButton)`
     text-align: left;
 `
 
-export const InspectionOverviewSection = () => {
+export const PredefinedMissionsPage = () => {
+    const { alerts, setAlert, setListAlert } = useAlertContext()
+    const { installation } = useContext(InstallationContext)
+
     const { TranslateText } = useLanguageContext()
-    const { enabledRobots, installationCode } = useAssetContext()
-    const { setAlert, setListAlert } = useAlertContext()
+    const { enabledRobots } = useAssetContext()
     const { missionDefinitions } = useMissionDefinitionsContext()
     const [isFetchingMissions, setIsFetchingMissions] = useState<boolean>(false)
     const [isScheduleMissionDialogOpen, setIsScheduleMissionDialogOpen] = useState<boolean>(false)
     const [missions, setMissions] = useState<CondensedMissionDefinition[]>([])
     const backendApi = useBackendApi()
 
-    const isScheduleButtonDisabled = enabledRobots.length === 0 || installationCode === ''
+    const isScheduleButtonDisabled = enabledRobots.length === 0 || installation.installationCode === ''
 
     const anchorRef = useRef<HTMLButtonElement>(null)
 
@@ -66,7 +72,7 @@ export const InspectionOverviewSection = () => {
     const fetchMissions = () => {
         setIsFetchingMissions(true)
         backendApi
-            .getAvailableMissions(installationCode as string)
+            .getAvailableMissions(installation.installationCode as string)
             .then((missions) => {
                 setMissions(missions)
                 setIsFetchingMissions(false)
@@ -99,30 +105,34 @@ export const InspectionOverviewSection = () => {
     )
 
     return (
-        <StyledView>
-            <StyledContent>
-                <StyledMissionButton>
-                    {isScheduleMissionDialogOpen && (
-                        <ScheduleMissionDialog
-                            isFetchingMissions={isFetchingMissions}
-                            missions={missions}
-                            onClose={() => setIsScheduleMissionDialogOpen(false)}
-                        />
+        <>
+            <Header alertDict={alerts} installation={installation} />
+            <NavBar />
+            <StyledView>
+                <StyledContent>
+                    <StyledMissionButton>
+                        {isScheduleMissionDialogOpen && (
+                            <ScheduleMissionDialog
+                                isFetchingMissions={isFetchingMissions}
+                                missions={missions}
+                                onClose={() => setIsScheduleMissionDialogOpen(false)}
+                            />
+                        )}
+                        <AddPredefinedMissionsButton />
+                    </StyledMissionButton>
+                    {allInspections.length > 0 ? (
+                        <AllInspectionsTable inspections={allInspections} />
+                    ) : (
+                        <StyledPlaceholderContent>
+                            <Placeholder>
+                                <Typography variant="h4" color="disabled">
+                                    {TranslateText('No predefined missions available')}
+                                </Typography>
+                            </Placeholder>
+                        </StyledPlaceholderContent>
                     )}
-                    <AddPredefinedMissionsButton />
-                </StyledMissionButton>
-                {allInspections.length > 0 ? (
-                    <AllInspectionsTable inspections={allInspections} />
-                ) : (
-                    <StyledPlaceholderContent>
-                        <Placeholder>
-                            <Typography variant="h4" color="disabled">
-                                {TranslateText('No predefined missions available')}
-                            </Typography>
-                        </Placeholder>
-                    </StyledPlaceholderContent>
-                )}
-            </StyledContent>
-        </StyledView>
+                </StyledContent>
+            </StyledView>
+        </>
     )
 }
