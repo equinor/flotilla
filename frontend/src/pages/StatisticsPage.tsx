@@ -1,13 +1,17 @@
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
-import { computeMissionStats, GroupedStats } from './InstallationStats'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Table, Typography, ButtonGroup, Button } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { useBackendApi } from 'api/UseBackendApi'
+import { InstallationContext } from 'components/Contexts/InstallationContext'
+import { computeMissionStats, GroupedStats } from './InstallationStats/InstallationStats'
+import { Header } from 'components/Header/Header'
+import { NavBar } from 'components/Header/NavBar'
+import { StyledPage } from 'components/Styles/StyledComponents'
 
 const StyledButtonGroup = styled(ButtonGroup)`
     margin-bottom: 2rem;
@@ -53,13 +57,15 @@ const getEpochRangeFromTimeSpan = (timeSpan: string): { min: number } => {
     return { min: Math.floor(minDate.getTime() / 1000) }
 }
 
-export const MissionStats = () => {
+export const StatisticsPage = () => {
     const [robotStats, setRobotStats] = useState<GroupedStats>({})
     const [loading, setLoading] = useState(true)
     const [timeSpan, setTimeSpan] = useState('day')
-    const { enabledRobots, installationCode } = useAssetContext()
+    const { enabledRobots } = useAssetContext()
+    const { installation } = useContext(InstallationContext)
     const { setAlert, setListAlert } = useAlertContext()
     const { TranslateText } = useLanguageContext()
+    const { alerts } = useAlertContext()
     const backendApi = useBackendApi()
 
     useEffect(() => {
@@ -69,6 +75,7 @@ export const MissionStats = () => {
             try {
                 const { min } = getEpochRangeFromTimeSpan(timeSpan)
                 const missions = await backendApi.getMissionRuns({
+                    installationCode: installation.installationCode,
                     pageSize: pageSize,
                     minCreationTime: min,
                 })
@@ -91,7 +98,7 @@ export const MissionStats = () => {
             }
         }
         loadStats()
-    }, [installationCode, timeSpan])
+    }, [installation, timeSpan])
 
     if (loading) return <StyledTypography variant="h4">Loading mission statistics...</StyledTypography>
 
@@ -136,21 +143,25 @@ export const MissionStats = () => {
 
     return (
         <>
-            <StyledTypography variant="body_short" color="text_secondary">
-                {TranslateText('Statistics info text')}
-            </StyledTypography>
-            <StyledButtonGroup>
-                {timeSpans.map((option) => (
-                    <Button
-                        key={option.value}
-                        variant={timeSpan === option.value ? 'contained' : 'outlined'}
-                        onClick={() => setTimeSpan(option.value)}
-                    >
-                        {option.label}
-                    </Button>
-                ))}
-            </StyledButtonGroup>
-            <StatsTable stats={robotStats} />
+            <Header alertDict={alerts} installation={installation} />
+            <NavBar />
+            <StyledPage>
+                <StyledTypography variant="body_short" color="text_secondary">
+                    {TranslateText('Statistics info text')}
+                </StyledTypography>
+                <StyledButtonGroup>
+                    {timeSpans.map((option) => (
+                        <Button
+                            key={option.value}
+                            variant={timeSpan === option.value ? 'contained' : 'outlined'}
+                            onClick={() => setTimeSpan(option.value)}
+                        >
+                            {option.label}
+                        </Button>
+                    ))}
+                </StyledButtonGroup>
+                <StatsTable stats={robotStats} />
+            </StyledPage>
         </>
     )
 }

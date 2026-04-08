@@ -62,6 +62,9 @@ const NavBarAsButton = () => {
                 <Menu.Item onClick={() => navigate(`/${installation.installationCode}/robots`)}>
                     {TranslateText('Robots')}
                 </Menu.Item>
+                <Menu.Item onClick={() => navigate(`/${installation.installationCode}/statistics`)}>
+                    {TranslateText('Statistics')}
+                </Menu.Item>
             </Menu>
         </>
     )
@@ -131,6 +134,7 @@ const NavBarAsTabs = () => {
         '/:installationCode/history',
         '/:installationCode/auto-schedule',
         '/:installationCode/robots',
+        '/:installationCode/statistics',
     ])
     const currentPath = routeMatch?.pattern?.path
 
@@ -180,6 +184,13 @@ const NavBarAsTabs = () => {
                             as={Link}
                         >
                             {TranslateText('Robots')}
+                        </Tabs.Tab>
+                        <Tabs.Tab
+                            value="/:installationCode/statistics"
+                            to={`/${installation.installationCode}/statistics`}
+                            as={Link}
+                        >
+                            {TranslateText('Statistics')}
                         </Tabs.Tab>
                     </Tabs.List>
                 </Tabs>

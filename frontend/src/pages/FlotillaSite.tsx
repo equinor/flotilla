@@ -22,6 +22,7 @@ import { InspectionsProvider } from 'components/Contexts/InspectionsContext'
 import { MissionDefinitionsProvider } from 'components/Contexts/MissionDefinitionsContext'
 import { MissionRunsProvider } from 'components/Contexts/MissionRunsContext'
 import { MissionControlProvider } from 'components/Contexts/MissionControlContext'
+import { StatisticsPage } from './StatisticsPage'
 
 export const FlotillaSite = () => {
     return (
@@ -37,6 +38,7 @@ export const FlotillaSite = () => {
                         <Route path="history" element={<MissionHistoryPage />} />
                         <Route path="auto-schedule" element={<AutoSchedulePage />} />
                         <Route path="robots" element={<RobotStatusPage />} />
+                        <Route path="statistics" element={<StatisticsPage />} />
                         <Route path="data-view" element={<DataViewPage />} />
                         <Route path="mission/:missionId" element={<MissionPageRouter />} />
                         <Route path="mission-simple/:missionId" element={<SimpleMissionPageRouter />} />
