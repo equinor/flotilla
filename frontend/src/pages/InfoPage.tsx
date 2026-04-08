@@ -7,7 +7,7 @@ import styled from 'styled-components'
 import infoPageImage from 'mediaAssets/taurob-about-us.png'
 import { phone_width } from 'utils/constants'
 
-const StyledInfoPAge = styled(StyledPage)`
+const StyledInfoPage = styled(StyledPage)`
     width: 100%;
     margin-left: 0px;
     padding-left: 0px;
@@ -85,7 +85,7 @@ export const InfoPage = () => {
     return (
         <>
             <Header />
-            <StyledInfoPAge>
+            <StyledInfoPage>
                 <StyledAboutSection>
                     <Typography variant="h1">{TranslateText('About Flotilla')}</Typography>
                     <StyledTypography variant="body_short">{TranslateText('Info: Flotilla is..')}</StyledTypography>
@@ -103,7 +103,7 @@ export const InfoPage = () => {
                     </StyledInfo>
                     <StyledImage src={infoPageImage} />
                 </StyledInfoSection>
-            </StyledInfoPAge>
+            </StyledInfoPage>
         </>
     )
 }
