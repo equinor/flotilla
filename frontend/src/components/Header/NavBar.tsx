@@ -1,4 +1,4 @@
-import { Button, Icon, Menu, Tabs } from '@equinor/eds-core-react'
+import { Button, Icon, Menu, Tabs, Typography } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useContext, useState } from 'react'
 import { Link, matchPath, useNavigate } from 'react-router-dom'
@@ -6,6 +6,8 @@ import { styled } from 'styled-components'
 import { Icons } from 'utils/icons'
 import { phone_width } from 'utils/constants'
 import { InstallationContext } from 'components/Contexts/InstallationContext'
+import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
+import { StopRobotDialog } from 'pages/FrontPage/MissionOverview/StopDialogs'
 
 const StyledButton = styled(Button)`
     width: 100px;
@@ -65,6 +67,47 @@ const NavBarAsButton = () => {
     )
 }
 
+const StyledTabHeaderRightContent = styled.div`
+    display: flex;
+    align-items: center;
+    gap: 24px;
+`
+const StyledOngoingMissionsInfo = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    cursor: pointer;
+`
+const StyledNumberOfMissions = styled.div`
+    display: flex;
+    text-wrap: nowrap;
+    flex-direction: row;
+`
+const SplitLeftAndRightStyle = styled.div`
+    display: flex;
+    justify-content: space-between;
+`
+
+const OngoingMissionsInfo = ({ goToOngoingTab }: { goToOngoingTab: () => void }) => {
+    const { TranslateText } = useLanguageContext()
+    const { ongoingMissions } = useMissionsContext()
+
+    const areaNames = new Set(
+        ongoingMissions.map((m) => m.inspectionArea.inspectionAreaName).filter((area) => area !== undefined)
+    )
+    const formattedAreaNames = Array.from(areaNames).join(' | ')
+
+    return (
+        <StyledOngoingMissionsInfo onClick={goToOngoingTab}>
+            <StyledNumberOfMissions>
+                <Icon name={Icons.Ongoing} size={24} />
+                <Typography variant="h5">{`${ongoingMissions.length} ${TranslateText('Ongoing missions')}`}</Typography>
+            </StyledNumberOfMissions>
+            <Typography variant="body_short">{formattedAreaNames}</Typography>
+        </StyledOngoingMissionsInfo>
+    )
+}
+
 function useRouteMatch(patterns: readonly string[]) {
     for (let i = 0; i < patterns.length; i += 1) {
         const pattern = patterns[i]
@@ -79,6 +122,8 @@ function useRouteMatch(patterns: readonly string[]) {
 const NavBarAsTabs = () => {
     const { TranslateText } = useLanguageContext()
     const { installation } = useContext(InstallationContext)
+    const navigate = useNavigate()
+
     const routeMatch = useRouteMatch([
         '/:installationCode/mission-control',
         '/:installationCode/inspection-overview',
@@ -91,52 +136,62 @@ const NavBarAsTabs = () => {
 
     return (
         <>
-            <Tabs activeTab={currentPath}>
-                <Tabs.List>
-                    <Tabs.Tab
-                        value="/:installationCode/mission-control"
-                        to={`/${installation.installationCode}/mission-control`}
-                        as={Link}
-                    >
-                        {TranslateText('Mission Control')}
-                    </Tabs.Tab>
-                    <Tabs.Tab
-                        value="/:installationCode/inspection-overview"
-                        to={`/${installation.installationCode}/inspection-overview`}
-                        as={Link}
-                    >
-                        {TranslateText('Area Overview')}
-                    </Tabs.Tab>
-                    <Tabs.Tab
-                        value="/:installationCode/predefined-missions"
-                        to={`/${installation.installationCode}/predefined-missions`}
-                        as={Link}
-                    >
-                        {TranslateText('Predefined Missions')}
-                    </Tabs.Tab>
-                    <Tabs.Tab
-                        value="/:installationCode/history"
-                        to={`/${installation.installationCode}/history`}
-                        as={Link}
-                    >
-                        {TranslateText('Mission History')}
-                    </Tabs.Tab>
-                    <Tabs.Tab
-                        value="/:installationCode/auto-schedule"
-                        to={`/${installation.installationCode}/auto-schedule`}
-                        as={Link}
-                    >
-                        {TranslateText('Auto Scheduling')}
-                    </Tabs.Tab>
-                    <Tabs.Tab
-                        value="/:installationCode/robots"
-                        to={`/${installation.installationCode}/robots`}
-                        as={Link}
-                    >
-                        {TranslateText('Robots')}
-                    </Tabs.Tab>
-                </Tabs.List>
-            </Tabs>
+            <SplitLeftAndRightStyle>
+                <Tabs activeTab={currentPath}>
+                    <Tabs.List>
+                        <Tabs.Tab
+                            value="/:installationCode/mission-control"
+                            to={`/${installation.installationCode}/mission-control`}
+                            as={Link}
+                        >
+                            {TranslateText('Mission Control')}
+                        </Tabs.Tab>
+                        <Tabs.Tab
+                            value="/:installationCode/inspection-overview"
+                            to={`/${installation.installationCode}/inspection-overview`}
+                            as={Link}
+                        >
+                            {TranslateText('Area Overview')}
+                        </Tabs.Tab>
+                        <Tabs.Tab
+                            value="/:installationCode/predefined-missions"
+                            to={`/${installation.installationCode}/predefined-missions`}
+                            as={Link}
+                        >
+                            {TranslateText('Predefined Missions')}
+                        </Tabs.Tab>
+                        <Tabs.Tab
+                            value="/:installationCode/history"
+                            to={`/${installation.installationCode}/history`}
+                            as={Link}
+                        >
+                            {TranslateText('Mission History')}
+                        </Tabs.Tab>
+                        <Tabs.Tab
+                            value="/:installationCode/auto-schedule"
+                            to={`/${installation.installationCode}/auto-schedule`}
+                            as={Link}
+                        >
+                            {TranslateText('Auto Scheduling')}
+                        </Tabs.Tab>
+                        <Tabs.Tab
+                            value="/:installationCode/robots"
+                            to={`/${installation.installationCode}/robots`}
+                            as={Link}
+                        >
+                            {TranslateText('Robots')}
+                        </Tabs.Tab>
+                    </Tabs.List>
+                </Tabs>
+                <StyledTabHeaderRightContent>
+                    <OngoingMissionsInfo
+                        goToOngoingTab={() => {
+                            navigate(`/${installation.installationCode}`)
+                        }}
+                    />
+                    <StopRobotDialog />
+                </StyledTabHeaderRightContent>
+            </SplitLeftAndRightStyle>
         </>
     )
 }
