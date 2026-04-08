@@ -2,13 +2,13 @@ import { Button, Card, Dialog, Icon, Typography, DotProgress } from '@equinor/ed
 import { Mission } from 'models/Mission'
 import styled from 'styled-components'
 import { useNavigate } from 'react-router-dom'
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
 import { StyledDialog } from 'components/Styles/StyledComponents'
 import { tokens } from '@equinor/eds-tokens'
 import { calculateRemaindingTimeInMinutes } from 'utils/CalculateRemaingingTime'
-import { useAssetContext } from 'components/Contexts/AssetContext'
+import { InstallationContext } from 'components/Contexts/InstallationContext'
 
 interface MissionQueueCardProps {
     order: number
@@ -66,9 +66,9 @@ const StyledButton = styled(Button)`
 
 export const MissionQueueCard = ({ order, mission, onDeleteMission }: MissionQueueCardProps) => {
     const navigate = useNavigate()
-    const { installationCode } = useAssetContext()
+    const { installation } = useContext(InstallationContext)
     const routeChange = () => {
-        const path = `/${installationCode}/mission/${mission.id}`
+        const path = `/${installation.installationCode}/mission/${mission.id}`
         navigate(path)
     }
     const [confirmDeleteDialogOpen, setConfirmDeleteDialogOpen] = useState<boolean>(false)

@@ -6,9 +6,9 @@ import { useLanguageContext } from './LanguageContext'
 import { AlertType, useAlertContext } from './AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
-import { useAssetContext } from './AssetContext'
 import { useBackendApi } from 'api/UseBackendApi'
 import { AuthContext } from './AuthContext'
+import { InstallationContext } from './InstallationContext'
 
 const upsertMissionList = (list: Mission[], mission: Mission) => {
     const newMissionList = [...list]
@@ -82,7 +82,7 @@ const useMissionRuns = (): IMissionRunsContext => {
     const { registerEvent, connectionReady } = useSignalRContext()
     const { TranslateText } = useLanguageContext()
     const { setAlert, setListAlert } = useAlertContext()
-    const { installationCode } = useAssetContext()
+    const { installation } = useContext(InstallationContext)
     const { isAuthenticated } = useContext(AuthContext)
     const backendApi = useBackendApi()
 
@@ -139,7 +139,7 @@ const useMissionRuns = (): IMissionRunsContext => {
         if (!isAuthenticated) return
         const fetchAndUpdateMissions = async () => {
             const ongoing = await fetchMissionRuns({
-                installationCode: installationCode,
+                installationCode: installation.installationCode,
                 statuses: [MissionStatus.Ongoing, MissionStatus.Pending, MissionStatus.Paused],
                 pageSize: 100,
                 orderBy: 'StartTime desc',
@@ -161,7 +161,7 @@ const useMissionRuns = (): IMissionRunsContext => {
             setOngoingMissions(ongoing ?? [])
 
             const queue = await fetchMissionRuns({
-                installationCode: installationCode,
+                installationCode: installation.installationCode,
                 statuses: [MissionStatus.Queued],
                 pageSize: 100,
                 orderBy: 'CreationTime',
@@ -183,14 +183,16 @@ const useMissionRuns = (): IMissionRunsContext => {
             setMissionQueue(queue ?? [])
         }
         fetchAndUpdateMissions()
-    }, [installationCode])
+    }, [installation])
 
     const [filteredMissionQueue, setFilteredMissionQueue] = useState<Mission[]>([])
     const [filteredOngoingMissions, setFilteredOngoingMissions] = useState<Mission[]>([])
     useEffect(() => {
-        setFilteredOngoingMissions(ongoingMissions.filter((m) => m.installationCode === installationCode))
-        setFilteredMissionQueue(missionQueue.filter((m) => m.inspectionArea.installationCode === installationCode))
-    }, [installationCode, ongoingMissions, missionQueue])
+        setFilteredOngoingMissions(ongoingMissions.filter((m) => m.installationCode === installation.installationCode))
+        setFilteredMissionQueue(
+            missionQueue.filter((m) => m.inspectionArea.installationCode === installation.installationCode)
+        )
+    }, [installation, ongoingMissions, missionQueue])
 
     return {
         ongoingMissions: filteredOngoingMissions,

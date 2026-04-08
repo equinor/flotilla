@@ -1,6 +1,6 @@
 import { CircularProgress, Table } from '@equinor/eds-core-react'
 import { Mission, MissionStatus } from 'models/Mission'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useContext, useEffect, useState } from 'react'
 import { SimpleHistoricMissionCard } from './HistoricMissionCard'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
@@ -14,8 +14,8 @@ import {
     StyledTableCell,
 } from 'components/Styles/StyledComponents'
 import { SignalREventLabels, useSignalRContext } from 'components/Contexts/SignalRContext'
-import { useAssetContext } from 'components/Contexts/AssetContext'
 import { useBackendApi } from 'api/UseBackendApi'
+import { InstallationContext } from 'components/Contexts/InstallationContext'
 
 enum InspectionTableColumns {
     Status = 'Status',
@@ -44,7 +44,7 @@ export const DataViewPage = () => (
 
 const DataViewComponent = () => {
     const { TranslateText } = useLanguageContext()
-    const { installationCode } = useAssetContext()
+    const { installation } = useContext(InstallationContext)
     const { page, switchPage, filterState, filterFunctions } = useMissionFilterContext()
     const { registerEvent, connectionReady } = useSignalRContext()
     const [filteredMissions, setFilteredMissions] = useState<Mission[]>([])
@@ -60,7 +60,7 @@ const DataViewComponent = () => {
         backendApi
             .getMissionRuns({
                 ...formattedFilter,
-                installationCode: installationCode,
+                installationCode: installation.installationCode,
                 pageSize: pageSize,
                 pageNumber: page ?? 1,
                 orderBy: 'EndTime desc, Name',
@@ -88,7 +88,7 @@ const DataViewComponent = () => {
     useEffect(() => {
         if (
             lastChangedMission &&
-            lastChangedMission.installationCode === installationCode &&
+            lastChangedMission.installationCode === installation.installationCode &&
             ![MissionStatus.Pending, MissionStatus.Queued, MissionStatus.Ongoing].includes(lastChangedMission.status)
         ) {
             updateFilteredMissions()

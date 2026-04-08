@@ -10,8 +10,9 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { PressureStatusDisplay } from 'components/Displays/RobotDisplays/PressureStatusDisplay'
 import { StyledButton, AttributeTitleTypography } from 'components/Styles/StyledComponents'
 import { Icons } from 'utils/icons'
-import { useAssetContext } from 'components/Contexts/AssetContext'
 import { useRobotTelemetry } from 'hooks/useRobotTelemetry'
+import { useContext } from 'react'
+import { InstallationContext } from 'components/Contexts/InstallationContext'
 
 const StyledRobotCard = styled.div`
     display: flex;
@@ -106,9 +107,9 @@ export const RobotCard = ({ robot }: RobotCardProps) => {
 
     const navigate = useNavigate()
     const { TranslateText } = useLanguageContext()
-    const { installationCode } = useAssetContext()
+    const { installation } = useContext(InstallationContext)
     const goToRobot = () => {
-        const path = `/${installationCode}/robot/${robot.id}`
+        const path = `/${installation.installationCode}/robot/${robot.id}`
         navigate(path)
     }
 

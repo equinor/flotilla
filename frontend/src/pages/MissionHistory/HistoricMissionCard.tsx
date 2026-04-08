@@ -8,7 +8,8 @@ import { MissionRestartButton } from 'components/Displays/MissionButtons/Mission
 import { TaskStatus } from 'models/Task'
 import { useNavigate } from 'react-router-dom'
 import { formatDateTime } from 'utils/StringFormatting'
-import { useAssetContext } from 'components/Contexts/AssetContext'
+import { useContext } from 'react'
+import { InstallationContext } from 'components/Contexts/InstallationContext'
 
 enum InspectionTableColumns {
     StatusShort = 'StatusShort',
@@ -43,7 +44,7 @@ const MissionEndTimeDisplay = ({ mission }: MissionProps) => {
 
 export const HistoricMissionCard = ({ index, mission }: IndexedMissionProps) => {
     const navigate = useNavigate()
-    const { installationCode } = useAssetContext()
+    const { installation } = useContext(InstallationContext)
 
     const missionHasFailedTasks = mission.tasks.some(
         (t) => t.status !== TaskStatus.PartiallySuccessful && t.status !== TaskStatus.Successful
@@ -58,7 +59,7 @@ export const HistoricMissionCard = ({ index, mission }: IndexedMissionProps) => 
                 <MissionStatusDisplay status={mission.status} />
             </Table.Cell>
             <Table.Cell id={InspectionTableColumns.Name}>
-                <Typography link onClick={() => navigate(`/${installationCode}/mission/${mission.id}`)}>
+                <Typography link onClick={() => navigate(`/${installation.installationCode}/mission/${mission.id}`)}>
                     {mission.name}
                 </Typography>
             </Table.Cell>
@@ -77,7 +78,7 @@ export const HistoricMissionCard = ({ index, mission }: IndexedMissionProps) => 
 
 export const SimpleHistoricMissionCard = ({ index, mission }: IndexedMissionProps) => {
     const navigate = useNavigate()
-    const { installationCode } = useAssetContext()
+    const { installation } = useContext(InstallationContext)
 
     return (
         <Table.Row key={index}>
@@ -85,7 +86,10 @@ export const SimpleHistoricMissionCard = ({ index, mission }: IndexedMissionProp
                 <MissionStatusDisplay status={mission.status} />
             </Table.Cell>
             <Table.Cell id={InspectionTableColumns.Name}>
-                <Typography link onClick={() => navigate(`/${installationCode}/mission-simple/${mission.id}`)}>
+                <Typography
+                    link
+                    onClick={() => navigate(`/${installation.installationCode}/mission-simple/${mission.id}`)}
+                >
                     {mission.name}
                 </Typography>
             </Table.Cell>

@@ -5,9 +5,9 @@ import { useLanguageContext } from './LanguageContext'
 import { AlertType, useAlertContext } from './AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
-import { Installation } from 'models/Installation'
 import { InspectionArea } from 'models/InspectionArea'
 import { useBackendApi } from 'api/UseBackendApi'
+import { InstallationContext } from './InstallationContext'
 
 const upsertRobotList = (list: RobotWithoutTelemetry[], robot: RobotWithoutTelemetry) => {
     const newList = [...list]
@@ -23,44 +23,24 @@ interface Props {
 
 interface IAssetContext {
     enabledRobots: RobotWithoutTelemetry[]
-    installationCode: string
-    installationName: string
-    installationId: string
     installationInspectionAreas: InspectionArea[]
-    activeInstallations: Installation[]
-    switchInstallation: (selectedName: string) => void
 }
 
 const defaultAssetState = {
     enabledRobots: [],
-    installationCode: '',
-    installationName: '',
-    installationId: '',
     installationInspectionAreas: [],
-    activeInstallations: [],
-    switchInstallation: () => {},
 }
 
 const AssetContext = createContext<IAssetContext>(defaultAssetState)
 
 export const AssetProvider: FC<Props> = ({ children }) => {
+    const { installation } = useContext(InstallationContext)
     const [enabledRobots, setEnabledRobots] = useState<RobotWithoutTelemetry[]>(defaultAssetState.enabledRobots)
-    const [activeInstallations, setActiveInstallations] = useState<Installation[]>([])
-    const [selectedInstallation, setSelectedInstallation] = useState<Installation | undefined>(undefined)
     const [installationInspectionAreas, setInstallationInspectionAreas] = useState<InspectionArea[]>([])
 
-    const { registerEvent, connectionReady, resetConnection } = useSignalRContext()
+    const { registerEvent, connectionReady } = useSignalRContext()
     const { TranslateText } = useLanguageContext()
     const { setAlert, setListAlert } = useAlertContext()
-
-    const [installationCode, setInstallationCode] = useState<string>(selectedInstallation?.installationCode ?? '')
-    const [installationName, setInstallationName] = useState<string>(selectedInstallation?.name ?? '')
-    const [installationId, setInstallationId] = useState<string>(selectedInstallation?.id ?? '')
-    useEffect(() => {
-        setInstallationCode(selectedInstallation?.installationCode ?? '')
-        setInstallationName(selectedInstallation?.name ?? '')
-        setInstallationId(selectedInstallation?.id ?? '')
-    }, [selectedInstallation])
 
     const backendApi = useBackendApi()
 
@@ -144,65 +124,49 @@ export const AssetProvider: FC<Props> = ({ children }) => {
     const [filteredRobots, setFilteredRobots] = useState<RobotWithoutTelemetry[]>([])
 
     useEffect(() => {
-        setFilteredRobots(
-            enabledRobots.filter(
-                (r) => r.currentInstallation.installationCode.toLowerCase() === installationCode.toLowerCase()
-            )
-        )
-    }, [installationCode, enabledRobots])
+        setFilteredRobots(enabledRobots.filter((r) => r.currentInstallation.id === installation.id))
+    }, [installation, enabledRobots])
 
     useEffect(() => {
-        const setOfInstallations: { [id: string]: Installation } = {}
-        enabledRobots.forEach((r) => {
-            setOfInstallations[r.currentInstallation.id] = r.currentInstallation
-        })
-
-        setActiveInstallations(Object.values(setOfInstallations))
-    }, [enabledRobots])
-
-    useEffect(() => {
-        if (installationCode)
-            backendApi
-                .getInspectionAreasByInstallationCode(installationCode)
-                .then((inspectionAreas: InspectionArea[]) => {
-                    setInstallationInspectionAreas(inspectionAreas)
-                })
-                .catch(() => {
-                    setAlert(
-                        AlertType.RequestFail,
-                        <FailedRequestAlertContent
-                            translatedMessage={TranslateText(
-                                'Failed to retrieve inspection areas on installation {0}',
-                                [installationCode]
-                            )}
-                        />,
-                        AlertCategory.ERROR
-                    )
-                    setListAlert(
-                        AlertType.RequestFail,
-                        <FailedRequestAlertListContent
-                            translatedMessage={TranslateText(
-                                'Failed to retrieve inspection areas on installation {0}',
-                                [installationCode]
-                            )}
-                        />,
-                        AlertCategory.ERROR
-                    )
-                })
-    }, [installationCode])
+        backendApi
+            .getInspectionAreasByInstallationCode(installation.installationCode)
+            .then((inspectionAreas: InspectionArea[]) => {
+                setInstallationInspectionAreas(inspectionAreas)
+            })
+            .catch(() => {
+                setAlert(
+                    AlertType.RequestFail,
+                    <FailedRequestAlertContent
+                        translatedMessage={TranslateText('Failed to retrieve inspection areas on installation {0}', [
+                            installation.installationCode,
+                        ])}
+                    />,
+                    AlertCategory.ERROR
+                )
+                setListAlert(
+                    AlertType.RequestFail,
+                    <FailedRequestAlertListContent
+                        translatedMessage={TranslateText('Failed to retrieve inspection areas on installation {0}', [
+                            installation.installationCode,
+                        ])}
+                    />,
+                    AlertCategory.ERROR
+                )
+            })
+    }, [])
 
     useEffect(() => {
         if (connectionReady) {
             registerEvent(SignalREventLabels.inspectionAreaCreated, (username: string, message: string) => {
                 const newInspectionArea: InspectionArea = JSON.parse(message)
-                if (newInspectionArea.installationCode !== installationCode) return
+                if (newInspectionArea.installationCode !== installation.installationCode) return
                 setInstallationInspectionAreas((oldInspectionAreas) => {
                     return [...oldInspectionAreas, newInspectionArea]
                 })
             })
             registerEvent(SignalREventLabels.inspectionAreaUpdated, (username: string, message: string) => {
                 const updatedInspectionArea: InspectionArea = JSON.parse(message)
-                if (updatedInspectionArea.installationCode !== installationCode) return
+                if (updatedInspectionArea.installationCode !== installation.installationCode) return
 
                 setInstallationInspectionAreas((oldInspectionAreas) => {
                     const inspectionAreaIndex = oldInspectionAreas.findIndex((d) => d.id === updatedInspectionArea.id)
@@ -216,7 +180,7 @@ export const AssetProvider: FC<Props> = ({ children }) => {
             })
             registerEvent(SignalREventLabels.inspectionAreaDeleted, (username: string, message: string) => {
                 const deletedInspectionArea: InspectionArea = JSON.parse(message)
-                if (deletedInspectionArea.installationCode !== installationCode) return
+                if (deletedInspectionArea.installationCode !== installation.installationCode) return
                 setInstallationInspectionAreas((oldInspectionAreas) => {
                     const inspectionAreaIndex = oldInspectionAreas.findIndex((d) => d.id === deletedInspectionArea.id)
                     if (inspectionAreaIndex !== -1) {
@@ -230,30 +194,18 @@ export const AssetProvider: FC<Props> = ({ children }) => {
         }
     }, [registerEvent, connectionReady])
 
-    const switchInstallation = (selectedId: string) => {
-        const installation = activeInstallations.find((i) => i.id === selectedId)
-        if (!installation) return
-        resetConnection()
-        setSelectedInstallation(installation)
-    }
-
     const [filteredInstallationInspectionAreas, setFilteredInstallationInspectionAreas] = useState<InspectionArea[]>([])
     useEffect(() => {
         setFilteredInstallationInspectionAreas(
-            installationInspectionAreas.filter((d) => d.installationCode === installationCode)
+            installationInspectionAreas.filter((d) => d.installationCode === installation.installationCode)
         )
-    }, [installationCode, installationInspectionAreas])
+    }, [installation, installationInspectionAreas])
 
     return (
         <AssetContext.Provider
             value={{
                 enabledRobots: filteredRobots,
-                installationCode,
-                installationName,
-                installationId,
                 installationInspectionAreas: filteredInstallationInspectionAreas,
-                activeInstallations: activeInstallations,
-                switchInstallation,
             }}
         >
             {children}

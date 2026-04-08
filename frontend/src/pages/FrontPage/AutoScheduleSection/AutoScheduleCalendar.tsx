@@ -3,7 +3,7 @@ import { format, parse, startOfWeek, getDay } from 'date-fns'
 import { nb } from 'date-fns/locale'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 import styled from 'styled-components'
-import { useMemo, useState } from 'react'
+import { useContext, useMemo, useState } from 'react'
 import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
 import { allDaysStartingSunday, DaysOfWeek } from 'models/AutoScheduleFrequency'
 import { MissionStatusType, selectMissionStatusType } from './AutoScheduleMissionTableRow'
@@ -12,8 +12,8 @@ import { useNavigate } from 'react-router-dom'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Button, Typography } from '@equinor/eds-core-react'
 import { StyledDialog } from 'components/Styles/StyledComponents'
-import { useAssetContext } from 'components/Contexts/AssetContext'
 import { useBackendApi } from 'api/UseBackendApi'
+import { InstallationContext } from 'components/Contexts/InstallationContext'
 
 const locales = { nb }
 const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales })
@@ -183,7 +183,7 @@ const legendItems = [
 export const CalendarPro = () => {
     const { missionDefinitions } = useMissionDefinitionsContext()
     const { TranslateText } = useLanguageContext()
-    const { installationCode } = useAssetContext()
+    const { installation } = useContext(InstallationContext)
     const backendApi = useBackendApi()
     const navigate = useNavigate()
     const [dialogOpen, setDialogOpen] = useState<boolean>(false)
@@ -345,7 +345,7 @@ export const CalendarPro = () => {
                         },
                     })}
                     onDoubleClickEvent={(event) =>
-                        navigate(`/${installationCode}/missiondefinition/${event.metadata.missionId}`)
+                        navigate(`/${installation.installationCode}/missiondefinition/${event.metadata.missionId}`)
                     }
                 />
             </CalendarWrapper>

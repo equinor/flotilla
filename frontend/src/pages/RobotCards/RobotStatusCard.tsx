@@ -8,8 +8,9 @@ import { RobotImage } from 'components/Displays/RobotDisplays/RobotImage'
 import { useNavigate } from 'react-router-dom'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { PressureStatusDisplay } from 'components/Displays/RobotDisplays/PressureStatusDisplay'
-import { useAssetContext } from 'components/Contexts/AssetContext'
 import { useRobotTelemetry } from 'hooks/useRobotTelemetry'
+import { useContext } from 'react'
+import { InstallationContext } from 'components/Contexts/InstallationContext'
 
 const StyledCard = styled(Card)`
     width: 220px;
@@ -67,11 +68,11 @@ interface RobotStatusCardProps {
 export const RobotStatusCard = ({ robot }: RobotStatusCardProps) => {
     const navigate = useNavigate()
     const { TranslateText } = useLanguageContext()
-    const { installationCode } = useAssetContext()
+    const { installation } = useContext(InstallationContext)
     const { robotBatteryLevel, robotBatteryStatus, robotPressureLevel } = useRobotTelemetry(robot)
 
     const goToRobot = () => {
-        const path = `/${installationCode}/robot/${robot.id}`
+        const path = `/${installation.installationCode}/robot/${robot.id}`
         navigate(path)
     }
 

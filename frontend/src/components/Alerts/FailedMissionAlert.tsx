@@ -6,7 +6,8 @@ import { AlertListContents } from './AlertsListItem'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
 import { AlertContainer, AlertButton } from './AlertStyles'
-import { useAssetContext } from 'components/Contexts/AssetContext'
+import { useContext } from 'react'
+import { InstallationContext } from 'components/Contexts/InstallationContext'
 
 interface MissionsProps {
     missions: Mission[]
@@ -15,10 +16,11 @@ interface MissionsProps {
 const FailedMission = ({ missions }: MissionsProps) => {
     const mission = missions[0]
     const { TranslateText } = useLanguageContext()
-    const { installationCode } = useAssetContext()
+    const { installation } = useContext(InstallationContext)
     const navigate = useNavigate()
+
     const goToMission = () => {
-        const path = `/${installationCode}/mission/${mission.id}`
+        const path = `/${installation.installationCode}/mission/${mission.id}`
         navigate(path)
     }
 
@@ -32,10 +34,11 @@ const FailedMission = ({ missions }: MissionsProps) => {
 
 const SeveralFailedMissions = ({ missions }: MissionsProps) => {
     const { TranslateText } = useLanguageContext()
-    const { installationCode } = useAssetContext()
+    const { installation } = useContext(InstallationContext)
     const navigate = useNavigate()
+
     const goToHistory = () => {
-        const path = `/${installationCode}/history`
+        const path = `/${installation.installationCode}/history`
         navigate(path)
     }
 

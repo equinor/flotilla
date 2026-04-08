@@ -10,12 +10,13 @@ import { Inspection } from './InspectionSection'
 import { compareInspections } from './InspectionUtilities'
 import { convertUTCDateToLocalDate, formatDateString, getDeadlineInDays } from 'utils/StringFormatting'
 import { AlreadyScheduledMissionDialog, ScheduleMissionDialog } from './ScheduleMissionDialogs'
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 import { FrontPageSectionId } from 'models/FrontPageSectionId'
 import { SmallScreenInfoText } from 'utils/InfoText'
 import { phone_width } from 'utils/constants'
+import { InstallationContext } from 'components/Contexts/InstallationContext'
 
 const StyledIcon = styled(Icon)`
     display: flex;
@@ -120,7 +121,8 @@ interface IInspectionRowProps {
 const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialog }: IInspectionRowProps) => {
     const { TranslateText } = useLanguageContext()
     const { ongoingMissions, missionQueue } = useMissionsContext()
-    const { enabledRobots, installationCode } = useAssetContext()
+    const { enabledRobots } = useAssetContext()
+    const { installation } = useContext(InstallationContext)
     const navigate = useNavigate()
     const mission = inspection.missionDefinition
     let status
@@ -180,7 +182,10 @@ const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialo
         <Table.Row key={mission.id}>
             <Table.Cell id={InspectionTableColumns.Status}>{status}</Table.Cell>
             <Table.Cell id={InspectionTableColumns.Name}>
-                <Typography link onClick={() => navigate(`/${installationCode}/missiondefinition/${mission.id}`)}>
+                <Typography
+                    link
+                    onClick={() => navigate(`/${installation.installationCode}/missiondefinition/${mission.id}`)}
+                >
                     {mission.name}
                 </Typography>
             </Table.Cell>

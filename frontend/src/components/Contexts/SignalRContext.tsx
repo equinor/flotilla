@@ -37,7 +37,6 @@ import { useMsal } from '@azure/msal-react'
 interface ISignalRContext {
     registerEvent: (eventName: string, onMessageReceived: (username: string, message: string) => void) => void
     connectionReady: boolean
-    resetConnection: () => void
 }
 
 interface Props {
@@ -47,7 +46,6 @@ interface Props {
 const defaultSignalRInterface = {
     registerEvent: () => {},
     connectionReady: false,
-    resetConnection: () => {},
 }
 
 const URL = config.BACKEND_API_SIGNALR_URL
@@ -145,7 +143,6 @@ export const SignalRProvider: FC<Props> = ({ children }) => {
             value={{
                 registerEvent,
                 connectionReady,
-                resetConnection,
             }}
         >
             {children}
