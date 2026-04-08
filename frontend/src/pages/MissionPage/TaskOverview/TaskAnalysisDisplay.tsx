@@ -5,7 +5,7 @@ import styled from 'styled-components'
 import { useInspectionId } from 'pages/InspectionReportPage/SetInspectionIdHook'
 import { tokens } from '@equinor/eds-tokens'
 
-const StyledButton = styled(Button)<{ $hasFinding: boolean }>`
+const StyledButton = styled(Button)<{ hasFinding: boolean }>`
     &:hover {
         ${({ $hasFinding }) =>
             $hasFinding
@@ -19,13 +19,13 @@ export const TaskAnalysisDisplay = ({ task }: { task: Task }) => {
     const { switchSelectedAnalysisId } = useInspectionId()
 
     const analysis = task.inspection.analysisResult
-    const hasFinding = task.inspection.analysisResult?.warning
+    const hasFinding = !!task.inspection.analysisResult?.warning
 
     return (
         <>
             {analysis?.analysisType && (
                 <StyledButton
-                    $hasFinding={hasFinding}
+                    hasFinding={hasFinding}
                     color={hasFinding ? 'danger' : 'primary'}
                     variant="ghost"
                     onClick={() => switchSelectedAnalysisId(task.inspection.isarInspectionId)}
