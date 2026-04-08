@@ -14,10 +14,10 @@ import {
     StyledInfoContent,
 } from './InspectionStyles'
 import { InspectionOverviewDialogView } from './InspectionOverview'
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 import { LargeDialogInspectionResult, TextAsImage } from './InspectionReportImage'
-import { useAssetContext } from 'components/Contexts/AssetContext'
 import { useInspectionId } from './SetInspectionIdHook'
+import { InstallationContext } from 'components/Contexts/InstallationContext'
 
 interface InspectionDialogViewProps {
     selectedInspectionId: string
@@ -26,7 +26,7 @@ interface InspectionDialogViewProps {
 
 export const InspectionDialogView = ({ selectedInspectionId, tasks }: InspectionDialogViewProps) => {
     const { TranslateText } = useLanguageContext()
-    const { installationName } = useAssetContext()
+    const { installation } = useContext(InstallationContext)
     const [switchImageDirection, setSwitchImageDirection] = useState<number>(0)
     const { switchSelectedInspectionId } = useInspectionId()
 
@@ -88,7 +88,7 @@ export const InspectionDialogView = ({ selectedInspectionId, tasks }: Inspection
                         <StyledBottomContent>
                             <StyledInfoContent>
                                 <Typography variant="caption">{TranslateText('Installation') + ':'}</Typography>
-                                <Typography variant="body_short">{installationName}</Typography>
+                                <Typography variant="body_short">{installation.name}</Typography>
                             </StyledInfoContent>
                             <StyledInfoContent>
                                 <Typography variant="caption">{TranslateText('Tag') + ':'}</Typography>

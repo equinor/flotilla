@@ -4,6 +4,7 @@ import { InspectionType } from 'models/Inspection'
 import { useLanguageContext } from './LanguageContext'
 import { MissionRunQueryParameters } from 'models/MissionRunQueryParameters'
 import { useSearchParams } from 'react-router-dom'
+import { InstallationContext } from './InstallationContext'
 
 interface IMissionFilterContext {
     page: number
@@ -122,6 +123,7 @@ const MissionFilterContext = createContext<IMissionFilterContext>(defaultMission
 export const MissionFilterProvider: FC<Props> = ({ children }) => {
     const { TranslateText } = useLanguageContext()
     const [searchParams, setSearchParams] = useSearchParams()
+    const { installation } = useContext(InstallationContext)
     const [page, setPage] = useState<number>(mapURLtoPage(searchParams))
     const [filterError, setFilterError] = useState<string>(defaultMissionFilterInterface.filterError)
     const [filterIsSet, setFilterIsSet] = useState<boolean>(defaultMissionFilterInterface.filterIsSet)
@@ -325,6 +327,7 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
                     localFilter.statuses = Object.assign([], missionStatusFilterOptionsIterable)
                 return {
                     ...localFilter,
+                    installationCode: installation.installationCode,
                     nameSearch: localFilter.missionName,
                     robotNameSearch: localFilter.robotName,
                     tagSearch: localFilter.tagId,

@@ -6,11 +6,11 @@ import { convertUTCDateToLocalDate } from 'utils/StringFormatting'
 import { MissionDefinition } from 'models/MissionDefinition'
 import { Link } from 'react-router-dom'
 import { StyledDialog } from 'components/Styles/StyledComponents'
-import { useRef, useState } from 'react'
+import { useContext, useRef, useState } from 'react'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
-import { useAssetContext } from 'components/Contexts/AssetContext'
 import { useBackendApi } from 'api/UseBackendApi'
+import { InstallationContext } from 'components/Contexts/InstallationContext'
 
 const StyledTableRow = styled.div`
     display: grid;
@@ -77,7 +77,7 @@ export const AutoScheduleMissionTableRow = ({
 }) => {
     const { TranslateText } = useLanguageContext()
     const backendApi = useBackendApi()
-    const { installationCode } = useAssetContext()
+    const { installation } = useContext(InstallationContext)
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
     const referenceElement = useRef<HTMLButtonElement>(null)
     const [isOpen, setIsOpen] = useState(false)
@@ -111,7 +111,7 @@ export const AutoScheduleMissionTableRow = ({
                         <Typography
                             color={typographyColor}
                             as={Link}
-                            to={`/${installationCode}/missiondefinition/${mission.id}`}
+                            to={`/${installation.installationCode}/missiondefinition/${mission.id}`}
                             link
                         >
                             {mission.name}

@@ -13,11 +13,11 @@ import { StyledDialog } from 'components/Styles/StyledComponents'
 import { allDays, DaysOfWeek, TimeAndDay } from 'models/AutoScheduleFrequency'
 import { MissionDefinition } from 'models/MissionDefinition'
 import { MissionDefinitionUpdateForm } from 'models/MissionDefinitionUpdateForm'
-import { ChangeEvent, useState } from 'react'
+import { ChangeEvent, useContext, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
-import { useAssetContext } from 'components/Contexts/AssetContext'
 import { useBackendApi } from 'api/UseBackendApi'
+import { InstallationContext } from 'components/Contexts/InstallationContext'
 
 const StyledSummary = styled.div`
     padding: 16px 8px 0px 8px;
@@ -57,7 +57,7 @@ const StyledTimeChips = styled.div`
 const useMissionUpdater = () => {
     const { TranslateText } = useLanguageContext()
     const { setAlert, setListAlert } = useAlertContext()
-    const { installationCode } = useAssetContext()
+    const { installation } = useContext(InstallationContext)
     const navigate = useNavigate()
     const backendApi = useBackendApi()
 
@@ -78,7 +78,7 @@ const useMissionUpdater = () => {
             .updateMissionDefinition(mission.id, form)
             .then((missionDefinition) => {
                 onSuccess()
-                if (missionDefinition.isDeprecated) navigate(`/${installationCode}`)
+                if (missionDefinition.isDeprecated) navigate(`/${installation.installationCode}`)
             })
             .catch(() => {
                 setAlert(

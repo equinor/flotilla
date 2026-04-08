@@ -3,14 +3,14 @@ import { Icons } from 'utils/icons'
 import { useNavigate } from 'react-router-dom'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import styled from 'styled-components'
-import { useRef, useState } from 'react'
+import { useContext, useRef, useState } from 'react'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { Mission } from 'models/Mission'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { ScheduleMissionWithInspectionAreaVerification } from '../InspectionAreaVerificationDialogs/ScheduleMissionWithInspectionAreaVerification'
-import { useAssetContext } from 'components/Contexts/AssetContext'
 import { useBackendApi } from 'api/UseBackendApi'
+import { InstallationContext } from 'components/Contexts/InstallationContext'
 
 const Centered = styled.div`
     display: flex;
@@ -36,7 +36,7 @@ enum ReRunOptions {
 
 export const MissionRestartButton = ({ mission, hasFailedTasks, smallButton }: MissionProps) => {
     const { TranslateText } = useLanguageContext()
-    const { installationCode } = useAssetContext()
+    const { installation } = useContext(InstallationContext)
     const { setAlert, setListAlert } = useAlertContext()
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const [isLocationVerificationOpen, setIsLocationVerificationOpen] = useState<boolean>(false)
@@ -45,7 +45,7 @@ export const MissionRestartButton = ({ mission, hasFailedTasks, smallButton }: M
 
     const navigate = useNavigate()
     const navigateToHome = () => {
-        const path = `/${installationCode}`
+        const path = `/${installation.installationCode}`
         navigate(path)
     }
     const backendApi = useBackendApi()

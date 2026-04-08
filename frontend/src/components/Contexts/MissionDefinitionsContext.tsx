@@ -5,8 +5,8 @@ import { useLanguageContext } from './LanguageContext'
 import { AlertType, useAlertContext } from './AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
-import { useAssetContext } from './AssetContext'
 import { useBackendApi } from 'api/UseBackendApi'
+import { InstallationContext } from './InstallationContext'
 
 interface IMissionDefinitionsContext {
     missionDefinitions: MissionDefinition[]
@@ -36,7 +36,7 @@ const upsertMissionDefinition = (oldQueue: MissionDefinition[], updatedMission: 
 const useMissionDefinitions = (): IMissionDefinitionsContext => {
     const [missionDefinitions, setMissionDefinitions] = useState<MissionDefinition[]>([])
     const { registerEvent, connectionReady } = useSignalRContext()
-    const { installationCode } = useAssetContext()
+    const { installation } = useContext(InstallationContext)
     const { TranslateText } = useLanguageContext()
     const { setAlert, setListAlert } = useAlertContext()
     const backendApi = useBackendApi()
@@ -71,7 +71,7 @@ const useMissionDefinitions = (): IMissionDefinitionsContext => {
         const fetchAndUpdateMissionDefinitions = () => {
             backendApi
                 .getMissionDefinitions({
-                    installationCode: installationCode,
+                    installationCode: installation.installationCode,
                     pageSize: 100,
                     orderBy: 'InstallationCode installationCode',
                 })
@@ -96,16 +96,18 @@ const useMissionDefinitions = (): IMissionDefinitionsContext => {
                     )
                 })
         }
-        if (installationCode) fetchAndUpdateMissionDefinitions()
-    }, [installationCode])
+        fetchAndUpdateMissionDefinitions()
+    }, [installation])
 
     const [filteredMissionDefinitions, setFilteredMissionDefinitions] = useState<MissionDefinition[]>([])
 
     useEffect(() => {
         setFilteredMissionDefinitions(
-            missionDefinitions.filter((m) => m.installationCode.toLowerCase() === installationCode.toLowerCase())
+            missionDefinitions.filter(
+                (m) => m.installationCode.toLowerCase() === installation.installationCode.toLowerCase()
+            )
         )
-    }, [installationCode, missionDefinitions])
+    }, [installation, missionDefinitions])
 
     return { missionDefinitions: filteredMissionDefinitions }
 }

@@ -13,7 +13,8 @@ import { convertUTCDateToLocalDate, formatDateTime } from 'utils/StringFormattin
 import { calculateRemaindingTimeInMinutes } from 'utils/CalculateRemaingingTime'
 import { useNavigate } from 'react-router-dom'
 import { phone_width } from 'utils/constants'
-import { useAssetContext } from 'components/Contexts/AssetContext'
+import { useContext } from 'react'
+import { InstallationContext } from 'components/Contexts/InstallationContext'
 
 const HeaderSection = styled(Card)`
     width: 100%;
@@ -146,7 +147,7 @@ const getStartUsedAndRemainingTime = (
 
 export const MissionHeader = ({ mission }: { mission: Mission }) => {
     const { TranslateText } = useLanguageContext()
-    const { installationCode } = useAssetContext()
+    const { installation } = useContext(InstallationContext)
     const navigate = useNavigate()
     const isMissionCompleted = mission.endTime ? true : false
 
@@ -191,7 +192,9 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
                     )}
                     <Button
                         variant="outlined"
-                        onClick={() => navigate(`/${installationCode}/missiondefinition/${mission.missionId}`)}
+                        onClick={() =>
+                            navigate(`/${installation.installationCode}/missiondefinition/${mission.missionId}`)
+                        }
                     >
                         {TranslateText('View mission definition')}
                     </Button>

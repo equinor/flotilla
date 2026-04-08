@@ -24,7 +24,6 @@ import {
 } from 'components/Styles/StyledComponents'
 import { phone_width } from 'utils/constants'
 import { SignalREventLabels, useSignalRContext } from 'components/Contexts/SignalRContext'
-import { useAssetContext } from 'components/Contexts/AssetContext'
 import { useBackendApi } from 'api/UseBackendApi'
 import { HistoricMissionCard } from './MissionHistory/HistoricMissionCard'
 import { FilterSection } from './MissionHistory/FilterSection'
@@ -121,7 +120,7 @@ export const MissionHistoryPage = () => {
 
 const MissionHistoryViewComponent = () => {
     const { TranslateText } = useLanguageContext()
-    const { installationCode } = useAssetContext()
+    const { installation } = useContext(InstallationContext)
     const { page, switchPage, filterState, filterIsSet, filterFunctions, filterError, clearFilterError } =
         useMissionFilterContext()
     const { setAlert, setListAlert } = useAlertContext()
@@ -187,7 +186,7 @@ const MissionHistoryViewComponent = () => {
         backendApi
             .getMissionRuns({
                 ...formattedFilter,
-                installationCode: installationCode,
+                installationCode: installation.installationCode,
                 pageSize: pageSize,
                 pageNumber: page ?? 1,
                 orderBy: 'EndTime desc, Name',
@@ -230,7 +229,7 @@ const MissionHistoryViewComponent = () => {
     useEffect(() => {
         if (
             lastChangedMission &&
-            lastChangedMission.installationCode === installationCode &&
+            lastChangedMission.installationCode === installation.installationCode &&
             ![MissionStatus.Pending, MissionStatus.Queued, MissionStatus.Ongoing].includes(lastChangedMission.status)
         ) {
             updateFilteredMissions()

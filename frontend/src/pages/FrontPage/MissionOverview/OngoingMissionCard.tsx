@@ -12,7 +12,8 @@ import { Icons } from 'utils/icons'
 import { RobotWithoutTelemetry } from 'models/Robot'
 import { NoMissionReason } from 'utils/IsRobotReadyToRunMissions'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
-import { useAssetContext } from 'components/Contexts/AssetContext'
+import { useContext } from 'react'
+import { InstallationContext } from 'components/Contexts/InstallationContext'
 
 interface MissionProps {
     mission: Mission
@@ -142,10 +143,10 @@ const StyledWrapper = styled.div`
 
 export const OngoingMissionCard = ({ mission, isOpen, setIsOpen }: MissionProps) => {
     const { TranslateText } = useLanguageContext()
-    const { installationCode } = useAssetContext()
+    const { installation } = useContext(InstallationContext)
     const navigate = useNavigate()
     const routeChange = () => {
-        const path = `/${installationCode}/mission/${mission.id}`
+        const path = `/${installation.installationCode}/mission/${mission.id}`
         navigate(path)
     }
 

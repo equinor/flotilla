@@ -19,6 +19,7 @@ import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'compon
 import { InfoAlertContent, InfoAlertListContent } from 'components/Alerts/InfoAlertContent'
 import { useBackendApi } from 'api/UseBackendApi'
 import { AuthContext } from './AuthContext'
+import { InstallationContext } from './InstallationContext'
 
 export enum AlertType {
     MissionFail,
@@ -81,7 +82,8 @@ export const AlertProvider: FC<Props> = ({ children }) => {
     const [recentFailedMissions, setRecentFailedMissions] = useState<Mission[]>([])
     const { registerEvent, connectionReady } = useSignalRContext()
     const { TranslateText } = useLanguageContext()
-    const { enabledRobots, installationCode } = useAssetContext()
+    const { enabledRobots } = useAssetContext()
+    const { installation } = useContext(InstallationContext)
     const [autoScheduleFailedMissionDict, setAutoScheduleFailedMissionDict] = useState<AutoScheduleFailedMissionDict>(
         JSON.parse(window.localStorage.getItem('autoScheduleFailedMissionDict') || '{}')
     )
@@ -172,7 +174,7 @@ export const AlertProvider: FC<Props> = ({ children }) => {
             const lastDismissTime: Date = getLastDismissalTime()
             backendApi
                 .getMissionRuns({
-                    installationCode: installationCode,
+                    installationCode: installation.installationCode,
                     statuses: [MissionStatus.Failed],
                     pageSize: pageSize,
                 })
@@ -180,7 +182,8 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                     const newRecentFailedMissions = missions.content.filter(
                         (m) =>
                             convertUTCDateToLocalDate(new Date(m.endTime!)) > lastDismissTime &&
-                            m.installationCode!.toLocaleLowerCase() === installationCode.toLocaleLowerCase()
+                            m.installationCode!.toLocaleLowerCase() ===
+                                installation.installationCode.toLocaleLowerCase()
                     )
                     setRecentFailedMissions(newRecentFailedMissions)
                 })
@@ -202,7 +205,7 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                 })
         }
         if (!recentFailedMissions || recentFailedMissions.length === 0) updateRecentFailedMissions()
-    }, [installationCode])
+    }, [installation])
 
     // Register a signalR event handler that listens for new failed missions
     useEffect(() => {
@@ -214,7 +217,8 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                 setRecentFailedMissions((failedMissions) => {
                     if (
                         !newFailedMission.installationCode ||
-                        newFailedMission.installationCode.toLocaleLowerCase() !== installationCode.toLocaleLowerCase()
+                        newFailedMission.installationCode.toLocaleLowerCase() !==
+                            installation.installationCode.toLocaleLowerCase()
                     )
                         return failedMissions // Ignore missions for other installations
                     // Ignore missions shortly after the user dismissed the last one
@@ -226,13 +230,17 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                 })
             })
         }
-    }, [registerEvent, connectionReady, installationCode])
+    }, [registerEvent, connectionReady, installation])
 
     useEffect(() => {
         if (connectionReady) {
             registerEvent(SignalREventLabels.alert, (username: string, message: string) => {
                 const backendAlert: Alert = JSON.parse(message)
-                if (backendAlert.installationCode.toLocaleLowerCase() !== installationCode.toLocaleLowerCase()) return
+                if (
+                    backendAlert.installationCode.toLocaleLowerCase() !==
+                    installation.installationCode.toLocaleLowerCase()
+                )
+                    return
 
                 const alertType = alertTypeEnumMap[backendAlert.alertCode]
 
@@ -276,7 +284,7 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                 }
             })
         }
-    }, [registerEvent, connectionReady, installationCode, enabledRobots])
+    }, [registerEvent, connectionReady, installation, enabledRobots])
 
     useEffect(() => {
         if (recentFailedMissions.length > 0) {

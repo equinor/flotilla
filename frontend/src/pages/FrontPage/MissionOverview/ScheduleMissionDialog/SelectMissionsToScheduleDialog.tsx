@@ -1,7 +1,7 @@
 import { Autocomplete, Button, Card, Dialog, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { memo, useState } from 'react'
+import { memo, useContext, useState } from 'react'
 import { RobotWithoutTelemetry, RobotStatus } from 'models/Robot'
 import { CondensedMissionDefinition } from 'models/CondensedMissionDefinition'
 import { useAssetContext } from 'components/Contexts/AssetContext'
@@ -11,6 +11,7 @@ import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'compon
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { phone_width } from 'utils/constants'
 import { useBackendApi } from 'api/UseBackendApi'
+import { InstallationContext } from 'components/Contexts/InstallationContext'
 
 const StyledMissionDialog = styled.div`
     display: flex;
@@ -46,7 +47,7 @@ interface ScheduleDialogProps {
 
 export const SelectMissionsToScheduleDialog = ({ missionsList, closeDialog }: ScheduleDialogProps) => {
     const { TranslateText } = useLanguageContext()
-    const { installationCode } = useAssetContext()
+    const { installation } = useContext(InstallationContext)
     const { setAlert, setListAlert } = useAlertContext()
     const { setLoadingRobotMissionSet } = useMissionsContext()
     const [selectedMissions, setSelectedMissions] = useState<CondensedMissionDefinition[]>([])
@@ -57,7 +58,7 @@ export const SelectMissionsToScheduleDialog = ({ missionsList, closeDialog }: Sc
         if (!selectedRobot) return
 
         selectedMissions.forEach((mission: CondensedMissionDefinition) => {
-            backendApi.postMission(mission.sourceId, selectedRobot.id, installationCode).catch((e) => {
+            backendApi.postMission(mission.sourceId, selectedRobot.id, installation.installationCode).catch((e) => {
                 setAlert(
                     AlertType.RequestFail,
                     <FailedRequestAlertContent
