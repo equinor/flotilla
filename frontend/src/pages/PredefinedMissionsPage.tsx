@@ -12,7 +12,7 @@ import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { CondensedMissionDefinition } from 'models/CondensedMissionDefinition'
 import { Icons } from 'utils/icons'
-import { StyledButton } from 'components/Styles/StyledComponents'
+import { StyledButton, StyledPage } from 'components/Styles/StyledComponents'
 import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { phone_width } from 'utils/constants'
@@ -108,31 +108,33 @@ export const PredefinedMissionsPage = () => {
         <>
             <Header alertDict={alerts} installation={installation} />
             <NavBar />
-            <StyledView>
-                <StyledContent>
-                    <StyledMissionButton>
-                        {isScheduleMissionDialogOpen && (
-                            <ScheduleMissionDialog
-                                isFetchingMissions={isFetchingMissions}
-                                missions={missions}
-                                onClose={() => setIsScheduleMissionDialogOpen(false)}
-                            />
+            <StyledPage>
+                <StyledView>
+                    <StyledContent>
+                        <StyledMissionButton>
+                            {isScheduleMissionDialogOpen && (
+                                <ScheduleMissionDialog
+                                    isFetchingMissions={isFetchingMissions}
+                                    missions={missions}
+                                    onClose={() => setIsScheduleMissionDialogOpen(false)}
+                                />
+                            )}
+                            <AddPredefinedMissionsButton />
+                        </StyledMissionButton>
+                        {allInspections.length > 0 ? (
+                            <AllInspectionsTable inspections={allInspections} />
+                        ) : (
+                            <StyledPlaceholderContent>
+                                <Placeholder>
+                                    <Typography variant="h4" color="disabled">
+                                        {TranslateText('No predefined missions available')}
+                                    </Typography>
+                                </Placeholder>
+                            </StyledPlaceholderContent>
                         )}
-                        <AddPredefinedMissionsButton />
-                    </StyledMissionButton>
-                    {allInspections.length > 0 ? (
-                        <AllInspectionsTable inspections={allInspections} />
-                    ) : (
-                        <StyledPlaceholderContent>
-                            <Placeholder>
-                                <Typography variant="h4" color="disabled">
-                                    {TranslateText('No predefined missions available')}
-                                </Typography>
-                            </Placeholder>
-                        </StyledPlaceholderContent>
-                    )}
-                </StyledContent>
-            </StyledView>
+                    </StyledContent>
+                </StyledView>
+            </StyledPage>
         </>
     )
 }

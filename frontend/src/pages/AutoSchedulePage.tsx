@@ -5,7 +5,13 @@ import { NavBar } from 'components/Header/NavBar'
 import { Autocomplete, Button, Icon, Table, Typography } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
-import { StyledDialog, StyledTableBody, StyledTableCell, TextAlignedButton } from 'components/Styles/StyledComponents'
+import {
+    StyledDialog,
+    StyledPage,
+    StyledTableBody,
+    StyledTableCell,
+    TextAlignedButton,
+} from 'components/Styles/StyledComponents'
 import { allDays, allDaysIndexOfToday, DaysOfWeek } from 'models/AutoScheduleFrequency'
 import styled from 'styled-components'
 import { capitalizeFirstLetter } from 'utils/StringFormatting'
@@ -75,23 +81,25 @@ export const AutoSchedulePage = () => {
         <>
             <Header alertDict={alerts} installation={installation} />
             <NavBar />
-            <StyledView>
-                <StyledContent>
-                    <StyledButtons>
-                        <Button variant="ghost" onClick={() => setShowListView(!showListView)}>
-                            <Icon name={showListView ? Icons.ViewWeek : Icons.List} size={24} />
-                            {showListView
-                                ? TranslateText('Switch to calendar view')
-                                : TranslateText('Switch to list view')}
-                        </Button>
-                        <EditAutoSchedulingButton />
-                    </StyledButtons>
-                    <StyledDesktopView>{showListView ? <DayOverview /> : <CalendarPro />}</StyledDesktopView>
-                    <StyledPhoneView>
-                        <DayOverview />
-                    </StyledPhoneView>
-                </StyledContent>
-            </StyledView>
+            <StyledPage>
+                <StyledView>
+                    <StyledContent>
+                        <StyledButtons>
+                            <Button variant="ghost" onClick={() => setShowListView(!showListView)}>
+                                <Icon name={showListView ? Icons.ViewWeek : Icons.List} size={24} />
+                                {showListView
+                                    ? TranslateText('Switch to calendar view')
+                                    : TranslateText('Switch to list view')}
+                            </Button>
+                            <EditAutoSchedulingButton />
+                        </StyledButtons>
+                        <StyledDesktopView>{showListView ? <DayOverview /> : <CalendarPro />}</StyledDesktopView>
+                        <StyledPhoneView>
+                            <DayOverview />
+                        </StyledPhoneView>
+                    </StyledContent>
+                </StyledView>
+            </StyledPage>
         </>
     )
 }

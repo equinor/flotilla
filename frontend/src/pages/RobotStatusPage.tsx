@@ -7,6 +7,7 @@ import { useContext } from 'react'
 import styled from 'styled-components'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 import { RobotStatusCard, RobotStatusCardPlaceholder } from './RobotCards/RobotStatusCard'
+import { StyledPage } from 'components/Styles/StyledComponents'
 
 const RobotCardSection = styled.div`
     display: flex;
@@ -48,12 +49,14 @@ export const RobotStatusPage = () => {
         <>
             <Header alertDict={alerts} installation={installation} />
             <NavBar />
-            <RobotView>
-                <RobotCardSection>
-                    {relevantRobots.length > 0 && robotDisplay}
-                    {relevantRobots.length === 0 && <RobotStatusCardPlaceholder />}
-                </RobotCardSection>
-            </RobotView>
+            <StyledPage>
+                <RobotView>
+                    <RobotCardSection>
+                        {relevantRobots.length > 0 && robotDisplay}
+                        {relevantRobots.length === 0 && <RobotStatusCardPlaceholder />}
+                    </RobotCardSection>
+                </RobotView>
+            </StyledPage>
         </>
     )
 }
