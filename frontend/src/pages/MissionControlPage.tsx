@@ -20,6 +20,7 @@ import {
 } from './FrontPage/MissionOverview/OngoingMissionCard'
 import { RobotCard, RobotCardPlaceholder } from './FrontPage/MissionOverview/RobotCard'
 import { RobotMissionQueueView } from './FrontPage/MissionOverview/MissionQueueView'
+import { StyledPage } from 'components/Styles/StyledComponents'
 
 const MissionControlStyle = styled.div`
     display: flex;
@@ -73,13 +74,15 @@ export const MissionControlPage = () => {
         <>
             <Header alertDict={alerts} installation={installation} />
             <NavBar />
-            <MissionControlStyle>
-                <MissionControlBody>
-                    {enabledRobots.length > 0 && missionControlCards}
-                    {enabledRobots.length === 0 && <MissionControlPlaceholderCard />}
-                </MissionControlBody>
-                <NextAutoScheduleMissionView />
-            </MissionControlStyle>
+            <StyledPage>
+                <MissionControlStyle>
+                    <MissionControlBody>
+                        {enabledRobots.length > 0 && missionControlCards}
+                        {enabledRobots.length === 0 && <MissionControlPlaceholderCard />}
+                    </MissionControlBody>
+                    <NextAutoScheduleMissionView />
+                </MissionControlStyle>
+            </StyledPage>
         </>
     )
 }

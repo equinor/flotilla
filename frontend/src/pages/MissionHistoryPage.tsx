@@ -17,6 +17,7 @@ import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'compon
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import {
     StyledLoading,
+    StyledPage,
     StyledPagination,
     StyledTableBody,
     StyledTableCaption,
@@ -111,9 +112,11 @@ export const MissionHistoryPage = () => {
         <>
             <Header alertDict={alerts} installation={installation} />
             <NavBar />
-            <MissionFilterProvider>
-                <MissionHistoryViewComponent />
-            </MissionFilterProvider>
+            <StyledPage>
+                <MissionFilterProvider>
+                    <MissionHistoryViewComponent />
+                </MissionFilterProvider>
+            </StyledPage>
         </>
     )
 }

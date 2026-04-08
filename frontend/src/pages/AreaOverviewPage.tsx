@@ -17,6 +17,7 @@ import { InspectionAreaCards } from './InspectionPage/InspectionAreaCards'
 import { InspectionTable } from './InspectionPage/InspectionTable'
 import { ScheduleMissionDialog } from './InspectionPage/ScheduleMissionDialogs'
 import { Inspection, InspectionAreaInspectionTuple } from './InspectionPage/InspectionSection'
+import { StyledPage } from 'components/Styles/StyledComponents'
 
 interface InspectionAreaAreaTuple {
     inspectionArea: InspectionArea
@@ -108,41 +109,43 @@ export const AreaOverviewPage = () => {
         <>
             <Header alertDict={alerts} installation={installation} />
             <NavBar />
-            <InspectionAreaOverview>
-                {installationInspectionAreas.length !== 1 && (
-                    <>
-                        <InspectionAreaSelection />
-                        {inspectionArea && inspections && (
-                            <InspectionTable
-                                inspectionArea={inspectionArea}
-                                scrollOnToggle={scrollOnToggle}
-                                openDialog={() => setIsDialogOpen(true)}
-                                setSelectedMissions={setSelectedMissions}
-                                inspections={inspections}
-                            />
-                        )}{' '}
-                    </>
+            <StyledPage>
+                <InspectionAreaOverview>
+                    {installationInspectionAreas.length !== 1 && (
+                        <>
+                            <InspectionAreaSelection />
+                            {inspectionArea && inspections && (
+                                <InspectionTable
+                                    inspectionArea={inspectionArea}
+                                    scrollOnToggle={scrollOnToggle}
+                                    openDialog={() => setIsDialogOpen(true)}
+                                    setSelectedMissions={setSelectedMissions}
+                                    inspections={inspections}
+                                />
+                            )}{' '}
+                        </>
+                    )}
+                    {inspectionArea?.plantCode && inspectionArea.areaPolygon?.positions && (
+                        <>
+                            {installationInspectionAreas.length === 1 && (
+                                <Typography variant="h3" style={{ marginTop: '10px' }}>
+                                    {inspectionArea?.inspectionAreaName}
+                                </Typography>
+                            )}
+                            <PlantPolygonMap inspectionArea={inspectionArea} floorId={'0'} />{' '}
+                        </>
+                    )}
+                </InspectionAreaOverview>
+                {isDialogOpen && (
+                    <ScheduleMissionDialog
+                        selectedMissions={selectedMissions!}
+                        closeDialog={closeDialog}
+                        setMissions={setSelectedMissions}
+                        unscheduledMissions={unscheduledMissions!}
+                        isAlreadyScheduled={isAlreadyScheduled}
+                    />
                 )}
-                {inspectionArea?.plantCode && inspectionArea.areaPolygon?.positions && (
-                    <>
-                        {installationInspectionAreas.length === 1 && (
-                            <Typography variant="h3" style={{ marginTop: '10px' }}>
-                                {inspectionArea?.inspectionAreaName}
-                            </Typography>
-                        )}
-                        <PlantPolygonMap inspectionArea={inspectionArea} floorId={'0'} />{' '}
-                    </>
-                )}
-            </InspectionAreaOverview>
-            {isDialogOpen && (
-                <ScheduleMissionDialog
-                    selectedMissions={selectedMissions!}
-                    closeDialog={closeDialog}
-                    setMissions={setSelectedMissions}
-                    unscheduledMissions={unscheduledMissions!}
-                    isAlreadyScheduled={isAlreadyScheduled}
-                />
-            )}
+            </StyledPage>
         </>
     )
 }
