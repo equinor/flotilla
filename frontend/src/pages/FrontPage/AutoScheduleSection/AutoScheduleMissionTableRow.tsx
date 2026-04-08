@@ -37,6 +37,10 @@ const StyledButton = styled(Button)`
     }
 `
 
+const CalenderButton = styled(Button)`
+    max-width: 100px;
+`
+
 export enum MissionStatusType {
     ScheduledJob = 'ScheduledJob',
     SkippedJob = 'SkippedJob',
@@ -144,17 +148,12 @@ export const AutoScheduleMissionTableRow = ({
                             </>
                         )}
                     </StyledMissionInfo>
-                    <Button
-                        style={{ maxWidth: '100px' }}
-                        variant="ghost_icon"
-                        onClick={() => setIsEditDialogOpen(true)}
-                    >
+                    <CalenderButton variant="ghost_icon" onClick={() => setIsEditDialogOpen(true)}>
                         <Icon name={Icons.Edit} size={16} color={typographyColor} />
-                    </Button>
+                    </CalenderButton>
                     {(missionStatusType === MissionStatusType.ScheduledJob ||
                         missionStatusType === MissionStatusType.SkippedJob) && (
-                        <Button
-                            style={{ maxWidth: '100px' }}
+                        <CalenderButton
                             variant="ghost"
                             disabled={missionStatusType === MissionStatusType.SkippedJob}
                             onClick={() => setIsSkipDialogOpen(true)}
@@ -162,7 +161,7 @@ export const AutoScheduleMissionTableRow = ({
                             {missionStatusType === MissionStatusType.ScheduledJob
                                 ? TranslateText('SkipAutoMission')
                                 : TranslateText('Skipped')}
-                        </Button>
+                        </CalenderButton>
                     )}
                     <StyledDialog open={isSkipDialogOpen}>
                         <StyledDialog.Header>
