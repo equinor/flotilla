@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6
         with:
           ref: ${{ inputs.CheckoutRef }}
 
@@ -50,13 +50,13 @@ jobs:
 
       - name: Checkout Pull Request by SHA
         if: ${{ inputs.PullRequestCheckout }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ steps.pr_head_sha.outputs.pr_head_sha }}
 
       - name: Set up .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@vc2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 #v5
         with:
           dotnet-version: "10.0.x"
 
