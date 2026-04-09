@@ -56,7 +56,7 @@ jobs:
           ref: ${{ steps.pr_head_sha.outputs.pr_head_sha }}
 
       - name: Set up .NET
-        uses: actions/setup-dotnet@vc2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 #v5
+        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 #v5
         with:
           dotnet-version: "10.0.x"
 
