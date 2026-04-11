@@ -1,30 +1,24 @@
 name: Deploy to Staging
+
+concurrency:
+  group: staging-concurrency
+  cancel-in-progress: true
+
 permissions:
   contents: read
   pull-requests: read
   packages: write
-
-# Only one workflow in a concurrency group may run at a time
-concurrency:
-  group: staging-concurrency
-  cancel-in-progress: true
 
 on:
   release:
     types: [published]
 
 jobs:
-  trigger-github-deployment:
-    name: Trigger GitHub Deployment
-    environment: Staging
-    runs-on: ubuntu-latest
-    steps:
-      - name: Empty Step
-        run: echo "Hello World"
-
   run_migrations:
     name: Update database in Staging
-    needs: trigger-github-deployment
+    permissions: 
+      contents: read
+      pull-requests: read
     uses: ./.github/workflows/runMigrations.yml
     with:
       PullRequestCheckout: false
@@ -33,52 +27,52 @@ jobs:
       ClientId: ${{secrets.CLIENTID}}
       ClientSecret: ${{secrets.CLIENTSECRET}}
 
-  build-and-push-release-to-dev:
-    name: Update containers in dev with version tag
+  build-and-push-flotilla-components-with-latest-tag-to-github-container-registry:
+    name: Build and push flotilla components with latest tag to github container registry
     permissions:
       contents: read
       packages: write
-    needs: trigger-github-deployment
     strategy:
       matrix:
         component: [broker, backend, frontend]
-    uses: ./.github/workflows/publish_component.yml
+    uses: equinor/armada/.github/workflows/build_and_publish_docker_image_to_container_registry.yml@main
     with:
-      ComponentName: ${{ matrix.component }}
-      Registry: ghcr.io
-      ImageName: ${{ github.repository }}
-      Tag: ${{ github.event.release.tag_name }}
-      SecondaryTag: latest
+      registry: ghcr.io
+      image_name: ${{ github.repository }}-${{ matrix.component }}
+      tag: ${{ github.event.release.tag_name }}
+      secondary_tag: latest
+      path_to_dockerfile: Dockerfile
+      path_to_context: ./${{ matrix.component}}
     secrets:
-      RegistryUsername: ${{ github.actor }}
-      RegistryPassword: ${{ secrets.GITHUB_TOKEN }}
+      registry_password: ${{ secrets.GITHUB_TOKEN }}
+      registry_username: ${{ github.actor }}
 
-  build-and-push-components:
-    name: Build and push containers to auroraprodcr for Staging/Production
+  build-and-push-latest-release-flotilla-component-to-aurora-prod-container-registry:
+    name: Build and push latest release flotilla components to aurora prod container registry
     permissions:
       contents: read
       packages: write
-    needs: [trigger-github-deployment]
     strategy:
       matrix:
         component: [broker, backend, frontend]
-    uses: ./.github/workflows/publish_component.yml
+    uses: equinor/armada/.github/workflows/build_and_publish_docker_image_to_container_registry.yml@main
     with:
-      ComponentName: ${{ matrix.component }}
-      Registry: auroraprodacr.azurecr.io
-      ImageName: robotics/flotilla
-      Tag: ${{ github.event.release.tag_name }}
-      SecondaryTag: latest
+      registry: auroraprodacr.azurecr.io
+      image_name: robotics/flotilla-${{ matrix.component }}
+      tag: ${{ github.event.release.tag_name }}
+      secondary_tag: latest
+      path_to_dockerfile: Dockerfile
+      path_to_context: ./${{ matrix.component}}
     secrets:
-      RegistryUsername: ${{ secrets.ROBOTICS_ACRPUSH_DOCKER_APPLICATION_ID }}
-      RegistryPassword: ${{ secrets.ROBOTICS_ACRPUSH_DOCKER_SECRET }}
+      registry_password: ${{ secrets.ROBOTICS_ACRPUSH_DOCKER_SECRET }}
+      registry_username: ${{ secrets.ROBOTICS_ACRPUSH_DOCKER_APPLICATION_ID }}
 
   deploy:
     name: Update deployment in Staging
     permissions:
       contents: read
       packages: write
-    needs: [trigger-github-deployment, build-and-push-components]
+    needs: build-and-push-latest-release-flotilla-component-to-aurora-prod-container-registry
     uses: ./.github/workflows/update_aurora_deployment.yml
     with:
       Environment: staging

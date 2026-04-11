@@ -1,12 +1,12 @@
 name: Deploy to Development
-permissions:
-  contents: read
-  pull-requests: read
 
-# Only one workflow in a concurrency group may run at a time
 concurrency:
   group: development-concurrency
   cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write
 
 on:
   push:
@@ -14,16 +14,7 @@ on:
       - "main"
 
 jobs:
-  trigger-github-deployment:
-    name: Trigger GitHub Deployment
-    environment: Development
-    runs-on: ubuntu-latest
-    steps:
-      - name: Empty Step
-        run: echo "Hello World"
-
   get-short-sha:
-    needs: trigger-github-deployment
     outputs:
       tag: ${{ steps.get-tag.outputs.tag }}
     runs-on: ubuntu-latest
@@ -33,32 +24,30 @@ jobs:
           SHA_SHORT=$(echo ${{ github.sha }} | cut -c1-8)
           echo "tag=$SHA_SHORT" >> "$GITHUB_OUTPUT"
 
-  build-and-push-components:
-    name: Build and push containers to ghcr for Development
-    needs: [get-short-sha, trigger-github-deployment]
+  build-and-push-flotilla-components-to-github-container-registry:
+    name: Build and push flotilla components to github container registry
+    needs: get-short-sha
     permissions:
       contents: read
       packages: write
     strategy:
       matrix:
         component: [broker, backend, frontend]
-    uses: ./.github/workflows/publish_component.yml
+    uses: equinor/armada/.github/workflows/build_and_publish_docker_image_to_container_registry.yml@main
     with:
-      ComponentName: ${{ matrix.component }}
-      Registry: ghcr.io
-      ImageName: ${{ github.repository }}
-      # Add dev. prefix for the tags used in dev environment,
-      # due to the commit hash can be interpreted as an integer if only numbers
-      # PS: Needs to match deploy.with.Tag
-      Tag: "dev.${{ needs.get-short-sha.outputs.tag }}"
-      SecondaryTag: dev
+      registry: ghcr.io
+      image_name: ${{ github.repository }}-${{ matrix.component }}
+      tag: "dev.${{ needs.get-short-sha.outputs.tag }}"
+      secondary_tag: dev
+      path_to_dockerfile: Dockerfile
+      path_to_context: ./${{ matrix.component}}
     secrets:
-      RegistryUsername: ${{ github.actor }}
-      RegistryPassword: ${{ secrets.GITHUB_TOKEN }}
+      registry_password: ${{ secrets.GITHUB_TOKEN }}
+      registry_username: ${{ github.actor }}
 
   deploy:
     name: Update deployment in Development
-    needs: [build-and-push-components, get-short-sha, trigger-github-deployment]
+    needs: [build-and-push-flotilla-components-to-github-container-registry, get-short-sha]
     permissions:
       contents: read
     uses: ./.github/workflows/update_aurora_deployment.yml
