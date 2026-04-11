@@ -39,7 +39,7 @@ jobs:
       image_name: ${{ github.repository }}-${{ matrix.component }}
       tag: "dev.${{ needs.get-short-sha.outputs.tag }}"
       secondary_tag: dev
-      path_to_dockerfile: Dockerfile
+      path_to_dockerfile: ${{ matrix.component}}/Dockerfile
       path_to_context: ./${{ matrix.component}}
     secrets:
       registry_password: ${{ secrets.GITHUB_TOKEN }}

@@ -41,7 +41,7 @@ jobs:
       image_name: ${{ github.repository }}-${{ matrix.component }}
       tag: ${{ github.event.release.tag_name }}
       secondary_tag: latest
-      path_to_dockerfile: Dockerfile
+      path_to_dockerfile: ${{ matrix.component}}/Dockerfile
       path_to_context: ./${{ matrix.component}}
     secrets:
       registry_password: ${{ secrets.GITHUB_TOKEN }}
@@ -61,7 +61,7 @@ jobs:
       image_name: robotics/flotilla-${{ matrix.component }}
       tag: ${{ github.event.release.tag_name }}
       secondary_tag: latest
-      path_to_dockerfile: Dockerfile
+      path_to_dockerfile: ${{ matrix.component}}/Dockerfile
       path_to_context: ./${{ matrix.component}}
     secrets:
       registry_password: ${{ secrets.ROBOTICS_ACRPUSH_DOCKER_SECRET }}
