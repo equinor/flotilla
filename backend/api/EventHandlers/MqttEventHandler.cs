@@ -539,6 +539,7 @@ namespace Api.EventHandlers
             if (!updatedFlotillaMissionRun.IsCompleted)
             {
                 await RobotService.UpdateCurrentMissionId(robot.Id, updatedFlotillaMissionRun.Id);
+                robot.CurrentMissionId = updatedFlotillaMissionRun.Id;
                 return;
             }
 
@@ -551,6 +552,7 @@ namespace Api.EventHandlers
             if (robot.CurrentMissionId == flotillaMissionRun.Id)
             {
                 await RobotService.UpdateCurrentMissionId(robot.Id, null);
+                robot.CurrentMissionId = null;
             }
 
             try
