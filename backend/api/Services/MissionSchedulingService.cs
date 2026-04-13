@@ -231,6 +231,13 @@ namespace Api.Services
                 logger.LogWarning("{Message}", errorMessage);
                 throw new MissionRunNotFoundException(errorMessage);
             }
+            else if (missionRun.Tasks.All(task => task.IsCompleted))
+            {
+                string errorMessage =
+                    $"Mission {isarMissionRunId} on robot {robotId} contains no unfinished tasks and cannot be put back on the queue";
+                logger.LogWarning("{Message}", errorMessage);
+                throw new NoUnfinishedTasksInMissionException(errorMessage);
+            }
 
             await missionRunService.UpdateMissionRunProperty(
                 missionRun.Id,
