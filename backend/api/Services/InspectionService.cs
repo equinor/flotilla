@@ -203,11 +203,7 @@ namespace Api.Services
         private IQueryable<Inspection> GetInspections(bool readOnly = true)
         {
             var query = context.Inspections.Include(i => i.AnalysisResult);
-            if (accessRoleService.IsUserAdmin() || !accessRoleService.IsAuthenticationAvailable())
-                return (readOnly ? query.AsNoTracking() : query.AsTracking());
-            throw new UnauthorizedAccessException(
-                "User does not have permission to view inspections"
-            );
+            return readOnly ? query.AsNoTracking() : query.AsTracking();
         }
 
         public async Task<Inspection?> ReadByIsarInspectionId(string id, bool readOnly = true)
