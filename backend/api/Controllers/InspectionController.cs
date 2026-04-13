@@ -219,7 +219,7 @@ namespace Api.Controllers
         /// Retrieves the visualized image associated with the given ISAR Inspection ID.
         /// </remarks>
         [HttpGet("analysis/{isarInspectionId}")]
-        [Authorize(Roles = Role.User)]
+        [Authorize(Roles = Role.Any)]
         [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
