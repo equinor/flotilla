@@ -391,6 +391,7 @@ namespace Api.EventHandlers
                     isarAbortedMission.Reason
                 );
             }
+            catch (NoUnfinishedTasksInMissionException) { }
             catch (RobotNotFoundException)
             {
                 _logger.LogWarning(
@@ -828,6 +829,7 @@ namespace Api.EventHandlers
                     robot.Name
                 );
             }
+            catch (NoUnfinishedTasksInMissionException) { }
             catch (RobotNotFoundException)
             {
                 _logger.LogWarning(

@@ -102,4 +102,6 @@ namespace Api.Utilities
     public class FailedToRemoveAutoSchedulingException(string message) : Exception(message) { }
 
     public class MultipleInspectionAreasFoundException(string message) : Exception(message) { }
+
+    public class NoUnfinishedTasksInMissionException(string message) : Exception(message) { }
 }
