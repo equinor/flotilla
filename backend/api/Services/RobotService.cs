@@ -27,6 +27,7 @@ namespace Api.Services
         public Task UpdateCurrentMissionId(string robotId, string? missionId);
         public Task UpdateCurrentInspectionAreaId(string robotId, string? inspectionAreaId);
         public Task UpdateDeprecated(string robotId, bool deprecated);
+        public Task UpdateAverageDurationPerTag(string robotId, float averageDurationPerTag);
         public Task<Robot?> Delete(string id);
         public void DetachTracking(FlotillaDbContext context, Robot robot);
     }
@@ -253,6 +254,34 @@ namespace Api.Services
             );
 
             await SendToSignalROnPropertyUpdate(robotId, "deprecated", deprecated);
+        }
+
+        public async Task UpdateAverageDurationPerTag(string robotId, float averageDurationPerTag)
+        {
+            logger.LogInformation(
+                "Setting average duration per tag on robot with id {robotId} to {NewValue}",
+                robotId,
+                averageDurationPerTag
+            );
+
+            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes(
+                AccessMode.Write
+            );
+            var robotQuery = context.Robots.Where(r =>
+                r.Id == robotId
+                && accessibleInstallationCodes.Result.Contains(
+                    r.CurrentInstallation.InstallationCode.ToUpper()
+                )
+            );
+            await robotQuery.ExecuteUpdateAsync(setters =>
+                setters.SetProperty(r => r.AverageDurationPerTag, averageDurationPerTag)
+            );
+
+            await SendToSignalROnPropertyUpdate(
+                robotId,
+                "averageDurationPerTag",
+                averageDurationPerTag
+            );
         }
 
         public async Task<IEnumerable<Robot>> ReadAll(bool readOnly = true)

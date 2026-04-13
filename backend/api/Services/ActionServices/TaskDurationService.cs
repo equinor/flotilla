@@ -77,9 +77,8 @@ namespace Api.Services.ActionServices
                 )
                 .Average();
 
+            await robotService.UpdateAverageDurationPerTag(robot.Id, (float)result);
             robot.AverageDurationPerTag = (float)result;
-
-            await robotService.Update(robot);
 
             logger.LogInformation(
                 "Robot '{robotId}' - Updated average time spent per tag to {AverageTimeSpent}s",
