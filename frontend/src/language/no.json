@@ -372,5 +372,6 @@
     "Mission Success Rate": "Suksessrate for oppdrag",
     "Successful Tasks": "Vellykkede oppgaver",
     "Failed Tasks": "Mislykkede oppgaver",
-    "Task Success Rate": "Suksessrate for oppgaver"
+    "Task Success Rate": "Suksessrate for oppgaver",
+    "Loading installation data": "Laster installasjonsdata"
 }
