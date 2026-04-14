@@ -23,6 +23,16 @@ import { MissionDefinitionsProvider } from 'components/Contexts/MissionDefinitio
 import { MissionRunsProvider } from 'components/Contexts/MissionRunsContext'
 import { MissionControlProvider } from 'components/Contexts/MissionControlContext'
 import { StatisticsPage } from './StatisticsPage'
+import styled from 'styled-components'
+import { useLanguageContext } from 'components/Contexts/LanguageContext'
+
+const StyledLoading = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 2rem;
+`
 
 export const FlotillaSite = () => {
     return (
@@ -56,14 +66,15 @@ export const FlotillaSite = () => {
 
 const InstallationLayout = () => {
     const { installationCode } = useParams()
+    const { TranslateText } = useLanguageContext()
     const installation = useInstallationOrUndefined(installationCode!)
 
     if (!installation) {
         return (
-            <>
+            <StyledLoading>
                 <CircularProgress />
-                <Typography variant="h2">Loading installation data...</Typography>
-            </>
+                <Typography variant="h2">{TranslateText('Loading installation data') + '...'}</Typography>
+            </StyledLoading>
         )
     }
 
