@@ -4,7 +4,7 @@ import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { Table, Typography, ButtonGroup, Button } from '@equinor/eds-core-react'
+import { Table, Typography, ButtonGroup, Button, CircularProgress } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { useBackendApi } from 'api/UseBackendApi'
 import { InstallationContext } from 'components/Contexts/InstallationContext'
@@ -24,6 +24,14 @@ const StyledTable = styled(Table)`
 
 const StyledTypography = styled(Typography)`
     padding: 16px;
+`
+
+const StyledLoading = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 2rem;
 `
 
 const timeSpans = [
@@ -100,7 +108,19 @@ export const StatisticsPage = () => {
         loadStats()
     }, [installation, timeSpan])
 
-    if (loading) return <StyledTypography variant="h4">Loading mission statistics...</StyledTypography>
+    if (loading)
+        return (
+            <>
+                <Header alertDict={alerts} installation={installation} />
+                <NavBar />
+                <StyledLoading>
+                    <CircularProgress />
+                    <StyledTypography variant="h4">
+                        {TranslateText('Loading mission statistics') + '...'}
+                    </StyledTypography>
+                </StyledLoading>
+            </>
+        )
 
     const StatsTable = ({ stats }: { stats: GroupedStats }) => (
         <StyledTable>
