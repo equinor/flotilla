@@ -329,6 +329,7 @@
     "More info": "More info",
     "Error description": "Error description",
     "Statistics": "Statistics",
+    "Loading mission statistics": "Loading mission statistics",
     "Unable to release robot {0} from intervention mode": "Unable to release robot {0} from intervention mode",
     "InterventionNeeded": "Intervention Needed",
     "ReturnHomePaused": "Returning home paused",

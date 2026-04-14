@@ -329,6 +329,7 @@
     "More info": "Mer info",
     "Error description": "Feilmelding",
     "Statistics": "Statistikk",
+    "Loading mission statistics": "Laster oppdragsstatistikk",
     "Unable to release robot {0} from intervention mode": "Kunne ikke frigjøre robot {0} fra intervensjonsmodus",
     "InterventionNeeded": "Intervensjon nødvendig",
     "ReturnHomePaused": "Kjøring hjem pauset",
