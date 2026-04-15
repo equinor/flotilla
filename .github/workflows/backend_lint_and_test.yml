@@ -1,4 +1,5 @@
 name: Backend
+
 permissions:
   contents: read
 
@@ -10,52 +11,10 @@ on:
     branches:
       - main
 
-defaults:
-  run:
-    working-directory: backend
-
 jobs:
-  build_backend:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6
-
-      - name: Set up .NET
-        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 #v5
-        with:
-          dotnet-version: "10.0.x"
-      - name: Build project and dependencies
-        run: dotnet build
-
-  test_backend:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6
-
-      - name: Set up .NET
-        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 #v5
-        with:
-          dotnet-version: "10.0.x"
-
-      - name: Build project and dependencies
-        run: dotnet build -warnaserror
-
-      - name: Run tests
-        run: dotnet test
-
-  check_formatting:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6
-
-      - name: Setup .NET Core
-        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 #v5
-        with:
-          dotnet-version: "10.0.x"
-
-      - name: Run csharpier format
-        run: |
-          dotnet tool restore
-          dotnet csharpier check .
+  backend:
+    permissions:
+      contents: read
+    uses: equinor/armada/.github/workflows/test_and_lint_dotnet_package.yml@main
+    with:
+      build_directory: backend
