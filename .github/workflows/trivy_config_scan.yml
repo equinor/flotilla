@@ -1,0 +1,22 @@
+name: Trivy IaC & Dockerfile Scanning
+
+permissions:
+  security-events: write
+  contents: read
+  actions: read
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  schedule:
+    - cron: "36 0 * * 3"
+
+jobs:
+  trivy-scan:
+    uses: equinor/armada/.github/workflows/trivy_config_scan.yml@main
+    permissions:
+      security-events: write
+      contents: read
+      actions: read
