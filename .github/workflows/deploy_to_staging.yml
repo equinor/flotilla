@@ -71,14 +71,19 @@ jobs:
     name: Update deployment in Staging
     permissions:
       contents: read
-      packages: write
     needs: build-and-push-latest-release-flotilla-component-to-aurora-prod-container-registry
-    uses: ./.github/workflows/update_aurora_deployment.yml
+    strategy:
+      max-parallel: 1
+      matrix:
+        component: [frontend, backend, broker]
+    uses: equinor/armada/.github/workflows/update_kubernetes_deployment.yml@main
     with:
-      Environment: staging
-      Registry: auroraprodacr.azurecr.io
-      ImageName: robotics/flotilla
-      Tag: ${{ github.event.release.tag_name }}
-      AuthorName: ${{ github.event.release.author.login }}
+      environment: staging
+      registry: auroraprodacr.azurecr.io
+      image_name: robotics/flotilla-${{ matrix.component }}
+      tag: ${{ github.event.release.tag_name }}
+      author_name: ${{ github.event.release.author.login }}
+      infrastructure_repository: equinor/robotics-infrastructure
+      commit_message_service_name: Flotilla
     secrets:
-      DeployKey: ${{ secrets.ROBOTICS_INFRASTRUCTURE_DEPLOY_KEY }}
+      deploy_key: ${{ secrets.ROBOTICS_INFRASTRUCTURE_DEPLOY_KEY }}
