@@ -50,16 +50,19 @@ jobs:
     needs: [build-and-push-flotilla-components-to-github-container-registry, get-short-sha]
     permissions:
       contents: read
-    uses: ./.github/workflows/update_aurora_deployment.yml
+    strategy:
+      max-parallel: 1
+      matrix:
+        component: [frontend, backend, broker]
+    uses: equinor/armada/.github/workflows/update_kubernetes_deployment.yml@main
     with:
-      Environment: development
-      Registry: ghcr.io
-      ImageName: ${{ github.repository }}
-      # Add dev. prefix for the tags used in dev environment,
-      # due to the commit hash can be interpreted as an integer if only numbers
-      # PS: Needs to match build-and-push-components.with.Tag
-      Tag: "dev.${{ needs.get-short-sha.outputs.tag }}"
-      AuthorEmail: ${{ github.event.head_commit.author.email }}
-      AuthorName: ${{ github.event.head_commit.author.name }}
+      environment: development
+      registry: ghcr.io
+      image_name: ${{ github.repository }}-${{ matrix.component }}
+      tag: "dev.${{ needs.get-short-sha.outputs.tag }}"
+      author_email: ${{ github.event.head_commit.author.email }}
+      author_name: ${{ github.event.head_commit.author.name }}
+      infrastructure_repository: equinor/robotics-infrastructure
+      commit_message_service_name: Flotilla
     secrets:
-      DeployKey: ${{ secrets.ROBOTICS_INFRASTRUCTURE_DEPLOY_KEY }}
+      deploy_key: ${{ secrets.ROBOTICS_INFRASTRUCTURE_DEPLOY_KEY }}

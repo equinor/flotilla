@@ -57,12 +57,18 @@ jobs:
   deploy:
     name: Update deployment in Production
     needs: [get_staging_version, trigger-github-deployment]
-    uses: ./.github/workflows/update_aurora_deployment.yml
+    strategy:
+      max-parallel: 1
+      matrix:
+        component: [frontend, backend, broker]
+    uses: equinor/armada/.github/workflows/update_kubernetes_deployment.yml@main
     with:
-      Environment: production
-      Tag: ${{ needs.get_staging_version.outputs.versionTag }}
-      Registry: auroraprodacr.azurecr.io
-      ImageName: robotics/flotilla
-      AuthorName: ${{ github.actor }}
+      environment: production
+      tag: ${{ needs.get_staging_version.outputs.versionTag }}
+      registry: auroraprodacr.azurecr.io
+      image_name: robotics/flotilla-${{ matrix.component }}
+      author_name: ${{ github.actor }}
+      infrastructure_repository: equinor/robotics-infrastructure
+      commit_message_service_name: Flotilla
     secrets:
-      DeployKey: ${{ secrets.ROBOTICS_INFRASTRUCTURE_DEPLOY_KEY }}
+      deploy_key: ${{ secrets.ROBOTICS_INFRASTRUCTURE_DEPLOY_KEY }}
