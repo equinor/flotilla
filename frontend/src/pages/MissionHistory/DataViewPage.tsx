@@ -6,9 +6,11 @@ import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { PaginationHeader } from 'models/PaginatedResponse'
 import { useMissionFilterContext, MissionFilterProvider } from 'components/Contexts/MissionFilterContext'
+import { useAlertContext } from 'components/Contexts/AlertContext'
 import {
     StyledLoading,
     StyledPagination,
+    StyledPage,
     StyledTableBody,
     StyledTableCaption,
     StyledTableCell,
@@ -16,6 +18,8 @@ import {
 import { SignalREventLabels, useSignalRContext } from 'components/Contexts/SignalRContext'
 import { useBackendApi } from 'api/UseBackendApi'
 import { InstallationContext } from 'components/Contexts/InstallationContext'
+import { Header } from 'components/Header/Header'
+import { NavBar } from 'components/Header/NavBar'
 
 enum InspectionTableColumns {
     Status = 'Status',
@@ -36,11 +40,22 @@ const StyledTable = styled.div`
     overflow-y: hidden;
 `
 
-export const DataViewPage = () => (
-    <MissionFilterProvider>
-        <DataViewComponent />
-    </MissionFilterProvider>
-)
+export const DataViewPage = () => {
+    const { alerts } = useAlertContext()
+    const { installation } = useContext(InstallationContext)
+
+    return (
+        <>
+            <Header alertDict={alerts} installation={installation} />
+            <NavBar />
+            <StyledPage>
+                <MissionFilterProvider>
+                    <DataViewComponent />
+                </MissionFilterProvider>
+            </StyledPage>
+        </>
+    )
+}
 
 const DataViewComponent = () => {
     const { TranslateText } = useLanguageContext()
