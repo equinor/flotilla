@@ -1,4 +1,4 @@
-import { CircularProgress, Table } from '@equinor/eds-core-react'
+import { Button, ButtonGroup, CircularProgress, Table, Typography } from '@equinor/eds-core-react'
 import { Mission, MissionStatus } from 'models/Mission'
 import { useCallback, useContext, useEffect, useState } from 'react'
 import { SimpleHistoricMissionCard } from './HistoricMissionCard'
@@ -27,6 +27,13 @@ enum InspectionTableColumns {
     CompletionTime = 'CompletionTime',
 }
 
+const StyledButtonGroup = styled(ButtonGroup)`
+    margin-bottom: 2rem;
+    max-width: 30rem;
+`
+
+type DataViewSource = 'fencilla' | 'clo'
+
 const TableWithHeader = styled.div`
     width: 100%;
     padding: 1rem;
@@ -43,21 +50,45 @@ const StyledTable = styled.div`
 export const DataViewPage = () => {
     const { alerts } = useAlertContext()
     const { installation } = useContext(InstallationContext)
+    const [dataViewSource, setDataViewSource] = useState<DataViewSource>('fencilla')
 
     return (
         <>
             <Header alertDict={alerts} installation={installation} />
             <NavBar />
             <StyledPage>
-                <MissionFilterProvider>
-                    <DataViewComponent />
-                </MissionFilterProvider>
+                <StyledButtonGroup>
+                    <Button
+                        color="primary"
+                        variant={dataViewSource === 'fencilla' ? 'contained' : 'outlined'}
+                        aria-pressed={dataViewSource === 'fencilla'}
+                        onClick={() => setDataViewSource('fencilla')}
+                    >
+                        Fencilla
+                    </Button>
+                    <Button
+                        color="primary"
+                        variant={dataViewSource === 'clo' ? 'contained' : 'outlined'}
+                        aria-pressed={dataViewSource === 'clo'}
+                        onClick={() => setDataViewSource('clo')}
+                    >
+                        CLO
+                    </Button>
+                </StyledButtonGroup>
+                {dataViewSource === 'fencilla' && (
+                    <MissionFilterProvider>
+                        <FencillaDataViewComponent />
+                    </MissionFilterProvider>
+                )}
+                {dataViewSource === 'clo' && (
+                    <Typography variant="h4">CLO data view not implemented yet</Typography>
+                )}
             </StyledPage>
         </>
     )
 }
 
-const DataViewComponent = () => {
+const FencillaDataViewComponent = () => {
     const { TranslateText } = useLanguageContext()
     const { installation } = useContext(InstallationContext)
     const { page, switchPage, filterState, filterFunctions } = useMissionFilterContext()
