@@ -109,8 +109,8 @@ const DataViewComponent = () => {
         }
     }, [registerEvent, connectionReady])
 
-    const missionsDisplay = filteredMissions.map((mission, index) => (
-        <SimpleHistoricMissionCard key={index} index={index} mission={mission} />
+    const missionsDisplay = filteredMissions.map((mission) => (
+        <SimpleHistoricMissionCard key={mission.id} mission={mission} />
     ))
 
     const PaginationComponent = () => (

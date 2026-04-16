@@ -95,7 +95,7 @@ export const RobotMissionQueueView = ({ robot }: { robot: RobotWithoutTelemetry 
     }, [missionQueue, ongoingMissions])
 
     const missionQueueDisplay = robotMissionQueue.map((mission, index) => (
-        <MissionQueueCard key={index} order={index + 1} mission={mission} onDeleteMission={onDeleteMission} />
+        <MissionQueueCard key={mission.id} order={index + 1} mission={mission} onDeleteMission={onDeleteMission} />
     ))
 
     const loadingQueueDisplay = (

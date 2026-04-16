@@ -70,8 +70,8 @@ export const ConflictingMissionInspectionAreasDialog = ({
 
     const MissionInspectionAreaNamesList = (
         <List>
-            {missionInspectionAreaNames.map((inspectionAreaName, index) => (
-                <List.Item key={index}>
+            {missionInspectionAreaNames.map((inspectionAreaName) => (
+                <List.Item key={inspectionAreaName}>
                     <b>{inspectionAreaName}</b>
                 </List.Item>
             ))}
