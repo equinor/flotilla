@@ -41,7 +41,7 @@ export const FlotillaSite = () => {
                         <Route path="statistics" element={<StatisticsPage />} />
                         <Route path="data-view" element={<DataViewPage />} />
                         <Route path="mission/:missionId" element={<MissionPageRouter />} />
-                        <Route path="mission-simple/:missionId" element={<SimpleMissionPageRouter />} />
+                        <Route path="mission-simple" element={<SimpleMissionPageRouter />} />
                         <Route path="missiondefinition/:missionId" element={<MissionDefinitionPageRouter />} />
                         <Route path="robot/:robotId" element={<RobotPageRouter />} />
                     </Route>
