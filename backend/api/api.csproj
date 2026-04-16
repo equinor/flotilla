@@ -6,8 +6,9 @@
     <UserSecretsId>f888e68d-d6f9-4dad-adb2-269ae53a9ea1</UserSecretsId>
     <RootNamespace>Api</RootNamespace>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <!--disable missing comment warning-->
-    <NoWarn>$(NoWarn);1591</NoWarn>
+    <!-- disable missing comment warning -->
+    <!-- disable NU1510 temporary to handle vulnerabilities -->
+    <NoWarn>$(NoWarn);1591;NU1510</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="AdaptiveCards.Templating" Version="2.0.5" />
@@ -53,6 +54,8 @@
     <PackageReference Include="MQTTnet.Extensions.ManagedClient" Version="4.3.7.1207" />
     <PackageReference Include="System.Linq.Dynamic.Core" Version="1.7.1" />
     <PackageReference Include="NCrontab" Version="3.4.0" />
+    <PackageReference Include="System.Security.Cryptography.Xml" Version="10.0.6" />
+    <!-- To force update to latest version to handle vulnerabilities-->
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="api" />
