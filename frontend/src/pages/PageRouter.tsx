@@ -5,15 +5,14 @@ import { MissionDefinitionPage } from './MissionDefinitionPage/MissionDefinition
 import { useAssetContext } from 'components/Contexts/AssetContext'
 
 export const SimpleMissionPageRouter = () => {
-    const { missionId } = useParams()
-
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [searchParams, setSearchParams] = useSearchParams()
 
+    const id = searchParams.get('id') ?? undefined
     const inspectionId = searchParams.get('inspectionId') ?? undefined
     const analysisId = searchParams.get('analysisId') ?? undefined
 
-    return <SimpleMissionPage missionId={missionId} inspectionId={inspectionId} analysisId={analysisId} />
+    return <SimpleMissionPage missionId={id} inspectionId={inspectionId} analysisId={analysisId} />
 }
 
 export const MissionPageRouter = () => {

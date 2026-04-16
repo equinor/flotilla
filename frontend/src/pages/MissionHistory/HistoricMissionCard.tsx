@@ -88,7 +88,7 @@ export const SimpleHistoricMissionCard = ({ index, mission }: IndexedMissionProp
             <Table.Cell id={InspectionTableColumns.Name}>
                 <Typography
                     link
-                    onClick={() => navigate(`/${installation.installationCode}/mission-simple/${mission.id}`)}
+                    onClick={() => navigate(`/${installation.installationCode}/mission-simple?id=${mission.id}`)}
                 >
                     {mission.name}
                 </Typography>
