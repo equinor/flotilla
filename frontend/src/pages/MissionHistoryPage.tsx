@@ -253,8 +253,8 @@ const MissionHistoryViewComponent = () => {
         }
     }, [registerEvent, connectionReady])
 
-    const missionsDisplay = filteredMissions.map((mission, index) => (
-        <HistoricMissionCard key={index} index={index} mission={mission} />
+    const missionsDisplay = filteredMissions.map((mission) => (
+        <HistoricMissionCard key={mission.id} mission={mission} />
     ))
 
     const PaginationComponent = () => (

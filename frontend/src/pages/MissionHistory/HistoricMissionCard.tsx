@@ -21,11 +21,6 @@ enum InspectionTableColumns {
     Rerun = 'RerunMission',
 }
 
-interface IndexedMissionProps {
-    index: number
-    mission: Mission
-}
-
 interface MissionProps {
     mission: Mission
 }
@@ -42,7 +37,7 @@ const MissionEndTimeDisplay = ({ mission }: MissionProps) => {
     )
 }
 
-export const HistoricMissionCard = ({ index, mission }: IndexedMissionProps) => {
+export const HistoricMissionCard = ({ mission }: MissionProps) => {
     const navigate = useNavigate()
     const { installation } = useContext(InstallationContext)
 
@@ -51,7 +46,7 @@ export const HistoricMissionCard = ({ index, mission }: IndexedMissionProps) => 
     )
 
     return (
-        <Table.Row key={index}>
+        <Table.Row key={mission.id}>
             <Table.Cell id={InspectionTableColumns.StatusShort}>
                 <MissionStatusDisplayShort status={mission.status} />
             </Table.Cell>
@@ -76,12 +71,12 @@ export const HistoricMissionCard = ({ index, mission }: IndexedMissionProps) => 
     )
 }
 
-export const SimpleHistoricMissionCard = ({ index, mission }: IndexedMissionProps) => {
+export const SimpleHistoricMissionCard = ({ mission }: MissionProps) => {
     const navigate = useNavigate()
     const { installation } = useContext(InstallationContext)
 
     return (
-        <Table.Row key={index}>
+        <Table.Row key={mission.id}>
             <Table.Cell id={InspectionTableColumns.Status}>
                 <MissionStatusDisplay status={mission.status} />
             </Table.Cell>

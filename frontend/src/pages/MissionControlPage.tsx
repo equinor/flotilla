@@ -66,8 +66,8 @@ export const MissionControlPage = () => {
     const { installation } = useContext(InstallationContext)
     const { enabledRobots } = useAssetContext()
 
-    const missionControlCards = enabledRobots.map((robot, index) => {
-        return <MissionControlCard key={index} robot={robot} />
+    const missionControlCards = enabledRobots.map((robot) => {
+        return <MissionControlCard key={robot.id} robot={robot} />
     })
 
     return (
