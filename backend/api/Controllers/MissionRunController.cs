@@ -138,14 +138,28 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<MissionRunResponse>> DeleteMissionRun([FromRoute] string id)
         {
-            var missionRun = await missionRunService.Delete(id);
+            var missionRun = await missionRunService.ReadById(id);
             if (missionRun is null)
             {
                 return NotFound($"Mission run with id {id} not found");
             }
 
-            var missionRunResponse = new MissionRunResponse(missionRun);
-            return Ok(missionRunResponse);
+            if (missionRun.Status == MissionStatus.Queued && missionRun.StartTime != null)
+            {
+                logger.LogInformation(
+                    "Mission run with id {missionRunId} is queued but has a start time. The mission will be cancelled instead of deleted.",
+                    missionRun.Id
+                );
+                missionRun = await missionRunService.SetMissionRunToCancelled(missionRun.Id);
+                return Ok(new MissionRunResponse(missionRun));
+            }
+
+            missionRun = await missionRunService.Delete(id);
+            if (missionRun is null)
+            {
+                return NotFound($"Mission run with id {id} not found when deleting");
+            }
+            return Ok(new MissionRunResponse(missionRun));
         }
 
         /// <summary>
