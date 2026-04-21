@@ -49,6 +49,7 @@ export const RobotStatusChip = ({ status, itemSize }: StatusProps) => {
             iconColor = tokens.colors.text.static_icons__default.hex
             break
         }
+        case RobotStatus.GoingToRechargingWithMission:
         case RobotStatus.GoingToRecharging: {
             statusIcon = Icons.Ongoing
             iconColor = tokens.colors.text.static_icons__default.hex
@@ -70,6 +71,7 @@ export const RobotStatusChip = ({ status, itemSize }: StatusProps) => {
             iconColor = tokens.colors.text.static_icons__default.hex
             break
         }
+        case RobotStatus.RechargingWithMission:
         case RobotStatus.Recharging: {
             iconColor = '#FFC300'
             statusIcon = Icons.BatteryCharging
