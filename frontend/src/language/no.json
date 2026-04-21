@@ -374,5 +374,7 @@
     "Successful Tasks": "Vellykkede oppgaver",
     "Failed Tasks": "Mislykkede oppgaver",
     "Task Success Rate": "Suksessrate for oppgaver",
-    "Loading installation data": "Laster installasjonsdata"
+    "Loading installation data": "Laster installasjonsdata",
+    "RechargingWithMission": "Lader",
+    "GoingToRechargingWithMission": "Returnerer for å lade (oppdrag pauset)"
 }
