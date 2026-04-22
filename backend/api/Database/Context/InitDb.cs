@@ -20,11 +20,7 @@ namespace Api.Database.Context
 
         private static List<Inspection> GetInspections()
         {
-            var inspection1 = new Inspection { InspectionType = InspectionType.Image };
-
-            var inspection2 = new Inspection { InspectionType = InspectionType.ThermalImage };
-
-            return new List<Inspection>([inspection1, inspection2]);
+            return new List<Inspection>([]);
         }
 
         private static List<AccessRole> GetAccessRoles()
@@ -51,18 +47,11 @@ namespace Api.Database.Context
             var installation1 = new Installation
             {
                 Id = Guid.NewGuid().ToString(),
-                Name = "Huldra",
-                InstallationCode = "HUA",
+                Name = "JARVIS - Sintef lab",
+                InstallationCode = "JAR",
             };
 
-            var installation2 = new Installation
-            {
-                Id = Guid.NewGuid().ToString(),
-                Name = "Kårstø",
-                InstallationCode = "KAA",
-            };
-
-            return new List<Installation>([installation1, installation2]);
+            return new List<Installation>([installation1]);
         }
 
         private static List<Plant> GetPlants()
@@ -71,125 +60,42 @@ namespace Api.Database.Context
             {
                 Id = Guid.NewGuid().ToString(),
                 Installation = installations[0],
-                Name = "HULDRA",
-                PlantCode = "HUA",
+                Name = "JARVIS",
+                PlantCode = "JAR",
             };
 
-            var plant2 = new Plant
-            {
-                Id = Guid.NewGuid().ToString(),
-                Installation = installations[1],
-                Name = "Kårstø",
-                PlantCode = "kaa",
-            };
-
-            return new List<Plant>([plant1, plant2]);
+            return new List<Plant>([plant1]);
         }
 
         private static List<InspectionArea> GetInspectionAreas()
         {
-            var inspectionArea1 = new InspectionArea
+            var inspectionAreaSintefLab = new InspectionArea
             {
                 Id = Guid.NewGuid().ToString(),
                 Plant = plants[0],
                 Installation = plants[0].Installation,
-                Name = "TestInspectionArea",
-            };
-
-            var inspectionArea2 = new InspectionArea
-            {
-                Id = Guid.NewGuid().ToString(),
-                Plant = plants[0],
-                Installation = plants[0].Installation,
-                Name = "TestInspectionArea2",
-            };
-
-            var inspectionArea3 = new InspectionArea
-            {
-                Id = Guid.NewGuid().ToString(),
-                Plant = plants[0],
-                Installation = plants[0].Installation,
-                Name = "TestInspectionArea3",
-            };
-
-            var inspectionArea4 = new InspectionArea
-            {
-                Id = Guid.NewGuid().ToString(),
-                Plant = plants[0],
-                Installation = plants[0].Installation,
-                Name = "TestInspectionArea4",
-            };
-
-            var inspectionAreaHuldraMezzanine = new InspectionArea
-            {
-                Id = Guid.NewGuid().ToString(),
-                Plant = plants[0],
-                Installation = plants[0].Installation,
-                Name = "Huldra Mezzanine InspectionArea",
-            };
-
-            var inspectionAreaKLab = new InspectionArea
-            {
-                Id = Guid.NewGuid().ToString(),
-                Plant = plants[1],
-                Installation = plants[1].Installation,
-                Name = "K-Lab",
+                Name = "Sintef Lab",
             };
 
             return new List<InspectionArea>([
-                inspectionArea1,
-                inspectionArea2,
-                inspectionArea3,
-                inspectionArea4,
-                inspectionAreaHuldraMezzanine,
-                inspectionAreaKLab,
+                inspectionAreaSintefLab,
             ]);
         }
 
         private static List<Source> GetSources()
         {
-            var source1 = new Source { SourceId = "986" };
+            var source1 = new Source { SourceId = "1", CustomMissionTasks = "[{\"TaskOrder\":0,\"TagId\":\"(3,0)\",\"RobotPose\":{\"Position\":{\"X\":3,\"Y\":0,\"Z\":0},\"Orientation\":{\"X\":0,\"Y\":0,\"Z\":0,\"W\":1}},\"Status\":2,\"Inspection\":{\"InspectionTarget\":{\"X\":3,\"Y\":1,\"Z\":0},\"InspectionType\":0}},{\"TaskOrder\":1,\"TagId\":\"(-1,-1)\",\"RobotPose\":{\"Position\":{\"X\":-1,\"Y\":-1,\"Z\":0},\"Orientation\":{\"X\":0,\"Y\":0,\"Z\":0,\"W\":1}},\"Status\":2,\"Inspection\":{\"InspectionTarget\":{\"X\":-1,\"Y\":-2,\"Z\":0},\"InspectionType\":0}}]" };
 
-            var source2 = new Source { SourceId = "990" };
-
-            var source3 = new Source { SourceId = "991" };
-
-            return new List<Source>([source1, source2, source3]);
+            return new List<Source>([source1]);
         }
 
         private static List<Robot> GetRobots()
         {
-            var robot1 = new Robot
+            var pantherRobot = new Robot
             {
-                IsarId = "c68b679d-308b-460f-9fe0-87eaadbd8a6e",
-                Name = "R2-D2",
-                SerialNumber = "D2",
-                Status = RobotStatus.Available,
-                Host = "localhost",
-                Port = 3000,
-                Type = RobotType.Turtlebot,
-                CurrentInstallation = installations[0],
-                Documentation = [],
-            };
-
-            var robot2 = new Robot
-            {
-                Name = "Ultron",
-                IsarId = "c68b679d-308b-460f-9fe0-87eaadbd5678",
-                SerialNumber = "Earth616",
-                Status = RobotStatus.Available,
-                Type = RobotType.TaurobInspector,
-                Host = "localhost",
-                Port = 3000,
-                CurrentInstallation = installations[0],
-                Documentation = [],
-            };
-
-            var robot3 = new Robot
-            {
-                Name = "Placebot",
+                Name = "Panther",
                 IsarId = "00000000-0000-0000-0000-000000000000",
-                SerialNumber = "Placebot1",
+                SerialNumber = "Panther jarvis",
                 Status = RobotStatus.Available,
                 Type = RobotType.Robot,
                 Host = "localhost",
@@ -199,21 +105,7 @@ namespace Api.Database.Context
                 Documentation = [],
             };
 
-            var robot4 = new Robot
-            {
-                Name = "Placebot Klab",
-                IsarId = "00000000-0000-0000-0000-000000000001",
-                SerialNumber = "Placebot Kårstø",
-                Status = RobotStatus.Available,
-                Type = RobotType.AnymalX,
-                Host = "localhost",
-                Port = 3000,
-                CurrentInstallation = installations[1],
-                CurrentInspectionAreaId = inspectionAreas[5].Id,
-                Documentation = [],
-            };
-
-            return new List<Robot>([robot1, robot2, robot3, robot4]);
+            return new List<Robot>([pantherRobot]);
         }
 
         private static List<MissionDefinition> GetMissionDefinitions()
@@ -221,269 +113,28 @@ namespace Api.Database.Context
             var missionDefinition1 = new MissionDefinition
             {
                 Id = Guid.NewGuid().ToString(),
-                Name = "Placeholder Mission 1",
+                Name = "Default mission",
                 InstallationCode = inspectionAreas[0].Installation!.InstallationCode,
                 InspectionArea = inspectionAreas[0],
                 Source = sources[0],
                 Comment = "Interesting comment",
-                InspectionFrequency = new DateTime().AddDays(12) - new DateTime(),
-                LastSuccessfulRun = null,
-            };
-
-            var missionDefinition2 = new MissionDefinition
-            {
-                Id = Guid.NewGuid().ToString(),
-                Name = "Placeholder Mission 2",
-                InstallationCode = inspectionAreas[1].Installation!.InstallationCode,
-                InspectionArea = inspectionAreas[1],
-                Source = sources[1],
-                InspectionFrequency = new DateTime().AddDays(7) - new DateTime(),
-                LastSuccessfulRun = null,
-            };
-
-            var missionDefinition3 = new MissionDefinition
-            {
-                Id = Guid.NewGuid().ToString(),
-                Name = "Placeholder Mission 3",
-                InstallationCode = inspectionAreas[1].Installation!.InstallationCode,
-                InspectionArea = inspectionAreas[1],
-                Source = sources[2],
-                LastSuccessfulRun = null,
-            };
-
-            var missionDefinition4 = new MissionDefinition
-            {
-                Id = Guid.NewGuid().ToString(),
-                Name = "Placeholder Mission 4",
-                InstallationCode = inspectionAreas[2].Installation.InstallationCode,
-                InspectionFrequency = new DateTime().AddDays(90) - new DateTime(),
-                InspectionArea = inspectionAreas[2],
-                Source = sources[2],
-                LastSuccessfulRun = null,
-            };
-
-            var missionDefinition5 = new MissionDefinition
-            {
-                Id = Guid.NewGuid().ToString(),
-                Name = "Placeholder Mission 5",
-                InstallationCode = inspectionAreas[2].Installation.InstallationCode,
-                InspectionFrequency = new DateTime().AddDays(35) - new DateTime(),
-                InspectionArea = inspectionAreas[2],
-                Source = sources[2],
-                LastSuccessfulRun = null,
-            };
-
-            var missionDefinition6 = new MissionDefinition
-            {
-                Id = Guid.NewGuid().ToString(),
-                Name = "Placeholder Mission 6",
-                InstallationCode = inspectionAreas[3].Installation.InstallationCode,
-                InspectionFrequency = new DateTime().AddDays(4) - new DateTime(),
-                InspectionArea = inspectionAreas[3],
-                Source = sources[2],
-                LastSuccessfulRun = null,
-            };
-            _ = new MissionDefinition
-            {
-                Id = Guid.NewGuid().ToString(),
-                Name = "Placeholder Mission 7",
-                InstallationCode = inspectionAreas[3].Installation.InstallationCode,
-                InspectionArea = inspectionAreas[4],
-                Source = sources[2],
                 LastSuccessfulRun = null,
             };
 
             return new List<MissionDefinition>([
-                missionDefinition1,
-                missionDefinition2,
-                missionDefinition3,
-                missionDefinition4,
-                missionDefinition5,
-                missionDefinition6,
+                missionDefinition1
             ]);
         }
 
         private static List<MissionTask> GetMissionTasks()
         {
-            var url = new Uri("https://dummyurl/tag?tagNo=ABCD");
-            var task1 = new MissionTask(
-                inspection: new Inspection(),
-                robotPose: new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
-                taskOrder: 0,
-                tagLink: url,
-                tagId: "ABCD",
-                taskDescription: "Task description",
-                poseId: 2,
-                status: TaskStatus.Successful
-            );
-
-            var task2 = new MissionTask(
-                inspection: new Inspection(),
-                robotPose: new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
-                taskOrder: 0,
-                tagLink: url,
-                tagId: "ABCDE",
-                taskDescription: "Task description",
-                poseId: 2,
-                status: TaskStatus.Failed
-            );
-
-            var task3 = new MissionTask(
-                inspection: new Inspection(),
-                robotPose: new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
-                taskOrder: 0,
-                tagLink: url,
-                tagId: "ABCDEF",
-                taskDescription: "Task description",
-                poseId: 2,
-                status: TaskStatus.PartiallySuccessful
-            );
-
-            var task4 = new MissionTask(
-                inspection: new Inspection(),
-                robotPose: new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
-                taskOrder: 0,
-                tagLink: url,
-                tagId: "ABCDEFG",
-                taskDescription: "Task description",
-                poseId: 2,
-                status: TaskStatus.Cancelled
-            );
-
-            var task5 = new MissionTask(
-                inspection: new Inspection(),
-                robotPose: new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
-                taskOrder: 0,
-                tagLink: url,
-                tagId: "ABCDEFGH",
-                taskDescription: "Task description",
-                poseId: 2,
-                status: TaskStatus.Failed
-            );
-
-            var task6 = new MissionTask(
-                inspection: new Inspection(),
-                robotPose: new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
-                taskOrder: 0,
-                tagLink: url,
-                tagId: "ABCDEFGHI",
-                taskDescription: "Task description",
-                poseId: 2,
-                status: TaskStatus.Failed
-            );
-
-            var task7 = new MissionTask(
-                inspection: new Inspection(),
-                robotPose: new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
-                taskOrder: 0,
-                tagLink: url,
-                tagId: "ABCDEFGHIJ",
-                taskDescription: "Task description",
-                poseId: 2,
-                status: TaskStatus.Failed
-            );
-
-            return [task1, task2, task3, task4, task5, task6, task7];
+            return new List<MissionTask>([]);
         }
 
         private static List<MissionRun> GetMissionRuns()
         {
-            var missionRun1 = new MissionRun
-            {
-                Name = "Placeholder Mission 1",
-                Robot = robots[0],
-                InstallationCode = inspectionAreas[0].Installation!.InstallationCode,
-                InspectionArea = inspectionAreas[0],
-                MissionId = missionDefinitions[0].Id,
-                Status = MissionStatus.Successful,
-                CreationTime = DateTime.UtcNow,
-                Tasks = [],
-            };
 
-            var missionRun2 = new MissionRun
-            {
-                Name = "Placeholder Mission 2",
-                Robot = robots[1],
-                InstallationCode = inspectionAreas[1].Installation!.InstallationCode,
-                InspectionArea = inspectionAreas[1],
-                MissionId = missionDefinitions[0].Id,
-                Status = MissionStatus.Successful,
-                CreationTime = DateTime.UtcNow,
-                Tasks = [],
-            };
-            missionDefinitions[0].LastSuccessfulRun = missionRun2;
-
-            var missionRun3 = new MissionRun
-            {
-                Name = "Placeholder Mission 3",
-                Robot = robots[2],
-                InstallationCode = inspectionAreas[1].Installation!.InstallationCode,
-                InspectionArea = inspectionAreas[1],
-                MissionId = missionDefinitions[1].Id,
-                Status = MissionStatus.Successful,
-                CreationTime = DateTime.UtcNow,
-                Tasks = [],
-            };
-
-            var missionRun4 = new MissionRun
-            {
-                Name = "Placeholder Mission 4",
-                Robot = robots[2],
-                InstallationCode = inspectionAreas[1].Installation.InstallationCode,
-                InspectionArea = inspectionAreas[1],
-                MissionId = missionDefinitions[1].Id,
-                Status = MissionStatus.Failed,
-                CreationTime = DateTime.UtcNow,
-                Tasks = [tasks[0], tasks[1]],
-            };
-
-            var missionRun5 = new MissionRun
-            {
-                Name = "Placeholder Mission 5",
-                Robot = robots[2],
-                InstallationCode = inspectionAreas[1].Installation.InstallationCode,
-                InspectionArea = inspectionAreas[1],
-                MissionId = missionDefinitions[1].Id,
-                Status = MissionStatus.PartiallySuccessful,
-                CreationTime = DateTime.UtcNow,
-                Tasks = [tasks[0], tasks[2]],
-            };
-
-            var missionRun6 = new MissionRun
-            {
-                Name = "Placeholder Mission 6",
-                Robot = robots[2],
-                InstallationCode = inspectionAreas[1].Installation.InstallationCode,
-                InspectionArea = inspectionAreas[1],
-                MissionId = missionDefinitions[1].Id,
-                Status = MissionStatus.Cancelled,
-                CreationTime = DateTime.UtcNow,
-                Tasks = [tasks[0], tasks[3]],
-            };
-
-            var missionRun7 = new MissionRun
-            {
-                Name = "Some failed tasks",
-                Robot = robots[2],
-                InstallationCode = inspectionAreas[1].Installation.InstallationCode,
-                InspectionArea = inspectionAreas[1],
-                MissionId = missionDefinitions[1].Id,
-                Status = MissionStatus.Failed,
-                CreationTime = DateTime.UtcNow,
-                Tasks = [tasks[0], tasks[1], tasks[2], tasks[3], tasks[4], tasks[5], tasks[6]],
-            };
-
-            missionDefinitions[1].LastSuccessfulRun = missionRun3;
-
-            return new List<MissionRun>([
-                missionRun1,
-                missionRun2,
-                missionRun3,
-                missionRun4,
-                missionRun5,
-                missionRun6,
-                missionRun7,
-            ]);
+            return new List<MissionRun>([]);
         }
 
         public static void PopulateDb(FlotillaDbContext context)
@@ -503,12 +154,6 @@ namespace Api.Database.Context
             context.AddRange(inspectionAreas);
             context.AddRange(sources);
 
-            var tasks = GetMissionTasks();
-            foreach (var task in tasks)
-            {
-                task.Inspection = inspections[0];
-            }
-            missionRuns[0].Tasks = tasks;
             context.AddRange(tasks);
             context.AddRange(missionDefinitions);
             context.AddRange(missionRuns);
