@@ -16,6 +16,7 @@ import { InstallationContext } from 'components/Contexts/InstallationContext'
 
 interface MissionProps {
     mission: Mission
+    canBePaused: boolean
     isOpen?: boolean
     setIsOpen?: (isOpen: boolean | ((prev: boolean) => boolean)) => void
 }
@@ -142,7 +143,7 @@ const StyledWrapper = styled.div`
     gap: 8px;
 `
 
-export const OngoingMissionCard = ({ mission, isOpen, setIsOpen }: MissionProps) => {
+export const OngoingMissionCard = ({ mission, canBePaused, isOpen, setIsOpen }: MissionProps) => {
     const { TranslateText } = useLanguageContext()
     const { installation } = useContext(InstallationContext)
     const navigate = useNavigate()
@@ -168,7 +169,8 @@ export const OngoingMissionCard = ({ mission, isOpen, setIsOpen }: MissionProps)
                 </Midcontent>
                 <MissionControlButtons
                     missionName={mission.name}
-                    isReturnToHomeMission={false}
+                    canBePaused={canBePaused}
+                    canBeSkipped={true}
                     robotId={mission.robot.id}
                     missionStatus={mission.status}
                 />
@@ -191,7 +193,8 @@ export const OngoingMissionCard = ({ mission, isOpen, setIsOpen }: MissionProps)
                 </LeftSection>
                 <MissionControlButtons
                     missionName={mission.name}
-                    isReturnToHomeMission={false}
+                    canBePaused={canBePaused}
+                    canBeSkipped={true}
                     robotId={mission.robot.id}
                     missionStatus={mission.status}
                 />
@@ -233,7 +236,8 @@ export const OngoingReturnHomeMissionCard = ({ robot, isOpen, setIsOpen, isPause
                 </Midcontent>
                 <MissionControlButtons
                     missionName={missionName}
-                    isReturnToHomeMission={true}
+                    canBePaused={true}
+                    canBeSkipped={false}
                     robotId={robot.id}
                     missionStatus={missionStatus}
                 />
@@ -255,7 +259,8 @@ export const OngoingReturnHomeMissionCard = ({ robot, isOpen, setIsOpen, isPause
                 </LeftSection>
                 <MissionControlButtons
                     missionName={missionName}
-                    isReturnToHomeMission={true}
+                    canBePaused={true}
+                    canBeSkipped={false}
                     robotId={robot.id}
                     missionStatus={missionStatus}
                 />
