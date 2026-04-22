@@ -3,7 +3,7 @@ import { Mission } from 'models/Mission'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { Task } from 'models/Task'
+import { Task, TaskStatus } from 'models/Task'
 import { AttributeTitleTypography } from 'components/Styles/StyledComponents'
 
 const StyledTagCount = styled.div`
@@ -26,7 +26,7 @@ export const MissionProgressDisplay = ({ mission }: MissionProps) => {
     }, [tasks])
 
     const countCompletedTasks = (tasks: Task[]) => {
-        return tasks.filter((task) => task.isCompleted).length
+        return tasks.filter((task) => task.isCompleted && task.status !== TaskStatus.Cancelled).length
     }
 
     return (
