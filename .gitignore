@@ -25,3 +25,5 @@ broker/mosquitto/config/certs/server-key.pem
 
 # Local missions
 missions/
+
+AGENTS.md
