@@ -12,13 +12,15 @@ interface MissionControlButtonsProps {
     missionName: string
     robotId: string
     missionStatus: MissionStatus
-    isReturnToHomeMission: boolean
+    canBePaused: boolean
+    canBeSkipped: boolean
 }
 
 interface MissionProps {
     missionName: string
     robotId: string
-    isReturnToHomeMission: boolean
+    canBePaused: boolean
+    canBeSkipped: boolean
 }
 
 const ButtonStyle = styled.div`
@@ -45,7 +47,8 @@ export const MissionControlButtons = ({
     missionName,
     robotId,
     missionStatus,
-    isReturnToHomeMission,
+    canBePaused,
+    canBeSkipped,
 }: MissionControlButtonsProps) => {
     const { missionControlState } = useMissionControlContext()
 
@@ -59,14 +62,16 @@ export const MissionControlButtons = ({
                         <OngoingMissionButton
                             missionName={missionName}
                             robotId={robotId}
-                            isReturnToHomeMission={isReturnToHomeMission}
+                            canBePaused={canBePaused}
+                            canBeSkipped={canBeSkipped}
                         />
                     )}
                     {missionStatus === MissionStatus.Paused && (
                         <PausedMissionButton
                             missionName={missionName}
                             robotId={robotId}
-                            isReturnToHomeMission={isReturnToHomeMission}
+                            canBePaused={true}
+                            canBeSkipped={canBeSkipped}
                         />
                     )}
                 </>
@@ -75,7 +80,7 @@ export const MissionControlButtons = ({
     )
 }
 
-const OngoingMissionButton = ({ missionName, robotId, isReturnToHomeMission }: MissionProps) => {
+const OngoingMissionButton = ({ missionName, robotId, canBePaused, canBeSkipped }: MissionProps) => {
     const { TranslateText } = useLanguageContext()
     const { updateRobotMissionState } = useMissionControlContext()
     const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -83,7 +88,7 @@ const OngoingMissionButton = ({ missionName, robotId, isReturnToHomeMission }: M
         setIsDialogOpen(!isDialogOpen)
     }
 
-    const skipMissionButton = !isReturnToHomeMission ? (
+    const skipMissionButton = (
         <ButtonText onClick={toggleSkipMissionDialog}>
             <ButtonIcon variant="contained_icon">
                 <Icon name={Icons.Next} size={24} />
@@ -96,24 +101,26 @@ const OngoingMissionButton = ({ missionName, robotId, isReturnToHomeMission }: M
                 toggleDialog={toggleSkipMissionDialog}
             />
         </ButtonText>
-    ) : (
-        <></>
+    )
+
+    const pauseMissionButton = (
+        <ButtonText onClick={() => updateRobotMissionState(MissionStatusRequest.Pause, robotId)}>
+            <ButtonIcon variant="contained_icon">
+                <Icon name={Icons.PauseStandard} size={24} />
+            </ButtonIcon>
+            <Typography variant="caption">{TranslateText('Pause')}</Typography>
+        </ButtonText>
     )
 
     return (
         <ButtonStyle>
-            <ButtonText onClick={() => updateRobotMissionState(MissionStatusRequest.Pause, robotId)}>
-                <ButtonIcon variant="contained_icon">
-                    <Icon name={Icons.PauseStandard} size={24} />
-                </ButtonIcon>
-                <Typography variant="caption">{TranslateText('Pause')}</Typography>
-            </ButtonText>
-            {skipMissionButton}
+            {canBePaused && pauseMissionButton}
+            {canBeSkipped && skipMissionButton}
         </ButtonStyle>
     )
 }
 
-const PausedMissionButton = ({ missionName, robotId, isReturnToHomeMission }: MissionProps) => {
+const PausedMissionButton = ({ missionName, robotId, canBeSkipped }: MissionProps) => {
     const { TranslateText } = useLanguageContext()
     const { updateRobotMissionState } = useMissionControlContext()
     const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -121,7 +128,7 @@ const PausedMissionButton = ({ missionName, robotId, isReturnToHomeMission }: Mi
         setIsDialogOpen(!isDialogOpen)
     }
 
-    const skipMissionButton = !isReturnToHomeMission ? (
+    const skipMissionButton = (
         <ButtonText onClick={toggleSkipMissionDialog}>
             <ButtonIcon variant="contained_icon">
                 <Icon name={Icons.Next} size={24} />
@@ -134,8 +141,6 @@ const PausedMissionButton = ({ missionName, robotId, isReturnToHomeMission }: Mi
                 toggleDialog={toggleSkipMissionDialog}
             />
         </ButtonText>
-    ) : (
-        <></>
     )
 
     return (
@@ -146,7 +151,7 @@ const PausedMissionButton = ({ missionName, robotId, isReturnToHomeMission }: Mi
                 </ButtonIcon>
                 <Typography variant="caption">{TranslateText('Start')}</Typography>
             </ButtonText>
-            {skipMissionButton}
+            {canBeSkipped && skipMissionButton}
         </ButtonStyle>
     )
 }
