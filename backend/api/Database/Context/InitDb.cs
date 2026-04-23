@@ -98,7 +98,7 @@ namespace Api.Database.Context
                 SerialNumber = "Panther jarvis",
                 Status = RobotStatus.Available,
                 Type = RobotType.Robot,
-                Host = "localhost",
+                Host = "isar",
                 Port = 3000,
                 CurrentInstallation = installations[0],
                 CurrentInspectionAreaId = inspectionAreas[0].Id,
