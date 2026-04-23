@@ -3,12 +3,15 @@ import { RobotWithoutTelemetry } from 'models/Robot'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
-import { StyledButton } from 'components/Styles/StyledComponents'
+import { Button } from '@equinor/eds-core-react'
+import { tokens } from '@equinor/eds-tokens'
 import styled from 'styled-components'
 import { useState } from 'react'
 import { useBackendApi } from 'api/UseBackendApi'
 
-const StyledTextButton = styled(StyledButton)`
+const StyledTextButton = styled(Button)`
+    height: auto;
+    min-height: ${tokens.shape.button.minHeight};
     text-align: left;
     align-self: stretch;
 `

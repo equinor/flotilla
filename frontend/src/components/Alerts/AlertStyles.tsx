@@ -1,12 +1,14 @@
 import styled from 'styled-components'
-import { TextAlignedButton } from 'components/Styles/StyledComponents'
-import { Icon } from '@equinor/eds-core-react'
+import { Button, Icon } from '@equinor/eds-core-react'
 
 export const AlertContainer = styled.div`
     padding-left: 5px;
 `
 
-export const AlertButton = styled(TextAlignedButton)`
+export const AlertButton = styled(Button)`
+    text-align: left;
+    height: auto;
+    padding: 5px 5px;
     :hover {
         background-color: #ff9797;
     }
