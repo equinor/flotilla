@@ -1,4 +1,5 @@
 import { Button, Dialog, Typography } from '@equinor/eds-core-react'
+import { tokens } from '@equinor/eds-tokens'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useContext, useState } from 'react'
@@ -8,7 +9,6 @@ import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'compon
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 import { RobotStatus } from 'models/Robot'
-import { StyledButton } from 'components/Styles/StyledComponents'
 import { useBackendApi } from 'api/UseBackendApi'
 import { InstallationContext } from 'components/Contexts/InstallationContext'
 
@@ -30,7 +30,9 @@ const StyledText = styled.div`
     gird-template-rows: auto, auto;
     gap: 1rem;
 `
-const StyledDockButton = styled(StyledButton)`
+const StyledDockButton = styled(Button)`
+    height: auto;
+    min-height: ${tokens.shape.button.minHeight};
     background-color: white;
 `
 const ContainButton = styled.div`

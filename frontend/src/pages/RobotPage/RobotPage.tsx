@@ -1,4 +1,4 @@
-import { Icon, Paper, Typography } from '@equinor/eds-core-react'
+import { Button, Icon, Paper, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { Header } from 'components/Header/Header'
 import { RobotImage } from 'components/Displays/RobotDisplays/RobotImage'
@@ -7,7 +7,7 @@ import { BatteryStatusDisplay } from 'components/Displays/RobotDisplays/BatteryS
 import { RobotStatusChip } from 'components/Displays/RobotDisplays/RobotStatusIcon'
 import { RobotStatus, RobotWithoutTelemetry } from 'models/Robot'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { StyledButton, StyledPage } from 'components/Styles/StyledComponents'
+import { StyledPage } from 'components/Styles/StyledComponents'
 import { DocumentationSection } from './Documentation'
 import { useMediaStreamContext } from 'components/Contexts/MediaStreamContext'
 import { VideoStreamSection } from '../MissionPage/MissionPage'
@@ -30,7 +30,9 @@ const StyledRobotPage = styled(StyledPage)`
     background-color: ${tokens.colors.ui.background__light.hex};
     gap: 5px;
 `
-const FullWidthButton = styled(StyledButton)`
+const FullWidthButton = styled(Button)`
+    height: auto;
+    min-height: ${tokens.shape.button.minHeight};
     text-align: left;
     align-self: stretch;
 `

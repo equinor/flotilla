@@ -8,7 +8,7 @@ import { RobotImage } from 'components/Displays/RobotDisplays/RobotImage'
 import { useNavigate } from 'react-router-dom'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { PressureStatusDisplay } from 'components/Displays/RobotDisplays/PressureStatusDisplay'
-import { StyledButton, AttributeTitleTypography } from 'components/Styles/StyledComponents'
+import { AttributeTitleTypography } from 'components/Styles/StyledComponents'
 import { Icons } from 'utils/icons'
 import { useRobotTelemetry } from 'hooks/useRobotTelemetry'
 import { useContext } from 'react'
@@ -84,7 +84,9 @@ const LongTypography = styled(Typography)`
         word-break: break-word;
     }
 `
-const StyledGhostButton = styled(StyledButton)`
+const StyledGhostButton = styled(Button)`
+    height: auto;
+    min-height: ${tokens.shape.button.minHeight};
     padding: 0;
 `
 const HiddenOnSmallScreen = styled.div`

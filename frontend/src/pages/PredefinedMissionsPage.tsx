@@ -2,7 +2,8 @@ import { InstallationContext } from 'components/Contexts/InstallationContext'
 import { Header } from 'components/Header/Header'
 import { NavBar } from 'components/Header/NavBar'
 import { useContext } from 'react'
-import { Icon, Typography } from '@equinor/eds-core-react'
+import { Button, Icon, Typography } from '@equinor/eds-core-react'
+import { tokens } from '@equinor/eds-tokens'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useRef, useState } from 'react'
 import { getInspectionDeadline } from 'utils/StringFormatting'
@@ -12,7 +13,7 @@ import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { CondensedMissionDefinition } from 'models/CondensedMissionDefinition'
 import { Icons } from 'utils/icons'
-import { StyledButton, StyledPage } from 'components/Styles/StyledComponents'
+import { StyledPage } from 'components/Styles/StyledComponents'
 import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { phone_width } from 'utils/constants'
@@ -40,7 +41,9 @@ const StyledView = styled.div`
     display: flex;
     align-items: flex-start;
 `
-const AlignedTextButton = styled(StyledButton)`
+const AlignedTextButton = styled(Button)`
+    height: auto;
+    min-height: ${tokens.shape.button.minHeight};
     text-align: left;
 `
 

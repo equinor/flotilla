@@ -6,7 +6,6 @@ import { MissionProgressDisplay } from 'components/Displays/MissionDisplays/Miss
 import { MissionStatusDisplayWithHeader } from 'components/Displays/MissionDisplays/MissionStatusDisplay'
 import { useNavigate } from 'react-router-dom'
 import { MissionControlButtons } from 'components/Displays/MissionButtons/MissionControlButtons'
-import { StyledButton } from 'components/Styles/StyledComponents'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
 import { RobotWithoutTelemetry } from 'models/Robot'
@@ -96,7 +95,9 @@ const Midcontent = styled.div`
     align-items: flex-start;
     gap: 24px;
 `
-const StyledGhostButton = styled(StyledButton)`
+const StyledGhostButton = styled(Button)`
+    height: auto;
+    min-height: ${tokens.shape.button.minHeight};
     padding: 0;
 `
 
