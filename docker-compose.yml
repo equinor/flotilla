@@ -19,8 +19,11 @@ services:
     environment:
       # Overwrites the ip address for the Mqtt service to connect to the Mqtt container:
       - Mqtt__Host=broker
-      - ASPNETCORE_ENVIRONMENT=Development
-      - AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET} # From .env file
+      - Mqtt__Password=${FLOTILLA_BROKER_PASSWORD}
+      - AzureAd__ClientSecret=${FLOTILLA_CLIENT_SECRET}
+      - ASPNETCORE_ENVIRONMENT=Local
+      - Local__DevUserId=local
+      - KeyVault__UseKeyVault=false
       - OpenTelemetry__OtelExporterOtlpEndpoint=http://otel-collector:4318
 
   aspire-dashboard:
@@ -39,3 +42,8 @@ services:
       - "4318:4318" # OTLP HTTP
     volumes:
       - ./config/otel-collector-config.yaml:/conf/config.yaml:ro
+
+networks:
+  default:
+    name: flotilla
+    driver: bridge
