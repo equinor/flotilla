@@ -505,6 +505,15 @@ namespace Api.EventHandlers
                     );
                 }
 
+                if (isarMission.ErrorDescription?.Length >= 450)
+                {
+                    _logger.LogInformation(
+                        $"Mission with isar mission Id {isarMission.MissionId} got error description: {isarMission.ErrorDescription} from ISAR. This text is more than 450 char and will be shorted down."
+                    );
+                    isarMission.ErrorDescription =
+                        isarMission.ErrorDescription.Substring(0, 446) + "...";
+                }
+
                 updatedFlotillaMissionRun = await MissionRunService.UpdateMissionRunStatus(
                     isarMission.MissionId,
                     status,
