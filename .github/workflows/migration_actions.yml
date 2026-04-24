@@ -1,0 +1,25 @@
+name: Migration actions
+
+on:
+  workflow_run:
+    workflows: [Migration checks]
+    types: [completed]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  migration_actions:
+    if: github.event.workflow_run.conclusion == 'success'
+    uses: equinor/armada/.github/workflows/migration_actions.yml@main
+    with:
+      stage_one_workflow_run_id: ${{ github.event.workflow_run.id }}
+      possible_migration_message: |
+        :bell: Changes in database folder detected :bell:
+        Do these changes require **adding new migrations**? :thinking: In that case follow [these steps](https://github.com/equinor/flotilla/tree/main/backend#Database-model-and-EF-Core).
+        If you are uncertain, ask a database admin on the team :smile:
+      migration_reminder: |
+        :bell: Migrations changes detected :bell:
+        :mega: Remember to comment "/UpdateDatabase" after review approval for migrations to take effect!
