@@ -1,0 +1,65 @@
+name: Update database
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  orchestration:
+    uses: equinor/armada/.github/workflows/database_update_orchestration.yml@main
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+
+  run_migrations:
+    needs: orchestration
+    if: needs.orchestration.outputs.approved == 'true'
+    uses: equinor/armada/.github/workflows/run_dotnet_migrations.yml@main
+    permissions:
+      contents: read
+      pull-requests: read
+    with:
+      pull_request_checkout: true
+      environment: Development
+      working_directory: backend/api
+    secrets:
+      client_id: ${{ secrets.CLIENTID }}
+      client_secret: ${{ secrets.CLIENTSECRET }}
+
+  database_success:
+    needs: run_migrations
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      issues: write
+    steps:
+      - name: Add comment
+        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 #v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            :sparkles: Successfully ran migration command! :sparkles:
+
+  database_failure:
+    needs: run_migrations
+    if: ${{ failure() }}
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      issues: write
+    steps:
+      - name: Add comment
+        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 #v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            :x: Migration failed, please see action log below for details :x:
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

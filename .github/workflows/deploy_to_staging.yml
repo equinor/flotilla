@@ -16,16 +16,16 @@ on:
 jobs:
   run_migrations:
     name: Update database in Staging
-    permissions: 
+    permissions:
       contents: read
       pull-requests: read
-    uses: ./.github/workflows/runMigrations.yml
+    uses: equinor/armada/.github/workflows/run_dotnet_migrations.yml@main
     with:
-      PullRequestCheckout: false
-      Environment: Staging
+      environment: Staging
+      working_directory: backend/api
     secrets:
-      ClientId: ${{secrets.CLIENTID}}
-      ClientSecret: ${{secrets.CLIENTSECRET}}
+      client_id: ${{ secrets.CLIENTID }}
+      client_secret: ${{ secrets.CLIENTSECRET }}
 
   build-and-push-flotilla-components-with-latest-tag-to-github-container-registry:
     name: Build and push flotilla components with latest tag to github container registry
