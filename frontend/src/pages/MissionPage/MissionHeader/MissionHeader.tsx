@@ -15,6 +15,7 @@ import { useNavigate } from 'react-router-dom'
 import { phone_width } from 'utils/constants'
 import { useContext } from 'react'
 import { InstallationContext } from 'components/Contexts/InstallationContext'
+import { RobotStatus } from 'models/Robot'
 
 const HeaderSection = styled(Card)`
     width: 100%;
@@ -170,6 +171,10 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
 
     const numberOfCompletedTasks = mission.tasks.filter((task) => task.isCompleted).length
 
+    const canBePaused =
+        mission.robot.status !== RobotStatus.GoingToRecharging &&
+        mission.robot.status !== RobotStatus.RechargingWithMission
+
     return (
         <>
             <HeaderSection>
@@ -177,7 +182,8 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
                     <StyledTypography>{mission.name}</StyledTypography>
                     {isMissionActive && (
                         <MissionControlButtons
-                            isReturnToHomeMission={false}
+                            canBePaused={canBePaused}
+                            canBeSkipped={true}
                             missionName={mission.name}
                             robotId={mission.robot.id}
                             missionStatus={mission.status}

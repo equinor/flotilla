@@ -374,5 +374,7 @@
     "Successful Tasks": "Successful Tasks",
     "Failed Tasks": "Failed Tasks",
     "Task Success Rate": "Task Success Rate",
-    "Loading installation data": "Loading installation data"
+    "Loading installation data": "Loading installation data",
+    "RechargingWithMission": "Recharging (mission paused)",
+    "GoingToRechargingWithMission": "Going home to recharge (mission paused)"
 }
