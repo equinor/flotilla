@@ -1,0 +1,15 @@
+name: Migration checks
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  migration_checks:
+    uses: equinor/armada/.github/workflows/migration_checks.yml@main
+    with:
+      database_paths: "backend/api/Database/**"
+      migrations_paths: "backend/api/Migrations/**"
