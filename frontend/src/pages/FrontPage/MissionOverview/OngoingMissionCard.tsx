@@ -17,6 +17,7 @@ import { InstallationContext } from 'components/Contexts/InstallationContext'
 interface MissionProps {
     mission: Mission
     canBePaused: boolean
+    canBeSkipped: boolean
     isOpen?: boolean
     setIsOpen?: (isOpen: boolean | ((prev: boolean) => boolean)) => void
 }
@@ -143,7 +144,7 @@ const StyledWrapper = styled.div`
     gap: 8px;
 `
 
-export const OngoingMissionCard = ({ mission, canBePaused, isOpen, setIsOpen }: MissionProps) => {
+export const OngoingMissionCard = ({ mission, canBePaused, canBeSkipped, isOpen, setIsOpen }: MissionProps) => {
     const { TranslateText } = useLanguageContext()
     const { installation } = useContext(InstallationContext)
     const navigate = useNavigate()
@@ -170,7 +171,7 @@ export const OngoingMissionCard = ({ mission, canBePaused, isOpen, setIsOpen }: 
                 <MissionControlButtons
                     missionName={mission.name}
                     canBePaused={canBePaused}
-                    canBeSkipped={true}
+                    canBeSkipped={canBeSkipped}
                     robotId={mission.robot.id}
                     missionStatus={mission.status}
                 />
@@ -194,7 +195,7 @@ export const OngoingMissionCard = ({ mission, canBePaused, isOpen, setIsOpen }: 
                 <MissionControlButtons
                     missionName={mission.name}
                     canBePaused={canBePaused}
-                    canBeSkipped={true}
+                    canBeSkipped={canBeSkipped}
                     robotId={mission.robot.id}
                     missionStatus={mission.status}
                 />

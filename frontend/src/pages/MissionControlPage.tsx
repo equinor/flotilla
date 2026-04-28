@@ -115,6 +115,22 @@ const MissionControlCard = ({ robot }: { robot: RobotWithoutTelemetry }) => {
                     <OngoingMissionCard
                         mission={ongoingMission}
                         canBePaused={true}
+                        canBeSkipped={true}
+                        isOpen={isOpen}
+                        setIsOpen={setIsOpen}
+                    />
+                )
+            else missionCard = <OngoingMissionPlaceholderCard robot={robot} isOpen={isOpen} setIsOpen={setIsOpen} />
+            break
+        case RobotStatus.Stopping:
+        case RobotStatus.Pausing:
+        case RobotStatus.StoppingReturnHome:
+            if (ongoingMission)
+                missionCard = (
+                    <OngoingMissionCard
+                        mission={ongoingMission}
+                        canBePaused={false}
+                        canBeSkipped={false}
                         isOpen={isOpen}
                         setIsOpen={setIsOpen}
                     />
@@ -128,6 +144,7 @@ const MissionControlCard = ({ robot }: { robot: RobotWithoutTelemetry }) => {
                     <OngoingMissionCard
                         mission={ongoingMission}
                         canBePaused={false}
+                        canBeSkipped={true}
                         isOpen={isOpen}
                         setIsOpen={setIsOpen}
                     />
