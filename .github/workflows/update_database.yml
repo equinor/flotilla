@@ -25,7 +25,7 @@ jobs:
       contents: read
       pull-requests: read
     with:
-      pull_request_checkout: true
+      pr_head_sha: ${{ needs.orchestration.outputs.pr_head_sha }}
       environment: Development
       working_directory: backend/api
     secrets:
