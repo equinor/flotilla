@@ -1,4 +1,4 @@
-name: Migration checks
+name: Verify migrations
 
 on:
   pull_request:
@@ -10,8 +10,8 @@ permissions:
   issues: read
 
 jobs:
-  migration_checks:
-    uses: equinor/armada/.github/workflows/migration_checks.yml@main
+  verify_migrations:
+    uses: equinor/armada/.github/workflows/verify_migrations.yml@main
     with:
       database_paths: "backend/api/Database/**"
       migrations_paths: "backend/api/Migrations/**"

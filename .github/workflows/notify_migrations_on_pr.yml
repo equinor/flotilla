@@ -1,8 +1,8 @@
-name: Migration actions
+name: Notify migrations on PR
 
 on:
   workflow_run:
-    workflows: [Migration checks]
+    workflows: [Verify migrations]
     types: [completed]
 
 permissions:
@@ -11,9 +11,9 @@ permissions:
   issues: write
 
 jobs:
-  migration_actions:
+  notify_migrations_on_pr:
     if: github.event.workflow_run.conclusion == 'success'
-    uses: equinor/armada/.github/workflows/migration_actions.yml@main
+    uses: equinor/armada/.github/workflows/notify_migrations_on_pr.yml@main
     with:
       stage_one_workflow_run_id: ${{ github.event.workflow_run.id }}
       migration_docs_url: https://github.com/equinor/flotilla/tree/main/backend#Database-model-and-EF-Core
