@@ -58,7 +58,7 @@ export const MissionControlButtons = ({
                 <CircularProgress size={32} />
             ) : (
                 <>
-                    {missionStatus === MissionStatus.Ongoing && (
+                    {missionStatus !== MissionStatus.Paused && (
                         <OngoingMissionButton
                             missionName={missionName}
                             robotId={robotId}
