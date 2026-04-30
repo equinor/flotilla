@@ -377,5 +377,8 @@
     "Loading installation data": "Laster installasjonsdata",
     "RechargingWithMission": "Lader",
     "GoingToRechargingWithMission": "Returnerer for å lade",
-    "PausedToCharge": "Pauset for lading"
+    "PausedToCharge": "Pauset for lading",
+    "Latest Value": "Siste verdi",
+    "Measured oil level throughout the last 7 days": "Målt oljenivå i løpet av de siste 7 dagene",
+    "Fill [%]": "Fyll [%]"
 }

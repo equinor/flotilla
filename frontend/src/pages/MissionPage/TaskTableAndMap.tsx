@@ -6,6 +6,7 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Mission } from 'models/Mission'
 import { phone_width } from 'utils/constants'
 import { PlantMap } from './MapPosition/PointillaMapView'
+import { StyledTableAndMap } from 'components/Styles/StyledComponents'
 
 const TaskAndMapSection = styled.div`
     display: flex;
@@ -25,13 +26,6 @@ const TaskAndMapSection = styled.div`
     border-radius: 6px;
     border: 1px solid ${tokens.colors.ui.background__medium.rgba};
     background: ${tokens.colors.ui.background__default.rgba};
-`
-
-const StyledTableAndMap = styled.div`
-    display: flex;
-    flex-wrap: wrap;
-    align-items: top;
-    gap: 30px;
 `
 
 interface TaskTableAndMapProps {

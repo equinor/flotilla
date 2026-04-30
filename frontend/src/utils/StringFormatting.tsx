@@ -10,7 +10,7 @@ export const convertUTCDateToLocalDate = (date: Date): Date => {
     return new Date(new Date(date).getTime() - new Date(date).getTimezoneOffset() * 60 * 1000)
 }
 
-const formatBackendDateTimeToDate = (date: Date) => new Date(date.toString())
+export const formatBackendDateTimeToDate = (date: Date) => new Date(date.toString() + 'Z')
 
 export const getInspectionDeadline = (
     inspectionFrequency: string | undefined,
