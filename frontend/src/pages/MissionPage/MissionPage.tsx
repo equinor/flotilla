@@ -10,7 +10,7 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { useMediaStreamContext } from 'components/Contexts/MediaStreamContext'
-import { StyledPage } from 'components/Styles/StyledComponents'
+import { StyledCardsWidth, StyledPage, VideoStreamSection } from 'components/Styles/StyledComponents'
 import { InspectionDialogView } from '../InspectionReportPage/InspectionView'
 import { InspectionOverviewSection } from '../InspectionReportPage/InspectionOverview'
 import { TaskTableAndMap } from './TaskTableAndMap'
@@ -23,18 +23,6 @@ const StyledMissionPageContent = styled.div`
     display: flex;
     flex-direction: column;
     gap: 10px;
-`
-
-const StyledCardsWidth = styled.div`
-    display: flex;
-    flex-direction: column;
-    max-width: fit-content;
-    gap: 20px;
-`
-
-export const VideoStreamSection = styled.div`
-    display: grid;
-    gap: 1rem;
 `
 
 const useMissionSelector = (missionId: string | undefined, inspectionId: string | undefined) => {

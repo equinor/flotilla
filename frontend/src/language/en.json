@@ -377,5 +377,8 @@
     "Loading installation data": "Loading installation data",
     "RechargingWithMission": "Recharging",
     "GoingToRechargingWithMission": "Returning to recharge",
-    "PausedToCharge": "Paused for charging"
+    "PausedToCharge": "Paused for charging",
+    "Latest Value": "Latest Value",
+    "Measured oil level throughout the last 7 days": "Measured oil level throughout the last 7 days",
+    "Fill [%]": "Fill [%]"
 }

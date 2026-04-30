@@ -65,6 +65,19 @@ export const AttributeTitleTypography = styled(Typography)`
     fontsize: 14;
     color: ${tokens.colors.text.static_icons__secondary.hex};
 `
+export const StyledTable = styled(Table)`
+    display: block;
+    overflow: auto;
+    max-width: calc(80vw);
+`
+
+export const StyledTableAndMap = styled.div`
+    display: flex;
+    flex-wrap: wrap;
+    align-items: top;
+    gap: 30px;
+`
+
 export const StyledTableCell = styled(Table.Cell)`
     background-color: ${tokens.colors.ui.background__default.hex};
 `
@@ -73,4 +86,15 @@ export const StyledTableBody = styled(Table.Body)`
 `
 export const StyledTableCaption = styled(Table.Caption)`
     background-color: ${tokens.colors.ui.background__default.hex};
+`
+export const StyledCardsWidth = styled.div`
+    display: flex;
+    flex-direction: column;
+    max-width: fit-content;
+    gap: 20px;
+`
+
+export const VideoStreamSection = styled.div`
+    display: grid;
+    gap: 1rem;
 `

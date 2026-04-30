@@ -5,6 +5,7 @@ import { InfoPage } from './InfoPage'
 import { MissionDefinitionPageRouter, MissionPageRouter, RobotPageRouter, SimpleMissionPageRouter } from './PageRouter'
 import { PageNotFound } from './NotFoundPage'
 import { DataViewPage } from './MissionHistory/DataViewPage'
+import { CloeDataViewPage } from './CloeDataViewPage'
 import { MissionControlPage } from './MissionControlPage'
 import { AreaOverviewPage } from './AreaOverviewPage'
 import { PredefinedMissionsPage } from './PredefinedMissionsPage'
@@ -50,6 +51,7 @@ export const FlotillaSite = () => {
                         <Route path="robots" element={<RobotStatusPage />} />
                         <Route path="statistics" element={<StatisticsPage />} />
                         <Route path="data-view" element={<DataViewPage />} />
+                        <Route path="cloe-view" element={<CloeDataViewPage />} />
                         <Route path="mission/:missionId" element={<MissionPageRouter />} />
                         <Route path="mission-simple" element={<SimpleMissionPageRouter />} />
                         <Route path="missiondefinition/:missionId" element={<MissionDefinitionPageRouter />} />
