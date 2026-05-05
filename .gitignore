@@ -27,3 +27,8 @@ broker/mosquitto/config/certs/server-key.pem
 missions/
 
 AGENTS.md
+
+# Visual Studio
+.vs/
+*.suo
+*.DotSettings.user
