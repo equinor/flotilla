@@ -71,9 +71,9 @@ function isApiError(err: any): err is ApiError {
 
 export const handleError = (requestType: string, path: string) => (e: unknown) => {
     if (isApiError(e)) {
-        console.error(`Failed to ${requestType} /${path}: ` + e.message)
+        console.error('Failed to %s /%s: %s', requestType, path, e.message)
         throw new Error(e.message)
     }
-    console.error(`Failed to ${requestType} /${path}: `, e)
+    console.error('Failed to %s /%s:', requestType, path, e)
     throw e
 }
