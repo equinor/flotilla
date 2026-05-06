@@ -30,7 +30,7 @@ npm ci
 To start the app, run the following command in the root folder:
 
 ```
-npm start
+npm run dev
 ```
 
 This command runs the app in development mode. Open [http://localhost:3001/robotics-frontend](http://localhost:3001/robotics-frontend) to view it in the browser.

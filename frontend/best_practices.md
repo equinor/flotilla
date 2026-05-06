@@ -29,7 +29,7 @@ npx prettier --write [path to source]
 
 We also avoid any warnings or errors from ESLint before we merge in any code. These warnings appear
 when compiling the code using
-npm start
+npm run dev
 but can also be run with
 npx eslint [path to src]
 

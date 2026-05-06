@@ -1,0 +1,22 @@
+name: Frontend
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  lint-frontend-package:
+    uses: equinor/armada/.github/workflows/lint_frontend_package.yml@main
+    permissions:
+      contents: read
+    with:
+      working-directory: frontend
+      run-prettier: true
+      run-eslint: true
+      run-build: true
+      run-unused-exports: true
