@@ -62,6 +62,7 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
     }, [registerEvent, connectionReady])
 
     const fetchImageData = (inspectionId: string): IImageData => {
+        // eslint-disable-next-line react-hooks/rules-of-hooks -- pre-existing design issue, tracked in #2698
         const result = useQuery({
             queryKey: ['fetchInspectionData', inspectionId],
             queryFn: async () => {
@@ -77,6 +78,7 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
     }
 
     const fetchAnalysisData = (inspectionId: string): IImageData => {
+        // eslint-disable-next-line react-hooks/rules-of-hooks -- pre-existing design issue, tracked in #2698
         const result = useQuery({
             queryKey: ['fetchAnalysisData', inspectionId],
             queryFn: async () => {
@@ -91,6 +93,7 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
     }
 
     const fetchValueData = (inspectionId: string): IValueData => {
+        // eslint-disable-next-line react-hooks/rules-of-hooks -- pre-existing design issue, tracked in #2698
         const result = useQuery({
             queryKey: ['fetchValueData', inspectionId],
             queryFn: async () => {
