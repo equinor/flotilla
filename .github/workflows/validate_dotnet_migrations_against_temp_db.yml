@@ -1,0 +1,13 @@
+name: Validate dotnet migrations against temporary database
+
+on:
+  pull_request:
+    paths:
+      - 'backend/api/**'
+      - '.github/workflows/**'
+
+jobs:
+  validate_dotnet_migrations_against_temp_db:
+    uses: equinor/armada/.github/workflows/validate_dotnet_migrations_against_temp_db.yml@main
+    with:
+      working_directory: backend/api
