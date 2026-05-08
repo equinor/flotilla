@@ -1,4 +1,4 @@
-﻿using Azure.Identity;
+using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
@@ -30,20 +30,23 @@ namespace Api.Database.Context
                 .AddEnvironmentVariables()
                 .Build();
 
-            string? keyVaultUri =
-                config.GetSection("KeyVault")["VaultUri"]
-                ?? throw new KeyNotFoundException("No key vault in config");
+            string? connectionString = config.GetSection("Database")["postgresConnectionString"];
 
-            // Connect to keyvault
-            var keyVault = new SecretClient(
-                new Uri(keyVaultUri),
-                new DefaultAzureCredential(new DefaultAzureCredentialOptions())
-            );
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                string? keyVaultUri =
+                    config.GetSection("KeyVault")["VaultUri"]
+                    ?? throw new KeyNotFoundException("No key vault in config");
 
-            // Get connection string
-            string? connectionString = keyVault
-                .GetSecret("Database--PostgreSqlConnectionString")
-                .Value.Value;
+                var keyVault = new SecretClient(
+                    new Uri(keyVaultUri),
+                    new DefaultAzureCredential(new DefaultAzureCredentialOptions())
+                );
+
+                connectionString = keyVault
+                    .GetSecret("Database--PostgreSqlConnectionString")
+                    .Value.Value;
+            }
 
             var optionsBuilder = new DbContextOptionsBuilder<FlotillaDbContext>();
 

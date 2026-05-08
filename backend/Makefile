@@ -8,7 +8,7 @@ test:
 	dotnet test
 
 format:
-	dotnet csharpier .
+	dotnet csharpier format .
 
 migration:
 	@if [ -z "$(name)" ]; then \
