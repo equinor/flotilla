@@ -121,9 +121,8 @@ namespace Api.Test.Controllers
                     Description = "Test description",
                 },
             };
-            var missionQuery = new MissionQuery
+            var missionQuery = new CreateMissionQuery
             {
-                RobotId = robot.Id,
                 InstallationCode = installation.InstallationCode,
                 Name = testName,
                 Tasks = tasks,
@@ -247,9 +246,8 @@ namespace Api.Test.Controllers
                     RobotPose = new Pose(11, 11, 11, 0, 0, 0, 1), // Position outside polygon
                 },
             };
-            var missionQuery = new MissionQuery
+            var missionQuery = new CreateMissionQuery
             {
-                RobotId = robot.Id,
                 InstallationCode = installation.InstallationCode,
                 Name = "TestMission",
                 Tasks = tasks,
