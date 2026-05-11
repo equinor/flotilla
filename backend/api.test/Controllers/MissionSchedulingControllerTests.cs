@@ -451,37 +451,5 @@ namespace Api.Test.Controllers
             // Act
             Assert.Equal(HttpStatusCode.BadRequest, scheduleMissionResponse.StatusCode);
         }
-
-        private static MissionQuery CreateDefaultMissionQuery(
-            string robotId,
-            string installationCode
-        )
-        {
-            return new MissionQuery
-            {
-                RobotId = robotId,
-                InstallationCode = installationCode,
-                Name = "TestMission",
-                Tasks =
-                [
-                    new TaskQuery
-                    {
-                        TagId = "test",
-                        TargetPosition = new Position(),
-                        SensorType = SensorType.Image,
-                        AnalysisTypes = [AnalysisType.Fencilla],
-                        RobotPose = new Pose(11, 11, 11, 0, 0, 0, 1),
-                    },
-                    new TaskQuery
-                    {
-                        RobotPose = new Pose(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f),
-                        TagId = "test",
-                        TargetPosition = new Position(),
-                        SensorType = SensorType.Image,
-                        AnalysisTypes = [AnalysisType.Fencilla],
-                    },
-                ],
-            };
-        }
     }
 }

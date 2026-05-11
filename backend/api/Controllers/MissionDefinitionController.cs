@@ -159,7 +159,7 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<MissionDefinition>> Create(
-            [FromBody] MissionQuery customMissionQuery
+            [FromBody] CreateMissionQuery customMissionQuery
         )
         {
             customMissionQuery = Sanitize.SanitizeUserInput(customMissionQuery);
@@ -216,7 +216,7 @@ namespace Api.Controllers
         /// <response code="200"> The mission definition was successfully updated </response>
         /// <response code="400"> The mission definition data is invalid </response>
         /// <response code="404"> There was no mission definition with the given ID in the database </response>
-        [HttpPut]
+        [HttpPatch]
         [Authorize(Roles = Role.User)]
         [Route("{id}")]
         [ProducesResponseType(typeof(MissionDefinitionResponse), StatusCodes.Status200OK)]
@@ -235,24 +235,31 @@ namespace Api.Controllers
             logger.LogInformation("Updating mission definition with id '{Id}'", id);
 
             if (!ModelState.IsValid)
-            {
                 return BadRequest("Invalid data.");
-            }
 
             var missionDefinition = await missionDefinitionService.ReadById(id, readOnly: false);
             if (missionDefinition == null)
-            {
                 return NotFound($"Could not find mission definition with id '{id}'");
-            }
 
-            if (missionDefinitionQuery.Name == null)
+            if (missionDefinitionQuery.Name != null)
+                missionDefinition.Name = missionDefinitionQuery.Name;
+
+            if (missionDefinitionQuery.Comment != null)
+                missionDefinition.Comment = missionDefinitionQuery.Comment;
+
+            if (missionDefinitionQuery.InspectionFrequency != null)
+                missionDefinition.InspectionFrequency = missionDefinitionQuery.InspectionFrequency;
+
+            if (missionDefinitionQuery.Tasks != null)
             {
-                return BadRequest("Name cannot be null.");
+                missionDefinition.Tasks =
+                [
+                    .. missionDefinitionQuery.Tasks.Select(
+                        (taskQuery, index) => new TaskDefinition(taskQuery, index + 1)
+                    ),
+                ];
             }
 
-            missionDefinition.Name = missionDefinitionQuery.Name;
-            missionDefinition.Comment = missionDefinitionQuery.Comment;
-            missionDefinition.InspectionFrequency = missionDefinitionQuery.InspectionFrequency;
             if (missionDefinitionQuery.SchedulingTimesCETperWeek != null)
             {
                 var schedulingTimesCETperWeek = missionDefinitionQuery
