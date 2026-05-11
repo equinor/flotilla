@@ -24,6 +24,8 @@ namespace Api.Controllers.Models
         /// Will be unchanged if null. Use an empty list to remove all scheduled times.
         /// </summary>
         public IList<TimeAndDayQuery>? SchedulingTimesCETperWeek { get; set; }
+
+        public IList<TaskQuery>? Tasks { get; set; }
     }
 
     public struct TimeAndDayQuery

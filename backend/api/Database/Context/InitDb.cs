@@ -10,7 +10,6 @@ namespace Api.Database.Context
         private static readonly List<Plant> plants = GetPlants();
         private static readonly List<InspectionArea> inspectionAreas = GetInspectionAreas();
         private static readonly List<Robot> robots = GetRobots();
-        private static readonly List<TaskDefinition> taskDefinitions = GetMissionTaskDefinitions();
         private static readonly List<MissionTask> tasks = GetMissionTasks();
         private static readonly List<MissionDefinition> missionDefinitions =
             GetMissionDefinitions();
@@ -208,6 +207,7 @@ namespace Api.Database.Context
         {
             var task1 = new TaskDefinition
             {
+                Index = 1,
                 TagId = "dummy tag id 1",
                 Description = "dummy task 1",
                 RobotPose = new Pose(),
@@ -222,6 +222,7 @@ namespace Api.Database.Context
 
             var task2 = new TaskDefinition
             {
+                Index = 2,
                 TagId = "dummy tag id 1",
                 Description = "dummy task 2",
                 RobotPose = new Pose(),
@@ -236,6 +237,7 @@ namespace Api.Database.Context
 
             var task3 = new TaskDefinition
             {
+                Index = 3,
                 TagId = "dummy tag id 2",
                 Description = "dummy task 3",
                 RobotPose = new Pose(),
@@ -259,7 +261,12 @@ namespace Api.Database.Context
                 Name = "Placeholder Mission 1",
                 InstallationCode = inspectionAreas[0].Installation!.InstallationCode,
                 InspectionArea = inspectionAreas[0],
-                Tasks = [],
+                Tasks =
+                [
+                    GetMissionTaskDefinitions()[0],
+                    GetMissionTaskDefinitions()[1],
+                    GetMissionTaskDefinitions()[2],
+                ],
                 Comment = "Interesting comment",
                 InspectionFrequency = new DateTime().AddDays(12) - new DateTime(),
                 LastSuccessfulRun = null,
@@ -271,7 +278,7 @@ namespace Api.Database.Context
                 Name = "Placeholder Mission 2",
                 InstallationCode = inspectionAreas[1].Installation!.InstallationCode,
                 InspectionArea = inspectionAreas[1],
-                Tasks = [],
+                Tasks = [GetMissionTaskDefinitions()[0], GetMissionTaskDefinitions()[2]],
                 InspectionFrequency = new DateTime().AddDays(7) - new DateTime(),
                 LastSuccessfulRun = null,
             };
@@ -282,7 +289,7 @@ namespace Api.Database.Context
                 Name = "Placeholder Mission 3",
                 InstallationCode = inspectionAreas[1].Installation!.InstallationCode,
                 InspectionArea = inspectionAreas[1],
-                Tasks = [],
+                Tasks = [GetMissionTaskDefinitions()[1], GetMissionTaskDefinitions()[2]],
                 LastSuccessfulRun = null,
             };
 
@@ -293,7 +300,7 @@ namespace Api.Database.Context
                 InstallationCode = inspectionAreas[2].Installation.InstallationCode,
                 InspectionFrequency = new DateTime().AddDays(90) - new DateTime(),
                 InspectionArea = inspectionAreas[2],
-                Tasks = [],
+                Tasks = [GetMissionTaskDefinitions()[0]],
                 LastSuccessfulRun = null,
             };
 
@@ -304,7 +311,7 @@ namespace Api.Database.Context
                 InstallationCode = inspectionAreas[2].Installation.InstallationCode,
                 InspectionFrequency = new DateTime().AddDays(35) - new DateTime(),
                 InspectionArea = inspectionAreas[2],
-                Tasks = [],
+                Tasks = [GetMissionTaskDefinitions()[1]],
                 LastSuccessfulRun = null,
             };
 
@@ -315,7 +322,7 @@ namespace Api.Database.Context
                 InstallationCode = inspectionAreas[3].Installation.InstallationCode,
                 InspectionFrequency = new DateTime().AddDays(4) - new DateTime(),
                 InspectionArea = inspectionAreas[3],
-                Tasks = [],
+                Tasks = [GetMissionTaskDefinitions()[2]],
                 LastSuccessfulRun = null,
             };
 
@@ -520,14 +527,6 @@ namespace Api.Database.Context
             }
             missionRuns[0].Tasks = tasks;
             context.AddRange(tasks);
-            var taskDefinitions = GetMissionTaskDefinitions();
-            missionDefinitions[0].Tasks =
-            [
-                taskDefinitions[0],
-                taskDefinitions[1],
-                taskDefinitions[2],
-            ];
-            context.AddRange(taskDefinitions);
             context.AddRange(missionDefinitions);
             context.AddRange(missionRuns);
             context.AddRange(accessRoles);
