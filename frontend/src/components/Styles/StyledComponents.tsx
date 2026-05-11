@@ -6,6 +6,8 @@ import { phone_width } from 'utils/constants'
 export const StyledDialog = styled(Dialog)`
     width: calc(100vw * 0.8);
     max-width: 420px;
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
     padding: 10px;
     display: flex;
     flex-direction: column;
