@@ -6,6 +6,9 @@ on:
       - 'backend/api/**'
       - '.github/workflows/**'
 
+permissions:
+  contents: read
+
 jobs:
   validate_dotnet_migrations_against_temp_db:
     uses: equinor/armada/.github/workflows/validate_dotnet_migrations_against_temp_db.yml@main
