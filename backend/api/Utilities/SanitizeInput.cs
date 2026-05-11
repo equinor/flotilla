@@ -5,9 +5,9 @@ namespace Api.Utilities
 {
     public static class Sanitize
     {
-        public static string SanitizeUserInput(string inputString)
+        public static string SanitizeUserInput(string? inputString)
         {
-            return inputString.Replace("\n", "").Replace("\r", "");
+            return inputString?.Replace("\n", "").Replace("\r", "") ?? string.Empty;
         }
 
         public static ScheduleMissionQuery SanitizeUserInput(ScheduleMissionQuery inputQuery)

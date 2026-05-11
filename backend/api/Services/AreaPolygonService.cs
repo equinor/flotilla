@@ -1,4 +1,5 @@
 using Api.Database.Models;
+using Api.Utilities;
 
 namespace Api.Services
 {
@@ -40,9 +41,11 @@ namespace Api.Services
                 )
                 {
                     logger.LogWarning(
-                        "Robot position {robotPosition} is outside the inspection area polygon for task {taskId}",
-                        robotPosition,
-                        missionTask.Id
+                        "Robot position (X={X}, Y={Y}, Z={Z}) is outside the inspection area polygon for task {taskId}",
+                        robotPosition.X,
+                        robotPosition.Y,
+                        robotPosition.Z,
+                        Sanitize.SanitizeUserInput(missionTask.Id)
                     );
                     return false;
                 }
