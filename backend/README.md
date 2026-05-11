@@ -192,18 +192,12 @@ is making migrations at the same time as you!**
 Updates to the database structure (applying migrations) are done in GitHub Actions.
 
 When a pull request contains changes in the `backend/api/Database/Migrations` folder,
-[a workflow](https://github.com/equinor/flotilla/blob/main/.github/workflows/notifyMigrationChanges.yml)
-is triggered to notify that the pull request has database changes.
+a workflow is triggered to notify that the pull request has database changes.
 
-After the pull request is approved, a user can then trigger the database changes by commenting
-`/UpdateDatabase` on the pull request.
-
-This will trigger
-[another workflow](https://github.com/equinor/flotilla/blob/main/.github/workflows/updateDatabase.yml)
-which updates the database by applying the new migrations.
-
-By doing migrations this way, we ensure that the commands themselves are scripted, and that the database
-changes become part of the review process of a pull request.
+After the pull request is merged, apply the migrations to the Development database by
+manually running the
+["Run database migrations (Development)"](https://github.com/equinor/flotilla/actions/workflows/run_development_migrations.yml)
+workflow from the Actions tab.
 
 ### Applying migrations to staging and production databases
 

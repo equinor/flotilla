@@ -1,0 +1,20 @@
+name: Run database migrations (Development)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  run_migrations:
+    name: Update database in Development
+    uses: equinor/armada/.github/workflows/run_dotnet_migrations.yml@main
+    permissions:
+      contents: read
+    with:
+      environment: Development
+      working_directory: backend/api
+    secrets:
+      client_id: ${{ secrets.CLIENTID }}
+      client_secret: ${{ secrets.CLIENTSECRET }}
