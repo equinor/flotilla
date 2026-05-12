@@ -38,6 +38,5 @@ export interface MissionDefinition {
     autoScheduleFrequency?: AutoScheduleFrequency
     lastSuccessfulRun?: Mission
     inspectionArea: InspectionArea
-    isDeprecated: boolean
     tasks: MissionTaskDefinition[]
 }
