@@ -20,6 +20,7 @@ interface MissionProps {
     canBeSkipped: boolean
     isOpen?: boolean
     setIsOpen?: (isOpen: boolean | ((prev: boolean) => boolean)) => void
+    missionStatus?: MissionStatus
 }
 
 interface MissionQueueButtonViewProps {
@@ -144,7 +145,14 @@ const StyledWrapper = styled.div`
     gap: 8px;
 `
 
-export const OngoingMissionCard = ({ mission, canBePaused, canBeSkipped, isOpen, setIsOpen }: MissionProps) => {
+export const OngoingMissionCard = ({
+    mission,
+    canBePaused,
+    canBeSkipped,
+    isOpen,
+    setIsOpen,
+    missionStatus,
+}: MissionProps) => {
     const { TranslateText } = useLanguageContext()
     const { installation } = useContext(InstallationContext)
     const navigate = useNavigate()
@@ -152,6 +160,8 @@ export const OngoingMissionCard = ({ mission, canBePaused, canBeSkipped, isOpen,
         const path = `/${installation.installationCode}/mission/${mission.id}`
         navigate(path)
     }
+
+    missionStatus = missionStatus ?? mission.status
 
     const SmallScreenContent = (
         <StyledSmallScreenMissionCard>
@@ -165,7 +175,7 @@ export const OngoingMissionCard = ({ mission, canBePaused, canBeSkipped, isOpen,
             </StyledHeader>
             <ControlButtonSpacing>
                 <Midcontent>
-                    <MissionStatusDisplayWithHeader status={mission.status} />
+                    <MissionStatusDisplayWithHeader status={missionStatus} />
                     <MissionProgressDisplay mission={mission} />
                 </Midcontent>
                 <MissionControlButtons
@@ -173,7 +183,7 @@ export const OngoingMissionCard = ({ mission, canBePaused, canBeSkipped, isOpen,
                     canBePaused={canBePaused}
                     canBeSkipped={canBeSkipped}
                     robotId={mission.robot.id}
-                    missionStatus={mission.status}
+                    missionStatus={missionStatus}
                 />
             </ControlButtonSpacing>
             <MissionQueueButtonView robotId={mission.robot.id} isOpen={isOpen} setIsOpen={setIsOpen} />
@@ -188,7 +198,7 @@ export const OngoingMissionCard = ({ mission, canBePaused, canBeSkipped, isOpen,
                         {mission.name}
                     </Typography>
                     <Midcontent>
-                        <MissionStatusDisplayWithHeader status={mission.status} />
+                        <MissionStatusDisplayWithHeader status={missionStatus} />
                         <MissionProgressDisplay mission={mission} />
                     </Midcontent>
                 </LeftSection>
@@ -197,7 +207,7 @@ export const OngoingMissionCard = ({ mission, canBePaused, canBeSkipped, isOpen,
                     canBePaused={canBePaused}
                     canBeSkipped={canBeSkipped}
                     robotId={mission.robot.id}
-                    missionStatus={mission.status}
+                    missionStatus={missionStatus}
                 />
             </ControlButtonSpacing>
             <ControlButtonSpacing>

@@ -12,6 +12,7 @@ export enum MissionStatus {
     Successful = 'Successful',
     PartiallySuccessful = 'PartiallySuccessful',
     Queued = 'Queued',
+    PausedToCharge = 'PausedToCharge',
 }
 
 export const missionStatusFilterOptionsIterable = [

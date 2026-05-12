@@ -376,5 +376,6 @@
     "Task Success Rate": "Suksessrate for oppgaver",
     "Loading installation data": "Laster installasjonsdata",
     "RechargingWithMission": "Lader",
-    "GoingToRechargingWithMission": "Returnerer for å lade (oppdrag pauset)"
+    "GoingToRechargingWithMission": "Returnerer for å lade",
+    "PausedToCharge": "Pauset for lading"
 }

@@ -105,11 +105,11 @@ interface RobotCardProps {
 }
 
 export const RobotCard = ({ robot }: RobotCardProps) => {
+    const { TranslateText } = useLanguageContext()
+    const { installation } = useContext(InstallationContext)
     const { robotBatteryLevel, robotBatteryStatus, robotPressureLevel } = useRobotTelemetry(robot)
 
     const navigate = useNavigate()
-    const { TranslateText } = useLanguageContext()
-    const { installation } = useContext(InstallationContext)
     const goToRobot = () => {
         const path = `/${installation.installationCode}/robot/${robot.id}`
         navigate(path)

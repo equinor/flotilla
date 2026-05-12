@@ -376,5 +376,6 @@
     "Task Success Rate": "Task Success Rate",
     "Loading installation data": "Loading installation data",
     "RechargingWithMission": "Recharging",
-    "GoingToRechargingWithMission": "Going home to recharge (mission paused)"
+    "GoingToRechargingWithMission": "Returning to recharge",
+    "PausedToCharge": "Paused for charging"
 }

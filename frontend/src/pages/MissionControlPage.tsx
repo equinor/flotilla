@@ -21,6 +21,7 @@ import {
 import { RobotCard, RobotCardPlaceholder } from './FrontPage/MissionOverview/RobotCard'
 import { RobotMissionQueueView } from './FrontPage/MissionOverview/MissionQueueView'
 import { StyledPage } from 'components/Styles/StyledComponents'
+import { MissionStatus } from 'models/Mission'
 
 const MissionControlStyle = styled.div`
     display: flex;
@@ -147,6 +148,7 @@ const MissionControlCard = ({ robot }: { robot: RobotWithoutTelemetry }) => {
                         canBeSkipped={true}
                         isOpen={isOpen}
                         setIsOpen={setIsOpen}
+                        missionStatus={MissionStatus.PausedToCharge}
                     />
                 )
             else missionCard = <OngoingMissionPlaceholderCard robot={robot} isOpen={isOpen} setIsOpen={setIsOpen} />
