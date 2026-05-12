@@ -13,7 +13,6 @@ namespace Api.Controllers.Models
         public AutoScheduleFrequency? AutoScheduleFrequency { get; set; }
         public virtual MissionRun? LastSuccessfulRun { get; set; }
         public InspectionAreaResponse InspectionArea { get; set; }
-        public bool IsDeprecated { get; set; }
 
         [JsonConstructor]
 #nullable disable
@@ -37,7 +36,6 @@ namespace Api.Controllers.Models
                     : null;
             LastSuccessfulRun = missionDefinition.LastSuccessfulRun;
             InspectionArea = new InspectionAreaResponse(missionDefinition.InspectionArea);
-            IsDeprecated = missionDefinition.IsDeprecated;
         }
     }
 }
