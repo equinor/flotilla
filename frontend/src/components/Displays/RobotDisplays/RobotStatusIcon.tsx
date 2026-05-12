@@ -33,13 +33,13 @@ export const RobotStatusChip = ({ status, itemSize }: StatusProps) => {
     switch (status) {
         case RobotStatus.Home:
         case RobotStatus.ReturningHome:
-        case RobotStatus.ReturnHomePaused:
         case RobotStatus.Available: {
             statusIcon = Icons.Successful
             iconColor = tokens.colors.interactive.success__resting.hex
             break
         }
         case RobotStatus.Paused:
+        case RobotStatus.ReturnHomePaused:
         case RobotStatus.Pausing:
         case RobotStatus.PausingReturnHome:
         case RobotStatus.Stopping:
