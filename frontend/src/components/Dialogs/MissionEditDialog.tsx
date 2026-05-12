@@ -13,11 +13,9 @@ import { StyledDialog } from 'components/Styles/StyledComponents'
 import { allDays, DaysOfWeek, TimeAndDay } from 'models/AutoScheduleFrequency'
 import { MissionDefinition } from 'models/MissionDefinition'
 import { MissionDefinitionUpdateForm } from 'models/MissionDefinitionUpdateForm'
-import { ChangeEvent, useContext, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { ChangeEvent, useState } from 'react'
 import styled from 'styled-components'
 import { useBackendApi } from 'api/UseBackendApi'
-import { InstallationContext } from 'components/Contexts/InstallationContext'
 
 const StyledSummary = styled.div`
     padding: 16px 8px 0px 8px;
@@ -57,8 +55,6 @@ const StyledTimeChips = styled.div`
 const useMissionUpdater = () => {
     const { TranslateText } = useLanguageContext()
     const { setAlert, setListAlert } = useAlertContext()
-    const { installation } = useContext(InstallationContext)
-    const navigate = useNavigate()
     const backendApi = useBackendApi()
 
     const updateMission = (
@@ -70,16 +66,12 @@ const useMissionUpdater = () => {
             comment: mission.comment,
             schedulingTimesCETperWeek: mission.autoScheduleFrequency?.schedulingTimesCETperWeek,
             name: mission.name,
-            isDeprecated: false,
         }
         const form: MissionDefinitionUpdateForm = { ...defaultForm, ...partialForm }
 
         backendApi
             .updateMissionDefinition(mission.id, form)
-            .then((missionDefinition) => {
-                onSuccess()
-                if (missionDefinition.isDeprecated) navigate(`/${installation.installationCode}`)
-            })
+            .then(onSuccess)
             .catch(() => {
                 setAlert(
                     AlertType.RequestFail,
