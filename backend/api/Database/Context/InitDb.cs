@@ -1,5 +1,4 @@
 ﻿using Api.Database.Models;
-using Microsoft.EntityFrameworkCore;
 using TaskStatus = Api.Database.Models.TaskStatus;
 
 namespace Api.Database.Context
@@ -11,7 +10,7 @@ namespace Api.Database.Context
         private static readonly List<Plant> plants = GetPlants();
         private static readonly List<InspectionArea> inspectionAreas = GetInspectionAreas();
         private static readonly List<Robot> robots = GetRobots();
-        private static readonly List<Source> sources = GetSources();
+        private static readonly List<TaskDefinition> taskDefinitions = GetMissionTaskDefinitions();
         private static readonly List<MissionTask> tasks = GetMissionTasks();
         private static readonly List<MissionDefinition> missionDefinitions =
             GetMissionDefinitions();
@@ -20,9 +19,9 @@ namespace Api.Database.Context
 
         private static List<Inspection> GetInspections()
         {
-            var inspection1 = new Inspection { InspectionType = InspectionType.Image };
+            var inspection1 = new Inspection { InspectionType = SensorType.Image };
 
-            var inspection2 = new Inspection { InspectionType = InspectionType.ThermalImage };
+            var inspection2 = new Inspection { InspectionType = SensorType.ThermalImage };
 
             return new List<Inspection>([inspection1, inspection2]);
         }
@@ -146,17 +145,6 @@ namespace Api.Database.Context
             ]);
         }
 
-        private static List<Source> GetSources()
-        {
-            var source1 = new Source { SourceId = "986" };
-
-            var source2 = new Source { SourceId = "990" };
-
-            var source3 = new Source { SourceId = "991" };
-
-            return new List<Source>([source1, source2, source3]);
-        }
-
         private static List<Robot> GetRobots()
         {
             var robot1 = new Robot
@@ -216,6 +204,53 @@ namespace Api.Database.Context
             return new List<Robot>([robot1, robot2, robot3, robot4]);
         }
 
+        private static List<TaskDefinition> GetMissionTaskDefinitions()
+        {
+            var task1 = new TaskDefinition
+            {
+                TagId = "dummy tag id 1",
+                Description = "dummy task 1",
+                RobotPose = new Pose(),
+                AnalysisTypes = [AnalysisType.Fencilla],
+                TargetPosition = new Position
+                {
+                    X = 0,
+                    Y = 0,
+                    Z = 0,
+                },
+            };
+
+            var task2 = new TaskDefinition
+            {
+                TagId = "dummy tag id 1",
+                Description = "dummy task 2",
+                RobotPose = new Pose(),
+                AnalysisTypes = [AnalysisType.CLOE],
+                TargetPosition = new Position
+                {
+                    X = 0,
+                    Y = 0,
+                    Z = 0,
+                },
+            };
+
+            var task3 = new TaskDefinition
+            {
+                TagId = "dummy tag id 2",
+                Description = "dummy task 3",
+                RobotPose = new Pose(),
+                AnalysisTypes = [AnalysisType.CO2],
+                TargetPosition = new Position
+                {
+                    X = 0,
+                    Y = 0,
+                    Z = 0,
+                },
+            };
+
+            return new List<TaskDefinition>([task1, task2, task3]);
+        }
+
         private static List<MissionDefinition> GetMissionDefinitions()
         {
             var missionDefinition1 = new MissionDefinition
@@ -224,7 +259,7 @@ namespace Api.Database.Context
                 Name = "Placeholder Mission 1",
                 InstallationCode = inspectionAreas[0].Installation!.InstallationCode,
                 InspectionArea = inspectionAreas[0],
-                Source = sources[0],
+                Tasks = [],
                 Comment = "Interesting comment",
                 InspectionFrequency = new DateTime().AddDays(12) - new DateTime(),
                 LastSuccessfulRun = null,
@@ -236,7 +271,7 @@ namespace Api.Database.Context
                 Name = "Placeholder Mission 2",
                 InstallationCode = inspectionAreas[1].Installation!.InstallationCode,
                 InspectionArea = inspectionAreas[1],
-                Source = sources[1],
+                Tasks = [],
                 InspectionFrequency = new DateTime().AddDays(7) - new DateTime(),
                 LastSuccessfulRun = null,
             };
@@ -247,7 +282,7 @@ namespace Api.Database.Context
                 Name = "Placeholder Mission 3",
                 InstallationCode = inspectionAreas[1].Installation!.InstallationCode,
                 InspectionArea = inspectionAreas[1],
-                Source = sources[2],
+                Tasks = [],
                 LastSuccessfulRun = null,
             };
 
@@ -258,7 +293,7 @@ namespace Api.Database.Context
                 InstallationCode = inspectionAreas[2].Installation.InstallationCode,
                 InspectionFrequency = new DateTime().AddDays(90) - new DateTime(),
                 InspectionArea = inspectionAreas[2],
-                Source = sources[2],
+                Tasks = [],
                 LastSuccessfulRun = null,
             };
 
@@ -269,7 +304,7 @@ namespace Api.Database.Context
                 InstallationCode = inspectionAreas[2].Installation.InstallationCode,
                 InspectionFrequency = new DateTime().AddDays(35) - new DateTime(),
                 InspectionArea = inspectionAreas[2],
-                Source = sources[2],
+                Tasks = [],
                 LastSuccessfulRun = null,
             };
 
@@ -280,16 +315,7 @@ namespace Api.Database.Context
                 InstallationCode = inspectionAreas[3].Installation.InstallationCode,
                 InspectionFrequency = new DateTime().AddDays(4) - new DateTime(),
                 InspectionArea = inspectionAreas[3],
-                Source = sources[2],
-                LastSuccessfulRun = null,
-            };
-            _ = new MissionDefinition
-            {
-                Id = Guid.NewGuid().ToString(),
-                Name = "Placeholder Mission 7",
-                InstallationCode = inspectionAreas[3].Installation.InstallationCode,
-                InspectionArea = inspectionAreas[4],
-                Source = sources[2],
+                Tasks = [],
                 LastSuccessfulRun = null,
             };
 
@@ -305,83 +331,68 @@ namespace Api.Database.Context
 
         private static List<MissionTask> GetMissionTasks()
         {
-            var url = new Uri("https://dummyurl/tag?tagNo=ABCD");
-            var task1 = new MissionTask(
-                inspection: new Inspection(),
-                robotPose: new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
-                taskOrder: 0,
-                tagLink: url,
-                tagId: "ABCD",
-                taskDescription: "Task description",
-                poseId: 2,
-                status: TaskStatus.Successful
-            );
+            var task1 = new MissionTask
+            {
+                Inspection = new Inspection(),
+                RobotPose = new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
+                TagId = "ABCD",
+                Description = "Task description",
+                Status = TaskStatus.Successful,
+            };
 
-            var task2 = new MissionTask(
-                inspection: new Inspection(),
-                robotPose: new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
-                taskOrder: 0,
-                tagLink: url,
-                tagId: "ABCDE",
-                taskDescription: "Task description",
-                poseId: 2,
-                status: TaskStatus.Failed
-            );
+            var task2 = new MissionTask
+            {
+                Inspection = new Inspection(),
+                RobotPose = new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
+                TagId = "ABCDE",
+                Description = "Task description",
+                Status = TaskStatus.Failed,
+            };
 
-            var task3 = new MissionTask(
-                inspection: new Inspection(),
-                robotPose: new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
-                taskOrder: 0,
-                tagLink: url,
-                tagId: "ABCDEF",
-                taskDescription: "Task description",
-                poseId: 2,
-                status: TaskStatus.PartiallySuccessful
-            );
+            var task3 = new MissionTask
+            {
+                Inspection = new Inspection(),
+                RobotPose = new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
+                TagId = "ABCDEF",
+                Description = "Task description",
+                Status = TaskStatus.PartiallySuccessful,
+            };
 
-            var task4 = new MissionTask(
-                inspection: new Inspection(),
-                robotPose: new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
-                taskOrder: 0,
-                tagLink: url,
-                tagId: "ABCDEFG",
-                taskDescription: "Task description",
-                poseId: 2,
-                status: TaskStatus.Cancelled
-            );
+            var task4 = new MissionTask
+            {
+                Inspection = new Inspection(),
+                RobotPose = new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
+                TagId = "ABCDEFG",
+                Description = "Task description",
+                Status = TaskStatus.Cancelled,
+            };
 
-            var task5 = new MissionTask(
-                inspection: new Inspection(),
-                robotPose: new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
-                taskOrder: 0,
-                tagLink: url,
-                tagId: "ABCDEFGH",
-                taskDescription: "Task description",
-                poseId: 2,
-                status: TaskStatus.Failed
-            );
+            var task5 = new MissionTask
+            {
+                Inspection = new Inspection(),
+                RobotPose = new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
+                TagId = "ABCDEFGH",
+                Description = "Task description",
+                Status = TaskStatus.Failed,
+            };
 
-            var task6 = new MissionTask(
-                inspection: new Inspection(),
-                robotPose: new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
-                taskOrder: 0,
-                tagLink: url,
-                tagId: "ABCDEFGHI",
-                taskDescription: "Task description",
-                poseId: 2,
-                status: TaskStatus.Failed
-            );
+            var task6 = new MissionTask
+            {
+                Inspection = new Inspection(),
+                RobotPose = new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
+                TagId = "ABCDEFGHI",
+                Description = "Task description",
+                Status = TaskStatus.Failed,
+            };
 
-            var task7 = new MissionTask(
-                inspection: new Inspection(),
-                robotPose: new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
-                taskOrder: 0,
-                tagLink: url,
-                tagId: "ABCDEFGHIJ",
-                taskDescription: "Task description",
-                poseId: 2,
-                status: TaskStatus.Failed
-            );
+            var task7 = new MissionTask
+            {
+                Inspection = new Inspection(),
+                RobotPose = new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
+                TagId = "ABCDEFGHIJ",
+                Description = "Task description",
+                Status = TaskStatus.Failed,
+            };
 
             return [task1, task2, task3, task4, task5, task6, task7];
         }
@@ -501,7 +512,6 @@ namespace Api.Database.Context
             context.AddRange(robots);
             context.AddRange(plants);
             context.AddRange(inspectionAreas);
-            context.AddRange(sources);
 
             var tasks = GetMissionTasks();
             foreach (var task in tasks)
@@ -510,6 +520,14 @@ namespace Api.Database.Context
             }
             missionRuns[0].Tasks = tasks;
             context.AddRange(tasks);
+            var taskDefinitions = GetMissionTaskDefinitions();
+            missionDefinitions[0].Tasks =
+            [
+                taskDefinitions[0],
+                taskDefinitions[1],
+                taskDefinitions[2],
+            ];
+            context.AddRange(taskDefinitions);
             context.AddRange(missionDefinitions);
             context.AddRange(missionRuns);
             context.AddRange(accessRoles);

@@ -97,7 +97,8 @@ namespace Api.Test.EventHandlers
             var missionRun = await DatabaseUtilities.NewMissionRun(
                 installation.InstallationCode,
                 robot,
-                inspectionArea
+                inspectionArea,
+                tasks: [new() { RobotPose = new Pose { } }]
             );
 
             // Act
@@ -129,7 +130,8 @@ namespace Api.Test.EventHandlers
                 installation.InstallationCode,
                 robot,
                 inspectionArea,
-                missionStatus: MissionStatus.Ongoing
+                missionStatus: MissionStatus.Ongoing,
+                tasks: [new() { RobotPose = new Pose { } }]
             );
             await MissionRunService.Create(missionRunOne);
             await MissionSchedulingService.StartNextMissionRunIfSystemIsAvailable(robot);
@@ -138,7 +140,8 @@ namespace Api.Test.EventHandlers
             var missionRunTwo = await DatabaseUtilities.NewMissionRun(
                 installation.InstallationCode,
                 robot,
-                inspectionArea
+                inspectionArea,
+                tasks: [new() { RobotPose = new Pose { } }]
             );
             await MissionRunService.Create(missionRunTwo);
             await MissionSchedulingService.StartNextMissionRunIfSystemIsAvailable(robot);
@@ -175,7 +178,8 @@ namespace Api.Test.EventHandlers
             var missionRun = await DatabaseUtilities.NewMissionRun(
                 installation.InstallationCode,
                 robot,
-                inspectionArea
+                inspectionArea,
+                tasks: [new() { RobotPose = new Pose { } }]
             );
 
             await MissionRunService.Create(missionRun);
@@ -226,12 +230,14 @@ namespace Api.Test.EventHandlers
             var missionRunOne = await DatabaseUtilities.NewMissionRun(
                 installation.InstallationCode,
                 robotOne,
-                inspectionArea
+                inspectionArea,
+                tasks: [new() { RobotPose = new Pose { } }]
             );
             var missionRunTwo = await DatabaseUtilities.NewMissionRun(
                 installation.InstallationCode,
                 robotTwo,
-                inspectionArea
+                inspectionArea,
+                tasks: [new() { RobotPose = new Pose { } }]
             );
 
             // Act (Ensure first mission is started)
@@ -355,13 +361,15 @@ namespace Api.Test.EventHandlers
                 robot,
                 inspectionArea,
                 writeToDatabase: true,
-                missionStatus: MissionStatus.Ongoing
+                missionStatus: MissionStatus.Ongoing,
+                tasks: [new() { RobotPose = new Pose { } }]
             );
             var missionRun2 = await DatabaseUtilities.NewMissionRun(
                 installation.InstallationCode,
                 robot,
                 inspectionArea,
-                writeToDatabase: true
+                writeToDatabase: true,
+                tasks: [new() { RobotPose = new Pose { } }]
             );
             Assert.False(IsarService.isStartCalled);
             Assert.False(IsarService.isStarted);

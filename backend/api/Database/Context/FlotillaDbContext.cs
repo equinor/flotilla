@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
 using Api.Database.Models;
-using Api.Services.MissionLoaders;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -26,7 +25,6 @@ namespace Api.Database.Context
         public DbSet<Installation> Installations => Set<Installation>();
         public DbSet<InspectionArea> InspectionAreas => Set<InspectionArea>();
         public DbSet<ExclusionArea> ExclusionAreas => Set<ExclusionArea>();
-        public DbSet<Source> Sources => Set<Source>();
         public DbSet<AccessRole> AccessRoles => Set<AccessRole>();
         public DbSet<UserInfo> UserInfos => Set<UserInfo>();
         public DbSet<TagInspectionMetadata> TagInspectionMetadata => Set<TagInspectionMetadata>();
@@ -61,9 +59,29 @@ namespace Api.Database.Context
                 );
             });
 
-            AddConverterForListOfEnums(
+            AddConverterForNullableListOfEnums(
                 modelBuilder.Entity<Robot>().Property(r => r.RobotCapabilities)
             );
+
+            AddConverterForNullableListOfEnums(
+                modelBuilder.Entity<MissionTask>().Property(r => r.AnalysisTypes)
+            );
+
+            AddConverterForNullableListOfEnums(
+                modelBuilder.Entity<Inspection>().Property(r => r.AnalysisTypes)
+            );
+
+            modelBuilder
+                .Entity<MissionDefinition>()
+                .OwnsMany(
+                    p => p.Tasks,
+                    tasks =>
+                    {
+                        tasks.WithOwner();
+                        tasks.HasKey("MissionDefinitionId", "Index");
+                        AddConverterForListOfEnums(tasks.Property(t => t.AnalysisTypes));
+                    }
+                );
 
             modelBuilder
                 .Entity<MissionDefinition>()
@@ -177,9 +195,33 @@ namespace Api.Database.Context
             }
         }
 
-        private static void AddConverterForListOfEnums<T>(
+        private static void AddConverterForNullableListOfEnums<T>(
             PropertyBuilder<IList<T>?> propertyBuilder
         )
+            where T : Enum
+        {
+#pragma warning disable IDE0305
+            var valueComparer = new ValueComparer<IList<T>?>(
+                (c1, c2) =>
+                    (c1 == null && c2 == null)
+                    || ((c1 != null == (c2 != null)) && c1!.SequenceEqual(c2!)),
+                c => c == null ? 0 : c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                c => c == null ? null : (IList<T>?)c.ToList()
+            );
+#pragma warning restore IDE0305
+
+            propertyBuilder
+                .HasConversion(
+                    r => r != null ? string.Join(';', r) : "",
+                    r =>
+                        r.Split(';', StringSplitOptions.RemoveEmptyEntries)
+                            .Select(r => (T)Enum.Parse(typeof(T), r))
+                            .ToList()
+                )
+                .Metadata.SetValueComparer(valueComparer);
+        }
+
+        private static void AddConverterForListOfEnums<T>(PropertyBuilder<IList<T>> propertyBuilder)
             where T : Enum
         {
 #pragma warning disable IDE0305

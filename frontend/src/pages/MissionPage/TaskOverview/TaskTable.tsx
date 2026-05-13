@@ -8,6 +8,8 @@ import { tokens } from '@equinor/eds-tokens'
 import { getColorsFromTaskStatus } from 'utils/MarkerStyles'
 import { ValidInspectionReportInspectionTypes } from 'models/Inspection'
 import { useInspectionId } from 'pages/InspectionReportPage/SetInspectionIdHook'
+import { useContext } from 'react'
+import { InstallationContext } from 'components/Contexts/InstallationContext'
 
 const StyledTable = styled(Table)`
     display: block;
@@ -49,9 +51,8 @@ export const TaskTable = ({ tasks, missionDefinitionPage }: TaskTableProps) => {
 }
 
 const TaskTableRows = ({ tasks, missionDefinitionPage }: TaskTableProps) => {
-    const rows = tasks.map((task) => {
-        // Workaround for current bug in echo
-        const order: number = task.taskOrder + 1
+    const rows = tasks.map((task, index) => {
+        const order: number = index + 1
         const rowStyle =
             task.status === TaskStatus.InProgress || task.status === TaskStatus.Paused
                 ? { background: tokens.colors.infographic.primary__mist_blue.hex }
@@ -95,15 +96,16 @@ const TaskTableRows = ({ tasks, missionDefinitionPage }: TaskTableProps) => {
 }
 
 const TagIdDisplay = ({ task }: { task: Task }) => {
+    const { installation } = useContext(InstallationContext)
+
     if (!task.tagId) return <Typography key={task.id + 'tagId'}>{'N/A'}</Typography>
 
-    if (task.tagLink)
-        return (
-            <Typography key={task.id + 'tagId'} link href={task.tagLink} target="_blank">
-                {task.tagId!}
-            </Typography>
-        )
-    else return <Typography key={task.id + 'tagId'}>{task.tagId!}</Typography>
+    const tagLink = `https://stid.equinor.com/${installation.installationCode}/tag?tagNo=${task.tagId}`
+    return (
+        <Typography key={task.id + 'tagId'} link href={tagLink} target="_blank">
+            {task.tagId!}
+        </Typography>
+    )
 }
 
 const DescriptionDisplay = ({ task }: { task: Task }) => {

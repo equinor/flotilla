@@ -10,8 +10,14 @@ namespace Api.Database.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string Id { get; set; }
 
+        private IList<TaskDefinition> _tasks;
+
         [Required]
-        public Source Source { get; set; }
+        public List<TaskDefinition> Tasks
+        {
+            get => _tasks != null ? [.. _tasks.OrderBy(t => t.Index)] : [];
+            set => _tasks = value;
+        }
 
         [Required]
         [MaxLength(200)]

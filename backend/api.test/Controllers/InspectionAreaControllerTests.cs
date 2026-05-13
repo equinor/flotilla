@@ -92,7 +92,7 @@ namespace Api.Test.Controllers
         }
 
         [Fact]
-        public async Task CheckThatMissionDefinitionIsCreatedInInspectionAreaWhenSchedulingACustomMissionRun()
+        public async Task CheckThatMissionDefinitionIsCreatedInInspectionAreaUponCreation()
         {
             // Arrange
             var installation = await DatabaseUtilities.NewInstallation();
@@ -107,27 +107,25 @@ namespace Api.Test.Controllers
                 inspectionArea.Id
             );
 
-            var inspection = new CustomInspectionQuery
-            {
-                InspectionTarget = new Position(),
-                InspectionType = InspectionType.Image,
-            };
-            var tasks = new List<CustomTaskQuery>
+            var testName = Guid.NewGuid().ToString();
+
+            var tasks = new List<TaskQuery>
             {
                 new()
                 {
-                    Inspection = inspection,
                     TagId = "test",
                     RobotPose = new Pose(),
-                    TaskOrder = 0,
+                    TargetPosition = new Position(),
+                    SensorType = SensorType.Image,
+                    AnalysisTypes = [AnalysisType.Fencilla],
+                    Description = "Test description",
                 },
             };
-            var missionQuery = new CustomMissionQuery
+            var missionQuery = new MissionQuery
             {
                 RobotId = robot.Id,
-                CreationTime = DateTime.UtcNow,
                 InstallationCode = installation.InstallationCode,
-                Name = "TestMission",
+                Name = testName,
                 Tasks = tasks,
             };
 
@@ -139,13 +137,9 @@ namespace Api.Test.Controllers
 
             // Act
             var missionResponse = await Client.PostAsync(
-                "/missions/custom",
+                "/missions/definitions",
                 missionContent,
                 TestContext.Current.CancellationToken
-            );
-            var userMissionResponse = await missionResponse.Content.ReadFromJsonAsync<MissionRun>(
-                SerializerOptions,
-                cancellationToken: TestContext.Current.CancellationToken
             );
             var inspectionAreaMissionResponse = await Client.GetAsync(
                 $"/inspectionAreas/{inspectionArea.Id}/mission-definitions",
@@ -153,17 +147,13 @@ namespace Api.Test.Controllers
             );
 
             // Assert
-            var mission = await MissionRunService.ReadById(userMissionResponse!.Id);
             var missionDefinitions = await MissionDefinitionService.ReadByInspectionAreaId(
                 inspectionArea.Id
             );
 
             Assert.True(missionResponse.IsSuccessStatusCode);
+            Assert.NotNull(missionDefinitions.Find((m) => m.Name == testName));
             Assert.True(inspectionAreaMissionResponse.IsSuccessStatusCode);
-            Assert.Single(
-                missionDefinitions,
-                m => m.Id.Equals(mission!.MissionId, StringComparison.Ordinal)
-            );
         }
 
         [Fact]
@@ -214,7 +204,7 @@ namespace Api.Test.Controllers
         }
 
         [Fact]
-        public async Task ScheduleMissionOutsideInspectionAreaPolygonFails()
+        public async Task CreateMissionDefinitionOutsideInspectionAreaPolygonFails()
         {
             // Arrange
             var installation = await DatabaseUtilities.NewInstallation();
@@ -246,25 +236,20 @@ namespace Api.Test.Controllers
 
             var robot = await DatabaseUtilities.NewRobot(RobotStatus.Available, installation);
 
-            var inspection = new CustomInspectionQuery
-            {
-                InspectionTarget = new Position(),
-                InspectionType = InspectionType.Image,
-            };
-            var tasks = new List<CustomTaskQuery>
+            var tasks = new List<TaskQuery>
             {
                 new()
                 {
-                    Inspection = inspection,
                     TagId = "test",
+                    TargetPosition = new Position(),
+                    SensorType = SensorType.Image,
+                    AnalysisTypes = [AnalysisType.Fencilla],
                     RobotPose = new Pose(11, 11, 11, 0, 0, 0, 1), // Position outside polygon
-                    TaskOrder = 0,
                 },
             };
-            var missionQuery = new CustomMissionQuery
+            var missionQuery = new MissionQuery
             {
                 RobotId = robot.Id,
-                CreationTime = DateTime.UtcNow,
                 InstallationCode = installation.InstallationCode,
                 Name = "TestMission",
                 Tasks = tasks,
@@ -278,7 +263,7 @@ namespace Api.Test.Controllers
 
             // Act
             var missionResponse = await Client.PostAsync(
-                "/missions/custom",
+                "/missions/definitions",
                 missionContent,
                 TestContext.Current.CancellationToken
             );

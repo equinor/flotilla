@@ -6,6 +6,5 @@
         public string MissionSourceId { get; set; }
         public DateTime? CreationTime { get; set; }
         public string InstallationCode { get; set; }
-        public TimeSpan? InspectionFrequency { get; set; }
     }
 }

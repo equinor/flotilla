@@ -4,7 +4,7 @@ import { StyledInspection, StyledInspectionImage } from './InspectionStyles'
 import { tokens } from '@equinor/eds-tokens'
 import { CircularProgress, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
-import { DisplayMethod, InspectionTypeToDisplayMethod } from 'models/Inspection'
+import { DisplayMethod, SensorTypeToDisplayMethod } from 'models/Inspection'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 
 const StyledSmallImagePlaceholder = styled.div`
@@ -117,12 +117,12 @@ const InspectionValueWithPlaceholder = ({ task, isLargeImage }: { task: Task; is
 }
 
 const InspectionResultWithPlaceholder = ({ task, isLargeImage }: { task: Task; isLargeImage: boolean }) => {
-    if (InspectionTypeToDisplayMethod[task.inspection.inspectionType] === DisplayMethod.None) {
+    if (SensorTypeToDisplayMethod[task.inspection.inspectionType] === DisplayMethod.None) {
         const errorMsg = 'Viewing of the inspection type is not supported'
         return <TextAsImage isLargeImage={isLargeImage} text={errorMsg} />
-    } else if (InspectionTypeToDisplayMethod[task.inspection.inspectionType] === DisplayMethod.Number) {
+    } else if (SensorTypeToDisplayMethod[task.inspection.inspectionType] === DisplayMethod.Number) {
         return <InspectionValueWithPlaceholder task={task} isLargeImage={isLargeImage} />
-    } else if (InspectionTypeToDisplayMethod[task.inspection.inspectionType] === DisplayMethod.Image) {
+    } else if (SensorTypeToDisplayMethod[task.inspection.inspectionType] === DisplayMethod.Image) {
         return <InspectionImageWithPlaceholder task={task} isLargeImage={isLargeImage} />
     }
 }

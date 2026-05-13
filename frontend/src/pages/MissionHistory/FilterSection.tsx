@@ -13,7 +13,7 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { MissionStatusFilterOptions, missionStatusFilterOptionsIterable } from 'models/Mission'
 import { ChangeEvent, useState } from 'react'
 import { Icons } from 'utils/icons'
-import { InspectionType } from 'models/Inspection'
+import { SensorType } from 'models/Inspection'
 import { useMissionFilterContext } from 'components/Contexts/MissionFilterContext'
 import { tokens } from '@equinor/eds-tokens'
 import { phone_width } from 'utils/constants'
@@ -62,8 +62,8 @@ export const FilterSection = () => {
         })
     )
 
-    const inspectionTypeTranslationMap: Map<string, InspectionType> = new Map(
-        Object.values(InspectionType).map((inspectionType) => {
+    const sensorTypeTranslationMap: Map<string, SensorType> = new Map(
+        Object.values(SensorType).map((inspectionType) => {
             return [TranslateText(inspectionType), inspectionType]
         })
     )
@@ -134,16 +134,16 @@ export const FilterSection = () => {
                         onFocus={(e) => e.preventDefault()}
                     />
                     <Autocomplete
-                        options={Array.from(inspectionTypeTranslationMap.keys())}
+                        options={Array.from(sensorTypeTranslationMap.keys())}
                         onOptionsChange={(changes: AutocompleteChanges<string>) => {
                             filterFunctions.switchInspectionTypes(
                                 changes.selectedItems.map((selectedItem) => {
-                                    return inspectionTypeTranslationMap.get(selectedItem)!
+                                    return sensorTypeTranslationMap.get(selectedItem)!
                                 })
                             )
                         }}
                         placeholder={`${filterState.inspectionTypes ? filterState.inspectionTypes.length : 0}/${
-                            Array.from(inspectionTypeTranslationMap.keys()).length
+                            Array.from(sensorTypeTranslationMap.keys()).length
                         } ${TranslateText('selected')}`}
                         label={TranslateText('Inspection type')}
                         initialSelectedOptions={

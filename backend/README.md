@@ -259,7 +259,3 @@ to monitor the backend of our application.
 
 We have one application insight instance for each environment.
 The connection strings for the AI instances are stored in the keyvault.
-
-## Custom Mission Loaders
-
-You can create your own mission loader to fetch missions from some external system. The custom mission loader needs to fulfill the [IMissionLoader](api/Services/MissionLoaders/MissionLoaderInterface.cs) interface. If your mission loader is an external API you might need to add it as a downstream API in [Program.cs](api/Program.cs)
