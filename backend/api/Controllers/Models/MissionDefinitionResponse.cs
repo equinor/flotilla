@@ -1,41 +1,33 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 using Api.Database.Models;
-using Api.Services;
 
 namespace Api.Controllers.Models
 {
     public class MissionDefinitionResponse
     {
-        public string Id { get; set; } = string.Empty;
-
-        public string Name { get; set; } = string.Empty;
-
-        public string InstallationCode { get; set; } = string.Empty;
-
+        public string Id { get; set; }
+        public List<TaskDefinition> Tasks { get; set; }
+        public string Name { get; set; }
+        public string InstallationCode { get; set; }
         public string? Comment { get; set; }
-
-        public TimeSpan? InspectionFrequency { get; set; }
-
         public AutoScheduleFrequency? AutoScheduleFrequency { get; set; }
-
         public virtual MissionRun? LastSuccessfulRun { get; set; }
-
-        public InspectionAreaResponse? InspectionArea { get; set; }
-
+        public InspectionAreaResponse InspectionArea { get; set; }
         public bool IsDeprecated { get; set; }
 
-        public string SourceId { get; set; } = string.Empty;
-
         [JsonConstructor]
+#nullable disable
         public MissionDefinitionResponse() { }
+
+#nullable enable
 
         public MissionDefinitionResponse(MissionDefinition missionDefinition)
         {
-            Id = missionDefinition.Id;
-            Name = missionDefinition.Name;
-            InstallationCode = missionDefinition.InstallationCode;
+            Id = missionDefinition.Id ?? string.Empty;
+            Tasks = missionDefinition.Tasks;
+            Name = missionDefinition.Name ?? string.Empty;
+            InstallationCode = missionDefinition.InstallationCode ?? string.Empty;
             Comment = missionDefinition.Comment;
-            InspectionFrequency = missionDefinition.InspectionFrequency;
             AutoScheduleFrequency =
                 (
                     missionDefinition.AutoScheduleFrequency is not null
@@ -43,43 +35,9 @@ namespace Api.Controllers.Models
                 )
                     ? missionDefinition.AutoScheduleFrequency
                     : null;
-            InspectionArea = new InspectionAreaResponse(missionDefinition.InspectionArea);
             LastSuccessfulRun = missionDefinition.LastSuccessfulRun;
+            InspectionArea = new InspectionAreaResponse(missionDefinition.InspectionArea);
             IsDeprecated = missionDefinition.IsDeprecated;
-            SourceId = missionDefinition.Source.SourceId;
         }
-    }
-
-    public class MissionDefinitionWithTasksResponse(
-        IMissionDefinitionTaskService service,
-        MissionDefinition missionDefinition
-    )
-    {
-        public string Id { get; } = missionDefinition.Id;
-
-        public List<MissionTask> Tasks { get; } =
-            service.GetTasksFromSource(missionDefinition.Source).Result!;
-
-        public string Name { get; } = missionDefinition.Name;
-
-        public string InstallationCode { get; } = missionDefinition.InstallationCode;
-
-        public string? Comment { get; } = missionDefinition.Comment;
-
-        public TimeSpan? InspectionFrequency { get; } = missionDefinition.InspectionFrequency;
-
-        public AutoScheduleFrequency? AutoScheduleFrequency { get; } =
-            (
-                missionDefinition.AutoScheduleFrequency is not null
-                && missionDefinition.AutoScheduleFrequency.HasValidValue()
-            )
-                ? missionDefinition.AutoScheduleFrequency
-                : null;
-
-        public virtual MissionRun? LastSuccessfulRun { get; } = missionDefinition.LastSuccessfulRun;
-
-        public InspectionArea InspectionArea { get; } = missionDefinition.InspectionArea;
-
-        public bool IsDeprecated { get; } = missionDefinition.IsDeprecated;
     }
 }

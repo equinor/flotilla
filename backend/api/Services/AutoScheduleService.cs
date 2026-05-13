@@ -1,6 +1,5 @@
 using System.Text.Json;
 using Api.Database.Models;
-using Api.Services.MissionLoaders;
 using Api.Utilities;
 using Hangfire;
 
@@ -46,7 +45,6 @@ namespace Api.Services
         ILogger<AutoScheduleService> logger,
         IMissionDefinitionService missionDefinitionService,
         IRobotService robotService,
-        IMissionLoader missionLoader,
         IMissionRunService missionRunService,
         IMissionSchedulingService missionSchedulingService,
         ISignalRService signalRService
@@ -246,17 +244,7 @@ namespace Api.Services
 
             try
             {
-                var missionTasks = await missionLoader.GetTasksForMission(
-                    missionDefinition.Source.SourceId
-                );
-                if (missionTasks == null)
-                {
-                    logger.LogError(
-                        "No mission tasks were found for mission definition {MissionDefinitionId}.",
-                        missionDefinition.Id
-                    );
-                    return;
-                }
+                var missionTasks = missionDefinition.Tasks;
 
                 var missionRun = new MissionRun
                 {
@@ -265,7 +253,7 @@ namespace Api.Services
                     MissionId = missionDefinition.Id,
                     Status = MissionStatus.Queued,
                     CreationTime = DateTime.UtcNow,
-                    Tasks = missionTasks,
+                    Tasks = [.. missionDefinition.Tasks.Select((t) => t.ToMissionRunTask())],
                     InstallationCode = missionDefinition.InstallationCode,
                     InspectionArea = missionDefinition.InspectionArea,
                 };

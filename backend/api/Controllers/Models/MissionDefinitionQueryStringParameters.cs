@@ -22,10 +22,5 @@
         /// The search parameter for the mission name
         /// </summary>
         public string? NameSearch { get; set; }
-
-        /// <summary>
-        /// The search parameter for the mission source id
-        /// </summary>
-        public string? SourceId { get; set; }
     }
 }

@@ -1,14 +1,17 @@
+import { AnalysisType } from './MissionDefinition'
 import { Position } from './Position'
 
 export interface Inspection {
     id: string
     isarInspectionId: string
     isCompleted: boolean
-    inspectionType: InspectionType
+    inspectionType: SensorType
     analysisResult?: AnalysisResult
     inspectionTarget: Position
     videoDuration?: number
     inspectionUrl?: string
+    analysisTypes: AnalysisType[]
+    taskDescription?: string
     startTime?: Date
     endTime?: Date
 }
@@ -25,7 +28,7 @@ interface AnalysisResult {
     blobName?: string
 }
 
-export enum InspectionType {
+export enum SensorType {
     Image = 'Image',
     ThermalImage = 'ThermalImage',
     Video = 'Video',
@@ -40,18 +43,15 @@ export enum DisplayMethod {
     None = 'None',
 }
 
-export const ValidInspectionReportInspectionTypes: InspectionType[] = [
-    InspectionType.Image,
-    InspectionType.ThermalImage,
-]
+export const ValidInspectionReportInspectionTypes: SensorType[] = [SensorType.Image, SensorType.ThermalImage]
 
-export const InspectionTypeToDisplayMethod: { [inspectionType in InspectionType]: DisplayMethod } = {
-    [InspectionType.Image]: DisplayMethod.Image,
-    [InspectionType.ThermalImage]: DisplayMethod.Image,
-    [InspectionType.CO2Measurement]: DisplayMethod.Number,
-    [InspectionType.Video]: DisplayMethod.None,
-    [InspectionType.ThermalVideo]: DisplayMethod.None,
-    [InspectionType.Audio]: DisplayMethod.None,
+export const SensorTypeToDisplayMethod: { [sensorType in SensorType]: DisplayMethod } = {
+    [SensorType.Image]: DisplayMethod.Image,
+    [SensorType.ThermalImage]: DisplayMethod.Image,
+    [SensorType.CO2Measurement]: DisplayMethod.Number,
+    [SensorType.Video]: DisplayMethod.None,
+    [SensorType.ThermalVideo]: DisplayMethod.None,
+    [SensorType.Audio]: DisplayMethod.None,
 }
 
 export interface SaraInspectionVisualizationReady {

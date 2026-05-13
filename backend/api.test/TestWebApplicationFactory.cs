@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using Api.Database.Context;
 using Api.Services;
-using Api.Services.MissionLoaders;
 using Api.Test.Database;
 using Api.Test.Mocks;
 using Microsoft.AspNetCore.Authentication;
@@ -83,7 +82,6 @@ namespace Api.Test
                 services.AddScoped<DatabaseUtilities>();
                 services.AddSingleton<IHttpContextAccessor, MockHttpContextAccessor>();
                 services.AddScoped<IBlobService, MockBlobService>();
-                services.AddScoped<IMissionLoader, MockMissionLoader>();
                 services
                     .AddAuthorizationBuilder()
                     .AddFallbackPolicy(

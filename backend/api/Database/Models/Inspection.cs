@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Api.Controllers.Models;
 using Api.Services.Models;
 #pragma warning disable CS8618
 namespace Api.Database.Models
@@ -9,28 +8,24 @@ namespace Api.Database.Models
     {
         public Inspection()
         {
-            InspectionType = InspectionType.Image;
+            InspectionType = SensorType.Image;
             InspectionTarget = new Position();
+            AnalysisTypes = [];
         }
 
         public Inspection(
-            InspectionType inspectionType,
+            SensorType sensorType,
+            Position target,
+            IList<AnalysisType> analysisTypes,
             float? videoDuration,
-            Position inspectionTarget,
-            string? inspectionTargetName
+            string? taskDescription = null
         )
         {
-            InspectionType = inspectionType;
+            InspectionType = sensorType;
+            InspectionTarget = target;
             VideoDuration = videoDuration;
-            InspectionTarget = inspectionTarget;
-            InspectionTargetName = inspectionTargetName;
-        }
-
-        public Inspection(CustomInspectionQuery inspectionQuery)
-        {
-            InspectionType = inspectionQuery.InspectionType;
-            InspectionTarget = inspectionQuery.InspectionTarget;
-            VideoDuration = inspectionQuery.VideoDuration;
+            AnalysisTypes = analysisTypes;
+            TaskDescription = taskDescription;
         }
 
         // Creates a blank deepcopy of the provided inspection
@@ -42,6 +37,8 @@ namespace Api.Database.Models
             VideoDuration = copy.VideoDuration;
             InspectionUrl = copy.InspectionUrl;
             InspectionTarget = new Position(copy.InspectionTarget);
+            TaskDescription = copy.TaskDescription;
+            AnalysisTypes = copy.AnalysisTypes;
         }
 
         [Key]
@@ -55,10 +52,12 @@ namespace Api.Database.Models
         [Required]
         public Position InspectionTarget { get; set; }
 
-        public string? InspectionTargetName { get; set; }
+        public IList<AnalysisType>? AnalysisTypes { get; set; }
 
         [Required]
-        public InspectionType InspectionType { get; set; }
+        public SensorType InspectionType { get; set; }
+
+        public string? TaskDescription { get; set; }
 
         public AnalysisResult AnalysisResult { get; set; }
 
@@ -75,28 +74,28 @@ namespace Api.Database.Models
             }
         }
 
-        public bool IsSupportedInspectionType(IList<RobotCapabilitiesEnum> capabilities)
+        public bool IsSupportedSensorType(IList<RobotCapabilitiesEnum> capabilities)
         {
             return InspectionType switch
             {
-                InspectionType.Image => capabilities.Contains(RobotCapabilitiesEnum.take_image),
-                InspectionType.ThermalImage => capabilities.Contains(
+                SensorType.Image => capabilities.Contains(RobotCapabilitiesEnum.take_image),
+                SensorType.ThermalImage => capabilities.Contains(
                     RobotCapabilitiesEnum.take_thermal_image
                 ),
-                InspectionType.Video => capabilities.Contains(RobotCapabilitiesEnum.take_video),
-                InspectionType.ThermalVideo => capabilities.Contains(
+                SensorType.Video => capabilities.Contains(RobotCapabilitiesEnum.take_video),
+                SensorType.ThermalVideo => capabilities.Contains(
                     RobotCapabilitiesEnum.take_thermal_video
                 ),
-                InspectionType.CO2Measurement => capabilities.Contains(
+                SensorType.CO2Measurement => capabilities.Contains(
                     RobotCapabilitiesEnum.take_co2_measurement
                 ),
-                InspectionType.Audio => capabilities.Contains(RobotCapabilitiesEnum.record_audio),
+                SensorType.Audio => capabilities.Contains(RobotCapabilitiesEnum.record_audio),
                 _ => false,
             };
         }
     }
 
-    public enum InspectionType
+    public enum SensorType
     {
         Image,
         ThermalImage,

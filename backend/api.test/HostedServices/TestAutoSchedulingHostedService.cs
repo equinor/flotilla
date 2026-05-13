@@ -103,6 +103,7 @@ namespace Api.Test.HostedServices
                 "1",
                 installation.InstallationCode,
                 inspectionArea,
+                null,
                 missionRun,
                 writeToDatabase: true
             );

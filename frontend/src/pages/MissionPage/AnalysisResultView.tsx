@@ -42,7 +42,8 @@ export const AnalysisResultDialogView = ({ selectedAnalysisId, tasks }: Inspecti
 
     const onClose = () => switchSelectedAnalysisId(undefined)
 
-    const currentTask = tasks.find((t) => t.inspection.isarInspectionId == selectedAnalysisId)
+    const taskIndex = tasks.findIndex((t) => t.inspection.isarInspectionId == selectedAnalysisId)
+    const currentTask = tasks[taskIndex]
 
     if (!currentTask) {
         return (
@@ -61,7 +62,7 @@ export const AnalysisResultDialogView = ({ selectedAnalysisId, tasks }: Inspecti
             <StyledDialogContent>
                 <StyledDialogHeader>
                     <Typography variant="accordion_header" group="ui">
-                        {TranslateText('Analysis result for task') + ' ' + (currentTask.taskOrder + 1)}
+                        {TranslateText('Analysis result for task') + ' ' + (taskIndex + 1)}
                     </Typography>
                     <StyledCloseButton variant="ghost" onClick={onClose}>
                         <Icon name={Icons.Clear} size={24} />

@@ -5,7 +5,6 @@ import { MediaStreamConfig } from 'models/VideoStream'
 import { MissionRunQueryParameters } from 'models/MissionRunQueryParameters'
 import { PaginatedResponse, PaginationHeader, PaginationHeaderName } from 'models/PaginatedResponse'
 import { Mission } from 'models/Mission'
-import { CondensedMissionDefinition } from 'models/CondensedMissionDefinition'
 import { MissionDefinition } from 'models/MissionDefinition'
 import { MissionDefinitionQueryParameters } from 'models/MissionDefinitionQueryParameters'
 import { InspectionArea } from 'models/InspectionArea'
@@ -80,12 +79,6 @@ export class BackendApi {
         return { pagination: pagination, content: result.content }
     }
 
-    async getAvailableMissions(installationCode: string): Promise<CondensedMissionDefinition[]> {
-        const path: string = 'mission-loader/available-missions/' + installationCode
-        const result = await this.api.GET<MissionDefinition[]>(path).catch(handleError('GET', path))
-        return result.content
-    }
-
     async getMissionDefinitions(
         parameters: MissionDefinitionQueryParameters
     ): Promise<PaginatedResponse<MissionDefinition>> {
@@ -95,7 +88,6 @@ export class BackendApi {
         path = path + 'InstallationCode=' + parameters.installationCode + '&'
 
         if (parameters.inspectionArea) path = path + 'InspectionArea=' + parameters.inspectionArea + '&'
-        if (parameters.sourceId) path = path + 'SourceId=' + parameters.sourceId + '&'
         if (parameters.pageNumber) path = path + 'PageNumber=' + parameters.pageNumber + '&'
         if (parameters.pageSize) path = path + 'PageSize=' + parameters.pageSize + '&'
         if (parameters.orderBy) path = path + 'OrderBy=' + parameters.orderBy + '&'
@@ -144,19 +136,6 @@ export class BackendApi {
     async getMissionRunByIsarInspectionId(inspectionId: string): Promise<Mission> {
         const path: string = 'missions/runs/inspection/' + inspectionId
         const result = await this.api.GET<Mission>(path).catch(handleError('GET', path))
-        return result.content
-    }
-
-    async postMission(missionSourceId: string, robotId: string, installationCode: string | null) {
-        const path: string = 'missions'
-        const robots: RobotWithoutTelemetry[] = await this.getEnabledRobots()
-        const desiredRobot = filterRobots(robots, robotId)
-        const body = {
-            robotId: desiredRobot[0].id,
-            missionSourceId: missionSourceId,
-            installationCode: installationCode,
-        }
-        const result = await this.api.POST<unknown, unknown>(path, body).catch(handleError('POST', path))
         return result.content
     }
 

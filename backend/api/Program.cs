@@ -52,8 +52,6 @@ builder.ConfigureLogger();
 builder.Services.AddMemoryCache();
 builder.Services.ConfigureDatabase(builder.Configuration, builder.Environment.EnvironmentName);
 
-builder.Services.ConfigureMissionLoader(builder.Configuration);
-
 var otelMeter = new Meter($"{applicationName}.Metrics", "0.0.1");
 builder.Services.AddSingleton(otelMeter);
 
@@ -74,16 +72,13 @@ builder.Services.AddScoped<IRobotService, RobotService>();
 
 builder.Services.AddScoped<IMissionRunService, MissionRunService>();
 builder.Services.AddScoped<IMissionDefinitionService, MissionDefinitionService>();
-builder.Services.AddScoped<IMissionDefinitionTaskService, MissionDefinitionTaskService>();
 builder.Services.AddScoped<IMissionTaskService, MissionTaskService>();
 builder.Services.AddScoped<IInspectionService, InspectionService>();
-builder.Services.AddScoped<ISourceService, SourceService>();
 builder.Services.AddScoped<IExclusionAreaService, ExclusionAreaService>();
 
 builder.Services.AddScoped<IMissionSchedulingService, MissionSchedulingService>();
 
 builder.Services.AddScoped<IIsarService, IsarService>();
-builder.Services.AddScoped<IEchoService, EchoService>();
 builder.Services.AddScoped<IPointillaService, PointillaService>();
 
 builder.Services.AddScoped<IBlobService, BlobService>();
@@ -142,7 +137,6 @@ if (builder.Configuration.GetSection("Redis").GetValue<bool>("UseRedis"))
         .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"))
         .EnableTokenAcquisitionToCallDownstreamApi()
         .AddDistributedTokenCaches()
-        .AddDownstreamApi(EchoService.ServiceName, builder.Configuration.GetSection("Echo"))
         .AddDownstreamApi(InspectionService.ServiceName, builder.Configuration.GetSection("SARA"))
         .AddDownstreamApi(IsarService.ServiceName, builder.Configuration.GetSection("Isar"))
         .AddDownstreamApi(
@@ -157,7 +151,6 @@ else
         .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"))
         .EnableTokenAcquisitionToCallDownstreamApi()
         .AddInMemoryTokenCaches()
-        .AddDownstreamApi(EchoService.ServiceName, builder.Configuration.GetSection("Echo"))
         .AddDownstreamApi(InspectionService.ServiceName, builder.Configuration.GetSection("SARA"))
         .AddDownstreamApi(IsarService.ServiceName, builder.Configuration.GetSection("Isar"))
         .AddDownstreamApi(

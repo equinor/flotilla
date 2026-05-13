@@ -3,12 +3,9 @@ import { Pose } from './Pose'
 
 export interface Task {
     id: string
-    taskOrder: number
     tagId?: string
     description?: string
-    tagLink?: string
     robotPose: Pose
-    poseId?: number
     status: TaskStatus
     isCompleted: boolean
     startTime?: Date

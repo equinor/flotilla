@@ -1,7 +1,6 @@
 using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
-using Api.Services.MissionLoaders;
 
 namespace Api.HostedServices
 {
@@ -21,9 +20,6 @@ namespace Api.HostedServices
 
         private IMissionRunService MissionRunService =>
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionRunService>();
-
-        private IMissionLoader MissionLoader =>
-            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionLoader>();
 
         private IRobotService RobotService =>
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IRobotService>();
