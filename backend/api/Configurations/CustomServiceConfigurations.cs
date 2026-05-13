@@ -1,9 +1,7 @@
 ﻿using System.Reflection;
 using Api.Database.Context;
-using Api.Services.MissionLoaders;
 using Azure.Core;
 using Azure.Identity;
-using Microsoft.Azure.StackExchangeRedis;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
@@ -295,30 +293,6 @@ namespace Api.Configurations
                 string xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
             });
-
-            return services;
-        }
-
-        public static IServiceCollection ConfigureMissionLoader(
-            this IServiceCollection services,
-            IConfiguration configuration
-        )
-        {
-            string? missionLoaderFileName = configuration["MissionLoader:FileName"];
-            if (missionLoaderFileName == null)
-                return services;
-
-            var loaderType = Type.GetType(missionLoaderFileName);
-            if (loaderType != null && typeof(IMissionLoader).IsAssignableFrom(loaderType))
-            {
-                services.AddScoped(typeof(IMissionLoader), loaderType);
-            }
-            else
-            {
-                throw new InvalidOperationException(
-                    "The specified class does not implement IMissionLoader or could not be found."
-                );
-            }
 
             return services;
         }

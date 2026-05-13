@@ -22,7 +22,6 @@ namespace Api.Test.Controllers
         public required JsonSerializerOptions SerializerOptions;
 
         public required IMissionDefinitionService MissionDefinitionService;
-        public required ISourceService SourceService;
 
         public async ValueTask InitializeAsync()
         {
@@ -40,7 +39,6 @@ namespace Api.Test.Controllers
 
             MissionDefinitionService =
                 serviceProvider.GetRequiredService<IMissionDefinitionService>();
-            SourceService = serviceProvider.GetRequiredService<ISourceService>();
         }
 
         public async ValueTask DisposeAsync()
@@ -60,11 +58,20 @@ namespace Api.Test.Controllers
                 plant.PlantCode
             );
 
-            var source = await SourceService.CreateSourceIfDoesNotExist([]);
-
+            var task = new TaskDefinition(
+                new TaskQuery
+                {
+                    TagId = "test",
+                    TargetPosition = new Position(),
+                    SensorType = SensorType.Image,
+                    AnalysisTypes = [AnalysisType.Fencilla],
+                    RobotPose = new Pose(11, 11, 11, 0, 0, 0, 1),
+                },
+                1
+            );
             var missionDefinition = new MissionDefinition
             {
-                Source = source,
+                Tasks = [task],
                 InstallationCode = installation.InstallationCode,
                 Name = "Test Mission Definition",
                 InspectionArea = inspectionArea,
@@ -81,7 +88,7 @@ namespace Api.Test.Controllers
 
             // Assert
             var missionDefinitions = await response.Content.ReadFromJsonAsync<
-                List<MissionDefinitionResponse>
+                IEnumerable<MissionDefinitionResponse>
             >(SerializerOptions, cancellationToken: TestContext.Current.CancellationToken);
 
             Assert.Single(missionDefinitions!);

@@ -13,9 +13,9 @@ namespace Api.Controllers
     public class MissionDefinitionController(
         ILogger<MissionDefinitionController> logger,
         IMissionDefinitionService missionDefinitionService,
-        IMissionDefinitionTaskService missionDefinitionTaskService,
-        IMissionRunService missionRunService,
-        IAutoScheduleService autoScheduleService
+        IInstallationService installationService,
+        IAutoScheduleService autoScheduleService,
+        IInspectionAreaService inspectionAreaService
     ) : ControllerBase
     {
         /// <summary>
@@ -26,14 +26,17 @@ namespace Api.Controllers
         /// </remarks>
         [HttpGet("")]
         [Authorize(Roles = Role.Any)]
-        [ProducesResponseType(typeof(IList<MissionDefinitionResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(
+            typeof(IEnumerable<MissionDefinitionResponse>),
+            StatusCodes.Status200OK
+        )]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<IList<MissionDefinitionResponse>>> GetMissionDefinitions(
-            [FromQuery] MissionDefinitionQueryStringParameters parameters
-        )
+        public async Task<
+            ActionResult<IEnumerable<MissionDefinitionResponse>>
+        > GetMissionDefinitions([FromQuery] MissionDefinitionQueryStringParameters parameters)
         {
             PagedList<MissionDefinition> missionDefinitions;
             try
@@ -90,36 +93,121 @@ namespace Api.Controllers
             {
                 return NotFound($"Could not find mission definition with id {id}");
             }
-            var missionDefinitionResponse = new MissionDefinitionWithTasksResponse(
-                missionDefinitionTaskService,
-                missionDefinition
-            );
+            var missionDefinitionResponse = new MissionDefinitionResponse(missionDefinition);
             return Ok(missionDefinitionResponse);
         }
 
         /// <summary>
-        ///     Lookup which mission run is scheduled next for the given mission definition
+        ///     List all available missions for the installation
         /// </summary>
+        /// <remarks>
+        ///     These missions are fetched based on your mission loader
+        /// </remarks>
         [HttpGet]
+        [Route("installation/{installationCode}")]
         [Authorize(Roles = Role.Any)]
-        [Route("{id}/next-run")]
-        [ProducesResponseType(typeof(MissionRun), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IList<MissionDefinitionResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<MissionRun>> GetNextMissionRun([FromRoute] string id)
+        [ProducesResponseType(StatusCodes.Status502BadGateway)]
+        [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
+        public async Task<ActionResult<IList<MissionDefinitionResponse>>> GetAvailableMissions(
+            [FromRoute] string installationCode
+        )
         {
-            var missionDefinition = await missionDefinitionService.ReadById(id, readOnly: true);
-            if (missionDefinition == null)
+            IQueryable<MissionDefinition> missionDefinitions;
+            try
             {
-                return NotFound($"Could not find mission definition with id {id}");
+                missionDefinitions = await missionDefinitionService.ReadByInstallationCode(
+                    installationCode
+                );
             }
-            var nextRun = await missionRunService.ReadNextScheduledRunByMissionId(
-                id,
+            catch (InvalidDataException e)
+            {
+                logger.LogError(e, "{ErrorMessage}", e.Message);
+                return BadRequest(e.Message);
+            }
+            catch (HttpRequestException e)
+            {
+                logger.LogError(e, "Error retrieving missions from Mission Loader");
+                return StatusCode(StatusCodes.Status502BadGateway);
+            }
+            catch (JsonException e)
+            {
+                logger.LogError(e, "Error retrieving missions from database");
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+
+            return Ok(missionDefinitions.Select((m) => new MissionDefinitionResponse(m)));
+        }
+
+        /// <summary>
+        ///     Create a new mission definition
+        /// </summary>
+        /// <remarks>
+        ///     <para> This query creates a new mission definition </para>
+        /// </remarks>
+        [HttpPost]
+        [Authorize(Roles = Role.User)]
+        [ProducesResponseType(typeof(MissionDefinition), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<MissionDefinition>> Create(
+            [FromBody] MissionQuery customMissionQuery
+        )
+        {
+            customMissionQuery = Sanitize.SanitizeUserInput(customMissionQuery);
+
+            customMissionQuery.InstallationCode = customMissionQuery.InstallationCode.ToUpper();
+
+            var installation = await installationService.ReadByInstallationCode(
+                customMissionQuery.InstallationCode,
                 readOnly: true
             );
-            return Ok(nextRun);
+            if (installation == null)
+            {
+                return NotFound(
+                    $"Could not find installation with name {customMissionQuery.InstallationCode}"
+                );
+            }
+
+            var missionTasks = customMissionQuery
+                .Tasks.Select((task, index) => new TaskDefinition(task, index))
+                .ToList();
+
+            try
+            {
+                var inspectionAreaForMission =
+                    inspectionAreaService.TryFindInspectionAreaForMissionTasks(
+                        missionTasks,
+                        customMissionQuery.InstallationCode
+                    );
+                if (inspectionAreaForMission == null)
+                {
+                    return BadRequest("No inspection area found for the mission tasks");
+                }
+
+                var newMissionDefinition = new MissionDefinition
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Tasks = missionTasks,
+                    Name = customMissionQuery.Name,
+                    InstallationCode = customMissionQuery.InstallationCode,
+                    InspectionArea = inspectionAreaForMission,
+                };
+                await missionDefinitionService.Create(newMissionDefinition);
+                return Ok(newMissionDefinition);
+            }
+            catch (MultipleInspectionAreasFoundException e)
+            {
+                return BadRequest(e.Message);
+            }
         }
 
         /// <summary>
@@ -129,7 +217,7 @@ namespace Api.Controllers
         /// <response code="400"> The mission definition data is invalid </response>
         /// <response code="404"> There was no mission definition with the given ID in the database </response>
         [HttpPut]
-        [Authorize(Roles = Role.Any)]
+        [Authorize(Roles = Role.User)]
         [Route("{id}")]
         [ProducesResponseType(typeof(MissionDefinitionResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

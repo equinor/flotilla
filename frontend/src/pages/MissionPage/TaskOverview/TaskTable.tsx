@@ -44,9 +44,8 @@ export const TaskTable = ({ tasks, missionDefinitionPage }: TaskTableProps) => {
 }
 
 const TaskTableRows = ({ tasks, missionDefinitionPage }: TaskTableProps) => {
-    const rows = tasks.map((task) => {
-        // Workaround for current bug in echo
-        const order: number = task.taskOrder + 1
+    const rows = tasks.map((task, index) => {
+        const order: number = index + 1
         const rowStyle =
             task.status === TaskStatus.InProgress || task.status === TaskStatus.Paused
                 ? { background: tokens.colors.infographic.primary__mist_blue.hex }

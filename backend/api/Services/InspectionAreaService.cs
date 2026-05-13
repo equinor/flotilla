@@ -40,7 +40,7 @@ namespace Api.Services
         );
 
         public InspectionArea? TryFindInspectionAreaForMissionTasks(
-            List<MissionTask> missionTasks,
+            List<TaskDefinition> missionTasks,
             string installationCode
         );
 
@@ -142,7 +142,7 @@ namespace Api.Services
         }
 
         public InspectionArea? TryFindInspectionAreaForMissionTasks(
-            List<MissionTask> missionTasks,
+            List<TaskDefinition> missionTasks,
             string installationCode
         )
         {

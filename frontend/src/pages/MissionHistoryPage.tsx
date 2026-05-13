@@ -9,7 +9,7 @@ import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { PaginationHeader } from 'models/PaginatedResponse'
 import { useMissionFilterContext, IFilterState, MissionFilterProvider } from 'components/Contexts/MissionFilterContext'
-import { InspectionType } from 'models/Inspection'
+import { SensorType } from 'models/Inspection'
 import { tokens } from '@equinor/eds-tokens'
 import { SmallScreenInfoText } from 'utils/InfoText'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
@@ -155,7 +155,7 @@ const MissionHistoryViewComponent = () => {
 
     const toDisplayValue = (
         filterName: string,
-        value: boolean | string | number | MissionStatusFilterOptions[] | InspectionType[]
+        value: boolean | string | number | MissionStatusFilterOptions[] | SensorType[]
     ) => {
         if (typeof value === 'boolean') {
             return ''

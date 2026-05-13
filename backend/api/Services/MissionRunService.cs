@@ -272,7 +272,7 @@ namespace Api.Services
 
             return missionRun.Tasks.Any(task =>
                 task.Inspection != null
-                && !task.Inspection.IsSupportedInspectionType(missionRun.Robot.RobotCapabilities)
+                && !task.Inspection.IsSupportedSensorType(missionRun.Robot.RobotCapabilities)
             );
         }
 

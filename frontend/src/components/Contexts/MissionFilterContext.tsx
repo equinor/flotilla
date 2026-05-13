@@ -1,6 +1,6 @@
 import { createContext, FC, useContext, useEffect, useState, useMemo } from 'react'
 import { MissionStatusFilterOptions, missionStatusFilterOptionsIterable } from 'models/Mission'
-import { InspectionType } from 'models/Inspection'
+import { SensorType } from 'models/Inspection'
 import { useLanguageContext } from './LanguageContext'
 import { MissionRunQueryParameters } from 'models/MissionRunQueryParameters'
 import { useSearchParams } from 'react-router-dom'
@@ -17,7 +17,7 @@ interface IMissionFilterContext {
         statuses: MissionStatusFilterOptions[] | undefined
         robotName: string | undefined
         tagId: string | undefined
-        inspectionTypes: InspectionType[] | undefined
+        inspectionTypes: SensorType[] | undefined
         minStartTime: number | undefined
         maxStartTime: number | undefined
         minEndTime: number | undefined
@@ -28,7 +28,7 @@ interface IMissionFilterContext {
         switchStatuses: (newStatuses: MissionStatusFilterOptions[]) => void
         switchRobotName: (newRobotName: string | undefined) => void
         switchTagId: (newTagId: string | undefined) => void
-        switchInspectionTypes: (newInspectionTypes: InspectionType[]) => void
+        switchInspectionTypes: (newInspectionTypes: SensorType[]) => void
         switchMinStartTime: (newMinStartTime: number | undefined) => void
         switchMaxStartTime: (newMaxStartTime: number | undefined) => void
         switchMinEndTime: (newMinEndTime: number | undefined) => void
@@ -174,7 +174,7 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
                 setFilterIsSet(true)
                 setFilterState({ ...filterState, tagId: newTagId })
             },
-            switchInspectionTypes: (newInspectionTypes: InspectionType[]) => {
+            switchInspectionTypes: (newInspectionTypes: SensorType[]) => {
                 setFilterIsSet(true)
                 setFilterState({ ...filterState, inspectionTypes: newInspectionTypes })
             },

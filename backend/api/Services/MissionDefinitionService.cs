@@ -32,8 +32,6 @@ namespace Api.Services
 
         public Task<List<MissionDefinition>?> ReadByHasAutoScheduleFrequency(bool readOnly = true);
 
-        public Task<MissionDefinition?> ReadBySourceId(string sourceId, bool readOnly = true);
-
         public Task<MissionDefinition> UpdateLastSuccessfulMissionRun(
             string missionRunId,
             string missionDefinitionId
@@ -61,8 +59,7 @@ namespace Api.Services
         ISignalRService signalRService,
         IAccessRoleService accessRoleService,
         ILogger<IMissionDefinitionService> logger,
-        IMissionRunService missionRunService,
-        ISourceService sourceService
+        IMissionRunService missionRunService
     ) : IMissionDefinitionService
     {
         public async Task<MissionDefinition> Create(MissionDefinition missionDefinition)
@@ -70,10 +67,6 @@ namespace Api.Services
             if (missionDefinition.LastSuccessfulRun is not null)
             {
                 context.Entry(missionDefinition.LastSuccessfulRun).State = EntityState.Unchanged;
-            }
-            if (missionDefinition.Source is not null)
-            {
-                context.Entry(missionDefinition.Source).State = EntityState.Unchanged;
             }
             context.Entry(missionDefinition.InspectionArea).State = EntityState.Unchanged;
 
@@ -140,13 +133,6 @@ namespace Api.Services
                     && m.InspectionArea.Id == inspectionAreaId
                 )
                 .ToListAsync();
-        }
-
-        public async Task<MissionDefinition?> ReadBySourceId(string sourceId, bool readOnly = true)
-        {
-            return await GetMissionDefinitionsWithSubModels(readOnly: readOnly)
-                .Where(m => m.IsDeprecated == false)
-                .FirstOrDefaultAsync(m => m.Source.SourceId.Equals(sourceId));
         }
 
         public async Task<List<MissionDefinition>?> ReadByHasAutoScheduleFrequency(
@@ -265,8 +251,8 @@ namespace Api.Services
                         .ThenInclude(plant => plant.Installation)
                 .Include(missionDefinition => missionDefinition.InspectionArea)
                     .ThenInclude(area => area!.Installation)
-                .Include(missionDefinition => missionDefinition.Source)
                 .Include(missionDefinition => missionDefinition.LastSuccessfulRun)
+                .Include(missionDefinition => missionDefinition.Tasks)
                 .Include(missionDefinition => missionDefinition.InspectionArea)
                 .Where(m =>
                     accessibleInstallationCodes.Result.Contains(
@@ -342,8 +328,6 @@ namespace Api.Services
         {
             if (missionDefinition.LastSuccessfulRun != null)
                 missionRunService.DetachTracking(context, missionDefinition.LastSuccessfulRun);
-            if (missionDefinition.Source != null)
-                sourceService.DetachTracking(context, missionDefinition.Source);
             context.Entry(missionDefinition).State = EntityState.Detached;
         }
     }

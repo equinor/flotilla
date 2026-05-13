@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Api.Services.Models;
 #pragma warning disable CS8618
 namespace Api.Database.Models
 {
@@ -55,10 +54,7 @@ namespace Api.Database.Models
         [Required]
         public IList<MissionTask> Tasks
         {
-            get =>
-                _tasks != null
-                    ? _tasks.OrderBy(t => t.TaskOrder).ToList()
-                    : new List<MissionTask>();
+            get => _tasks != null ? _tasks.OrderBy(t => t.TaskOrder).ToList() : [];
             set => _tasks = value;
         }
 

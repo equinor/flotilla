@@ -30,7 +30,8 @@ export const InspectionDialogView = ({ selectedInspectionId, tasks }: Inspection
     const [switchImageDirection, setSwitchImageDirection] = useState<number>(0)
     const { switchSelectedInspectionId } = useInspectionId()
 
-    const currentTask = tasks.find((t) => t.inspection.isarInspectionId == selectedInspectionId)
+    const taskIndex = tasks.findIndex((t) => t.inspection.isarInspectionId == selectedInspectionId)
+    const currentTask = tasks[taskIndex]
 
     const closeDialog = () => {
         switchSelectedInspectionId(undefined)
@@ -76,7 +77,7 @@ export const InspectionDialogView = ({ selectedInspectionId, tasks }: Inspection
             <StyledDialogContent>
                 <StyledDialogHeader>
                     <Typography variant="accordion_header" group="ui">
-                        {TranslateText('Inspection report for task') + ' ' + (currentTask.taskOrder + 1)}
+                        {TranslateText('Inspection report for task') + ' ' + (taskIndex + 1)}
                     </Typography>
                     <StyledCloseButton variant="ghost" onClick={closeDialog}>
                         <Icon name={Icons.Clear} size={24} />

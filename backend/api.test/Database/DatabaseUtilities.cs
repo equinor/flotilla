@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Api.Controllers.Models;
 using Api.Database.Models;
@@ -8,7 +9,6 @@ namespace Api.Test.Database
 {
     public class DatabaseUtilities(
         IMissionRunService _missionRunService,
-        ISourceService _sourceService,
         IMissionDefinitionService _missionDefinitionService,
         IInstallationService _installationService,
         IPlantService _plantService,
@@ -37,6 +37,7 @@ namespace Api.Test.Database
                 installationCode,
                 inspectionArea,
                 null,
+                null,
                 writeToDatabase
             );
 
@@ -52,11 +53,14 @@ namespace Api.Test.Database
                 InstallationCode = installationCode,
             };
 
-            missionRun.Tasks = [new(new Pose())];
             if (writeToDatabase)
             {
                 missionRun = await _missionRunService.Create(missionRun);
-                await _robotService.UpdateCurrentMissionId(robot.Id, missionRun.Id);
+                if (
+                    missionStatus != MissionStatus.Successful
+                    && missionStatus != MissionStatus.Failed
+                )
+                    await _robotService.UpdateCurrentMissionId(robot.Id, missionRun.Id);
             }
             return missionRun;
         }
@@ -65,6 +69,7 @@ namespace Api.Test.Database
             string? id,
             string installationCode,
             InspectionArea inspectionArea,
+            List<TaskDefinition>? tasks = null,
             MissionRun? lastSuccessfulRun = null,
             bool writeToDatabase = false
         )
@@ -75,14 +80,13 @@ namespace Api.Test.Database
             if (string.IsNullOrEmpty(id))
                 id = Guid.NewGuid().ToString();
 
-            var source = await _sourceService.Create(new Source { SourceId = $"{id}" });
             var missionDefinition = new MissionDefinition
             {
                 Id = id,
                 Name = "testMissionDefinition",
                 InspectionArea = inspectionArea,
                 InstallationCode = installationCode,
-                Source = source,
+                Tasks = tasks ?? [],
                 InspectionFrequency = new DateTime().AddDays(7) - new DateTime(),
                 LastSuccessfulRun = lastSuccessfulRun,
                 AutoScheduleFrequency = new AutoScheduleFrequency
@@ -164,11 +168,6 @@ namespace Api.Test.Database
 
             var robot = new Robot(createRobotQuery, installation, inspectionAreaId);
             return await _robotService.Create(robot);
-        }
-
-        public async Task<Source> NewSource(string sourceId = "TestId")
-        {
-            return await _sourceService.Create(new Source { SourceId = sourceId });
         }
     }
 }

@@ -225,27 +225,23 @@ public static class TestSetupHelpers
             _areaPolygonService,
             _exclusionAreaService
         );
-        var _sourceService = new SourceService(context, new Mock<ILogger<SourceService>>().Object);
         var _missionDefinitionService = new MissionDefinitionService(
             context,
             signalRService,
             _accessRoleService,
             new Mock<ILogger<MissionDefinitionService>>().Object,
-            _missionRunService,
-            _sourceService
+            _missionRunService
         );
         var _autoScheduleService = new AutoScheduleService(
             new Mock<ILogger<AutoScheduleService>>().Object,
             _missionDefinitionService,
             _robotService,
-            new MockMissionLoader(),
             _missionRunService,
             _missionSchedulingService,
             signalRService
         );
         var databaseUtilities = new DatabaseUtilities(
             _missionRunService,
-            _sourceService,
             _missionDefinitionService,
             _installationService,
             _plantService,
