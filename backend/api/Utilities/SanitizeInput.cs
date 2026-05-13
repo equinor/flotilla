@@ -24,9 +24,8 @@ namespace Api.Utilities
             return inputQuery;
         }
 
-        public static CustomMissionQuery SanitizeUserInput(CustomMissionQuery inputQuery)
+        public static CreateMissionQuery SanitizeUserInput(CreateMissionQuery inputQuery)
         {
-            inputQuery.RobotId = SanitizeUserInput(inputQuery.RobotId);
             inputQuery.InstallationCode = SanitizeUserInput(inputQuery.InstallationCode);
             inputQuery.Name = SanitizeUserInput(inputQuery.Name);
 

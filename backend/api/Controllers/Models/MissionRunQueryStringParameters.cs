@@ -56,9 +56,9 @@ namespace Api.Controllers.Models
         public string? TagSearch { get; set; }
 
         /// <summary>
-        /// Filter for an inspection type in the mission equal to any of InspectionTypes
+        /// Filter for an inspection type in the mission equal to any of SensorTypes
         /// </summary>
-        public List<InspectionType>? InspectionTypes { get; set; }
+        public List<SensorType>? InspectionTypes { get; set; }
 
         #region Time Filters
 

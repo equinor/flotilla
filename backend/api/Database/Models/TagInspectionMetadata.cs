@@ -1,8 +1,8 @@
-﻿#nullable disable
+#nullable disable
 using System.ComponentModel.DataAnnotations;
 using Api.Services.Models;
 
-namespace Api.Services.MissionLoaders
+namespace Api.Database.Models
 {
     public class TagInspectionMetadata
     {

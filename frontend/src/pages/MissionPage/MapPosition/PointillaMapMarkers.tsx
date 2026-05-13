@@ -19,12 +19,11 @@ const orderTasksByDrawOrder = (tasks: Task[]) => {
         const ra = rank(a),
             rb = rank(b)
         if (ra !== rb) return ra - rb
-        if (ra === 1) return b.taskOrder - a.taskOrder
-        return a.taskOrder - b.taskOrder
+        return 1
     })
 }
 
-const getTaskMarker = (map: L.Map, task: Task) => {
+const getTaskMarker = (map: L.Map, task: Task, index: number) => {
     const color = getColorsFromTaskStatus(task.status)
 
     const taskMarker = L.circleMarker([task.inspection.inspectionTarget.y, task.inspection.inspectionTarget.x], {
@@ -34,7 +33,7 @@ const getTaskMarker = (map: L.Map, task: Task) => {
         weight: 1,
         fillOpacity: 0.8,
     })
-        .bindTooltip((task.taskOrder + 1).toString(), {
+        .bindTooltip((index + 1).toString(), {
             permanent: true,
             direction: 'center',
             className: 'circleLabel',
@@ -44,7 +43,7 @@ const getTaskMarker = (map: L.Map, task: Task) => {
 }
 
 export const getTaskMarkers = (map: L.Map, tasks: Task[]) => {
-    return orderTasksByDrawOrder(tasks).map((task) => getTaskMarker(map, task))
+    return orderTasksByDrawOrder(tasks).map((task, index) => getTaskMarker(map, task, index))
 }
 
 const getRobotAuraMarker = (map: L.Map, robotPose: Pose) => {

@@ -64,16 +64,30 @@ namespace Api.Test.Controllers
                 installation,
                 inspectionArea.Id
             );
-            string missionsUrl = "/missions";
+            TaskDefinition task = new()
+            {
+                TagId = "dummy tag id 1",
+                Description = "dummy task 1",
+                RobotPose = new Pose(),
+                AnalysisTypes = [AnalysisType.Fencilla],
+                TargetPosition = new Position
+                {
+                    X = 0,
+                    Y = 0,
+                    Z = 0,
+                },
+            };
+            var missionDefinition = await DatabaseUtilities.NewMissionDefinition(
+                null,
+                installation.InstallationCode,
+                inspectionArea,
+                [task],
+                writeToDatabase: true
+            );
+            string missionsUrl = $"/missions/schedule/{missionDefinition.Id}";
 
             // Act
-            var query = new ScheduledMissionQuery
-            {
-                RobotId = robot.Id,
-                InstallationCode = installation.InstallationCode,
-                MissionSourceId = "95",
-                CreationTime = DateTime.UtcNow,
-            };
+            var query = new ScheduledMissionQuery { RobotId = robot.Id };
             var content = new StringContent(
                 JsonSerializer.Serialize(query),
                 null,
@@ -111,6 +125,26 @@ namespace Api.Test.Controllers
                 installation,
                 inspectionArea.Id
             );
+            TaskDefinition task = new()
+            {
+                TagId = "dummy tag id 1",
+                Description = "dummy task 1",
+                RobotPose = new Pose(),
+                AnalysisTypes = [AnalysisType.Fencilla],
+                TargetPosition = new Position
+                {
+                    X = 0,
+                    Y = 0,
+                    Z = 0,
+                },
+            };
+            var missionDefinition = await DatabaseUtilities.NewMissionDefinition(
+                null,
+                installation.InstallationCode,
+                inspectionArea,
+                [task],
+                writeToDatabase: true
+            );
 
             // Act
             var query = new ScheduledMissionQuery
@@ -126,11 +160,11 @@ namespace Api.Test.Controllers
                 "application/json"
             );
 
-            const string MissionsUrl = "/missions";
-            _ = await Client.PostAsync(MissionsUrl, content, TestContext.Current.CancellationToken);
+            string missionsUrl = $"/missions/schedule/{missionDefinition.Id}";
+            _ = await Client.PostAsync(missionsUrl, content, TestContext.Current.CancellationToken);
 
             var responseMissionOne = await Client.PostAsync(
-                MissionsUrl,
+                missionsUrl,
                 content,
                 TestContext.Current.CancellationToken
             );
@@ -139,7 +173,7 @@ namespace Api.Test.Controllers
                 cancellationToken: TestContext.Current.CancellationToken
             );
             var responseMissionTwo = await Client.PostAsync(
-                MissionsUrl,
+                missionsUrl,
                 content,
                 TestContext.Current.CancellationToken
             );
@@ -148,7 +182,7 @@ namespace Api.Test.Controllers
                 cancellationToken: TestContext.Current.CancellationToken
             );
             var responseMissionThree = await Client.PostAsync(
-                MissionsUrl,
+                missionsUrl,
                 content,
                 TestContext.Current.CancellationToken
             );
@@ -194,7 +228,7 @@ namespace Api.Test.Controllers
         }
 
         [Fact]
-        public async Task ScheduleDuplicateCustomMissionDefinitions()
+        public async Task CreateDuplicateMissionDefinitions()
         {
             // Arrange
             var installation = await DatabaseUtilities.NewInstallation();
@@ -209,7 +243,28 @@ namespace Api.Test.Controllers
                 inspectionArea.Id
             );
 
-            var query = CreateDefaultCustomMissionQuery(robot.Id, installation.InstallationCode);
+            TaskDefinition task = new()
+            {
+                TagId = "dummy tag id 1",
+                Description = "dummy task 1",
+                RobotPose = new Pose(),
+                AnalysisTypes = [AnalysisType.Fencilla],
+                TargetPosition = new Position
+                {
+                    X = 0,
+                    Y = 0,
+                    Z = 0,
+                },
+            };
+            var missionDefinition = await DatabaseUtilities.NewMissionDefinition(
+                null,
+                installation.InstallationCode,
+                inspectionArea,
+                [task],
+                writeToDatabase: true
+            );
+
+            var query = new ScheduledMissionQuery { RobotId = robot.Id };
             var content = new StringContent(
                 JsonSerializer.Serialize(query),
                 null,
@@ -217,9 +272,9 @@ namespace Api.Test.Controllers
             );
 
             // Act
-            const string CustomMissionsUrl = "/missions/custom";
+            string customMissionsUrl = $"/missions/schedule/{missionDefinition.Id}";
             var responseMissionOne = await Client.PostAsync(
-                CustomMissionsUrl,
+                customMissionsUrl,
                 content,
                 TestContext.Current.CancellationToken
             );
@@ -229,7 +284,7 @@ namespace Api.Test.Controllers
             );
 
             var responseMissionTwo = await Client.PostAsync(
-                CustomMissionsUrl,
+                customMissionsUrl,
                 content,
                 TestContext.Current.CancellationToken
             );
@@ -245,114 +300,6 @@ namespace Api.Test.Controllers
 
             Assert.Equal(missionRunOne!.MissionId, missionRunTwo!.MissionId);
             Assert.Single(missionDefinitions);
-        }
-
-        [Fact]
-        public async Task CheckThatNextRunIsCorrectlySelectedWhenSchedulingMultipleMissions()
-        {
-            // Arrange
-            var installation = await DatabaseUtilities.NewInstallation();
-            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
-            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
-                installation.InstallationCode,
-                plant.PlantCode
-            );
-            var robot = await DatabaseUtilities.NewRobot(
-                RobotStatus.Available,
-                installation,
-                inspectionArea.Id
-            );
-
-            var query = CreateDefaultCustomMissionQuery(robot.Id, installation.InstallationCode);
-            var content = new StringContent(
-                JsonSerializer.Serialize(query),
-                null,
-                "application/json"
-            );
-
-            const string CustomMissionsUrl = "/missions/custom";
-            var response = await Client.PostAsync(
-                CustomMissionsUrl,
-                content,
-                TestContext.Current.CancellationToken
-            );
-            var activeMissionRun = await response.Content.ReadFromJsonAsync<MissionRun>(
-                SerializerOptions,
-                cancellationToken: TestContext.Current.CancellationToken
-            );
-
-            var scheduleQuery = new ScheduleMissionQuery
-            {
-                RobotId = robot.Id,
-                CreationTime = DateTime.SpecifyKind(new DateTime(2050, 1, 1), DateTimeKind.Utc),
-            };
-            var scheduleContent = new StringContent(
-                JsonSerializer.Serialize(scheduleQuery),
-                null,
-                "application/json"
-            );
-
-            string scheduleMissionsUrl = $"/missions/schedule/{activeMissionRun!.MissionId}";
-
-            var missionRunOneResponse = await Client.PostAsync(
-                scheduleMissionsUrl,
-                scheduleContent,
-                TestContext.Current.CancellationToken
-            );
-            var missionRunOne = await missionRunOneResponse.Content.ReadFromJsonAsync<MissionRun>(
-                SerializerOptions,
-                cancellationToken: TestContext.Current.CancellationToken
-            );
-
-            var missionRunTwoResponse = await Client.PostAsync(
-                scheduleMissionsUrl,
-                scheduleContent,
-                TestContext.Current.CancellationToken
-            );
-            var missionRunTwo = await missionRunTwoResponse.Content.ReadFromJsonAsync<MissionRun>(
-                SerializerOptions,
-                cancellationToken: TestContext.Current.CancellationToken
-            );
-
-            var missionRunThreeResponse = await Client.PostAsync(
-                scheduleMissionsUrl,
-                scheduleContent,
-                TestContext.Current.CancellationToken
-            );
-            var missionRunThree =
-                await missionRunThreeResponse.Content.ReadFromJsonAsync<MissionRun>(
-                    SerializerOptions,
-                    cancellationToken: TestContext.Current.CancellationToken
-                );
-
-            Thread.Sleep(1000);
-            // Act
-            string nextMissionUrl = $"missions/definitions/{activeMissionRun.MissionId}/next-run";
-            var nextMissionResponse = await Client.GetAsync(
-                nextMissionUrl,
-                TestContext.Current.CancellationToken
-            );
-
-            // Assert
-            var nextMissionRun = await nextMissionResponse.Content.ReadFromJsonAsync<MissionRun>(
-                SerializerOptions,
-                cancellationToken: TestContext.Current.CancellationToken
-            );
-
-            // Next mission can be any of these three missions due to timing
-            var possibleNextMissionRuns = new List<string>
-            {
-                missionRunOne!.Id,
-                missionRunTwo!.Id,
-                missionRunThree!.Id,
-            };
-
-            Assert.True(nextMissionResponse.IsSuccessStatusCode);
-            Assert.NotNull(nextMissionRun);
-            Assert.Equal(missionRunOne!.MissionId, activeMissionRun.MissionId);
-            Assert.Equal(missionRunTwo!.MissionId, activeMissionRun.MissionId);
-            Assert.Equal(missionRunThree!.MissionId, activeMissionRun.MissionId);
-            Assert.Contains(nextMissionRun.Id, possibleNextMissionRuns);
         }
 
         [Fact]
@@ -373,21 +320,43 @@ namespace Api.Test.Controllers
                 inspectionArea.Id
             );
 
-            var query = CreateDefaultCustomMissionQuery(robot.Id, installation.InstallationCode);
-            var content = new StringContent(
-                JsonSerializer.Serialize(query),
+            var missionId = Guid.NewGuid().ToString();
+            TaskDefinition task1 = new()
+            {
+                TagId = "dummy tag id 1",
+                Description = "dummy task 1",
+                RobotPose = new Pose(),
+                AnalysisTypes = [AnalysisType.Fencilla],
+                TargetPosition = new Position
+                {
+                    X = 0,
+                    Y = 0,
+                    Z = 0,
+                },
+            };
+            var missionDefinition = await DatabaseUtilities.NewMissionDefinition(
+                missionId,
+                installation.InstallationCode,
+                inspectionArea,
+                [task1],
+                writeToDatabase: true
+            );
+
+            var scheduleQuery = new ScheduleMissionQuery { RobotId = robot.Id };
+            var scheduleContent = new StringContent(
+                JsonSerializer.Serialize(scheduleQuery),
                 null,
                 "application/json"
             );
 
-            // Act
-            const string CustomMissionsUrl = "/missions/custom";
-            var response = await Client.PostAsync(
-                CustomMissionsUrl,
-                content,
+            string scheduleUrl = $"/missions/schedule/{missionDefinition.Id}";
+
+            var scheduleMissionResponse = await Client.PostAsync(
+                scheduleUrl,
+                scheduleContent,
                 TestContext.Current.CancellationToken
             );
-            Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+            Assert.Equal(HttpStatusCode.Conflict, scheduleMissionResponse.StatusCode);
         }
 
         [Fact]
@@ -442,59 +411,45 @@ namespace Api.Test.Controllers
                 inspectionAreaRobot.Id
             );
 
-            var query = CreateDefaultCustomMissionQuery(robot.Id, installation.InstallationCode);
-            var content = new StringContent(
-                JsonSerializer.Serialize(query),
+            var missionId = Guid.NewGuid().ToString();
+            TaskDefinition task1 = new()
+            {
+                TagId = "dummy tag id 1",
+                Description = "dummy task 1",
+                RobotPose = new Pose(),
+                AnalysisTypes = [AnalysisType.Fencilla],
+                TargetPosition = new Position
+                {
+                    X = 0,
+                    Y = 0,
+                    Z = 0,
+                },
+            };
+            var missionDefinition = await DatabaseUtilities.NewMissionDefinition(
+                missionId,
+                installation.InstallationCode,
+                _inspectionAreaMission,
+                [task1],
+                writeToDatabase: true
+            );
+
+            var scheduleQuery = new ScheduleMissionQuery { RobotId = robot.Id };
+            var scheduleContent = new StringContent(
+                JsonSerializer.Serialize(scheduleQuery),
                 null,
                 "application/json"
             );
 
-            // Act
-            const string CustomMissionsUrl = "/missions/custom";
-            var missionResponse = await Client.PostAsync(
-                CustomMissionsUrl,
-                content,
+            string scheduleUrl = $"/missions/schedule/{missionDefinition.Id}";
+
+            var scheduleMissionResponse = await Client.PostAsync(
+                scheduleUrl,
+                scheduleContent,
                 TestContext.Current.CancellationToken
             );
-            Assert.Equal(HttpStatusCode.BadRequest, missionResponse.StatusCode);
-        }
 
-        private static CustomMissionQuery CreateDefaultCustomMissionQuery(
-            string robotId,
-            string installationCode
-        )
-        {
-            return new CustomMissionQuery
-            {
-                RobotId = robotId,
-                InstallationCode = installationCode,
-                CreationTime = DateTime.SpecifyKind(new DateTime(3050, 1, 1), DateTimeKind.Utc),
-                InspectionFrequency = new TimeSpan(14, 0, 0, 0),
-                Name = "TestMission",
-                Tasks =
-                [
-                    new CustomTaskQuery
-                    {
-                        RobotPose = new Pose(),
-                        Inspection = new CustomInspectionQuery
-                        {
-                            InspectionTarget = new Position(),
-                            InspectionType = InspectionType.Image,
-                        },
-                        TaskOrder = 0,
-                    },
-                    new CustomTaskQuery
-                    {
-                        RobotPose = new Pose(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f),
-                        Inspection = new CustomInspectionQuery
-                        {
-                            InspectionTarget = new Position(),
-                            InspectionType = InspectionType.Image,
-                        },
-                        TaskOrder = 1,
-                    },
-                ],
-            };
+            // Act
+            Assert.Equal(HttpStatusCode.BadRequest, scheduleMissionResponse.StatusCode);
         }
     }
 }

@@ -1,13 +1,11 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Net;
-using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
-using Api.Services.MissionLoaders;
 using Api.Services.Models;
 using Api.Utilities;
 using Microsoft.EntityFrameworkCore;
@@ -28,7 +26,7 @@ namespace Api.Services
         public Task<TagInspectionMetadata> CreateOrUpdateTagInspectionMetadata(
             TagInspectionMetadata metadata
         );
-        public Task<IsarZoomDescription?> FindInspectionZoom(EchoTag echoTag);
+        public Task<IsarZoomDescription?> FindInspectionZoom(string tagId);
         public string GetInspectionName(
             string installationCode,
             Position position,
@@ -285,11 +283,11 @@ namespace Api.Services
             return metadata;
         }
 
-        public async Task<IsarZoomDescription?> FindInspectionZoom(EchoTag echoTag)
+        public async Task<IsarZoomDescription?> FindInspectionZoom(string tagId)
         {
             return (
                 await context
-                    .TagInspectionMetadata.Where(e => e.TagId == echoTag.TagId)
+                    .TagInspectionMetadata.Where(e => e.TagId == tagId)
                     .FirstOrDefaultAsync()
             )?.ZoomDescription;
         }

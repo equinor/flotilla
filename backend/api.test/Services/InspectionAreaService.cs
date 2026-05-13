@@ -55,10 +55,34 @@ namespace Api.Test.Services
                 ],
             };
 
-            List<MissionTask> missionTasks =
+            List<TaskDefinition> missionTasks =
             [
-                new(new Pose(1, 1, 1, 0, 0, 0, 1)),
-                new(new Pose(2, 2, 2, 0, 0, 0, 1)),
+                new TaskDefinition
+                {
+                    TagId = "dummy tag id 1",
+                    Description = "dummy task 1",
+                    RobotPose = new Pose(1, 1, 1, 0, 0, 0, 1),
+                    AnalysisTypes = [AnalysisType.Fencilla],
+                    TargetPosition = new Position
+                    {
+                        X = 0,
+                        Y = 0,
+                        Z = 0,
+                    },
+                },
+                new TaskDefinition
+                {
+                    TagId = "dummy tag id 2",
+                    Description = "dummy task 2",
+                    RobotPose = new Pose(2, 2, 2, 0, 0, 0, 1),
+                    AnalysisTypes = [AnalysisType.Fencilla],
+                    TargetPosition = new Position
+                    {
+                        X = 0,
+                        Y = 0,
+                        Z = 0,
+                    },
+                },
             ];
 
             var testBool = AreaPolygonService.MissionTasksAreInsideAreaPolygon(
@@ -83,10 +107,34 @@ namespace Api.Test.Services
                     new PolygonPoint { X = 10, Y = 0 },
                 ],
             };
-            List<MissionTask> missionTasks =
+            List<TaskDefinition> missionTasks =
             [
-                new(new Pose(1, 1, 1, 0, 0, 0, 1)),
-                new(new Pose(11, 11, 11, 0, 0, 0, 1)),
+                new TaskDefinition
+                {
+                    TagId = "dummy tag id 1",
+                    Description = "dummy task 1",
+                    RobotPose = new Pose(1, 1, 1, 0, 0, 0, 1),
+                    AnalysisTypes = [AnalysisType.Fencilla],
+                    TargetPosition = new Position
+                    {
+                        X = 0,
+                        Y = 0,
+                        Z = 0,
+                    },
+                },
+                new TaskDefinition
+                {
+                    TagId = "dummy tag id 2",
+                    Description = "dummy task 2",
+                    RobotPose = new Pose(11, 11, 11, 0, 0, 0, 1),
+                    AnalysisTypes = [AnalysisType.Fencilla],
+                    TargetPosition = new Position
+                    {
+                        X = 0,
+                        Y = 0,
+                        Z = 0,
+                    },
+                },
             ];
 
             var testBool = AreaPolygonService.MissionTasksAreInsideAreaPolygon(

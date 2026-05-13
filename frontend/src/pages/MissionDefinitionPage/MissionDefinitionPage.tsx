@@ -120,7 +120,6 @@ const MissionDefinitionPageBody = ({ missionDefinition }: { missionDefinition: M
             comment: missionDefinition.comment,
             schedulingTimesCETperWeek: [],
             name: missionDefinition.name,
-            isDeprecated: false,
         }
         backendApi.updateMissionDefinition(missionDefinition.id, defaultMissionDefinitionForm).catch(() => {
             setAlert(

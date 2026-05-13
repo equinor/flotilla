@@ -128,7 +128,7 @@ namespace Api.Services
 
             if (
                 !areaPolygonService.MissionTasksAreInsideAreaPolygon(
-                    (List<MissionTask>)missionRun.Tasks,
+                    [.. missionRun.Tasks.Select((t) => t.ToMissionTaskDefinition())],
                     currentInspectionArea.AreaPolygon
                 )
             )

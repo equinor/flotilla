@@ -60,10 +60,6 @@ namespace Api.Utilities
         public int IsarStatusCode { get; set; }
     }
 
-    public class MissionLoaderUnavailableException(string message) : Exception(message) { }
-
-    public class SourceException(string message) : Exception(message) { }
-
     public class InstallationNotFoundException(string message) : Exception(message) { }
 
     public class PlantNotFoundException(string message) : Exception(message) { }

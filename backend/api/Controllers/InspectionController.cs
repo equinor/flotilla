@@ -1,7 +1,6 @@
 ﻿using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
-using Api.Services.MissionLoaders;
 using Api.Services.Models;
 using Api.Utilities;
 using Microsoft.AspNetCore.Authorization;
@@ -177,7 +176,7 @@ namespace Api.Controllers
                 return NotFound(errorMessage);
             }
 
-            if (task.Inspection?.InspectionType != InspectionType.CO2Measurement)
+            if (task.Inspection?.InspectionType != SensorType.CO2Measurement)
             {
                 string errorMessage =
                     $"Inspection with ISAR Inspection ID {isarInspectionId} is of type {task.Inspection?.InspectionType}. Fetching of inspection value is not supported for this inspection type.";

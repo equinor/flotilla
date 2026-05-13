@@ -3,18 +3,23 @@ using Api.Services.Models;
 
 namespace Api.Controllers.Models
 {
-    public struct CustomInspectionQuery
+    public struct TaskQuery
     {
-        public InspectionType InspectionType { get; set; }
+#nullable disable
+        public TaskQuery() { }
 
-        public Position InspectionTarget { get; set; }
-
-        public float? VideoDuration { get; set; }
-    }
-
-    public struct CustomTaskQuery
-    {
-        public int TaskOrder { get; set; }
+#nullable enable
+        public TaskQuery(TaskDefinition def)
+        {
+            TagId = def.TagId;
+            Description = def.Description;
+            RobotPose = def.RobotPose;
+            TargetPosition = def.TargetPosition;
+            ZoomDescription = def.ZoomDescription;
+            SensorType = def.SensorType;
+            AnalysisTypes = def.AnalysisTypes;
+            VideoDuration = def.VideoDuration;
+        }
 
         public string? TagId { get; set; }
 
@@ -22,29 +27,25 @@ namespace Api.Controllers.Models
 
         public Pose RobotPose { get; set; }
 
-        public IsarZoomDescription? IsarZoomDescription { get; set; }
+        public Position TargetPosition { get; set; }
 
-        public CustomInspectionQuery Inspection { get; set; }
+        public IsarZoomDescription? ZoomDescription { get; set; }
+
+        public SensorType SensorType { get; set; }
+
+        public IList<AnalysisType> AnalysisTypes { get; set; }
+
+        public float? VideoDuration { get; set; }
     }
 
-    public struct CustomMissionQuery
+    public struct CreateMissionQuery
     {
-        public string RobotId { get; set; }
-
-        public DateTime? CreationTime { get; set; }
-
         public string InstallationCode { get; set; }
-
-        public TimeSpan? InspectionFrequency { get; set; }
 
         public string Name { get; set; }
 
         public string? Description { get; set; }
 
-        public string? Comment { get; set; }
-
-        public List<CustomTaskQuery> Tasks { get; set; }
-
-        public IsarZoomDescription? IsarZoomDescription { get; set; }
+        public List<TaskQuery> Tasks { get; set; }
     }
 }
