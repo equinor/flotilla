@@ -530,6 +530,9 @@ namespace Api.Test.MQTT
             var message = new SaraInspectionResultMessage
             {
                 InspectionId = Guid.NewGuid().ToString(),
+                WorkflowId = Guid.NewGuid(),
+                AnalysisRunId = Guid.NewGuid(),
+                AnalysisId = Guid.NewGuid(),
                 StorageAccount = "testaccount",
                 BlobContainer = installation.InstallationCode,
                 BlobName = "testblob",
@@ -592,7 +595,10 @@ namespace Api.Test.MQTT
             const string VALUE = "testvalue";
             var message = new SaraAnalysisResultMessage
             {
-                InspectionId = isarInspectionId,
+                InspectionIds = [isarInspectionId],
+                WorkflowId = Guid.NewGuid(),
+                AnalysisRunId = Guid.NewGuid(),
+                AnalysisId = Guid.NewGuid(),
                 AnalysisType = "test_analysis",
                 StorageAccount = "testaccount",
                 BlobContainer = installation.InstallationCode,

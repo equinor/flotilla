@@ -902,10 +902,25 @@ namespace Api.EventHandlers
 
         private async void OnSaraAnalysisResultMessage(SaraAnalysisResultMessage saraAnalysisResult)
         {
+            if (saraAnalysisResult.InspectionIds.Count == 0)
+            {
+                _logger.LogError(
+                    "SARA analysis result message contained no inspection IDs; skipping"
+                );
+                return;
+            }
+
+            // TODO: SARA may emit multiple inspection IDs for group analyses
+            // (e.g. results derived from several inspections). For now we only
+            // persist the result against the first ID; future work should iterate
+            // the full list and emit one persist + SignalR event per inspection.
+            var inspectionId = saraAnalysisResult.InspectionIds[0];
+
             var analysisResult = new AnalysisResult
             {
-                InspectionId = saraAnalysisResult.InspectionId,
+                InspectionId = inspectionId,
                 AnalysisType = saraAnalysisResult.AnalysisType,
+                AnalysisGroupId = saraAnalysisResult.AnalysisGroupId,
                 Value = saraAnalysisResult.Value,
                 Unit = saraAnalysisResult.Unit,
                 Warning = saraAnalysisResult.Warning,
