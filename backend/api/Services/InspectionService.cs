@@ -214,7 +214,8 @@ namespace Api.Services
 
         private async Task<SaraInspectionDataResponse> GetInspectionStorageInfo(string inspectionId)
         {
-            string relativePath = $"PlantData/{inspectionId}/inspection-data-storage-location";
+            string relativePath =
+                $"inspection-record/inspection-id/{inspectionId}/anonymized-location";
 
             HttpResponseMessage response;
 
