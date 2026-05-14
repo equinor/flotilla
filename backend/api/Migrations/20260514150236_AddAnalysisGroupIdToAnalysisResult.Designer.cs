@@ -3,6 +3,7 @@ using System;
 using Api.Database.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Api.Migrations
 {
     [DbContext(typeof(FlotillaDbContext))]
-    partial class FlotillaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260514150236_AddAnalysisGroupIdToAnalysisResult")]
+    partial class AddAnalysisGroupIdToAnalysisResult
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -131,7 +134,7 @@ namespace Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("text");
 
-                    b.Property<string>("AnalysisTypes")
+                    b.Property<string>("InspectionTargetName")
                         .HasColumnType("text");
 
                     b.Property<string>("InspectionType")
@@ -146,9 +149,6 @@ namespace Api.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
-
-                    b.Property<string>("TaskDescription")
-                        .HasColumnType("text");
 
                     b.Property<float?>("VideoDuration")
                         .HasColumnType("real");
@@ -248,6 +248,10 @@ namespace Api.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.Property<string>("SourceId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AutoScheduleFrequencyId");
@@ -255,6 +259,8 @@ namespace Api.Migrations
                     b.HasIndex("InspectionAreaId");
 
                     b.HasIndex("LastSuccessfulRunId");
+
+                    b.HasIndex("SourceId");
 
                     b.ToTable("MissionDefinitions");
                 });
@@ -333,9 +339,6 @@ namespace Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("text");
 
-                    b.Property<string>("AnalysisTypes")
-                        .HasColumnType("text");
-
                     b.Property<string>("Description")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
@@ -352,6 +355,9 @@ namespace Api.Migrations
                     b.Property<string>("MissionRunId")
                         .HasColumnType("text");
 
+                    b.Property<int?>("PoseId")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime?>("StartTime")
                         .HasColumnType("timestamp with time zone");
 
@@ -360,6 +366,10 @@ namespace Api.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("TagId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("TagLink")
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
@@ -468,14 +478,22 @@ namespace Api.Migrations
                     b.ToTable("Robots");
                 });
 
-            modelBuilder.Entity("Api.Database.Models.TagInspectionMetadata", b =>
+            modelBuilder.Entity("Api.Database.Models.Source", b =>
                 {
-                    b.Property<string>("TagId")
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("text");
 
-                    b.HasKey("TagId");
+                    b.Property<string>("CustomMissionTasks")
+                        .HasColumnType("text");
 
-                    b.ToTable("TagInspectionMetadata");
+                    b.Property<string>("SourceId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Sources");
                 });
 
             modelBuilder.Entity("Api.Database.Models.UserInfo", b =>
@@ -491,6 +509,16 @@ namespace Api.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("UserInfos");
+                });
+
+            modelBuilder.Entity("Api.Services.MissionLoaders.TagInspectionMetadata", b =>
+                {
+                    b.Property<string>("TagId")
+                        .HasColumnType("text");
+
+                    b.HasKey("TagId");
+
+                    b.ToTable("TagInspectionMetadata");
                 });
 
             modelBuilder.Entity("Api.Database.Models.AccessRole", b =>
@@ -682,175 +710,11 @@ namespace Api.Migrations
                         .WithMany()
                         .HasForeignKey("LastSuccessfulRunId");
 
-                    b.OwnsMany("Api.Database.Models.TaskDefinition", "Tasks", b1 =>
-                        {
-                            b1.Property<string>("MissionDefinitionId")
-                                .HasColumnType("text");
-
-                            b1.Property<int>("Index")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("integer");
-
-                            NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<int>("Index"));
-
-                            b1.Property<string>("AnalysisTypes")
-                                .IsRequired()
-                                .HasColumnType("text");
-
-                            b1.Property<string>("Description")
-                                .HasMaxLength(500)
-                                .HasColumnType("character varying(500)");
-
-                            b1.Property<string>("SensorType")
-                                .IsRequired()
-                                .HasColumnType("text");
-
-                            b1.Property<string>("TagId")
-                                .HasMaxLength(200)
-                                .HasColumnType("character varying(200)");
-
-                            b1.Property<float?>("VideoDuration")
-                                .HasColumnType("real");
-
-                            b1.HasKey("MissionDefinitionId", "Index");
-
-                            b1.ToTable("TaskDefinition");
-
-                            b1.WithOwner()
-                                .HasForeignKey("MissionDefinitionId");
-
-                            b1.OwnsOne("Api.Database.Models.Pose", "RobotPose", b2 =>
-                                {
-                                    b2.Property<string>("TaskDefinitionMissionDefinitionId")
-                                        .HasColumnType("text");
-
-                                    b2.Property<int>("TaskDefinitionIndex")
-                                        .HasColumnType("integer");
-
-                                    b2.HasKey("TaskDefinitionMissionDefinitionId", "TaskDefinitionIndex");
-
-                                    b2.ToTable("TaskDefinition");
-
-                                    b2.WithOwner()
-                                        .HasForeignKey("TaskDefinitionMissionDefinitionId", "TaskDefinitionIndex");
-
-                                    b2.OwnsOne("Api.Database.Models.Orientation", "Orientation", b3 =>
-                                        {
-                                            b3.Property<string>("PoseTaskDefinitionMissionDefinitionId")
-                                                .HasColumnType("text");
-
-                                            b3.Property<int>("PoseTaskDefinitionIndex")
-                                                .HasColumnType("integer");
-
-                                            b3.Property<float>("W")
-                                                .HasColumnType("real");
-
-                                            b3.Property<float>("X")
-                                                .HasColumnType("real");
-
-                                            b3.Property<float>("Y")
-                                                .HasColumnType("real");
-
-                                            b3.Property<float>("Z")
-                                                .HasColumnType("real");
-
-                                            b3.HasKey("PoseTaskDefinitionMissionDefinitionId", "PoseTaskDefinitionIndex");
-
-                                            b3.ToTable("TaskDefinition");
-
-                                            b3.WithOwner()
-                                                .HasForeignKey("PoseTaskDefinitionMissionDefinitionId", "PoseTaskDefinitionIndex");
-                                        });
-
-                                    b2.OwnsOne("Api.Database.Models.Position", "Position", b3 =>
-                                        {
-                                            b3.Property<string>("PoseTaskDefinitionMissionDefinitionId")
-                                                .HasColumnType("text");
-
-                                            b3.Property<int>("PoseTaskDefinitionIndex")
-                                                .HasColumnType("integer");
-
-                                            b3.Property<float>("X")
-                                                .HasColumnType("real");
-
-                                            b3.Property<float>("Y")
-                                                .HasColumnType("real");
-
-                                            b3.Property<float>("Z")
-                                                .HasColumnType("real");
-
-                                            b3.HasKey("PoseTaskDefinitionMissionDefinitionId", "PoseTaskDefinitionIndex");
-
-                                            b3.ToTable("TaskDefinition");
-
-                                            b3.WithOwner()
-                                                .HasForeignKey("PoseTaskDefinitionMissionDefinitionId", "PoseTaskDefinitionIndex");
-                                        });
-
-                                    b2.Navigation("Orientation")
-                                        .IsRequired();
-
-                                    b2.Navigation("Position")
-                                        .IsRequired();
-                                });
-
-                            b1.OwnsOne("Api.Database.Models.Position", "TargetPosition", b2 =>
-                                {
-                                    b2.Property<string>("TaskDefinitionMissionDefinitionId")
-                                        .HasColumnType("text");
-
-                                    b2.Property<int>("TaskDefinitionIndex")
-                                        .HasColumnType("integer");
-
-                                    b2.Property<float>("X")
-                                        .HasColumnType("real");
-
-                                    b2.Property<float>("Y")
-                                        .HasColumnType("real");
-
-                                    b2.Property<float>("Z")
-                                        .HasColumnType("real");
-
-                                    b2.HasKey("TaskDefinitionMissionDefinitionId", "TaskDefinitionIndex");
-
-                                    b2.ToTable("TaskDefinition");
-
-                                    b2.WithOwner()
-                                        .HasForeignKey("TaskDefinitionMissionDefinitionId", "TaskDefinitionIndex");
-                                });
-
-                            b1.OwnsOne("Api.Services.Models.IsarZoomDescription", "ZoomDescription", b2 =>
-                                {
-                                    b2.Property<string>("TaskDefinitionMissionDefinitionId")
-                                        .HasColumnType("text");
-
-                                    b2.Property<int>("TaskDefinitionIndex")
-                                        .HasColumnType("integer");
-
-                                    b2.Property<double>("ObjectHeight")
-                                        .HasColumnType("double precision")
-                                        .HasJsonPropertyName("objectHeight");
-
-                                    b2.Property<double>("ObjectWidth")
-                                        .HasColumnType("double precision")
-                                        .HasJsonPropertyName("objectWidth");
-
-                                    b2.HasKey("TaskDefinitionMissionDefinitionId", "TaskDefinitionIndex");
-
-                                    b2.ToTable("TaskDefinition");
-
-                                    b2.WithOwner()
-                                        .HasForeignKey("TaskDefinitionMissionDefinitionId", "TaskDefinitionIndex");
-                                });
-
-                            b1.Navigation("RobotPose")
-                                .IsRequired();
-
-                            b1.Navigation("TargetPosition")
-                                .IsRequired();
-
-                            b1.Navigation("ZoomDescription");
-                        });
+                    b.HasOne("Api.Database.Models.Source", "Source")
+                        .WithMany()
+                        .HasForeignKey("SourceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("AutoScheduleFrequency");
 
@@ -858,7 +722,7 @@ namespace Api.Migrations
 
                     b.Navigation("LastSuccessfulRun");
 
-                    b.Navigation("Tasks");
+                    b.Navigation("Source");
                 });
 
             modelBuilder.Entity("Api.Database.Models.MissionRun", b =>
@@ -1039,7 +903,7 @@ namespace Api.Migrations
                     b.Navigation("Documentation");
                 });
 
-            modelBuilder.Entity("Api.Database.Models.TagInspectionMetadata", b =>
+            modelBuilder.Entity("Api.Services.MissionLoaders.TagInspectionMetadata", b =>
                 {
                     b.OwnsOne("Api.Services.Models.IsarZoomDescription", "ZoomDescription", b1 =>
                         {

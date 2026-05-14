@@ -4,8 +4,20 @@ namespace Api.Mqtt.MessageModels
 {
     public class SaraAnalysisResultMessage : MqttMessage
     {
-        [JsonPropertyName("inspection_id")]
-        public required string InspectionId { get; set; }
+        [JsonPropertyName("inspection_ids")]
+        public required List<string> InspectionIds { get; set; }
+
+        [JsonPropertyName("analysis_group_id")]
+        public string? AnalysisGroupId { get; set; }
+
+        [JsonPropertyName("workflow_id")]
+        public required Guid WorkflowId { get; set; }
+
+        [JsonPropertyName("analysis_run_id")]
+        public required Guid AnalysisRunId { get; set; }
+
+        [JsonPropertyName("analysis_id")]
+        public required Guid AnalysisId { get; set; }
 
         [JsonPropertyName("analysisType")]
         public required string AnalysisType { get; set; }
@@ -23,12 +35,12 @@ namespace Api.Mqtt.MessageModels
         public string? Warning { get; set; }
 
         [JsonPropertyName("storageAccount")]
-        public required string StorageAccount { get; set; }
+        public string? StorageAccount { get; set; }
 
         [JsonPropertyName("blobContainer")]
-        public required string BlobContainer { get; set; }
+        public string? BlobContainer { get; set; }
 
         [JsonPropertyName("blobName")]
-        public required string BlobName { get; set; }
+        public string? BlobName { get; set; }
     }
 }
