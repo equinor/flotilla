@@ -10,6 +10,8 @@ namespace Api.Database.Models
         [Required]
         public required string AnalysisType { get; set; }
 
+        public string? AnalysisGroupId { get; set; }
+
         public string? Value { get; set; }
 
         public string? Unit { get; set; }
