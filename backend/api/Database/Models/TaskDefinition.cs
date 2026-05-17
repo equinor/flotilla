@@ -63,6 +63,7 @@ namespace Api.Database.Models
                 RobotPose = this.RobotPose,
                 Status = TaskStatus.NotStarted,
                 IsarZoomDescription = this.ZoomDescription,
+                AnalysisTypes = this.AnalysisTypes,
                 Inspection = new Inspection(
                     this.SensorType,
                     this.TargetPosition,
