@@ -100,6 +100,9 @@ namespace Api.Services.Models
         [JsonPropertyName("duration")]
         public float? Duration { get; set; }
 
+        [JsonPropertyName("analysis_types")]
+        public List<string>? AnalysisTypes { get; set; }
+
         public IsarInspectionDefinition(MissionTask missionTask)
         {
             var inspection = missionTask.Inspection!;
@@ -115,6 +118,29 @@ namespace Api.Services.Models
                     : null;
             InspectionDescription = missionTask.Description;
             Duration = inspection.VideoDuration;
+            AnalysisTypes = ToSaraAnalysisKeys(inspection.AnalysisTypes);
+        }
+
+        private static List<string>? ToSaraAnalysisKeys(IList<AnalysisType>? types)
+        {
+            if (types is null || types.Count == 0)
+                return null;
+            var mapped = types
+                .Select(t =>
+                    t switch
+                    {
+                        AnalysisType.Fencilla => "fencilla",
+                        AnalysisType.CLOE => "cloe",
+                        AnalysisType.ThermalReading => "thermal-reading",
+                        AnalysisType.CO2 => "co2",
+                        _ => null,
+                    }
+                )
+                .Where(s => s is not null)
+                .Cast<string>()
+                .Distinct()
+                .ToList();
+            return mapped.Count == 0 ? null : mapped;
         }
     }
 
