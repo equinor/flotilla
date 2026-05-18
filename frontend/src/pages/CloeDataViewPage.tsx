@@ -8,7 +8,7 @@ import { useBackendApi } from 'api/UseBackendApi'
 import { InstallationContext } from 'components/Contexts/InstallationContext'
 import { PlantMap } from './MissionPage/MapPosition/PointillaMapView'
 import { Task } from 'models/Task'
-import { formatBackendDateTimeToDate, formatDateTime } from 'utils/StringFormatting'
+import { formatDateTime } from 'utils/StringFormatting'
 import { TimeseriesLinePlot, TimeseriesLinePlotData } from 'components/Displays/TimeseriesLinePlot'
 import { DescriptionDisplay, TagIdDisplay } from 'components/Displays/TaskDisplay'
 
@@ -141,15 +141,15 @@ export const CloeDataViewPage = () => {
 
     const linePlotData: TimeseriesLinePlotData = recentSphericalGlassMissions.reduce<TimeseriesLinePlotData>(
         (accumulatedData, mission) => {
-            const missionTimestamp: Date = formatBackendDateTimeToDate(
-                mission.endTime ?? mission.startTime ?? mission.creationTime
+            const missionTimestamp = new Date(
+                (mission.endTime ?? mission.startTime ?? mission.creationTime) as unknown as string
             )
             mission.tasks.forEach((task) => {
                 const tagId = task.tagId
                 const rawFillLevel = task.inspection?.analysisResult?.value
-                const sampleTimestamp: Date =
+                const sampleTimestamp =
                     task.endTime || task.startTime
-                        ? formatBackendDateTimeToDate(task.endTime ?? task.startTime!)
+                        ? new Date((task.endTime ?? task.startTime) as unknown as string)
                         : missionTimestamp
                 if (!tagId || !rawFillLevel || !sampleTimestamp) return
                 if (!Object.hasOwn(accumulatedData, tagId)) {
