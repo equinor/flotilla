@@ -145,9 +145,10 @@ export const CloeDataViewPage = () => {
             mission.tasks.forEach((task) => {
                 const tagId = task.tagId
                 const rawFillLevel = task.inspection?.analysisResult?.value
-                const sampleTimestamp: Date = formatBackendDateTimeToDate(
-                    task.endTime ?? task.startTime ?? missionTimestamp
-                )
+                const sampleTimestamp: Date =
+                    task.endTime || task.startTime
+                        ? formatBackendDateTimeToDate(task.endTime ?? task.startTime!)
+                        : missionTimestamp
                 if (!tagId || !rawFillLevel || !sampleTimestamp) return
                 if (!Object.hasOwn(accumulatedData, tagId)) {
                     accumulatedData[tagId] = []
