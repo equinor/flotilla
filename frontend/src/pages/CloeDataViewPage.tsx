@@ -86,6 +86,7 @@ export const CloeDataViewPage = () => {
                 installationCode: installation.installationCode,
                 orderBy: 'EndTime desc, Name',
                 statuses: [MissionStatus.Successful, MissionStatus.PartiallySuccessful],
+                nameSearch: 'Avlesning',
             })
             .then((missionRuns) => {
                 const missions = missionRuns.content
