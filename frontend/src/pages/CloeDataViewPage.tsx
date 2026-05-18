@@ -141,7 +141,9 @@ export const CloeDataViewPage = () => {
 
     const linePlotData: TimeseriesLinePlotData = recentSphericalGlassMissions.reduce<TimeseriesLinePlotData>(
         (accumulatedData, mission) => {
-            const missionTimestamp: Date = mission.endTime ?? mission.startTime ?? mission.creationTime
+            const missionTimestamp: Date = formatBackendDateTimeToDate(
+                mission.endTime ?? mission.startTime ?? mission.creationTime
+            )
             mission.tasks.forEach((task) => {
                 const tagId = task.tagId
                 const rawFillLevel = task.inspection?.analysisResult?.value
