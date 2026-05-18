@@ -81,8 +81,8 @@ export const PendingResultPlaceholder = ({ isLargeImage }: { isLargeImage: boole
 }
 
 const InspectionImageWithPlaceholder = ({ task, isLargeImage }: { task: Task; isLargeImage: boolean }) => {
-    const { fetchImageData } = useInspectionsContext()
-    const { data, isPending, isError } = fetchImageData(task.inspection.isarInspectionId)
+    const { useImageData } = useInspectionsContext()
+    const { data, isPending, isError } = useImageData(task.inspection.isarInspectionId)
     if (isError || !data) {
         const errorMsg = 'No inspection could be found'
         return <TextAsImage isLargeImage={isLargeImage} text={errorMsg} />
@@ -97,8 +97,8 @@ const InspectionImageWithPlaceholder = ({ task, isLargeImage }: { task: Task; is
 }
 
 const InspectionValueWithPlaceholder = ({ task, isLargeImage }: { task: Task; isLargeImage: boolean }) => {
-    const { fetchValueData } = useInspectionsContext()
-    const { data, isPending, isError } = fetchValueData(task.inspection.isarInspectionId)
+    const { useValueData } = useInspectionsContext()
+    const { data, isPending, isError } = useValueData(task.inspection.isarInspectionId)
 
     if (isError || data === undefined) {
         const errorMsg = 'No inspection could be found'

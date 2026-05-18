@@ -16,9 +16,9 @@ interface IValueData {
     isError: boolean
 }
 interface IInspectionsContext {
-    fetchImageData: (inspectionId: string) => IImageData
-    fetchAnalysisData: (inspectionId: string) => IImageData
-    fetchValueData: (inspectionId: string) => IValueData
+    useImageData: (inspectionId: string) => IImageData
+    useAnalysisData: (inspectionId: string) => IImageData
+    useValueData: (inspectionId: string) => IValueData
 }
 
 interface Props {
@@ -26,9 +26,9 @@ interface Props {
 }
 
 const defaultInspectionsContext = {
-    fetchImageData: () => ({ data: undefined, isPending: false, isError: true }),
-    fetchAnalysisData: () => ({ data: undefined, isPending: false, isError: true }),
-    fetchValueData: () => ({ data: undefined, isPending: false, isError: true }),
+    useImageData: () => ({ data: undefined, isPending: false, isError: true }),
+    useAnalysisData: () => ({ data: undefined, isPending: false, isError: true }),
+    useValueData: () => ({ data: undefined, isPending: false, isError: true }),
 }
 
 const InspectionsContext = createContext<IInspectionsContext>(defaultInspectionsContext)
@@ -85,8 +85,7 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
         }
     }, [registerEvent, connectionReady])
 
-    const fetchImageData = (inspectionId: string): IImageData => {
-        // eslint-disable-next-line react-hooks/rules-of-hooks -- pre-existing design issue, tracked in #2698
+    const useImageData = (inspectionId: string): IImageData => {
         const result = useQuery({
             queryKey: ['fetchInspectionData', inspectionId],
             queryFn: async () => {
@@ -101,8 +100,7 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
         return { data: result.data, isPending: result.isPending, isError: result.isError }
     }
 
-    const fetchAnalysisData = (inspectionId: string): IImageData => {
-        // eslint-disable-next-line react-hooks/rules-of-hooks -- pre-existing design issue, tracked in #2698
+    const useAnalysisData = (inspectionId: string): IImageData => {
         const result = useQuery({
             queryKey: ['fetchAnalysisData', inspectionId],
             queryFn: async () => {
@@ -116,8 +114,7 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
         return { data: result.data, isPending: result.isPending, isError: result.isError }
     }
 
-    const fetchValueData = (inspectionId: string): IValueData => {
-        // eslint-disable-next-line react-hooks/rules-of-hooks -- pre-existing design issue, tracked in #2698
+    const useValueData = (inspectionId: string): IValueData => {
         const result = useQuery({
             queryKey: ['fetchValueData', inspectionId],
             queryFn: async () => {
@@ -134,9 +131,9 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
     return (
         <InspectionsContext.Provider
             value={{
-                fetchImageData,
-                fetchAnalysisData,
-                fetchValueData,
+                useImageData,
+                useAnalysisData,
+                useValueData,
             }}
         >
             {children}

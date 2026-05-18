@@ -27,8 +27,8 @@ const StyledImage = styled.img<{ $otherContentHeight?: string }>`
     border: none;
 `
 const AnalysisImage = ({ inspectionId }: { inspectionId: string }) => {
-    const { fetchAnalysisData } = useInspectionsContext()
-    const { data, isPending } = fetchAnalysisData(inspectionId)
+    const { useAnalysisData } = useInspectionsContext()
+    const { data, isPending } = useAnalysisData(inspectionId)
 
     if (isPending) return <PendingResultPlaceholder isLargeImage={true} />
     if (!data) return <TextAsImage isLargeImage={true} text="No inspection could be found" />
