@@ -103,6 +103,8 @@ export const TimeseriesLinePlot = ({ data, yLabel }: Props) => {
                 })),
                 borderColor,
                 backgroundColor,
+                pointRadius: 4,
+                pointHoverRadius: 6,
             }
         }
     )
