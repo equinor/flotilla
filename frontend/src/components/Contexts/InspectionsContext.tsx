@@ -1,4 +1,4 @@
-import { createContext, FC, useContext, useEffect } from 'react'
+import { createContext, FC, useContext, useEffect, useRef } from 'react'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { SaraAnalysisResultReady, SaraInspectionVisualizationReady } from 'models/Inspection'
 import { useQuery } from '@tanstack/react-query'
@@ -37,14 +37,29 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
     const { registerEvent, connectionReady } = useSignalRContext()
     const backendApi = useBackendApi()
 
+    // Keep a stable ref to backendApi so callbacks don't capture a stale closure
+    const backendApiRef = useRef(backendApi)
+    useEffect(() => {
+        backendApiRef.current = backendApi
+    }, [backendApi])
+
     useEffect(() => {
         if (connectionReady) {
             registerEvent(SignalREventLabels.inspectionVisualizationReady, (username: string, message: string) => {
                 const inspectionVisualizationData: SaraInspectionVisualizationReady = JSON.parse(message)
+                const inspectionId = inspectionVisualizationData.inspectionId
                 queryClient.invalidateQueries({
-                    queryKey: ['fetchInspectionData', inspectionVisualizationData.inspectionId],
+                    queryKey: ['fetchInspectionData', inspectionId],
                 })
-                fetchImageData(inspectionVisualizationData.inspectionId)
+                queryClient.fetchQuery({
+                    queryKey: ['fetchInspectionData', inspectionId],
+                    queryFn: async () => {
+                        const imageBlob = await backendApiRef.current.getInspection(inspectionId)
+                        return URL.createObjectURL(imageBlob)
+                    },
+                    retry: 1,
+                    staleTime: 10 * 60 * 1000,
+                })
             })
         }
     }, [registerEvent, connectionReady])
@@ -53,10 +68,19 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
         if (connectionReady) {
             registerEvent(SignalREventLabels.analysisResultReady, (username: string, message: string) => {
                 const analysisResultData: SaraAnalysisResultReady = JSON.parse(message)
+                const inspectionId = analysisResultData.inspectionId
                 queryClient.invalidateQueries({
-                    queryKey: ['fetchAnalysisData', analysisResultData.inspectionId],
+                    queryKey: ['fetchAnalysisData', inspectionId],
                 })
-                fetchAnalysisData(analysisResultData.inspectionId)
+                queryClient.fetchQuery({
+                    queryKey: ['fetchAnalysisData', inspectionId],
+                    queryFn: async () => {
+                        const imageBlob = await backendApiRef.current.getAnalysis(inspectionId)
+                        return URL.createObjectURL(imageBlob)
+                    },
+                    retry: 1,
+                    staleTime: 10 * 60 * 1000,
+                })
             })
         }
     }, [registerEvent, connectionReady])
