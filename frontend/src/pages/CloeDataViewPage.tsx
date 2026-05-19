@@ -78,7 +78,7 @@ export const CloeDataViewPage = () => {
     const { registerEvent, connectionReady } = useSignalRContext()
     const [cloeMissions, setCloeMissions] = useState<Mission[]>([])
     const [latestCloeMission, setLatestCloeMission] = useState<Mission>()
-    const [timeRange, setTimeRange] = useState<'7days' | '1month'>('7days')
+    const [timeRange, setTimeRange] = useState<'7days' | '1month'>('1month')
     const backendApi = useBackendApi()
 
     const fetchMissions = (): Promise<Mission[]> => {
