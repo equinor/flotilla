@@ -379,6 +379,8 @@
     "GoingToRechargingWithMission": "Returning to recharge",
     "PausedToCharge": "Paused for charging",
     "Latest Value": "Latest Value",
-    "Measured oil level throughout the last 7 days": "Measured oil level throughout the last 7 days",
+    "Measured oil level": "Measured oil level",
+    "7 days": "7 days",
+    "1 month": "1 month",
     "Fill [%]": "Fill [%]"
 }

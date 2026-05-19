@@ -379,6 +379,8 @@
     "GoingToRechargingWithMission": "Returnerer for å lade",
     "PausedToCharge": "Pauset for lading",
     "Latest Value": "Siste verdi",
-    "Measured oil level throughout the last 7 days": "Målt oljenivå i løpet av de siste 7 dagene",
+    "Measured oil level": "Målt oljenivå",
+    "7 days": "7 dager",
+    "1 month": "1 måned",
     "Fill [%]": "Fyll [%]"
 }
