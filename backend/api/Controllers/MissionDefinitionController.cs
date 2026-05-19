@@ -178,7 +178,7 @@ namespace Api.Controllers
             }
 
             var missionTasks = customMissionQuery
-                .Tasks.Select((task, index) => new TaskDefinition(task, index))
+                .Tasks.Select((task, index) => new TaskDefinition(task, index + 1))
                 .ToList();
 
             try
