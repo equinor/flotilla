@@ -1,4 +1,4 @@
-import { Chip, Table, Typography } from '@equinor/eds-core-react'
+import { Button, ButtonGroup, Chip, Table, Typography } from '@equinor/eds-core-react'
 import { Mission, MissionStatus } from 'models/Mission'
 import { useContext, useEffect, useState } from 'react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
@@ -78,6 +78,7 @@ export const CloeDataViewPage = () => {
     const { registerEvent, connectionReady } = useSignalRContext()
     const [cloeMissions, setCloeMissions] = useState<Mission[]>([])
     const [latestCloeMission, setLatestCloeMission] = useState<Mission>()
+    const [timeRange, setTimeRange] = useState<'7days' | '1month'>('7days')
     const backendApi = useBackendApi()
 
     const fetchMissions = (): Promise<Mission[]> => {
@@ -130,12 +131,14 @@ export const CloeDataViewPage = () => {
 
     const missionForTableAndMap = latestCloeMission ? sphericalGlassTaskMission(latestCloeMission) : undefined
 
+    const timeRangeCutoff =
+        timeRange === '7days' ? Date.now() - 7 * 24 * 60 * 60 * 1000 : Date.now() - 30 * 24 * 60 * 60 * 1000
+
     const recentSphericalGlassMissions = cloeMissions
         .filter((mission) => {
             const missionTimestamp = mission.endTime ?? mission.startTime ?? mission.creationTime
             if (!missionTimestamp) return false
-            const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
-            return new Date(missionTimestamp).getTime() >= sevenDaysAgo
+            return new Date(missionTimestamp).getTime() >= timeRangeCutoff
         })
         .map(sphericalGlassTaskMission)
 
@@ -172,8 +175,26 @@ export const CloeDataViewPage = () => {
                         <PlantMap plantCode={plantCode} floorId="0" mission={missionForTableAndMap} />
                     )}
                 </StyledTableAndMap>
-                <Typography variant="h4">{TranslateText('Measured oil level throughout the last 7 days')}</Typography>
-                <TimeseriesLinePlot data={linePlotData} yLabel={TranslateText('Fill [%]')} />
+                {recentSphericalGlassMissions.length > 0 && (
+                    <>
+                        <Typography variant="h4">{TranslateText('Measured oil level')}</Typography>
+                        <ButtonGroup>
+                            <Button
+                                variant={timeRange === '7days' ? 'contained' : 'outlined'}
+                                onClick={() => setTimeRange('7days')}
+                            >
+                                {TranslateText('7 days')}
+                            </Button>
+                            <Button
+                                variant={timeRange === '1month' ? 'contained' : 'outlined'}
+                                onClick={() => setTimeRange('1month')}
+                            >
+                                {TranslateText('1 month')}
+                            </Button>
+                        </ButtonGroup>
+                        <TimeseriesLinePlot data={linePlotData} yLabel={TranslateText('Fill [%]')} />
+                    </>
+                )}
             </StyledCardsWidth>
         </StyledPage>
     )
