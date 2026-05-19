@@ -12,6 +12,15 @@ import { formatDateTime } from 'utils/StringFormatting'
 import { TimeseriesLinePlot, TimeseriesLinePlotData } from 'components/Displays/TimeseriesLinePlot'
 import { DescriptionDisplay, TagIdDisplay } from 'components/Displays/TaskDisplay'
 
+enum TimeRange {
+    SevenDays = '7days',
+    OneMonth = '1month',
+}
+
+enum CloeMissionNames {
+    Avlesning = 'Avlesning',
+}
+
 enum CloeAnalysableDescriptions {
     SphericalGlass = 'Spherical glass',
 }
@@ -57,7 +66,7 @@ const CloeDataTable = ({ tasks }: { tasks: Task[] }) => {
                                 </Table.Cell>
                             ) : (
                                 <Table.Cell>
-                                    <Typography>Analysis result not available</Typography>
+                                    <Typography>{TranslateText('Analysis result not available')}</Typography>
                                 </Table.Cell>
                             )}
                             {task.endTime && (
@@ -77,8 +86,7 @@ export const CloeDataViewPage = () => {
     const { installation } = useContext(InstallationContext)
     const { registerEvent, connectionReady } = useSignalRContext()
     const [cloeMissions, setCloeMissions] = useState<Mission[]>([])
-    const [latestCloeMission, setLatestCloeMission] = useState<Mission>()
-    const [timeRange, setTimeRange] = useState<'7days' | '1month'>('1month')
+    const [timeRange, setTimeRange] = useState<TimeRange>(TimeRange.OneMonth)
     const backendApi = useBackendApi()
 
     const fetchMissions = (): Promise<Mission[]> => {
@@ -87,7 +95,7 @@ export const CloeDataViewPage = () => {
                 installationCode: installation.installationCode,
                 orderBy: 'EndTime desc, Name',
                 statuses: [MissionStatus.Successful, MissionStatus.PartiallySuccessful],
-                nameSearch: 'Avlesning',
+                nameSearch: CloeMissionNames.Avlesning,
             })
             .then((missionRuns) => {
                 const missions = missionRuns.content
@@ -98,30 +106,6 @@ export const CloeDataViewPage = () => {
             })
     }
 
-    useEffect(() => {
-        fetchMissions().then((missions) => {
-            setCloeMissions(missions)
-        })
-    }, [installation.installationCode])
-
-    useEffect(() => {
-        if (cloeMissions.length > 0) {
-            setLatestCloeMission(cloeMissions[0])
-        }
-    }, [cloeMissions])
-
-    useEffect(() => {
-        if (connectionReady) {
-            registerEvent(SignalREventLabels.analysisResultReady, () => {
-                fetchMissions().then((missions) => {
-                    setCloeMissions(missions)
-                })
-            })
-        }
-    }, [registerEvent, connectionReady])
-
-    const plantCode = latestCloeMission?.inspectionArea.plantCode ?? undefined
-
     const sphericalGlassTaskMission = (mission: Mission): Mission => ({
         ...mission,
         tasks: mission.tasks
@@ -129,18 +113,39 @@ export const CloeDataViewPage = () => {
             .map((task, index) => ({ ...task, taskOrder: index })),
     })
 
-    const missionForTableAndMap = latestCloeMission ? sphericalGlassTaskMission(latestCloeMission) : undefined
+    const filterCloeMissions = (missions: Mission[]) =>
+        missions.map(sphericalGlassTaskMission).filter((m) => m.tasks.length > 0)
 
-    const timeRangeCutoff =
-        timeRange === '7days' ? Date.now() - 7 * 24 * 60 * 60 * 1000 : Date.now() - 30 * 24 * 60 * 60 * 1000
-
-    const recentSphericalGlassMissions = cloeMissions
-        .filter((mission) => {
-            const missionTimestamp = mission.endTime ?? mission.startTime ?? mission.creationTime
-            if (!missionTimestamp) return false
-            return new Date(missionTimestamp).getTime() >= timeRangeCutoff
+    useEffect(() => {
+        fetchMissions().then((missions) => {
+            setCloeMissions(filterCloeMissions(missions))
         })
-        .map(sphericalGlassTaskMission)
+    }, [installation.installationCode])
+
+    useEffect(() => {
+        if (connectionReady) {
+            registerEvent(SignalREventLabels.analysisResultReady, () => {
+                fetchMissions().then((missions) => {
+                    setCloeMissions(filterCloeMissions(missions))
+                })
+            })
+        }
+    }, [registerEvent, connectionReady])
+
+    const latestCloeMission = cloeMissions[0]
+    const plantCode = latestCloeMission?.inspectionArea.plantCode
+
+    const getTimeRangeCutoff = (range: TimeRange): number => {
+        const millisecondsInADay = 24 * 60 * 60 * 1000
+        const days = range === TimeRange.SevenDays ? 7 : 30
+        return Date.now() - days * millisecondsInADay
+    }
+
+    const recentSphericalGlassMissions = cloeMissions.filter((mission) => {
+        const missionTimestamp = mission.endTime ?? mission.startTime ?? mission.creationTime
+        if (!missionTimestamp) return false
+        return new Date(missionTimestamp).getTime() >= getTimeRangeCutoff(timeRange)
+    })
 
     const linePlotData: TimeseriesLinePlotData = recentSphericalGlassMissions.reduce<TimeseriesLinePlotData>(
         (accumulatedData, mission) => {
@@ -168,31 +173,35 @@ export const CloeDataViewPage = () => {
     return (
         <StyledPage>
             <StyledCardsWidth>
-                <Typography variant="h2">Data View for Constant Level Oilers</Typography>
+                <Typography variant="h2">{TranslateText('Data View for Constant Level Oilers')}</Typography>
                 <StyledTableAndMap>
-                    {missionForTableAndMap && <CloeDataTable tasks={missionForTableAndMap.tasks} />}
-                    {plantCode && missionForTableAndMap && (
-                        <PlantMap plantCode={plantCode} floorId="0" mission={missionForTableAndMap} />
+                    {latestCloeMission && <CloeDataTable tasks={latestCloeMission.tasks} />}
+                    {plantCode && latestCloeMission && (
+                        <PlantMap plantCode={plantCode} floorId="0" mission={latestCloeMission} />
                     )}
                 </StyledTableAndMap>
-                {recentSphericalGlassMissions.length > 0 && (
+                {cloeMissions.length > 0 && (
                     <>
                         <Typography variant="h4">{TranslateText('Measured oil level')}</Typography>
                         <ButtonGroup>
                             <Button
-                                variant={timeRange === '7days' ? 'contained' : 'outlined'}
-                                onClick={() => setTimeRange('7days')}
+                                variant={timeRange === TimeRange.SevenDays ? 'contained' : 'outlined'}
+                                onClick={() => setTimeRange(TimeRange.SevenDays)}
                             >
                                 {TranslateText('7 days')}
                             </Button>
                             <Button
-                                variant={timeRange === '1month' ? 'contained' : 'outlined'}
-                                onClick={() => setTimeRange('1month')}
+                                variant={timeRange === TimeRange.OneMonth ? 'contained' : 'outlined'}
+                                onClick={() => setTimeRange(TimeRange.OneMonth)}
                             >
                                 {TranslateText('1 month')}
                             </Button>
                         </ButtonGroup>
-                        <TimeseriesLinePlot data={linePlotData} yLabel={TranslateText('Fill [%]')} />
+                        {recentSphericalGlassMissions.length > 0 ? (
+                            <TimeseriesLinePlot data={linePlotData} yLabel={TranslateText('Fill [%]')} />
+                        ) : (
+                            <Typography>{TranslateText('No data available in the selected time range')}</Typography>
+                        )}
                     </>
                 )}
             </StyledCardsWidth>

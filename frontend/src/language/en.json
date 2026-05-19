@@ -382,5 +382,8 @@
     "Measured oil level": "Measured oil level",
     "7 days": "7 days",
     "1 month": "1 month",
-    "Fill [%]": "Fill [%]"
+    "Fill [%]": "Fill [%]",
+    "No data available in the selected time range": "No data available in the selected time range",
+    "Data View for Constant Level Oilers": "Data View for Constant Level Oilers",
+    "Analysis result not available": "Analysis result not available"
 }
