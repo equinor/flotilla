@@ -1,4 +1,5 @@
-import { Button, Icon, TopBar, Typography } from '@equinor/eds-core-react'
+import { Button, Icon, TopBar } from '@equinor/eds-core-react'
+import { tokens } from '@equinor/eds-tokens'
 import styled from 'styled-components'
 import { SelectLanguage } from 'components/Header/LanguageSelector'
 import { Icons } from 'utils/icons'
@@ -13,15 +14,32 @@ import { Installation } from 'models/Installation'
 const StyledTopBar = styled(TopBar)`
     align-items: center;
     box-shadow: none;
+    border-bottom: 1px solid ${tokens.colors.ui.background__medium.hex};
+    background: ${tokens.colors.ui.background__default.hex};
+    height: 56px;
+    padding: 0 2rem;
     @media (max-width: ${phone_width}) {
         grid-column-gap: 12px;
+        padding: 0 1rem;
     }
-    height: fit-content;
 `
-const StyledWrapper = styled.div`
-    display: flex;
-    flex-direction: row;
-    align-items: center;
+const BrandName = styled.span`
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: ${tokens.colors.text.static_icons__default.hex};
+    cursor: pointer;
+`
+const InstallationName = styled.span`
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: ${tokens.colors.text.static_icons__tertiary.hex};
+    margin-left: 12px;
+    padding-left: 12px;
+    border-left: 1px solid ${tokens.colors.ui.background__medium.hex};
 `
 const IconStyle = styled.div`
     display: flex;
@@ -41,10 +59,9 @@ const StyledAlertList = styled.div`
     align-items: center;
     gap: 0.5rem;
 `
-const StyledTopBarHeader = styled.div`
+const BrandWrapper = styled.div`
     display: flex;
-    flex-direction: row;
-    gap: 4px;
+    align-items: center;
 `
 
 interface Props {
@@ -58,24 +75,12 @@ export const Header = ({ alertDict, installation }: Props) => {
     return (
         <>
             <StyledTopBar id={FrontPageSectionId.TopBar}>
-                <StyledWrapper>
-                    <TopBar.Header onClick={() => navigate(`/${installation?.installationCode || ''}`)}>
-                        <StyledTopBarHeader>
-                            <HandPointer>
-                                <Typography variant="body_short_bold" color="text-primary">
-                                    Flotilla
-                                </Typography>
-                            </HandPointer>
-                            {installation && (
-                                <>
-                                    <Typography variant="body_short" color="text-primary">
-                                        {`| ${installation.name}`}
-                                    </Typography>
-                                </>
-                            )}
-                        </StyledTopBarHeader>
-                    </TopBar.Header>
-                </StyledWrapper>
+                <TopBar.Header onClick={() => navigate(`/${installation?.installationCode || ''}`)}>
+                    <BrandWrapper>
+                        <BrandName>Flotilla</BrandName>
+                        {installation && <InstallationName>{installation.name}</InstallationName>}
+                    </BrandWrapper>
+                </TopBar.Header>
                 <TopBar.Actions>
                     <IconStyle>
                         {alertDict && <AlertIcon />}

@@ -33,7 +33,7 @@ const StyledText = styled.div`
 const StyledDockButton = styled(Button)`
     height: auto;
     min-height: ${tokens.shape.button.minHeight};
-    background-color: white;
+    white-space: nowrap;
 `
 const ContainButton = styled.div`
     display: block;
@@ -159,7 +159,7 @@ export const StopRobotDialog = () => {
     return (
         <>
             <ContainButton>
-                <StyledDockButton color="danger" variant="outlined" onClick={openDialog}>
+                <StyledDockButton color="danger" variant="contained" onClick={openDialog}>
                     {!dockActivated ? (
                         <>{TranslateText('Send robots to dock')}</>
                     ) : (
