@@ -38,13 +38,13 @@ export const StyledPage = styled.div`
     flex-wrap: wrap;
     justify-content: start;
     flex-direction: column;
-    gap: 1rem;
-    padding: 2rem;
+    gap: 2rem;
+    padding: 2.5rem 3rem;
     @media (max-width: ${phone_width}) {
-        padding: 0.7rem;
+        padding: 1rem;
     }
     min-height: calc(100vh - 65px);
-    background-color: ${tokens.colors.ui.background__light.hex};
+    background-color: ${tokens.colors.ui.background__default.hex};
 `
 export const StyledLoading = styled.div`
     display: flex;
@@ -61,9 +61,11 @@ export const StyledPagination = styled(Pagination)`
     background-color: ${tokens.colors.ui.background__default.hex};
 `
 export const AttributeTitleTypography = styled(Typography)`
-    variant: meta;
-    fontsize: 14;
-    color: ${tokens.colors.text.static_icons__secondary.hex};
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: ${tokens.colors.text.static_icons__tertiary.hex};
 `
 export const StyledTable = styled(Table)`
     display: block;

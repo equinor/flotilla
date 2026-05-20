@@ -1,4 +1,5 @@
-import { Button, Icon, Table, Typography } from '@equinor/eds-core-react'
+import { Button, Icon, Table } from '@equinor/eds-core-react'
+import { tokens } from '@equinor/eds-tokens'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
 import { StyledTableBody } from 'components/Styles/StyledComponents'
@@ -10,6 +11,16 @@ import { AutoScheduleMissionTableRow } from './AutoScheduleMissionTableRow'
 
 const StyledNextAutoMission = styled.div`
     margin-top: 30px;
+`
+
+const SectionTitle = styled.p`
+    margin: 0 0 10px 0;
+    font-family: Equinor, sans-serif;
+    font-size: 0.92rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: ${tokens.colors.text.static_icons__default.hex};
 `
 
 const StyledTable = styled(Table)`
@@ -82,7 +93,7 @@ export const NextAutoScheduleMissionView = () => {
         <>
             {timeMissionPairs.length > 0 && (
                 <StyledNextAutoMission>
-                    <Typography variant="h5">{TranslateText('Next auto scheduled mission for today')}</Typography>
+                    <SectionTitle>{TranslateText('Next auto scheduled mission for today')}</SectionTitle>
                     <StyledTable>
                         <StyledTableBody>
                             {!showMore ? (

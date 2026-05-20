@@ -3,7 +3,6 @@ import { InstallationContext } from 'components/Contexts/InstallationContext'
 import { Header } from 'components/Header/Header'
 import { NavBar } from 'components/Header/NavBar'
 import { useContext } from 'react'
-import { Card } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 import { tokens } from '@equinor/eds-tokens'
@@ -26,25 +25,38 @@ import { MissionStatus } from 'models/Mission'
 const MissionControlStyle = styled.div`
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.5rem;
+`
+const SectionLabel = styled.p`
+    margin: 0;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: ${tokens.colors.text.static_icons__tertiary.hex};
 `
 const MissionControlBody = styled.div`
     display: flex;
     flex-wrap: wrap;
     align-items: flex-start;
-    gap: 16px;
+    gap: 24px;
 `
-const MissionControlCardStyle = styled(Card)`
+const MissionControlCardStyle = styled.div`
     display: flex;
     gap: 0px;
     flex-direction: column;
+    background: ${tokens.colors.ui.background__default.hex};
+    border-left: 4px solid ${tokens.colors.interactive.primary__resting.hex};
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.1),
+        0 12px 32px rgba(0, 0, 0, 0.08);
 
     @media (min-width: 960px) {
         width: 960px;
     }
 
     @media (max-width: 960px) {
-        max-width: 90hw;
+        max-width: 90vw;
         align-self: stretch;
     }
 `
@@ -159,10 +171,7 @@ const MissionControlCard = ({ robot }: { robot: RobotWithoutTelemetry }) => {
     }
 
     return (
-        <MissionControlCardStyle
-            id={FrontPageSectionId.RobotCard + robot.id}
-            style={{ boxShadow: tokens.elevation.raised }}
-        >
+        <MissionControlCardStyle id={FrontPageSectionId.RobotCard + robot.id}>
             <OngoingMissionControlCardStyle>
                 <RobotCard robot={robot} />
                 {missionCard}
@@ -174,7 +183,7 @@ const MissionControlCard = ({ robot }: { robot: RobotWithoutTelemetry }) => {
 
 const MissionControlPlaceholderCard = () => {
     return (
-        <MissionControlCardStyle style={{ boxShadow: tokens.elevation.raised }}>
+        <MissionControlCardStyle>
             <OngoingMissionControlCardStyle>
                 <RobotCardPlaceholder />
                 <OngoingMissionPlaceholderCard />

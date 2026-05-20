@@ -88,6 +88,13 @@ const StyledGhostButton = styled(Button)`
     height: auto;
     min-height: ${tokens.shape.button.minHeight};
     padding: 0;
+    border-radius: 0;
+    border-bottom: 3px solid transparent;
+    transition: border-color 0.15s ease;
+    &&:hover {
+        background: none;
+        border-bottom-color: ${tokens.colors.interactive.primary__hover_alt.hex};
+    }
 `
 const HiddenOnSmallScreen = styled.div`
     @media (max-width: 960px) {

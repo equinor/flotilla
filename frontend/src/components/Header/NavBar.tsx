@@ -1,4 +1,5 @@
-import { Button, Icon, Menu, Tabs, Typography } from '@equinor/eds-core-react'
+import { Button, Icon, Menu, Typography } from '@equinor/eds-core-react'
+import { tokens } from '@equinor/eds-tokens'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useContext, useState } from 'react'
 import { Link, matchPath, useNavigate } from 'react-router-dom'
@@ -12,6 +13,48 @@ import { StopRobotDialog } from 'pages/FrontPage/MissionOverview/StopDialogs'
 const StyledButton = styled(Button)`
     width: 100px;
     border-radius: 4px;
+`
+const NavWrapper = styled.div`
+    background: ${tokens.colors.ui.background__default.hex};
+    border-bottom: 1px solid ${tokens.colors.ui.background__medium.hex};
+    padding: 0 1rem 0 calc(2rem - 14px);
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+`
+const NavLinks = styled.nav`
+    display: flex;
+    align-items: stretch;
+`
+const NavItem = styled(Link)<{ $active: boolean }>`
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    height: 48px;
+    font-family: Equinor, sans-serif;
+    font-size: 0.78rem;
+    font-weight: ${({ $active }) => ($active ? '700' : '600')};
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: ${({ $active }) =>
+        $active ? tokens.colors.interactive.primary__resting.hex : tokens.colors.text.static_icons__default.hex};
+    border-bottom: 3px solid
+        ${({ $active }) => ($active ? tokens.colors.interactive.primary__resting.hex : 'transparent')};
+    text-decoration: none;
+    transition:
+        color 0.15s ease,
+        border-color 0.15s ease;
+    white-space: nowrap;
+    &:hover {
+        color: ${tokens.colors.interactive.primary__resting.hex};
+        border-bottom-color: ${tokens.colors.interactive.primary__hover_alt.hex};
+    }
+`
+const RightContent = styled.div`
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding-right: 0;
 `
 
 const NavBarAsButton = () => {
@@ -74,9 +117,25 @@ const StyledTabHeaderRightContent = styled.div`
 `
 const StyledOngoingMissionsInfo = styled.div`
     display: flex;
-    flex-direction: column;
-    align-items: flex-end;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    background: ${tokens.colors.ui.background__light.hex};
     cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s ease;
+    &:hover {
+        background: ${tokens.colors.interactive.primary__hover_alt.hex};
+    }
+`
+const OngoingDot = styled.span<{ $active: boolean }>`
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: ${({ $active }) =>
+        $active ? tokens.colors.interactive.primary__resting.hex : tokens.colors.text.static_icons__tertiary.hex};
 `
 const StyledNumberOfMissions = styled.div`
     display: flex;
@@ -99,11 +158,10 @@ const OngoingMissionsInfo = ({ goToOngoingTab }: { goToOngoingTab: () => void })
 
     return (
         <StyledOngoingMissionsInfo onClick={goToOngoingTab}>
-            <StyledNumberOfMissions>
-                <Icon name={Icons.Ongoing} size={24} />
-                <Typography variant="h5">{`${ongoingMissions.length} ${TranslateText('Ongoing missions')}`}</Typography>
-            </StyledNumberOfMissions>
-            <Typography variant="body_short">{formattedAreaNames}</Typography>
+            <OngoingDot $active={ongoingMissions.length > 0} />
+            <Typography variant="body_short">
+                {`${ongoingMissions.length} ${TranslateText('Ongoing missions').toLowerCase()}`}
+            </Typography>
         </StyledOngoingMissionsInfo>
     )
 }
@@ -134,65 +192,57 @@ const NavBarAsTabs = () => {
     ])
     const currentPath = routeMatch?.pattern?.path
 
+    const navItems = [
+        {
+            path: '/:installationCode/mission-control',
+            to: `/${installation.installationCode}/mission-control`,
+            label: TranslateText('Mission Control'),
+        },
+        {
+            path: '/:installationCode/inspection-overview',
+            to: `/${installation.installationCode}/inspection-overview`,
+            label: TranslateText('Area Overview'),
+        },
+        {
+            path: '/:installationCode/predefined-missions',
+            to: `/${installation.installationCode}/predefined-missions`,
+            label: TranslateText('Predefined Missions'),
+        },
+        {
+            path: '/:installationCode/history',
+            to: `/${installation.installationCode}/history`,
+            label: TranslateText('Mission History'),
+        },
+        {
+            path: '/:installationCode/auto-schedule',
+            to: `/${installation.installationCode}/auto-schedule`,
+            label: TranslateText('Auto Scheduling'),
+        },
+        {
+            path: '/:installationCode/statistics',
+            to: `/${installation.installationCode}/statistics`,
+            label: TranslateText('Statistics'),
+        },
+    ]
+
     return (
-        <>
-            <SplitLeftAndRightStyle>
-                <Tabs activeTab={currentPath}>
-                    <Tabs.List>
-                        <Tabs.Tab
-                            value="/:installationCode/mission-control"
-                            to={`/${installation.installationCode}/mission-control`}
-                            as={Link}
-                        >
-                            {TranslateText('Mission Control')}
-                        </Tabs.Tab>
-                        <Tabs.Tab
-                            value="/:installationCode/inspection-overview"
-                            to={`/${installation.installationCode}/inspection-overview`}
-                            as={Link}
-                        >
-                            {TranslateText('Area Overview')}
-                        </Tabs.Tab>
-                        <Tabs.Tab
-                            value="/:installationCode/predefined-missions"
-                            to={`/${installation.installationCode}/predefined-missions`}
-                            as={Link}
-                        >
-                            {TranslateText('Predefined Missions')}
-                        </Tabs.Tab>
-                        <Tabs.Tab
-                            value="/:installationCode/history"
-                            to={`/${installation.installationCode}/history`}
-                            as={Link}
-                        >
-                            {TranslateText('Mission History')}
-                        </Tabs.Tab>
-                        <Tabs.Tab
-                            value="/:installationCode/auto-schedule"
-                            to={`/${installation.installationCode}/auto-schedule`}
-                            as={Link}
-                        >
-                            {TranslateText('Auto Scheduling')}
-                        </Tabs.Tab>
-                        <Tabs.Tab
-                            value="/:installationCode/statistics"
-                            to={`/${installation.installationCode}/statistics`}
-                            as={Link}
-                        >
-                            {TranslateText('Statistics')}
-                        </Tabs.Tab>
-                    </Tabs.List>
-                </Tabs>
-                <StyledTabHeaderRightContent>
-                    <OngoingMissionsInfo
-                        goToOngoingTab={() => {
-                            navigate(`/${installation.installationCode}`)
-                        }}
-                    />
-                    <StopRobotDialog />
-                </StyledTabHeaderRightContent>
-            </SplitLeftAndRightStyle>
-        </>
+        <NavWrapper>
+            <NavLinks>
+                {navItems.map(({ path, to, label }) => (
+                    <NavItem key={path} to={to} $active={currentPath === path}>
+                        {label}
+                    </NavItem>
+                ))}
+            </NavLinks>
+            <RightContent>
+                <OngoingMissionsInfo
+                    goToOngoingTab={() => {
+                        navigate(`/${installation.installationCode}`)
+                    }}
+                />
+                <StopRobotDialog />
+            </RightContent>
+        </NavWrapper>
     )
 }
 
