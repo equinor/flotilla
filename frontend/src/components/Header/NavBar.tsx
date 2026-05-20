@@ -59,9 +59,6 @@ const NavBarAsButton = () => {
                 <Menu.Item onClick={() => navigate(`/${installation.installationCode}/auto-schedule`)}>
                     {TranslateText('Auto Scheduling')}
                 </Menu.Item>
-                <Menu.Item onClick={() => navigate(`/${installation.installationCode}/robots`)}>
-                    {TranslateText('Robots')}
-                </Menu.Item>
                 <Menu.Item onClick={() => navigate(`/${installation.installationCode}/statistics`)}>
                     {TranslateText('Statistics')}
                 </Menu.Item>
@@ -133,7 +130,6 @@ const NavBarAsTabs = () => {
         '/:installationCode/predefined-missions',
         '/:installationCode/history',
         '/:installationCode/auto-schedule',
-        '/:installationCode/robots',
         '/:installationCode/statistics',
     ])
     const currentPath = routeMatch?.pattern?.path
@@ -177,13 +173,6 @@ const NavBarAsTabs = () => {
                             as={Link}
                         >
                             {TranslateText('Auto Scheduling')}
-                        </Tabs.Tab>
-                        <Tabs.Tab
-                            value="/:installationCode/robots"
-                            to={`/${installation.installationCode}/robots`}
-                            as={Link}
-                        >
-                            {TranslateText('Robots')}
                         </Tabs.Tab>
                         <Tabs.Tab
                             value="/:installationCode/statistics"
