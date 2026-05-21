@@ -110,11 +110,6 @@ const NavBarAsButton = () => {
     )
 }
 
-const StyledTabHeaderRightContent = styled.div`
-    display: flex;
-    align-items: center;
-    gap: 24px;
-`
 const StyledOngoingMissionsInfo = styled.div`
     display: flex;
     align-items: center;
@@ -137,24 +132,9 @@ const OngoingDot = styled.span<{ $active: boolean }>`
     background: ${({ $active }) =>
         $active ? tokens.colors.interactive.primary__resting.hex : tokens.colors.text.static_icons__tertiary.hex};
 `
-const StyledNumberOfMissions = styled.div`
-    display: flex;
-    text-wrap: nowrap;
-    flex-direction: row;
-`
-const SplitLeftAndRightStyle = styled.div`
-    display: flex;
-    justify-content: space-between;
-`
-
 const OngoingMissionsInfo = ({ goToOngoingTab }: { goToOngoingTab: () => void }) => {
     const { TranslateText } = useLanguageContext()
     const { ongoingMissions } = useMissionsContext()
-
-    const areaNames = new Set(
-        ongoingMissions.map((m) => m.inspectionArea.inspectionAreaName).filter((area) => area !== undefined)
-    )
-    const formattedAreaNames = Array.from(areaNames).join(' | ')
 
     return (
         <StyledOngoingMissionsInfo onClick={goToOngoingTab}>

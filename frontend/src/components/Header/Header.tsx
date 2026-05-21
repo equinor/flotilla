@@ -47,9 +47,6 @@ const IconStyle = styled.div`
     flex-direction: row-reverse;
     gap: 0.8rem;
 `
-const HandPointer = styled.div`
-    cursor: pointer;
-`
 const SelectLanguageWrapper = styled.div`
     margin-left: 1rem;
 `
