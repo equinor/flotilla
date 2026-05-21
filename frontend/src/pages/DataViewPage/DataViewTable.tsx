@@ -71,10 +71,10 @@ export const DataViewTable = ({
                                     </Chip>
                                 </Table.Cell>
                                 <Table.Cell>
-                                    <TagIdDisplay task={task} />
+                                    <TagIdDisplay task={task} index={index} />
                                 </Table.Cell>
                                 <Table.Cell>
-                                    <DescriptionDisplay task={task} />
+                                    <DescriptionDisplay task={task} index={index} />
                                 </Table.Cell>
                                 {task.inspection.analysisResult?.value ? (
                                     <Table.Cell>
