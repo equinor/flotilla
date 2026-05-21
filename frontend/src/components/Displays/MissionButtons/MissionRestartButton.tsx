@@ -87,7 +87,7 @@ export const MissionRestartButton = ({ mission, hasFailedTasks, smallButton }: M
                     return hasFailedTasks ? setIsOpen(!isOpen) : selectRerunOption(ReRunOptions.ReRun)
                 }}
             >
-                <Icon name={smallButton ? Icons.AddOutlined : Icons.Add} size={24} />
+                <Icon name={Icons.Add} size={24} />
                 {!smallButton && TranslateText('Queue mission')}
             </StyledButton>
             <EdsProvider density="compact">

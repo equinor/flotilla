@@ -31,7 +31,7 @@ const StyledHeaderCell = styled(Table.Cell)`
         font-weight: 600;
         letter-spacing: 0.1em;
         text-transform: uppercase;
-        color: ${tokens.colors.text.static_icons__tertiary.hex};
+        color: ${tokens.colors.text.static_icons__default.hex};
         background-color: ${tokens.colors.ui.background__default.hex};
         border-bottom: 2px solid ${tokens.colors.ui.background__medium.hex};
     }
@@ -39,7 +39,7 @@ const StyledHeaderCell = styled(Table.Cell)`
 const StyledRow = styled(Table.Row)`
     transition: background-color 0.12s ease;
     &&:hover {
-        background-color: rgba(0, 0, 0, 0.025);
+        background-color: ${tokens.colors.ui.background__light.hex};
     }
 `
 const TableTitle = styled.p`
