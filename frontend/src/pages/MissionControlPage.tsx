@@ -27,14 +27,6 @@ const MissionControlStyle = styled.div`
     flex-direction: column;
     gap: 1.5rem;
 `
-const SectionLabel = styled.p`
-    margin: 0;
-    font-size: 0.65rem;
-    font-weight: 600;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: ${tokens.colors.text.static_icons__tertiary.hex};
-`
 const MissionControlBody = styled.div`
     display: flex;
     flex-wrap: wrap;

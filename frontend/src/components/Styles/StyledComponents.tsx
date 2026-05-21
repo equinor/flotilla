@@ -28,11 +28,6 @@ export const StyledButton = styled(Button)`
     height: auto;
     min-height: ${tokens.shape.button.minHeight};
 `
-export const TextAlignedButton = styled(Button)`
-    text-align: left;
-    height: auto;
-    padding: 5px 5px;
-`
 export const StyledPage = styled.div`
     display: flex;
     flex-wrap: wrap;

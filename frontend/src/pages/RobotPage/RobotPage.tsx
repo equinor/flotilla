@@ -1,4 +1,4 @@
-import { Button, Icon, Paper, Typography } from '@equinor/eds-core-react'
+import { Button, Icon, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { Header } from 'components/Header/Header'
 import { RobotImage } from 'components/Displays/RobotDisplays/RobotImage'
@@ -7,7 +7,7 @@ import { BatteryStatusDisplay } from 'components/Displays/RobotDisplays/BatteryS
 import { RobotStatusChip } from 'components/Displays/RobotDisplays/RobotStatusIcon'
 import { RobotStatus, RobotWithoutTelemetry } from 'models/Robot'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { StyledPage, VideoStreamSection } from 'components/Styles/StyledComponents'
+import { VideoStreamSection } from 'components/Styles/StyledComponents'
 import { DocumentationSection } from './Documentation'
 import { useMediaStreamContext } from 'components/Contexts/MediaStreamContext'
 import { useContext, useEffect, useState } from 'react'
@@ -25,65 +25,75 @@ import { useBackendApi } from 'api/UseBackendApi'
 import { InstallationContext } from 'components/Contexts/InstallationContext'
 import { useAlertContext } from 'components/Contexts/AlertContext'
 
-const StyledRobotPage = styled(StyledPage)`
-    background-color: ${tokens.colors.ui.background__light.hex};
-    gap: 5px;
-`
-const FullWidthButton = styled(Button)`
-    height: auto;
-    min-height: ${tokens.shape.button.minHeight};
-    text-align: left;
-    align-self: stretch;
-`
-const RobotInfo = styled.div`
+const StyledRobotPage = styled.div`
     display: flex;
+    flex-direction: column;
+    background-color: ${tokens.colors.ui.background__default.hex};
+    min-height: 100vh;
+`
+
+const HeroSection = styled.div`
+    display: flex;
+    flex-direction: row;
     align-items: center;
-    gap: 32px;
-    align-self: stretch;
-    width: 100%;
+    gap: 3rem;
+    padding: 2rem 4rem;
+    background-color: ${tokens.colors.ui.background__light.hex};
+    box-sizing: border-box;
     @media (max-width: ${phone_width}) {
         flex-direction: column;
-    }
-`
-const StatusContent = styled.div`
-    gap: 48px;
-    display: grid;
-    grid-template-columns: auto auto auto;
-    align-self: start;
-    @media (max-width: ${phone_width}) {
+        padding: 1.5rem;
+        gap: 16px;
         align-items: flex-start;
-        grid-template-columns: repeat(1, 70vw);
+    }
+`
+
+const HeroLeft = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+`
+
+const MetricsRow = styled.div`
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    padding: 2rem 4rem;
+    @media (max-width: ${phone_width}) {
+        padding: 1rem 1.5rem;
+    }
+`
+
+const MetricCard = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 140px;
+    padding: 0 2rem;
+    border-left: 1px solid ${tokens.colors.ui.background__medium.hex};
+    &:first-child {
+        padding-left: 0;
+        border-left: none;
+    }
+`
+
+const MetricLabel = styled.span`
+    font-family: Equinor, sans-serif;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: ${tokens.colors.text.static_icons__tertiary.hex};
+`
+
+const ActionsRow = styled.div`
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 0 4rem 2rem 4rem;
+    @media (max-width: ${phone_width}) {
+        padding: 0 1.5rem 1.5rem 1.5rem;
         flex-direction: column;
-        gap: 8px;
-    }
-`
-const StyledContainer = styled(Paper)`
-    padding: 24px;
-    width: fit-content;
-    @media (max-width: ${phone_width}) {
-        width: 90vw;
-    }
-`
-
-const StyledLeftContent = styled.div`
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: flex-start;
-    gap: 8px;
-    align-self: stretch;
-`
-
-const StyledStatusElement = styled.div`
-    display: flex;
-    padding: 2px 6px 4px 6px;
-    flex-direction: column;
-    align-items: flex-start;
-`
-const StyledWideItem = styled(StyledStatusElement)`
-    grid-column: span 2;
-    @media (max-width: ${phone_width}) {
-        grid-column: span 1;
     }
 `
 
@@ -122,14 +132,14 @@ export const RobotPage = ({ robot }: RobotPageProps) => {
 
     const stopButton =
         robot && [RobotStatus.Busy, RobotStatus.Paused].includes(robot.status) ? (
-            <FullWidthButton variant="contained" onClick={toggleSkipMissionDialog}>
+            <Button variant="contained" onClick={toggleSkipMissionDialog}>
                 <Icon
                     name={Icons.StopButton}
                     style={{ color: tokens.colors.interactive.icon_on_interactive_colors.rgba }}
                     size={24}
                 />
                 {TranslateText('Stop')} {robot.name}
-            </FullWidthButton>
+            </Button>
         ) : (
             <></>
         )
@@ -164,70 +174,56 @@ export const RobotPage = ({ robot }: RobotPageProps) => {
             <StyledRobotPage>
                 {robot && (
                     <>
-                        <StyledContainer>
-                            <Typography variant="h1">{robot.name}</Typography>
-                            <RobotInfo>
-                                <StyledLeftContent>
-                                    <RobotImage height="350px" robotType={robot.type} />
-                                    {stopButton}
-                                    {robot && robot.status != RobotStatus.InterventionNeeded && (
-                                        <ReturnHomeButton robot={robot} />
-                                    )}
-                                    {robot && robot.status == RobotStatus.InterventionNeeded && (
-                                        <InterventionNeededButton robot={robot} />
-                                    )}
-                                    {robot && <MaintenanceButton robotId={robot.id} robotStatus={robot.status} />}
-                                </StyledLeftContent>
-                                <StatusContent>
-                                    <StyledStatusElement>
-                                        <Typography variant="caption">{TranslateText('Status')}</Typography>
-                                        <RobotStatusChip status={robot.status} itemSize={24} />
-                                    </StyledStatusElement>
+                        <HeroSection>
+                            <RobotImage height="280px" robotType={robot.type} />
+                            <HeroLeft>
+                                <Typography variant="h1">{robot.name}</Typography>
+                                <RobotStatusChip status={robot.status} itemSize={24} />
+                            </HeroLeft>
+                        </HeroSection>
 
-                                    {robot.status !== RobotStatus.Offline && (
-                                        <>
-                                            <StyledStatusElement>
-                                                <Typography variant="caption">{TranslateText('Battery')}</Typography>
-                                                <BatteryStatusDisplay
-                                                    itemSize={24}
-                                                    batteryLevel={robotBatteryLevel}
-                                                    batteryState={robotBatteryStatus}
-                                                />
-                                            </StyledStatusElement>
-                                            {robotPressureLevel !== undefined && (
-                                                <StyledStatusElement>
-                                                    <Typography variant="caption">
-                                                        {TranslateText('Pressure')}
-                                                    </Typography>
-                                                    <PressureStatusDisplay
-                                                        itemSize={24}
-                                                        pressure={robotPressureLevel}
-                                                    />
-                                                </StyledStatusElement>
-                                            )}
-                                            {robot.type && (
-                                                <StyledStatusElement>
-                                                    <Typography variant="caption">
-                                                        {TranslateText('Robot Model')}
-                                                    </Typography>
-                                                    <Typography style={{ fontSize: '24px' }}>{robot.type}</Typography>
-                                                </StyledStatusElement>
-                                            )}
-                                            {currentInspectionArea && (
-                                                <StyledWideItem>
-                                                    <Typography variant="caption">
-                                                        {TranslateText('Current Inspection Area')}
-                                                    </Typography>
-                                                    <Typography style={{ fontSize: '24px' }}>
-                                                        {currentInspectionArea.inspectionAreaName}
-                                                    </Typography>
-                                                </StyledWideItem>
-                                            )}
-                                        </>
-                                    )}
-                                </StatusContent>
-                            </RobotInfo>
-                        </StyledContainer>
+                        {robot.status !== RobotStatus.Offline && (
+                            <MetricsRow>
+                                <MetricCard>
+                                    <MetricLabel>{TranslateText('Battery')}</MetricLabel>
+                                    <BatteryStatusDisplay
+                                        itemSize={24}
+                                        batteryLevel={robotBatteryLevel}
+                                        batteryState={robotBatteryStatus}
+                                    />
+                                </MetricCard>
+                                {robotPressureLevel !== undefined && (
+                                    <MetricCard>
+                                        <MetricLabel>{TranslateText('Pressure')}</MetricLabel>
+                                        <PressureStatusDisplay itemSize={24} pressure={robotPressureLevel} />
+                                    </MetricCard>
+                                )}
+                                {robot.type && (
+                                    <MetricCard>
+                                        <MetricLabel>{TranslateText('Robot Model')}</MetricLabel>
+                                        <Typography style={{ fontSize: '24px' }}>{robot.type}</Typography>
+                                    </MetricCard>
+                                )}
+                                {currentInspectionArea && (
+                                    <MetricCard>
+                                        <MetricLabel>{TranslateText('Current Inspection Area')}</MetricLabel>
+                                        <Typography style={{ fontSize: '24px' }}>
+                                            {currentInspectionArea.inspectionAreaName}
+                                        </Typography>
+                                    </MetricCard>
+                                )}
+                            </MetricsRow>
+                        )}
+
+                        <ActionsRow>
+                            {stopButton}
+                            {robot.status != RobotStatus.InterventionNeeded && <ReturnHomeButton robot={robot} />}
+                            {robot.status == RobotStatus.InterventionNeeded && (
+                                <InterventionNeededButton robot={robot} />
+                            )}
+                            <MaintenanceButton robotId={robot.id} robotStatus={robot.status} />
+                        </ActionsRow>
+
                         {skipMissionDialog}
                         {robot.documentation && robot.documentation.length > 0 && (
                             <DocumentationSection documentation={robot.documentation} />
@@ -280,13 +276,11 @@ const MaintenanceButton = ({ robotId, robotStatus }: MaintenanceButtonProps) => 
     return (
         <>
             {robotStatus == RobotStatus.Maintenance ? (
-                <FullWidthButton onClick={onReleaseMaintenanceMode}>
-                    {TranslateText(`Release maintenance mode`)}
-                </FullWidthButton>
+                <Button onClick={onReleaseMaintenanceMode}>{TranslateText(`Release maintenance mode`)}</Button>
             ) : (
-                <FullWidthButton color="danger" disabled={isStoppingDueToMaintenance} onClick={onSetMaintenenceMode}>
+                <Button color="danger" disabled={isStoppingDueToMaintenance} onClick={onSetMaintenenceMode}>
                     {TranslateText('Set maintenance mode')}
-                </FullWidthButton>
+                </Button>
             )}
         </>
     )
