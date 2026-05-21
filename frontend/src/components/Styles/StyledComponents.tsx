@@ -81,7 +81,16 @@ export const StyledTableAndMap = styled.div`
 `
 
 export const StyledTableCell = styled(Table.Cell)`
-    background-color: ${tokens.colors.ui.background__default.hex};
+    && {
+        font-family: Equinor, sans-serif;
+        font-size: 0.65rem;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: ${tokens.colors.text.static_icons__default.hex};
+        background-color: ${tokens.colors.ui.background__default.hex};
+        border-bottom: 2px solid ${tokens.colors.ui.background__medium.hex};
+    }
 `
 export const StyledTableBody = styled(Table.Body)`
     background-color: ${tokens.colors.ui.background__light.hex};

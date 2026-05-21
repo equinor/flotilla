@@ -38,7 +38,15 @@ const StyledSearch = styled(Search)`
 `
 const StyledButtonDiv = styled.div`
     display: flex;
-    gap: 1rem;
+    gap: 0.25rem;
+`
+const MutedButton = styled(Button)`
+    && {
+        color: ${tokens.colors.text.static_icons__tertiary.hex};
+    }
+    &&:hover {
+        color: ${tokens.colors.text.static_icons__secondary.hex};
+    }
 `
 const StyledDialog = styled(Dialog)`
     width: calc(100vw * 0.9);
@@ -95,10 +103,9 @@ export const FilterSection = () => {
                         <Icon name={Icons.Filter} size={24} />
                         {TranslateText('Filter')}
                     </Button>
-                    <Button variant="ghost" onClick={onClearFilters}>
-                        <Icon name={Icons.Clear} size={24} />
+                    <MutedButton variant="ghost" onClick={onClearFilters}>
                         {TranslateText('Clear all filters')}
-                    </Button>
+                    </MutedButton>
                 </StyledButtonDiv>
             </StyledHeader>
             <StyledDialog open={isFilteringDialogOpen} isDismissable>
