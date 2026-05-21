@@ -24,6 +24,34 @@ const StyledIcon = styled(Icon)`
     height: 1.3rem;
     width: 1.3rem;
 `
+const StyledHeaderCell = styled(Table.Cell)`
+    && {
+        font-family: Equinor, sans-serif;
+        font-size: 0.65rem;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: ${tokens.colors.text.static_icons__tertiary.hex};
+        background-color: ${tokens.colors.ui.background__default.hex};
+        border-bottom: 2px solid ${tokens.colors.ui.background__medium.hex};
+    }
+`
+const StyledRow = styled(Table.Row)`
+    transition: background-color 0.12s ease;
+    &&:hover {
+        background-color: rgba(0, 0, 0, 0.025);
+    }
+`
+const TableTitle = styled.p`
+    margin: 0 0 14px 0;
+    font-family: Equinor, sans-serif;
+    font-size: 0.92rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: left;
+    color: ${tokens.colors.text.static_icons__default.hex};
+`
 const StyledTable = styled.div`
     display: grid;
     overflow-x: auto;
@@ -37,6 +65,7 @@ const StyledContent = styled.div`
     grid-template-columns: 14px auto;
     align-items: center;
     gap: 4px;
+    color: ${tokens.colors.text.static_icons__secondary.hex};
 `
 const StyledCircle = styled.div`
     width: 13px;
@@ -179,7 +208,7 @@ const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialo
     const noRobotReadyForMissionsText = TranslateText('No robot available')
 
     return (
-        <Table.Row key={mission.id}>
+        <StyledRow key={mission.id}>
             <Table.Cell id={InspectionTableColumns.Status}>{status}</Table.Cell>
             <Table.Cell id={InspectionTableColumns.Name}>
                 <Typography
@@ -210,11 +239,7 @@ const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialo
                                 setMissions([mission])
                             }}
                         >
-                            <StyledIcon
-                                color={`${tokens.colors.interactive.focus.hex}`}
-                                name={Icons.AddOutlined}
-                                size={24}
-                            />
+                            <StyledIcon color={`${tokens.colors.interactive.focus.hex}`} name={Icons.Add} size={24} />
                             {isScheduleButtonDisabled && noRobotReadyForMissionsText}
                         </Button>
                     )}
@@ -227,16 +252,12 @@ const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialo
                                 setMissions([mission])
                             }}
                         >
-                            <StyledIcon
-                                color={`${tokens.colors.interactive.focus.hex}`}
-                                name={Icons.AddOutlined}
-                                size={24}
-                            />
+                            <StyledIcon color={`${tokens.colors.interactive.focus.hex}`} name={Icons.Add} size={24} />
                         </Button>
                     )}
                 </Centered>
             </Table.Cell>
-        </Table.Row>
+        </StyledRow>
     )
 }
 
@@ -270,25 +291,19 @@ export const InspectionTable = ({ inspectionArea, inspections, openDialog, setSe
             <HideColumnsOnSmallScreen>
                 <Table>
                     <Table.Caption>
-                        <Typography variant="h3" style={{ marginBottom: '14px' }}>
-                            {inspectionArea.inspectionAreaName}
-                        </Typography>
+                        <TableTitle>{inspectionArea.inspectionAreaName}</TableTitle>
                         <SmallScreenInfoText />
                     </Table.Caption>
                     <Table.Head sticky>
                         <Table.Row>
                             {Object.values(InspectionTableColumns).map((col) => (
-                                <Table.Cell
-                                    id={col}
-                                    key={col}
-                                    style={{ backgroundColor: tokens.colors.ui.background__default.hex }}
-                                >
+                                <StyledHeaderCell id={col} key={col}>
                                     {TranslateText(col)}
-                                </Table.Cell>
+                                </StyledHeaderCell>
                             ))}
                         </Table.Row>
                     </Table.Head>
-                    <Table.Body style={{ backgroundColor: tokens.colors.ui.background__light.hex }}>
+                    <Table.Body style={{ backgroundColor: tokens.colors.ui.background__default.hex }}>
                         {cellValues}
                     </Table.Body>
                 </Table>
@@ -363,17 +378,13 @@ export const AllInspectionsTable = ({ inspections }: ITableProps) => {
                     <Table.Head sticky>
                         <Table.Row>
                             {Object.values(InspectionTableColumns).map((col) => (
-                                <Table.Cell
-                                    id={col}
-                                    key={col}
-                                    style={{ backgroundColor: tokens.colors.ui.background__default.hex }}
-                                >
+                                <StyledHeaderCell id={col} key={col}>
                                     {TranslateText(col)}
-                                </Table.Cell>
+                                </StyledHeaderCell>
                             ))}
                         </Table.Row>
                     </Table.Head>
-                    <Table.Body style={{ backgroundColor: tokens.colors.ui.background__light.hex }}>
+                    <Table.Body style={{ backgroundColor: tokens.colors.ui.background__default.hex }}>
                         {cellValues}
                     </Table.Body>
                 </Table>
