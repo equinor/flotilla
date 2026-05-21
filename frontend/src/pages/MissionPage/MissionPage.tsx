@@ -10,11 +10,12 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { useMediaStreamContext } from 'components/Contexts/MediaStreamContext'
-import { StyledCardsWidth, StyledPage, VideoStreamSection } from 'components/Styles/StyledComponents'
+import { StyledCardsWidth, VideoStreamSection } from 'components/Styles/StyledComponents'
 import { InspectionDialogView } from '../InspectionReportPage/InspectionView'
 import { InspectionOverviewSection } from '../InspectionReportPage/InspectionOverview'
 import { TaskTableAndMap } from './TaskTableAndMap'
 import { AnalysisResultDialogView } from './AnalysisResultView'
+import { tokens } from '@equinor/eds-tokens'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useBackendApi } from 'api/UseBackendApi'
 import { InstallationContext } from 'components/Contexts/InstallationContext'
@@ -22,7 +23,21 @@ import { InstallationContext } from 'components/Contexts/InstallationContext'
 const StyledMissionPageContent = styled.div`
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 0;
+`
+
+const StyledMissionPage = styled.div`
+    display: flex;
+    flex-direction: column;
+    background: ${tokens.colors.ui.background__default.hex};
+    min-height: 100vh;
+`
+
+const StyledMissionPageBody = styled.div`
+    padding: 1.5rem 4rem 2rem 4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
 `
 
 const useMissionSelector = (missionId: string | undefined, inspectionId: string | undefined) => {
@@ -122,11 +137,58 @@ export const MissionPage = ({
     return (
         <>
             <Header alertDict={alerts} installation={installation} />
-            <StyledPage>
+            <StyledMissionPage>
                 {selectedMission !== undefined && (
                     <StyledMissionPageContent>
+                        <MissionHeader mission={selectedMission} />
+                        <StyledMissionPageBody>
+                            <StyledCardsWidth>
+                                <TaskTableAndMap mission={selectedMission} missionDefinitionPage={false} />
+                                <VideoStreamSection>
+                                    {videoMediaStreams && videoMediaStreams.length > 0 && (
+                                        <VideoStreamWindow videoStreams={videoMediaStreams} />
+                                    )}
+                                </VideoStreamSection>
+                                {inspectionId && (
+                                    <InspectionDialogView
+                                        selectedInspectionId={inspectionId}
+                                        tasks={selectedMission.tasks}
+                                    />
+                                )}
+                                {analysisId && (
+                                    <AnalysisResultDialogView
+                                        selectedAnalysisId={analysisId}
+                                        tasks={selectedMission.tasks}
+                                    />
+                                )}
+                                <InspectionOverviewSection tasks={selectedMission.tasks} />
+                            </StyledCardsWidth>
+                        </StyledMissionPageBody>
+                    </StyledMissionPageContent>
+                )}
+            </StyledMissionPage>
+        </>
+    )
+}
+
+export const SimpleMissionPage = ({
+    missionId,
+    inspectionId,
+    analysisId,
+}: {
+    missionId: string | undefined
+    inspectionId: string | undefined
+    analysisId: string | undefined
+}) => {
+    const { selectedMission, videoMediaStreams } = useMissionSelector(missionId, inspectionId ?? analysisId)
+
+    return (
+        <StyledMissionPage>
+            {selectedMission !== undefined && (
+                <StyledMissionPageContent>
+                    <SimpleMissionHeader mission={selectedMission} />
+                    <StyledMissionPageBody>
                         <StyledCardsWidth>
-                            <MissionHeader mission={selectedMission} />
                             <TaskTableAndMap mission={selectedMission} missionDefinitionPage={false} />
                             <VideoStreamSection>
                                 {videoMediaStreams && videoMediaStreams.length > 0 && (
@@ -147,46 +209,9 @@ export const MissionPage = ({
                             )}
                             <InspectionOverviewSection tasks={selectedMission.tasks} />
                         </StyledCardsWidth>
-                    </StyledMissionPageContent>
-                )}
-            </StyledPage>
-        </>
-    )
-}
-
-export const SimpleMissionPage = ({
-    missionId,
-    inspectionId,
-    analysisId,
-}: {
-    missionId: string | undefined
-    inspectionId: string | undefined
-    analysisId: string | undefined
-}) => {
-    const { selectedMission, videoMediaStreams } = useMissionSelector(missionId, inspectionId ?? analysisId)
-
-    return (
-        <StyledPage>
-            {selectedMission !== undefined && (
-                <StyledMissionPageContent>
-                    <StyledCardsWidth>
-                        <SimpleMissionHeader mission={selectedMission} />
-                        <TaskTableAndMap mission={selectedMission} missionDefinitionPage={false} />
-                        <VideoStreamSection>
-                            {videoMediaStreams && videoMediaStreams.length > 0 && (
-                                <VideoStreamWindow videoStreams={videoMediaStreams} />
-                            )}
-                        </VideoStreamSection>
-                        {inspectionId && (
-                            <InspectionDialogView selectedInspectionId={inspectionId} tasks={selectedMission.tasks} />
-                        )}
-                        {analysisId && (
-                            <AnalysisResultDialogView selectedAnalysisId={analysisId} tasks={selectedMission.tasks} />
-                        )}
-                        <InspectionOverviewSection tasks={selectedMission.tasks} />
-                    </StyledCardsWidth>
+                    </StyledMissionPageBody>
                 </StyledMissionPageContent>
             )}
-        </StyledPage>
+        </StyledMissionPage>
     )
 }

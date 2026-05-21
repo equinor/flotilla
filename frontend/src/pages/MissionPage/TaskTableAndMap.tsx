@@ -11,9 +11,9 @@ import { StyledTableAndMap } from 'components/Styles/StyledComponents'
 const TaskAndMapSection = styled.div`
     display: flex;
     min-height: 60%;
-    padding: 24px;
+    padding: 24px 24px 24px 0;
     @media (max-width: ${phone_width}) {
-        padding: 6px 8px 8px 6px;
+        padding: 6px 8px 8px 0;
     }
     @media (min-width: ${phone_width}) {
         min-width: 930px;
@@ -23,8 +23,7 @@ const TaskAndMapSection = styled.div`
     align-items: flex-start;
     gap: 8px;
     align-self: stretch;
-    border-radius: 6px;
-    border: 1px solid ${tokens.colors.ui.background__medium.rgba};
+    border-radius: 2px;
     background: ${tokens.colors.ui.background__default.rgba};
 `
 
