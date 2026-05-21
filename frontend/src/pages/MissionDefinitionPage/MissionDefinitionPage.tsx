@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { MissionDefinitionHeader } from './MissionDefinitionHeader/MissionDefinitionHeader'
 import { Header } from 'components/Header/Header'
 import { MissionDefinition } from 'models/MissionDefinition'
-import { Button, Typography, Icon, Card } from '@equinor/eds-core-react'
+import { Button, Typography, Icon } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { MissionDefinitionUpdateForm } from 'models/MissionDefinitionUpdateForm'
 import { Icons } from 'utils/icons'
@@ -26,13 +26,17 @@ import { formulateAutoScheduleFrequencyAsString } from 'utils/language'
 import { useBackendApi } from 'api/UseBackendApi'
 import { InstallationContext } from 'components/Contexts/InstallationContext'
 
-const StyledCard = styled(Card)`
+const StyledCard = styled.div`
     display: flex;
-    padding: 8px;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px;
     min-height: 100px;
-    height: auto
-    border-radius: 6px;
-    border: 1px solid ${tokens.colors.ui.background__medium.hex};
+    height: auto;
+    background: ${tokens.colors.ui.background__default.hex};
+    box-shadow:
+        0 2px 6px rgba(0, 0, 0, 0.08),
+        0 8px 20px rgba(0, 0, 0, 0.06);
     overflow-y: hidden;
 `
 const StyledTableAndMap = styled.div`
@@ -48,6 +52,15 @@ const StyledTopComponents = styled.div`
 const StyledButton = styled(Button)`
     width: 160px;
 `
+const StyledFieldTitle = styled.span`
+    font-family: Equinor, sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: ${tokens.colors.text.static_icons__default.hex};
+`
+
 const StyledMissionDefinitionPageBody = styled.div`
     display: flex;
     flex-direction: column;
@@ -70,9 +83,7 @@ const MetadataItem = ({
         <FormItem>
             <StyledCard>
                 <TitleComponent>
-                    <Typography variant="body_long_bold" color={tokens.colors.text.static_icons__secondary.hex}>
-                        {title}
-                    </Typography>
+                    <StyledFieldTitle>{title}</StyledFieldTitle>
                     {onEdit && (
                         <EditButton variant="ghost" onClick={onEdit}>
                             <Icon name={Icons.Edit} size={16} />
