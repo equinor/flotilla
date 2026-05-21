@@ -111,8 +111,8 @@ export class BackendApi {
     async updateMissionDefinition(id: string, form: MissionDefinitionUpdateForm): Promise<MissionDefinition> {
         const path: string = 'missions/definitions/' + id
         const result = await this.api
-            .PUT<MissionDefinitionUpdateForm, MissionDefinition>(path, form)
-            .catch(handleError('PUT', path))
+            .PATCH<MissionDefinitionUpdateForm, MissionDefinition>(path, form)
+            .catch(handleError('PATCH', path))
         return result.content
     }
 
