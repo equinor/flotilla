@@ -12,7 +12,7 @@ export class BackendAPICaller {
     }
 
     private async initializeRequest<T>(
-        method: 'GET' | 'POST' | 'PUT' | 'DELETE',
+        method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
         body?: T,
         contentType?: string,
         opts?: { headers?: Record<string, string>; signal?: AbortSignal }
@@ -39,7 +39,7 @@ export class BackendAPICaller {
     }
 
     private async query<TBody, TContent>(
-        method: 'GET' | 'POST' | 'PUT' | 'DELETE',
+        method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
         path: string,
         body?: TBody,
         contentType?: string,
@@ -98,6 +98,15 @@ export class BackendAPICaller {
         opts?: { headers?: Record<string, string>; signal?: AbortSignal }
     ) {
         return this.query<TBody, TContent>('PUT', path, body, contentType, opts)
+    }
+
+    PATCH<TBody, TContent>(
+        path: string,
+        body?: TBody,
+        contentType?: string,
+        opts?: { headers?: Record<string, string>; signal?: AbortSignal }
+    ) {
+        return this.query<TBody, TContent>('PATCH', path, body, contentType, opts)
     }
 
     DELETE<TBody, TContent>(
