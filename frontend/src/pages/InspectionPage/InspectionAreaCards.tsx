@@ -79,7 +79,7 @@ const InspectionAreaCard = ({
                 }
                 style={
                     selectedInspectionArea === inspectionAreaData.inspectionArea
-                        ? { border: `solid ${getCardColorFromInspections(inspectionAreaData.inspections)} 2px` }
+                        ? { border: `solid ${getCardColorFromInspections(inspectionAreaData.inspections)} 1px` }
                         : {}
                 }
             >
@@ -108,14 +108,11 @@ const InspectionAreaCard = ({
                     <Tooltip placement="top" title={queueMissionsTooltip}>
                         <Button
                             disabled={isScheduleMissionsDisabled}
-                            variant="outlined"
+                            variant="ghost"
                             onClick={() => handleScheduleAll(inspectionAreaData.inspections)}
                             color="secondary"
                         >
-                            <Icon
-                                name={Icons.LibraryAdd}
-                                color={inspectionAreaData.inspections.length > 0 ? '' : 'grey'}
-                            />
+                            <Icon name={Icons.Add} color={inspectionAreaData.inspections.length > 0 ? '' : 'grey'} />
                             <Typography color={tokens.colors.text.static_icons__secondary.hex}>
                                 {TranslateText('Queue the missions')}
                             </Typography>

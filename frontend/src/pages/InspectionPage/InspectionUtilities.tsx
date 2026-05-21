@@ -13,7 +13,7 @@ export const StyledCard = styled(Card)`
     justify-content: space-between;
     flex: 1 0 0;
     cursor: pointer;
-    border-radius: 0px 4px 4px 0px;
+    border-radius: 0px 2px 2px 0px;
 `
 export const CardComponent = styled.div`
     display: flex;
@@ -40,9 +40,8 @@ export const TopInspectionAreaText = styled.div`
 `
 export const Rectangle = styled.div`
     display: flex-start;
-    width: 24px;
+    width: 8px;
     height: 100%;
-    border-radius: 6px 0px 0px 6px;
 `
 export const StyledInspectionAreaCard = styled.div`
     display: flex;
@@ -50,10 +49,11 @@ export const StyledInspectionAreaCard = styled.div`
         max-width: calc(100vw - 30px);
     }
     max-width: 450px;
-    border-radius: 6px;
+    border-radius: 2px;
+    overflow: hidden;
     box-shadow:
-        0px 3px 4px 0px rgba(0, 0, 0, 0.12),
-        0px 2px 4px 0px rgba(0, 0, 0, 0.14);
+        0px 4px 12px rgba(0, 0, 0, 0.1),
+        0px 12px 32px rgba(0, 0, 0, 0.08);
 `
 const Circle = styled.div`
     width: 13px;
@@ -69,7 +69,7 @@ const MissionComponents = styled.div`
 export const InspectionAreaOverview = styled.div`
     display: flex;
     flex-direction: column;
-    gap: 25px;
+    gap: 48px;
 `
 const MissionInspections = styled.div`
     display: flex;
