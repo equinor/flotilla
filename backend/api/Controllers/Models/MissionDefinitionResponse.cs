@@ -6,12 +6,12 @@ namespace Api.Controllers.Models
     public class MissionDefinitionResponse
     {
         public string Id { get; set; }
-        public List<TaskDefinition> Tasks { get; set; }
+        public List<TaskDefinitionResponse> Tasks { get; set; }
         public string Name { get; set; }
         public string InstallationCode { get; set; }
         public string? Comment { get; set; }
         public AutoScheduleFrequency? AutoScheduleFrequency { get; set; }
-        public virtual MissionRun? LastSuccessfulRun { get; set; }
+        public virtual MissionRunResponse? LastSuccessfulRun { get; set; }
         public InspectionAreaResponse InspectionArea { get; set; }
 
         [JsonConstructor]
@@ -23,7 +23,7 @@ namespace Api.Controllers.Models
         public MissionDefinitionResponse(MissionDefinition missionDefinition)
         {
             Id = missionDefinition.Id ?? string.Empty;
-            Tasks = missionDefinition.Tasks;
+            Tasks = [.. missionDefinition.Tasks.Select((t) => new TaskDefinitionResponse(t))];
             Name = missionDefinition.Name ?? string.Empty;
             InstallationCode = missionDefinition.InstallationCode ?? string.Empty;
             Comment = missionDefinition.Comment;
@@ -34,7 +34,8 @@ namespace Api.Controllers.Models
                 )
                     ? missionDefinition.AutoScheduleFrequency
                     : null;
-            LastSuccessfulRun = missionDefinition.LastSuccessfulRun;
+            if (missionDefinition.LastSuccessfulRun != null)
+                LastSuccessfulRun = new MissionRunResponse(missionDefinition.LastSuccessfulRun);
             InspectionArea = new InspectionAreaResponse(missionDefinition.InspectionArea);
         }
     }
