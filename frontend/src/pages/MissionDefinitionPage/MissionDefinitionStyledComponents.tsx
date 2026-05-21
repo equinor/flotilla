@@ -5,7 +5,7 @@ export const FormCard = styled(Card)`
     display: flex;
     justify-content: center;
     padding: 8px;
-    gap: 25px;
+    gap: 12px;
     box-shadow: none;
 `
 

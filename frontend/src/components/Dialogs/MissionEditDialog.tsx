@@ -20,6 +20,9 @@ import { useBackendApi } from 'api/UseBackendApi'
 const StyledSummary = styled.div`
     padding: 16px 8px 0px 8px;
     border-top: 1px solid ${tokens.colors.interactive.disabled__border.hex};
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 `
 
 const StyledFormCard = styled(FormCard)`
@@ -39,6 +42,7 @@ const StyledDaySelector = styled.div`
 `
 const DayButton = styled(Button)`
     width: 42px;
+    border-radius: 2px !important;
 `
 const StyledTimeSelector = styled.div`
     display: flex;
@@ -50,6 +54,30 @@ const StyledTimeChips = styled.div`
     display: flex;
     flex-direction: row;
     gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+`
+const StyledDayRow = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+`
+const DayLabel = styled.span`
+    font-family: Equinor, sans-serif;
+    font-size: 0.78rem;
+    color: ${tokens.colors.text.static_icons__tertiary.hex};
+    min-width: 80px;
+`
+const SectionLabel = styled.p`
+    margin: 0;
+    font-family: Equinor, sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: ${tokens.colors.text.static_icons__tertiary.hex};
 `
 
 const useMissionUpdater = () => {
@@ -122,21 +150,19 @@ export const MissionSchedulingEditDialog = ({ mission, isOpen, onClose }: Missio
             <StyledDialog open={isOpen} isDismissable={true} onClose={onClose}>
                 <StyledDialog.Header>
                     <StyledDialog.Title>
-                        <Typography variant="h3">
+                        <Typography variant="h4">
                             {TranslateText('Edit auto scheduling of mission') + ' ' + mission.name}
                         </Typography>
                     </StyledDialog.Title>
                 </StyledDialog.Header>
                 <FormCard>
-                    <Typography variant="h6">{TranslateText('Add additional times')}</Typography>
-
                     <SelectTimesAndDates
                         currentAutoScheduleTimes={schedulingTimes}
                         changedAutoScheduleTimes={setSchedulingTimes}
                     />
                     <SelectedTimeDaySummary schedulingTimes={schedulingTimes} removeTimeAndDay={removeTimeAndDay} />
                     <ButtonSection>
-                        <Button onClick={onClose} variant="outlined" color="primary">
+                        <Button onClick={onClose} variant="ghost" color="primary">
                             {TranslateText('Cancel')}
                         </Button>
                         <Button onClick={onSubmit} variant="contained" color="primary">
@@ -257,7 +283,7 @@ const SelectDaysOfWeek = ({ currentAutoScheduleDays, changedAutoScheduleDays }: 
 
     return (
         <StyledSelectSection>
-            <Typography variant="meta">{TranslateText('Select days of the week')}</Typography>
+            <SectionLabel>{TranslateText('Select days of the week')}</SectionLabel>
             <StyledDaySelector>
                 {Object.entries(allDays).map(([key, value]) => (
                     <OneLetterDayButton key={key} day={value} />
@@ -315,9 +341,16 @@ const AddTimesAndDates = ({ addAutoScheduleTimes }: { addAutoScheduleTimes: (new
         <>
             <SelectDaysOfWeek currentAutoScheduleDays={selectedDays} changedAutoScheduleDays={setSelectedDays} />
             <SelectTimeOfDay changedAutoScheduleTime={setSelectedTime} />
-            <Button onClick={addTime} disabled={selectedTime === undefined || selectedDays.length === 0}>
-                {TranslateText('Add time')}
-            </Button>
+            <div style={{ padding: '0 8px' }}>
+                <Button
+                    onClick={addTime}
+                    variant="outlined"
+                    style={{ width: '100%' }}
+                    disabled={selectedTime === undefined || selectedDays.length === 0}
+                >
+                    {TranslateText('Add time')}
+                </Button>
+            </div>
         </>
     )
 }
@@ -331,7 +364,7 @@ const SelectTimeOfDay = ({ changedAutoScheduleTime }: { changedAutoScheduleTime:
 
     return (
         <StyledSelectSection>
-            <Typography variant="meta">{TranslateText('Select start time')}</Typography>
+            <SectionLabel>{TranslateText('Select start time')}</SectionLabel>
             <StyledTimeSelector>
                 <TextField
                     id="time"
@@ -360,15 +393,15 @@ const SelectedTimeDaySummary = ({
 
     return (
         <StyledSummary>
-            <Typography variant="h6">{TranslateText('Selected times')}</Typography>
+            <SectionLabel>{TranslateText('Selected times')}</SectionLabel>
             {schedulingTimes.length === 0 && (
-                <Typography color="warning">{TranslateText('No times have been selected')}</Typography>
+                <Typography color="secondary">{TranslateText('No times have been selected')}</Typography>
             )}
             {allDays.map((day) => (
                 <div key={`Summary ${day}`}>
                     {timesForSpecificDay(day).length > 0 && (
-                        <>
-                            <Typography>{TranslateText(day) + ':'}</Typography>
+                        <StyledDayRow>
+                            <DayLabel>{TranslateText(day) + ':'}</DayLabel>
                             <StyledTimeChips>
                                 {timesForSpecificDay(day).map((timeAndDay) => (
                                     <SelectedTimeChip
@@ -380,7 +413,7 @@ const SelectedTimeDaySummary = ({
                                     />
                                 ))}
                             </StyledTimeChips>
-                        </>
+                        </StyledDayRow>
                     )}
                 </div>
             ))}
