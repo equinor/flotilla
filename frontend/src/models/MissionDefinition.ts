@@ -18,7 +18,6 @@ interface ZoomDescription {
 }
 
 export interface MissionTaskDefinition {
-    id: string
     tagId: string
     description?: string
     robotPose: Pose

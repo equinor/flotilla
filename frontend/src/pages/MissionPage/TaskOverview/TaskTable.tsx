@@ -79,10 +79,10 @@ const TaskTableRows = ({ tasks }: TaskTableProps) => {
                     </Chip>
                 </Table.Cell>
                 <Table.Cell>
-                    <TagIdDisplay task={task} />
+                    <TagIdDisplay task={task} index={index} />
                 </Table.Cell>
                 <Table.Cell>
-                    <DescriptionDisplay task={task} />
+                    <DescriptionDisplay task={task} index={index} />
                 </Table.Cell>
                 <Table.Cell>
                     <InspectionTypesDisplay task={task} />
@@ -113,10 +113,10 @@ const MissionDefinitionTaskTableRows = ({ tasks }: MissionDefinitionTaskTablePro
                     </Chip>
                 </Table.Cell>
                 <Table.Cell>
-                    <TagIdDisplay task={task} />
+                    <TagIdDisplay task={task} index={index} />
                 </Table.Cell>
                 <Table.Cell>
-                    <DescriptionDisplay task={task} />
+                    <DescriptionDisplay task={task} index={index} />
                 </Table.Cell>
             </StyledTableRow>
         )
