@@ -45,8 +45,17 @@ namespace Api.EventHandlers
         private async void OnTeamsMessageReceived(TeamsMessageEventArgs e)
         {
             string teamsMessage = e.TeamsMessage;
+            string url;
 
-            string url = GetWebhookURL(_configuration, "TeamsSystemStatusNotification");
+            try
+            {
+                url = GetWebhookURL(_configuration);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                _logger.LogError(ex, "Failed to get webhook URL from configuration");
+                return;
+            }
             var client = new HttpClient();
             client.DefaultRequestHeaders.Accept.Add(
                 new MediaTypeWithQualityHeaderValue("application/json")
@@ -92,20 +101,14 @@ namespace Api.EventHandlers
             return content;
         }
 
-        private static string GetWebhookURL(IConfiguration configuration, string secretName)
+        private static string GetWebhookURL(IConfiguration configuration)
         {
-            string? keyVaultUri =
-                configuration.GetSection("KeyVault")["VaultUri"]
-                ?? throw new KeyNotFoundException("No key vault in config");
+            string? webhookUrlFromConfig = configuration.GetSection("TeamsNotification")[
+                "WebhookUrl"
+            ];
 
-            var keyVault = new SecretClient(
-                new Uri(keyVaultUri),
-                new DefaultAzureCredential(new DefaultAzureCredentialOptions())
-            );
-
-            string webhookURL = keyVault.GetSecret(secretName).Value.Value;
-
-            return webhookURL;
+            return webhookUrlFromConfig
+                ?? throw new KeyNotFoundException("No webhook URL in config");
         }
     }
 }
