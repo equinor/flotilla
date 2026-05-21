@@ -112,13 +112,8 @@ namespace Api.HostedServices
         {
             foreach (var missionDefinition in missionDefinitions)
             {
-                if (
-                    missionDefinition.AutoScheduleFrequency == null
-                    || missionDefinition.AutoScheduleFrequency.AutoScheduledJobs == null
-                )
+                if (missionDefinition.AutoScheduleFrequency == null)
                     continue;
-
-                missionDefinition.AutoScheduleFrequency.AutoScheduledJobs = null;
                 await MissionDefinitionService.Update(missionDefinition);
             }
         }
