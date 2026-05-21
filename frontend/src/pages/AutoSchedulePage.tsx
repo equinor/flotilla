@@ -5,13 +5,7 @@ import { NavBar } from 'components/Header/NavBar'
 import { Autocomplete, Button, Icon, Table, Typography } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
-import {
-    StyledDialog,
-    StyledPage,
-    StyledTableBody,
-    StyledTableCell,
-    TextAlignedButton,
-} from 'components/Styles/StyledComponents'
+import { StyledDialog, StyledPage, StyledTableBody, StyledTableCell } from 'components/Styles/StyledComponents'
 import { allDays, allDaysIndexOfToday, DaysOfWeek } from 'models/AutoScheduleFrequency'
 import styled from 'styled-components'
 import { capitalizeFirstLetter } from 'utils/StringFormatting'
@@ -44,7 +38,7 @@ const StyledView = styled.div`
 const StyledContent = styled.div`
     display: flex;
     flex-direction: column;
-    gap: 30px;
+    gap: 8px;
     align-items: end;
     @media (max-width: ${phone_width}) {
         align-items: start;
@@ -67,7 +61,8 @@ const StyledPhoneView = styled.div`
 const StyledButtons = styled.div`
     display: flex;
     flex-direction: row;
-    gap: 10px;
+    gap: 0.5rem;
+    align-items: center;
 `
 
 export const AutoSchedulePage = () => {
@@ -86,7 +81,7 @@ export const AutoSchedulePage = () => {
                     <StyledContent>
                         <StyledButtons>
                             <Button variant="ghost" onClick={() => setShowListView(!showListView)}>
-                                <Icon name={showListView ? Icons.ViewWeek : Icons.List} size={24} />
+                                <Icon name={showListView ? Icons.ViewWeek : Icons.List} size={18} />
                                 {showListView
                                     ? TranslateText('Switch to calendar view')
                                     : TranslateText('Switch to list view')}
@@ -191,10 +186,10 @@ const EditAutoSchedulingButton = () => {
 
     return (
         <>
-            <TextAlignedButton onClick={openDialog}>
-                <Icon name={Icons.Add} size={24} />
+            <Button variant="ghost" onClick={openDialog}>
+                <Icon name={Icons.Add} size={18} />
                 {TranslateText('Edit auto scheduling')}
-            </TextAlignedButton>
+            </Button>
             <StyledDialog open={dialogOpen}>
                 {selectedMissions.length === 1 ? (
                     <MissionSchedulingEditDialog
