@@ -1,4 +1,5 @@
-import { Button, Card, Typography } from '@equinor/eds-core-react'
+import React from 'react'
+import { Button, Typography } from '@equinor/eds-core-react'
 import { MissionControlButtons } from 'components/Displays/MissionButtons/MissionControlButtons'
 import { MissionStatusDisplay } from 'components/Displays/MissionDisplays/MissionStatusDisplay'
 import { differenceInMinutes } from 'date-fns'
@@ -18,45 +19,52 @@ import { InstallationContext } from 'components/Contexts/InstallationContext'
 import { RobotStatus } from 'models/Robot'
 import { AnalysisType } from 'models/MissionDefinition'
 
-const HeaderSection = styled(Card)`
+const HeaderSection = styled.div`
     width: 100%;
-    padding: 15px 0px 15px 0px;
-    top: 58px;
+    padding: 1.5rem 4rem;
+    top: 56px;
     position: sticky;
     z-index: 1;
-    box-shadow: none;
     background-color: ${tokens.colors.ui.background__light.hex};
-`
-const StaticHeaderSection = styled(Card)`
-    width: 100%;
-    padding: 15px 0px 15px 0px;
-    z-index: 1;
-    box-shadow: none;
-    background-color: ${tokens.colors.ui.background__light.hex};
-`
-const TitleSection = styled.div`
+    box-sizing: border-box;
     display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 20px;
-`
-const InfoSection = styled.div`
-    display: flex;
-    flex-wrap: wrap;
-    gap: 32px;
-    width: fit-content;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 2rem;
     @media (max-width: ${phone_width}) {
-        display: grid;
-        grid-template-columns: repeat(3, calc(75vw / 3));
-        gap: 32px;
-        width: fit-content;
-        align-items: end;
+        flex-direction: column;
+        padding: 1rem 1.5rem;
     }
 `
-const StyledTitleText = styled.div`
-    display: grid;
-    grid-direction: column;
-    gap: 5px;
+const StaticHeaderSection = styled.div`
+    width: 100%;
+    padding: 1.5rem 4rem;
+    background-color: ${tokens.colors.ui.background__light.hex};
+    box-sizing: border-box;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 2rem;
+    @media (max-width: ${phone_width}) {
+        flex-direction: column;
+        padding: 1rem 1.5rem;
+    }
+`
+const TitleArea = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+`
+const ButtonGroup = styled.div`
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    flex-shrink: 0;
+    @media (max-width: ${phone_width}) {
+        width: 100%;
+    }
 `
 const StyledTypography = styled(Typography)`
     font-family: Equinor;
@@ -68,34 +76,40 @@ const StyledTypography = styled(Typography)`
         font-size: 24px;
     }
 `
-
-const StyledMissionHeader = styled(Card)`
+const MetricsSection = styled.div`
+    width: 100%;
+    padding: 1.25rem 4rem;
+    background-color: ${tokens.colors.ui.background__light.hex};
+    box-sizing: border-box;
     display: flex;
-    padding: 10px;
+    flex-wrap: wrap;
+    gap: 48px;
+    border-top: none;
+    @media (max-width: ${phone_width}) {
+        padding: 1rem 1.5rem;
+        gap: 1rem 0;
+    }
+`
+const MetricItem = styled.div`
+    display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    align-content: center;
-    gap: 24px;
-    flex: 1 0 0;
-    align-self: stretch;
-    border-radius: 6px;
-    max-height: fit-content;
-    border: 1px solid ${tokens.colors.ui.background__medium.hex};
-    background: ${tokens.colors.ui.background__default.hex};
+    gap: 6px;
+`
+const MetricLabel = styled.span`
+    font-family: Equinor, sans-serif;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: ${tokens.colors.text.static_icons__tertiary.hex};
 `
 
-const HeaderText = (title: string, text: string) => {
-    return (
-        <StyledTitleText>
-            <Typography variant="meta" color={tokens.colors.text.static_icons__secondary.hex}>
-                {title}
-            </Typography>
-            <Typography variant="caption" color={tokens.colors.text.static_icons__secondary.hex}>
-                {text}
-            </Typography>
-        </StyledTitleText>
-    )
-}
+const Metric = ({ label, children }: { label: string; children: React.ReactNode }) => (
+    <MetricItem>
+        <MetricLabel>{label}</MetricLabel>
+        {children}
+    </MetricItem>
+)
 
 const getStartUsedAndRemainingTime = (
     mission: Mission,
@@ -121,9 +135,9 @@ const getStartUsedAndRemainingTime = (
             : formatDateTime(mission.endTime, 'dd/MM/yyy')
         usedTimeInMinutes = mission.startTime
             ? differenceInMinutes(
-                  convertUTCDateToLocalDate(mission.endTime),
-                  convertUTCDateToLocalDate(mission.startTime)
-              )
+                convertUTCDateToLocalDate(mission.endTime),
+                convertUTCDateToLocalDate(mission.startTime)
+            )
             : 0
         remainingTime = 'N/A'
     } else if (mission.startTime) {
@@ -196,8 +210,20 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
     return (
         <>
             <HeaderSection>
-                <TitleSection>
+                <TitleArea>
                     <StyledTypography>{mission.name}</StyledTypography>
+                    {mission.description && (
+                        <Typography
+                            variant="body_long"
+                            group="paragraph"
+                            color={tokens.colors.text.static_icons__secondary.hex}
+                        >
+                            {`${translatedDescription}: ${mission.description}`}
+                        </Typography>
+                    )}
+                    <StatusReason statusReason={mission.statusReason} status={mission.status} />
+                </TitleArea>
+                <ButtonGroup>
                     {isMissionActive && (
                         <MissionControlButtons
                             canBePaused={canBePaused}
@@ -227,30 +253,35 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
                             {TranslateText('Go to data overview')}
                         </Button>
                     )}
-                </TitleSection>
-                <Typography
-                    variant="body_long"
-                    group="paragraph"
-                    color={tokens.colors.text.static_icons__secondary.hex}
-                >
-                    {mission.description && `${translatedDescription}: ${mission.description}`}
-                </Typography>
-                <StatusReason statusReason={mission.statusReason} status={mission.status}></StatusReason>
+                </ButtonGroup>
             </HeaderSection>
-            <StyledMissionHeader>
-                <InfoSection>
-                    <div>
-                        {HeaderText(translatedStatus, '')}
-                        <MissionStatusDisplay status={mission.status} />
-                    </div>
-                    {HeaderText(translatedTasks, `${numberOfCompletedTasks + '/' + mission.tasks.length}`)}
-                    {HeaderText(translatedStartDate, `${startDate}`)}
-                    {HeaderText(translatedStartTime, `${startTime}`)}
-                    {HeaderText(translatedUsedTime, `${usedTime}`)}
-                    {!isMissionCompleted && HeaderText(translatedEstimatedTimeRemaining, `${remainingTime}`)}
-                    {HeaderText(translatedRobot, `${mission.robot.name}`)}
-                </InfoSection>
-            </StyledMissionHeader>
+            <MetricsSection>
+                <Metric label={translatedStatus}>
+                    <MissionStatusDisplay status={mission.status} />
+                </Metric>
+                <Metric label={translatedTasks}>
+                    <Typography>
+                        {numberOfCompletedTasks}/{mission.tasks.length}
+                    </Typography>
+                </Metric>
+                <Metric label={translatedStartDate}>
+                    <Typography>{startDate}</Typography>
+                </Metric>
+                <Metric label={translatedStartTime}>
+                    <Typography>{startTime}</Typography>
+                </Metric>
+                <Metric label={translatedUsedTime}>
+                    <Typography>{usedTime}</Typography>
+                </Metric>
+                {!isMissionCompleted && (
+                    <Metric label={translatedEstimatedTimeRemaining}>
+                        <Typography>{remainingTime}</Typography>
+                    </Metric>
+                )}
+                <Metric label={translatedRobot}>
+                    <Typography>{mission.robot.name}</Typography>
+                </Metric>
+            </MetricsSection>
         </>
     )
 }
@@ -277,40 +308,47 @@ export const SimpleMissionHeader = ({ mission }: { mission: Mission }) => {
     return (
         <>
             <StaticHeaderSection>
-                <TitleSection>
+                <TitleArea>
                     <StyledTypography>{mission.name}</StyledTypography>
-                </TitleSection>
-                <Typography
-                    variant="body_long"
-                    group="paragraph"
-                    color={tokens.colors.text.static_icons__secondary.hex}
-                >
-                    {mission.description && `${translatedDescription}: ${mission.description}`}
-                </Typography>
-                <StatusReason statusReason={mission.statusReason} status={mission.status}></StatusReason>
-                <TitleSection>
-                    <Button
-                        variant="outlined"
-                        onClick={() => navigate(`/${installation.installationCode}/fencilla-view`)}
-                    >
-                        {TranslateText('Go to data overview')}
-                    </Button>
-                </TitleSection>
+                    {mission.description && (
+                        <Typography
+                            variant="body_long"
+                            group="paragraph"
+                            color={tokens.colors.text.static_icons__secondary.hex}
+                        >
+                            {`${translatedDescription}: ${mission.description}`}
+                        </Typography>
+                    )}
+                    <StatusReason statusReason={mission.statusReason} status={mission.status} />
+                </TitleArea>
             </StaticHeaderSection>
-            <StyledMissionHeader>
-                <InfoSection>
-                    <div>
-                        {HeaderText(translatedStatus, '')}
-                        <MissionStatusDisplay status={mission.status} />
-                    </div>
-                    {HeaderText(translatedTasks, `${numberOfCompletedTasks + '/' + mission.tasks.length}`)}
-                    {HeaderText(translatedStartDate, `${startDate}`)}
-                    {HeaderText(translatedStartTime, `${startTime}`)}
-                    {HeaderText(translatedUsedTime, `${usedTime}`)}
-                    {!isMissionCompleted && HeaderText(translatedEstimatedTimeRemaining, `${remainingTime}`)}
-                    {HeaderText(translatedRobot, `${mission.robot.name}`)}
-                </InfoSection>
-            </StyledMissionHeader>
+            <MetricsSection>
+                <Metric label={translatedStatus}>
+                    <MissionStatusDisplay status={mission.status} />
+                </Metric>
+                <Metric label={translatedTasks}>
+                    <Typography>
+                        {numberOfCompletedTasks}/{mission.tasks.length}
+                    </Typography>
+                </Metric>
+                <Metric label={translatedStartDate}>
+                    <Typography>{startDate}</Typography>
+                </Metric>
+                <Metric label={translatedStartTime}>
+                    <Typography>{startTime}</Typography>
+                </Metric>
+                <Metric label={translatedUsedTime}>
+                    <Typography>{usedTime}</Typography>
+                </Metric>
+                {!isMissionCompleted && (
+                    <Metric label={translatedEstimatedTimeRemaining}>
+                        <Typography>{remainingTime}</Typography>
+                    </Metric>
+                )}
+                <Metric label={translatedRobot}>
+                    <Typography>{mission.robot.name}</Typography>
+                </Metric>
+            </MetricsSection>
         </>
     )
 }

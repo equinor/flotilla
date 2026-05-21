@@ -8,12 +8,32 @@ import { getColorsFromTaskStatus } from 'utils/MarkerStyles'
 import { ValidInspectionReportInspectionTypes } from 'models/Inspection'
 import { useInspectionId } from 'pages/InspectionReportPage/SetInspectionIdHook'
 import { DescriptionDisplay, TagIdDisplay } from 'components/Displays/TaskDisplay'
-import { StyledTable } from 'components/Styles/StyledComponents'
+import { StyledTable, StyledTableBody } from 'components/Styles/StyledComponents'
+import styled from 'styled-components'
+
+const TaskHeaderCell = styled(Table.Cell)`
+    && {
+        font-family: Equinor, sans-serif;
+        font-size: 0.65rem;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: ${tokens.colors.text.static_icons__default.hex};
+        border-bottom: 2px solid ${tokens.colors.ui.background__medium.hex};
+    }
+`
 
 interface TaskTableProps {
     tasks: Task[]
     missionDefinitionPage: boolean
 }
+
+const StyledRow = styled(Table.Row)`
+    transition: background-color 0.12s ease;
+    &&:hover {
+        background-color: ${tokens.colors.ui.background__light.hex};
+    }
+`
 
 export const TaskTable = ({ tasks, missionDefinitionPage }: TaskTableProps) => {
     const { TranslateText } = useLanguageContext()
@@ -22,23 +42,23 @@ export const TaskTable = ({ tasks, missionDefinitionPage }: TaskTableProps) => {
         <StyledTable>
             <Table.Head>
                 <Table.Row>
-                    <Table.Cell>#</Table.Cell>
-                    <Table.Cell>{TranslateText('Tag-ID')}</Table.Cell>
-                    <Table.Cell>{TranslateText('Description')}</Table.Cell>
+                    <TaskHeaderCell>#</TaskHeaderCell>
+                    <TaskHeaderCell>{TranslateText('Tag-ID')}</TaskHeaderCell>
+                    <TaskHeaderCell>{TranslateText('Description')}</TaskHeaderCell>
                     {!missionDefinitionPage && (
                         <>
-                            <Table.Cell>{TranslateText('Inspection Types')}</Table.Cell>
-                            <Table.Cell>{TranslateText('Status')}</Table.Cell>
+                            <TaskHeaderCell>{TranslateText('Inspection Types')}</TaskHeaderCell>
+                            <TaskHeaderCell>{TranslateText('Status')}</TaskHeaderCell>
                             {tasks.some((t) => t.inspection.analysisResult) && (
-                                <Table.Cell>{TranslateText('Analysis')}</Table.Cell>
+                                <TaskHeaderCell>{TranslateText('Analysis')}</TaskHeaderCell>
                             )}
                         </>
                     )}
                 </Table.Row>
             </Table.Head>
-            <Table.Body>
+            <StyledTableBody>
                 {tasks && <TaskTableRows tasks={tasks} missionDefinitionPage={missionDefinitionPage} />}
-            </Table.Body>
+            </StyledTableBody>
         </StyledTable>
     )
 }
@@ -55,7 +75,7 @@ const TaskTableRows = ({ tasks, missionDefinitionPage }: TaskTableProps) => {
         const markerColors = getColorsFromTaskStatus(task.status)
 
         return (
-            <Table.Row key={task.id} style={rowStyle}>
+            <StyledRow key={task.id} style={rowStyle}>
                 <Table.Cell>
                     <Chip style={{ background: markerColors.fillColor }}>
                         <Typography variant="body_short_bold" style={{ color: markerColors.textColor }}>
@@ -77,12 +97,14 @@ const TaskTableRows = ({ tasks, missionDefinitionPage }: TaskTableProps) => {
                         <Table.Cell>
                             <TaskStatusDisplay status={task.status} errorMessage={task.errorDescription} />
                         </Table.Cell>
-                        <Table.Cell>
-                            {task.inspection.analysisResult ? <TaskAnalysisDisplay task={task} /> : <></>}
-                        </Table.Cell>
+                        {tasks.some((t) => t.inspection.analysisResult) && (
+                            <Table.Cell>
+                                {task.inspection.analysisResult ? <TaskAnalysisDisplay task={task} /> : <></>}
+                            </Table.Cell>
+                        )}
                     </>
                 )}
-            </Table.Row>
+            </StyledRow>
         )
     })
     return <>{rows}</>
