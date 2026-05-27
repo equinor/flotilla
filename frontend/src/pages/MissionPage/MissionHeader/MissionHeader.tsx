@@ -16,6 +16,7 @@ import { phone_width } from 'utils/constants'
 import { useContext } from 'react'
 import { InstallationContext } from 'components/Contexts/InstallationContext'
 import { RobotStatus } from 'models/Robot'
+import { AnalysisType } from 'models/MissionDefinition'
 
 const HeaderSection = styled(Card)`
     width: 100%;
@@ -175,6 +176,23 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
         mission.robot.status !== RobotStatus.GoingToRecharging &&
         mission.robot.status !== RobotStatus.RechargingWithMission
 
+    const analysisType = mission.tasks
+        .flatMap((task) => task.inspection?.analysisTypes ?? [])
+        .find((type) => type === AnalysisType.Fencilla || type === AnalysisType.CLOE)
+
+    const getDataOverviewUrl = (type: AnalysisType): string | undefined => {
+        switch (type) {
+            case AnalysisType.Fencilla:
+                return `/${installation.installationCode}/data-view?missionName="Perimeter"&statuses=%5B"Successful"%2C"PartiallySuccessful"%5D`
+            case AnalysisType.CLOE:
+                return `/${installation.installationCode}/cloe-view`
+            default:
+                return undefined
+        }
+    }
+
+    const dataOverviewUrl = analysisType ? getDataOverviewUrl(analysisType) : undefined
+
     return (
         <>
             <HeaderSection>
@@ -204,6 +222,11 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
                     >
                         {TranslateText('View mission definition')}
                     </Button>
+                    {dataOverviewUrl && (
+                        <Button variant="outlined" onClick={() => navigate(dataOverviewUrl)}>
+                            {TranslateText('Go to data overview')}
+                        </Button>
+                    )}
                 </TitleSection>
                 <Typography
                     variant="body_long"
@@ -235,7 +258,8 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
 export const SimpleMissionHeader = ({ mission }: { mission: Mission }) => {
     const { TranslateText } = useLanguageContext()
     const isMissionCompleted = mission.endTime ? true : false
-
+    const { installation } = useContext(InstallationContext)
+    const navigate = useNavigate()
     const translatedStartDate = TranslateText('Start date')
     const translatedStartTime = TranslateText('Start time')
     const translatedUsedTime = TranslateText('Time used')
@@ -264,6 +288,18 @@ export const SimpleMissionHeader = ({ mission }: { mission: Mission }) => {
                     {mission.description && `${translatedDescription}: ${mission.description}`}
                 </Typography>
                 <StatusReason statusReason={mission.statusReason} status={mission.status}></StatusReason>
+                <TitleSection>
+                    <Button
+                        variant="outlined"
+                        onClick={() =>
+                            navigate(
+                                `/${installation.installationCode}/data-view?missionName="Perimeter"&statuses=%5B"Successful"%2C"PartiallySuccessful"%5D`
+                            )
+                        }
+                    >
+                        {TranslateText('Go to data overview')}
+                    </Button>
+                </TitleSection>
             </StaticHeaderSection>
             <StyledMissionHeader>
                 <InfoSection>
