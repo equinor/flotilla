@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom'
 import { formatDateTime } from 'utils/StringFormatting'
 import { useContext } from 'react'
 import { InstallationContext } from 'components/Contexts/InstallationContext'
+import { tokens } from '@equinor/eds-tokens'
 
 enum InspectionTableColumns {
     StatusShort = 'StatusShort',
@@ -45,8 +46,17 @@ export const HistoricMissionCard = ({ mission }: MissionProps) => {
         (t) => t.status !== TaskStatus.PartiallySuccessful && t.status !== TaskStatus.Successful
     )
 
+    const missionHasAnalysisResultWithWarning = mission.tasks.some((t) => !!t.inspection.analysisResult?.warning)
+
     return (
-        <Table.Row key={mission.id}>
+        <Table.Row
+            key={mission.id}
+            style={{
+                backgroundColor: missionHasAnalysisResultWithWarning
+                    ? tokens.colors.interactive.warning__highlight.hex
+                    : undefined,
+            }}
+        >
             <Table.Cell id={InspectionTableColumns.StatusShort}>
                 <MissionStatusDisplayShort status={mission.status} />
             </Table.Cell>
