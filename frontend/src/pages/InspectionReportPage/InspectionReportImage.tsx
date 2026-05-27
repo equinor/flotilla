@@ -80,7 +80,7 @@ export const PendingResultPlaceholder = ({ isLargeImage }: { isLargeImage: boole
     )
 }
 
-const InspectionImageWithPlaceholder = ({ task, isLargeImage }: { task: Task; isLargeImage: boolean }) => {
+export const InspectionImageWithPlaceholder = ({ task, isLargeImage }: { task: Task; isLargeImage: boolean }) => {
     const { useImageData } = useInspectionsContext()
     const { data, isPending, isError } = useImageData(task.inspection.isarInspectionId)
     if (isError || !data) {

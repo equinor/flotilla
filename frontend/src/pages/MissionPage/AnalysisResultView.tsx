@@ -36,6 +36,61 @@ const AnalysisImage = ({ inspectionId }: { inspectionId: string }) => {
     return <StyledImage $otherContentHeight="0px" src={data} />
 }
 
+export const AnalysisResultDialogContent = ({ currentTask }: { currentTask: Task }) => {
+    const { TranslateText } = useLanguageContext()
+
+    return (
+        <div>
+            {currentTask.inspection.analysisResult?.storageAccount ? (
+                <AnalysisImage inspectionId={currentTask.inspection.isarInspectionId} />
+            ) : (
+                <>{/* No image to display*/}</>
+            )}
+            <StyledBottomContent>
+                <StyledInfoContent>
+                    <Typography variant="caption">{TranslateText('Tag') + ':'}</Typography>
+                    <Typography variant="body_short">{currentTask.tagId}</Typography>
+                </StyledInfoContent>
+                {currentTask.description && (
+                    <StyledInfoContent>
+                        <Typography variant="caption">{TranslateText('Description') + ':'}</Typography>
+                        <Typography variant="body_short">{currentTask.description}</Typography>
+                    </StyledInfoContent>
+                )}
+                {currentTask.endTime && (
+                    <StyledInfoContent>
+                        <Typography variant="caption">{TranslateText('Timestamp') + ':'}</Typography>
+                        <Typography variant="body_short">
+                            {formatDateTime(currentTask.endTime, 'dd.MM.yy - HH:mm')}
+                        </Typography>
+                    </StyledInfoContent>
+                )}
+                {currentTask.inspection.analysisResult?.warning && (
+                    <StyledInfoContent>
+                        <Typography variant="caption">{TranslateText('Warning') + ':'}</Typography>
+                        <Typography variant="body_short">{currentTask.inspection.analysisResult.warning}</Typography>
+                    </StyledInfoContent>
+                )}
+                {currentTask.inspection.analysisResult?.value && (
+                    <StyledInfoContent>
+                        <Typography variant="caption">{TranslateText('Value') + ':'}</Typography>
+                        <Typography variant="body_short">{currentTask.inspection.analysisResult.value}</Typography>
+                    </StyledInfoContent>
+                )}
+                {currentTask.inspection.analysisResult?.confidence !== undefined &&
+                    currentTask.inspection.analysisResult?.confidence !== null && (
+                        <StyledInfoContent>
+                            <Typography variant="caption">{TranslateText('Confidence') + ':'}</Typography>
+                            <Typography variant="body_short">
+                                {Math.round(currentTask.inspection.analysisResult.confidence) + '%'}
+                            </Typography>
+                        </StyledInfoContent>
+                    )}
+            </StyledBottomContent>
+        </div>
+    )
+}
+
 export const AnalysisResultDialogView = ({ selectedAnalysisId, tasks }: InspectionDialogViewProps) => {
     const { TranslateText } = useLanguageContext()
     const { switchSelectedAnalysisId } = useInspectionId()
@@ -69,58 +124,7 @@ export const AnalysisResultDialogView = ({ selectedAnalysisId, tasks }: Inspecti
                     </StyledCloseButton>
                 </StyledDialogHeader>
                 <StyledDialogInspectionView>
-                    <div>
-                        {currentTask.inspection.analysisResult?.storageAccount ? (
-                            <AnalysisImage inspectionId={currentTask.inspection.isarInspectionId} />
-                        ) : (
-                            <>{/* No image to display*/}</>
-                        )}
-                        <StyledBottomContent>
-                            <StyledInfoContent>
-                                <Typography variant="caption">{TranslateText('Tag') + ':'}</Typography>
-                                <Typography variant="body_short">{currentTask.tagId}</Typography>
-                            </StyledInfoContent>
-                            {currentTask.description && (
-                                <StyledInfoContent>
-                                    <Typography variant="caption">{TranslateText('Description') + ':'}</Typography>
-                                    <Typography variant="body_short">{currentTask.description}</Typography>
-                                </StyledInfoContent>
-                            )}
-                            {currentTask.endTime && (
-                                <StyledInfoContent>
-                                    <Typography variant="caption">{TranslateText('Timestamp') + ':'}</Typography>
-                                    <Typography variant="body_short">
-                                        {formatDateTime(currentTask.endTime, 'dd.MM.yy - HH:mm')}
-                                    </Typography>
-                                </StyledInfoContent>
-                            )}
-                            {currentTask.inspection.analysisResult?.warning && (
-                                <StyledInfoContent>
-                                    <Typography variant="caption">{TranslateText('Warning') + ':'}</Typography>
-                                    <Typography variant="body_short">
-                                        {currentTask.inspection.analysisResult.warning}
-                                    </Typography>
-                                </StyledInfoContent>
-                            )}
-                            {currentTask.inspection.analysisResult?.value && (
-                                <StyledInfoContent>
-                                    <Typography variant="caption">{TranslateText('Value') + ':'}</Typography>
-                                    <Typography variant="body_short">
-                                        {currentTask.inspection.analysisResult.value}
-                                    </Typography>
-                                </StyledInfoContent>
-                            )}
-                            {currentTask.inspection.analysisResult?.confidence !== undefined &&
-                                currentTask.inspection.analysisResult?.confidence !== null && (
-                                    <StyledInfoContent>
-                                        <Typography variant="caption">{TranslateText('Confidence') + ':'}</Typography>
-                                        <Typography variant="body_short">
-                                            {Math.round(currentTask.inspection.analysisResult.confidence) + '%'}
-                                        </Typography>
-                                    </StyledInfoContent>
-                                )}
-                        </StyledBottomContent>
-                    </div>
+                    <AnalysisResultDialogContent currentTask={currentTask} />
                 </StyledDialogInspectionView>
             </StyledDialogContent>
         </StyledDialog>

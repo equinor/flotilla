@@ -1,6 +1,8 @@
 import { Button, ButtonGroup, Chip, Table, Typography } from '@equinor/eds-core-react'
 import { Mission, MissionStatus } from 'models/Mission'
 import { useContext, useEffect, useState } from 'react'
+import styled from 'styled-components'
+import { tokens } from '@equinor/eds-tokens'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { StyledCardsWidth, StyledPage, StyledTable, StyledTableAndMap } from 'components/Styles/StyledComponents'
 import { SignalREventLabels, useSignalRContext } from 'components/Contexts/SignalRContext'
@@ -11,6 +13,26 @@ import { formatDateTime } from 'utils/StringFormatting'
 import { TimeseriesLinePlot, TimeseriesLinePlotData } from 'components/Displays/TimeseriesLinePlot'
 import { DescriptionDisplay, TagIdDisplay } from 'components/Displays/TaskDisplay'
 import { PlantMap } from 'pages/MissionPage/MapPosition/PointillaMapView'
+import { StyledImagesSection } from 'pages/InspectionReportPage/InspectionStyles'
+import { InspectionImageWithPlaceholder } from 'pages/InspectionReportPage/InspectionReportImage'
+import { AnalysisResultDialogContent } from 'pages/MissionPage/AnalysisResultView'
+
+const CloeMapWrapper = styled.div`
+    .leaflet-tooltip.circleLabel {
+        background-color: ${tokens.colors.ui.background__medium.hex} !important;
+        padding: 0 4px !important;
+        border-radius: 2px !important;
+    }
+`
+const StyledTopAlignedImagesSection = styled(StyledImagesSection)`
+    align-items: flex-start;
+`
+const StyledCloeImageCard = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-width: 480px;
+`
 
 enum TimeRange {
     SevenDays = '7days',
@@ -29,7 +51,15 @@ const checkIfAnalysableDescription = (description: string) => {
     return Object.values(CloeAnalysableDescriptions).includes(description as CloeAnalysableDescriptions)
 }
 
-const CloeDataTable = ({ tasks }: { tasks: Task[] }) => {
+const CloeDataTable = ({
+    tasks,
+    selectedTagId,
+    onSelectTag,
+}: {
+    tasks: Task[]
+    selectedTagId: string | null
+    onSelectTag: (tagId: string | null) => void
+}) => {
     const { TranslateText } = useLanguageContext()
 
     return (
@@ -45,37 +75,52 @@ const CloeDataTable = ({ tasks }: { tasks: Task[] }) => {
             </Table.Head>
             <Table.Body>
                 {tasks &&
-                    tasks.map((task, index) => (
-                        <Table.Row key={task.id}>
-                            <Table.Cell>
-                                <Chip>
-                                    <Typography variant="body_short_bold">{index + 1}</Typography>
-                                </Chip>
-                            </Table.Cell>
-                            <Table.Cell>
-                                <TagIdDisplay task={task} />
-                            </Table.Cell>
-                            <Table.Cell>
-                                <DescriptionDisplay task={task} />
-                            </Table.Cell>
-                            {task.inspection.analysisResult?.value ? (
+                    tasks.map((task, index) => {
+                        const isSelected = !!task.tagId && task.tagId === selectedTagId
+                        return (
+                            <Table.Row
+                                key={task.id}
+                                onClick={() => {
+                                    if (!task.tagId) return
+                                    onSelectTag(isSelected ? null : task.tagId)
+                                }}
+                                style={{
+                                    cursor: task.tagId ? 'pointer' : 'default',
+                                    backgroundColor: isSelected
+                                        ? tokens.colors.interactive.primary__selected_highlight.rgba
+                                        : undefined,
+                                }}
+                            >
                                 <Table.Cell>
-                                    <Typography>
-                                        {Math.round(parseFloat(task.inspection.analysisResult?.value)) + '%'}
-                                    </Typography>
+                                    <Chip>
+                                        <Typography variant="body_short_bold">{index + 1}</Typography>
+                                    </Chip>
                                 </Table.Cell>
-                            ) : (
                                 <Table.Cell>
-                                    <Typography>{TranslateText('Analysis result not available')}</Typography>
+                                    <TagIdDisplay task={task} />
                                 </Table.Cell>
-                            )}
-                            {task.endTime && (
                                 <Table.Cell>
-                                    <Typography>{formatDateTime(task.endTime, 'dd.MM.yy - HH:mm')}</Typography>
+                                    <DescriptionDisplay task={task} />
                                 </Table.Cell>
-                            )}
-                        </Table.Row>
-                    ))}
+                                {task.inspection.analysisResult?.value ? (
+                                    <Table.Cell>
+                                        <Typography>
+                                            {Math.round(parseFloat(task.inspection.analysisResult?.value)) + '%'}
+                                        </Typography>
+                                    </Table.Cell>
+                                ) : (
+                                    <Table.Cell>
+                                        <Typography>{TranslateText('Analysis result not available')}</Typography>
+                                    </Table.Cell>
+                                )}
+                                {task.endTime && (
+                                    <Table.Cell>
+                                        <Typography>{formatDateTime(task.endTime, 'dd.MM.yy - HH:mm')}</Typography>
+                                    </Table.Cell>
+                                )}
+                            </Table.Row>
+                        )
+                    })}
             </Table.Body>
         </StyledTable>
     )
@@ -87,6 +132,7 @@ export const CloeDataViewPage = () => {
     const { registerEvent, connectionReady } = useSignalRContext()
     const [cloeMissions, setCloeMissions] = useState<Mission[]>([])
     const [timeRange, setTimeRange] = useState<TimeRange>(TimeRange.OneMonth)
+    const [selectedTagId, setSelectedTagId] = useState<string | null>(null)
     const backendApi = useBackendApi()
 
     const fetchMissions = (): Promise<Mission[]> => {
@@ -160,6 +206,7 @@ export const CloeDataViewPage = () => {
                         ? new Date((task.endTime ?? task.startTime) as unknown as string)
                         : missionTimestamp
                 if (!tagId || !rawFillLevel || !sampleTimestamp) return
+                if (selectedTagId && tagId !== selectedTagId) return
                 if (!Object.hasOwn(accumulatedData, tagId)) {
                     accumulatedData[tagId] = []
                 }
@@ -170,16 +217,59 @@ export const CloeDataViewPage = () => {
         {} as TimeseriesLinePlotData
     )
 
+    const mapMission = (() => {
+        if (!latestCloeMission) return undefined
+        if (!selectedTagId) return latestCloeMission
+        const selectedIndex = latestCloeMission.tasks.findIndex((t) => t.tagId === selectedTagId)
+        if (selectedIndex < 0) return latestCloeMission
+        const selectedTask = latestCloeMission.tasks[selectedIndex]
+        const paddedTasks: Task[] = Array.from({ length: selectedIndex + 1 }, (_, i) => ({
+            ...selectedTask,
+            id: `${selectedTask.id}__pad_${i}`,
+        }))
+        paddedTasks[selectedIndex] = selectedTask
+        return { ...latestCloeMission, tasks: paddedTasks }
+    })()
+
+    const selectedTask = selectedTagId ? latestCloeMission?.tasks.find((t) => t.tagId === selectedTagId) : undefined
+
     return (
         <StyledPage>
             <StyledCardsWidth>
                 <Typography variant="h2">{TranslateText('Data View for Constant Level Oilers')}</Typography>
                 <StyledTableAndMap>
-                    {latestCloeMission && <CloeDataTable tasks={latestCloeMission.tasks} />}
-                    {plantCode && latestCloeMission && (
-                        <PlantMap plantCode={plantCode} floorId="0" mission={latestCloeMission} />
+                    {latestCloeMission && (
+                        <CloeDataTable
+                            tasks={latestCloeMission.tasks}
+                            selectedTagId={selectedTagId}
+                            onSelectTag={setSelectedTagId}
+                        />
+                    )}
+                    {plantCode && mapMission && (
+                        <CloeMapWrapper>
+                            <PlantMap
+                                key={selectedTagId ?? 'all'}
+                                plantCode={plantCode}
+                                floorId="0"
+                                mission={mapMission}
+                            />
+                        </CloeMapWrapper>
                     )}
                 </StyledTableAndMap>
+                {selectedTask && selectedTask.inspection.isarInspectionId && (
+                    <StyledTopAlignedImagesSection>
+                        <StyledCloeImageCard>
+                            <Typography variant="h4">{TranslateText('Latest inspection')}</Typography>
+                            <InspectionImageWithPlaceholder task={selectedTask} isLargeImage={true} />
+                        </StyledCloeImageCard>
+                        {selectedTask.inspection.analysisResult?.storageAccount && (
+                            <StyledCloeImageCard>
+                                <Typography variant="h4">{TranslateText('Latest analysis result')}</Typography>
+                                <AnalysisResultDialogContent currentTask={selectedTask} />
+                            </StyledCloeImageCard>
+                        )}
+                    </StyledTopAlignedImagesSection>
+                )}
                 {cloeMissions.length > 0 && (
                     <>
                         <Typography variant="h4">{TranslateText('Measured oil level')}</Typography>
