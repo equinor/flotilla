@@ -183,7 +183,7 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
     const getDataOverviewUrl = (type: AnalysisType): string | undefined => {
         switch (type) {
             case AnalysisType.Fencilla:
-                return `/${installation.installationCode}/data-view?missionName="Perimeter"&statuses=%5B"Successful"%2C"PartiallySuccessful"%5D`
+                return `/${installation.installationCode}/fencilla-view`
             case AnalysisType.CLOE:
                 return `/${installation.installationCode}/cloe-view`
             default:
@@ -291,11 +291,7 @@ export const SimpleMissionHeader = ({ mission }: { mission: Mission }) => {
                 <TitleSection>
                     <Button
                         variant="outlined"
-                        onClick={() =>
-                            navigate(
-                                `/${installation.installationCode}/data-view?missionName="Perimeter"&statuses=%5B"Successful"%2C"PartiallySuccessful"%5D`
-                            )
-                        }
+                        onClick={() => navigate(`/${installation.installationCode}/fencilla-view`)}
                     >
                         {TranslateText('Go to data overview')}
                     </Button>

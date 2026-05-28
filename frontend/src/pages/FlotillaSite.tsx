@@ -4,8 +4,7 @@ import { AssetSelectionPage } from './AssetSelectionPage'
 import { InfoPage } from './InfoPage'
 import { MissionDefinitionPageRouter, MissionPageRouter, RobotPageRouter, SimpleMissionPageRouter } from './PageRouter'
 import { PageNotFound } from './NotFoundPage'
-import { DataViewPage } from './MissionHistory/DataViewPage'
-import { CloeDataViewPage } from './CloeDataViewPage'
+import { FencillaViewPage } from './DataViewPage/FencillaViewPage'
 import { MissionControlPage } from './MissionControlPage'
 import { AreaOverviewPage } from './AreaOverviewPage'
 import { PredefinedMissionsPage } from './PredefinedMissionsPage'
@@ -26,6 +25,7 @@ import { MissionControlProvider } from 'components/Contexts/MissionControlContex
 import { StatisticsPage } from './StatisticsPage'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { CloeDataViewPage } from './DataViewPage/CloeDataViewPage'
 
 const StyledLoading = styled.div`
     display: flex;
@@ -50,7 +50,9 @@ export const FlotillaSite = () => {
                         <Route path="auto-schedule" element={<AutoSchedulePage />} />
                         <Route path="robots" element={<RobotStatusPage />} />
                         <Route path="statistics" element={<StatisticsPage />} />
-                        <Route path="data-view" element={<DataViewPage />} />
+                        {/* data-view needs to redirect to fencilla-view for backwards compatibility */}
+                        <Route path="data-view" element={<FencillaViewPage />} />
+                        <Route path="fencilla-view" element={<FencillaViewPage />} />
                         <Route path="cloe-view" element={<CloeDataViewPage />} />
                         <Route path="mission/:missionId" element={<MissionPageRouter />} />
                         <Route path="mission-simple" element={<SimpleMissionPageRouter />} />
