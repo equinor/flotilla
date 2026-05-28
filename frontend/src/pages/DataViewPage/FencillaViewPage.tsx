@@ -1,7 +1,7 @@
 import { CircularProgress, Table } from '@equinor/eds-core-react'
 import { Mission, MissionStatus } from 'models/Mission'
 import { useCallback, useContext, useEffect, useState } from 'react'
-import { SimpleHistoricMissionCard } from './HistoricMissionCard'
+import { SimpleHistoricMissionCard } from '../MissionHistory/HistoricMissionCard'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { PaginationHeader } from 'models/PaginatedResponse'
@@ -23,6 +23,10 @@ enum InspectionTableColumns {
     CompletionTime = 'CompletionTime',
 }
 
+enum FencillaMissionNames {
+    Perimeter = 'Perimeter',
+}
+
 const TableWithHeader = styled.div`
     width: 100%;
     padding: 1rem;
@@ -36,16 +40,16 @@ const StyledTable = styled.div`
     overflow-y: hidden;
 `
 
-export const DataViewPage = () => (
+export const FencillaViewPage = () => (
     <MissionFilterProvider>
-        <DataViewComponent />
+        <FencillaViewComponent />
     </MissionFilterProvider>
 )
 
-const DataViewComponent = () => {
+const FencillaViewComponent = () => {
     const { TranslateText } = useLanguageContext()
     const { installation } = useContext(InstallationContext)
-    const { page, switchPage, filterState, filterFunctions } = useMissionFilterContext()
+    const { page, switchPage, filterState } = useMissionFilterContext()
     const { registerEvent, connectionReady } = useSignalRContext()
     const [filteredMissions, setFilteredMissions] = useState<Mission[]>([])
     const [paginationDetails, setPaginationDetails] = useState<PaginationHeader>()
@@ -56,14 +60,14 @@ const DataViewComponent = () => {
     const backendApi = useBackendApi()
 
     const updateFilteredMissions = useCallback(() => {
-        const formattedFilter = filterFunctions.getFormattedFilter()
         backendApi
             .getMissionRuns({
-                ...formattedFilter,
                 installationCode: installation.installationCode,
                 pageSize: pageSize,
                 pageNumber: page ?? 1,
                 orderBy: 'EndTime desc, Name',
+                statuses: [MissionStatus.Successful, MissionStatus.PartiallySuccessful],
+                nameSearch: FencillaMissionNames.Perimeter,
             })
             .then((paginatedMissions) => {
                 setFilteredMissions(paginatedMissions.content)
@@ -75,7 +79,7 @@ const DataViewComponent = () => {
                 setIsLoading(false)
             })
             .catch(() => {})
-    }, [page, pageSize, filterFunctions])
+    }, [page, pageSize])
 
     useEffect(() => {
         if (isResettingPage) setIsResettingPage(false)

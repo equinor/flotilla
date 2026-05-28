@@ -6,11 +6,11 @@ import { StyledCardsWidth, StyledPage, StyledTable, StyledTableAndMap } from 'co
 import { SignalREventLabels, useSignalRContext } from 'components/Contexts/SignalRContext'
 import { useBackendApi } from 'api/UseBackendApi'
 import { InstallationContext } from 'components/Contexts/InstallationContext'
-import { PlantMap } from './MissionPage/MapPosition/PointillaMapView'
 import { Task } from 'models/Task'
 import { formatDateTime } from 'utils/StringFormatting'
 import { TimeseriesLinePlot, TimeseriesLinePlotData } from 'components/Displays/TimeseriesLinePlot'
 import { DescriptionDisplay, TagIdDisplay } from 'components/Displays/TaskDisplay'
+import { PlantMap } from 'pages/MissionPage/MapPosition/PointillaMapView'
 
 enum TimeRange {
     SevenDays = '7days',
