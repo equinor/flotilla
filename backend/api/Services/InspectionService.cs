@@ -23,10 +23,6 @@ namespace Api.Services
         );
         public Task<Inspection?> ReadByInspectionId(string id, bool readOnly = true);
         public Task<Inspection?> ReadByIsarInspectionId(string id, bool readOnly = true);
-        public Task<TagInspectionMetadata> CreateOrUpdateTagInspectionMetadata(
-            TagInspectionMetadata metadata
-        );
-        public Task<IsarZoomDescription?> FindInspectionZoom(string tagId);
         public string GetInspectionName(
             string installationCode,
             Position position,
@@ -261,36 +257,6 @@ namespace Api.Services
             throw new InspectionNotFoundException(
                 "Unexpected error when trying to get inspection data"
             );
-        }
-
-        public async Task<TagInspectionMetadata> CreateOrUpdateTagInspectionMetadata(
-            TagInspectionMetadata metadata
-        )
-        {
-            var existingMetadata = await context
-                .TagInspectionMetadata.Where(e => e.TagId == metadata.TagId)
-                .FirstOrDefaultAsync();
-            if (existingMetadata == null)
-            {
-                await context.TagInspectionMetadata.AddAsync(metadata);
-            }
-            else
-            {
-                existingMetadata.ZoomDescription = metadata.ZoomDescription;
-                context.TagInspectionMetadata.Update(existingMetadata);
-            }
-
-            await context.SaveChangesAsync();
-            return metadata;
-        }
-
-        public async Task<IsarZoomDescription?> FindInspectionZoom(string tagId)
-        {
-            return (
-                await context
-                    .TagInspectionMetadata.Where(e => e.TagId == tagId)
-                    .FirstOrDefaultAsync()
-            )?.ZoomDescription;
         }
 
         public static int FloorWithTolerance(double value, double tolerance = 0.06)
