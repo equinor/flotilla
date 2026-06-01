@@ -198,7 +198,12 @@ export const CloeDataViewPage = () => {
                             </Button>
                         </ButtonGroup>
                         {recentSphericalGlassMissions.length > 0 ? (
-                            <TimeseriesLinePlot data={linePlotData} yLabel={TranslateText('Fill [%]')} />
+                            <TimeseriesLinePlot
+                                data={linePlotData}
+                                yLabel={TranslateText('Fill [%]')}
+                                ymin={0}
+                                ymax={100}
+                            />
                         ) : (
                             <Typography>{TranslateText('No data available in the selected time range')}</Typography>
                         )}
