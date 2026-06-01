@@ -53,9 +53,11 @@ export interface TimeseriesLinePlotData {
 interface Props {
     data: TimeseriesLinePlotData
     yLabel: string
+    ymin: number
+    ymax: number
 }
 
-export const TimeseriesLinePlot = ({ data, yLabel }: Props) => {
+export const TimeseriesLinePlot = ({ data, yLabel, ymin, ymax }: Props) => {
     const options: ChartOptions<'line'> = useMemo(
         () => ({
             responsive: true,
@@ -99,6 +101,8 @@ export const TimeseriesLinePlot = ({ data, yLabel }: Props) => {
                         display: true,
                         text: yLabel,
                     },
+                    min: ymin,
+                    max: ymax,
                 },
             },
         }),
