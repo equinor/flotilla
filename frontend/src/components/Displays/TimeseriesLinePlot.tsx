@@ -79,11 +79,12 @@ export const TimeseriesLinePlot = ({ data, yLabel, ymin, ymax }: Props) => {
                     time: {
                         // Luxon format tokens (https://moment.github.io/luxon/#/formatting?id=table-of-tokens)
                         tooltipFormat: 'dd.MM.yy HH:mm',
+                        unit: 'day',
                         displayFormats: {
-                            millisecond: 'HH:mm:ss.SSS',
-                            second: 'HH:mm:ss',
-                            minute: 'HH:mm',
-                            hour: 'HH:mm',
+                            millisecond: 'dd.MM',
+                            second: 'dd.MM',
+                            minute: 'dd.MM',
+                            hour: 'dd.MM',
                             day: 'dd.MM',
                             week: 'dd.MM',
                             month: 'MM.yyyy',
