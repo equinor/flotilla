@@ -19,11 +19,13 @@ const StyledTopBar = styled(TopBar)`
     height: 56px;
     padding: 0 2rem;
     @media (max-width: ${phone_width}) {
-        grid-column-gap: 12px;
+        grid-column-gap: 8px;
         padding: 0 1rem;
+        height: auto;
+        min-height: 56px;
     }
 `
-const BrandName = styled.span`
+const AppName = styled.span`
     font-size: 1rem;
     font-weight: 700;
     letter-spacing: 0.16em;
@@ -40,25 +42,38 @@ const InstallationName = styled.span`
     margin-left: 12px;
     padding-left: 12px;
     border-left: 1px solid ${tokens.colors.ui.background__medium.hex};
+    @media (max-width: ${phone_width}) {
+        margin-left: 0;
+        padding-left: 0;
+        border-left: none;
+        font-size: 0.55rem;
+    }
 `
 const IconStyle = styled.div`
     display: flex;
     align-items: center;
     flex-direction: row-reverse;
     gap: 0.8rem;
+    @media (max-width: ${phone_width}) {
+        gap: 0.1rem;
+    }
 `
 const SelectLanguageWrapper = styled.div`
     margin-left: 1rem;
 `
 const StyledAlertList = styled.div`
     display: grid;
-    grid-template-rows: repeat(auto-fill);
     align-items: center;
     gap: 0.5rem;
 `
-const BrandWrapper = styled.div`
+const AppWrapper = styled.div`
     display: flex;
     align-items: center;
+    @media (max-width: ${phone_width}) {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 6px 0;
+    }
 `
 
 interface Props {
@@ -73,10 +88,10 @@ export const Header = ({ alertDict, installation }: Props) => {
         <>
             <StyledTopBar id={FrontPageSectionId.TopBar}>
                 <TopBar.Header onClick={() => navigate(`/${installation?.installationCode || ''}`)}>
-                    <BrandWrapper>
-                        <BrandName>Flotilla</BrandName>
+                    <AppWrapper>
+                        <AppName>Flotilla</AppName>
                         {installation && <InstallationName>{installation.name}</InstallationName>}
-                    </BrandWrapper>
+                    </AppWrapper>
                 </TopBar.Header>
                 <TopBar.Actions>
                     <IconStyle>

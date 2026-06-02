@@ -46,8 +46,7 @@ const MissionControlCardStyle = styled.div`
     }
 
     @media (max-width: 960px) {
-        max-width: 90vw;
-        align-self: stretch;
+        width: 100%;
     }
 `
 const OngoingMissionControlCardStyle = styled.div`

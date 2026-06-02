@@ -17,11 +17,13 @@ export const ButtonSection = styled.div`
 
 export const FormContainer = styled.div`
     display: flex;
-    gap: 24px 32px;
+    flex-direction: column;
+    gap: 24px;
 
     @media (min-width: 800px) {
         display: grid;
         grid-template-columns: repeat(2, 480px);
+        gap: 24px 32px;
     }
 `
 
