@@ -39,7 +39,7 @@ export const StyledPage = styled.div`
         padding: 1rem;
     }
     min-height: calc(100vh - 65px);
-    background-color: ${tokens.colors.ui.background__default.hex};
+    background-color: ${tokens.colors.ui.background__light.hex};
 `
 export const StyledLoading = styled.div`
     display: flex;
@@ -87,6 +87,12 @@ export const StyledTableCell = styled(Table.Cell)`
         border-bottom: 2px solid ${tokens.colors.ui.background__medium.hex};
     }
 `
+export const StyledTableRow = styled(Table.Row)`
+    transition: background-color 0.12s ease;
+    &&:hover {
+        background-color: ${tokens.colors.ui.background__light.hex};
+    }
+`
 export const StyledTableBody = styled(Table.Body)`
     background-color: ${tokens.colors.ui.background__light.hex};
 `
@@ -103,4 +109,16 @@ export const StyledCardsWidth = styled.div`
 export const VideoStreamSection = styled.div`
     display: grid;
     gap: 1rem;
+`
+
+export const cardShadow = '0 4px 12px rgba(0, 0, 0, 0.1), 0 12px 32px rgba(0, 0, 0, 0.08)'
+export const subtleCardShadow = '0 2px 6px rgba(0, 0, 0, 0.08), 0 8px 20px rgba(0, 0, 0, 0.06)'
+
+export const FieldLabel = styled.span`
+    font-family: Equinor, sans-serif;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: ${tokens.colors.text.static_icons__tertiary.hex};
 `

@@ -60,7 +60,6 @@ const StyledPhoneView = styled.div`
 
 const StyledButtons = styled.div`
     display: flex;
-    flex-direction: row;
     gap: 0.5rem;
     align-items: center;
 `

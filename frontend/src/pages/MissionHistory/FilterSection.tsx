@@ -40,7 +40,7 @@ const StyledButtonDiv = styled.div`
     display: flex;
     gap: 0.25rem;
 `
-const MutedButton = styled(Button)`
+const ClearFiltersButton = styled(Button)`
     && {
         color: ${tokens.colors.text.static_icons__tertiary.hex};
     }
@@ -103,9 +103,9 @@ export const FilterSection = () => {
                         <Icon name={Icons.Filter} size={24} />
                         {TranslateText('Filter')}
                     </Button>
-                    <MutedButton variant="ghost" onClick={onClearFilters}>
+                    <ClearFiltersButton variant="ghost" onClick={onClearFilters}>
                         {TranslateText('Clear all filters')}
-                    </MutedButton>
+                    </ClearFiltersButton>
                 </StyledButtonDiv>
             </StyledHeader>
             <StyledDialog open={isFilteringDialogOpen} isDismissable>

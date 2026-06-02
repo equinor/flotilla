@@ -17,6 +17,7 @@ import { FrontPageSectionId } from 'models/FrontPageSectionId'
 import { SmallScreenInfoText } from 'utils/InfoText'
 import { phone_width } from 'utils/constants'
 import { InstallationContext } from 'components/Contexts/InstallationContext'
+import { StyledTableCell, StyledTableRow } from 'components/Styles/StyledComponents'
 
 const StyledIcon = styled(Icon)`
     display: flex;
@@ -24,32 +25,13 @@ const StyledIcon = styled(Icon)`
     height: 1.3rem;
     width: 1.3rem;
 `
-const StyledHeaderCell = styled(Table.Cell)`
-    && {
-        font-family: Equinor, sans-serif;
-        font-size: 0.65rem;
-        font-weight: 600;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        color: ${tokens.colors.text.static_icons__default.hex};
-        background-color: ${tokens.colors.ui.background__default.hex};
-        border-bottom: 2px solid ${tokens.colors.ui.background__medium.hex};
-    }
-`
-const StyledRow = styled(Table.Row)`
-    transition: background-color 0.12s ease;
-    &&:hover {
-        background-color: ${tokens.colors.ui.background__light.hex};
-    }
-`
 const TableTitle = styled.p`
-    margin: 0 0 14px 0;
+    margin: 0 0 0.875rem 0;
     font-family: Equinor, sans-serif;
     font-size: 0.92rem;
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    text-align: left;
     color: ${tokens.colors.text.static_icons__default.hex};
 `
 const StyledTable = styled.div`
@@ -208,7 +190,7 @@ const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialo
     const noRobotReadyForMissionsText = TranslateText('No robot available')
 
     return (
-        <StyledRow key={mission.id}>
+        <StyledTableRow key={mission.id}>
             <Table.Cell id={InspectionTableColumns.Status}>{status}</Table.Cell>
             <Table.Cell id={InspectionTableColumns.Name}>
                 <Typography
@@ -257,7 +239,7 @@ const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialo
                     )}
                 </Centered>
             </Table.Cell>
-        </StyledRow>
+        </StyledTableRow>
     )
 }
 
@@ -297,9 +279,9 @@ export const InspectionTable = ({ inspectionArea, inspections, openDialog, setSe
                     <Table.Head sticky>
                         <Table.Row>
                             {Object.values(InspectionTableColumns).map((col) => (
-                                <StyledHeaderCell id={col} key={col}>
+                                <StyledTableCell id={col} key={col}>
                                     {TranslateText(col)}
-                                </StyledHeaderCell>
+                                </StyledTableCell>
                             ))}
                         </Table.Row>
                     </Table.Head>
@@ -378,9 +360,9 @@ export const AllInspectionsTable = ({ inspections }: ITableProps) => {
                     <Table.Head sticky>
                         <Table.Row>
                             {Object.values(InspectionTableColumns).map((col) => (
-                                <StyledHeaderCell id={col} key={col}>
+                                <StyledTableCell id={col} key={col}>
                                     {TranslateText(col)}
-                                </StyledHeaderCell>
+                                </StyledTableCell>
                             ))}
                         </Table.Row>
                     </Table.Head>

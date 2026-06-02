@@ -30,7 +30,7 @@ const StyledMissionPage = styled.div`
     display: flex;
     flex-direction: column;
     background: ${tokens.colors.ui.background__default.hex};
-    min-height: 100vh;
+    height: 100vh;
 `
 
 const StyledMissionPageBody = styled.div`

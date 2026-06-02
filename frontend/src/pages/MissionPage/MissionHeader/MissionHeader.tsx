@@ -14,6 +14,7 @@ import { convertUTCDateToLocalDate, formatDateTime } from 'utils/StringFormattin
 import { calculateRemaindingTimeInMinutes } from 'utils/CalculateRemaingingTime'
 import { useNavigate } from 'react-router-dom'
 import { phone_width } from 'utils/constants'
+import { FieldLabel } from 'components/Styles/StyledComponents'
 import { useContext } from 'react'
 import { InstallationContext } from 'components/Contexts/InstallationContext'
 import { RobotStatus } from 'models/Robot'
@@ -69,7 +70,6 @@ const ButtonGroup = styled.div`
 const StyledTypography = styled(Typography)`
     font-family: Equinor;
     font-size: 32px;
-    font-style: normal;
     font-weight: 400;
     line-height: 40px;
     @media (max-width: ${phone_width}) {
@@ -95,18 +95,9 @@ const MetricItem = styled.div`
     flex-direction: column;
     gap: 6px;
 `
-const MetricLabel = styled.span`
-    font-family: Equinor, sans-serif;
-    font-size: 0.65rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: ${tokens.colors.text.static_icons__tertiary.hex};
-`
-
 const Metric = ({ label, children }: { label: string; children: React.ReactNode }) => (
     <MetricItem>
-        <MetricLabel>{label}</MetricLabel>
+        <FieldLabel>{label}</FieldLabel>
         {children}
     </MetricItem>
 )

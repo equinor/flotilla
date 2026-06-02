@@ -37,7 +37,6 @@ const StyledSelectSection = styled.div`
 `
 const StyledDaySelector = styled.div`
     display: flex;
-    flex-direction: row;
     gap: 2px;
 `
 const DayButton = styled(Button)`
@@ -46,27 +45,22 @@ const DayButton = styled(Button)`
 `
 const StyledTimeSelector = styled.div`
     display: flex;
-    flex-direction: row;
     align-items: end;
     gap: 8px;
 `
 const StyledTimeChips = styled.div`
     display: flex;
-    flex-direction: row;
     gap: 8px;
     align-items: center;
     flex-wrap: wrap;
 `
 const StyledDayRow = styled.div`
     display: flex;
-    flex-direction: row;
     align-items: center;
     gap: 8px;
     flex-wrap: wrap;
 `
-const DayLabel = styled.span`
-    font-family: Equinor, sans-serif;
-    font-size: 0.78rem;
+const DayLabel = styled(Typography).attrs({ variant: 'caption' })`
     color: ${tokens.colors.text.static_icons__tertiary.hex};
     min-width: 80px;
 `

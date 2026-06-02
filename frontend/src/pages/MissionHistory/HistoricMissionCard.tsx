@@ -1,7 +1,7 @@
 import { Table, Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
-import styled from 'styled-components'
 import { Mission } from 'models/Mission'
+import { StyledTableRow } from 'components/Styles/StyledComponents'
 import {
     MissionStatusDisplay,
     MissionStatusDisplayShort,
@@ -22,13 +22,6 @@ enum InspectionTableColumns {
     CompletionTime = 'CompletionTime',
     Rerun = 'RerunMission',
 }
-
-const StyledRow = styled(Table.Row)`
-    transition: background-color 0.12s ease;
-    &&:hover {
-        background-color: ${tokens.colors.ui.background__light.hex};
-    }
-`
 
 interface MissionProps {
     mission: Mission
@@ -57,7 +50,7 @@ export const HistoricMissionCard = ({ mission }: MissionProps) => {
     const missionHasAnalysisResultWithWarning = mission.tasks.some((t) => !!t.inspection.analysisResult?.warning)
 
     return (
-        <StyledRow
+        <StyledTableRow
             key={mission.id}
             style={{
                 backgroundColor: missionHasAnalysisResultWithWarning
@@ -85,7 +78,7 @@ export const HistoricMissionCard = ({ mission }: MissionProps) => {
             <Table.Cell id={InspectionTableColumns.Rerun}>
                 <MissionRestartButton mission={mission} hasFailedTasks={missionHasFailedTasks} smallButton={true} />
             </Table.Cell>
-        </StyledRow>
+        </StyledTableRow>
     )
 }
 
@@ -94,7 +87,7 @@ export const SimpleHistoricMissionCard = ({ mission }: MissionProps) => {
     const { installation } = useContext(InstallationContext)
 
     return (
-        <StyledRow key={mission.id}>
+        <StyledTableRow key={mission.id}>
             <Table.Cell id={InspectionTableColumns.Status}>
                 <MissionStatusDisplay status={mission.status} />
             </Table.Cell>
@@ -109,6 +102,6 @@ export const SimpleHistoricMissionCard = ({ mission }: MissionProps) => {
             <Table.Cell id={InspectionTableColumns.CompletionTime}>
                 <MissionEndTimeDisplay mission={mission} />
             </Table.Cell>
-        </StyledRow>
+        </StyledTableRow>
     )
 }

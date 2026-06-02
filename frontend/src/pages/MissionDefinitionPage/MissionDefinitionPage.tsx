@@ -9,7 +9,7 @@ import { MissionDefinitionUpdateForm } from 'models/MissionDefinitionUpdateForm'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
 import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
-import { StyledPage } from 'components/Styles/StyledComponents'
+import { StyledPage, subtleCardShadow } from 'components/Styles/StyledComponents'
 import styled from 'styled-components'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
@@ -34,9 +34,7 @@ const StyledCard = styled.div`
     min-height: 100px;
     height: auto;
     background: ${tokens.colors.ui.background__default.hex};
-    box-shadow:
-        0 2px 6px rgba(0, 0, 0, 0.08),
-        0 8px 20px rgba(0, 0, 0, 0.06);
+    box-shadow: ${subtleCardShadow};
     overflow-y: hidden;
 `
 const StyledTableAndMap = styled.div`
