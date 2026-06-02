@@ -163,6 +163,7 @@ const NavBarAsTabs = () => {
         { to: `/${installation.installationCode}/predefined-missions`, label: TranslateText('Predefined Missions') },
         { to: `/${installation.installationCode}/history`, label: TranslateText('Mission History') },
         { to: `/${installation.installationCode}/auto-schedule`, label: TranslateText('Auto Scheduling') },
+        { to: `/${installation.installationCode}/data-overview`, label: TranslateText('Data Overview') },
     ]
 
     return (
