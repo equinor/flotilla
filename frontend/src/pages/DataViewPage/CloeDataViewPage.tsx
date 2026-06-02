@@ -24,6 +24,9 @@ const CloeMapWrapper = styled.div`
         border-radius: 2px !important;
     }
 `
+const CloeTableWrapper = styled.div`
+    align-self: flex-start;
+`
 const StyledTopAlignedImagesSection = styled(StyledImagesSection)`
     align-items: flex-start;
 `
@@ -252,11 +255,13 @@ export const CloeDataViewPage = () => {
                 <Typography variant="h2">{TranslateText('Data View for Constant Level Oilers')}</Typography>
                 <StyledTableAndMap>
                     {latestCloeMission && (
-                        <CloeDataTable
-                            tasks={latestCloeMission.tasks}
-                            selectedTagId={selectedTagId}
-                            onSelectTag={setSelectedTagId}
-                        />
+                        <CloeTableWrapper>
+                            <CloeDataTable
+                                tasks={latestCloeMission.tasks}
+                                selectedTagId={selectedTagId}
+                                onSelectTag={setSelectedTagId}
+                            />
+                        </CloeTableWrapper>
                     )}
                     {plantCode && mapMission && (
                         <CloeMapWrapper>
