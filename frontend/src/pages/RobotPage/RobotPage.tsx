@@ -7,7 +7,7 @@ import { BatteryStatusDisplay } from 'components/Displays/RobotDisplays/BatteryS
 import { RobotStatusChip } from 'components/Displays/RobotDisplays/RobotStatusIcon'
 import { RobotStatus, RobotWithoutTelemetry } from 'models/Robot'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { VideoStreamSection } from 'components/Styles/StyledComponents'
+import { VideoStreamSection, FieldLabel } from 'components/Styles/StyledComponents'
 import { DocumentationSection } from './Documentation'
 import { useMediaStreamContext } from 'components/Contexts/MediaStreamContext'
 import { useContext, useEffect, useState } from 'react'
@@ -34,7 +34,6 @@ const StyledRobotPage = styled.div`
 
 const HeroSection = styled.div`
     display: flex;
-    flex-direction: row;
     align-items: center;
     gap: 3rem;
     padding: 2rem 4rem;
@@ -75,15 +74,6 @@ const MetricCard = styled.div`
         padding-left: 0;
         border-left: none;
     }
-`
-
-const MetricLabel = styled.span`
-    font-family: Equinor, sans-serif;
-    font-size: 0.65rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: ${tokens.colors.text.static_icons__tertiary.hex};
 `
 
 const ActionsRow = styled.div`
@@ -185,7 +175,7 @@ export const RobotPage = ({ robot }: RobotPageProps) => {
                         {robot.status !== RobotStatus.Offline && (
                             <MetricsRow>
                                 <MetricCard>
-                                    <MetricLabel>{TranslateText('Battery')}</MetricLabel>
+                                    <FieldLabel>{TranslateText('Battery')}</FieldLabel>
                                     <BatteryStatusDisplay
                                         itemSize={24}
                                         batteryLevel={robotBatteryLevel}
@@ -194,19 +184,19 @@ export const RobotPage = ({ robot }: RobotPageProps) => {
                                 </MetricCard>
                                 {robotPressureLevel !== undefined && (
                                     <MetricCard>
-                                        <MetricLabel>{TranslateText('Pressure')}</MetricLabel>
+                                        <FieldLabel>{TranslateText('Pressure')}</FieldLabel>
                                         <PressureStatusDisplay itemSize={24} pressure={robotPressureLevel} />
                                     </MetricCard>
                                 )}
                                 {robot.type && (
                                     <MetricCard>
-                                        <MetricLabel>{TranslateText('Robot Model')}</MetricLabel>
+                                        <FieldLabel>{TranslateText('Robot Model')}</FieldLabel>
                                         <Typography style={{ fontSize: '24px' }}>{robot.type}</Typography>
                                     </MetricCard>
                                 )}
                                 {currentInspectionArea && (
                                     <MetricCard>
-                                        <MetricLabel>{TranslateText('Current Inspection Area')}</MetricLabel>
+                                        <FieldLabel>{TranslateText('Current Inspection Area')}</FieldLabel>
                                         <Typography style={{ fontSize: '24px' }}>
                                             {currentInspectionArea.inspectionAreaName}
                                         </Typography>

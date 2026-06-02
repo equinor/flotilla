@@ -4,6 +4,7 @@ import { Inspection } from './InspectionSection'
 import { getDeadlineInDays } from 'utils/StringFormatting'
 import { tokens } from '@equinor/eds-tokens'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { cardShadow } from 'components/Styles/StyledComponents'
 
 export const StyledCard = styled(Card)`
     display: flex;
@@ -51,9 +52,7 @@ export const StyledInspectionAreaCard = styled.div`
     max-width: 450px;
     border-radius: 2px;
     overflow: hidden;
-    box-shadow:
-        0px 4px 12px rgba(0, 0, 0, 0.1),
-        0px 12px 32px rgba(0, 0, 0, 0.08);
+    box-shadow: ${cardShadow};
 `
 const Circle = styled.div`
     width: 13px;
@@ -62,7 +61,6 @@ const Circle = styled.div`
 `
 const MissionComponents = styled.div`
     display: flex;
-    flex-direction: row;
     align-items: center;
     gap: 4px;
 `
@@ -78,7 +76,7 @@ const MissionInspections = styled.div`
 `
 export const Placeholder = styled.div`
     padding: 24px;
-    border: 1px solid #dcdcdc;
+    border: 1px solid ${tokens.colors.ui.background__medium.hex};
     border-radius: 4px;
 `
 export const Content = styled.div`

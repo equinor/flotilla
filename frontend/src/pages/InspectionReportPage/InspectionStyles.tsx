@@ -116,7 +116,6 @@ export const StyledInspectionContent = styled.div`
 `
 export const StyledDialogInspectionView = styled.div`
     display: flex;
-    flex-direction: row;
     gap: 16px;
 `
 

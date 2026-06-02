@@ -19,7 +19,7 @@ import {
 } from './FrontPage/MissionOverview/OngoingMissionCard'
 import { RobotCard, RobotCardPlaceholder } from './FrontPage/MissionOverview/RobotCard'
 import { RobotMissionQueueView } from './FrontPage/MissionOverview/MissionQueueView'
-import { StyledPage } from 'components/Styles/StyledComponents'
+import { StyledPage, cardShadow } from 'components/Styles/StyledComponents'
 import { MissionStatus } from 'models/Mission'
 
 const MissionControlStyle = styled.div`
@@ -39,9 +39,7 @@ const MissionControlCardStyle = styled.div`
     flex-direction: column;
     background: ${tokens.colors.ui.background__default.hex};
     border-left: 4px solid ${tokens.colors.interactive.primary__resting.hex};
-    box-shadow:
-        0 4px 12px rgba(0, 0, 0, 0.1),
-        0 12px 32px rgba(0, 0, 0, 0.08);
+    box-shadow: ${cardShadow};
 
     @media (min-width: 960px) {
         width: 960px;
@@ -54,12 +52,7 @@ const MissionControlCardStyle = styled.div`
 `
 const OngoingMissionControlCardStyle = styled.div`
     display: flex;
-    gap: 0px;
     align-items: flex-start;
-
-    @media (min-width: 960px) {
-        flex-direction: row;
-    }
 
     @media (max-width: 960px) {
         flex-direction: column;

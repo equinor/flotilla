@@ -2,7 +2,6 @@ import { Button, Icon, Table } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
-import { StyledTableBody } from 'components/Styles/StyledComponents'
 import { allDays, allDaysIndexOfToday, parseAutoScheduledJobIds } from 'models/AutoScheduleFrequency'
 import styled from 'styled-components'
 import { Icons } from 'utils/icons'
@@ -26,7 +25,7 @@ const SectionTitle = styled.p`
 const StyledTable = styled(Table)`
     width: 960px;
     margin-top: 10px;
-    border-top: 1px solid #dcdcdc;
+    border-top: 1px solid ${tokens.colors.ui.background__medium.hex};
 
     @media (max-width: 960px) {
         width: 95%;
@@ -95,7 +94,7 @@ export const NextAutoScheduleMissionView = () => {
                 <StyledNextAutoMission>
                     <SectionTitle>{TranslateText('Next auto scheduled mission for today')}</SectionTitle>
                     <StyledTable>
-                        <StyledTableBody>
+                        <Table.Body style={{ backgroundColor: tokens.colors.ui.background__default.hex }}>
                             {!showMore ? (
                                 <AutoScheduleMissionTableRow
                                     day={currentDayOfTheWeek}
@@ -114,7 +113,7 @@ export const NextAutoScheduleMissionView = () => {
                                     ))}
                                 </>
                             )}
-                        </StyledTableBody>
+                        </Table.Body>
                     </StyledTable>
                     {timeMissionPairs.length > 1 && (
                         <ShowLessOrMoreButton showMore={showMore} setShowMore={setShowMore} />

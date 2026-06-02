@@ -69,7 +69,6 @@ const StyledMainBody = styled.div`
 `
 const StyledHeader = styled.div`
     display: flex;
-    flex-direction: row;
     align-self: stretch;
     justify-content: space-between;
 `

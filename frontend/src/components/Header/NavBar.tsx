@@ -2,7 +2,7 @@ import { Button, Icon, Menu, Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useContext, useState } from 'react'
-import { Link, matchPath, useNavigate } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import { styled } from 'styled-components'
 import { Icons } from 'utils/icons'
 import { phone_width } from 'utils/constants'
@@ -17,7 +17,7 @@ const StyledButton = styled(Button)`
 const NavWrapper = styled.div`
     background: ${tokens.colors.ui.background__default.hex};
     border-bottom: 1px solid ${tokens.colors.ui.background__medium.hex};
-    padding: 0 1rem 0 calc(2rem - 14px);
+    padding: 0 1rem;
     display: flex;
     justify-content: space-between;
     align-items: stretch;
@@ -26,25 +26,28 @@ const NavLinks = styled.nav`
     display: flex;
     align-items: stretch;
 `
-const NavItem = styled(Link)<{ $active: boolean }>`
+const NavItem = styled(NavLink)`
     display: flex;
     align-items: center;
     padding: 0 14px;
     height: 48px;
     font-family: Equinor, sans-serif;
     font-size: 0.78rem;
-    font-weight: ${({ $active }) => ($active ? '700' : '600')};
+    font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: ${({ $active }) =>
-        $active ? tokens.colors.interactive.primary__resting.hex : tokens.colors.text.static_icons__default.hex};
-    border-bottom: 3px solid
-        ${({ $active }) => ($active ? tokens.colors.interactive.primary__resting.hex : 'transparent')};
+    color: ${tokens.colors.text.static_icons__default.hex};
+    border-bottom: 3px solid transparent;
     text-decoration: none;
     transition:
         color 0.15s ease,
         border-color 0.15s ease;
     white-space: nowrap;
+    &.active {
+        font-weight: 700;
+        color: ${tokens.colors.interactive.primary__resting.hex};
+        border-bottom-color: ${tokens.colors.interactive.primary__resting.hex};
+    }
     &:hover {
         color: ${tokens.colors.interactive.primary__resting.hex};
         border-bottom-color: ${tokens.colors.interactive.primary__hover_alt.hex};
@@ -54,7 +57,6 @@ const RightContent = styled.div`
     display: flex;
     align-items: center;
     gap: 24px;
-    padding-right: 0;
 `
 
 const NavBarAsButton = () => {
@@ -146,70 +148,25 @@ const OngoingMissionsInfo = ({ goToOngoingTab }: { goToOngoingTab: () => void })
     )
 }
 
-function useRouteMatch(patterns: readonly string[]) {
-    for (let i = 0; i < patterns.length; i += 1) {
-        const pattern = patterns[i]
-        const possibleMatch = matchPath(pattern, location.pathname)
-        if (possibleMatch !== null) {
-            return possibleMatch
-        }
-    }
-    return null
-}
-
 const NavBarAsTabs = () => {
     const { TranslateText } = useLanguageContext()
     const { installation } = useContext(InstallationContext)
     const navigate = useNavigate()
 
-    const routeMatch = useRouteMatch([
-        '/:installationCode/mission-control',
-        '/:installationCode/inspection-overview',
-        '/:installationCode/predefined-missions',
-        '/:installationCode/history',
-        '/:installationCode/auto-schedule',
-        '/:installationCode/statistics',
-    ])
-    const currentPath = routeMatch?.pattern?.path
-
     const navItems = [
-        {
-            path: '/:installationCode/mission-control',
-            to: `/${installation.installationCode}/mission-control`,
-            label: TranslateText('Mission Control'),
-        },
-        {
-            path: '/:installationCode/inspection-overview',
-            to: `/${installation.installationCode}/inspection-overview`,
-            label: TranslateText('Area Overview'),
-        },
-        {
-            path: '/:installationCode/predefined-missions',
-            to: `/${installation.installationCode}/predefined-missions`,
-            label: TranslateText('Predefined Missions'),
-        },
-        {
-            path: '/:installationCode/history',
-            to: `/${installation.installationCode}/history`,
-            label: TranslateText('Mission History'),
-        },
-        {
-            path: '/:installationCode/auto-schedule',
-            to: `/${installation.installationCode}/auto-schedule`,
-            label: TranslateText('Auto Scheduling'),
-        },
-        {
-            path: '/:installationCode/statistics',
-            to: `/${installation.installationCode}/statistics`,
-            label: TranslateText('Statistics'),
-        },
+        { to: `/${installation.installationCode}/mission-control`, label: TranslateText('Mission Control') },
+        { to: `/${installation.installationCode}/inspection-overview`, label: TranslateText('Area Overview') },
+        { to: `/${installation.installationCode}/predefined-missions`, label: TranslateText('Predefined Missions') },
+        { to: `/${installation.installationCode}/history`, label: TranslateText('Mission History') },
+        { to: `/${installation.installationCode}/auto-schedule`, label: TranslateText('Auto Scheduling') },
+        { to: `/${installation.installationCode}/statistics`, label: TranslateText('Statistics') },
     ]
 
     return (
         <NavWrapper>
             <NavLinks>
-                {navItems.map(({ path, to, label }) => (
-                    <NavItem key={path} to={to} $active={currentPath === path}>
+                {navItems.map(({ to, label }) => (
+                    <NavItem key={to} to={to} end>
                         {label}
                     </NavItem>
                 ))}
@@ -234,7 +191,6 @@ const StyledShowOnMobile = styled.div`
 `
 
 const StyledShowOffMobile = styled.div`
-    display: block;
     @media (max-width: ${phone_width}) {
         display: none;
     }
