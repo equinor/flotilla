@@ -83,7 +83,7 @@ const LongTypography = styled(Typography)`
         word-break: break-word;
     }
 `
-const StyledGhostButton = styled(Button)`
+export const StyledGhostButton = styled(Button)`
     height: auto;
     min-height: ${tokens.shape.button.minHeight};
     padding: 0;

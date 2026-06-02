@@ -324,5 +324,9 @@
     "Latest inspection": "Latest inspection",
     "Latest analysis result": "Latest analysis result",
     "Selected inspection": "Selected inspection",
-    "Selected analysis result": "Selected analysis result"
+    "Selected analysis result": "Selected analysis result",
+    "Analysis performed on images of the constant level oilers": "Analysis performed on images of the constant level oilers",
+    "Data View for Perimeter Breach Detection": "Data View for Perimeter Breach Detection",
+    "Analysis performed on images of the perimeter fences": "Analysis performed on images of the perimeter fences",
+    "Data Overview": "Data Overview"
 }

@@ -24,6 +24,7 @@ import { MissionControlProvider } from 'components/Contexts/MissionControlContex
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { CloeDataViewPage } from './DataViewPage/CloeDataViewPage'
+import { DataOverviewPage } from './DataOverviewPage'
 
 const StyledLoading = styled.div`
     display: flex;
@@ -46,6 +47,7 @@ export const FlotillaSite = () => {
                         <Route path="predefined-missions" element={<PredefinedMissionsPage />} />
                         <Route path="history" element={<MissionHistoryPage />} />
                         <Route path="auto-schedule" element={<AutoSchedulePage />} />
+                        <Route path="data-overview" element={<DataOverviewPage />} />
                         {/* data-view needs to redirect to fencilla-view for backwards compatibility */}
                         <Route path="data-view" element={<FencillaViewPage />} />
                         <Route path="fencilla-view" element={<FencillaViewPage />} />

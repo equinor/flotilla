@@ -318,11 +318,16 @@
     "1 month": "1 måned",
     "Fill [%]": "Fyll [%]",
     "No data available in the selected time range": "Ingen data tilgjengelig i det valgte tidsrommet",
-    "Data View for Constant Level Oilers": "Datavisning for Constant Level Oilers",
     "Not available": "Ikke tilgjengelig",
+    "Selected inspection": "Utvalgt inspeksjon",
+    "Selected analysis result": "Utvalgt analyseresultat",
+    "Data View for Constant Level Oilers": "Datavisning for Nivåmåling",
+    "Analysis result not available": "Analyseresultat ikke tilgjengelig",
     "Go to data overview": "Gå til dataoversikt",
     "Latest inspection": "Siste inspeksjon",
     "Latest analysis result": "Siste analyseresultat",
-    "Selected inspection": "Utvalgt inspeksjon",
-    "Selected analysis result": "Utvalgt analyseresultat"
+    "Analysis performed on images of the constant level oilers.": "Analyse utført på bilder av nivåmålinger.",
+    "Data View for Perimeter Breach Detection": "Datavisning for Perimeter Sikkerhetsrunder",
+    "Analysis performed on images of the perimeter fences.": "Analyse utført på bilder av perimetergjerdene.",
+    "Data Overview": "Dataoversikt"
 }
