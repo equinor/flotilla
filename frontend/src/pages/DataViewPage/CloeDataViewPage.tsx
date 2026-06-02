@@ -77,6 +77,13 @@ const CloeDataTable = ({
                 {tasks &&
                     tasks.map((task, index) => {
                         const isSelected = !!task.tagId && task.tagId === selectedTagId
+                        const taskHasWarning = !!task.inspection.analysisResult?.warning
+                        const backgroundColor = isSelected
+                            ? tokens.colors.interactive.primary__selected_highlight.rgba
+                            : taskHasWarning
+                              ? tokens.colors.interactive.danger__highlight.rgba
+                              : undefined
+
                         return (
                             <Table.Row
                                 key={task.id}
@@ -86,9 +93,7 @@ const CloeDataTable = ({
                                 }}
                                 style={{
                                     cursor: task.tagId ? 'pointer' : 'default',
-                                    backgroundColor: isSelected
-                                        ? tokens.colors.interactive.primary__selected_highlight.rgba
-                                        : undefined,
+                                    backgroundColor,
                                 }}
                             >
                                 <Table.Cell>
