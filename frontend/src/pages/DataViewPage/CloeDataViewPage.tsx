@@ -4,7 +4,13 @@ import { useContext, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { tokens } from '@equinor/eds-tokens'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { StyledCardsWidth, StyledPage, StyledTable, StyledTableAndMap } from 'components/Styles/StyledComponents'
+import {
+    StyledCardsWidth,
+    StyledPage,
+    StyledTable,
+    StyledTableAndMap,
+    StyledTableCell,
+} from 'components/Styles/StyledComponents'
 import { SignalREventLabels, useSignalRContext } from 'components/Contexts/SignalRContext'
 import { useBackendApi } from 'api/UseBackendApi'
 import { InstallationContext } from 'components/Contexts/InstallationContext'
@@ -86,11 +92,11 @@ const CloeDataTable = ({
         <StyledTable>
             <Table.Head>
                 <Table.Row>
-                    <Table.Cell>#</Table.Cell>
-                    <Table.Cell>{TranslateText('Tag-ID')}</Table.Cell>
-                    <Table.Cell>{TranslateText('Description')}</Table.Cell>
-                    <Table.Cell>{TranslateText('Latest Value')}</Table.Cell>
-                    <Table.Cell>{TranslateText('Timestamp')}</Table.Cell>
+                    <StyledTableCell>#</StyledTableCell>
+                    <StyledTableCell>{TranslateText('Tag-ID')}</StyledTableCell>
+                    <StyledTableCell>{TranslateText('Description')}</StyledTableCell>
+                    <StyledTableCell>{TranslateText('Latest Value')}</StyledTableCell>
+                    <StyledTableCell>{TranslateText('Timestamp')}</StyledTableCell>
                 </Table.Row>
             </Table.Head>
             <Table.Body>
