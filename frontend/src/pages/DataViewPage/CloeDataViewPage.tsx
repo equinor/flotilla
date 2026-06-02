@@ -39,6 +39,11 @@ enum TimeRange {
     OneMonth = '1month',
 }
 
+const CLOE_FETCH_WINDOW_DAYS = 30
+const CLOE_PAGE_SIZE = 200
+const MS_PER_SECOND = 1000
+const MS_PER_DAY = 24 * 60 * 60 * MS_PER_SECOND
+
 enum CloeMissionNames {
     Avlesning = 'Avlesning',
 }
@@ -141,12 +146,15 @@ export const CloeDataViewPage = () => {
     const backendApi = useBackendApi()
 
     const fetchMissions = (): Promise<Mission[]> => {
+        const minEndTime = Math.floor((Date.now() - CLOE_FETCH_WINDOW_DAYS * MS_PER_DAY) / MS_PER_SECOND)
         return backendApi
             .getMissionRuns({
                 installationCode: installation.installationCode,
                 orderBy: 'EndTime desc, Name',
                 statuses: [MissionStatus.Successful, MissionStatus.PartiallySuccessful],
                 nameSearch: CloeMissionNames.Avlesning,
+                minEndTime: minEndTime,
+                pageSize: CLOE_PAGE_SIZE,
             })
             .then((missionRuns) => {
                 const missions = missionRuns.content
