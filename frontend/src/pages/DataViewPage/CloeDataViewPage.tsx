@@ -1,4 +1,4 @@
-import { Button, ButtonGroup, Chip, Table, Typography } from '@equinor/eds-core-react'
+import { Button, Chip, Table, Typography } from '@equinor/eds-core-react'
 import { Mission, MissionStatus } from 'models/Mission'
 import { useContext, useEffect, useState } from 'react'
 import styled from 'styled-components'
@@ -26,6 +26,18 @@ const CloeMapWrapper = styled.div`
 `
 const CloeTableWrapper = styled.div`
     align-self: flex-start;
+`
+const TimeRangeToggle = styled.div`
+    display: inline-flex;
+    align-self: flex-start;
+    gap: 4px;
+    padding: 4px;
+    border-radius: 6px;
+    background-color: ${tokens.colors.ui.background__light.hex};
+    box-shadow: inset 0 0 0 1px ${tokens.colors.ui.background__medium.hex};
+`
+const TimeRangeToggleButton = styled(Button)`
+    border-radius: 4px;
 `
 const StyledTopAlignedImagesSection = styled(StyledImagesSection)`
     align-items: flex-start;
@@ -290,21 +302,23 @@ export const CloeDataViewPage = () => {
                 )}
                 {cloeMissions.length > 0 && (
                     <>
-                        <Typography variant="h4">{TranslateText('Measured oil level')}</Typography>
-                        <ButtonGroup>
-                            <Button
-                                variant={timeRange === TimeRange.SevenDays ? 'contained' : 'outlined'}
+                        <Typography variant="h3">{TranslateText('Measured oil level')}</Typography>
+                        <TimeRangeToggle role="group" aria-label={TranslateText('Measured oil level')}>
+                            <TimeRangeToggleButton
+                                variant={timeRange === TimeRange.SevenDays ? 'contained' : 'ghost'}
+                                aria-pressed={timeRange === TimeRange.SevenDays}
                                 onClick={() => setTimeRange(TimeRange.SevenDays)}
                             >
                                 {TranslateText('7 days')}
-                            </Button>
-                            <Button
-                                variant={timeRange === TimeRange.OneMonth ? 'contained' : 'outlined'}
+                            </TimeRangeToggleButton>
+                            <TimeRangeToggleButton
+                                variant={timeRange === TimeRange.OneMonth ? 'contained' : 'ghost'}
+                                aria-pressed={timeRange === TimeRange.OneMonth}
                                 onClick={() => setTimeRange(TimeRange.OneMonth)}
                             >
                                 {TranslateText('1 month')}
-                            </Button>
-                        </ButtonGroup>
+                            </TimeRangeToggleButton>
+                        </TimeRangeToggle>
                         {recentSphericalGlassMissions.length > 0 ? (
                             <TimeseriesLinePlot
                                 data={linePlotData}
