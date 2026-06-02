@@ -12,6 +12,7 @@ import {
     ChartOptions,
     DefaultDataPoint,
     ChartDataset,
+    Plugin,
 } from 'chart.js'
 import { DateTime } from 'luxon'
 import { useMemo } from 'react'
@@ -129,5 +130,12 @@ export const TimeseriesLinePlot = ({ data, yLabel, ymin, ymax }: Props) => {
     )
 
     const chartData: ChartData<'line'> = { labels: [], datasets }
-    return <Line options={options} data={chartData} />
+    const plotAreaBackground: Plugin<'line'> = {
+        id: 'plotAreaBackground',
+        beforeDraw: ({ ctx, chartArea: a }) => {
+            ctx.fillStyle = tokens.colors.ui.background__default.hex
+            ctx.fillRect(a.left, a.top, a.width, a.height)
+        },
+    }
+    return <Line options={options} data={chartData} plugins={[plotAreaBackground]} />
 }
