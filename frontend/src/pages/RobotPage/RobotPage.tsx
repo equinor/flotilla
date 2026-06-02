@@ -56,9 +56,10 @@ const HeroLeft = styled.div`
 const MetricsRow = styled.div`
     display: flex;
     flex-wrap: wrap;
-    gap: 0;
     padding: 2rem 4rem;
     @media (max-width: ${phone_width}) {
+        flex-direction: column;
+        gap: 1rem;
         padding: 1rem 1.5rem;
     }
 `
@@ -72,6 +73,10 @@ const MetricCard = styled.div`
     border-left: 1px solid ${tokens.colors.ui.background__medium.hex};
     &:first-child {
         padding-left: 0;
+        border-left: none;
+    }
+    @media (max-width: ${phone_width}) {
+        padding: 0;
         border-left: none;
     }
 `

@@ -28,7 +28,7 @@ const StyledTable = styled(Table)`
     border-top: 1px solid ${tokens.colors.ui.background__medium.hex};
 
     @media (max-width: 960px) {
-        width: 95%;
+        width: 100%;
     }
 `
 

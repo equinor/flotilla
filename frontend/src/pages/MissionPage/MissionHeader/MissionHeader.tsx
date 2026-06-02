@@ -84,10 +84,11 @@ const MetricsSection = styled.div`
     display: flex;
     flex-wrap: wrap;
     gap: 48px;
-    border-top: none;
     @media (max-width: ${phone_width}) {
         padding: 1rem 1.5rem;
-        gap: 1rem 0;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
     }
 `
 const MetricItem = styled.div`
@@ -126,9 +127,9 @@ const getStartUsedAndRemainingTime = (
             : formatDateTime(mission.endTime, 'dd/MM/yyy')
         usedTimeInMinutes = mission.startTime
             ? differenceInMinutes(
-                convertUTCDateToLocalDate(mission.endTime),
-                convertUTCDateToLocalDate(mission.startTime)
-            )
+                  convertUTCDateToLocalDate(mission.endTime),
+                  convertUTCDateToLocalDate(mission.startTime)
+              )
             : 0
         remainingTime = 'N/A'
     } else if (mission.startTime) {
@@ -280,8 +281,6 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
 export const SimpleMissionHeader = ({ mission }: { mission: Mission }) => {
     const { TranslateText } = useLanguageContext()
     const isMissionCompleted = mission.endTime ? true : false
-    const { installation } = useContext(InstallationContext)
-    const navigate = useNavigate()
     const translatedStartDate = TranslateText('Start date')
     const translatedStartTime = TranslateText('Start time')
     const translatedUsedTime = TranslateText('Time used')

@@ -23,14 +23,13 @@ import { InstallationContext } from 'components/Contexts/InstallationContext'
 const StyledMissionPageContent = styled.div`
     display: flex;
     flex-direction: column;
-    gap: 0;
 `
 
 const StyledMissionPage = styled.div`
     display: flex;
     flex-direction: column;
     background: ${tokens.colors.ui.background__default.hex};
-    height: 100vh;
+    min-height: 100vh;
 `
 
 const StyledMissionPageBody = styled.div`
@@ -38,6 +37,9 @@ const StyledMissionPageBody = styled.div`
     display: flex;
     flex-direction: column;
     gap: 2rem;
+    @media (max-width: 960px) {
+        padding: 1rem 1.5rem 1.5rem 1.5rem;
+    }
 `
 
 const useMissionSelector = (missionId: string | undefined, inspectionId: string | undefined) => {

@@ -12,12 +12,17 @@ import { tokens } from '@equinor/eds-tokens'
 import { useBackendApi } from 'api/UseBackendApi'
 import { InstallationContext } from 'components/Contexts/InstallationContext'
 import { MissionSchedulingEditDialog } from 'components/Dialogs/MissionEditDialog'
+import { phone_width } from 'utils/constants'
 
 const StyledTableRow = styled.div`
     display: grid;
     align-items: center;
     gap: 1rem;
     grid-template-columns: 100px auto 16px 100px;
+    @media (max-width: ${phone_width}) {
+        grid-template-columns: 70px 1fr 16px 80px;
+        gap: 0.5rem;
+    }
 `
 
 const StyledDialogActions = styled(StyledDialog.Actions)`
@@ -37,7 +42,7 @@ const StyledButton = styled(Button)`
     }
 `
 
-const CalenderButton = styled(Button)`
+const CalendarButton = styled(Button)`
     max-width: 100px;
 `
 
@@ -148,12 +153,12 @@ export const AutoScheduleMissionTableRow = ({
                             </>
                         )}
                     </StyledMissionInfo>
-                    <CalenderButton variant="ghost_icon" onClick={() => setIsEditDialogOpen(true)}>
+                    <CalendarButton variant="ghost_icon" onClick={() => setIsEditDialogOpen(true)}>
                         <Icon name={Icons.Edit} size={16} color={typographyColor} />
-                    </CalenderButton>
+                    </CalendarButton>
                     {(missionStatusType === MissionStatusType.ScheduledJob ||
                         missionStatusType === MissionStatusType.SkippedJob) && (
-                        <CalenderButton
+                        <CalendarButton
                             variant="ghost"
                             disabled={missionStatusType === MissionStatusType.SkippedJob}
                             onClick={() => setIsSkipDialogOpen(true)}
@@ -161,7 +166,7 @@ export const AutoScheduleMissionTableRow = ({
                             {missionStatusType === MissionStatusType.ScheduledJob
                                 ? TranslateText('SkipAutoMission')
                                 : TranslateText('Skipped')}
-                        </CalenderButton>
+                        </CalendarButton>
                     )}
                     <StyledDialog open={isSkipDialogOpen}>
                         <StyledDialog.Header>

@@ -25,6 +25,7 @@ import {
 import { formulateAutoScheduleFrequencyAsString } from 'utils/language'
 import { useBackendApi } from 'api/UseBackendApi'
 import { InstallationContext } from 'components/Contexts/InstallationContext'
+import { phone_width } from 'utils/constants'
 
 const StyledCard = styled.div`
     display: flex;
@@ -38,17 +39,22 @@ const StyledCard = styled.div`
     overflow-y: hidden;
 `
 const StyledTableAndMap = styled.div`
-    display: flex;
-    width: fit-content;
+    overflow-x: auto;
 `
 
 const StyledTopComponents = styled.div`
     display: flex;
-    justify-content: left;
+    justify-content: flex-start;
     gap: 30px;
+    @media (max-width: ${phone_width}) {
+        flex-direction: column;
+    }
 `
 const StyledButton = styled(Button)`
     width: 160px;
+    @media (max-width: ${phone_width}) {
+        width: 100%;
+    }
 `
 const StyledFieldTitle = styled.span`
     font-family: Equinor, sans-serif;
@@ -62,7 +68,6 @@ const StyledFieldTitle = styled.span`
 const StyledMissionDefinitionPageBody = styled.div`
     display: flex;
     flex-direction: column;
-    justify-items: stretch;
     gap: 30px;
 `
 
