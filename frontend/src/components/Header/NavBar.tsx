@@ -9,6 +9,7 @@ import { phone_width } from 'utils/constants'
 import { InstallationContext } from 'components/Contexts/InstallationContext'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { StopRobotDialog } from 'pages/FrontPage/MissionOverview/StopDialogs'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 
 const StyledButton = styled(Button)`
     width: 100px;
@@ -62,6 +63,7 @@ const RightContent = styled.div`
 const NavBarAsButton = () => {
     const { TranslateText } = useLanguageContext()
     const { installation } = useContext(InstallationContext)
+    const { installationInspectionAreas } = useAssetContext()
     const [isOpen, setIsOpen] = useState(false)
     const [anchorEl, setAnchorEl] = useState(null)
     const navigate = useNavigate()
@@ -92,9 +94,11 @@ const NavBarAsButton = () => {
                 <Menu.Item onClick={() => navigate(`/${installation.installationCode}/mission-control`)}>
                     {TranslateText('Mission Control')}
                 </Menu.Item>
-                <Menu.Item onClick={() => navigate(`/${installation.installationCode}/inspection-overview`)}>
-                    {TranslateText('Area Overview')}
-                </Menu.Item>
+                {installationInspectionAreas.length > 1 && (
+                    <Menu.Item onClick={() => navigate(`/${installation.installationCode}/inspection-overview`)}>
+                        {TranslateText('Area Overview')}
+                    </Menu.Item>
+                )}
                 <Menu.Item onClick={() => navigate(`/${installation.installationCode}/predefined-missions`)}>
                     {TranslateText('Predefined Missions')}
                 </Menu.Item>
@@ -148,11 +152,14 @@ const OngoingMissionsInfo = ({ goToOngoingTab }: { goToOngoingTab: () => void })
 const NavBarAsTabs = () => {
     const { TranslateText } = useLanguageContext()
     const { installation } = useContext(InstallationContext)
+    const { installationInspectionAreas } = useAssetContext()
     const navigate = useNavigate()
 
     const navItems = [
         { to: `/${installation.installationCode}/mission-control`, label: TranslateText('Mission Control') },
-        { to: `/${installation.installationCode}/inspection-overview`, label: TranslateText('Area Overview') },
+        ...(installationInspectionAreas.length <= 1
+            ? []
+            : [{ to: `/${installation.installationCode}/inspection-overview`, label: TranslateText('Area Overview') }]),
         { to: `/${installation.installationCode}/predefined-missions`, label: TranslateText('Predefined Missions') },
         { to: `/${installation.installationCode}/history`, label: TranslateText('Mission History') },
         { to: `/${installation.installationCode}/auto-schedule`, label: TranslateText('Auto Scheduling') },
