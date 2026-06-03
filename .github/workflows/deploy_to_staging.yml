@@ -24,7 +24,6 @@ jobs:
     with:
       environment: Staging
       working_directory: backend/api
-      azure_client_id: ${{ secrets.CLIENTID }}
       azure_subscription_id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
   build-and-push-flotilla-components-with-latest-tag-to-github-container-registry:
