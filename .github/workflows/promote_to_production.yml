@@ -45,14 +45,17 @@ jobs:
   run_migrations:
     name: Update database in Production
     needs: [get_staging_version, trigger-github-deployment]
+    permissions:
+      contents: read
+      pull-requests: read
+      id-token: write
     uses: equinor/armada/.github/workflows/run_dotnet_migrations.yml@main
     with:
       environment: Production
       checkout_ref: ${{ needs.get_staging_version.outputs.versionTag }}
       working_directory: backend/api
-    secrets:
-      client_id: ${{ secrets.CLIENTID }}
-      client_secret: ${{ secrets.CLIENTSECRET }}
+      azure_client_id: ${{ secrets.CLIENTID }}
+      azure_subscription_id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
   deploy:
     name: Update deployment in Production
