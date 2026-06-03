@@ -18,5 +18,4 @@ jobs:
     with:
       environment: Development
       working_directory: backend/api
-      azure_client_id: ${{ secrets.CLIENTID }}
       azure_subscription_id: ${{ vars.AZURE_SUBSCRIPTION_ID }}

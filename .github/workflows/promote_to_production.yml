@@ -54,7 +54,6 @@ jobs:
       environment: Production
       checkout_ref: ${{ needs.get_staging_version.outputs.versionTag }}
       working_directory: backend/api
-      azure_client_id: ${{ secrets.CLIENTID }}
       azure_subscription_id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
   deploy:
