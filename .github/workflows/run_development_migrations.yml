@@ -14,9 +14,9 @@ jobs:
     permissions:
       contents: read
       pull-requests: read
+      id-token: write
     with:
       environment: Development
       working_directory: backend/api
-    secrets:
-      client_id: ${{ secrets.CLIENTID }}
-      client_secret: ${{ secrets.CLIENTSECRET }}
+      azure_client_id: ${{ secrets.CLIENTID }}
+      azure_subscription_id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
