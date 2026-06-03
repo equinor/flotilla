@@ -104,9 +104,6 @@ const NavBarAsButton = () => {
                 <Menu.Item onClick={() => navigate(`/${installation.installationCode}/auto-schedule`)}>
                     {TranslateText('Auto Scheduling')}
                 </Menu.Item>
-                <Menu.Item onClick={() => navigate(`/${installation.installationCode}/statistics`)}>
-                    {TranslateText('Statistics')}
-                </Menu.Item>
             </Menu>
         </>
     )
@@ -159,7 +156,6 @@ const NavBarAsTabs = () => {
         { to: `/${installation.installationCode}/predefined-missions`, label: TranslateText('Predefined Missions') },
         { to: `/${installation.installationCode}/history`, label: TranslateText('Mission History') },
         { to: `/${installation.installationCode}/auto-schedule`, label: TranslateText('Auto Scheduling') },
-        { to: `/${installation.installationCode}/statistics`, label: TranslateText('Statistics') },
     ]
 
     return (

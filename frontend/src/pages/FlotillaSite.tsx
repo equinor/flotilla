@@ -21,7 +21,6 @@ import { InspectionsProvider } from 'components/Contexts/InspectionsContext'
 import { MissionDefinitionsProvider } from 'components/Contexts/MissionDefinitionsContext'
 import { MissionRunsProvider } from 'components/Contexts/MissionRunsContext'
 import { MissionControlProvider } from 'components/Contexts/MissionControlContext'
-import { StatisticsPage } from './StatisticsPage'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { CloeDataViewPage } from './DataViewPage/CloeDataViewPage'
@@ -47,7 +46,6 @@ export const FlotillaSite = () => {
                         <Route path="predefined-missions" element={<PredefinedMissionsPage />} />
                         <Route path="history" element={<MissionHistoryPage />} />
                         <Route path="auto-schedule" element={<AutoSchedulePage />} />
-                        <Route path="statistics" element={<StatisticsPage />} />
                         {/* data-view needs to redirect to fencilla-view for backwards compatibility */}
                         <Route path="data-view" element={<FencillaViewPage />} />
                         <Route path="fencilla-view" element={<FencillaViewPage />} />
