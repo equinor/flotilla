@@ -1,6 +1,6 @@
 import { Button, Chip, Table, Typography } from '@equinor/eds-core-react'
 import { Mission, MissionStatus } from 'models/Mission'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
 import { tokens } from '@equinor/eds-tokens'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
@@ -164,6 +164,7 @@ export const CloeDataViewPage = () => {
     const [cloeMissions, setCloeMissions] = useState<Mission[]>([])
     const [timeRange, setTimeRange] = useState<TimeRange>(TimeRange.OneMonth)
     const [selectedTagId, setSelectedTagId] = useState<string | null>(null)
+    const [selectedDataPoint, setSelectedDataPoint] = useState<{ tagId: string; timeMs: number } | null>(null)
     const backendApi = useBackendApi()
 
     const fetchMissions = (): Promise<Mission[]> => {
@@ -227,8 +228,11 @@ export const CloeDataViewPage = () => {
         return new Date(missionTimestamp).getTime() >= getTimeRangeCutoff(timeRange)
     })
 
-    const linePlotData: TimeseriesLinePlotData = recentSphericalGlassMissions.reduce<TimeseriesLinePlotData>(
-        (accumulatedData, mission) => {
+    const makeLookupKey = (tagId: string, timeMs: number) => `${tagId}|${timeMs}`
+    const { linePlotData, dataPointTaskLookup } = useMemo(() => {
+        const plotData: TimeseriesLinePlotData = {}
+        const taskLookup = new Map<string, Task>()
+        recentSphericalGlassMissions.forEach((mission) => {
             const missionTimestamp = new Date(
                 (mission.endTime ?? mission.startTime ?? mission.creationTime) as unknown as string
             )
@@ -241,15 +245,13 @@ export const CloeDataViewPage = () => {
                         : missionTimestamp
                 if (!tagId || !rawFillLevel || !sampleTimestamp) return
                 if (selectedTagId && tagId !== selectedTagId) return
-                if (!Object.hasOwn(accumulatedData, tagId)) {
-                    accumulatedData[tagId] = []
-                }
-                accumulatedData[tagId].push({ time: sampleTimestamp, value: Number(rawFillLevel) })
+                if (!Object.hasOwn(plotData, tagId)) plotData[tagId] = []
+                plotData[tagId].push({ time: sampleTimestamp, value: Number(rawFillLevel) })
+                taskLookup.set(makeLookupKey(tagId, sampleTimestamp.getTime()), task)
             })
-            return accumulatedData
-        },
-        {} as TimeseriesLinePlotData
-    )
+        })
+        return { linePlotData: plotData, dataPointTaskLookup: taskLookup }
+    }, [recentSphericalGlassMissions, selectedTagId])
 
     const mapMission = (() => {
         if (!latestCloeMission) return undefined
@@ -265,7 +267,19 @@ export const CloeDataViewPage = () => {
         return { ...latestCloeMission, tasks: paddedTasks }
     })()
 
-    const selectedTask = selectedTagId ? latestCloeMission?.tasks.find((t) => t.tagId === selectedTagId) : undefined
+    const selectedDataPointTask = selectedDataPoint
+        ? dataPointTaskLookup.get(makeLookupKey(selectedDataPoint.tagId, selectedDataPoint.timeMs))
+        : undefined
+    const selectedTask =
+        selectedDataPointTask ??
+        (selectedTagId ? latestCloeMission?.tasks.find((t) => t.tagId === selectedTagId) : undefined)
+    const isSelectedTaskFromDataPoint = !!selectedDataPointTask
+    const inspectionImageTitle = isSelectedTaskFromDataPoint
+        ? TranslateText('Selected inspection')
+        : TranslateText('Latest inspection')
+    const analysisImageTitle = isSelectedTaskFromDataPoint
+        ? TranslateText('Selected analysis result')
+        : TranslateText('Latest analysis result')
 
     return (
         <StyledPage>
@@ -277,7 +291,10 @@ export const CloeDataViewPage = () => {
                             <CloeDataTable
                                 tasks={latestCloeMission.tasks}
                                 selectedTagId={selectedTagId}
-                                onSelectTag={setSelectedTagId}
+                                onSelectTag={(tagId) => {
+                                    setSelectedTagId(tagId)
+                                    setSelectedDataPoint(null)
+                                }}
                             />
                         </CloeTableWrapper>
                     )}
@@ -295,12 +312,12 @@ export const CloeDataViewPage = () => {
                 {selectedTask && selectedTask.inspection.isarInspectionId && (
                     <StyledTopAlignedImagesSection>
                         <StyledCloeImageCard>
-                            <Typography variant="h4">{TranslateText('Latest inspection')}</Typography>
+                            <Typography variant="h4">{inspectionImageTitle}</Typography>
                             <InspectionImageWithPlaceholder task={selectedTask} isLargeImage={true} />
                         </StyledCloeImageCard>
                         {selectedTask.inspection.analysisResult?.storageAccount && (
                             <StyledCloeImageCard>
-                                <Typography variant="h4">{TranslateText('Latest analysis result')}</Typography>
+                                <Typography variant="h4">{analysisImageTitle}</Typography>
                                 <AnalysisResultDialogContent currentTask={selectedTask} />
                             </StyledCloeImageCard>
                         )}
@@ -308,19 +325,25 @@ export const CloeDataViewPage = () => {
                 )}
                 {cloeMissions.length > 0 && (
                     <>
-                        <Typography variant="h3">{TranslateText('Measured oil level')}</Typography>
+                        <Typography variant="h3">{TranslateText('Estimated oil level')}</Typography>
                         <TimeRangeToggle role="group" aria-label={TranslateText('Measured oil level')}>
                             <TimeRangeToggleButton
                                 variant={timeRange === TimeRange.SevenDays ? 'contained' : 'ghost'}
                                 aria-pressed={timeRange === TimeRange.SevenDays}
-                                onClick={() => setTimeRange(TimeRange.SevenDays)}
+                                onClick={() => {
+                                    setTimeRange(TimeRange.SevenDays)
+                                    setSelectedDataPoint(null)
+                                }}
                             >
                                 {TranslateText('7 days')}
                             </TimeRangeToggleButton>
                             <TimeRangeToggleButton
                                 variant={timeRange === TimeRange.OneMonth ? 'contained' : 'ghost'}
                                 aria-pressed={timeRange === TimeRange.OneMonth}
-                                onClick={() => setTimeRange(TimeRange.OneMonth)}
+                                onClick={() => {
+                                    setTimeRange(TimeRange.OneMonth)
+                                    setSelectedDataPoint(null)
+                                }}
                             >
                                 {TranslateText('1 month')}
                             </TimeRangeToggleButton>
@@ -331,6 +354,23 @@ export const CloeDataViewPage = () => {
                                 yLabel={TranslateText('Fill [%]')}
                                 ymin={0}
                                 ymax={100}
+                                selectedPoint={
+                                    selectedDataPoint
+                                        ? {
+                                              id: selectedDataPoint.tagId,
+                                              time: new Date(selectedDataPoint.timeMs),
+                                          }
+                                        : undefined
+                                }
+                                onPointClick={({ id, time }) => {
+                                    const timeMs = time.getTime()
+                                    setSelectedDataPoint((current) =>
+                                        current && current.tagId === id && current.timeMs === timeMs
+                                            ? null
+                                            : { tagId: id, timeMs }
+                                    )
+                                    setSelectedTagId(id)
+                                }}
                             />
                         ) : (
                             <Typography>{TranslateText('No data available in the selected time range')}</Typography>

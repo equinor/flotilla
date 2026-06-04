@@ -51,19 +51,41 @@ export interface TimeseriesLinePlotData {
     [id: string]: TimeseriesLinePlotDataPoint[]
 }
 
+interface TimeseriesLinePlotSelectedPoint {
+    id: string
+    time: Date
+}
+
 interface Props {
     data: TimeseriesLinePlotData
     yLabel: string
     ymin: number
     ymax: number
+    onPointClick?: (point: { id: string; time: Date; value: number }) => void
+    selectedPoint: TimeseriesLinePlotSelectedPoint | undefined
 }
 
-export const TimeseriesLinePlot = ({ data, yLabel, ymin, ymax }: Props) => {
+export const TimeseriesLinePlot = ({ data, yLabel, ymin, ymax, onPointClick, selectedPoint }: Props) => {
+    const dataEntries = useMemo(() => Object.entries(data), [data])
+
     const options: ChartOptions<'line'> = useMemo(
         () => ({
             responsive: true,
             spanGaps: true,
-
+            onClick: (_event, elements) => {
+                if (!onPointClick || elements.length === 0) return
+                const { datasetIndex, index } = elements[0]
+                const entry = dataEntries[datasetIndex]
+                if (!entry) return
+                const [id, points] = entry
+                const point = points[index]
+                if (!point) return
+                onPointClick({ id, time: point.time, value: point.value })
+            },
+            onHover: (event, elements) => {
+                const target = event.native?.target as HTMLElement | undefined
+                if (target) target.style.cursor = onPointClick && elements.length > 0 ? 'pointer' : 'default'
+            },
             plugins: {
                 legend: {
                     position: 'right' as const,
@@ -108,13 +130,16 @@ export const TimeseriesLinePlot = ({ data, yLabel, ymin, ymax }: Props) => {
                 },
             },
         }),
-        [yLabel]
+        [yLabel, ymin, ymax, dataEntries, onPointClick]
     )
 
     // @ts-expect-error ; Date isn't assignable to number for x-axis value - assumption: library can handle it anyways
-    const datasets: ChartDataset<'line', DefaultDataPoint<'line'>>[] = Object.entries(data).map(
+    const datasets: ChartDataset<'line', DefaultDataPoint<'line'>>[] = dataEntries.map(
         ([id, dataPointArray], index: number) => {
             const [borderColor, backgroundColor] = PALETTE[index % PALETTE.length]
+            const selectedTimeMs = selectedPoint && selectedPoint.id === id ? selectedPoint.time.getTime() : undefined
+            const isSelected = (pointIndex: number) =>
+                selectedTimeMs !== undefined && dataPointArray[pointIndex]?.time.getTime() === selectedTimeMs
             return {
                 label: id,
                 data: dataPointArray.map((dataPoint) => ({
@@ -123,8 +148,11 @@ export const TimeseriesLinePlot = ({ data, yLabel, ymin, ymax }: Props) => {
                 })),
                 borderColor,
                 backgroundColor,
-                pointRadius: 4,
-                pointHoverRadius: 6,
+                pointRadius: (ctx) => (isSelected(ctx.dataIndex) ? 8 : 4),
+                pointHoverRadius: (ctx) => (isSelected(ctx.dataIndex) ? 9 : 6),
+                pointBorderWidth: (ctx) => (isSelected(ctx.dataIndex) ? 3 : 1),
+                pointBorderColor: (ctx) =>
+                    isSelected(ctx.dataIndex) ? tokens.colors.text.static_icons__default.hex : borderColor,
             }
         }
     )

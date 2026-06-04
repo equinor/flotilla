@@ -312,7 +312,7 @@
     "GoingToRechargingWithMission": "Returning to recharge",
     "PausedToCharge": "Paused for charging",
     "Latest Value": "Latest Value",
-    "Measured oil level": "Measured oil level",
+    "Estimated oil level": "Estimated oil level",
     "7 days": "7 days",
     "1 month": "1 month",
     "Fill [%]": "Fill [%]",
@@ -321,5 +321,7 @@
     "Analysis result not available": "Analysis result not available",
     "Go to data overview": "Go to data overview",
     "Latest inspection": "Latest inspection",
-    "Latest analysis result": "Latest analysis result"
+    "Latest analysis result": "Latest analysis result",
+    "Selected inspection": "Selected inspection",
+    "Selected analysis result": "Selected analysis result"
 }
