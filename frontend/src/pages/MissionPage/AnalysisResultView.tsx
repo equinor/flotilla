@@ -5,6 +5,7 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { formatDateTime } from 'utils/StringFormatting'
 import { useInspectionsContext } from 'components/Contexts/InspectionsContext'
 import {
+    HiddenOnSmallScreen,
     StyledBottomContent,
     StyledCloseButton,
     StyledDialog,
@@ -16,6 +17,7 @@ import {
 import { TextAsImage, PendingResultPlaceholder } from 'pages/InspectionReportPage/InspectionReportImage'
 import styled from 'styled-components'
 import { useInspectionId } from 'pages/InspectionReportPage/SetInspectionIdHook'
+import { AnalysisOverviewDialogView } from 'pages/InspectionReportPage/ImageOverview'
 
 interface InspectionDialogViewProps {
     selectedAnalysisId: string
@@ -125,6 +127,9 @@ export const AnalysisResultDialogView = ({ selectedAnalysisId, tasks }: Inspecti
                 </StyledDialogHeader>
                 <StyledDialogInspectionView>
                     <AnalysisResultDialogContent currentTask={currentTask} />
+                    <HiddenOnSmallScreen>
+                        <AnalysisOverviewDialogView tasks={tasks} />
+                    </HiddenOnSmallScreen>
                 </StyledDialogInspectionView>
             </StyledDialogContent>
         </StyledDialog>

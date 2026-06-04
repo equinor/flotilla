@@ -134,3 +134,25 @@ export const LargeDialogInspectionResult = ({ task }: { task: Task }) => {
 export const SmallInspectionResult = ({ task }: { task: Task }) => {
     return <InspectionResultWithPlaceholder task={task} isLargeImage={false} />
 }
+
+const AnalysisImageWithPlaceholder = ({ task, isLargeImage }: { task: Task; isLargeImage: boolean }) => {
+    const { useAnalysisData } = useInspectionsContext()
+    const { data, isPending, isError } = useAnalysisData(task.inspection.isarInspectionId)
+    if (!task.inspection.analysisResult?.storageAccount) {
+        return <TextAsImage isLargeImage={isLargeImage} text={'No analysis available'} />
+    }
+    if (isError || !data) {
+        return <TextAsImage isLargeImage={isLargeImage} text={'No analysis could be found'} />
+    } else if (isPending) {
+        return <PendingResultPlaceholder isLargeImage={isLargeImage} />
+    } else
+        return isLargeImage ? (
+            <StyledInspection $otherContentHeight={'174px'} src={data} />
+        ) : (
+            <StyledInspectionImage src={data} />
+        )
+}
+
+export const SmallAnalysisResult = ({ task }: { task: Task }) => {
+    return <AnalysisImageWithPlaceholder task={task} isLargeImage={false} />
+}

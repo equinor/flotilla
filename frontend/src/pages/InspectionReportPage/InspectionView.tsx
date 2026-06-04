@@ -13,7 +13,7 @@ import {
     StyledDialogInspectionView,
     StyledInfoContent,
 } from './InspectionStyles'
-import { InspectionOverviewDialogView } from './InspectionOverview'
+import { InspectionOverviewDialogView } from './ImageOverview'
 import { useContext, useState } from 'react'
 import { LargeDialogInspectionResult, TextAsImage } from './InspectionReportImage'
 import { useInspectionId } from './SetInspectionIdHook'
