@@ -31,7 +31,8 @@ namespace Api.Services
         );
     }
 
-    public class BlobService(ILogger<BlobService> logger) : IBlobService
+    public class BlobService(ILogger<BlobService> logger, IConfiguration configuration)
+        : IBlobService
     {
         public async Task<byte[]?> DownloadBlob(
             string blobName,
@@ -114,12 +115,32 @@ namespace Api.Services
 
         private BlobContainerClient GetBlobContainerClient(string containerName, string accountName)
         {
-            var credential = new DefaultAzureCredential();
+            var authType =
+                configuration[$"BlobStorage:{accountName}:AuthType"]
+                ?? configuration["BlobStorage:DefaultAuthType"]
+                ?? throw new ConfigException(
+                    $"BlobStorage:DefaultAuthType is required (no per-account AuthType found for '{accountName}')"
+                );
 
-            var serviceClient = new BlobServiceClient(
-                new Uri($"https://{accountName}.blob.core.windows.net"),
-                credential
-            );
+            BlobServiceClient serviceClient;
+            if (authType.Equals("ConnectionString", StringComparison.OrdinalIgnoreCase))
+            {
+                var connectionString =
+                    configuration[$"BlobStorage:{accountName}:ConnectionString"]
+                    ?? throw new ConfigException(
+                        $"BlobStorage:{accountName}:ConnectionString is required when AuthType is ConnectionString"
+                    );
+                serviceClient = new BlobServiceClient(connectionString);
+            }
+            else
+            {
+                var credential = new DefaultAzureCredential();
+                serviceClient = new BlobServiceClient(
+                    new Uri($"https://{accountName}.blob.core.windows.net"),
+                    credential
+                );
+            }
+
             var containerClient = serviceClient.GetBlobContainerClient(
                 containerName.ToLower(CultureInfo.CurrentCulture)
             );
