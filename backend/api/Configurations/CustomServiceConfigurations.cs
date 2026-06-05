@@ -79,8 +79,39 @@ namespace Api.Configurations
                     );
                     ConfigureDatabaseWithKeyvaultConnString(services, configuration);
                 }
+
+                bool seedData = configuration
+                    .GetSection("Database")
+                    .GetValue<bool>("SeedExampleDataPostgres", false);
+                if (seedData)
+                {
+                    SeedDatabasePostgres(configuration);
+                }
             }
             return services;
+        }
+
+        private static void SeedDatabasePostgres(IConfiguration configuration)
+        {
+            Console.WriteLine("Seeding database with initial data...");
+            string? connectionString = configuration["Database:PostgreSqlConnectionString"];
+            if (!string.IsNullOrEmpty(connectionString))
+            {
+                var optionsBuilder = new DbContextOptionsBuilder<FlotillaDbContext>();
+                optionsBuilder.UseNpgsql(
+                    connectionString,
+                    o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery)
+                );
+                using var seedContext = new FlotillaDbContext(optionsBuilder.Options);
+                InitDb.PopulateDb(seedContext);
+                Console.WriteLine("Database seeded.");
+            }
+            else
+            {
+                Console.WriteLine(
+                    "Warning: SeedExampleDataPostgres is true but no PostgreSqlConnectionString found. Skipping seed."
+                );
+            }
         }
 
         public static void ConfigureDatabaseWithManagedIdentity(

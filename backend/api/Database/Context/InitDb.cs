@@ -278,7 +278,23 @@ namespace Api.Database.Context
                 },
             };
 
-            return new List<TaskDefinition>([task1, task2, task3]);
+            var task4 = new TaskDefinition
+            {
+                Index = 4,
+                TagId = "thermal-tag-1",
+                Description = "Thermal reading inspection",
+                RobotPose = new Pose(),
+                SensorType = SensorType.ThermalImage,
+                AnalysisTypes = [AnalysisType.ThermalReading],
+                TargetPosition = new Position
+                {
+                    X = 0,
+                    Y = 0,
+                    Z = 0,
+                },
+            };
+
+            return new List<TaskDefinition>([task1, task2, task3, task4]);
         }
 
         private static List<MissionDefinition> GetMissionDefinitions()
@@ -354,6 +370,16 @@ namespace Api.Database.Context
                 LastSuccessfulRun = null,
             };
 
+            var thermalReadingMission = new MissionDefinition
+            {
+                Id = Guid.NewGuid().ToString(),
+                Name = "Thermal Reading Mission",
+                InstallationCode = inspectionAreas[5].Installation.InstallationCode,
+                InspectionArea = inspectionAreas[5],
+                Tasks = [GetMissionTaskDefinitions()[3]],
+                LastSuccessfulRun = null,
+            };
+
             return new List<MissionDefinition>([
                 missionDefinition1,
                 missionDefinition2,
@@ -361,6 +387,7 @@ namespace Api.Database.Context
                 missionDefinition4,
                 missionDefinition5,
                 missionDefinition6,
+                thermalReadingMission,
             ]);
         }
 
@@ -535,7 +562,7 @@ namespace Api.Database.Context
         public static void PopulateDb(FlotillaDbContext context)
         {
             // To make sure we are not trying to initialize database more than once during tests
-            if (context.Robots.Any())
+            if (context.Robots.Any() || context.Installations.Any())
             {
                 return;
             }
