@@ -12,7 +12,7 @@ import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { useMediaStreamContext } from 'components/Contexts/MediaStreamContext'
 import { StyledCardsWidth, VideoStreamSection } from 'components/Styles/StyledComponents'
 import { InspectionDialogView } from '../InspectionReportPage/InspectionView'
-import { InspectionOverviewSection } from '../InspectionReportPage/ImageOverview'
+import { AnalysisOverviewSection, InspectionOverviewSection } from '../InspectionReportPage/ImageOverview'
 import { TaskTableAndMap } from './TaskTableAndMap'
 import { AnalysisResultDialogView } from './AnalysisResultView'
 import { tokens } from '@equinor/eds-tokens'
@@ -164,6 +164,7 @@ export const MissionPage = ({
                                     />
                                 )}
                                 <InspectionOverviewSection tasks={selectedMission.tasks} />
+                                <AnalysisOverviewSection tasks={selectedMission.tasks} />
                             </StyledCardsWidth>
                         </StyledMissionPageBody>
                     </StyledMissionPageContent>
@@ -210,6 +211,7 @@ export const SimpleMissionPage = ({
                                 />
                             )}
                             <InspectionOverviewSection tasks={selectedMission.tasks} />
+                            <AnalysisOverviewSection tasks={selectedMission.tasks} />
                         </StyledCardsWidth>
                     </StyledMissionPageBody>
                 </StyledMissionPageContent>
