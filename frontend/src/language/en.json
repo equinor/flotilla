@@ -329,5 +329,11 @@
     "Analysis performed on images of the constant level oilers": "Analysis performed on images of the constant level oilers",
     "Data View for Perimeter Breach Detection": "Data View for Perimeter Breach Detection",
     "Analysis performed on images of the perimeter fences": "Analysis performed on images of the perimeter fences",
-    "Data Overview": "Data Overview"
+    "Data Overview": "Data Overview",
+    "Data View for Thermal Reading for Pumps": "Data View for Thermal Reading for Pumps",
+    "Analysis performed on thermal images of the pumps": "Analysis performed on thermal images of the pumps",
+    "Go to Data View": "Go to Data View",
+    "Estimated maximum temperature": "Estimated maximum temperature",
+    "Temperature [°C]": "Temperature [°C]",
+    "No analysis available": "No analysis available"
 }

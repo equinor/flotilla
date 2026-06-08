@@ -6,14 +6,16 @@ import { DescriptionDisplay, TagIdDisplay } from 'components/Displays/TaskDispla
 import { Task } from 'models/Task'
 import { formatDateTime } from 'utils/StringFormatting'
 
-export const CloeDataTable = ({
+export const DataViewTable = ({
     tasks,
     selectedTagId,
     onSelectTag,
+    latestValueUnit,
 }: {
     tasks: Task[]
     selectedTagId: string | null
     onSelectTag: (tagId: string | null) => void
+    latestValueUnit: string
 }) => {
     const { TranslateText } = useLanguageContext()
 
@@ -65,7 +67,8 @@ export const CloeDataTable = ({
                                 {task.inspection.analysisResult?.value ? (
                                     <Table.Cell>
                                         <Typography>
-                                            {Math.round(parseFloat(task.inspection.analysisResult?.value)) + '%'}
+                                            {Math.round(parseFloat(task.inspection.analysisResult?.value)) +
+                                                latestValueUnit}
                                         </Typography>
                                     </Table.Cell>
                                 ) : (

@@ -25,6 +25,7 @@ import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { CloeDataViewPage } from './DataViewPage/CloeDataViewPage'
 import { DataOverviewPage } from './DataOverviewPage'
+import { ThermalReadingViewPage } from './DataViewPage/ThermalReadingViewPage'
 
 const StyledLoading = styled.div`
     display: flex;
@@ -52,6 +53,7 @@ export const FlotillaSite = () => {
                         <Route path="data-view" element={<FencillaViewPage />} />
                         <Route path="fencilla-view" element={<FencillaViewPage />} />
                         <Route path="cloe-view" element={<CloeDataViewPage />} />
+                        <Route path="thermal-reading-view" element={<ThermalReadingViewPage />} />
                         <Route path="mission/:missionId" element={<MissionPageRouter />} />
                         <Route path="mission-simple" element={<SimpleMissionPageRouter />} />
                         <Route path="missiondefinition/:missionId" element={<MissionDefinitionPageRouter />} />
