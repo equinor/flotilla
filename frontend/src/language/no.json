@@ -327,8 +327,14 @@
     "Go to data overview": "Gå til dataoversikt",
     "Latest inspection": "Siste inspeksjon",
     "Latest analysis result": "Siste analyseresultat",
-    "Analysis performed on images of the constant level oilers.": "Analyse utført på bilder av nivåmålinger.",
+    "Analysis performed on images of the constant level oilers": "Analyse utført på bilder av nivåmålinger",
     "Data View for Perimeter Breach Detection": "Datavisning for Perimeter Sikkerhetsrunder",
-    "Analysis performed on images of the perimeter fences.": "Analyse utført på bilder av perimetergjerdene.",
-    "Data Overview": "Dataoversikt"
+    "Analysis performed on images of the perimeter fences": "Analyse utført på bilder av perimetergjerdene",
+    "Data Overview": "Dataoversikt",
+    "Data View for Thermal Reading for Pumps": "Datavisning for termisk avlesning for pumper",
+    "Analysis performed on thermal images of the pumps": "Analyse utført på termiske bilder av pumpene",
+    "Go to Data View": "Gå til datavisning",
+    "Estimated maximum temperature": "Estimert maksimal temperatur",
+    "Temperature [°C]": "Temperatur [°C]",
+    "No analysis available": "Ingen analyse ble funnet"
 }

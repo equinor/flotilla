@@ -13,6 +13,7 @@ import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
 import cloe from 'mediaAssets/cloe.png'
 import fenceBreach from 'mediaAssets/fenceBreach.png'
+import thermalReading from 'mediaAssets/thermalReading.png'
 
 const StyledCard = styled(Card)`
     width: clamp(600px, 50%, 700px);
@@ -57,15 +58,25 @@ export const DataOverviewPage = () => {
         {
             to: `/${installation.installationCode}/cloe-view`,
             label: TranslateText('Data View for Constant Level Oilers'),
-            description: TranslateText('Analysis performed on images of the constant level oilers.'),
+            description: TranslateText('Analysis performed on images of the constant level oilers'),
             source: cloe,
         },
         {
             to: `/${installation.installationCode}/fencilla-view`,
             label: TranslateText('Data View for Perimeter Breach Detection'),
-            description: TranslateText('Analysis performed on images of the perimeter fences.'),
+            description: TranslateText('Analysis performed on images of the perimeter fences'),
             source: fenceBreach,
         },
+        ...(installation.installationCode?.toUpperCase() === 'KAA'
+            ? [
+                  {
+                      to: `/${installation.installationCode}/thermal-reading-view`,
+                      label: TranslateText('Data View for Thermal Reading for Pumps'),
+                      description: TranslateText('Analysis performed on thermal images of the pumps'),
+                      source: thermalReading,
+                  },
+              ]
+            : []),
     ]
 
     return (
