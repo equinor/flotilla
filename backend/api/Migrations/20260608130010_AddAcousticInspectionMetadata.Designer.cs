@@ -3,6 +3,7 @@ using System;
 using Api.Database.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Api.Migrations
 {
     [DbContext(typeof(FlotillaDbContext))]
-    partial class FlotillaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260608130010_AddAcousticInspectionMetadata")]
+    partial class AddAcousticInspectionMetadata
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -466,6 +469,16 @@ namespace Api.Migrations
                     b.HasIndex("CurrentInstallationId");
 
                     b.ToTable("Robots");
+                });
+
+            modelBuilder.Entity("Api.Database.Models.TagInspectionMetadata", b =>
+                {
+                    b.Property<string>("TagId")
+                        .HasColumnType("text");
+
+                    b.HasKey("TagId");
+
+                    b.ToTable("TagInspectionMetadata");
                 });
 
             modelBuilder.Entity("Api.Database.Models.UserInfo", b =>
@@ -1143,6 +1156,32 @@ namespace Api.Migrations
                     b.Navigation("CurrentInstallation");
 
                     b.Navigation("Documentation");
+                });
+
+            modelBuilder.Entity("Api.Database.Models.TagInspectionMetadata", b =>
+                {
+                    b.OwnsOne("Api.Services.Models.IsarZoomDescription", "ZoomDescription", b1 =>
+                        {
+                            b1.Property<string>("TagInspectionMetadataTagId")
+                                .HasColumnType("text");
+
+                            b1.Property<double>("ObjectHeight")
+                                .HasColumnType("double precision")
+                                .HasJsonPropertyName("objectHeight");
+
+                            b1.Property<double>("ObjectWidth")
+                                .HasColumnType("double precision")
+                                .HasJsonPropertyName("objectWidth");
+
+                            b1.HasKey("TagInspectionMetadataTagId");
+
+                            b1.ToTable("TagInspectionMetadata");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TagInspectionMetadataTagId");
+                        });
+
+                    b.Navigation("ZoomDescription");
                 });
 
             modelBuilder.Entity("Api.Database.Models.Inspection", b =>

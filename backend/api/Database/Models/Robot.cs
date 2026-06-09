@@ -175,6 +175,7 @@ namespace Api.Database.Models
         take_thermal_video,
         take_co2_measurement,
         record_audio,
+        take_acoustic_measurement,
     }
 
     public enum BatteryState

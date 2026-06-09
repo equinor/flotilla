@@ -1,9 +1,10 @@
-﻿using Api.Database.Models;
+﻿using System.ComponentModel.DataAnnotations;
+using Api.Database.Models;
 using Api.Services.Models;
 
 namespace Api.Controllers.Models
 {
-    public struct TaskQuery
+    public struct TaskQuery : IValidatableObject
     {
 #nullable disable
         public TaskQuery() { }
@@ -19,6 +20,7 @@ namespace Api.Controllers.Models
             SensorType = def.SensorType;
             AnalysisTypes = def.AnalysisTypes;
             VideoDuration = def.VideoDuration;
+            AcousticInspectionMetadata = def.AcousticInspectionMetadata;
         }
 
         public string? TagId { get; set; }
@@ -36,6 +38,29 @@ namespace Api.Controllers.Models
         public IList<AnalysisType> AnalysisTypes { get; set; }
 
         public float? VideoDuration { get; set; }
+
+        public AcousticInspectionMetadata? AcousticInspectionMetadata { get; set; }
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (SensorType == SensorType.AcousticMeasurement && AcousticInspectionMetadata is null)
+            {
+                yield return new ValidationResult(
+                    $"{nameof(AcousticInspectionMetadata)} is required when {nameof(SensorType)} is {nameof(SensorType.AcousticMeasurement)}.",
+                    [nameof(AcousticInspectionMetadata), nameof(SensorType)]
+                );
+            }
+            else if (
+                SensorType != SensorType.AcousticMeasurement
+                && AcousticInspectionMetadata is not null
+            )
+            {
+                yield return new ValidationResult(
+                    $"{nameof(AcousticInspectionMetadata)} can only be set when {nameof(SensorType)} is {nameof(SensorType.AcousticMeasurement)}.",
+                    [nameof(AcousticInspectionMetadata), nameof(SensorType)]
+                );
+            }
+        }
     }
 
     public struct CreateMissionQuery
