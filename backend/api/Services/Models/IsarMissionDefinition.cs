@@ -103,6 +103,10 @@ namespace Api.Services.Models
         [JsonPropertyName("analysis_types")]
         public List<string>? AnalysisTypes { get; set; }
 
+        [JsonPropertyName("acoustic")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public IsarAcousticInspection? Acoustic { get; set; }
+
         public IsarInspectionDefinition(MissionTask missionTask)
         {
             var inspection = missionTask.Inspection!;
@@ -119,6 +123,10 @@ namespace Api.Services.Models
             InspectionDescription = missionTask.Description;
             Duration = inspection.VideoDuration;
             AnalysisTypes = ToSaraAnalysisKeys(inspection.AnalysisTypes);
+            Acoustic =
+                inspection.AcousticInspectionMetadata != null
+                    ? new IsarAcousticInspection(inspection.AcousticInspectionMetadata)
+                    : null;
         }
 
         private static List<string>? ToSaraAnalysisKeys(IList<AnalysisType>? types)
@@ -141,6 +149,65 @@ namespace Api.Services.Models
                 .Distinct()
                 .ToList();
             return mapped.Count == 0 ? null : mapped;
+        }
+    }
+
+    public struct IsarAcousticInspection
+    {
+        [JsonPropertyName("frequency_from")]
+        public float FrequencyFrom { get; set; }
+
+        [JsonPropertyName("frequency_to")]
+        public float FrequencyTo { get; set; }
+
+        [JsonPropertyName("snr_value_threshold")]
+        public float SnrValueThreshold { get; set; }
+
+        [JsonPropertyName("detection_type")]
+        public string DetectionType { get; set; }
+
+        [JsonPropertyName("roi")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public IsarRoi? Roi { get; set; }
+
+        public IsarAcousticInspection(AcousticInspectionMetadata metadata)
+        {
+            FrequencyFrom = metadata.FrequencyFrom;
+            FrequencyTo = metadata.FrequencyTo;
+            SnrValueThreshold = metadata.SnrValueThreshold;
+            DetectionType = metadata.DetectionType switch
+            {
+                AcousticDetectionType.Leak => "leak",
+                _ => throw new ArgumentOutOfRangeException(
+                    nameof(metadata),
+                    metadata.DetectionType,
+                    $"Unknown {nameof(AcousticDetectionType)} value"
+                ),
+            };
+            Roi = metadata.Roi is null ? null : new IsarRoi(metadata.Roi);
+        }
+    }
+
+    public readonly struct IsarRoi
+    {
+        [JsonPropertyName("x")]
+        public int X { get; }
+
+        [JsonPropertyName("y")]
+        public int Y { get; }
+
+        [JsonPropertyName("width")]
+        public int Width { get; }
+
+        [JsonPropertyName("height")]
+        public int Height { get; }
+
+        public IsarRoi(Roi roi)
+        {
+            X = roi.X;
+            Y = roi.Y;
+            Width = roi.Width;
+            Height = roi.Height;
         }
     }
 

@@ -1,6 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using Api.Services.Models;
+using Microsoft.EntityFrameworkCore;
 #pragma warning disable CS8618
 namespace Api.Database.Models
 {
@@ -18,7 +20,8 @@ namespace Api.Database.Models
             Position target,
             IList<AnalysisType> analysisTypes,
             float? videoDuration,
-            string? taskDescription = null
+            string? taskDescription = null,
+            AcousticInspectionMetadata? acousticInspectionMetadata = null
         )
         {
             InspectionType = sensorType;
@@ -26,6 +29,7 @@ namespace Api.Database.Models
             VideoDuration = videoDuration;
             AnalysisTypes = analysisTypes;
             TaskDescription = taskDescription;
+            AcousticInspectionMetadata = acousticInspectionMetadata;
         }
 
         // Creates a blank deepcopy of the provided inspection
@@ -39,6 +43,9 @@ namespace Api.Database.Models
             InspectionTarget = new Position(copy.InspectionTarget);
             TaskDescription = copy.TaskDescription;
             AnalysisTypes = copy.AnalysisTypes;
+            AcousticInspectionMetadata = copy.AcousticInspectionMetadata is not null
+                ? new AcousticInspectionMetadata(copy.AcousticInspectionMetadata)
+                : null;
         }
 
         [Key]
@@ -62,6 +69,8 @@ namespace Api.Database.Models
         public AnalysisResult AnalysisResult { get; set; }
 
         public float? VideoDuration { get; set; }
+
+        public AcousticInspectionMetadata? AcousticInspectionMetadata { get; set; }
 
         [MaxLength(250)]
         public string? InspectionUrl { get; set; }
@@ -90,6 +99,9 @@ namespace Api.Database.Models
                     RobotCapabilitiesEnum.take_co2_measurement
                 ),
                 SensorType.Audio => capabilities.Contains(RobotCapabilitiesEnum.record_audio),
+                SensorType.AcousticMeasurement => capabilities.Contains(
+                    RobotCapabilitiesEnum.take_acoustic_measurement
+                ),
                 _ => false,
             };
         }
@@ -103,5 +115,79 @@ namespace Api.Database.Models
         ThermalVideo,
         Audio,
         CO2Measurement,
+        AcousticMeasurement,
+    }
+
+    public enum AcousticDetectionType
+    {
+        [JsonStringEnumMemberName("leak")]
+        Leak,
+    }
+
+    [Owned]
+    public class AcousticInspectionMetadata(
+        float frequencyFrom,
+        float frequencyTo,
+        float snrValueThreshold,
+        AcousticDetectionType detectionType
+    ) : IValidatableObject
+    {
+        public const float MaxAcousticFrequencyHz = 100_000f;
+
+        [Required]
+        [Range(0f, MaxAcousticFrequencyHz)]
+        public float FrequencyFrom { get; set; } = frequencyFrom;
+
+        [Required]
+        [Range(0f, MaxAcousticFrequencyHz)]
+        public float FrequencyTo { get; set; } = frequencyTo;
+
+        [Required]
+        public float SnrValueThreshold { get; set; } = snrValueThreshold;
+
+        [Required]
+        public AcousticDetectionType DetectionType { get; set; } = detectionType;
+
+        public Roi? Roi { get; set; }
+
+        public AcousticInspectionMetadata(AcousticInspectionMetadata copy)
+            : this(copy.FrequencyFrom, copy.FrequencyTo, copy.SnrValueThreshold, copy.DetectionType)
+        {
+            Roi = copy.Roi is null ? null : new Roi(copy.Roi);
+        }
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (FrequencyFrom >= FrequencyTo)
+            {
+                yield return new ValidationResult(
+                    $"{nameof(FrequencyFrom)} must be less than {nameof(FrequencyTo)}.",
+                    [nameof(FrequencyFrom), nameof(FrequencyTo)]
+                );
+            }
+        }
+    }
+
+    [Owned]
+    public class Roi(int x, int y, int width, int height)
+    {
+        [Required]
+        [Range(0, int.MaxValue)]
+        public int X { get; set; } = x;
+
+        [Required]
+        [Range(0, int.MaxValue)]
+        public int Y { get; set; } = y;
+
+        [Required]
+        [Range(1, int.MaxValue)]
+        public int Width { get; set; } = width;
+
+        [Required]
+        [Range(1, int.MaxValue)]
+        public int Height { get; set; } = height;
+
+        public Roi(Roi copy)
+            : this(copy.X, copy.Y, copy.Width, copy.Height) { }
     }
 }

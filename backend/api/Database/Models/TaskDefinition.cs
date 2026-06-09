@@ -29,6 +29,7 @@ namespace Api.Database.Models
             SensorType = taskQuery.SensorType;
             TargetPosition = taskQuery.TargetPosition;
             VideoDuration = taskQuery.VideoDuration;
+            AcousticInspectionMetadata = taskQuery.AcousticInspectionMetadata;
         }
 
         public int Index { get; set; }
@@ -53,6 +54,8 @@ namespace Api.Database.Models
 
         public float? VideoDuration { get; set; }
 
+        public AcousticInspectionMetadata? AcousticInspectionMetadata { get; set; }
+
         public MissionTask ToMissionRunTask()
         {
             return new MissionTask
@@ -69,7 +72,8 @@ namespace Api.Database.Models
                     this.TargetPosition,
                     this.AnalysisTypes,
                     this.VideoDuration,
-                    Description
+                    Description,
+                    this.AcousticInspectionMetadata
                 ),
             };
         }
