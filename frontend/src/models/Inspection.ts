@@ -9,6 +9,7 @@ export interface Inspection {
     analysisResult?: AnalysisResult
     inspectionTarget: Position
     videoDuration?: number
+    acousticInspectionMetadata?: AcousticInspectionMetadata
     inspectionUrl?: string
     analysisTypes: AnalysisType[]
     taskDescription?: string
@@ -35,6 +36,24 @@ export enum SensorType {
     ThermalVideo = 'ThermalVideo',
     Audio = 'Audio',
     CO2Measurement = 'CO2Measurement',
+    AcousticMeasurement = 'AcousticMeasurement',
+}
+
+type AcousticDetectionType = 'leak'
+
+interface Roi {
+    x: number
+    y: number
+    width: number
+    height: number
+}
+
+export interface AcousticInspectionMetadata {
+    frequencyFrom: number
+    frequencyTo: number
+    snrValueThreshold: number
+    detectionType: AcousticDetectionType
+    roi?: Roi
 }
 
 export enum DisplayMethod {
@@ -52,6 +71,7 @@ export const SensorTypeToDisplayMethod: { [sensorType in SensorType]: DisplayMet
     [SensorType.Video]: DisplayMethod.None,
     [SensorType.ThermalVideo]: DisplayMethod.None,
     [SensorType.Audio]: DisplayMethod.None,
+    [SensorType.AcousticMeasurement]: DisplayMethod.None,
 }
 
 export interface SaraInspectionVisualizationReady {

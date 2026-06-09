@@ -50,6 +50,7 @@
     "ThermalVideo": "Thermal video",
     "Audio": "Audio",
     "CO2Measurement": "CO2 concentration",
+    "AcousticMeasurement": "Acoustic measurement",
     "Camera": "Camera",
     "Select installation": "Select installation",
     "History": "History",
