@@ -3,7 +3,7 @@ import { Mission } from './Mission'
 import { AutoScheduleFrequency } from './AutoScheduleFrequency'
 import { Pose } from './Pose'
 import { Position } from './Position'
-import { SensorType } from './Inspection'
+import { AcousticInspectionMetadata, SensorType } from './Inspection'
 
 export enum AnalysisType {
     Fencilla = 'Fencilla',
@@ -27,6 +27,7 @@ interface MissionTaskDefinition {
     analysisTypes: AnalysisType[]
     sensorType: SensorType
     videoDuration?: number
+    acousticInspectionMetadata?: AcousticInspectionMetadata
 }
 
 export interface MissionDefinition {
