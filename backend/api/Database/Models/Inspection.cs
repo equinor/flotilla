@@ -125,28 +125,37 @@ namespace Api.Database.Models
     }
 
     [Owned]
-    public class AcousticInspectionMetadata(
-        float frequencyFrom,
-        float frequencyTo,
-        float snrValueThreshold,
-        AcousticDetectionType detectionType
-    ) : IValidatableObject
+    public class AcousticInspectionMetadata : IValidatableObject
     {
         public const float MaxAcousticFrequencyHz = 100_000f;
 
-        [Required]
-        [Range(0f, MaxAcousticFrequencyHz)]
-        public float FrequencyFrom { get; set; } = frequencyFrom;
+        [JsonConstructor]
+        public AcousticInspectionMetadata(
+            float frequencyFrom,
+            float frequencyTo,
+            float snrValueThreshold,
+            AcousticDetectionType detectionType
+        )
+        {
+            FrequencyFrom = frequencyFrom;
+            FrequencyTo = frequencyTo;
+            SnrValueThreshold = snrValueThreshold;
+            DetectionType = detectionType;
+        }
 
         [Required]
         [Range(0f, MaxAcousticFrequencyHz)]
-        public float FrequencyTo { get; set; } = frequencyTo;
+        public float FrequencyFrom { get; set; }
 
         [Required]
-        public float SnrValueThreshold { get; set; } = snrValueThreshold;
+        [Range(0f, MaxAcousticFrequencyHz)]
+        public float FrequencyTo { get; set; }
 
         [Required]
-        public AcousticDetectionType DetectionType { get; set; } = detectionType;
+        public float SnrValueThreshold { get; set; }
+
+        [Required]
+        public AcousticDetectionType DetectionType { get; set; }
 
         public Roi? Roi { get; set; }
 
@@ -169,23 +178,32 @@ namespace Api.Database.Models
     }
 
     [Owned]
-    public class Roi(int x, int y, int width, int height)
+    public class Roi
     {
-        [Required]
-        [Range(0, int.MaxValue)]
-        public int X { get; set; } = x;
+        [JsonConstructor]
+        public Roi(int x, int y, int width, int height)
+        {
+            X = x;
+            Y = y;
+            Width = width;
+            Height = height;
+        }
 
         [Required]
         [Range(0, int.MaxValue)]
-        public int Y { get; set; } = y;
+        public int X { get; set; }
+
+        [Required]
+        [Range(0, int.MaxValue)]
+        public int Y { get; set; }
 
         [Required]
         [Range(1, int.MaxValue)]
-        public int Width { get; set; } = width;
+        public int Width { get; set; }
 
         [Required]
         [Range(1, int.MaxValue)]
-        public int Height { get; set; } = height;
+        public int Height { get; set; }
 
         public Roi(Roi copy)
             : this(copy.X, copy.Y, copy.Width, copy.Height) { }
