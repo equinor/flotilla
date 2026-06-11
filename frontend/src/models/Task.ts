@@ -4,6 +4,7 @@ import { Pose } from './Pose'
 
 export interface Task {
     id: string
+    taskOrder: number
     tagId?: string
     description?: string
     robotPose: Pose
