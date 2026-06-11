@@ -19,6 +19,5 @@ export const CloeDataViewPage = () => (
         plotYLabel="Fill [%]"
         plotYMin={0}
         plotYMax={100}
-        latestValueUnit="%"
     />
 )

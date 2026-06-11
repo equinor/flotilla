@@ -51,7 +51,6 @@ interface DataViewProps {
     plotYLabel: string
     plotYMin: number
     plotYMax: number
-    latestValueUnit: string
 }
 
 export const DataView = ({
@@ -63,7 +62,6 @@ export const DataView = ({
     plotYLabel,
     plotYMin,
     plotYMax,
-    latestValueUnit,
 }: DataViewProps) => {
     const { TranslateText } = useLanguageContext()
     const { installation } = useContext(InstallationContext)
@@ -209,7 +207,6 @@ export const DataView = ({
                                     setSelectedTagId(tagId)
                                     setSelectedDataPoint(null)
                                 }}
-                                latestValueUnit={latestValueUnit}
                             />
                         )}
                         {plantCode && mapMission && (
