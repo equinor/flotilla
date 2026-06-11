@@ -21,7 +21,6 @@ export const ThermalReadingViewPage = () => {
             plotYLabel="Temperature [°C]"
             plotYMin={-20}
             plotYMax={100}
-            latestValueUnit="°C"
         />
     )
 }

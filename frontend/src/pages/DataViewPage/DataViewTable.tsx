@@ -6,16 +6,28 @@ import { DescriptionDisplay, TagIdDisplay } from 'components/Displays/TaskDispla
 import { Task } from 'models/Task'
 import { formatDateTime } from 'utils/StringFormatting'
 
+const unitDisplaySymbols: Record<string, string> = {
+    celsius: '°C',
+    percentage: '%',
+}
+
+const formatUnit = (unit?: string): string => {
+    if (!unit) return ''
+    const normalizedUnit = unit
+        .toLowerCase()
+        .replace(/\s*\[.*\]\s*/, '')
+        .trim()
+    return unitDisplaySymbols[normalizedUnit] ?? unit
+}
+
 export const DataViewTable = ({
     tasks,
     selectedTagId,
     onSelectTag,
-    latestValueUnit,
 }: {
     tasks: Task[]
     selectedTagId: string | null
     onSelectTag: (tagId: string | null) => void
-    latestValueUnit: string
 }) => {
     const { TranslateText } = useLanguageContext()
 
@@ -68,7 +80,7 @@ export const DataViewTable = ({
                                     <Table.Cell>
                                         <Typography>
                                             {Math.round(parseFloat(task.inspection.analysisResult?.value)) +
-                                                latestValueUnit}
+                                                formatUnit(task.inspection.analysisResult?.unit)}
                                         </Typography>
                                     </Table.Cell>
                                 ) : (
