@@ -135,6 +135,9 @@ export const MissionPage = ({
     const { selectedMission, videoMediaStreams } = useMissionSelector(missionId, undefined)
     const { alerts } = useAlertContext()
     const { installation } = useContext(InstallationContext)
+    const hasAnalysisType = selectedMission
+        ? selectedMission.tasks.some((task) => task.analysisTypes.length > 0)
+        : false
 
     return (
         <>
@@ -164,7 +167,7 @@ export const MissionPage = ({
                                     />
                                 )}
                                 <InspectionOverviewSection tasks={selectedMission.tasks} />
-                                <AnalysisOverviewSection tasks={selectedMission.tasks} />
+                                {hasAnalysisType && <AnalysisOverviewSection tasks={selectedMission.tasks} />}
                             </StyledCardsWidth>
                         </StyledMissionPageBody>
                     </StyledMissionPageContent>
@@ -184,6 +187,9 @@ export const SimpleMissionPage = ({
     analysisId: string | undefined
 }) => {
     const { selectedMission, videoMediaStreams } = useMissionSelector(missionId, inspectionId ?? analysisId)
+    const hasAnalysisType = selectedMission
+        ? selectedMission.tasks.some((task) => task.analysisTypes.length > 0)
+        : false
 
     return (
         <StyledMissionPage>
@@ -211,7 +217,7 @@ export const SimpleMissionPage = ({
                                 />
                             )}
                             <InspectionOverviewSection tasks={selectedMission.tasks} />
-                            <AnalysisOverviewSection tasks={selectedMission.tasks} />
+                            {hasAnalysisType && <AnalysisOverviewSection tasks={selectedMission.tasks} />}
                         </StyledCardsWidth>
                     </StyledMissionPageBody>
                 </StyledMissionPageContent>
