@@ -1,4 +1,5 @@
 import { Inspection } from './Inspection'
+import { AnalysisType } from './MissionDefinition'
 import { Pose } from './Pose'
 
 export interface Task {
@@ -6,6 +7,7 @@ export interface Task {
     tagId?: string
     description?: string
     robotPose: Pose
+    analysisTypes: AnalysisType[]
     status: TaskStatus
     isCompleted: boolean
     startTime?: Date

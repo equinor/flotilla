@@ -203,7 +203,7 @@
     "No mission running": "No Flotilla mission is running",
     "Tag": "Tag",
     "Timestamp": "Timestamp",
-    "Last completed inspection": "Last completed inspection",
+    "Inspection result": "Inspection result",
     "Inspection report for task": "Inspection report for task",
     "Battery is too low to start a mission.": "Battery is too low to start a mission.",
     "Robot is sent to dock and cannot run missions. Queued missions will run when robot is dismissed from dock.": "Robot is sent to dock and cannot run missions. Queued missions will run when robot is dismissed from dock.",
@@ -323,7 +323,7 @@
     "Not available": "Not available",
     "Go to data overview": "Go to data overview",
     "Latest inspection": "Latest inspection",
-    "Latest analysis result": "Latest analysis result",
+    "Analysis result": "Analysis result",
     "Selected inspection": "Selected inspection",
     "Selected analysis result": "Selected analysis result",
     "Analysis performed on images of the constant level oilers": "Analysis performed on images of the constant level oilers",
@@ -335,5 +335,6 @@
     "Go to Data View": "Go to Data View",
     "Estimated maximum temperature": "Estimated maximum temperature",
     "Temperature [°C]": "Temperature [°C]",
-    "No analysis available": "No analysis available"
+    "No analysis available": "No analysis available",
+    "Latest analysis result": "Latest analysis result"
 }

@@ -203,7 +203,7 @@
     "No mission running": "Ingen pågående Flotilla oppdrag",
     "Tag": "Tag",
     "Timestamp": "Tidspunkt",
-    "Last completed inspection": "Siste gjennomførte inspeksjon",
+    "Inspection result": "Inspeksjonsresultat",
     "Inspection report for task": "Inspeksjonsrapport for oppgave",
     "Battery is too low to start a mission.": "Batterinivået er for lavt til å starte oppdrag.",
     "Robot is sent to dock and cannot run missions. Queued missions will run when robot is dismissed from dock.": "Roboten er sendt til ladestasjon og kan ikke kjøre oppdrag. Oppdrag i kø vil kjøres når roboten slippes ut fra ladestasjon.",
@@ -326,7 +326,7 @@
     "Analysis result not available": "Analyseresultat ikke tilgjengelig",
     "Go to data overview": "Gå til dataoversikt",
     "Latest inspection": "Siste inspeksjon",
-    "Latest analysis result": "Siste analyseresultat",
+    "Analysis result": "Analyseresultat",
     "Analysis performed on images of the constant level oilers": "Analyse utført på bilder av nivåmålinger",
     "Data View for Perimeter Breach Detection": "Datavisning for Perimeter Sikkerhetsrunder",
     "Analysis performed on images of the perimeter fences": "Analyse utført på bilder av perimetergjerdene",
@@ -336,5 +336,6 @@
     "Go to Data View": "Gå til datavisning",
     "Estimated maximum temperature": "Estimert maksimal temperatur",
     "Temperature [°C]": "Temperatur [°C]",
-    "No analysis available": "Ingen analyse ble funnet"
+    "No analysis available": "Ingen analyse ble funnet",
+    "Latest analysis result": "Siste analyseresultat"
 }

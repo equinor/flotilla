@@ -73,12 +73,12 @@ const OverviewDialogView = ({ tasks, variant }: { tasks: Task[]; variant: Overvi
 
 export const InspectionOverviewSection = ({ tasks }: { tasks: Task[] }) => {
     const { TranslateText } = useLanguageContext()
-    return <OverviewSection tasks={tasks} variant="inspection" title={TranslateText('Last completed inspection')} />
+    return <OverviewSection tasks={tasks} variant="inspection" title={TranslateText('Inspection result')} />
 }
 
 export const AnalysisOverviewSection = ({ tasks }: { tasks: Task[] }) => {
     const { TranslateText } = useLanguageContext()
-    return <OverviewSection tasks={tasks} variant="analysis" title={TranslateText('Latest analysis result')} />
+    return <OverviewSection tasks={tasks} variant="analysis" title={TranslateText('Analysis result')} />
 }
 
 export const InspectionOverviewDialogView = ({ tasks }: { tasks: Task[] }) => (
