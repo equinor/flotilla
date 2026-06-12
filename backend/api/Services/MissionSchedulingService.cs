@@ -88,6 +88,33 @@ namespace Api.Services
                 return;
             }
 
+            if (missionRun.Tasks.Count == 0)
+            {
+                logger.LogWarning(
+                    "MissionRun {RobotName} was not started on robot {RobotId} as the mission has no tasks",
+                    missionRun.Id,
+                    robot.Id
+                );
+                try
+                {
+                    await AbortMissionRun(
+                        missionRun,
+                        $"Mission run {missionRun.Id} aborted: Mission has no tasks"
+                    );
+                }
+                catch (RobotNotFoundException)
+                {
+                    logger.LogError(
+                        "Failed to abort scheduled mission {missionRun.Id} for robot {RobotName} with Id {RobotId}",
+                        missionRun.Id,
+                        robot.Name,
+                        robot.Id
+                    );
+                }
+                await StartNextMissionRunIfSystemIsAvailable(robot);
+                return;
+            }
+
             missionRun.Tasks = await exclusionAreaService.FilterOutExcludedMissionTasks(
                 missionRun.Tasks,
                 missionRun.InstallationCode
