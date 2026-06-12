@@ -87,7 +87,6 @@ namespace Api.Test.Database
                 InspectionArea = inspectionArea,
                 InstallationCode = installationCode,
                 Tasks = tasks ?? [],
-                InspectionFrequency = new DateTime().AddDays(7) - new DateTime(),
                 LastSuccessfulRun = lastSuccessfulRun,
                 AutoScheduleFrequency = new AutoScheduleFrequency
                 {

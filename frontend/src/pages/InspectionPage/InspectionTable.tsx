@@ -6,9 +6,8 @@ import { tokens } from '@equinor/eds-tokens'
 import { MissionDefinition } from 'models/MissionDefinition'
 import { useNavigate } from 'react-router-dom'
 import { Icons } from 'utils/icons'
-import { Inspection } from './InspectionSection'
-import { compareInspections } from './InspectionUtilities'
-import { convertUTCDateToLocalDate, formatDateString, getDeadlineInDays } from 'utils/StringFormatting'
+import { compareMissionDefinitions } from './InspectionUtilities'
+import { formatDateString } from 'utils/StringFormatting'
 import { AlreadyScheduledMissionDialog, ScheduleMissionDialog } from './ScheduleMissionDialogs'
 import { useContext, useEffect, useState } from 'react'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
@@ -18,6 +17,7 @@ import { SmallScreenInfoText } from 'utils/InfoText'
 import { phone_width } from 'utils/constants'
 import { InstallationContext } from 'components/Contexts/InstallationContext'
 import { StyledTableCell, StyledTableRow } from 'components/Styles/StyledComponents'
+import { IconData } from '@equinor/eds-icons'
 
 const StyledIcon = styled(Icon)`
     display: flex;
@@ -49,10 +49,9 @@ const StyledContent = styled.div`
     gap: 4px;
     color: ${tokens.colors.text.static_icons__secondary.hex};
 `
-const StyledCircle = styled.div`
-    width: 13px;
-    height: 13px;
-    border-radius: 50px;
+const Centered = styled.div`
+    display: flex;
+    justify-content: center;
 `
 
 enum InspectionTableColumns {
@@ -60,7 +59,6 @@ enum InspectionTableColumns {
     Name = 'Name',
     Description = 'Description',
     LastCompleted = 'LastCompleted',
-    Deadline = 'Deadline',
     AddToQueue = 'AddToQueue',
 }
 
@@ -69,13 +67,13 @@ const HideColumnsOnSmallScreen = styled.div`
         display: none;
     }
     @media (max-width: ${phone_width}) {
+        #${InspectionTableColumns.Status} {
+            display: none;
+        }
         #${InspectionTableColumns.Description} {
             display: none;
         }
         #${InspectionTableColumns.LastCompleted} {
-            display: none;
-        }
-        #${InspectionTableColumns.Deadline} {
             display: none;
         }
         #SmallScreenInfoText {
@@ -87,62 +85,34 @@ const HideColumnsOnSmallScreen = styled.div`
         }
     }
 `
-const Centered = styled.div`
-    display: flex;
-    justify-content: center;
-`
 
 interface IProps {
     inspectionArea: InspectionArea
-    inspections: Inspection[]
+    missionDefinitions: MissionDefinition[]
     scrollOnToggle: boolean
     openDialog: () => void
     setSelectedMissions: (selectedMissions: MissionDefinition[]) => void
 }
 
-interface ITableProps {
-    inspections: Inspection[]
-}
-
-const getStatusColorAndTextFromDeadline = (deadlineDate: Date): { statusColor: string; statusText: string } => {
-    const deadlineDays = getDeadlineInDays(deadlineDate)
-
-    switch (true) {
-        case deadlineDays <= 0:
-            return { statusColor: 'red', statusText: 'Past deadline' }
-        case deadlineDays > 0 && deadlineDays <= 1:
-            return { statusColor: 'red', statusText: 'Due today' }
-        case deadlineDays > 1 && deadlineDays <= 7:
-            return { statusColor: 'red', statusText: 'Due this week' }
-        case deadlineDays > 7 && deadlineDays <= 14:
-            return { statusColor: 'orange', statusText: 'Due within two weeks' }
-        case deadlineDays > 7 && deadlineDays <= 30:
-            return { statusColor: 'green', statusText: 'Due within a month' }
-    }
-    return { statusColor: 'green', statusText: 'Up to date' }
-}
-
-interface IInspectionRowProps {
-    inspection: Inspection
+interface IMissionRowProps {
+    mission: MissionDefinition
     openDialog: () => void
     setMissions: (selectedMissions: MissionDefinition[]) => void
     openScheduledDialog: () => void
 }
 
-const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialog }: IInspectionRowProps) => {
+const MissionRow = ({ mission, openDialog, setMissions, openScheduledDialog }: IMissionRowProps) => {
     const { TranslateText } = useLanguageContext()
     const { ongoingMissions, missionQueue } = useMissionsContext()
     const { enabledRobots } = useAssetContext()
     const { installation } = useContext(InstallationContext)
     const navigate = useNavigate()
-    const mission = inspection.missionDefinition
-    let status
-    let lastCompleted: string = ''
+
     const isScheduled = missionQueue.map((m) => m.missionId).includes(mission.id)
     const isOngoing = ongoingMissions.map((m) => m.missionId).includes(mission.id)
-
     const isScheduleButtonDisabled = enabledRobots.length === 0
 
+    let status: React.ReactNode
     if (isOngoing) {
         status = (
             <StyledContent>
@@ -157,35 +127,25 @@ const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialo
                 {TranslateText('Queued')}
             </StyledContent>
         )
-    } else if (!mission.lastSuccessfulRun || !mission.lastSuccessfulRun.endTime) {
-        if (inspection.missionDefinition.inspectionFrequency) {
-            status = (
-                <StyledContent>
-                    <StyledCircle style={{ background: 'red' }} />
-                    {TranslateText('Not yet performed')}
-                </StyledContent>
-            )
-        } else {
-            status = (
-                <StyledContent>
-                    <StyledCircle style={{ background: 'green' }} />
-                    {TranslateText('No planned inspection')}
-                </StyledContent>
-            )
-        }
-        lastCompleted = TranslateText('Never')
     } else {
-        const { statusColor, statusText } = inspection.missionDefinition.inspectionFrequency
-            ? getStatusColorAndTextFromDeadline(inspection.deadline!)
-            : { statusColor: 'green', statusText: 'No planned inspection' }
+        const iconData: IconData = {
+            name: 'empty',
+            prefix: 'eds',
+            height: '24',
+            width: '24',
+            svgPathData: '',
+        }
         status = (
             <StyledContent>
-                <StyledCircle style={{ background: statusColor }} />
-                {TranslateText(statusText)}
+                <Icon data={iconData} size={16} />
+                {TranslateText('Idle')}
             </StyledContent>
         )
-        lastCompleted = formatDateString(mission.lastSuccessfulRun.endTime!)
     }
+
+    const lastCompleted = mission.lastSuccessfulRun?.endTime
+        ? formatDateString(mission.lastSuccessfulRun.endTime)
+        : TranslateText('Never')
 
     const noRobotReadyForMissionsText = TranslateText('No robot available')
 
@@ -204,11 +164,6 @@ const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialo
                 {mission.comment}
             </Table.Cell>
             <Table.Cell id={InspectionTableColumns.LastCompleted}>{lastCompleted}</Table.Cell>
-            <Table.Cell id={InspectionTableColumns.Deadline}>
-                {inspection.deadline
-                    ? formatDateString(convertUTCDateToLocalDate(inspection.deadline).toISOString())
-                    : ''}
-            </Table.Cell>
             <Table.Cell id={InspectionTableColumns.AddToQueue}>
                 <Centered>
                     {!isScheduled && (
@@ -243,7 +198,7 @@ const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialo
     )
 }
 
-export const InspectionTable = ({ inspectionArea, inspections, openDialog, setSelectedMissions }: IProps) => {
+export const InspectionTable = ({ inspectionArea, missionDefinitions, openDialog, setSelectedMissions }: IProps) => {
     const { TranslateText } = useLanguageContext()
 
     const [isScheduledDialogOpen, setIsScheduledDialogOpen] = useState<boolean>(false)
@@ -255,18 +210,6 @@ export const InspectionTable = ({ inspectionArea, inspections, openDialog, setSe
     const closeScheduleDialog = () => {
         setIsScheduledDialogOpen(false)
     }
-
-    const cellValues = inspections
-        .sort(compareInspections)
-        .map((inspection) => (
-            <InspectionRow
-                key={inspection.missionDefinition.id}
-                inspection={inspection}
-                openDialog={openDialog}
-                setMissions={setSelectedMissions}
-                openScheduledDialog={openScheduleDialog}
-            />
-        ))
 
     return (
         <StyledTable id={FrontPageSectionId.InspectionTable}>
@@ -286,7 +229,15 @@ export const InspectionTable = ({ inspectionArea, inspections, openDialog, setSe
                         </Table.Row>
                     </Table.Head>
                     <Table.Body style={{ backgroundColor: tokens.colors.ui.background__default.hex }}>
-                        {cellValues}
+                        {missionDefinitions.sort(compareMissionDefinitions).map((mission) => (
+                            <MissionRow
+                                key={mission.id}
+                                mission={mission}
+                                openDialog={openDialog}
+                                setMissions={setSelectedMissions}
+                                openScheduledDialog={openScheduleDialog}
+                            />
+                        ))}
                     </Table.Body>
                 </Table>
             </HideColumnsOnSmallScreen>
@@ -297,7 +248,11 @@ export const InspectionTable = ({ inspectionArea, inspections, openDialog, setSe
     )
 }
 
-export const AllInspectionsTable = ({ inspections }: ITableProps) => {
+interface Props {
+    missionDefinitions: MissionDefinition[]
+}
+
+export const MissionDefinitionsTable = ({ missionDefinitions }: Props) => {
     const { TranslateText } = useLanguageContext()
     const { ongoingMissions, missionQueue } = useMissionsContext()
     const [selectedMissions, setSelectedMissions] = useState<MissionDefinition[]>()
@@ -338,18 +293,6 @@ export const AllInspectionsTable = ({ inspections }: ITableProps) => {
         }
     }, [isDialogOpen, ongoingMissions, missionQueue, selectedMissions])
 
-    const cellValues = inspections
-        .sort(compareInspections)
-        .map((inspection) => (
-            <InspectionRow
-                key={inspection.missionDefinition.id}
-                inspection={inspection}
-                openDialog={openDialog}
-                setMissions={setSelectedMissions}
-                openScheduledDialog={openScheduleDialog}
-            />
-        ))
-
     return (
         <StyledTable>
             <HideColumnsOnSmallScreen>
@@ -367,7 +310,15 @@ export const AllInspectionsTable = ({ inspections }: ITableProps) => {
                         </Table.Row>
                     </Table.Head>
                     <Table.Body style={{ backgroundColor: tokens.colors.ui.background__default.hex }}>
-                        {cellValues}
+                        {missionDefinitions.sort(compareMissionDefinitions).map((mission) => (
+                            <MissionRow
+                                key={mission.id}
+                                mission={mission}
+                                openDialog={openDialog}
+                                setMissions={setSelectedMissions}
+                                openScheduledDialog={openScheduleDialog}
+                            />
+                        ))}
                     </Table.Body>
                 </Table>
                 {isDialogOpen && (

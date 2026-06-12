@@ -247,9 +247,6 @@ namespace Api.Controllers
             if (missionDefinitionQuery.Comment != null)
                 missionDefinition.Comment = missionDefinitionQuery.Comment;
 
-            if (missionDefinitionQuery.InspectionFrequency != null)
-                missionDefinition.InspectionFrequency = missionDefinitionQuery.InspectionFrequency;
-
             if (missionDefinitionQuery.Tasks != null)
             {
                 missionDefinition.Tasks =
