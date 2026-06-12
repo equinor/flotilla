@@ -5,4 +5,6 @@ build:
 	npm run build
 
 format:
-	npm run prettier
+	npx prettier --write src
+	npx eslint src
+	node_modules/.bin/ts-unused-exports tsconfig.json
