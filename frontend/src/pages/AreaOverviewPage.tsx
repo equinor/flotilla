@@ -6,17 +6,16 @@ import { useContext } from 'react'
 import { useState, useEffect } from 'react'
 import { InspectionArea } from 'models/InspectionArea'
 import { MissionDefinition } from 'models/MissionDefinition'
-import { getInspectionDeadline } from 'utils/StringFormatting'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 import { PlantPolygonMap } from 'pages/MissionPage/MapPosition/PointillaMapView'
 import { Typography } from '@equinor/eds-core-react'
-import { compareInspections, InspectionAreaOverview } from './InspectionPage/InspectionUtilities'
+import { compareMissionDefinitions, InspectionAreaOverview } from './InspectionPage/InspectionUtilities'
 import { InspectionAreaCards } from './InspectionPage/InspectionAreaCards'
 import { InspectionTable } from './InspectionPage/InspectionTable'
 import { ScheduleMissionDialog } from './InspectionPage/ScheduleMissionDialogs'
-import { Inspection, InspectionAreaInspectionTuple } from './InspectionPage/InspectionSection'
+import { InspectionAreaInspectionTuple } from './InspectionPage/InspectionSection'
 import { StyledPage } from 'components/Styles/StyledComponents'
 
 interface InspectionAreaAreaTuple {
@@ -48,14 +47,7 @@ export const AreaOverviewPage = () => {
                 (m) => m.inspectionArea.inspectionAreaName === inspectionArea.inspectionAreaName
             )
             return {
-                inspections: missionDefinitionsInInspectionArea.map((m) => {
-                    return {
-                        missionDefinition: m,
-                        deadline: m.lastSuccessfulRun
-                            ? getInspectionDeadline(m.inspectionFrequency, m.lastSuccessfulRun.endTime!)
-                            : undefined,
-                    }
-                }),
+                missionDefinitions: missionDefinitionsInInspectionArea,
                 inspectionArea: inspectionArea,
             }
         }) ?? []
@@ -74,10 +66,10 @@ export const AreaOverviewPage = () => {
         setIsDialogOpen(false)
     }
 
-    const handleScheduleAll = (inspections: Inspection[]) => {
+    const handleScheduleAll = (missionDefinitions: MissionDefinition[]) => {
         setIsDialogOpen(true)
-        const sortedInspections = inspections.sort(compareInspections)
-        setSelectedMissions(sortedInspections.map((i) => i.missionDefinition))
+        const sortedMissionDefinitions = missionDefinitions.sort(compareMissionDefinitions)
+        setSelectedMissions(sortedMissionDefinitions)
     }
 
     useEffect(() => {
@@ -89,10 +81,10 @@ export const AreaOverviewPage = () => {
 
     const inspectionArea =
         installationInspectionAreas.length === 1 ? installationInspectionAreas[0] : selectedInspectionArea
-    const inspections =
+    const selectedAreaMissionDefinitions =
         inspectionAreaInspections.length === 1
-            ? inspectionAreaInspections[0].inspections
-            : inspectionAreaInspections.find((d) => d.inspectionArea === inspectionArea)?.inspections
+            ? inspectionAreaInspections[0].missionDefinitions
+            : inspectionAreaInspections.find((d) => d.inspectionArea === inspectionArea)?.missionDefinitions
 
     const InspectionAreaSelection = () => (
         <InspectionAreaOverview>
@@ -114,13 +106,13 @@ export const AreaOverviewPage = () => {
                     {installationInspectionAreas.length !== 1 && (
                         <>
                             <InspectionAreaSelection />
-                            {inspectionArea && inspections && (
+                            {inspectionArea && selectedAreaMissionDefinitions && (
                                 <InspectionTable
                                     inspectionArea={inspectionArea}
                                     scrollOnToggle={scrollOnToggle}
                                     openDialog={() => setIsDialogOpen(true)}
                                     setSelectedMissions={setSelectedMissions}
-                                    inspections={inspections}
+                                    missionDefinitions={selectedAreaMissionDefinitions}
                                 />
                             )}{' '}
                         </>
