@@ -15,11 +15,6 @@ namespace Api.Controllers.Models
         public string? Name { get; set; }
 
         /// <summary>
-        /// Change the inspection frequency
-        /// </summary>
-        public TimeSpan? InspectionFrequency { get; set; }
-
-        /// <summary>
         /// Change the time and day in the automated scheduling frequency
         /// Will be unchanged if null. Use an empty list to remove all scheduled times.
         /// </summary>

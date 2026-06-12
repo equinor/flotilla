@@ -35,7 +35,6 @@ export interface MissionDefinition {
     name: string
     installationCode: string
     comment?: string
-    inspectionFrequency?: string
     autoScheduleFrequency?: AutoScheduleFrequency
     lastSuccessfulRun?: Mission
     inspectionArea: InspectionArea

@@ -1,9 +1,7 @@
-import { Card, Typography } from '@equinor/eds-core-react'
+import { Card } from '@equinor/eds-core-react'
 import styled from 'styled-components'
-import { Inspection } from './InspectionSection'
-import { getDeadlineInDays } from 'utils/StringFormatting'
+import { MissionDefinition } from 'models/MissionDefinition'
 import { tokens } from '@equinor/eds-tokens'
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { cardShadow } from 'components/Styles/StyledComponents'
 
 export const StyledCard = styled(Card)`
@@ -14,7 +12,7 @@ export const StyledCard = styled(Card)`
     justify-content: space-between;
     flex: 1 0 0;
     cursor: pointer;
-    border-radius: 0px 2px 2px 0px;
+    border-radius: 2px;
 `
 export const CardComponent = styled.div`
     display: flex;
@@ -39,11 +37,6 @@ export const TopInspectionAreaText = styled.div`
     justify-content: space-between;
     margin-right: 5px;
 `
-export const Rectangle = styled.div`
-    display: flex-start;
-    width: 8px;
-    height: 100%;
-`
 export const StyledInspectionAreaCard = styled.div`
     display: flex;
     @media (max-width: 800px) {
@@ -54,25 +47,10 @@ export const StyledInspectionAreaCard = styled.div`
     overflow: hidden;
     box-shadow: ${cardShadow};
 `
-const Circle = styled.div`
-    width: 13px;
-    height: 13px;
-    border-radius: 50px;
-`
-const MissionComponents = styled.div`
-    display: flex;
-    align-items: center;
-    gap: 4px;
-`
 export const InspectionAreaOverview = styled.div`
     display: flex;
     flex-direction: column;
     gap: 48px;
-`
-const MissionInspections = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
 `
 export const Placeholder = styled.div`
     padding: 24px;
@@ -85,114 +63,16 @@ export const Content = styled.div`
     gap: 5px;
 `
 
-export enum InspectionAreaCardColors {
-    Gray = 'gray',
-    Green = 'green',
-    Red = 'red',
-    Orange = 'orange',
-}
-
-export const getDeadlineInspection = (deadline: Date): InspectionAreaCardColors => {
-    const deadlineDays = getDeadlineInDays(deadline)
-    switch (true) {
-        case deadlineDays <= 1:
-        case 1 < deadlineDays && deadlineDays <= 7:
-            return InspectionAreaCardColors.Red
-        case 7 < deadlineDays && deadlineDays <= 14:
-            return InspectionAreaCardColors.Orange
-        case 7 < deadlineDays && deadlineDays <= 30:
-            return InspectionAreaCardColors.Green
-    }
-    return InspectionAreaCardColors.Green
-}
-
 /**
- * Compares two inspections so that they can be sorted. An inspection with
- * an inspection frequency and/or a last run will be sorted before an inspection without.
- * If both inspections have an inspection frequency and/or a last run, the
- * inspection with the closest deadline will be sorted above the other.
- * @param inspection1 Arbitrary inspection to be compared
- * @param inspection2 Other arbitrary inspection to be compared
- * @returns positive number if the inspections should be sorted in the order
- *  inspection 1, inspection 2, and a negative number if the inspections should be
- *  sorted in the order inspection 2, inspection 1.
+ * Compares two mission definitions for sorting. Missions without a last successful
+ * run are sorted before missions with one. If neither has a last run, they are
+ * sorted alphabetically by name.
  */
-export const compareInspections = (inspection1: Inspection, inspection2: Inspection) => {
-    if (!inspection1.missionDefinition.inspectionFrequency && !inspection2.missionDefinition.inspectionFrequency) {
-        if (!inspection1.missionDefinition.lastSuccessfulRun && !inspection2.missionDefinition.lastSuccessfulRun) {
-            return inspection1.missionDefinition.name > inspection2.missionDefinition.name ? 1 : -1
-        }
-        if (!inspection1.missionDefinition.lastSuccessfulRun) return -1
-        if (!inspection2.missionDefinition.lastSuccessfulRun) return 1
-    } else if (!inspection1.missionDefinition.lastSuccessfulRun && !inspection2.missionDefinition.lastSuccessfulRun) {
-        if (!inspection1.missionDefinition.inspectionFrequency) return 1
-        if (!inspection2.missionDefinition.inspectionFrequency) return -1
+export const compareMissionDefinitions = (a: MissionDefinition, b: MissionDefinition) => {
+    if (!a.lastSuccessfulRun && !b.lastSuccessfulRun) {
+        return a.name > b.name ? 1 : -1
     }
-    if (!inspection1.missionDefinition.inspectionFrequency) return 1
-    if (!inspection2.missionDefinition.inspectionFrequency) return -1
-    if (!inspection1.missionDefinition.lastSuccessfulRun) return -1
-    if (!inspection2.missionDefinition.lastSuccessfulRun) return 1
-    else return inspection1.deadline!.getTime() - inspection2.deadline!.getTime()
-}
-
-interface ICardMissionInformationProps {
-    inspectionAreaName: string
-    inspections: Inspection[]
-}
-
-interface InspectionAreaMissionCount {
-    [color: string]: {
-        count: number
-        message: string
-    }
-}
-
-export const CardMissionInformation = ({ inspections }: ICardMissionInformationProps) => {
-    const { TranslateText } = useLanguageContext()
-
-    const colorsCount: InspectionAreaMissionCount = {
-        red: { count: 0, message: 'Must be inspected this week' },
-        orange: { count: 0, message: 'Must be inspected within two weeks' },
-        green: { count: 0, message: 'Up to date' },
-        grey: { count: 0, message: '' },
-    }
-
-    inspections.forEach((inspection) => {
-        if (!inspection.deadline) {
-            if (!inspection.missionDefinition.lastSuccessfulRun && inspection.missionDefinition.inspectionFrequency) {
-                colorsCount['red'].count++
-            } else {
-                colorsCount['green'].count++
-            }
-        } else {
-            const dealineColor = getDeadlineInspection(inspection.deadline)
-            colorsCount[dealineColor!].count++
-        }
-    })
-
-    return (
-        <MissionInspections>
-            {Object.keys(colorsCount)
-                .filter((color) => colorsCount[color].count > 0)
-                .map((color) => (
-                    <MissionComponents key={color}>
-                        <Circle style={{ background: color }} />
-                        <Typography color={tokens.colors.text.static_icons__secondary.hex}>
-                            {colorsCount[color].count > 1 &&
-                                colorsCount[color].count +
-                                    ' ' +
-                                    TranslateText('Missions').toLowerCase() +
-                                    ' ' +
-                                    TranslateText(colorsCount[color].message).toLowerCase()}
-                            {colorsCount[color].count === 1 &&
-                                colorsCount[color].count +
-                                    ' ' +
-                                    TranslateText('Mission').toLowerCase() +
-                                    ' ' +
-                                    TranslateText(colorsCount[color].message).toLowerCase()}
-                        </Typography>
-                    </MissionComponents>
-                ))}
-        </MissionInspections>
-    )
+    if (!a.lastSuccessfulRun) return -1
+    if (!b.lastSuccessfulRun) return 1
+    return a.name > b.name ? 1 : -1
 }

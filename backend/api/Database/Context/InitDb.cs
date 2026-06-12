@@ -312,7 +312,6 @@ namespace Api.Database.Context
                     GetMissionTaskDefinitions()[2],
                 ],
                 Comment = "Interesting comment",
-                InspectionFrequency = new DateTime().AddDays(12) - new DateTime(),
                 LastSuccessfulRun = null,
             };
 
@@ -323,7 +322,6 @@ namespace Api.Database.Context
                 InstallationCode = inspectionAreas[1].Installation!.InstallationCode,
                 InspectionArea = inspectionAreas[1],
                 Tasks = [GetMissionTaskDefinitions()[0], GetMissionTaskDefinitions()[2]],
-                InspectionFrequency = new DateTime().AddDays(7) - new DateTime(),
                 LastSuccessfulRun = null,
             };
 
@@ -342,7 +340,6 @@ namespace Api.Database.Context
                 Id = Guid.NewGuid().ToString(),
                 Name = "Placeholder Mission 4",
                 InstallationCode = inspectionAreas[2].Installation.InstallationCode,
-                InspectionFrequency = new DateTime().AddDays(90) - new DateTime(),
                 InspectionArea = inspectionAreas[2],
                 Tasks = [GetMissionTaskDefinitions()[0]],
                 LastSuccessfulRun = null,
@@ -353,7 +350,6 @@ namespace Api.Database.Context
                 Id = Guid.NewGuid().ToString(),
                 Name = "Placeholder Mission 5",
                 InstallationCode = inspectionAreas[2].Installation.InstallationCode,
-                InspectionFrequency = new DateTime().AddDays(35) - new DateTime(),
                 InspectionArea = inspectionAreas[2],
                 Tasks = [GetMissionTaskDefinitions()[1]],
                 LastSuccessfulRun = null,
@@ -364,7 +360,6 @@ namespace Api.Database.Context
                 Id = Guid.NewGuid().ToString(),
                 Name = "Placeholder Mission 6",
                 InstallationCode = inspectionAreas[3].Installation.InstallationCode,
-                InspectionFrequency = new DateTime().AddDays(4) - new DateTime(),
                 InspectionArea = inspectionAreas[3],
                 Tasks = [GetMissionTaskDefinitions()[2]],
                 LastSuccessfulRun = null,
