@@ -21,7 +21,7 @@ namespace Api.Controllers.Models
 
         public InspectionAreaResponse? InspectionArea { get; set; }
 
-        public virtual RobotResponse Robot { get; set; }
+        public virtual RobotResponse? Robot { get; set; }
 
         public MissionStatus Status { get; set; }
 
@@ -56,7 +56,7 @@ namespace Api.Controllers.Models
                 mission.InspectionArea != null
                     ? new InspectionAreaResponse(mission.InspectionArea)
                     : null;
-            Robot = new RobotResponse(mission.Robot);
+            Robot = mission.Robot != null ? new RobotResponse(mission.Robot) : null;
             Status = mission.Status;
             IsCompleted = mission.IsCompleted;
             CreationTime = mission.CreationTime;
