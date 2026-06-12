@@ -59,17 +59,24 @@ namespace Api.Mqtt
             _maxRetryAttempts = mqttConfig.GetValue<int>("MaxRetryAttempts");
             _shouldFailOnMaxRetries = mqttConfig.GetValue<bool>("ShouldFailOnMaxRetries");
 
-            var tlsOptions = new MqttClientTlsOptions
-            {
-                UseTls = true,
-                /* Currently disabled to use self-signed certificate in the internal broker communication */
-                //if (_notProduction)
-                IgnoreCertificateChainErrors = true,
-            };
+            bool allowInsecure = mqttConfig.GetValue<bool>("AllowInsecureLocalConnections");
+
             var builder = new MqttClientOptionsBuilder()
                 .WithTcpServer(_serverHost, _serverPort)
-                .WithTlsOptions(tlsOptions)
                 .WithCredentials(username, password);
+
+            if (allowInsecure)
+            {
+                _logger.LogWarning(
+                    "MQTT TLS disabled — insecure connections allowed. Do NOT use in production."
+                );
+            }
+            else
+            {
+                builder.WithTlsOptions(
+                    new MqttClientTlsOptions { UseTls = true, IgnoreCertificateChainErrors = true }
+                );
+            }
 
             _options = new ManagedMqttClientOptionsBuilder()
                 .WithAutoReconnectDelay(_reconnectDelay)
