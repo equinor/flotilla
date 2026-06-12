@@ -84,10 +84,6 @@ namespace Api.Database.Context
 
             modelBuilder
                 .Entity<MissionDefinition>()
-                .Property(m => m.InspectionFrequency)
-                .HasConversion(new TimeSpanToTicksConverter());
-            modelBuilder
-                .Entity<MissionDefinition>()
                 .HasOne(m => m.InspectionArea)
                 .WithMany()
                 .OnDelete(DeleteBehavior.Restrict);

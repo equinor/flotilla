@@ -1,20 +1,16 @@
 import { InspectionArea } from 'models/InspectionArea'
-import { InspectionAreaInspectionTuple, Inspection } from './InspectionSection'
+import { MissionDefinition } from 'models/MissionDefinition'
+import { InspectionAreaInspectionTuple } from './InspectionSection'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import {
     CardComponent,
-    CardMissionInformation,
     Content,
-    InspectionAreaCardColors,
     InspectionAreaText,
     Placeholder,
-    Rectangle,
     StyledCard,
     StyledInspectionAreaCard,
     StyledInspectionAreaCards,
     TopInspectionAreaText,
-    compareInspections,
-    getDeadlineInspection,
 } from './InspectionUtilities'
 import { Button, Icon, Tooltip, Typography } from '@equinor/eds-core-react'
 import { Icons } from 'utils/icons'
@@ -22,18 +18,11 @@ import { tokens } from '@equinor/eds-tokens'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 
-interface IInspectionAreaCardProps {
-    inspectionAreaMissions: InspectionAreaInspectionTuple[]
-    onClickInspectionArea: (inspectionArea: InspectionArea) => void
-    selectedInspectionArea: InspectionArea | undefined
-    handleScheduleAll: (inspections: Inspection[]) => void
-}
-
 interface InspectionAreaCardProps {
     inspectionAreaData: InspectionAreaInspectionTuple
     onClickInspectionArea: (inspectionArea: InspectionArea) => void
     selectedInspectionArea: InspectionArea | undefined
-    handleScheduleAll: (inspections: Inspection[]) => void
+    handleScheduleAll: (missionDefinitions: MissionDefinition[]) => void
 }
 
 const InspectionAreaCard = ({
@@ -46,40 +35,24 @@ const InspectionAreaCard = ({
     const { ongoingMissions } = useMissionsContext()
     const { enabledRobots } = useAssetContext()
 
-    const isScheduleMissionsDisabled = enabledRobots.length === 0 || inspectionAreaData.inspections.length === 0
-
-    const getCardColorFromInspections = (inspections: Inspection[]): InspectionAreaCardColors => {
-        if (inspections.length === 0) return InspectionAreaCardColors.Gray
-        const sortedInspections = inspections.sort(compareInspections)
-
-        if (sortedInspections.length === 0) return InspectionAreaCardColors.Green
-
-        const nextInspection = sortedInspections[0]
-        if (!nextInspection.deadline) {
-            if (!nextInspection.missionDefinition.inspectionFrequency) return InspectionAreaCardColors.Green
-            else return InspectionAreaCardColors.Red
-        }
-
-        return getDeadlineInspection(nextInspection.deadline)
-    }
+    const isScheduleMissionsDisabled = enabledRobots.length === 0 || inspectionAreaData.missionDefinitions.length === 0
 
     let queueMissionsTooltip = ''
-    if (inspectionAreaData.inspections.length === 0) queueMissionsTooltip = TranslateText('No planned inspection')
+    if (inspectionAreaData.missionDefinitions.length === 0) queueMissionsTooltip = TranslateText('No available mission')
     else if (isScheduleMissionsDisabled) queueMissionsTooltip = TranslateText('No robot available')
 
     return (
         <StyledInspectionAreaCard key={inspectionAreaData.inspectionArea.inspectionAreaName}>
-            <Rectangle style={{ background: `${getCardColorFromInspections(inspectionAreaData.inspections)}` }} />
             <StyledCard
                 key={inspectionAreaData.inspectionArea.inspectionAreaName}
                 onClick={
-                    inspectionAreaData.inspections.length > 0
+                    inspectionAreaData.missionDefinitions.length > 0
                         ? () => onClickInspectionArea(inspectionAreaData.inspectionArea)
                         : undefined
                 }
                 style={
                     selectedInspectionArea === inspectionAreaData.inspectionArea
-                        ? { border: `solid ${getCardColorFromInspections(inspectionAreaData.inspections)} 1px` }
+                        ? { border: `solid ${tokens.colors.interactive.focus.hex} 1px` }
                         : {}
                 }
             >
@@ -88,31 +61,34 @@ const InspectionAreaCard = ({
                         <Typography variant={'body_short_bold'}>
                             {inspectionAreaData.inspectionArea.inspectionAreaName.toString()}
                         </Typography>
-                        {inspectionAreaData.inspections
-                            .filter((i) => ongoingMissions.find((m) => m.missionId === i.missionDefinition.id))
-                            .map((inspection) => (
-                                <Content key={inspection.missionDefinition.id}>
+                        {inspectionAreaData.missionDefinitions
+                            .filter((m) => ongoingMissions.find((om) => om.missionId === m.id))
+                            .map((mission) => (
+                                <Content key={mission.id}>
                                     <Icon name={Icons.Ongoing} size={16} />
                                     {TranslateText('InProgress')}
                                 </Content>
                             ))}
                     </TopInspectionAreaText>
-                    {inspectionAreaData.inspections && (
-                        <CardMissionInformation
-                            inspectionAreaName={inspectionAreaData.inspectionArea.inspectionAreaName}
-                            inspections={inspectionAreaData.inspections}
-                        />
-                    )}
+                    <Typography color={tokens.colors.text.static_icons__secondary.hex}>
+                        {inspectionAreaData.missionDefinitions.length}{' '}
+                        {inspectionAreaData.missionDefinitions.length === 1
+                            ? TranslateText('Mission').toLowerCase()
+                            : TranslateText('Missions').toLowerCase()}
+                    </Typography>
                 </InspectionAreaText>
                 <CardComponent>
                     <Tooltip placement="top" title={queueMissionsTooltip}>
                         <Button
                             disabled={isScheduleMissionsDisabled}
                             variant="ghost"
-                            onClick={() => handleScheduleAll(inspectionAreaData.inspections)}
+                            onClick={() => handleScheduleAll(inspectionAreaData.missionDefinitions)}
                             color="secondary"
                         >
-                            <Icon name={Icons.Add} color={inspectionAreaData.inspections.length > 0 ? '' : 'grey'} />
+                            <Icon
+                                name={Icons.Add}
+                                color={inspectionAreaData.missionDefinitions.length > 0 ? '' : 'grey'}
+                            />
                             <Typography color={tokens.colors.text.static_icons__secondary.hex}>
                                 {TranslateText('Queue the missions')}
                             </Typography>
@@ -122,6 +98,13 @@ const InspectionAreaCard = ({
             </StyledCard>
         </StyledInspectionAreaCard>
     )
+}
+
+interface IInspectionAreaCardProps {
+    inspectionAreaMissions: InspectionAreaInspectionTuple[]
+    onClickInspectionArea: (inspectionArea: InspectionArea) => void
+    selectedInspectionArea: InspectionArea | undefined
+    handleScheduleAll: (missionDefinitions: MissionDefinition[]) => void
 }
 
 export const InspectionAreaCards = ({
