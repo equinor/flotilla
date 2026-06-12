@@ -116,7 +116,10 @@ namespace Api.Services
         )
         {
             var missionDefinitions = await GetMissionDefinitionsWithSubModels(readOnly: readOnly)
-                .Where(m => m.IsDeprecated == false && m.InstallationCode == installationCode)
+                .Where(m =>
+                    m.IsDeprecated == false
+                    && m.InstallationCode.ToLower().Equals(installationCode.ToLower())
+                )
                 .ToListAsync();
             return missionDefinitions.AsQueryable();
         }
