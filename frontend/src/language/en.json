@@ -336,5 +336,12 @@
     "Estimated maximum temperature": "Estimated maximum temperature",
     "Temperature [°C]": "Temperature [°C]",
     "No analysis available": "No analysis available",
-    "Latest analysis result": "Latest analysis result"
+    "Latest analysis result": "Latest analysis result",
+    "shortMonday": "M",
+    "shortTuesday": "T",
+    "shortWednesday": "W",
+    "shortThursday": "T",
+    "shortFriday": "F",
+    "shortSaturday": "S",
+    "shortSunday": "S"
 }
