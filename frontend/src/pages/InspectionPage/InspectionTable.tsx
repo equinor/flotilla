@@ -7,7 +7,7 @@ import { MissionDefinition } from 'models/MissionDefinition'
 import { useNavigate } from 'react-router-dom'
 import { Icons } from 'utils/icons'
 import { compareMissionDefinitions } from './InspectionUtilities'
-import { formatDateString } from 'utils/StringFormatting'
+import { formatDateTime } from 'utils/StringFormatting'
 import { AlreadyScheduledMissionDialog, ScheduleMissionDialog } from './ScheduleMissionDialogs'
 import { useContext, useEffect, useState } from 'react'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
@@ -144,7 +144,7 @@ const MissionRow = ({ mission, openDialog, setMissions, openScheduledDialog }: I
     }
 
     const lastCompleted = mission.lastSuccessfulRun?.endTime
-        ? formatDateString(mission.lastSuccessfulRun.endTime)
+        ? formatDateTime(mission.lastSuccessfulRun.endTime, 'yyyy-MM-dd HH:mm:ss')
         : TranslateText('Never')
 
     const noRobotReadyForMissionsText = TranslateText('No robot available')
