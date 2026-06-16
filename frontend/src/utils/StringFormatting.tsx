@@ -10,7 +10,7 @@ export const convertUTCDateToLocalDate = (date: Date | string): Date => {
     return date
 }
 
-export const formatDateTime = (dateTime: Date | string, dateFormat: string): string =>
+export const formatDateTime = (dateTime: Date | string, dateFormat: string = 'dd/MM/yy - HH:mm'): string =>
     format(convertUTCDateToLocalDate(dateTime), dateFormat)
 
 export const capitalizeFirstLetter = (str: string) => {

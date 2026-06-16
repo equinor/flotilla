@@ -45,7 +45,7 @@ const ImageOverview = ({ tasks, variant }: { tasks: Task[]; variant: OverviewVar
                                                 {TranslateText('Timestamp') + ':'}
                                             </Typography>
                                             <Typography variant="body_short">
-                                                {formatDateTime(task.endTime!, 'dd.MM.yy - HH:mm')}
+                                                {formatDateTime(task.endTime!)}
                                             </Typography>
                                         </StyledInspectionContent>
                                     )}

@@ -107,24 +107,16 @@ const getStartUsedAndRemainingTime = (
     mission: Mission,
     translatedMinutes: string
 ): {
-    startTime: string
-    startDate: string
+    startDateTime: string
     usedTime: string
     remainingTime: string
 } => {
-    let startTime: string
-    let startDate: string
+    let startDateTime: string
     let remainingTime: string
     let usedTimeInMinutes: number
 
     if (mission.endTime) {
-        startTime = mission.startTime
-            ? formatDateTime(mission.startTime, 'HH:mm')
-            : formatDateTime(mission.endTime, 'HH:mm')
-
-        startDate = mission.startTime
-            ? formatDateTime(mission.startTime, 'dd/MM/yyy')
-            : formatDateTime(mission.endTime, 'dd/MM/yyy')
+        startDateTime = mission.startTime ? formatDateTime(mission.startTime) : formatDateTime(mission.endTime)
         usedTimeInMinutes = mission.startTime
             ? differenceInMinutes(
                   convertUTCDateToLocalDate(mission.endTime),
@@ -133,16 +125,14 @@ const getStartUsedAndRemainingTime = (
             : 0
         remainingTime = 'N/A'
     } else if (mission.startTime) {
-        startTime = formatDateTime(mission.startTime, 'HH:mm')
-        startDate = formatDateTime(mission.startTime, 'dd/MM/yyy')
+        startDateTime = formatDateTime(mission.startTime)
         usedTimeInMinutes = differenceInMinutes(Date.now(), convertUTCDateToLocalDate(mission.startTime))
         if (mission.estimatedTaskDuration)
             remainingTime =
                 calculateRemaindingTimeInMinutes(mission.tasks, mission.estimatedTaskDuration) + ' ' + translatedMinutes
         else remainingTime = 'N/A'
     } else {
-        startTime = 'N/A'
-        startDate = 'N/A'
+        startDateTime = 'N/A'
         usedTimeInMinutes = 0
         if (mission.estimatedTaskDuration)
             remainingTime =
@@ -150,7 +140,7 @@ const getStartUsedAndRemainingTime = (
         else remainingTime = 'N/A'
     }
     const usedTime: string = usedTimeInMinutes + ' ' + translatedMinutes
-    return { startTime, startDate, usedTime, remainingTime }
+    return { startDateTime, usedTime, remainingTime }
 }
 
 export const MissionHeader = ({ mission }: { mission: Mission }) => {
@@ -159,8 +149,7 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
     const navigate = useNavigate()
     const isMissionCompleted = mission.endTime ? true : false
 
-    const translatedStartDate = TranslateText('Start date')
-    const translatedStartTime = TranslateText('Start time')
+    const translatedStartDateTime = TranslateText('Start date and time')
     const translatedUsedTime = TranslateText('Time used')
     const translatedEstimatedTimeRemaining = TranslateText('Estimated time remaining')
     const translatedRobot = TranslateText('Robot')
@@ -169,7 +158,7 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
     const translatedStatus = TranslateText('Status')
 
     const translatedMinutes = TranslateText('minutes')
-    const { startTime, startDate, usedTime, remainingTime } = getStartUsedAndRemainingTime(mission, translatedMinutes)
+    const { startDateTime, usedTime, remainingTime } = getStartUsedAndRemainingTime(mission, translatedMinutes)
     const isMissionActive = mission.status === MissionStatus.Ongoing || mission.status === MissionStatus.Paused
 
     const missionHasFailedTasks = mission.tasks.some(
@@ -256,11 +245,8 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
                         {numberOfCompletedTasks}/{mission.tasks.length}
                     </Typography>
                 </Metric>
-                <Metric label={translatedStartDate}>
-                    <Typography>{startDate}</Typography>
-                </Metric>
-                <Metric label={translatedStartTime}>
-                    <Typography>{startTime}</Typography>
+                <Metric label={translatedStartDateTime}>
+                    <Typography>{startDateTime}</Typography>
                 </Metric>
                 <Metric label={translatedUsedTime}>
                     <Typography>{usedTime}</Typography>
@@ -281,8 +267,7 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
 export const SimpleMissionHeader = ({ mission }: { mission: Mission }) => {
     const { TranslateText } = useLanguageContext()
     const isMissionCompleted = mission.endTime ? true : false
-    const translatedStartDate = TranslateText('Start date')
-    const translatedStartTime = TranslateText('Start time')
+    const translatedStartDateTime = TranslateText('Start date and time')
     const translatedUsedTime = TranslateText('Time used')
     const translatedEstimatedTimeRemaining = TranslateText('Estimated time remaining')
     const translatedRobot = TranslateText('Robot')
@@ -291,7 +276,7 @@ export const SimpleMissionHeader = ({ mission }: { mission: Mission }) => {
     const translatedStatus = TranslateText('Status')
 
     const translatedMinutes = TranslateText('minutes')
-    const { startTime, startDate, usedTime, remainingTime } = getStartUsedAndRemainingTime(mission, translatedMinutes)
+    const { startDateTime, usedTime, remainingTime } = getStartUsedAndRemainingTime(mission, translatedMinutes)
 
     const numberOfCompletedTasks = mission.tasks.filter((task) => task.isCompleted).length
 
@@ -321,11 +306,8 @@ export const SimpleMissionHeader = ({ mission }: { mission: Mission }) => {
                         {numberOfCompletedTasks}/{mission.tasks.length}
                     </Typography>
                 </Metric>
-                <Metric label={translatedStartDate}>
-                    <Typography>{startDate}</Typography>
-                </Metric>
-                <Metric label={translatedStartTime}>
-                    <Typography>{startTime}</Typography>
+                <Metric label={translatedStartDateTime}>
+                    <Typography>{startDateTime}</Typography>
                 </Metric>
                 <Metric label={translatedUsedTime}>
                     <Typography>{usedTime}</Typography>
