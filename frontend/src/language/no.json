@@ -337,5 +337,12 @@
     "Estimated maximum temperature": "Estimert maksimal temperatur",
     "Temperature [°C]": "Temperatur [°C]",
     "No analysis available": "Ingen analyse ble funnet",
-    "Latest analysis result": "Siste analyseresultat"
+    "Latest analysis result": "Siste analyseresultat",
+    "shortMonday": "M",
+    "shortTuesday": "T",
+    "shortWednesday": "O",
+    "shortThursday": "T",
+    "shortFriday": "F",
+    "shortSaturday": "L",
+    "shortSunday": "S"
 }
