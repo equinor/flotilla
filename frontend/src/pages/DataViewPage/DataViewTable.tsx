@@ -90,7 +90,7 @@ export const DataViewTable = ({
                                 )}
                                 {task.endTime && (
                                     <Table.Cell>
-                                        <Typography>{formatDateTime(task.endTime, 'dd.MM.yy - HH:mm')}</Typography>
+                                        <Typography>{formatDateTime(task.endTime)}</Typography>
                                     </Table.Cell>
                                 )}
                             </Table.Row>

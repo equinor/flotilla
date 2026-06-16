@@ -144,7 +144,7 @@ const MissionRow = ({ mission, openDialog, setMissions, openScheduledDialog }: I
     }
 
     const lastCompleted = mission.lastSuccessfulRun?.endTime
-        ? formatDateTime(mission.lastSuccessfulRun.endTime, 'yyyy-MM-dd HH:mm:ss')
+        ? formatDateTime(mission.lastSuccessfulRun.endTime)
         : TranslateText('Never')
 
     const noRobotReadyForMissionsText = TranslateText('No robot available')

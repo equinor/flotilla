@@ -104,9 +104,7 @@ export const InspectionDialogView = ({ selectedInspectionId, tasks }: Inspection
                             {currentTask.endTime && (
                                 <StyledInfoContent>
                                     <Typography variant="caption">{TranslateText('Timestamp') + ':'}</Typography>
-                                    <Typography variant="body_short">
-                                        {formatDateTime(currentTask.endTime, 'dd.MM.yy - HH:mm')}
-                                    </Typography>
+                                    <Typography variant="body_short">{formatDateTime(currentTask.endTime)}</Typography>
                                 </StyledInfoContent>
                             )}
                         </StyledBottomContent>

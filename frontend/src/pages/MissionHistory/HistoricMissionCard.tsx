@@ -29,13 +29,7 @@ interface MissionProps {
 
 const MissionEndTimeDisplay = ({ mission }: MissionProps) => {
     return (
-        <>
-            {mission.endTime ? (
-                <Typography>{formatDateTime(mission.endTime, 'HH:mm:ss - dd/MM/yy')}</Typography>
-            ) : (
-                <Typography>-</Typography>
-            )}
-        </>
+        <>{mission.endTime ? <Typography>{formatDateTime(mission.endTime)}</Typography> : <Typography>-</Typography>}</>
     )
 }
 
