@@ -9,13 +9,17 @@ import { ValidInspectionReportInspectionTypes } from 'models/Inspection'
 import { useInspectionId } from 'pages/InspectionReportPage/SetInspectionIdHook'
 import { DescriptionDisplay, TagIdDisplay } from 'components/Displays/TaskDisplay'
 import { StyledTable, StyledTableBody, StyledTableCell, StyledTableRow } from 'components/Styles/StyledComponents'
+import { MissionTaskDefinition } from 'models/MissionDefinition'
 
 interface TaskTableProps {
     tasks: Task[]
-    missionDefinitionPage: boolean
 }
 
-export const TaskTable = ({ tasks, missionDefinitionPage }: TaskTableProps) => {
+interface MissionDefinitionTaskTableProps {
+    tasks: MissionTaskDefinition[]
+}
+
+export const TaskTable = ({ tasks }: TaskTableProps) => {
     const { TranslateText } = useLanguageContext()
 
     return (
@@ -25,25 +29,36 @@ export const TaskTable = ({ tasks, missionDefinitionPage }: TaskTableProps) => {
                     <StyledTableCell>#</StyledTableCell>
                     <StyledTableCell>{TranslateText('Tag-ID')}</StyledTableCell>
                     <StyledTableCell>{TranslateText('Description')}</StyledTableCell>
-                    {!missionDefinitionPage && (
-                        <>
-                            <StyledTableCell>{TranslateText('Inspection Types')}</StyledTableCell>
-                            <StyledTableCell>{TranslateText('Status')}</StyledTableCell>
-                            {tasks.some((t) => t.inspection.analysisResult) && (
-                                <StyledTableCell>{TranslateText('Analysis')}</StyledTableCell>
-                            )}
-                        </>
+                    <StyledTableCell>{TranslateText('Inspection Types')}</StyledTableCell>
+                    <StyledTableCell>{TranslateText('Status')}</StyledTableCell>
+                    {tasks.some((t) => t.inspection.analysisResult) && (
+                        <StyledTableCell>{TranslateText('Analysis')}</StyledTableCell>
                     )}
                 </Table.Row>
             </Table.Head>
-            <StyledTableBody>
-                {tasks && <TaskTableRows tasks={tasks} missionDefinitionPage={missionDefinitionPage} />}
-            </StyledTableBody>
+            <StyledTableBody>{tasks && <TaskTableRows tasks={tasks} />}</StyledTableBody>
         </StyledTable>
     )
 }
 
-const TaskTableRows = ({ tasks, missionDefinitionPage }: TaskTableProps) => {
+export const MissionDefinitionTaskTable = ({ tasks }: MissionDefinitionTaskTableProps) => {
+    const { TranslateText } = useLanguageContext()
+
+    return (
+        <StyledTable>
+            <Table.Head>
+                <Table.Row>
+                    <StyledTableCell>#</StyledTableCell>
+                    <StyledTableCell>{TranslateText('Tag-ID')}</StyledTableCell>
+                    <StyledTableCell>{TranslateText('Description')}</StyledTableCell>
+                </Table.Row>
+            </Table.Head>
+            <StyledTableBody>{tasks && <MissionDefinitionTaskTableRows tasks={tasks} />}</StyledTableBody>
+        </StyledTable>
+    )
+}
+
+const TaskTableRows = ({ tasks }: TaskTableProps) => {
     const rows = tasks.map((task, index) => {
         const order: number = index + 1
         const rowStyle =
@@ -69,21 +84,40 @@ const TaskTableRows = ({ tasks, missionDefinitionPage }: TaskTableProps) => {
                 <Table.Cell>
                     <DescriptionDisplay task={task} />
                 </Table.Cell>
-                {!missionDefinitionPage && (
-                    <>
-                        <Table.Cell>
-                            <InspectionTypesDisplay task={task} />
-                        </Table.Cell>
-                        <Table.Cell>
-                            <TaskStatusDisplay status={task.status} errorMessage={task.errorDescription} />
-                        </Table.Cell>
-                        {tasks.some((t) => t.inspection.analysisResult) && (
-                            <Table.Cell>
-                                {task.inspection.analysisResult ? <TaskAnalysisDisplay task={task} /> : <></>}
-                            </Table.Cell>
-                        )}
-                    </>
+                <Table.Cell>
+                    <InspectionTypesDisplay task={task} />
+                </Table.Cell>
+                <Table.Cell>
+                    <TaskStatusDisplay status={task.status} errorMessage={task.errorDescription} />
+                </Table.Cell>
+                {tasks.some((t) => t.inspection.analysisResult) && (
+                    <Table.Cell>
+                        {task.inspection.analysisResult ? <TaskAnalysisDisplay task={task} /> : <></>}
+                    </Table.Cell>
                 )}
+            </StyledTableRow>
+        )
+    })
+    return <>{rows}</>
+}
+
+const MissionDefinitionTaskTableRows = ({ tasks }: MissionDefinitionTaskTableProps) => {
+    const rows = tasks.map((task, index) => {
+        const order: number = index + 1
+
+        return (
+            <StyledTableRow key={index + 'missionDefintion'}>
+                <Table.Cell>
+                    <Chip>
+                        <Typography variant="body_short_bold">{order}</Typography>
+                    </Chip>
+                </Table.Cell>
+                <Table.Cell>
+                    <TagIdDisplay task={task} />
+                </Table.Cell>
+                <Table.Cell>
+                    <DescriptionDisplay task={task} />
+                </Table.Cell>
             </StyledTableRow>
         )
     })

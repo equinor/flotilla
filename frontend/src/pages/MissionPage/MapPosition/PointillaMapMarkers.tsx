@@ -1,9 +1,10 @@
 import { Task, TaskStatus } from 'models/Task'
-import { getColorsFromTaskStatus } from 'utils/MarkerStyles'
 import L from 'leaflet'
 import robotPictogram from 'mediaAssets/onshore_drone.svg'
 import { Pose } from 'models/Pose'
 import { tokens } from '@equinor/eds-tokens'
+import { MissionTaskDefinition } from 'models/MissionDefinition'
+import { Position } from 'models/Position'
 
 const robotIcon = L.icon({
     iconUrl: robotPictogram,
@@ -24,27 +25,31 @@ const orderTasksByDrawOrder = (tasks: Task[]) => {
     })
 }
 
-const getTaskMarker = (map: L.Map, task: Task) => {
-    const color = getColorsFromTaskStatus(task.status)
-
-    const taskMarker = L.circleMarker([task.inspection.inspectionTarget.y, task.inspection.inspectionTarget.x], {
+const getPositionMarker = (map: L.Map, pos: Position, index: number) => {
+    const positionMarker = L.circleMarker([pos.y, pos.x], {
         radius: 15,
-        fillColor: color.fillColor,
+        fillColor: tokens.colors.ui.background__medium.hex,
         color: 'black',
         weight: 1,
         fillOpacity: 0.8,
     })
-        .bindTooltip(task.taskOrder.toString(), {
+        .bindTooltip(index.toString(), {
             permanent: true,
             direction: 'center',
             className: 'circleLabel',
         })
         .addTo(map)
-    return taskMarker
+    return positionMarker
 }
 
 export const getTaskMarkers = (map: L.Map, tasks: Task[]) => {
-    return orderTasksByDrawOrder(tasks).map((task) => getTaskMarker(map, task))
+    return orderTasksByDrawOrder(tasks).map((task) =>
+        getPositionMarker(map, task.inspection.inspectionTarget, task.taskOrder)
+    )
+}
+
+export const getTaskDefinitionMarkers = (map: L.Map, tasks: MissionTaskDefinition[]) => {
+    return tasks.map((task, index) => getPositionMarker(map, task.targetPosition, index + 1))
 }
 
 const getRobotAuraMarker = (map: L.Map, robotPose: Pose) => {

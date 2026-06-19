@@ -17,7 +17,7 @@ interface ZoomDescription {
     objectHeight: number
 }
 
-interface MissionTaskDefinition {
+export interface MissionTaskDefinition {
     id: string
     tagId: string
     description?: string

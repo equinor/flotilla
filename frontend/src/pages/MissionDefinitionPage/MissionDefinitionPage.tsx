@@ -14,8 +14,7 @@ import styled from 'styled-components'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
-import { TaskTableAndMap } from '../MissionPage/TaskTableAndMap'
-import { useQuery } from '@tanstack/react-query'
+import { MissionDefinitionTaskTableAndMap } from '../MissionPage/TaskTableAndMap'
 import { EditButton, FormContainer, FormItem, TitleComponent } from './MissionDefinitionStyledComponents'
 import {
     MissionCommentEditDialog,
@@ -119,16 +118,6 @@ const MissionDefinitionPageBody = ({ missionDefinition }: { missionDefinition: M
     const [isEditingComment, setIsEditingComment] = useState<boolean>(false)
     const [isEditingSchedule, setIsEditingSchedule] = useState<boolean>(false)
 
-    const lastMissionRun = useQuery({
-        queryKey: ['fetchMissionRun', missionDefinition.lastSuccessfulRun?.id],
-        queryFn: async () => {
-            return await backendApi.getMissionRunById(missionDefinition.lastSuccessfulRun!.id)
-        },
-        retry: 2,
-        retryDelay: 2000,
-        enabled: missionDefinition.lastSuccessfulRun?.id !== undefined,
-    }).data
-
     const onDeleteAutoSchedule = () => {
         const defaultMissionDefinitionForm: MissionDefinitionUpdateForm = {
             comment: missionDefinition.comment,
@@ -206,7 +195,7 @@ const MissionDefinitionPageBody = ({ missionDefinition }: { missionDefinition: M
             )}
 
             <StyledTableAndMap>
-                {lastMissionRun && <TaskTableAndMap mission={lastMissionRun} missionDefinitionPage={true} />}
+                <MissionDefinitionTaskTableAndMap missionDefinition={missionDefinition} />
             </StyledTableAndMap>
         </StyledMissionDefinitionPageBody>
     )

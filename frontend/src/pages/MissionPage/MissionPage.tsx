@@ -148,7 +148,7 @@ export const MissionPage = ({
                         <MissionHeader mission={selectedMission} />
                         <StyledMissionPageBody>
                             <StyledCardsWidth>
-                                <TaskTableAndMap mission={selectedMission} missionDefinitionPage={false} />
+                                <TaskTableAndMap mission={selectedMission} />
                                 <VideoStreamSection>
                                     {videoMediaStreams && videoMediaStreams.length > 0 && (
                                         <VideoStreamWindow videoStreams={videoMediaStreams} />
@@ -198,7 +198,7 @@ export const SimpleMissionPage = ({
                     <SimpleMissionHeader mission={selectedMission} />
                     <StyledMissionPageBody>
                         <StyledCardsWidth>
-                            <TaskTableAndMap mission={selectedMission} missionDefinitionPage={false} />
+                            <TaskTableAndMap mission={selectedMission} />
                             <VideoStreamSection>
                                 {videoMediaStreams && videoMediaStreams.length > 0 && (
                                     <VideoStreamWindow videoStreams={videoMediaStreams} />

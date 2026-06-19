@@ -1,12 +1,13 @@
 import { Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import styled from 'styled-components'
-import { TaskTable } from './TaskOverview/TaskTable'
+import { MissionDefinitionTaskTable, TaskTable } from './TaskOverview/TaskTable'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Mission } from 'models/Mission'
 import { phone_width } from 'utils/constants'
-import { PlantMap } from './MapPosition/PointillaMapView'
+import { MissionDefinitionPlantMap, PlantMap } from './MapPosition/PointillaMapView'
 import { StyledTableAndMap } from 'components/Styles/StyledComponents'
+import { MissionDefinition } from 'models/MissionDefinition'
 
 const TaskAndMapSection = styled.div`
     display: flex;
@@ -29,20 +30,42 @@ const TaskAndMapSection = styled.div`
 
 interface TaskTableAndMapProps {
     mission: Mission
-    missionDefinitionPage: boolean
 }
 
-export const TaskTableAndMap = ({ mission, missionDefinitionPage }: TaskTableAndMapProps) => {
-    const { TranslateText } = useLanguageContext()
+interface MissionDefinitionTaskTableAndMapProps {
+    missionDefinition: MissionDefinition
+}
 
+export const TaskTableAndMap = ({ mission }: TaskTableAndMapProps) => {
+    const { TranslateText } = useLanguageContext()
     const plantCode = mission.inspectionArea.plantCode ? mission.inspectionArea.plantCode : undefined
 
     return (
         <TaskAndMapSection>
             <Typography variant="h4">{TranslateText('Tasks')}</Typography>
             <StyledTableAndMap>
-                <TaskTable tasks={mission?.tasks} missionDefinitionPage={missionDefinitionPage} />
+                <TaskTable tasks={mission?.tasks} />
                 {plantCode && <PlantMap plantCode={plantCode} floorId="0" mission={mission} />}
+            </StyledTableAndMap>
+        </TaskAndMapSection>
+    )
+}
+
+export const MissionDefinitionTaskTableAndMap = ({ missionDefinition }: MissionDefinitionTaskTableAndMapProps) => {
+    const { TranslateText } = useLanguageContext()
+    const plantCode = missionDefinition.inspectionArea.plantCode
+    return (
+        <TaskAndMapSection>
+            <Typography variant="h4">{TranslateText('Tasks')}</Typography>
+            <StyledTableAndMap>
+                <MissionDefinitionTaskTable tasks={missionDefinition.tasks} />
+                {plantCode && (
+                    <MissionDefinitionPlantMap
+                        plantCode={plantCode}
+                        floorId="0"
+                        missionDefinition={missionDefinition}
+                    />
+                )}
             </StyledTableAndMap>
         </TaskAndMapSection>
     )
