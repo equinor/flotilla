@@ -18,7 +18,8 @@ namespace Api.Configurations
         public static IServiceCollection ConfigureDatabase(
             this IServiceCollection services,
             IConfiguration configuration,
-            string environmentName
+            string environmentName,
+            TokenCredential runtimeCredential
         )
         {
             Console.WriteLine("Configuring Database...");
@@ -69,7 +70,11 @@ namespace Api.Configurations
                 try
                 {
                     Console.WriteLine("Trying Managed Identity for PostgreSQL…");
-                    ConfigureDatabaseWithManagedIdentity(services, configuration);
+                    ConfigureDatabaseWithManagedIdentity(
+                        services,
+                        configuration,
+                        runtimeCredential
+                    );
                     Console.WriteLine("Managed Identity configured successfully.");
                 }
                 catch (Exception ex)
@@ -116,7 +121,8 @@ namespace Api.Configurations
 
         public static void ConfigureDatabaseWithManagedIdentity(
             this IServiceCollection services,
-            IConfiguration configuration
+            IConfiguration configuration,
+            TokenCredential runtimeCredential
         )
         {
             var server =
@@ -129,15 +135,13 @@ namespace Api.Configurations
                 configuration["Database:User"]
                 ?? throw new InvalidOperationException("Missing Database:User");
 
-            var credential = CreateCredential(configuration);
-
             Console.WriteLine("Requesting Entra token via Credential...");
             TokenRequestContext context = new([AzurePostgresScope]);
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
             AccessToken token;
             try
             {
-                token = credential.GetToken(context, cts.Token);
+                token = runtimeCredential.GetToken(context, cts.Token);
             }
             catch (OperationCanceledException oce)
             {
@@ -174,14 +178,13 @@ namespace Api.Configurations
                         {
                             o.ConfigureDataSource(ds =>
                             {
-                                var dbCredential = CreateCredential(configuration);
                                 ds.UsePeriodicPasswordProvider(
                                     async (_, ct) =>
                                     {
                                         using var cts = new CancellationTokenSource(
                                             TimeSpan.FromSeconds(5)
                                         );
-                                        var token = await dbCredential.GetTokenAsync(
+                                        var token = await runtimeCredential.GetTokenAsync(
                                             new TokenRequestContext([AzurePostgresScope]),
                                             CancellationTokenSource
                                                 .CreateLinkedTokenSource(ct, cts.Token)
@@ -202,7 +205,7 @@ namespace Api.Configurations
             );
         }
 
-        private static TokenCredential CreateCredential(IConfiguration config)
+        public static TokenCredential CreateCredential(IConfiguration config)
         {
             string? tenantId = config["AzureAd:TenantId"];
             string? clientId = config["AzureAd:ClientId"];

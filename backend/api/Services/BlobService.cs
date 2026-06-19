@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Api.Utilities;
 using Azure;
-using Azure.Identity;
+using Azure.Core;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Microsoft.Extensions.Logging;
@@ -31,8 +31,11 @@ namespace Api.Services
         );
     }
 
-    public class BlobService(ILogger<BlobService> logger, IConfiguration configuration)
-        : IBlobService
+    public class BlobService(
+        ILogger<BlobService> logger,
+        IConfiguration configuration,
+        TokenCredential tokenCredential
+    ) : IBlobService
     {
         public async Task<byte[]?> DownloadBlob(
             string blobName,
@@ -134,10 +137,9 @@ namespace Api.Services
             }
             else
             {
-                var credential = new DefaultAzureCredential();
                 serviceClient = new BlobServiceClient(
                     new Uri($"https://{accountName}.blob.core.windows.net"),
-                    credential
+                    tokenCredential
                 );
             }
 

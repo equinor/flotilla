@@ -13,6 +13,7 @@ using Api.Services.ActionServices;
 using Api.Services.Events;
 using Api.SignalRHubs;
 using Api.Utilities;
+using Azure.Core;
 using Azure.Identity;
 using DotEnv.Core;
 using Hangfire;
@@ -44,13 +45,20 @@ if (builder.Configuration.GetSection("KeyVault").GetValue<bool>("UseKeyVault"))
         Console.WriteLine("NO KEYVAULT IN CONFIG");
     }
 }
+var runtimeCredential = CustomServiceConfigurations.CreateCredential(builder.Configuration);
+builder.Services.AddSingleton<TokenCredential>(runtimeCredential);
+
 var applicationName = builder.Configuration["AppName"] ?? "FlotillaBackend";
 
 builder.Logging.ClearProviders();
 builder.ConfigureLogger();
 
 builder.Services.AddMemoryCache();
-builder.Services.ConfigureDatabase(builder.Configuration, builder.Environment.EnvironmentName);
+builder.Services.ConfigureDatabase(
+    builder.Configuration,
+    builder.Environment.EnvironmentName,
+    runtimeCredential
+);
 
 var otelMeter = new Meter($"{applicationName}.Metrics", "0.0.1");
 builder.Services.AddSingleton(otelMeter);
