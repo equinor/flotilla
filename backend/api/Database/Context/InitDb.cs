@@ -88,7 +88,14 @@ namespace Api.Database.Context
                 InstallationCode = "KAA",
             };
 
-            return new List<Installation>([installation1, installation2]);
+            var installation3 = new Installation
+            {
+                Id = Guid.NewGuid().ToString(),
+                Name = "Northern Lights",
+                InstallationCode = "NLS",
+            };
+
+            return new List<Installation>([installation1, installation2, installation3]);
         }
 
         private static List<Plant> GetPlants()
@@ -109,7 +116,15 @@ namespace Api.Database.Context
                 PlantCode = "kaa",
             };
 
-            return new List<Plant>([plant1, plant2]);
+            var plant3 = new Plant
+            {
+                Id = Guid.NewGuid().ToString(),
+                Installation = installations[2],
+                Name = "Northern Lights",
+                PlantCode = "NLT",
+            };
+
+            return new List<Plant>([plant1, plant2, plant3]);
         }
 
         private static List<InspectionArea> GetInspectionAreas()
@@ -162,6 +177,14 @@ namespace Api.Database.Context
                 Name = "K-Lab",
             };
 
+            var inspectionAreaNls = new InspectionArea
+            {
+                Id = Guid.NewGuid().ToString(),
+                Plant = plants[2],
+                Installation = plants[2].Installation,
+                Name = "Northern Lights",
+            };
+
             return new List<InspectionArea>([
                 inspectionArea1,
                 inspectionArea2,
@@ -169,6 +192,7 @@ namespace Api.Database.Context
                 inspectionArea4,
                 inspectionAreaHuldraMezzanine,
                 inspectionAreaKLab,
+                inspectionAreaNls,
             ]);
         }
 
@@ -228,7 +252,21 @@ namespace Api.Database.Context
                 Documentation = [],
             };
 
-            return new List<Robot>([robot1, robot2, robot3, robot4]);
+            var robot5 = new Robot
+            {
+                Name = "Placebot NLS",
+                IsarId = "00000000-0000-0000-0000-000000000002",
+                SerialNumber = "Placebot NLS",
+                Status = RobotStatus.Available,
+                Type = RobotType.Robot,
+                Host = "localhost",
+                Port = 3000,
+                CurrentInstallation = installations[2],
+                CurrentInspectionAreaId = inspectionAreas[6].Id,
+                Documentation = [],
+            };
+
+            return new List<Robot>([robot1, robot2, robot3, robot4, robot5]);
         }
 
         private static List<TaskDefinition> GetMissionTaskDefinitions()
@@ -294,7 +332,39 @@ namespace Api.Database.Context
                 },
             };
 
-            return new List<TaskDefinition>([task1, task2, task3, task4]);
+            var task5 = new TaskDefinition
+            {
+                Index = 1,
+                TagId = "cloe-tag-1",
+                Description = "CLOE level gauge reading",
+                RobotPose = new Pose(),
+                SensorType = SensorType.Image,
+                AnalysisTypes = [AnalysisType.CLOE],
+                TargetPosition = new Position
+                {
+                    X = 0,
+                    Y = 0,
+                    Z = 0,
+                },
+            };
+
+            var task6 = new TaskDefinition
+            {
+                Index = 2,
+                TagId = "cloe-tag-2",
+                Description = "CLOE level gauge reading",
+                RobotPose = new Pose(),
+                SensorType = SensorType.Image,
+                AnalysisTypes = [AnalysisType.CLOE],
+                TargetPosition = new Position
+                {
+                    X = 0,
+                    Y = 0,
+                    Z = 0,
+                },
+            };
+
+            return new List<TaskDefinition>([task1, task2, task3, task4, task5, task6]);
         }
 
         private static List<MissionDefinition> GetMissionDefinitions()
@@ -380,6 +450,20 @@ namespace Api.Database.Context
                 LastSuccessfulRun = null,
             };
 
+            var cloeMission = new MissionDefinition
+            {
+                Id = "12c13d56-9a0d-482b-846b-bb42f6db1ecf",
+                Name = "CLOE Mission",
+                InstallationCode = inspectionAreas[6].Installation.InstallationCode,
+                InspectionArea = inspectionAreas[6],
+                Tasks =
+                [
+                    GetMissionTaskDefinitions()[4],
+                    GetMissionTaskDefinitions()[5],
+                ],
+                LastSuccessfulRun = null,
+            };
+
             return new List<MissionDefinition>([
                 missionDefinition1,
                 missionDefinition2,
@@ -388,6 +472,7 @@ namespace Api.Database.Context
                 missionDefinition5,
                 missionDefinition6,
                 thermalReadingMission,
+                cloeMission,
             ]);
         }
 
