@@ -63,8 +63,8 @@ jobs:
       path_to_dockerfile: ${{ matrix.component}}/Dockerfile
       path_to_context: ./${{ matrix.component}}
     secrets:
-      registry_password: ${{ secrets.ROBOTICS_ACRPUSH_DOCKER_SECRET }}
-      registry_username: ${{ secrets.ROBOTICS_ACRPUSH_DOCKER_APPLICATION_ID }}
+      registry_password: ${{ secrets.AURORA_CONTAINER_REGISTRY_PROD_PASSWORD }}
+      registry_username: ${{ secrets.AURORA_CONTAINER_REGISTRY_PROD_USERNAME }}
 
   deploy:
     name: Update deployment in Staging
