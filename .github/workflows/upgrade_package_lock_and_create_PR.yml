@@ -1,4 +1,4 @@
-name: Npm audit fix and create PR
+name: Pnpm audit fix and create PR
 
 on:
   push:
@@ -17,7 +17,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    uses: equinor/armada/.github/workflows/npm_dependency_update_and_create_pr.yml@main
+    uses: equinor/armada/.github/workflows/pnpm_dependency_update_and_create_pr.yml@main
     with:
       working-directory: frontend
       node-version: "24"

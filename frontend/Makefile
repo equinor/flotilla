@@ -1,10 +1,10 @@
 run:
-	npm run dev
+	pnpm dev
 
 build:
-	npm run build
+	pnpm build
 
 format:
-	npx prettier --write src
-	npx eslint src
-	node_modules/.bin/ts-unused-exports tsconfig.json
+	pnpm exec prettier --write src
+	pnpm exec eslint src
+	pnpm exec ts-unused-exports tsconfig.json

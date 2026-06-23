@@ -11,11 +11,12 @@ permissions:
 
 jobs:
   lint-frontend-package:
-    uses: equinor/armada/.github/workflows/lint_frontend_package.yml@main
+    uses: equinor/armada/.github/workflows/lint_frontend_package_pnpm.yml@main
     permissions:
       contents: read
     with:
       working-directory: frontend
+      node-versions: '["24.x"]'
       run-prettier: true
       run-eslint: true
       run-build: true
