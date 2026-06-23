@@ -1,11 +1,13 @@
 FROM node:lts-alpine AS build
 
+RUN corepack enable
+
 WORKDIR /app
 
 COPY . .
 
-RUN npm install
-RUN npm run build
+RUN pnpm install --frozen-lockfile
+RUN pnpm build
 
 FROM nginxinc/nginx-unprivileged:1.27-alpine
 

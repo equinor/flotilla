@@ -22,7 +22,7 @@ As a starting point, make a copy of the `.env.example` file and rename it to `.e
 To install the application, navigate to the frontend folder and run the following command:
 
 ```
-npm ci
+pnpm install --frozen-lockfile
 ```
 
 ## Run
@@ -30,7 +30,7 @@ npm ci
 To start the app, run the following command in the root folder:
 
 ```
-npm run dev
+pnpm dev
 ```
 
 This command runs the app in development mode. Open [http://localhost:3001/robotics-frontend](http://localhost:3001/robotics-frontend) to view it in the browser.
@@ -55,7 +55,7 @@ The TypeScript models have been automatically generated using an [openapi-to-typ
 This can be updated by cloning the [flotilla-openapi](https://github.com/equinor/flotilla-openapi) repository and then running:
 
 ```bash
-npx openapi-typescript <path-to-flotilla-openapi>/openapi.yaml --output ./src/models/schema.ts
+pnpm dlx openapi-typescript <path-to-flotilla-openapi>/openapi.yaml --output ./src/models/schema.ts
 ```
 
 ## Formatting
@@ -64,7 +64,7 @@ We use Prettier for formatting.
 To test the formatting locally, run:
 
 ```
-npm run prettier_check
+pnpm prettier_check
 ```
 
 We recommend installing the [Prettier extension for VS Code](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)

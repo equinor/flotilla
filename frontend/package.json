@@ -43,7 +43,7 @@
         "preview": "vite preview",
         "test": "vitest",
         "lint": "eslint src",
-        "prettier_check": "npx prettier --check src"
+        "prettier_check": "prettier --check src"
     },
     "browserslist": {
         "production": [
@@ -74,5 +74,6 @@
         "typescript": "^5.9.3",
         "typescript-eslint": "^8.56.1",
         "vitest": "^4.0.18"
-    }
+    },
+    "packageManager": "pnpm@10.33.4"
 }
