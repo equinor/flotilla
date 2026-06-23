@@ -55,18 +55,26 @@ export const DataOverviewPage = () => {
     const navigate = useNavigate()
 
     const analysisPages = [
-        {
-            to: `/${installation.installationCode}/cloe-view`,
-            label: TranslateText('Data View for Constant Level Oilers'),
-            description: TranslateText('Analysis performed on images of the constant level oilers'),
-            source: cloe,
-        },
-        {
-            to: `/${installation.installationCode}/fencilla-view`,
-            label: TranslateText('Data View for Perimeter Breach Detection'),
-            description: TranslateText('Analysis performed on images of the perimeter fences'),
-            source: fenceBreach,
-        },
+        ...(installation.installationCode?.toUpperCase() === 'NLS'
+            ? [
+                  {
+                      to: `/${installation.installationCode}/cloe-view`,
+                      label: TranslateText('Data View for Constant Level Oilers'),
+                      description: TranslateText('Analysis performed on images of the constant level oilers'),
+                      source: cloe,
+                  },
+              ]
+            : []),
+        ...(installation.installationCode?.toUpperCase() === 'NLS'
+            ? [
+                  {
+                      to: `/${installation.installationCode}/fencilla-view`,
+                      label: TranslateText('Data View for Perimeter Breach Detection'),
+                      description: TranslateText('Analysis performed on images of the perimeter fences'),
+                      source: fenceBreach,
+                  },
+              ]
+            : []),
         ...(installation.installationCode?.toUpperCase() === 'KAA'
             ? [
                   {
