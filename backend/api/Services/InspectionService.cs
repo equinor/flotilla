@@ -209,7 +209,7 @@ namespace Api.Services
         private async Task<SaraInspectionDataResponse> GetInspectionStorageInfo(string inspectionId)
         {
             string relativePath =
-                $"inspection-record/inspection-id/{inspectionId}/anonymized-location";
+                $"inspection-record/inspection-id/{inspectionId}/visualization-location";
 
             HttpResponseMessage response;
 
@@ -251,7 +251,7 @@ namespace Api.Services
 
             if (response.StatusCode == HttpStatusCode.UnprocessableEntity)
             {
-                throw new InspectionNotFoundException("Anonymization workflow failed");
+                throw new InspectionNotFoundException("Visualization workflow failed");
             }
 
             throw new InspectionNotFoundException(
