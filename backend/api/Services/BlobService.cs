@@ -3,6 +3,7 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using Api.Services.Models;
 using Api.Utilities;
 using Azure;
 using Azure.Core;
@@ -14,7 +15,7 @@ namespace Api.Services
 {
     public interface IBlobService
     {
-        public Task<byte[]?> DownloadBlob(
+        public Task<BlobDownload?> DownloadBlob(
             string blobName,
             string containerName,
             string accountName
@@ -37,7 +38,7 @@ namespace Api.Services
         TokenCredential tokenCredential
     ) : IBlobService
     {
-        public async Task<byte[]?> DownloadBlob(
+        public async Task<BlobDownload?> DownloadBlob(
             string blobName,
             string containerName,
             string accountName
@@ -46,10 +47,10 @@ namespace Api.Services
             var blobContainerClient = GetBlobContainerClient(containerName, accountName);
             var blobClient = blobContainerClient.GetBlobClient(blobName);
 
-            using var memoryStream = new MemoryStream();
             try
             {
-                await blobClient.DownloadToAsync(memoryStream);
+                var result = (await blobClient.DownloadContentAsync()).Value;
+                return new BlobDownload(result.Content.ToArray(), result.Details.ContentType);
             }
             catch (RequestFailedException)
             {
@@ -60,8 +61,6 @@ namespace Api.Services
                 );
                 return null;
             }
-
-            return memoryStream.ToArray();
         }
 
         public AsyncPageable<BlobItem> FetchAllBlobs(string containerName, string accountName)

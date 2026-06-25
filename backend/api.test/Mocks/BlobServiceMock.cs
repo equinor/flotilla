@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Api.Services;
+using Api.Services.Models;
 using Azure;
 using Azure.Storage.Blobs.Models;
 
@@ -7,15 +8,14 @@ namespace Api.Test.Mocks
 {
     public class MockBlobService : IBlobService
     {
-        public async Task<byte[]?> DownloadBlob(
+        public async Task<BlobDownload?> DownloadBlob(
             string blobName,
             string containerName,
             string accountName
         )
         {
-            using var memoryStream = new System.IO.MemoryStream();
             await Task.CompletedTask;
-            return memoryStream.ToArray();
+            return new BlobDownload([], null);
         }
 
         public AsyncPageable<BlobItem> FetchAllBlobs(string containerName, string accountName)
