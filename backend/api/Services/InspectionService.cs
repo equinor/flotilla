@@ -52,11 +52,12 @@ namespace Api.Services
         {
             var inspectionData = await GetInspectionStorageInfo(isarInspectionId);
 
-            return await blobService.DownloadBlob(
+            var blob = await blobService.DownloadBlob(
                 inspectionData.BlobName,
                 inspectionData.BlobContainer,
                 inspectionData.StorageAccount
             );
+            return blob?.Content;
         }
 
         public async Task<byte[]?> FetchAnalysisFromIsarInspectionId(string isarInspectionId)
@@ -66,11 +67,12 @@ namespace Api.Services
             {
                 return null;
             }
-            return await blobService.DownloadBlob(
+            var blob = await blobService.DownloadBlob(
                 inspectionData.BlobName,
                 inspectionData.BlobContainer,
                 inspectionData.StorageAccount
             );
+            return blob?.Content;
         }
 
         private async Task<SaraAnalysisDataResponse?> GetAnalysisStorageInfo(
