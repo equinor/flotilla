@@ -20,7 +20,6 @@ namespace Api.Database.Models
             Position target,
             IList<AnalysisType> analysisTypes,
             float? videoDuration,
-            string? taskDescription = null,
             AcousticInspectionMetadata? acousticInspectionMetadata = null
         )
         {
@@ -28,7 +27,6 @@ namespace Api.Database.Models
             InspectionTarget = target;
             VideoDuration = videoDuration;
             AnalysisTypes = analysisTypes;
-            TaskDescription = taskDescription;
             AcousticInspectionMetadata = acousticInspectionMetadata;
         }
 
@@ -39,9 +37,7 @@ namespace Api.Database.Models
             IsarInspectionId = useEmptyID ? "" : copy.IsarInspectionId;
             InspectionType = copy.InspectionType;
             VideoDuration = copy.VideoDuration;
-            InspectionUrl = copy.InspectionUrl;
             InspectionTarget = new Position(copy.InspectionTarget);
-            TaskDescription = copy.TaskDescription;
             AnalysisTypes = copy.AnalysisTypes;
             AcousticInspectionMetadata = copy.AcousticInspectionMetadata is not null
                 ? new AcousticInspectionMetadata(copy.AcousticInspectionMetadata)
@@ -64,16 +60,9 @@ namespace Api.Database.Models
         [Required]
         public SensorType InspectionType { get; set; }
 
-        public string? TaskDescription { get; set; }
-
-        public AnalysisResult AnalysisResult { get; set; }
-
         public float? VideoDuration { get; set; }
 
         public AcousticInspectionMetadata? AcousticInspectionMetadata { get; set; }
-
-        [MaxLength(250)]
-        public string? InspectionUrl { get; set; }
 
         public void UpdateWithIsarInfo(IsarTask isarTask)
         {

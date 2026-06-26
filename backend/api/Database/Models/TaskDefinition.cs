@@ -72,7 +72,6 @@ namespace Api.Database.Models
                     this.TargetPosition,
                     this.AnalysisTypes,
                     this.VideoDuration,
-                    Description,
                     this.AcousticInspectionMetadata
                 ),
             };

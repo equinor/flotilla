@@ -558,7 +558,7 @@ namespace Api.Test.MQTT
         }
 
         [Fact]
-        public async Task TestMQTTSaraAnalysisResult()
+        public async Task TestMQTTSaraAnalysisResultNoErrors()
         {
             var installation = await DatabaseUtilities.NewInstallation();
             var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
@@ -599,7 +599,7 @@ namespace Api.Test.MQTT
                 WorkflowId = Guid.NewGuid(),
                 AnalysisRunId = Guid.NewGuid(),
                 AnalysisId = Guid.NewGuid(),
-                AnalysisType = "test_analysis",
+                AnalysisType = AnalysisType.Fencilla,
                 StorageAccount = "testaccount",
                 BlobContainer = installation.InstallationCode,
                 BlobName = "testblob",
@@ -610,15 +610,6 @@ namespace Api.Test.MQTT
                 $"sara/analysis_result_available",
                 messageString
             );
-
-            await TestSetupHelpers.WaitFor(async () =>
-            {
-                var inspection = await InspectionService.ReadByIsarInspectionId(
-                    isarInspectionId,
-                    readOnly: true
-                );
-                return inspection?.AnalysisResult?.Value == VALUE;
-            });
         }
     }
 }

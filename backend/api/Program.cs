@@ -89,8 +89,6 @@ builder.Services.AddScoped<IMissionSchedulingService, MissionSchedulingService>(
 builder.Services.AddScoped<IIsarService, IsarService>();
 builder.Services.AddScoped<IPointillaService, PointillaService>();
 
-builder.Services.AddScoped<IBlobService, BlobService>();
-
 builder.Services.AddScoped<IInstallationService, InstallationService>();
 builder.Services.AddScoped<IPlantService, PlantService>();
 builder.Services.AddScoped<IInspectionAreaService, InspectionAreaService>();
