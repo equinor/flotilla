@@ -60,6 +60,17 @@ namespace Api.Controllers.Models
                     [nameof(AcousticInspectionMetadata), nameof(SensorType)]
                 );
             }
+
+            if (
+                (SensorType == SensorType.Video || SensorType == SensorType.ThermalVideo)
+                && VideoDuration is null
+            )
+            {
+                yield return new ValidationResult(
+                    $"{nameof(VideoDuration)} is required when {nameof(SensorType)} is {SensorType}.",
+                    [nameof(VideoDuration), nameof(SensorType)]
+                );
+            }
         }
     }
 
