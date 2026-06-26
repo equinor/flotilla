@@ -1,5 +1,6 @@
 import { Icon, Typography } from '@equinor/eds-core-react'
 import { Task } from 'models/Task'
+import { Inspection, SensorType } from 'models/Inspection'
 import { Icons } from 'utils/icons'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { formatDateTime } from 'utils/StringFormatting'
@@ -22,6 +23,32 @@ import { InstallationContext } from 'components/Contexts/InstallationContext'
 interface InspectionDialogViewProps {
     selectedInspectionId: string
     tasks: Task[]
+}
+
+const AcousticMetadataInfo = ({ inspection }: { inspection: Inspection }) => {
+    const { TranslateText } = useLanguageContext()
+    const metadata = inspection.acousticInspectionMetadata
+    if (inspection.inspectionType !== SensorType.AcousticMeasurement || !metadata) {
+        return null
+    }
+    return (
+        <>
+            <StyledInfoContent>
+                <Typography variant="caption">{TranslateText('Frequency range') + ':'}</Typography>
+                <Typography variant="body_short">
+                    {metadata.frequencyFrom + ' - ' + metadata.frequencyTo + ' Hz'}
+                </Typography>
+            </StyledInfoContent>
+            <StyledInfoContent>
+                <Typography variant="caption">{TranslateText('SNR threshold') + ':'}</Typography>
+                <Typography variant="body_short">{metadata.snrValueThreshold + ' dB'}</Typography>
+            </StyledInfoContent>
+            <StyledInfoContent>
+                <Typography variant="caption">{TranslateText('Detection type') + ':'}</Typography>
+                <Typography variant="body_short">{TranslateText(metadata.detectionType)}</Typography>
+            </StyledInfoContent>
+        </>
+    )
 }
 
 export const InspectionDialogView = ({ selectedInspectionId, tasks }: InspectionDialogViewProps) => {
@@ -52,6 +79,8 @@ export const InspectionDialogView = ({ selectedInspectionId, tasks }: Inspection
     const successfullyCompletedTasks = tasks.filter((task) => task.status === 'Successful')
 
     document.addEventListener('keydown', (event) => {
+        // Let a focused video handle arrow keys for seeking instead of switching inspection.
+        if (event.target instanceof HTMLMediaElement) return
         if (event.code === 'ArrowLeft' && switchImageDirection !== -1) {
             setSwitchImageDirection(-1)
         } else if (event.code === 'ArrowRight' && switchImageDirection !== 1) {
@@ -60,6 +89,7 @@ export const InspectionDialogView = ({ selectedInspectionId, tasks }: Inspection
     })
 
     document.addEventListener('keyup', (event) => {
+        if (event.target instanceof HTMLMediaElement) return
         if (
             (event.code === 'ArrowLeft' && switchImageDirection === -1) ||
             (event.code === 'ArrowRight' && switchImageDirection === 1)
@@ -107,6 +137,7 @@ export const InspectionDialogView = ({ selectedInspectionId, tasks }: Inspection
                                     <Typography variant="body_short">{formatDateTime(currentTask.endTime)}</Typography>
                                 </StyledInfoContent>
                             )}
+                            <AcousticMetadataInfo inspection={currentTask.inspection} />
                         </StyledBottomContent>
                     </div>
                     <HiddenOnSmallScreen>
