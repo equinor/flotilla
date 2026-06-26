@@ -17,10 +17,10 @@ namespace Api.Controllers
     ) : ControllerBase
     {
         /// <summary>
-        /// Lookup the inspection image for task with specified isarInspectionId
+        /// Lookup the inspection media for task with specified isarInspectionId
         /// </summary>
         /// <remarks>
-        /// Retrieves the inspection image associated with the given ISAR Inspection ID.
+        /// Retrieves the inspection media associated with the given ISAR Inspection ID.
         /// </remarks>
         [HttpGet("image/{isarInspectionId}")]
         [Authorize(Roles = Role.Any)]
@@ -30,7 +30,7 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult> GetInspectionImageByIsarInspectionId(
+        public async Task<ActionResult> GetInspectionMediaByIsarInspectionId(
             [FromRoute] string isarInspectionId
         )
         {
@@ -38,12 +38,12 @@ namespace Api.Controllers
 
             try
             {
-                byte[]? inspectionStream =
-                    await inspectionService.FetchInspectionImageFromIsarInspectionId(
+                var inspectionMedia =
+                    await inspectionService.FetchInspectionMediaFromIsarInspectionId(
                         isarInspectionId
                     );
 
-                if (inspectionStream == null)
+                if (inspectionMedia == null)
                 {
                     logger.LogError(
                         "Could not fetch inspection with ISAR Inspection ID {isarInspectionId}",
@@ -54,7 +54,10 @@ namespace Api.Controllers
                     );
                 }
 
-                return File(inspectionStream, "image/png");
+                return File(
+                    inspectionMedia.Content,
+                    inspectionMedia.ContentType ?? InspectionMediaType.DefaultContentType
+                );
             }
             catch (InspectionNotAvailableYetException)
             {
@@ -69,22 +72,22 @@ namespace Api.Controllers
             catch (InspectionNotFoundException)
             {
                 logger.LogWarning(
-                    "Could not find inspection image with ISAR Inspection ID {IsarInspectionId}",
+                    "Could not find inspection media with ISAR Inspection ID {IsarInspectionId}",
                     isarInspectionId
                 );
                 return NotFound(
-                    $"Could not find inspection image with ISAR Inspection ID{isarInspectionId}"
+                    $"Could not find inspection media with ISAR Inspection ID{isarInspectionId}"
                 );
             }
             catch (Exception e)
             {
                 logger.LogError(
                     e,
-                    "Could not find inspection image with ISAR Inspection ID {IsarInspectionId}",
+                    "Could not find inspection media with ISAR Inspection ID {IsarInspectionId}",
                     isarInspectionId
                 );
                 return NotFound(
-                    $"Could not find inspection image with ISAR Inspection ID{isarInspectionId}."
+                    $"Could not find inspection media with ISAR Inspection ID{isarInspectionId}."
                 );
             }
         }

@@ -15,7 +15,9 @@ namespace Api.Services
 {
     public interface IInspectionService
     {
-        public Task<byte[]?> FetchInspectionImageFromIsarInspectionId(string isarInspectionId);
+        public Task<BlobDownload?> FetchInspectionMediaFromIsarInspectionId(
+            string isarInspectionId
+        );
         public Task<byte[]?> FetchAnalysisFromIsarInspectionId(string isarInspectionId);
         public Task<Inspection> UpdateInspectionAnalysisResults(
             string inspectionId,
@@ -48,7 +50,9 @@ namespace Api.Services
     {
         public const string ServiceName = "SARA";
 
-        public async Task<byte[]?> FetchInspectionImageFromIsarInspectionId(string isarInspectionId)
+        public async Task<BlobDownload?> FetchInspectionMediaFromIsarInspectionId(
+            string isarInspectionId
+        )
         {
             var inspectionData = await GetInspectionStorageInfo(isarInspectionId);
 
@@ -57,7 +61,19 @@ namespace Api.Services
                 inspectionData.BlobContainer,
                 inspectionData.StorageAccount
             );
-            return blob?.Content;
+            if (blob is null)
+            {
+                return null;
+            }
+
+            var inspection = await ReadByIsarInspectionId(isarInspectionId, readOnly: true);
+            string contentType = InspectionMediaType.Resolve(
+                blob.ContentType,
+                inspectionData.BlobName,
+                inspection?.InspectionType ?? SensorType.Image
+            );
+
+            return new BlobDownload(blob.Content, contentType);
         }
 
         public async Task<byte[]?> FetchAnalysisFromIsarInspectionId(string isarInspectionId)
