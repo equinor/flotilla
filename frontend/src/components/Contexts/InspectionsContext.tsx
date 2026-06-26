@@ -54,8 +54,8 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
                 queryClient.fetchQuery({
                     queryKey: ['fetchInspectionData', inspectionId],
                     queryFn: async () => {
-                        const imageBlob = await backendApiRef.current.getInspection(inspectionId)
-                        return URL.createObjectURL(imageBlob)
+                        const mediaBlob = await backendApiRef.current.getInspectionMedia(inspectionId)
+                        return URL.createObjectURL(mediaBlob)
                     },
                     retry: 1,
                     staleTime: 10 * 60 * 1000,
@@ -89,8 +89,8 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
         const result = useQuery({
             queryKey: ['fetchInspectionData', inspectionId],
             queryFn: async () => {
-                const imageBlob = await backendApi.getInspection(inspectionId)
-                return URL.createObjectURL(imageBlob)
+                const mediaBlob = await backendApi.getInspectionMedia(inspectionId)
+                return URL.createObjectURL(mediaBlob)
             },
             retry: 1,
             staleTime: 10 * 60 * 1000, // If data is received, stale time is 10 min before making new API call
