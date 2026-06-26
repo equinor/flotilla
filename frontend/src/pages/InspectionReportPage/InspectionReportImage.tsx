@@ -6,6 +6,7 @@ import { CircularProgress, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { DisplayMethod, SensorTypeToDisplayMethod } from 'models/Inspection'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { VideoPlaceholder, VideoPlayer } from './InspectionVideoPlayer'
 
 const StyledSmallImagePlaceholder = styled.div`
     display: flex;
@@ -116,14 +117,31 @@ const InspectionValueWithPlaceholder = ({ task, isLargeImage }: { task: Task; is
     }
 }
 
+const InspectionVideoWithPlaceholder = ({ task, isLargeImage }: { task: Task; isLargeImage: boolean }) => {
+    const { useImageData } = useInspectionsContext()
+    const { data, isPending, isError } = useImageData(task.inspection.isarInspectionId)
+    if (isError || !data) {
+        return <TextAsImage isLargeImage={isLargeImage} text={'No inspection could be found'} />
+    } else if (isPending) {
+        return <PendingResultPlaceholder isLargeImage={isLargeImage} />
+    } else return <VideoPlayer src={data} />
+}
+
 const InspectionResultWithPlaceholder = ({ task, isLargeImage }: { task: Task; isLargeImage: boolean }) => {
-    if (SensorTypeToDisplayMethod[task.inspection.inspectionType] === DisplayMethod.None) {
+    const displayMethod = SensorTypeToDisplayMethod[task.inspection.inspectionType]
+    if (displayMethod === DisplayMethod.None) {
         const errorMsg = 'Viewing of the inspection type is not supported'
         return <TextAsImage isLargeImage={isLargeImage} text={errorMsg} />
-    } else if (SensorTypeToDisplayMethod[task.inspection.inspectionType] === DisplayMethod.Number) {
+    } else if (displayMethod === DisplayMethod.Number) {
         return <InspectionValueWithPlaceholder task={task} isLargeImage={isLargeImage} />
-    } else if (SensorTypeToDisplayMethod[task.inspection.inspectionType] === DisplayMethod.Image) {
+    } else if (displayMethod === DisplayMethod.Image) {
         return <InspectionImageWithPlaceholder task={task} isLargeImage={isLargeImage} />
+    } else if (displayMethod === DisplayMethod.Video) {
+        return isLargeImage ? (
+            <InspectionVideoWithPlaceholder task={task} isLargeImage={isLargeImage} />
+        ) : (
+            <VideoPlaceholder />
+        )
     }
 }
 
