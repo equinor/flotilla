@@ -254,20 +254,11 @@ export class BackendApi {
         return result.content
     }
 
-    async getInspectionMedia(inspectionId: string): Promise<Blob> {
-        const path: string = 'inspection/media/' + inspectionId
+    async getInspection(inspectionId: string): Promise<Blob> {
+        const path: string = 'inspection/image/' + inspectionId
 
         return this.api
             .GET_BLOB(path)
-            .then((response) => response.content)
-            .catch(handleError('GET', path))
-    }
-
-    async getInspectionMediaExists(inspectionId: string): Promise<boolean> {
-        const path: string = 'inspection/media/' + inspectionId + '/exists'
-
-        return this.api
-            .GET<boolean>(path)
             .then((response) => response.content)
             .catch(handleError('GET', path))
     }

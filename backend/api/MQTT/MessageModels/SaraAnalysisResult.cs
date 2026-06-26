@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Api.Database.Models;
 
 namespace Api.Mqtt.MessageModels
 {
@@ -20,7 +21,7 @@ namespace Api.Mqtt.MessageModels
         public required Guid AnalysisId { get; set; }
 
         [JsonPropertyName("analysisType")]
-        public required string AnalysisType { get; set; }
+        public required AnalysisType AnalysisType { get; set; }
 
         [JsonPropertyName("value")]
         public string? Value { get; set; }

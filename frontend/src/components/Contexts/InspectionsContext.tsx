@@ -15,14 +15,8 @@ interface IValueData {
     isPending: boolean
     isError: boolean
 }
-interface IExistsData {
-    exists: boolean
-    isPending: boolean
-    isError: boolean
-}
 interface IInspectionsContext {
     useMediaData: (inspectionId: string) => IImageData
-    useMediaExists: (inspectionId: string) => IExistsData
     useAnalysisData: (inspectionId: string) => IImageData
     useValueData: (inspectionId: string) => IValueData
 }
@@ -33,7 +27,6 @@ interface Props {
 
 const defaultInspectionsContext = {
     useMediaData: () => ({ data: undefined, isPending: false, isError: true }),
-    useMediaExists: () => ({ exists: false, isPending: false, isError: true }),
     useAnalysisData: () => ({ data: undefined, isPending: false, isError: true }),
     useValueData: () => ({ data: undefined, isPending: false, isError: true }),
 }
@@ -64,7 +57,7 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
                 queryClient.fetchQuery({
                     queryKey: ['fetchInspectionData', inspectionId],
                     queryFn: async () => {
-                        const mediaBlob = await backendApiRef.current.getInspectionMedia(inspectionId)
+                        const mediaBlob = await backendApiRef.current.getInspection(inspectionId)
                         return URL.createObjectURL(mediaBlob)
                     },
                     retry: 1,
@@ -99,7 +92,7 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
         const result = useQuery({
             queryKey: ['fetchInspectionData', inspectionId],
             queryFn: async () => {
-                const mediaBlob = await backendApi.getInspectionMedia(inspectionId)
+                const mediaBlob = await backendApi.getInspection(inspectionId)
                 return URL.createObjectURL(mediaBlob)
             },
             retry: 1,
@@ -108,18 +101,6 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
         })
 
         return { data: result.data, isPending: result.isPending, isError: result.isError }
-    }
-
-    const useMediaExists = (inspectionId: string): IExistsData => {
-        const result = useQuery({
-            queryKey: ['inspectionMediaExists', inspectionId],
-            queryFn: async () => backendApi.getInspectionMediaExists(inspectionId),
-            retry: 1,
-            staleTime: 10 * 60 * 1000, // If data is received, stale time is 10 min before making new API call
-            enabled: inspectionId !== undefined,
-        })
-
-        return { exists: result.data ?? false, isPending: result.isPending, isError: result.isError }
     }
 
     const useAnalysisData = (inspectionId: string): IImageData => {
@@ -154,7 +135,6 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
         <InspectionsContext.Provider
             value={{
                 useMediaData,
-                useMediaExists,
                 useAnalysisData,
                 useValueData,
             }}

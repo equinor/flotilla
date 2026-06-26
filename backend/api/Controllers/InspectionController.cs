@@ -1,7 +1,6 @@
 ﻿using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
-using Api.Services.Models;
 using Api.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,102 +15,6 @@ namespace Api.Controllers
         IMissionRunService missionRunService
     ) : ControllerBase
     {
-        /// <summary>
-        /// Lookup the inspection media for task with specified isarInspectionId
-        /// </summary>
-        /// <remarks>
-        /// Retrieves the inspection media associated with the given ISAR Inspection ID.
-        /// </remarks>
-        [HttpGet("media/{isarInspectionId}")]
-        [Authorize(Roles = Role.Any)]
-        [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult> GetInspectionMediaByIsarInspectionId(
-            [FromRoute] string isarInspectionId
-        )
-        {
-            isarInspectionId = Sanitize.SanitizeUserInput(isarInspectionId);
-
-            try
-            {
-                var inspectionMedia =
-                    await inspectionService.FetchInspectionMediaFromIsarInspectionId(
-                        isarInspectionId
-                    );
-
-                if (inspectionMedia == null)
-                {
-                    logger.LogError(
-                        "Could not fetch inspection with ISAR Inspection ID {isarInspectionId}",
-                        isarInspectionId
-                    );
-                    return NotFound(
-                        $"Could not fetch inspection with ISAR Inspection ID {isarInspectionId}"
-                    );
-                }
-
-                return File(
-                    inspectionMedia.Content,
-                    inspectionMedia.ContentType ?? InspectionMediaType.DefaultContentType
-                );
-            }
-            catch (InspectionNotAvailableYetException)
-            {
-                logger.LogInformation(
-                    "Inspection not available yet for ISAR Inspection ID {IsarInspectionId}",
-                    isarInspectionId
-                );
-                return NotFound(
-                    $"Inspection not available yet for ISAR Inspection ID {isarInspectionId}"
-                );
-            }
-            catch (InspectionNotFoundException)
-            {
-                logger.LogWarning(
-                    "Could not find inspection media with ISAR Inspection ID {IsarInspectionId}",
-                    isarInspectionId
-                );
-                return NotFound(
-                    $"Could not find inspection media with ISAR Inspection ID {isarInspectionId}"
-                );
-            }
-            catch (Exception e)
-            {
-                logger.LogError(
-                    e,
-                    "Could not find inspection media with ISAR Inspection ID {IsarInspectionId}",
-                    isarInspectionId
-                );
-                return NotFound(
-                    $"Could not find inspection media with ISAR Inspection ID {isarInspectionId}."
-                );
-            }
-        }
-
-        /// <summary>
-        /// Check whether inspection media is available for the given isarInspectionId
-        /// </summary>
-        /// <remarks>
-        /// Lightweight existence check so the frontend can show a placeholder until the
-        /// media has arrived, without downloading the blob.
-        /// </remarks>
-        [HttpGet("media/{isarInspectionId}/exists")]
-        [Authorize(Roles = Role.Any)]
-        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult<bool>> InspectionMediaExists(
-            [FromRoute] string isarInspectionId
-        )
-        {
-            isarInspectionId = Sanitize.SanitizeUserInput(isarInspectionId);
-            return Ok(await inspectionService.InspectionMediaExists(isarInspectionId));
-        }
-
         /// <summary>
         /// Lookup the inspection value for task with specified isarInspectionId
         /// </summary>
@@ -192,55 +95,6 @@ namespace Api.Controllers
             {
                 logger.LogWarning(e.Message);
                 return NotFound(e.Message);
-            }
-        }
-
-        /// <summary>
-        /// Lookup the visualized image for task with specified isarInspectionId
-        /// </summary>
-        /// <remarks>
-        /// Retrieves the visualized image associated with the given ISAR Inspection ID.
-        /// </remarks>
-        [HttpGet("analysis/{isarInspectionId}")]
-        [Authorize(Roles = Role.Any)]
-        [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult> GetAnalysisImageByIsarInspectionId(
-            [FromRoute] string isarInspectionId
-        )
-        {
-            isarInspectionId = Sanitize.SanitizeUserInput(isarInspectionId);
-
-            try
-            {
-                byte[]? inspectionStream =
-                    await inspectionService.FetchAnalysisFromIsarInspectionId(isarInspectionId);
-
-                if (inspectionStream == null)
-                {
-                    logger.LogError(
-                        "Could not fetch analysis for inspection with ISAR Inspection ID {isarInspectionId}",
-                        isarInspectionId
-                    );
-                    return NotFound(
-                        $"Could not fetch analysis for inspection with ISAR Inspection ID {isarInspectionId}"
-                    );
-                }
-
-                return File(inspectionStream, "image/png");
-            }
-            catch (Exception e)
-            {
-                logger.LogError(
-                    e,
-                    "Could not find visualized image with ISAR Inspection ID {IsarInspectionId}",
-                    isarInspectionId
-                );
-                return NotFound(
-                    $"Could not find visualized image with ISAR Inspection ID {isarInspectionId}."
-                );
             }
         }
     }

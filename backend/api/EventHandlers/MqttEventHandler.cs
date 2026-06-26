@@ -916,18 +916,15 @@ namespace Api.EventHandlers
             // the full list and emit one persist + SignalR event per inspection.
             var inspectionId = saraAnalysisResult.InspectionIds[0];
 
-            var analysisResult = new AnalysisResult
+            var analysisResult = new AnalysisResultDto
             {
                 InspectionId = inspectionId,
                 AnalysisType = saraAnalysisResult.AnalysisType,
-                AnalysisGroupId = saraAnalysisResult.AnalysisGroupId,
                 Value = saraAnalysisResult.Value,
                 Unit = saraAnalysisResult.Unit,
                 Warning = saraAnalysisResult.Warning,
                 Confidence = saraAnalysisResult.Confidence,
                 StorageAccount = saraAnalysisResult.StorageAccount,
-                BlobContainer = saraAnalysisResult.BlobContainer,
-                BlobName = saraAnalysisResult.BlobName,
             };
 
             var missionRun = await MissionRunService.ReadByIsarInspectionId(
@@ -940,27 +937,11 @@ namespace Api.EventHandlers
             if (installation == null)
             {
                 _logger.LogError(
-                    "Installation with code {Code} not found when processing SARA analysis result update",
-                    analysisResult.BlobContainer
+                    "Installation could not found when processing SARA analysis result update with inspection ID {inspectionId}",
+                    inspectionId
                 );
                 return;
             }
-
-            var inspection = await InspectionService.ReadByIsarInspectionId(
-                analysisResult.InspectionId
-            );
-            if (inspection is null)
-            {
-                _logger.LogError(
-                    "Inspection with ISAR ID {id} not found when processing SARA analysis result update",
-                    analysisResult.InspectionId
-                );
-                return;
-            }
-
-            inspection.AnalysisResult = analysisResult;
-
-            await InspectionService.UpdateInspectionAnalysisResults(inspection.Id, analysisResult);
 
             _ = SignalRService.SendMessageAsync(
                 "Analysis Result Ready",

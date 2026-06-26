@@ -81,7 +81,6 @@ namespace Api.Test
                 services.AddSingleton<ISignalRService, MockSignalRService>(_ => MockSignalRService);
                 services.AddScoped<DatabaseUtilities>();
                 services.AddSingleton<IHttpContextAccessor, MockHttpContextAccessor>();
-                services.AddScoped<IBlobService, MockBlobService>();
                 services
                     .AddAuthorizationBuilder()
                     .AddFallbackPolicy(

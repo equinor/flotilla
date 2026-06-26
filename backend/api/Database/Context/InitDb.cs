@@ -16,26 +16,6 @@ namespace Api.Database.Context
         private static readonly List<MissionRun> missionRuns = GetMissionRuns();
         private static readonly List<AccessRole> accessRoles = GetAccessRoles();
 
-        private static readonly List<AnalysisResult> analysisResults = GetAnalysisResults();
-
-        private static List<AnalysisResult> GetAnalysisResults()
-        {
-            var analysisResult1 = new AnalysisResult
-            {
-                InspectionId = inspections[0].Id,
-                AnalysisType = AnalysisType.Fencilla.ToString(),
-                Value = "Some value",
-                Unit = "",
-                Confidence = 0.95f,
-                Warning = "Some warning",
-                StorageAccount = "some storage account",
-                BlobContainer = "some blob container",
-                BlobName = "some blob name",
-            };
-
-            return new List<AnalysisResult>([analysisResult1]);
-        }
-
         private static List<Inspection> GetInspections()
         {
             var inspection1 = new Inspection
@@ -563,7 +543,6 @@ namespace Api.Database.Context
             }
 
             context.AddRange(inspections);
-            context.AddRange(analysisResults);
             context.AddRange(installations);
             context.SaveChanges();
 

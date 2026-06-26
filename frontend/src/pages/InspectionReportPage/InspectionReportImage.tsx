@@ -132,11 +132,11 @@ const LargeVideoWithPlaceholder = ({ task }: { task: Task }) => {
 }
 
 const SmallVideoWithPlaceholder = ({ task }: { task: Task }) => {
-    const { useMediaExists } = useInspectionsContext()
-    const { exists, isPending, isError } = useMediaExists(task.inspection.isarInspectionId)
+    const { useMediaData } = useInspectionsContext()
+    const { data, isPending, isError } = useMediaData(task.inspection.isarInspectionId)
     if (isPending) {
         return <PendingResultPlaceholder isLargeImage={false} />
-    } else if (isError || !exists) {
+    } else if (isError || !data) {
         return <TextAsImage isLargeImage={false} text={'No inspection could be found'} />
     } else return <VideoPlaceholder />
 }
