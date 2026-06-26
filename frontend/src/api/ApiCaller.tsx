@@ -61,15 +61,9 @@ export class BackendAPICaller {
         let responseContent: any = ''
         // Status code 204 means no content
         if (response.status !== 204) {
-            if (contentType === 'image/png') {
-                responseContent = await response.blob().catch((e) => {
-                    throw new Error(`Error getting blob from response: ${e}`)
-                })
-            } else {
-                responseContent = await response.json().catch((e) => {
-                    throw new Error(`Error getting json from response: ${e}`)
-                })
-            }
+            responseContent = await response.json().catch((e) => {
+                throw new Error(`Error getting json from response: ${e}`)
+            })
         }
         return { content: responseContent as TContent, headers: response.headers }
     }
