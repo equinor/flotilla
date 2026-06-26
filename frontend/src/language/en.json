@@ -194,6 +194,7 @@
     "Tag": "Tag",
     "Timestamp": "Timestamp",
     "Inspection result": "Inspection result",
+    "Video": "Video",
     "Inspection report for task": "Inspection report for task",
     "Battery is too low to start a mission.": "Battery is too low to start a mission.",
     "Robot is sent to dock and cannot run missions. Queued missions will run when robot is dismissed from dock.": "Robot is sent to dock and cannot run missions. Queued missions will run when robot is dismissed from dock.",

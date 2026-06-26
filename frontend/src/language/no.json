@@ -194,6 +194,7 @@
     "Tag": "Tag",
     "Timestamp": "Tidspunkt",
     "Inspection result": "Inspeksjonsresultat",
+    "Video": "Video",
     "Inspection report for task": "Inspeksjonsrapport for oppgave",
     "Battery is too low to start a mission.": "Batterinivået er for lavt til å starte oppdrag.",
     "Robot is sent to dock and cannot run missions. Queued missions will run when robot is dismissed from dock.": "Roboten er sendt til ladestasjon og kan ikke kjøre oppdrag. Oppdrag i kø vil kjøres når roboten slippes ut fra ladestasjon.",

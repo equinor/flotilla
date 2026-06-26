@@ -58,20 +58,27 @@ export interface AcousticInspectionMetadata {
 
 export enum DisplayMethod {
     Image = 'Image',
+    Video = 'Video',
     Number = 'Number',
     None = 'None',
 }
 
-export const ValidInspectionReportInspectionTypes: SensorType[] = [SensorType.Image, SensorType.ThermalImage]
+export const ValidInspectionReportInspectionTypes: SensorType[] = [
+    SensorType.Image,
+    SensorType.ThermalImage,
+    SensorType.Video,
+    SensorType.ThermalVideo,
+    SensorType.AcousticMeasurement,
+]
 
 export const SensorTypeToDisplayMethod: { [sensorType in SensorType]: DisplayMethod } = {
     [SensorType.Image]: DisplayMethod.Image,
     [SensorType.ThermalImage]: DisplayMethod.Image,
     [SensorType.CO2Measurement]: DisplayMethod.Number,
-    [SensorType.Video]: DisplayMethod.None,
-    [SensorType.ThermalVideo]: DisplayMethod.None,
+    [SensorType.Video]: DisplayMethod.Video,
+    [SensorType.ThermalVideo]: DisplayMethod.Video,
     [SensorType.Audio]: DisplayMethod.None,
-    [SensorType.AcousticMeasurement]: DisplayMethod.None,
+    [SensorType.AcousticMeasurement]: DisplayMethod.Video,
 }
 
 export interface SaraInspectionVisualizationReady {
