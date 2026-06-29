@@ -76,7 +76,7 @@ namespace Api.Controllers
                     isarInspectionId
                 );
                 return NotFound(
-                    $"Could not find inspection media with ISAR Inspection ID{isarInspectionId}"
+                    $"Could not find inspection media with ISAR Inspection ID {isarInspectionId}"
                 );
             }
             catch (Exception e)
@@ -87,9 +87,29 @@ namespace Api.Controllers
                     isarInspectionId
                 );
                 return NotFound(
-                    $"Could not find inspection media with ISAR Inspection ID{isarInspectionId}."
+                    $"Could not find inspection media with ISAR Inspection ID {isarInspectionId}."
                 );
             }
+        }
+
+        /// <summary>
+        /// Check whether inspection media is available for the given isarInspectionId
+        /// </summary>
+        /// <remarks>
+        /// Lightweight existence check so the frontend can show a placeholder until the
+        /// media has arrived, without downloading the blob.
+        /// </remarks>
+        [HttpGet("image/{isarInspectionId}/exists")]
+        [Authorize(Roles = Role.Any)]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<ActionResult<bool>> InspectionMediaExists(
+            [FromRoute] string isarInspectionId
+        )
+        {
+            isarInspectionId = Sanitize.SanitizeUserInput(isarInspectionId);
+            return Ok(await inspectionService.InspectionMediaExists(isarInspectionId));
         }
 
         /// <summary>

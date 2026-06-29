@@ -21,6 +21,8 @@ namespace Api.Services
             string accountName
         );
 
+        public Task<bool> BlobExists(string blobName, string containerName, string accountName);
+
         public AsyncPageable<BlobItem> FetchAllBlobs(string containerName, string accountName);
 
         public Task UploadJsonToBlob(
@@ -60,6 +62,25 @@ namespace Api.Services
                     containerName
                 );
                 return null;
+            }
+        }
+
+        public async Task<bool> BlobExists(
+            string blobName,
+            string containerName,
+            string accountName
+        )
+        {
+            var blobContainerClient = GetBlobContainerClient(containerName, accountName);
+            var blobClient = blobContainerClient.GetBlobClient(blobName);
+
+            try
+            {
+                return (await blobClient.ExistsAsync()).Value;
+            }
+            catch (RequestFailedException)
+            {
+                return false;
             }
         }
 

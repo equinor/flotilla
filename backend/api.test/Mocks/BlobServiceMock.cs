@@ -18,6 +18,16 @@ namespace Api.Test.Mocks
             return new BlobDownload([], null);
         }
 
+        public async Task<bool> BlobExists(
+            string blobName,
+            string containerName,
+            string accountName
+        )
+        {
+            await Task.CompletedTask;
+            return true;
+        }
+
         public AsyncPageable<BlobItem> FetchAllBlobs(string containerName, string accountName)
         {
             var page = Page<BlobItem>.FromValues([], continuationToken: null, response: null!);
