@@ -1,4 +1,3 @@
-import { config } from 'config'
 import { ApiError } from './ApiError'
 /** Implements the request sent to the backend api. */
 
@@ -6,9 +5,11 @@ type GetAccessToken = () => Promise<string>
 
 export class BackendAPICaller {
     private readonly getAccessToken: GetAccessToken
+    private readonly baseUrl: string
 
-    constructor(getAccessToken: GetAccessToken) {
+    constructor(getAccessToken: GetAccessToken, baseUrl: string) {
         this.getAccessToken = getAccessToken
+        this.baseUrl = baseUrl
     }
 
     private async initializeRequest<T>(
@@ -45,7 +46,7 @@ export class BackendAPICaller {
         contentType?: string,
         opts?: { headers?: Record<string, string>; signal?: AbortSignal }
     ): Promise<{ content: TContent; headers: Headers }> {
-        const url = `${config.BACKEND_URL}/${path}`
+        const url = `${this.baseUrl}/${path}`
 
         let init = await this.initializeRequest(method, body, contentType, opts)
         let response = await fetch(url, init)
@@ -120,7 +121,7 @@ export class BackendAPICaller {
         path: string,
         opts?: { headers?: Record<string, string>; signal?: AbortSignal }
     ): Promise<{ content: Blob; headers: Headers }> {
-        const url = `${config.BACKEND_URL}/${path}`
+        const url = `${this.baseUrl}/${path}`
 
         let init = await this.initializeRequest('GET', undefined, undefined, opts)
         let response = await fetch(url, init)

@@ -1,7 +1,7 @@
 import { useMsal } from '@azure/msal-react'
 import { useCallback, useEffect, useMemo } from 'react'
 import { InteractionStatus } from '@azure/msal-browser'
-import { loginRequest } from 'api/AuthConfig'
+import { backendLoginRequest, saraLoginRequest } from 'api/AuthConfig'
 import { AuthContext } from './AuthContext'
 import { InteractionRequiredAuthError } from '@azure/msal-browser'
 
@@ -14,12 +14,12 @@ export const AuthProvider = ({ children }: Props) => {
 
     const isAuthenticated = !!(instance.getActiveAccount() ?? accounts[0])
 
-    const getAccessToken = useCallback(async () => {
+    const getBackendAccessToken = useCallback(async () => {
         const account = instance.getActiveAccount() ?? accounts[0]
         if (!account) throw new Error('No signed-in account found.')
 
         try {
-            const resp = await instance.acquireTokenSilent({ ...loginRequest, account })
+            const resp = await instance.acquireTokenSilent({ ...backendLoginRequest, account })
             return resp.accessToken
         } catch (e: any) {
             // 1) If MSAL is already doing an interactive flow, do NOT start another
@@ -35,7 +35,38 @@ export const AuthProvider = ({ children }: Props) => {
                 e?.errorCode === 'login_required'
 
             if (interactionRequired) {
-                await instance.acquireTokenRedirect({ ...loginRequest, account })
+                await instance.acquireTokenRedirect({ ...backendLoginRequest, account })
+                // Redirect navigates away; this is mostly to satisfy TS control flow
+                throw e
+            }
+
+            // 3) Otherwise bubble up
+            throw e
+        }
+    }, [accounts, inProgress, instance])
+
+    const getSaraAccessToken = useCallback(async () => {
+        const account = instance.getActiveAccount() ?? accounts[0]
+        if (!account) throw new Error('No signed-in account found.')
+
+        try {
+            const resp = await instance.acquireTokenSilent({ ...saraLoginRequest, account })
+            return resp.accessToken
+        } catch (e: any) {
+            // 1) If MSAL is already doing an interactive flow, do NOT start another
+            if (e?.errorCode === 'interaction_in_progress' || inProgress !== 'none') {
+                throw e
+            }
+
+            // 2) If an interactive login/consent is required, trigger redirect once
+            const interactionRequired =
+                e instanceof InteractionRequiredAuthError ||
+                e?.errorCode === 'interaction_required' ||
+                e?.errorCode === 'consent_required' ||
+                e?.errorCode === 'login_required'
+
+            if (interactionRequired) {
+                await instance.acquireTokenRedirect({ ...saraLoginRequest, account })
                 // Redirect navigates away; this is mostly to satisfy TS control flow
                 throw e
             }
@@ -50,10 +81,13 @@ export const AuthProvider = ({ children }: Props) => {
 
         if (inProgress !== InteractionStatus.None) return
 
-        instance.loginRedirect(loginRequest)
+        instance.loginRedirect(backendLoginRequest)
     }, [accounts.length, inProgress, instance])
 
-    const value = useMemo(() => ({ getAccessToken, isAuthenticated }), [getAccessToken, isAuthenticated])
+    const value = useMemo(
+        () => ({ getBackendAccessToken, getSaraAccessToken, isAuthenticated }),
+        [getBackendAccessToken, getSaraAccessToken, isAuthenticated]
+    )
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

@@ -20,6 +20,8 @@ const getEnvVariable = (name: string): string => {
 export const config = {
     AI_CONNECTION_STRING: getEnvVariable('VITE_AI_CONNECTION_STRING'),
     BACKEND_URL: getEnvVariable('VITE_BACKEND_URL'),
+    SARA_URL: getEnvVariable('VITE_SARA_URL'),
+    SARA_API_SCOPE: getEnvVariable('VITE_SARA_API_SCOPE'),
     BACKEND_API_SCOPE: getEnvVariable('VITE_BACKEND_API_SCOPE'),
     BACKEND_API_SIGNALR_URL: getEnvVariable('VITE_BACKEND_URL') + '/hub',
     FRONTEND_URL: getEnvVariable('VITE_FRONTEND_URL'),

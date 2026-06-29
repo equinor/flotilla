@@ -8,12 +8,6 @@ public class AnalysisResultDto
     [JsonPropertyName("inspectionId")]
     public string InspectionId { get; set; } = "";
 
-    [JsonPropertyName("workflowId")]
-    public Guid WorkflowId { get; set; }
-
-    [JsonPropertyName("analysisId")]
-    public Guid AnalysisId { get; set; }
-
     [JsonPropertyName("analysisType")]
     public AnalysisType AnalysisType { get; set; }
 
@@ -28,7 +22,4 @@ public class AnalysisResultDto
 
     [JsonPropertyName("warning")]
     public string? Warning { get; set; }
-
-    [JsonPropertyName("storageAccount")]
-    public string? StorageAccount { get; set; }
 }

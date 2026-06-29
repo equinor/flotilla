@@ -4,6 +4,7 @@ import { SaraAnalysisResultReady, SaraInspectionVisualizationReady } from 'model
 import { useQuery } from '@tanstack/react-query'
 import { queryClient } from '../../App'
 import { useBackendApi } from 'api/UseBackendApi'
+import { useSaraApi } from 'api/UseSaraApi'
 
 interface IImageData {
     data: string | undefined
@@ -36,12 +37,15 @@ const InspectionsContext = createContext<IInspectionsContext>(defaultInspections
 export const InspectionsProvider: FC<Props> = ({ children }) => {
     const { registerEvent, connectionReady } = useSignalRContext()
     const backendApi = useBackendApi()
+    const saraApi = useSaraApi()
 
     // Keep a stable ref to backendApi so callbacks don't capture a stale closure
     const backendApiRef = useRef(backendApi)
+    const saraApiRef = useRef(saraApi)
     useEffect(() => {
         backendApiRef.current = backendApi
-    }, [backendApi])
+        saraApiRef.current = saraApi
+    }, [backendApi, saraApi])
 
     useEffect(() => {
         if (connectionReady) {
@@ -51,14 +55,10 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
                 queryClient.invalidateQueries({
                     queryKey: ['fetchInspectionData', inspectionId],
                 })
-                queryClient.invalidateQueries({
-                    queryKey: ['inspectionMediaExists', inspectionId],
-                })
                 queryClient.fetchQuery({
                     queryKey: ['fetchInspectionData', inspectionId],
                     queryFn: async () => {
-                        const mediaBlob = await backendApiRef.current.getInspection(inspectionId)
-                        return URL.createObjectURL(mediaBlob)
+                        return await saraApiRef.current.getAnonymizedDataUrl(inspectionId)
                     },
                     retry: 1,
                     staleTime: 10 * 60 * 1000,
@@ -78,8 +78,7 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
                 queryClient.fetchQuery({
                     queryKey: ['fetchAnalysisData', inspectionId],
                     queryFn: async () => {
-                        const imageBlob = await backendApiRef.current.getAnalysis(inspectionId)
-                        return URL.createObjectURL(imageBlob)
+                        return await saraApiRef.current.getAnalysedDataUrl(inspectionId)
                     },
                     retry: 1,
                     staleTime: 10 * 60 * 1000,
@@ -92,8 +91,7 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
         const result = useQuery({
             queryKey: ['fetchInspectionData', inspectionId],
             queryFn: async () => {
-                const mediaBlob = await backendApi.getInspection(inspectionId)
-                return URL.createObjectURL(mediaBlob)
+                return await saraApiRef.current.getAnonymizedDataUrl(inspectionId)
             },
             retry: 1,
             staleTime: 10 * 60 * 1000, // If data is received, stale time is 10 min before making new API call
@@ -107,8 +105,7 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
         const result = useQuery({
             queryKey: ['fetchAnalysisData', inspectionId],
             queryFn: async () => {
-                const imageBlob = await backendApi.getAnalysis(inspectionId)
-                return URL.createObjectURL(imageBlob)
+                return await saraApiRef.current.getAnalysedDataUrl(inspectionId)
             },
             retry: 1,
             staleTime: 10 * 60 * 1000, // If data is received, stale time is 10 min before making new API call

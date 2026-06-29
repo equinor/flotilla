@@ -874,9 +874,6 @@ namespace Api.EventHandlers
             var inspectionResultMessage = new InspectionResultMessage
             {
                 InspectionId = inspectionResult.InspectionId,
-                StorageAccount = inspectionResult.StorageAccount,
-                BlobContainer = inspectionResult.BlobContainer,
-                BlobName = inspectionResult.BlobName,
             };
 
             var installation = await InstallationService.ReadByInstallationCode(
@@ -924,7 +921,6 @@ namespace Api.EventHandlers
                 Unit = saraAnalysisResult.Unit,
                 Warning = saraAnalysisResult.Warning,
                 Confidence = saraAnalysisResult.Confidence,
-                StorageAccount = saraAnalysisResult.StorageAccount,
             };
 
             var missionRun = await MissionRunService.ReadByIsarInspectionId(
