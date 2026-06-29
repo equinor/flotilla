@@ -18,6 +18,7 @@ namespace Api.Services
         public Task<BlobDownload?> FetchInspectionMediaFromIsarInspectionId(
             string isarInspectionId
         );
+        public Task<bool> InspectionMediaExists(string isarInspectionId);
         public Task<byte[]?> FetchAnalysisFromIsarInspectionId(string isarInspectionId);
         public Task<Inspection> UpdateInspectionAnalysisResults(
             string inspectionId,
@@ -74,6 +75,27 @@ namespace Api.Services
             );
 
             return new BlobDownload(blob.Content, contentType);
+        }
+
+        public async Task<bool> InspectionMediaExists(string isarInspectionId)
+        {
+            try
+            {
+                var inspectionData = await GetInspectionStorageInfo(isarInspectionId);
+                return await blobService.BlobExists(
+                    inspectionData.BlobName,
+                    inspectionData.BlobContainer,
+                    inspectionData.StorageAccount
+                );
+            }
+            catch (InspectionNotAvailableYetException)
+            {
+                return false;
+            }
+            catch (InspectionNotFoundException)
+            {
+                return false;
+            }
         }
 
         public async Task<byte[]?> FetchAnalysisFromIsarInspectionId(string isarInspectionId)
