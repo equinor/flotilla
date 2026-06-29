@@ -55,7 +55,7 @@ const SignalRContext = createContext<ISignalRContext>(defaultSignalRInterface)
 export const SignalRProvider: FC<Props> = ({ children }) => {
     const [connection, setConnection] = useState<signalR.HubConnection | undefined>(undefined)
     const [connectionReady, setConnectionReady] = useState<boolean>(defaultSignalRInterface.connectionReady)
-    const { getAccessToken } = useContext(AuthContext)
+    const { getBackendAccessToken } = useContext(AuthContext)
     const { accounts, inProgress } = useMsal()
 
     const createConnection = useCallback(() => {
@@ -64,7 +64,7 @@ export const SignalRProvider: FC<Props> = ({ children }) => {
             .withUrl(URL, {
                 accessTokenFactory: async () => {
                     try {
-                        return await getAccessToken()
+                        return await getBackendAccessToken()
                     } catch (e) {
                         console.error('Failed to acquire access token for SignalR:', e)
                         return '' // causes auth to fail; connection will error/retry
@@ -95,7 +95,7 @@ export const SignalRProvider: FC<Props> = ({ children }) => {
         })
 
         return newConnection
-    }, [getAccessToken])
+    }, [getBackendAccessToken])
 
     const resetConnection = () => {
         if (connection) {
