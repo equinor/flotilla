@@ -1,7 +1,7 @@
 import { Button, Card, Dialog } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import { styled } from 'styled-components'
-import { phone_width } from 'utils/constants'
+import { phone_width, tablet_width } from 'utils/constants'
 
 export const HiddenOnSmallScreen = styled.div`
     @media (max-width: ${phone_width}) {
@@ -23,7 +23,11 @@ export const StyledInspectionImage = styled.img`
 export const StyledDialog = styled(Dialog)`
     display: flex;
     width: 100%;
-    max-height: 80vh;
+    max-width: 90vw;
+    max-height: 85vh;
+    @media (max-width: ${tablet_width}) {
+        max-height: 80vh;
+    }
 `
 export const StyledCloseButton = styled(Button)`
     width: 24px;
