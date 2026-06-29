@@ -4,6 +4,7 @@ import { tokens } from '@equinor/eds-tokens'
 import styled from 'styled-components'
 import { Icons } from 'utils/icons'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { phone_width, tablet_width } from 'utils/constants'
 
 const StyledVideoPlaceholder = styled.div`
     display: flex;
@@ -23,6 +24,19 @@ const StyledVideoWrapper = styled.div`
     width: 100%;
 `
 
+const StyledVideoPlayer = styled(ReactPlayer)`
+    width: auto !important;
+    height: auto !important;
+    max-width: 100%;
+    max-height: calc(85vh - 174px);
+    @media (max-width: ${tablet_width}) {
+        max-height: calc(80vh - 174px);
+    }
+    @media (max-width: ${phone_width}) {
+        max-height: calc(70vh - 174px);
+    }
+`
+
 export const VideoPlaceholder = () => {
     const { TranslateText } = useLanguageContext()
     return (
@@ -35,6 +49,6 @@ export const VideoPlaceholder = () => {
 
 export const VideoPlayer = ({ src }: { src: string }) => (
     <StyledVideoWrapper>
-        <ReactPlayer src={src} controls playsInline style={{ maxWidth: '100%', maxHeight: 'calc(80vh - 174px)' }} />
+        <StyledVideoPlayer src={src} controls playsInline />
     </StyledVideoWrapper>
 )
