@@ -118,13 +118,27 @@ const InspectionValueWithPlaceholder = ({ task, isLargeImage }: { task: Task; is
 }
 
 const InspectionVideoWithPlaceholder = ({ task, isLargeImage }: { task: Task; isLargeImage: boolean }) => {
+    return isLargeImage ? <LargeVideoWithPlaceholder task={task} /> : <SmallVideoWithPlaceholder task={task} />
+}
+
+const LargeVideoWithPlaceholder = ({ task }: { task: Task }) => {
     const { useImageData } = useInspectionsContext()
     const { data, isPending, isError } = useImageData(task.inspection.isarInspectionId)
-    if (isError || !data) {
-        return <TextAsImage isLargeImage={isLargeImage} text={'No inspection could be found'} />
-    } else if (isPending) {
-        return <PendingResultPlaceholder isLargeImage={isLargeImage} />
-    } else return isLargeImage ? <VideoPlayer src={data} /> : <VideoPlaceholder />
+    if (isPending) {
+        return <PendingResultPlaceholder isLargeImage={true} />
+    } else if (isError || !data) {
+        return <TextAsImage isLargeImage={true} text={'No inspection could be found'} />
+    } else return <VideoPlayer src={data} />
+}
+
+const SmallVideoWithPlaceholder = ({ task }: { task: Task }) => {
+    const { useMediaExists } = useInspectionsContext()
+    const { exists, isPending, isError } = useMediaExists(task.inspection.isarInspectionId)
+    if (isPending) {
+        return <PendingResultPlaceholder isLargeImage={false} />
+    } else if (isError || !exists) {
+        return <TextAsImage isLargeImage={false} text={'No inspection could be found'} />
+    } else return <VideoPlaceholder />
 }
 
 const InspectionResultWithPlaceholder = ({ task, isLargeImage }: { task: Task; isLargeImage: boolean }) => {
