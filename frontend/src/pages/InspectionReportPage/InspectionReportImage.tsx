@@ -124,7 +124,7 @@ const InspectionVideoWithPlaceholder = ({ task, isLargeImage }: { task: Task; is
         return <TextAsImage isLargeImage={isLargeImage} text={'No inspection could be found'} />
     } else if (isPending) {
         return <PendingResultPlaceholder isLargeImage={isLargeImage} />
-    } else return <VideoPlayer src={data} />
+    } else return isLargeImage ? <VideoPlayer src={data} /> : <VideoPlaceholder />
 }
 
 const InspectionResultWithPlaceholder = ({ task, isLargeImage }: { task: Task; isLargeImage: boolean }) => {
@@ -137,11 +137,7 @@ const InspectionResultWithPlaceholder = ({ task, isLargeImage }: { task: Task; i
     } else if (displayMethod === DisplayMethod.Image) {
         return <InspectionImageWithPlaceholder task={task} isLargeImage={isLargeImage} />
     } else if (displayMethod === DisplayMethod.Video) {
-        return isLargeImage ? (
-            <InspectionVideoWithPlaceholder task={task} isLargeImage={isLargeImage} />
-        ) : (
-            <VideoPlaceholder />
-        )
+        return <InspectionVideoWithPlaceholder task={task} isLargeImage={isLargeImage} />
     }
 }
 
