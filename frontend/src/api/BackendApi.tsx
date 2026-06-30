@@ -255,7 +255,7 @@ export class BackendApi {
     }
 
     async getInspectionMedia(inspectionId: string): Promise<Blob> {
-        const path: string = 'inspection/image/' + inspectionId
+        const path: string = 'inspection/media/' + inspectionId
 
         return this.api
             .GET_BLOB(path)
@@ -264,7 +264,7 @@ export class BackendApi {
     }
 
     async getInspectionMediaExists(inspectionId: string): Promise<boolean> {
-        const path: string = 'inspection/image/' + inspectionId + '/exists'
+        const path: string = 'inspection/media/' + inspectionId + '/exists'
 
         return this.api
             .GET<boolean>(path)
