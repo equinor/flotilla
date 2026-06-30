@@ -22,7 +22,7 @@ namespace Api.Controllers
         /// <remarks>
         /// Retrieves the inspection media associated with the given ISAR Inspection ID.
         /// </remarks>
-        [HttpGet("image/{isarInspectionId}")]
+        [HttpGet("media/{isarInspectionId}")]
         [Authorize(Roles = Role.Any)]
         [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -99,7 +99,7 @@ namespace Api.Controllers
         /// Lightweight existence check so the frontend can show a placeholder until the
         /// media has arrived, without downloading the blob.
         /// </remarks>
-        [HttpGet("image/{isarInspectionId}/exists")]
+        [HttpGet("media/{isarInspectionId}/exists")]
         [Authorize(Roles = Role.Any)]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
