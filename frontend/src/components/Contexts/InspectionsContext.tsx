@@ -21,7 +21,7 @@ interface IExistsData {
     isError: boolean
 }
 interface IInspectionsContext {
-    useImageData: (inspectionId: string) => IImageData
+    useMediaData: (inspectionId: string) => IImageData
     useMediaExists: (inspectionId: string) => IExistsData
     useAnalysisData: (inspectionId: string) => IImageData
     useValueData: (inspectionId: string) => IValueData
@@ -32,7 +32,7 @@ interface Props {
 }
 
 const defaultInspectionsContext = {
-    useImageData: () => ({ data: undefined, isPending: false, isError: true }),
+    useMediaData: () => ({ data: undefined, isPending: false, isError: true }),
     useMediaExists: () => ({ exists: false, isPending: false, isError: true }),
     useAnalysisData: () => ({ data: undefined, isPending: false, isError: true }),
     useValueData: () => ({ data: undefined, isPending: false, isError: true }),
@@ -95,7 +95,7 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
         }
     }, [registerEvent, connectionReady])
 
-    const useImageData = (inspectionId: string): IImageData => {
+    const useMediaData = (inspectionId: string): IImageData => {
         const result = useQuery({
             queryKey: ['fetchInspectionData', inspectionId],
             queryFn: async () => {
@@ -153,7 +153,7 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
     return (
         <InspectionsContext.Provider
             value={{
-                useImageData,
+                useMediaData,
                 useMediaExists,
                 useAnalysisData,
                 useValueData,
