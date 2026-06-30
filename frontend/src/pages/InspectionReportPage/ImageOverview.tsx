@@ -58,12 +58,15 @@ const ImageOverview = ({ tasks, variant }: { tasks: Task[]; variant: OverviewVar
     )
 }
 
-const OverviewSection = ({ tasks, variant, title }: { tasks: Task[]; variant: OverviewVariant; title: string }) => (
-    <StyledInspectionOverviewSection>
-        <Typography variant="h4">{title}</Typography>
-        <ImageOverview tasks={tasks} variant={variant} />
-    </StyledInspectionOverviewSection>
-)
+const OverviewSection = ({ tasks, variant, title }: { tasks: Task[]; variant: OverviewVariant; title: string }) => {
+    if (!tasks.some((task) => task.status === TaskStatus.Successful)) return <></>
+    return (
+        <StyledInspectionOverviewSection>
+            <Typography variant="h4">{title}</Typography>
+            <ImageOverview tasks={tasks} variant={variant} />
+        </StyledInspectionOverviewSection>
+    )
+}
 
 const OverviewDialogView = ({ tasks, variant }: { tasks: Task[]; variant: OverviewVariant }) => (
     <StyledInspectionOverviewDialogView>
