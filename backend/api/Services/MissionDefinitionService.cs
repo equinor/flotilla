@@ -256,6 +256,8 @@ namespace Api.Services
                     .ThenInclude(area => area!.Installation)
                 .Include(missionDefinition => missionDefinition.LastSuccessfulRun)
                 .Include(missionDefinition => missionDefinition.Tasks)
+                    .ThenInclude(task => task.AcousticInspectionMetadata)
+                        .ThenInclude(metadata => metadata != null ? metadata.Roi : null)
                 .Include(missionDefinition => missionDefinition.InspectionArea)
                 .Where(m =>
                     accessibleInstallationCodes.Result.Contains(
