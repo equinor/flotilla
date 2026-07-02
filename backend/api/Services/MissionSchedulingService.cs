@@ -28,7 +28,6 @@ namespace Api.Services
         ISignalRService signalRService,
         IErrorHandlingService errorHandlingService,
         IInspectionAreaService inspectionAreaService,
-        IAreaPolygonService areaPolygonService,
         IExclusionAreaService exclusionAreaService
     ) : IMissionSchedulingService
     {
@@ -154,9 +153,9 @@ namespace Api.Services
             );
 
             if (
-                !areaPolygonService.MissionTasksAreInsideAreaPolygon(
-                    [.. missionRun.Tasks.Select((t) => t.ToMissionTaskDefinition())],
-                    currentInspectionArea.AreaPolygon
+                !missionRun.InspectionArea.Id.Equals(
+                    robot.CurrentInspectionAreaId,
+                    StringComparison.InvariantCultureIgnoreCase
                 )
             )
             {
