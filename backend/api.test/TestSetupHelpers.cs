@@ -222,7 +222,6 @@ public static class TestSetupHelpers
             signalRService,
             _errorHandlingService,
             _inspectionAreaService,
-            _areaPolygonService,
             _exclusionAreaService
         );
         var _missionDefinitionService = new MissionDefinitionService(
