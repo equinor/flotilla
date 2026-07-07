@@ -17,7 +17,6 @@ import { SmallScreenInfoText } from 'utils/InfoText'
 import { phone_width } from 'utils/constants'
 import { InstallationContext } from 'components/Contexts/InstallationContext'
 import { StyledTableCell, StyledTableRow } from 'components/Styles/StyledComponents'
-import { IconData } from '@equinor/eds-icons'
 
 const StyledIcon = styled(Icon)`
     display: flex;
@@ -42,20 +41,12 @@ const StyledTable = styled.div`
     }
     max-width: fit-content;
 `
-const StyledContent = styled.div`
-    display: grid;
-    grid-template-columns: 14px auto;
-    align-items: center;
-    gap: 4px;
-    color: ${tokens.colors.text.static_icons__secondary.hex};
-`
 const Centered = styled.div`
     display: flex;
     justify-content: center;
 `
 
 enum InspectionTableColumns {
-    Status = 'Status',
     Name = 'Name',
     Description = 'Description',
     LastCompleted = 'LastCompleted',
@@ -67,9 +58,6 @@ const HideColumnsOnSmallScreen = styled.div`
         display: none;
     }
     @media (max-width: ${phone_width}) {
-        #${InspectionTableColumns.Status} {
-            display: none;
-        }
         #${InspectionTableColumns.Description} {
             display: none;
         }
@@ -103,45 +91,13 @@ interface IMissionRowProps {
 
 const MissionRow = ({ mission, openDialog, setMissions, openScheduledDialog }: IMissionRowProps) => {
     const { TranslateText } = useLanguageContext()
-    const { ongoingMissions, missionQueue } = useMissionsContext()
+    const { missionQueue } = useMissionsContext()
     const { enabledRobots } = useAssetContext()
     const { installation } = useContext(InstallationContext)
     const navigate = useNavigate()
 
     const isScheduled = missionQueue.map((m) => m.missionId).includes(mission.id)
-    const isOngoing = ongoingMissions.map((m) => m.missionId).includes(mission.id)
     const isScheduleButtonDisabled = enabledRobots.length === 0
-
-    let status: React.ReactNode
-    if (isOngoing) {
-        status = (
-            <StyledContent>
-                <Icon name={Icons.Ongoing} size={16} />
-                {TranslateText('InProgress')}
-            </StyledContent>
-        )
-    } else if (isScheduled) {
-        status = (
-            <StyledContent>
-                <Icon name={Icons.Queued} size={16} />
-                {TranslateText('Queued')}
-            </StyledContent>
-        )
-    } else {
-        const iconData: IconData = {
-            name: 'empty',
-            prefix: 'eds',
-            height: '24',
-            width: '24',
-            svgPathData: '',
-        }
-        status = (
-            <StyledContent>
-                <Icon data={iconData} size={16} />
-                {TranslateText('Idle')}
-            </StyledContent>
-        )
-    }
 
     const lastCompleted = mission.lastSuccessfulRun?.endTime
         ? formatDateTime(mission.lastSuccessfulRun.endTime)
@@ -151,7 +107,6 @@ const MissionRow = ({ mission, openDialog, setMissions, openScheduledDialog }: I
 
     return (
         <StyledTableRow key={mission.id}>
-            <Table.Cell id={InspectionTableColumns.Status}>{status}</Table.Cell>
             <Table.Cell id={InspectionTableColumns.Name}>
                 <Typography
                     link
