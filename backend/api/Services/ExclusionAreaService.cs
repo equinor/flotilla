@@ -258,7 +258,7 @@ namespace Api.Services
 
         public async Task<ExclusionArea?> Delete(string id)
         {
-            var exclusionArea = await GetExclusionAreas()
+            var exclusionArea = await GetExclusionAreas(readOnly: false)
                 .FirstOrDefaultAsync(ev => ev.Id.Equals(id));
             if (exclusionArea is null)
             {
