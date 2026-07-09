@@ -177,6 +177,11 @@ namespace Api.Controllers
                 );
             }
 
+            if (customMissionQuery.Tasks == null || customMissionQuery.Tasks.Count == 0)
+            {
+                return BadRequest("A mission definition must contain at least one task");
+            }
+
             var missionTasks = customMissionQuery
                 .Tasks.Select((task, index) => new TaskDefinition(task, index + 1))
                 .ToList();
@@ -249,6 +254,11 @@ namespace Api.Controllers
 
             if (missionDefinitionQuery.Tasks != null)
             {
+                if (missionDefinitionQuery.Tasks.Count == 0)
+                {
+                    return BadRequest("A mission definition must contain at least one task");
+                }
+
                 missionDefinition.Tasks =
                 [
                     .. missionDefinitionQuery.Tasks.Select(
