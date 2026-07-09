@@ -6,7 +6,7 @@ import { convertUTCDateToLocalDate } from 'utils/StringFormatting'
 import { MissionDefinition } from 'models/MissionDefinition'
 import { Link } from 'react-router-dom'
 import { StyledDialog } from 'components/Styles/StyledComponents'
-import { useContext, useRef, useState } from 'react'
+import { useContext, useState } from 'react'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
 import { useBackendApi } from 'api/UseBackendApi'
@@ -90,7 +90,7 @@ export const AutoScheduleMissionTableRow = ({
     const { installation } = useContext(InstallationContext)
     const [isSkipDialogOpen, setIsSkipDialogOpen] = useState<boolean>(false)
     const [isEditDialogOpen, setIsEditDialogOpen] = useState<boolean>(false)
-    const referenceElement = useRef<HTMLButtonElement>(null)
+    const [referenceElement, setReferenceElement] = useState<HTMLButtonElement | null>(null)
     const [isOpen, setIsOpen] = useState(false)
 
     const missionStatusType = selectMissionStatusType(day, time, mission)
@@ -134,7 +134,7 @@ export const AutoScheduleMissionTableRow = ({
                                     variant="ghost_icon"
                                     aria-haspopup
                                     aria-expanded={isOpen}
-                                    ref={referenceElement}
+                                    ref={setReferenceElement}
                                     onClick={handleOpen}
                                 >
                                     <Icon name={Icons.Info} color={typographyColor} />
@@ -142,7 +142,7 @@ export const AutoScheduleMissionTableRow = ({
 
                                 <Popover
                                     open={isOpen}
-                                    anchorEl={referenceElement.current}
+                                    anchorEl={referenceElement}
                                     onClose={handleClose}
                                     placement="top"
                                 >

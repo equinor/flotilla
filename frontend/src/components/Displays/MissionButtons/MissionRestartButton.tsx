@@ -3,7 +3,7 @@ import { Icons } from 'utils/icons'
 import { useNavigate } from 'react-router-dom'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import styled from 'styled-components'
-import { useContext, useRef, useState } from 'react'
+import { useContext, useState } from 'react'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { Mission } from 'models/Mission'
@@ -41,7 +41,7 @@ export const MissionRestartButton = ({ mission, hasFailedTasks, smallButton }: M
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const [isLocationVerificationOpen, setIsLocationVerificationOpen] = useState<boolean>(false)
     const [selectedRerunOption, setSelectedRerunOption] = useState<ReRunOptions>()
-    const anchorRef = useRef<HTMLButtonElement>(null)
+    const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
 
     const navigate = useNavigate()
     const navigateToHome = () => {
@@ -78,7 +78,7 @@ export const MissionRestartButton = ({ mission, hasFailedTasks, smallButton }: M
         <Centered>
             <StyledButton
                 variant={smallButton ? 'ghost_icon' : 'outlined'}
-                ref={anchorRef}
+                ref={setAnchorEl}
                 id="anchor-default"
                 aria-haspopup="true"
                 aria-expanded={isOpen}
@@ -96,7 +96,7 @@ export const MissionRestartButton = ({ mission, hasFailedTasks, smallButton }: M
                     id="menu-default"
                     aria-labelledby="anchor-default"
                     onClose={() => setIsOpen(false)}
-                    anchorEl={anchorRef.current}
+                    anchorEl={anchorEl}
                 >
                     <Menu.Item
                         onClick={() => {

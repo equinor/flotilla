@@ -1,4 +1,4 @@
-import { createContext, FC, useContext, useEffect, useState } from 'react'
+import { createContext, FC, useContext, useEffect, useMemo, useState } from 'react'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { MissionDefinition } from 'models/MissionDefinition'
 import { useLanguageContext } from './LanguageContext'
@@ -99,15 +99,13 @@ const useMissionDefinitions = (): IMissionDefinitionsContext => {
         fetchAndUpdateMissionDefinitions()
     }, [installation])
 
-    const [filteredMissionDefinitions, setFilteredMissionDefinitions] = useState<MissionDefinition[]>([])
-
-    useEffect(() => {
-        setFilteredMissionDefinitions(
+    const filteredMissionDefinitions = useMemo(
+        () =>
             missionDefinitions.filter(
                 (m) => m.installationCode.toLowerCase() === installation.installationCode.toLowerCase()
-            )
-        )
-    }, [installation, missionDefinitions])
+            ),
+        [missionDefinitions, installation.installationCode]
+    )
 
     return { missionDefinitions: filteredMissionDefinitions }
 }

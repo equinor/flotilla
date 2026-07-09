@@ -286,36 +286,6 @@ export const AlertProvider: FC<Props> = ({ children }) => {
         }
     }, [registerEvent, connectionReady, installation, enabledRobots])
 
-    useEffect(() => {
-        if (recentFailedMissions.length > 0) {
-            setAlert(
-                AlertType.MissionFail,
-                <FailedMissionAlertContent missions={recentFailedMissions} />,
-                AlertCategory.ERROR
-            )
-            setListAlert(
-                AlertType.MissionFail,
-                <FailedMissionAlertListContent missions={recentFailedMissions} />,
-                AlertCategory.ERROR
-            )
-        }
-    }, [recentFailedMissions])
-
-    useEffect(() => {
-        if (Object.keys(autoScheduleFailedMissionDict).length > 0) {
-            setListAlert(
-                AlertType.AutoScheduleFail,
-                <FailedAutoMissionAlertContent autoScheduleFailedMissionDict={autoScheduleFailedMissionDict} />,
-                AlertCategory.ERROR
-            )
-            setAlert(
-                AlertType.AutoScheduleFail,
-                <FailedAutoMissionAlertContent autoScheduleFailedMissionDict={autoScheduleFailedMissionDict} />,
-                AlertCategory.ERROR
-            )
-        }
-    }, [connectionReady, autoScheduleFailedMissionDict])
-
     const robotsWithFrozenQueue = enabledRobots.filter((robot) => robot.status === RobotStatus.Lockdown)
 
     const getActiveSendToDockAlertType = () => {
@@ -324,48 +294,80 @@ export const AlertProvider: FC<Props> = ({ children }) => {
         else return AlertType.DockSuccess
     }
 
+    const computedDockAlertType = getActiveSendToDockAlertType()
     const [activeSendToDockAlertType, setActiveSendToDockAlertType] = useState<AlertType | undefined>(
-        getActiveSendToDockAlertType()
+        computedDockAlertType
     )
+    const [prevComputedDockAlertType, setPrevComputedDockAlertType] = useState<AlertType | undefined>(
+        computedDockAlertType
+    )
+    const [dismissedDockAlertType, setDismissedDockAlertType] = useState<AlertType | undefined>(undefined)
 
-    useEffect(() => {
-        let newActiveSendToDockAlertType = getActiveSendToDockAlertType()
-        if (activeSendToDockAlertType === newActiveSendToDockAlertType) return
+    if (computedDockAlertType !== prevComputedDockAlertType) {
+        setPrevComputedDockAlertType(computedDockAlertType)
+        setDismissedDockAlertType(undefined)
+        setActiveSendToDockAlertType((current) => {
+            if (current === computedDockAlertType) return current
+            if (current !== undefined && computedDockAlertType === undefined) return AlertType.DismissDock
+            return computedDockAlertType
+        })
+    }
 
-        if (activeSendToDockAlertType !== undefined && newActiveSendToDockAlertType === undefined) {
-            newActiveSendToDockAlertType = AlertType.DismissDock
+    const showDockAlert =
+        activeSendToDockAlertType !== undefined && activeSendToDockAlertType !== dismissedDockAlertType
+
+    const combinedAlerts: AlertDictionaryType = { ...alerts }
+    const combinedListAlerts: AlertDictionaryType = { ...listAlerts }
+
+    if (recentFailedMissions.length > 0) {
+        combinedAlerts[AlertType.MissionFail] = {
+            content: <FailedMissionAlertContent missions={recentFailedMissions} />,
+            dismissFunction: () => clearAlert(AlertType.MissionFail),
+            alertCategory: AlertCategory.ERROR,
         }
-        setActiveSendToDockAlertType(newActiveSendToDockAlertType)
-    }, [robotsWithFrozenQueue])
+        combinedListAlerts[AlertType.MissionFail] = {
+            content: <FailedMissionAlertListContent missions={recentFailedMissions} />,
+            dismissFunction: () => clearListAlert(AlertType.MissionFail),
+            alertCategory: AlertCategory.ERROR,
+        }
+    }
 
-    useEffect(() => {
-        clearListAlert(AlertType.DismissDock)
-        clearAlert(AlertType.DismissDock)
-        clearListAlert(AlertType.RequestDock)
-        clearAlert(AlertType.RequestDock)
-        clearListAlert(AlertType.DockSuccess)
-        clearAlert(AlertType.DockSuccess)
+    if (Object.keys(autoScheduleFailedMissionDict).length > 0) {
+        combinedAlerts[AlertType.AutoScheduleFail] = {
+            content: <FailedAutoMissionAlertContent autoScheduleFailedMissionDict={autoScheduleFailedMissionDict} />,
+            dismissFunction: () => clearAlert(AlertType.AutoScheduleFail),
+            alertCategory: AlertCategory.ERROR,
+        }
+        combinedListAlerts[AlertType.AutoScheduleFail] = {
+            content: <FailedAutoMissionAlertContent autoScheduleFailedMissionDict={autoScheduleFailedMissionDict} />,
+            dismissFunction: () => clearListAlert(AlertType.AutoScheduleFail),
+            alertCategory: AlertCategory.ERROR,
+        }
+    }
 
-        if (activeSendToDockAlertType === undefined) return
-        const alertCategory =
+    if (showDockAlert) {
+        const dockAlertCategory =
             activeSendToDockAlertType === AlertType.RequestDock ? AlertCategory.WARNING : AlertCategory.INFO
-
-        setListAlert(
-            AlertType.RequestDock,
-            <DockAlertListContent alertType={activeSendToDockAlertType} />,
-            alertCategory
-        )
-        setAlert(AlertType.RequestDock, <DockAlertContent alertType={activeSendToDockAlertType} />, alertCategory)
-    }, [activeSendToDockAlertType])
+        combinedAlerts[AlertType.RequestDock] = {
+            content: <DockAlertContent alertType={activeSendToDockAlertType!} />,
+            dismissFunction: () => setDismissedDockAlertType(activeSendToDockAlertType),
+            alertCategory: dockAlertCategory,
+        }
+        combinedListAlerts[AlertType.RequestDock] = {
+            content: <DockAlertListContent alertType={activeSendToDockAlertType!} />,
+            dismissFunction: () => setDismissedDockAlertType(activeSendToDockAlertType),
+            alertCategory: dockAlertCategory,
+        }
+    }
 
     return (
         <AlertContext.Provider
             value={{
-                alerts,
+                alerts: combinedAlerts,
                 setAlert,
                 clearAlerts,
                 clearAlert,
-                listAlerts,
+                listAlerts: combinedListAlerts,
                 setListAlert,
                 clearListAlerts,
                 clearListAlert,

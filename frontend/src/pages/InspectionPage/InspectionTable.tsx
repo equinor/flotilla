@@ -9,7 +9,7 @@ import { Icons } from 'utils/icons'
 import { compareMissionDefinitions } from './InspectionUtilities'
 import { formatDateTime } from 'utils/StringFormatting'
 import { AlreadyScheduledMissionDialog, ScheduleMissionDialog } from './ScheduleMissionDialogs'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useState } from 'react'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 import { FrontPageSectionId } from 'models/FrontPageSectionId'
@@ -213,8 +213,6 @@ export const MissionDefinitionsTable = ({ missionDefinitions }: Props) => {
     const [selectedMissions, setSelectedMissions] = useState<MissionDefinition[]>()
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
     const [isScheduledDialogOpen, setIsScheduledDialogOpen] = useState<boolean>(false)
-    const [unscheduledMissions, setUnscheduledMissions] = useState<MissionDefinition[]>([])
-    const [isAlreadyScheduled, setIsAlreadyScheduled] = useState<boolean>(false)
 
     const openDialog = () => {
         setIsDialogOpen(true)
@@ -225,9 +223,7 @@ export const MissionDefinitionsTable = ({ missionDefinitions }: Props) => {
     }
 
     const closeDialog = () => {
-        setIsAlreadyScheduled(false)
         setSelectedMissions([])
-        setUnscheduledMissions([])
         setIsDialogOpen(false)
     }
 
@@ -235,18 +231,12 @@ export const MissionDefinitionsTable = ({ missionDefinitions }: Props) => {
         setIsScheduledDialogOpen(false)
     }
 
-    useEffect(() => {
-        const isScheduled = (mission: MissionDefinition) => missionQueue.map((m) => m.missionId).includes(mission.id)
-        const isOngoing = (mission: MissionDefinition) => ongoingMissions.map((m) => m.missionId).includes(mission.id)
-        let unscheduledMissions: MissionDefinition[] = []
-        if (selectedMissions) {
-            selectedMissions.forEach((mission) => {
-                if (isOngoing(mission) || isScheduled(mission)) setIsAlreadyScheduled(true)
-                else unscheduledMissions = unscheduledMissions.concat([mission])
-            })
-            setUnscheduledMissions(unscheduledMissions)
-        }
-    }, [isDialogOpen, ongoingMissions, missionQueue, selectedMissions])
+    const isScheduled = (mission: MissionDefinition) => missionQueue.map((m) => m.missionId).includes(mission.id)
+    const isOngoing = (mission: MissionDefinition) => ongoingMissions.map((m) => m.missionId).includes(mission.id)
+    const isAlreadyScheduled =
+        !!selectedMissions && selectedMissions.some((mission) => isOngoing(mission) || isScheduled(mission))
+    const unscheduledMissions =
+        selectedMissions?.filter((mission) => !isOngoing(mission) && !isScheduled(mission)) ?? []
 
     return (
         <StyledTable>

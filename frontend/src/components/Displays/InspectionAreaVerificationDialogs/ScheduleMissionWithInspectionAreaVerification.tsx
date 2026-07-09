@@ -1,5 +1,4 @@
-import { RobotWithoutTelemetry } from 'models/Robot'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import {
     ConflictingMissionInspectionAreasDialog,
     ConflictingRobotInspectionAreaDialog,
@@ -29,39 +28,33 @@ export const ScheduleMissionWithInspectionAreaVerification = ({
     closeDialog,
 }: IProps) => {
     const { enabledRobots } = useAssetContext()
-    const [dialogToOpen, setDialogToOpen] = useState<DialogTypes>(DialogTypes.unknown)
-    const [selectedRobot, setSelectedRobot] = useState<RobotWithoutTelemetry>()
 
     const unikMissionInspectionAreas = missionInspectionAreas.filter(
         (inspectionArea, index, self) => self.findIndex((i) => i.id === inspectionArea.id) === index
     )
 
-    useEffect(() => {
-        setSelectedRobot(enabledRobots.find((robot) => robot.id === robotId))
-    }, [robotId, enabledRobots])
+    const selectedRobot = enabledRobots.find((robot) => robot.id === robotId)
 
-    useEffect(() => {
-        if (!selectedRobot) return
-
-        if (unikMissionInspectionAreas.length > 1) {
-            setDialogToOpen(DialogTypes.conflictingMissionInspectionAreas)
-            return
-        }
-
-        if (unikMissionInspectionAreas.length === 0) {
-            setDialogToOpen(DialogTypes.unknownNewInspectionArea)
-            return
-        }
+    const getDialogToOpen = (): DialogTypes | undefined => {
+        if (!selectedRobot) return DialogTypes.unknown
+        if (unikMissionInspectionAreas.length > 1) return DialogTypes.conflictingMissionInspectionAreas
+        if (unikMissionInspectionAreas.length === 0) return DialogTypes.unknownNewInspectionArea
         if (
             selectedRobot.currentInspectionAreaId &&
             unikMissionInspectionAreas[0]?.id !== selectedRobot.currentInspectionAreaId
         ) {
-            setDialogToOpen(DialogTypes.conflictingRobotInspectionArea)
-            return
+            return DialogTypes.conflictingRobotInspectionArea
         }
+        return undefined
+    }
 
-        scheduleMissions()
-    }, [unikMissionInspectionAreas, selectedRobot])
+    const resolvedDialog = getDialogToOpen()
+    const dialogToOpen = resolvedDialog ?? DialogTypes.unknown
+    const shouldScheduleDirectly = !!selectedRobot && resolvedDialog === undefined
+
+    useEffect(() => {
+        if (shouldScheduleDirectly) scheduleMissions()
+    }, [shouldScheduleDirectly])
 
     const unikMissionInspectionAreaNames = unikMissionInspectionAreas.map((area) => area?.inspectionAreaName ?? '')
 
