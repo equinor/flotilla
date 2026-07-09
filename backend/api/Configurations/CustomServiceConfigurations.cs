@@ -15,6 +15,26 @@ namespace Api.Configurations
         private const string AzurePostgresScope =
             "https://ossrdbms-aad.database.windows.net/.default";
 
+        private sealed record ConnectionResiliencyOptions(
+            bool TcpKeepAlive,
+            int KeepAlive,
+            int ConnectionIdleLifetime,
+            int ConnectionPruningInterval
+        );
+
+        private static ConnectionResiliencyOptions GetConnectionResiliencyOptions(
+            IConfiguration configuration
+        )
+        {
+            var section = configuration.GetSection("Database:ConnectionResiliency");
+            return new ConnectionResiliencyOptions(
+                TcpKeepAlive: section.GetValue("TcpKeepAlive", true),
+                KeepAlive: section.GetValue("KeepAlive", 30),
+                ConnectionIdleLifetime: section.GetValue("ConnectionIdleLifetime", 60),
+                ConnectionPruningInterval: section.GetValue("ConnectionPruningInterval", 10)
+            );
+        }
+
         public static IServiceCollection ConfigureDatabase(
             this IServiceCollection services,
             IConfiguration configuration,
@@ -148,12 +168,17 @@ namespace Api.Configurations
                 throw new TimeoutException("Timed out acquiring token", oce);
             }
 
+            var resiliency = GetConnectionResiliencyOptions(configuration);
             var baseConnString = new NpgsqlConnectionStringBuilder
             {
                 Host = $"{server}.postgres.database.azure.com",
                 Database = postgresDb,
                 Username = $"{dbUser}",
                 SslMode = SslMode.VerifyFull,
+                TcpKeepAlive = resiliency.TcpKeepAlive,
+                KeepAlive = resiliency.KeepAlive,
+                ConnectionIdleLifetime = resiliency.ConnectionIdleLifetime,
+                ConnectionPruningInterval = resiliency.ConnectionPruningInterval,
             }.ToString();
 
             int DATABASE_TIMEOUT;
@@ -252,6 +277,17 @@ namespace Api.Configurations
         )
         {
             string? connection = configuration["Database:PostgreSqlConnectionString"];
+            if (!string.IsNullOrEmpty(connection))
+            {
+                var resiliency = GetConnectionResiliencyOptions(configuration);
+                connection = new NpgsqlConnectionStringBuilder(connection)
+                {
+                    TcpKeepAlive = resiliency.TcpKeepAlive,
+                    KeepAlive = resiliency.KeepAlive,
+                    ConnectionIdleLifetime = resiliency.ConnectionIdleLifetime,
+                    ConnectionPruningInterval = resiliency.ConnectionPruningInterval,
+                }.ToString();
+            }
             int DATABASE_TIMEOUT;
             var timeoutValue = configuration["Database:Timeout"];
             if (
