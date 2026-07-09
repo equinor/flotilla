@@ -1,5 +1,5 @@
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { MissionPage, SimpleMissionPage } from './MissionPage/MissionPage'
+import { MissionPage } from './MissionPage/MissionPage'
 import { RobotPage } from './RobotPage/RobotPage'
 import { MissionDefinitionPage } from './MissionDefinitionPage/MissionDefinitionPage'
 import { useAssetContext } from 'components/Contexts/AssetContext'
@@ -12,7 +12,7 @@ export const SimpleMissionPageRouter = () => {
     const inspectionId = searchParams.get('inspectionId') ?? undefined
     const analysisId = searchParams.get('analysisId') ?? undefined
 
-    return <SimpleMissionPage missionId={id} inspectionId={inspectionId} analysisId={analysisId} />
+    return <MissionPage missionId={id} inspectionId={inspectionId} analysisId={analysisId} includeHeader={false} />
 }
 
 export const MissionPageRouter = () => {
@@ -24,7 +24,7 @@ export const MissionPageRouter = () => {
     const inspectionId = searchParams.get('inspectionId') ?? undefined
     const analysisId = searchParams.get('analysisId') ?? undefined
 
-    return <MissionPage missionId={missionId} inspectionId={inspectionId} analysisId={analysisId} />
+    return <MissionPage missionId={missionId} inspectionId={inspectionId} analysisId={analysisId} includeHeader />
 }
 
 export const MissionDefinitionPageRouter = () => {

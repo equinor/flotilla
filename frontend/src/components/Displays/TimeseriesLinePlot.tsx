@@ -14,7 +14,6 @@ import {
     ChartDataset,
     Plugin,
 } from 'chart.js'
-import { DateTime } from 'luxon'
 import { useMemo } from 'react'
 import { Line } from 'react-chartjs-2'
 import { tokens } from '@equinor/eds-tokens'
@@ -42,18 +41,14 @@ const PALETTE_COLORS = [
 
 const PALETTE: [string, string][] = PALETTE_COLORS.map((hex) => [hex, hexToRgba(hex, 0.5)])
 
-interface TimeseriesLinePlotDataPoint {
+export interface TimeseriesLinePlotDataPoint {
     time: Date
     value: number
+    inspectionId: string
 }
 
 export interface TimeseriesLinePlotData {
-    [id: string]: TimeseriesLinePlotDataPoint[]
-}
-
-interface TimeseriesLinePlotSelectedPoint {
-    id: string
-    time: Date
+    [inspectionId: string]: TimeseriesLinePlotDataPoint[]
 }
 
 interface Props {
@@ -61,12 +56,12 @@ interface Props {
     yLabel: string
     ymin: number
     ymax: number
-    onPointClick?: (point: { id: string; time: Date; value: number }) => void
-    selectedPoint: TimeseriesLinePlotSelectedPoint | undefined
+    onPointClick?: (point: TimeseriesLinePlotDataPoint) => void
+    selectedInspectionId: string | undefined
 }
 
-export const TimeseriesLinePlot = ({ data, yLabel, ymin, ymax, onPointClick, selectedPoint }: Props) => {
-    const dataEntries = useMemo(() => Object.entries(data), [data])
+export const TimeseriesLinePlot = ({ data, yLabel, ymin, ymax, onPointClick, selectedInspectionId }: Props) => {
+    const dataValues = useMemo(() => Object.values(data), [data])
 
     const options: ChartOptions<'line'> = useMemo(
         () => ({
@@ -75,12 +70,12 @@ export const TimeseriesLinePlot = ({ data, yLabel, ymin, ymax, onPointClick, sel
             onClick: (_event, elements) => {
                 if (!onPointClick || elements.length === 0) return
                 const { datasetIndex, index } = elements[0]
-                const entry = dataEntries[datasetIndex]
+                const entry = dataValues[datasetIndex]
                 if (!entry) return
-                const [id, points] = entry
-                const point = points[index]
+
+                const point = entry[index]
                 if (!point) return
-                onPointClick({ id, time: point.time, value: point.value })
+                onPointClick(point)
             },
             onHover: (event, elements) => {
                 const target = event.native?.target as HTMLElement | undefined
@@ -130,20 +125,19 @@ export const TimeseriesLinePlot = ({ data, yLabel, ymin, ymax, onPointClick, sel
                 },
             },
         }),
-        [yLabel, ymin, ymax, dataEntries, onPointClick]
+        [yLabel, ymin, ymax, dataValues, onPointClick]
     )
 
     // @ts-expect-error ; Date isn't assignable to number for x-axis value - assumption: library can handle it anyways
-    const datasets: ChartDataset<'line', DefaultDataPoint<'line'>>[] = dataEntries.map(
-        ([id, dataPointArray], index: number) => {
+    const datasets: ChartDataset<'line', DefaultDataPoint<'line'>>[] = Object.entries(data).map(
+        ([inspectionId, dataPointArray], index: number) => {
             const [borderColor, backgroundColor] = PALETTE[index % PALETTE.length]
-            const selectedTimeMs = selectedPoint && selectedPoint.id === id ? selectedPoint.time.getTime() : undefined
             const isSelected = (pointIndex: number) =>
-                selectedTimeMs !== undefined && dataPointArray[pointIndex]?.time.getTime() === selectedTimeMs
+                selectedInspectionId !== undefined && dataPointArray[pointIndex].inspectionId === selectedInspectionId
             return {
-                label: id,
+                label: inspectionId,
                 data: dataPointArray.map((dataPoint) => ({
-                    x: DateTime.fromJSDate(dataPoint.time).toISO(),
+                    x: dataPoint.time,
                     y: dataPoint.value,
                 })),
                 borderColor,

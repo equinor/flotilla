@@ -1,18 +1,9 @@
-import { Task } from 'models/Task'
-import { AnalysisTypes, DataView } from './DataView'
-
-enum CloeAnalysableDescriptions {
-    SphericalGlass = 'Spherical glass',
-}
-
-const checkIfAnalysableDescription = (description: string) => {
-    return Object.values(CloeAnalysableDescriptions).includes(description as CloeAnalysableDescriptions)
-}
+import { DataView } from './DataView'
+import { AnalysisType } from 'models/MissionDefinition'
 
 export const CloeDataViewPage = () => (
     <DataView
-        analysisType={AnalysisTypes.CLOE}
-        taskFilter={(task: Task) => (task.description ? checkIfAnalysableDescription(task.description) : false)}
+        analysisType={AnalysisType.CLOE}
         pageTitle="Data View for Constant Level Oilers"
         plotTitle="Estimated oil level"
         plotAriaLabel="Estimated oil level"

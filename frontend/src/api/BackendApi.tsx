@@ -254,15 +254,6 @@ export class BackendApi {
         return result.content
     }
 
-    async getValue(inspectionId: string): Promise<number> {
-        const path: string = 'inspection/value/' + inspectionId
-
-        return this.api
-            .GET<number>(path)
-            .then((response) => response.content)
-            .catch(handleError('GET', path))
-    }
-
     async skipAutoScheduledMission(missionId: string, timeOfDay: string): Promise<void> {
         const path: string = `missions/definitions/${missionId}/skip-auto-mission`
         const body = { timeOfDay: timeOfDay }

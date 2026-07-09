@@ -1,13 +1,13 @@
 import { Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import styled from 'styled-components'
-import { MissionDefinitionTaskTable, TaskTable } from './TaskOverview/TaskTable'
+import { MissionDefinitionTaskTable, TaskAndData, TaskTable } from './TaskOverview/TaskTable'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { Mission } from 'models/Mission'
 import { phone_width } from 'utils/constants'
 import { MissionDefinitionPlantMap, PlantMap } from './MapPosition/PointillaMapView'
 import { StyledTableAndMap } from 'components/Styles/StyledComponents'
 import { MissionDefinition } from 'models/MissionDefinition'
+import { RobotWithoutTelemetry } from 'models/Robot'
 
 const TaskAndMapSection = styled.div`
     display: flex;
@@ -29,23 +29,26 @@ const TaskAndMapSection = styled.div`
 `
 
 interface TaskTableAndMapProps {
-    mission: Mission
+    tasksAndData: TaskAndData[]
+    plantCode: string
+    robot: RobotWithoutTelemetry
 }
 
 interface MissionDefinitionTaskTableAndMapProps {
     missionDefinition: MissionDefinition
 }
 
-export const TaskTableAndMap = ({ mission }: TaskTableAndMapProps) => {
+export const TaskTableAndMap = ({ tasksAndData, plantCode, robot }: TaskTableAndMapProps) => {
     const { TranslateText } = useLanguageContext()
-    const plantCode = mission.inspectionArea.plantCode ? mission.inspectionArea.plantCode : undefined
 
     return (
         <TaskAndMapSection>
             <Typography variant="h4">{TranslateText('Tasks')}</Typography>
             <StyledTableAndMap>
-                <TaskTable tasks={mission?.tasks} />
-                {plantCode && <PlantMap plantCode={plantCode} floorId="0" mission={mission} />}
+                <TaskTable tasksAndData={tasksAndData} />
+                {plantCode && (
+                    <PlantMap plantCode={plantCode} floorId="0" tasks={tasksAndData.map((t) => t.task)} robot={robot} />
+                )}
             </StyledTableAndMap>
         </TaskAndMapSection>
     )
@@ -60,11 +63,7 @@ export const MissionDefinitionTaskTableAndMap = ({ missionDefinition }: MissionD
             <StyledTableAndMap>
                 <MissionDefinitionTaskTable tasks={missionDefinition.tasks} />
                 {plantCode && (
-                    <MissionDefinitionPlantMap
-                        plantCode={plantCode}
-                        floorId="0"
-                        missionDefinition={missionDefinition}
-                    />
+                    <MissionDefinitionPlantMap plantCode={plantCode} floorId="0" tasks={missionDefinition.tasks} />
                 )}
             </StyledTableAndMap>
         </TaskAndMapSection>

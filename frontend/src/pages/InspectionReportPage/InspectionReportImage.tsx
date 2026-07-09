@@ -1,12 +1,11 @@
 import { useInspectionsContext } from 'components/Contexts/InspectionsContext'
-import { Task } from 'models/Task'
 import { StyledInspection, StyledInspectionImage } from './InspectionStyles'
 import { tokens } from '@equinor/eds-tokens'
 import { CircularProgress, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
-import { DisplayMethod, SensorTypeToDisplayMethod } from 'models/Inspection'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { VideoPlaceholder, VideoPlayer } from './InspectionVideoPlayer'
+import { FileType, InspectionData } from 'models/InspectionRecord'
 
 const StyledSmallImagePlaceholder = styled.div`
     display: flex;
@@ -81,106 +80,103 @@ export const PendingResultPlaceholder = ({ isLargeImage }: { isLargeImage: boole
     )
 }
 
-export const InspectionImageWithPlaceholder = ({ task, isLargeImage }: { task: Task; isLargeImage: boolean }) => {
-    const { useMediaData } = useInspectionsContext()
-    const { data, isPending, isError } = useMediaData(task.inspection.isarInspectionId)
-    if (isError || !data) {
+export const InspectionImageWithPlaceholder = ({
+    inspection,
+    isLargeImage,
+}: {
+    inspection: InspectionData
+    isLargeImage: boolean
+}) =>
+    isLargeImage ? (
+        <StyledInspection $otherContentHeight={'174px'} src={inspection.anonymizedSAS} />
+    ) : (
+        <StyledInspectionImage src={inspection.anonymizedSAS} />
+    )
+
+const InspectionValueWithPlaceholder = ({
+    inspection,
+    isLargeImage,
+}: {
+    inspection: InspectionData
+    isLargeImage: boolean
+}) => {
+    if (!inspection.value) {
         const errorMsg = 'No inspection could be found'
         return <TextAsImage isLargeImage={isLargeImage} text={errorMsg} />
-    } else if (isPending) {
-        return <PendingResultPlaceholder isLargeImage={isLargeImage} />
-    } else
-        return isLargeImage ? (
-            <StyledInspection $otherContentHeight={'174px'} src={data} />
-        ) : (
-            <StyledInspectionImage src={data} />
-        )
-}
-
-const InspectionValueWithPlaceholder = ({ task, isLargeImage }: { task: Task; isLargeImage: boolean }) => {
-    const { useValueData } = useInspectionsContext()
-    const { data, isPending, isError } = useValueData(task.inspection.isarInspectionId)
-
-    if (isError || data === undefined) {
-        const errorMsg = 'No inspection could be found'
-        return <TextAsImage isLargeImage={isLargeImage} text={errorMsg} />
-    } else if (isPending) {
-        return <PendingResultPlaceholder isLargeImage={isLargeImage} />
     } else {
         return (
             <TextAsImage
                 isLargeImage={isLargeImage}
-                text={`CO2 consentration: {0}%`}
-                textArgs={[data.toFixed(3).toString()]}
+                text={`${inspection.inspectionDescription}: {0} ${inspection.unit}`}
+                textArgs={[parseFloat(inspection.value).toFixed(3).toString()]}
             />
         )
     }
 }
 
-const InspectionVideoWithPlaceholder = ({ task, isLargeImage }: { task: Task; isLargeImage: boolean }) => {
-    return isLargeImage ? <LargeVideoWithPlaceholder task={task} /> : <SmallVideoWithPlaceholder task={task} />
-}
+const InspectionVideoWithPlaceholder = ({
+    inspection,
+    isLargeImage,
+}: {
+    inspection: InspectionData
+    isLargeImage: boolean
+}) => (isLargeImage ? <LargeVideoWithPlaceholder inspection={inspection} /> : <VideoPlaceholder />)
 
-const LargeVideoWithPlaceholder = ({ task }: { task: Task }) => {
-    const { useMediaData } = useInspectionsContext()
-    const { data, isPending, isError } = useMediaData(task.inspection.isarInspectionId)
-    if (isPending) {
-        return <PendingResultPlaceholder isLargeImage={true} />
-    } else if (isError || !data) {
-        return <TextAsImage isLargeImage={true} text={'No inspection could be found'} />
-    } else return <VideoPlayer src={data} />
-}
+const LargeVideoWithPlaceholder = ({ inspection }: { inspection: InspectionData }) => (
+    <VideoPlayer src={inspection.anonymizedSAS} />
+)
 
-const SmallVideoWithPlaceholder = ({ task }: { task: Task }) => {
-    const { useMediaData } = useInspectionsContext()
-    const { data, isPending, isError } = useMediaData(task.inspection.isarInspectionId)
-    if (isPending) {
-        return <PendingResultPlaceholder isLargeImage={false} />
-    } else if (isError || !data) {
-        return <TextAsImage isLargeImage={false} text={'No inspection could be found'} />
-    } else return <VideoPlaceholder />
-}
-
-const InspectionResultWithPlaceholder = ({ task, isLargeImage }: { task: Task; isLargeImage: boolean }) => {
-    const displayMethod = SensorTypeToDisplayMethod[task.inspection.inspectionType]
-    if (displayMethod === DisplayMethod.None) {
+const InspectionResultWithPlaceholder = ({
+    inspection,
+    isLargeImage,
+}: {
+    inspection: InspectionData
+    isLargeImage: boolean
+}) => {
+    if (inspection.fileType === FileType.SOUND) {
         const errorMsg = 'Viewing of the inspection type is not supported'
         return <TextAsImage isLargeImage={isLargeImage} text={errorMsg} />
-    } else if (displayMethod === DisplayMethod.Number) {
-        return <InspectionValueWithPlaceholder task={task} isLargeImage={isLargeImage} />
-    } else if (displayMethod === DisplayMethod.Image) {
-        return <InspectionImageWithPlaceholder task={task} isLargeImage={isLargeImage} />
-    } else if (displayMethod === DisplayMethod.Video) {
-        return <InspectionVideoWithPlaceholder task={task} isLargeImage={isLargeImage} />
+    } else if (inspection.fileType === FileType.VALUE) {
+        return <InspectionValueWithPlaceholder inspection={inspection} isLargeImage={isLargeImage} />
+    } else if (inspection.fileType === FileType.IMAGE) {
+        return <InspectionImageWithPlaceholder inspection={inspection} isLargeImage={isLargeImage} />
+    } else if (inspection.fileType === FileType.VIDEO) {
+        return <InspectionVideoWithPlaceholder inspection={inspection} isLargeImage={isLargeImage} />
     }
 }
 
-export const LargeDialogInspectionResult = ({ task }: { task: Task }) => {
-    return <InspectionResultWithPlaceholder task={task} isLargeImage={true} />
-}
+export const LargeDialogInspectionResult = ({ inspection }: { inspection: InspectionData }) => (
+    <InspectionResultWithPlaceholder inspection={inspection} isLargeImage={true} />
+)
 
-export const SmallInspectionResult = ({ task }: { task: Task }) => {
-    return <InspectionResultWithPlaceholder task={task} isLargeImage={false} />
-}
+export const SmallInspectionResult = ({ inspection }: { inspection: InspectionData }) => (
+    <InspectionResultWithPlaceholder inspection={inspection} isLargeImage={false} />
+)
 
-const AnalysisImageWithPlaceholder = ({ task, isLargeImage }: { task: Task; isLargeImage: boolean }) => {
-    const { useAnalysisData } = useInspectionsContext()
-    const { data, isPending, isError } = useAnalysisData(task.inspection.isarInspectionId)
-    if (!task.inspection.analysisResult?.storageAccount) {
+const AnalysisImageWithPlaceholder = ({
+    inspectionId,
+    isLargeImage,
+}: {
+    inspectionId: string
+    isLargeImage: boolean
+}) => {
+    const { useSaraData } = useInspectionsContext()
+    const { data, isPending, isError } = useSaraData(inspectionId)
+
+    if (!data?.visualisedSAS) {
         return <TextAsImage isLargeImage={isLargeImage} text={'No analysis available'} />
-    }
-    if (isError || !data) {
-        return <TextAsImage isLargeImage={isLargeImage} text={'No analysis could be found'} />
     } else if (isPending) {
         return <PendingResultPlaceholder isLargeImage={isLargeImage} />
+    } else if (isError || !data) {
+        return <TextAsImage isLargeImage={isLargeImage} text={'No analysis could be found'} />
     } else
         return isLargeImage ? (
-            <StyledInspection $otherContentHeight={'174px'} src={data} />
+            <StyledInspection $otherContentHeight={'174px'} src={data.visualisedSAS} />
         ) : (
-            <StyledInspectionImage src={data} />
+            <StyledInspectionImage src={data.visualisedSAS} />
         )
 }
 
-export const SmallAnalysisResult = ({ task }: { task: Task }) => {
-    return <AnalysisImageWithPlaceholder task={task} isLargeImage={false} />
-}
+export const SmallAnalysisResult = ({ inspectionId }: { inspectionId: string }) => (
+    <AnalysisImageWithPlaceholder inspectionId={inspectionId} isLargeImage={false} />
+)

@@ -1,25 +1,32 @@
 import { createContext, FC, useContext, useEffect, useRef } from 'react'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
-import { SaraAnalysisResultReady, SaraInspectionVisualizationReady } from 'models/Inspection'
 import { useQuery } from '@tanstack/react-query'
 import { queryClient } from '../../App'
 import { useBackendApi } from 'api/UseBackendApi'
 import { useSaraApi } from 'api/UseSaraApi'
+import { FlotillaAnalysisResultMessage, InspectionData } from 'models/InspectionRecord'
+import { AnalysisType } from 'models/MissionDefinition'
 
-interface IImageData {
-    data: string | undefined
+interface IInspectionData {
+    data: InspectionData | undefined
     isPending: boolean
     isError: boolean
 }
-interface IValueData {
-    data: number | undefined
+interface IInspectionListData {
+    data: InspectionData[] | undefined
     isPending: boolean
     isError: boolean
 }
 interface IInspectionsContext {
-    useMediaData: (inspectionId: string) => IImageData
-    useAnalysisData: (inspectionId: string) => IImageData
-    useValueData: (inspectionId: string) => IValueData
+    useSaraData: (inspectionId: string) => IInspectionData
+    useSaraListData: (
+        inspectionIds?: string[] | null,
+        installationCode?: string | null,
+        tagId?: string | null,
+        analysisType?: AnalysisType | null,
+        minDate?: Date | null,
+        maxDate?: Date | null
+    ) => IInspectionListData
 }
 
 interface Props {
@@ -27,9 +34,8 @@ interface Props {
 }
 
 const defaultInspectionsContext = {
-    useMediaData: () => ({ data: undefined, isPending: false, isError: true }),
-    useAnalysisData: () => ({ data: undefined, isPending: false, isError: true }),
-    useValueData: () => ({ data: undefined, isPending: false, isError: true }),
+    useSaraData: () => ({ data: undefined, isPending: false, isError: true }),
+    useSaraListData: () => ({ data: undefined, isPending: false, isError: true }),
 }
 
 const InspectionsContext = createContext<IInspectionsContext>(defaultInspectionsContext)
@@ -50,15 +56,14 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
     useEffect(() => {
         if (connectionReady) {
             registerEvent(SignalREventLabels.inspectionVisualizationReady, (username: string, message: string) => {
-                const inspectionVisualizationData: SaraInspectionVisualizationReady = JSON.parse(message)
-                const inspectionId = inspectionVisualizationData.inspectionId
+                const inspectionId: string = JSON.parse(message)
                 queryClient.invalidateQueries({
                     queryKey: ['fetchInspectionData', inspectionId],
                 })
                 queryClient.fetchQuery({
                     queryKey: ['fetchInspectionData', inspectionId],
                     queryFn: async () => {
-                        return await saraApiRef.current.getAnonymizedDataUrl(inspectionId)
+                        return await saraApiRef.current.getSaraDataByInspectionId(inspectionId)
                     },
                     retry: 1,
                     staleTime: 10 * 60 * 1000,
@@ -70,15 +75,20 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
     useEffect(() => {
         if (connectionReady) {
             registerEvent(SignalREventLabels.analysisResultReady, (username: string, message: string) => {
-                const analysisResultData: SaraAnalysisResultReady = JSON.parse(message)
-                const inspectionId = analysisResultData.inspectionId
+                const inspectionResult: FlotillaAnalysisResultMessage = JSON.parse(message)
                 queryClient.invalidateQueries({
-                    queryKey: ['fetchAnalysisData', inspectionId],
+                    queryKey: [
+                        'fetchInspectionListData',
+                        [inspectionResult.installationCode, inspectionResult.analysisType],
+                    ],
+                })
+                queryClient.invalidateQueries({
+                    queryKey: ['fetchInspectionData', inspectionResult.inspectionId],
                 })
                 queryClient.fetchQuery({
-                    queryKey: ['fetchAnalysisData', inspectionId],
+                    queryKey: ['fetchInspectionData', inspectionResult.inspectionId],
                     queryFn: async () => {
-                        return await saraApiRef.current.getAnalysedDataUrl(inspectionId)
+                        return await saraApiRef.current.getSaraDataByInspectionId(inspectionResult.inspectionId)
                     },
                     retry: 1,
                     staleTime: 10 * 60 * 1000,
@@ -87,25 +97,11 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
         }
     }, [registerEvent, connectionReady])
 
-    const useMediaData = (inspectionId: string): IImageData => {
+    const useSaraData = (inspectionId: string): IInspectionData => {
         const result = useQuery({
             queryKey: ['fetchInspectionData', inspectionId],
             queryFn: async () => {
-                return await saraApiRef.current.getAnonymizedDataUrl(inspectionId)
-            },
-            retry: 1,
-            staleTime: 10 * 60 * 1000, // If data is received, stale time is 10 min before making new API call
-            enabled: inspectionId !== undefined,
-        })
-
-        return { data: result.data, isPending: result.isPending, isError: result.isError }
-    }
-
-    const useAnalysisData = (inspectionId: string): IImageData => {
-        const result = useQuery({
-            queryKey: ['fetchAnalysisData', inspectionId],
-            queryFn: async () => {
-                return await saraApiRef.current.getAnalysedDataUrl(inspectionId)
+                return await saraApiRef.current.getSaraDataByInspectionId(inspectionId)
             },
             retry: 1,
             staleTime: 10 * 60 * 1000, // If data is received, stale time is 10 min before making new API call
@@ -114,16 +110,28 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
         return { data: result.data, isPending: result.isPending, isError: result.isError }
     }
 
-    const useValueData = (inspectionId: string): IValueData => {
+    const useSaraListData = (
+        inspectionIds?: string[] | null,
+        installationCode?: string | null,
+        tagId?: string | null,
+        analysisType?: AnalysisType | null,
+        minDate?: Date | null,
+        maxDate?: Date | null
+    ): IInspectionListData => {
         const result = useQuery({
-            queryKey: ['fetchValueData', inspectionId],
+            queryKey: ['fetchInspectionListData', [installationCode, analysisType, inspectionIds]],
             queryFn: async () => {
-                const value = await backendApi.getValue(inspectionId)
-                return value
+                return await saraApiRef.current.getSaraData(
+                    inspectionIds,
+                    installationCode,
+                    tagId,
+                    analysisType,
+                    minDate,
+                    maxDate
+                )
             },
             retry: 1,
             staleTime: 10 * 60 * 1000, // If data is received, stale time is 10 min before making new API call
-            enabled: inspectionId !== undefined,
         })
         return { data: result.data, isPending: result.isPending, isError: result.isError }
     }
@@ -131,9 +139,8 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
     return (
         <InspectionsContext.Provider
             value={{
-                useMediaData,
-                useAnalysisData,
-                useValueData,
+                useSaraData,
+                useSaraListData,
             }}
         >
             {children}

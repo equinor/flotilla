@@ -1,5 +1,4 @@
 import { Table, Typography } from '@equinor/eds-core-react'
-import { tokens } from '@equinor/eds-tokens'
 import { Mission } from 'models/Mission'
 import { StyledTableRow } from 'components/Styles/StyledComponents'
 import {
@@ -41,17 +40,8 @@ export const HistoricMissionCard = ({ mission }: MissionProps) => {
         (t) => t.status !== TaskStatus.PartiallySuccessful && t.status !== TaskStatus.Successful
     )
 
-    const missionHasAnalysisResultWithWarning = mission.tasks.some((t) => !!t.inspection.analysisResult?.warning)
-
     return (
-        <StyledTableRow
-            key={mission.id}
-            style={{
-                backgroundColor: missionHasAnalysisResultWithWarning
-                    ? tokens.colors.interactive.warning__highlight.hex
-                    : undefined,
-            }}
-        >
+        <StyledTableRow key={mission.id}>
             <Table.Cell id={InspectionTableColumns.StatusShort}>
                 <MissionStatusDisplayShort status={mission.status} />
             </Table.Cell>
