@@ -36,23 +36,6 @@ export const MediaStreamProvider: FC<Props> = ({ children }) => {
     )
     const backendApi = useBackendApi()
 
-    useEffect(() => {
-        // Here we maintain the localstorage with the connection details
-        const updatedConfigs: MediaStreamConfigDictionaryType = {}
-        Object.keys(mediaStreams).forEach((robotId) => {
-            const conf = mediaStreams[robotId]
-
-            if (conf.streams.length === 0 && !conf.isLoading) refreshRobotMediaConfig(robotId)
-            updatedConfigs[robotId] = {
-                url: conf.url,
-                token: conf.token,
-                mediaConnectionType: conf.mediaConnectionType,
-                robotId: conf.robotId,
-            }
-        })
-        window.localStorage.setItem('mediaConfigs', JSON.stringify(updatedConfigs))
-    }, [mediaStreams])
-
     const addTrackToConnection = (newTrack: MediaStreamTrack, robotId: string) => {
         setMediaStreams((oldStreams) => {
             if (
@@ -150,6 +133,22 @@ export const MediaStreamProvider: FC<Props> = ({ children }) => {
             })
             .catch(() => console.log(`No media config found for robot with ID ${robotId}`))
     }
+
+    useEffect(() => {
+        const updatedConfigs: MediaStreamConfigDictionaryType = {}
+        Object.keys(mediaStreams).forEach((robotId) => {
+            const conf = mediaStreams[robotId]
+
+            if (conf.streams.length === 0 && !conf.isLoading) refreshRobotMediaConfig(robotId)
+            updatedConfigs[robotId] = {
+                url: conf.url,
+                token: conf.token,
+                mediaConnectionType: conf.mediaConnectionType,
+                robotId: conf.robotId,
+            }
+        })
+        window.localStorage.setItem('mediaConfigs', JSON.stringify(updatedConfigs))
+    }, [mediaStreams])
 
     return (
         <MediaStreamContext.Provider

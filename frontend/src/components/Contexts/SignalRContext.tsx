@@ -1,5 +1,5 @@
 import * as signalR from '@microsoft/signalr'
-import React, { createContext, FC, useContext, useEffect, useCallback, useState } from 'react'
+import React, { createContext, FC, useContext, useEffect, useCallback, useState, useRef } from 'react'
 import { AuthContext } from './AuthContext'
 import { config } from 'config'
 import { useMsal } from '@azure/msal-react'
@@ -53,7 +53,7 @@ const URL = config.BACKEND_API_SIGNALR_URL
 const SignalRContext = createContext<ISignalRContext>(defaultSignalRInterface)
 
 export const SignalRProvider: FC<Props> = ({ children }) => {
-    const [connection, setConnection] = useState<signalR.HubConnection | undefined>(undefined)
+    const connectionRef = useRef<signalR.HubConnection | undefined>(undefined)
     const [connectionReady, setConnectionReady] = useState<boolean>(defaultSignalRInterface.connectionReady)
     const { getBackendAccessToken } = useContext(AuthContext)
     const { accounts, inProgress } = useMsal()
@@ -98,12 +98,12 @@ export const SignalRProvider: FC<Props> = ({ children }) => {
     }, [getBackendAccessToken])
 
     const resetConnection = () => {
-        if (connection) {
-            connection.stop()
+        if (connectionRef.current) {
+            connectionRef.current.stop()
         }
 
         const newConnection = createConnection()
-        setConnection(newConnection)
+        connectionRef.current = newConnection
 
         newConnection
             .start()
@@ -129,8 +129,8 @@ export const SignalRProvider: FC<Props> = ({ children }) => {
     }, [accounts, inProgress])
 
     const registerEvent = (eventName: string, onMessageReceived: (username: string, message: string) => void) => {
-        if (connection)
-            connection.on(eventName, (username, message) => {
+        if (connectionRef.current)
+            connectionRef.current.on(eventName, (username, message) => {
                 if (message === 'null') {
                     console.warn(`Received signalR message for event ${eventName} is 'null'`)
                     return

@@ -75,15 +75,13 @@ const FencillaViewComponent = () => {
                 if (page > paginatedMissions.pagination.TotalPages && paginatedMissions.pagination.TotalPages > 0) {
                     switchPage(paginatedMissions.pagination.TotalPages)
                     setIsResettingPage(true)
+                } else {
+                    setIsResettingPage(false)
                 }
                 setIsLoading(false)
             })
             .catch(() => {})
     }, [page, pageSize])
-
-    useEffect(() => {
-        if (isResettingPage) setIsResettingPage(false)
-    }, [isResettingPage])
 
     useEffect(() => {
         updateFilteredMissions()
@@ -117,16 +115,6 @@ const FencillaViewComponent = () => {
         <SimpleHistoricMissionCard key={mission.id} mission={mission} />
     ))
 
-    const PaginationComponent = () => (
-        <StyledPagination
-            totalItems={paginationDetails!.TotalCount}
-            itemsPerPage={paginationDetails!.PageSize}
-            withItemIndicator
-            defaultPage={page}
-            onChange={(_, newPage) => onPageChange(newPage)}
-        ></StyledPagination>
-    )
-
     const onPageChange = (newPage: number) => {
         setIsLoading(true)
         switchPage(newPage)
@@ -145,7 +133,13 @@ const FencillaViewComponent = () => {
                     )}
                     <StyledTableCaption captionSide={'bottom'}>
                         {paginationDetails && paginationDetails.TotalPages > 1 && !isResettingPage && (
-                            <PaginationComponent />
+                            <StyledPagination
+                                totalItems={paginationDetails.TotalCount}
+                                itemsPerPage={paginationDetails.PageSize}
+                                withItemIndicator
+                                defaultPage={page}
+                                onChange={(_, newPage) => onPageChange(newPage)}
+                            ></StyledPagination>
                         )}
                     </StyledTableCaption>
                     <Table.Head sticky>

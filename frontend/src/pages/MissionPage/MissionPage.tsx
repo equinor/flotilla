@@ -48,7 +48,6 @@ const useMissionSelector = (missionId: string | undefined, inspectionId: string 
     const navigate = useNavigate()
     const { TranslateText } = useLanguageContext()
     const { setAlert, setListAlert } = useAlertContext()
-    const [videoMediaStreams, setVideoMediaStreams] = useState<MediaStreamTrack[]>([])
     const [selectedMission, setSelectedMission] = useState<Mission>()
     const { registerEvent, connectionReady } = useSignalRContext()
     const { mediaStreams, addMediaStreamConfigIfItDoesNotExist } = useMediaStreamContext()
@@ -68,13 +67,7 @@ const useMissionSelector = (missionId: string | undefined, inspectionId: string 
         }
     }, [connectionReady])
 
-    useEffect(() => {
-        if (selectedMission && mediaStreams && Object.keys(mediaStreams).includes(selectedMission?.robot.id)) {
-            const mediaStreamConfig = mediaStreams[selectedMission?.robot.id]
-            if (mediaStreamConfig && mediaStreamConfig.streams.length > 0)
-                setVideoMediaStreams(mediaStreamConfig.streams)
-        }
-    }, [selectedMission, mediaStreams])
+    const videoMediaStreams = (selectedMission ? mediaStreams[selectedMission.robot.id]?.streams : undefined) ?? []
 
     useEffect(() => {
         if (missionId)

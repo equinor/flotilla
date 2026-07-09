@@ -1,4 +1,4 @@
-import { createContext, FC, useContext, useEffect, useState } from 'react'
+import { createContext, FC, useContext, useEffect, useMemo, useState } from 'react'
 import { Mission, MissionStatus } from 'models/Mission'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { TaskStatus } from 'models/Task'
@@ -185,14 +185,14 @@ const useMissionRuns = (): IMissionRunsContext => {
         fetchAndUpdateMissions()
     }, [installation])
 
-    const [filteredMissionQueue, setFilteredMissionQueue] = useState<Mission[]>([])
-    const [filteredOngoingMissions, setFilteredOngoingMissions] = useState<Mission[]>([])
-    useEffect(() => {
-        setFilteredOngoingMissions(ongoingMissions.filter((m) => m.installationCode === installation.installationCode))
-        setFilteredMissionQueue(
-            missionQueue.filter((m) => m.inspectionArea.installationCode === installation.installationCode)
-        )
-    }, [installation, ongoingMissions, missionQueue])
+    const filteredOngoingMissions = useMemo(
+        () => ongoingMissions.filter((m) => m.installationCode === installation.installationCode),
+        [ongoingMissions, installation.installationCode]
+    )
+    const filteredMissionQueue = useMemo(
+        () => missionQueue.filter((m) => m.inspectionArea.installationCode === installation.installationCode),
+        [missionQueue, installation.installationCode]
+    )
 
     return {
         ongoingMissions: filteredOngoingMissions,

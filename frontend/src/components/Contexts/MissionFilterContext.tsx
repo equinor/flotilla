@@ -126,7 +126,6 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
     const { installation } = useContext(InstallationContext)
     const [page, setPage] = useState<number>(mapURLtoPage(searchParams))
     const [filterError, setFilterError] = useState<string>(defaultMissionFilterInterface.filterError)
-    const [filterIsSet, setFilterIsSet] = useState<boolean>(defaultMissionFilterInterface.filterIsSet)
     const [filterState, setFilterState] = useState<IMissionFilterContext['filterState']>(mapURLtoFilter(searchParams))
 
     useEffect(() => {
@@ -159,23 +158,18 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
     const filterFunctions = useMemo(
         () => ({
             switchMissionName: (newMissionName: string | undefined) => {
-                setFilterIsSet(true)
                 setFilterState({ ...filterState, missionName: newMissionName })
             },
             switchStatuses: (newStatuses: MissionStatusFilterOptions[]) => {
-                setFilterIsSet(true)
                 setFilterState({ ...filterState, statuses: newStatuses })
             },
             switchRobotName: (newRobotName: string | undefined) => {
-                setFilterIsSet(true)
                 setFilterState({ ...filterState, robotName: newRobotName })
             },
             switchTagId: (newTagId: string | undefined) => {
-                setFilterIsSet(true)
                 setFilterState({ ...filterState, tagId: newTagId })
             },
             switchInspectionTypes: (newInspectionTypes: SensorType[]) => {
-                setFilterIsSet(true)
                 setFilterState({ ...filterState, inspectionTypes: newInspectionTypes })
             },
             switchMinStartTime: (newMinStartTime: number | undefined) => {
@@ -191,7 +185,6 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
                         ])
                     )
                 else {
-                    setFilterIsSet(true)
                     setFilterState({ ...filterState, minStartTime: newMinStartTime })
                 }
             },
@@ -211,7 +204,6 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
                         ])
                     )
                 else {
-                    setFilterIsSet(true)
                     setFilterState({ ...filterState, maxStartTime: newMaxStartTime })
                 }
             },
@@ -231,7 +223,6 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
                         ])
                     )
                 else {
-                    setFilterIsSet(true)
                     setFilterState({ ...filterState, minEndTime: newMinEndTime })
                 }
             },
@@ -248,7 +239,6 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
                         ])
                     )
                 else {
-                    setFilterIsSet(true)
                     setFilterState({ ...filterState, maxEndTime: newMaxEndTime })
                 }
             },
@@ -337,13 +327,11 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
         [filterState, TranslateText]
     )
 
-    useEffect(() => {
-        const isAllNotSet = () => {
-            if (Object.keys(filterState).length === 0) return true
-            return Object.entries(filterState).every((entry) => filterFunctions.isSet(entry[0], entry[1]))
-        }
-        setFilterIsSet(!isAllNotSet())
-    }, [filterState, filterFunctions])
+    const isAllNotSet = () => {
+        if (Object.keys(filterState).length === 0) return true
+        return Object.entries(filterState).every((entry) => filterFunctions.isSet(entry[0], entry[1]))
+    }
+    const filterIsSet = !isAllNotSet()
 
     return (
         <MissionFilterContext.Provider

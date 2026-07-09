@@ -1,6 +1,5 @@
 import { Typography } from '@equinor/eds-core-react'
 import { Mission } from 'models/Mission'
-import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Task, TaskStatus } from 'models/Task'
@@ -17,17 +16,14 @@ interface MissionProps {
 
 export const MissionProgressDisplay = ({ mission }: MissionProps) => {
     const { TranslateText } = useLanguageContext()
-    const [completedTasks, setCompletedTasks] = useState<number>(0)
 
     const tasks = mission.tasks
-
-    useEffect(() => {
-        setCompletedTasks(countCompletedTasks(tasks))
-    }, [tasks])
 
     const countCompletedTasks = (tasks: Task[]) => {
         return tasks.filter((task) => task.isCompleted && task.status !== TaskStatus.Cancelled).length
     }
+
+    const completedTasks = countCompletedTasks(tasks)
 
     return (
         <StyledTagCount>

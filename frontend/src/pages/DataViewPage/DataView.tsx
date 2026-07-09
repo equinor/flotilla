@@ -74,6 +74,7 @@ export const DataView = ({
     const [searchParams] = useSearchParams()
     const inspectionId = searchParams.get('inspectionId') ?? undefined
     const analysisId = searchParams.get('analysisId') ?? undefined
+    const [nowMs] = useState(() => Date.now())
 
     const fetchMissions = (): Promise<Mission[]> => {
         const minEndTime = Math.floor((Date.now() - FETCH_WINDOW_DAYS * MS_PER_DAY) / MS_PER_SECOND)
@@ -128,9 +129,8 @@ export const DataView = ({
     const plantCode = latestMission?.inspectionArea.plantCode
 
     const getTimeRangeCutoff = (range: TimeRange): number => {
-        const millisecondsInADay = 24 * 60 * 60 * 1000
         const days = range === TimeRange.SevenDays ? 7 : 30
-        return Date.now() - days * millisecondsInADay
+        return nowMs - days * MS_PER_DAY
     }
 
     const recentMissions = missions.filter((mission) => {

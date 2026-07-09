@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, FC, useEffect } from 'react'
+import { createContext, useContext, useState, FC, useEffect, useMemo } from 'react'
 import { RobotPropertyUpdate, RobotWithoutTelemetry, robotTelemetryPropsList } from 'models/Robot'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { useLanguageContext } from './LanguageContext'
@@ -121,11 +121,10 @@ export const AssetProvider: FC<Props> = ({ children }) => {
                 })
     }, [])
 
-    const [filteredRobots, setFilteredRobots] = useState<RobotWithoutTelemetry[]>([])
-
-    useEffect(() => {
-        setFilteredRobots(enabledRobots.filter((r) => r.currentInstallation.id === installation.id))
-    }, [installation, enabledRobots])
+    const filteredRobots = useMemo(
+        () => enabledRobots.filter((r) => r.currentInstallation.id === installation.id),
+        [enabledRobots, installation.id]
+    )
 
     useEffect(() => {
         backendApi
@@ -194,12 +193,10 @@ export const AssetProvider: FC<Props> = ({ children }) => {
         }
     }, [registerEvent, connectionReady])
 
-    const [filteredInstallationInspectionAreas, setFilteredInstallationInspectionAreas] = useState<InspectionArea[]>([])
-    useEffect(() => {
-        setFilteredInstallationInspectionAreas(
-            installationInspectionAreas.filter((d) => d.installationCode === installation.installationCode)
-        )
-    }, [installation, installationInspectionAreas])
+    const filteredInstallationInspectionAreas = useMemo(
+        () => installationInspectionAreas.filter((d) => d.installationCode === installation.installationCode),
+        [installationInspectionAreas, installation.installationCode]
+    )
 
     return (
         <AssetContext.Provider

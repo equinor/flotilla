@@ -99,7 +99,6 @@ interface RobotPageProps {
 export const RobotPage = ({ robot }: RobotPageProps) => {
     const { TranslateText } = useLanguageContext()
     const { mediaStreams, addMediaStreamConfigIfItDoesNotExist } = useMediaStreamContext()
-    const [videoMediaStreams, setVideoMediaStreams] = useState<MediaStreamTrack[]>([])
     const { ongoingMissions } = useMissionsContext()
     const { robotBatteryLevel, robotBatteryStatus, robotPressureLevel } = useRobotTelemetry(robot)
     const backendApi = useBackendApi()
@@ -117,13 +116,7 @@ export const RobotPage = ({ robot }: RobotPageProps) => {
 
     const mission = ongoingMissions.find((mission) => mission.robot.id === robot.id)
 
-    useEffect(() => {
-        if (robot.id && mediaStreams && Object.keys(mediaStreams).includes(robot.id)) {
-            const mediaStreamConfig = mediaStreams[robot.id]
-            if (mediaStreamConfig && mediaStreamConfig.streams.length > 0)
-                setVideoMediaStreams(mediaStreamConfig.streams)
-        }
-    }, [mediaStreams, robot.id])
+    const videoMediaStreams = (robot.id ? mediaStreams[robot.id]?.streams : undefined) ?? []
 
     const stopButton =
         robot && [RobotStatus.Busy, RobotStatus.Paused].includes(robot.status) ? (

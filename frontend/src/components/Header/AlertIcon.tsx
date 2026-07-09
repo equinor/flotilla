@@ -2,7 +2,7 @@ import { Button, Icon, Popover, Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import { useAlertContext } from 'components/Contexts/AlertContext'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import styled from 'styled-components'
 import { Icons } from 'utils/icons'
 import { AlertListItem } from 'components/Alerts/AlertsListItem'
@@ -40,7 +40,7 @@ export const AlertIcon = () => {
     const { TranslateText } = useLanguageContext()
     const [isAlertDialogOpen, setIsAlertDialogOpen] = useState<boolean>(false)
 
-    const referenceElementNotifications = useRef<HTMLButtonElement>(null)
+    const [referenceElementNotifications, setReferenceElementNotifications] = useState<HTMLButtonElement | null>(null)
 
     const onAlertOpen = () => {
         setIsAlertDialogOpen(true)
@@ -55,7 +55,7 @@ export const AlertIcon = () => {
             <Button
                 variant="ghost_icon"
                 onClick={!isAlertDialogOpen ? onAlertOpen : onAlertClose}
-                ref={referenceElementNotifications}
+                ref={setReferenceElementNotifications}
             >
                 <Icon name={Icons.Notifications} size={24} />
                 {Object.entries(listAlerts).length !== 0 && ( //Alert banners
@@ -66,7 +66,7 @@ export const AlertIcon = () => {
                 onClose={onAlertClose}
                 open={isAlertDialogOpen}
                 placement={'bottom-end'}
-                anchorEl={referenceElementNotifications.current}
+                anchorEl={referenceElementNotifications}
             >
                 <StyledAlertPopoverHeader>
                     <Typography variant="h4">{TranslateText('Alerts')}</Typography>

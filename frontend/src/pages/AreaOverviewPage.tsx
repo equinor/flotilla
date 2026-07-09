@@ -3,7 +3,7 @@ import { InstallationContext } from 'components/Contexts/InstallationContext'
 import { Header } from 'components/Header/Header'
 import { NavBar } from 'components/Header/NavBar'
 import { useContext } from 'react'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { InspectionArea } from 'models/InspectionArea'
 import { MissionDefinition } from 'models/MissionDefinition'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
@@ -31,7 +31,6 @@ export const AreaOverviewPage = () => {
     const { missionDefinitions } = useMissionDefinitionsContext()
     const [selectedMissions, setSelectedMissions] = useState<MissionDefinition[]>()
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
-    const [isAlreadyScheduled, setIsAlreadyScheduled] = useState<boolean>(false)
     const [selectedInspectionArea, setSelectedInspectionArea] = useState<InspectionArea>()
     const [scrollOnToggle, setScrollOnToggle] = useState<boolean>(true)
 
@@ -61,7 +60,6 @@ export const AreaOverviewPage = () => {
     const isOngoing = (mission: MissionDefinition) => ongoingMissions.map((m) => m.missionId).includes(mission.id)
 
     const closeDialog = () => {
-        setIsAlreadyScheduled(false)
         setSelectedMissions([])
         setIsDialogOpen(false)
     }
@@ -72,10 +70,8 @@ export const AreaOverviewPage = () => {
         setSelectedMissions(sortedMissionDefinitions)
     }
 
-    useEffect(() => {
-        if (selectedMissions && selectedMissions.some((mission) => isOngoing(mission) || isScheduled(mission)))
-            setIsAlreadyScheduled(true)
-    }, [ongoingMissions, missionQueue, selectedMissions])
+    const isAlreadyScheduled =
+        !!selectedMissions && selectedMissions.some((mission) => isOngoing(mission) || isScheduled(mission))
 
     const unscheduledMissions = selectedMissions?.filter((m) => !isOngoing(m) && !isScheduled(m))
 
@@ -86,17 +82,6 @@ export const AreaOverviewPage = () => {
             ? inspectionAreaInspections[0].missionDefinitions
             : inspectionAreaInspections.find((d) => d.inspectionArea === inspectionArea)?.missionDefinitions
 
-    const InspectionAreaSelection = () => (
-        <InspectionAreaOverview>
-            <InspectionAreaCards
-                inspectionAreaMissions={inspectionAreaInspections}
-                onClickInspectionArea={onClickInspectionArea}
-                selectedInspectionArea={selectedInspectionArea}
-                handleScheduleAll={handleScheduleAll}
-            />
-        </InspectionAreaOverview>
-    )
-
     return (
         <>
             <Header alertDict={alerts} installation={installation} />
@@ -105,7 +90,14 @@ export const AreaOverviewPage = () => {
                 <InspectionAreaOverview>
                     {installationInspectionAreas.length !== 1 && (
                         <>
-                            <InspectionAreaSelection />
+                            <InspectionAreaOverview>
+                                <InspectionAreaCards
+                                    inspectionAreaMissions={inspectionAreaInspections}
+                                    onClickInspectionArea={onClickInspectionArea}
+                                    selectedInspectionArea={selectedInspectionArea}
+                                    handleScheduleAll={handleScheduleAll}
+                                />
+                            </InspectionAreaOverview>
                             {inspectionArea && selectedAreaMissionDefinitions && (
                                 <InspectionTable
                                     inspectionArea={inspectionArea}

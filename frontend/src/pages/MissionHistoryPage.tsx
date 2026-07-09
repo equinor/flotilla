@@ -139,20 +139,6 @@ const MissionHistoryViewComponent = () => {
     const checkBoxWhiteBackgroundColor = tokens.colors.ui.background__default.hex
     const backendApi = useBackendApi()
 
-    const FilterErrorDialog = () => (
-        <Dialog open={filterError !== ''} isDismissable onClose={() => clearFilterError()}>
-            <Dialog.Header>
-                <Dialog.Title>{TranslateText('Filter error')}</Dialog.Title>
-            </Dialog.Header>
-            <Dialog.CustomContent>
-                <Typography variant="body_short">{filterError}</Typography>
-            </Dialog.CustomContent>
-            <Dialog.Actions>
-                <Button onClick={() => clearFilterError()}>{TranslateText('Close')}</Button>
-            </Dialog.Actions>
-        </Dialog>
-    )
-
     const toDisplayValue = (
         filterName: string,
         value: boolean | string | number | MissionStatusFilterOptions[] | SensorType[]
@@ -200,6 +186,8 @@ const MissionHistoryViewComponent = () => {
                 if (page > paginatedMissions.pagination.TotalPages && paginatedMissions.pagination.TotalPages > 0) {
                     switchPage(paginatedMissions.pagination.TotalPages)
                     setIsResettingPage(true)
+                } else {
+                    setIsResettingPage(false)
                 }
                 setIsLoading(false)
             })
@@ -220,10 +208,6 @@ const MissionHistoryViewComponent = () => {
                 )
             })
     }, [page, pageSize, filterFunctions])
-
-    useEffect(() => {
-        if (isResettingPage) setIsResettingPage(false)
-    }, [isResettingPage])
 
     useEffect(() => {
         updateFilteredMissions()
@@ -257,42 +241,31 @@ const MissionHistoryViewComponent = () => {
         <HistoricMissionCard key={mission.id} mission={mission} />
     ))
 
-    const PaginationComponent = () => (
-        <StyledPagination
-            totalItems={paginationDetails!.TotalCount}
-            itemsPerPage={paginationDetails!.PageSize}
-            withItemIndicator
-            defaultPage={page}
-            onChange={(_, newPage) => onPageChange(newPage)}
-        ></StyledPagination>
-    )
-
     const onPageChange = (newPage: number) => {
         setIsLoading(true)
         switchPage(newPage)
     }
 
-    const ActiveFilterContent = () =>
-        flatten(filterState)
-            .filter((filter) => !filterFunctions.isSet(filter.name, filter.value))
-            .map((filter) => {
-                const valueToDisplay = toDisplayValue(filter.name, filter.value!)
-                const filterName = valueToDisplay ? `${TranslateText(filter.name)}: ` : TranslateText(filter.name)
-                return (
-                    <Chip
-                        style={{
-                            backgroundColor: checkBoxWhiteBackgroundColor,
-                            borderColor: checkBoxBorderColour,
-                            height: '2rem',
-                            paddingLeft: '10px',
-                        }}
-                        key={filter.name}
-                        onDelete={() => filterFunctions.removeFilter(filter.name)}
-                    >
-                        {filterName} {valueToDisplay}
-                    </Chip>
-                )
-            })
+    const activeFilterContent = flatten(filterState)
+        .filter((filter) => !filterFunctions.isSet(filter.name, filter.value))
+        .map((filter) => {
+            const valueToDisplay = toDisplayValue(filter.name, filter.value!)
+            const filterName = valueToDisplay ? `${TranslateText(filter.name)}: ` : TranslateText(filter.name)
+            return (
+                <Chip
+                    style={{
+                        backgroundColor: checkBoxWhiteBackgroundColor,
+                        borderColor: checkBoxBorderColour,
+                        height: '2rem',
+                        paddingLeft: '10px',
+                    }}
+                    key={filter.name}
+                    onDelete={() => filterFunctions.removeFilter(filter.name)}
+                >
+                    {filterName} {valueToDisplay}
+                </Chip>
+            )
+        })
 
     return (
         <TableWithHeader>
@@ -303,12 +276,22 @@ const MissionHistoryViewComponent = () => {
                         {TranslateText('Active Filters')}
                         {':'}
                     </Typography>
-                    <ActiveFilterList>
-                        <ActiveFilterContent />
-                    </ActiveFilterList>
+                    <ActiveFilterList>{activeFilterContent}</ActiveFilterList>
                 </StyledActiveFilterList>
             )}
-            {filterError && <FilterErrorDialog />}
+            {filterError && (
+                <Dialog open={filterError !== ''} isDismissable onClose={() => clearFilterError()}>
+                    <Dialog.Header>
+                        <Dialog.Title>{TranslateText('Filter error')}</Dialog.Title>
+                    </Dialog.Header>
+                    <Dialog.CustomContent>
+                        <Typography variant="body_short">{filterError}</Typography>
+                    </Dialog.CustomContent>
+                    <Dialog.Actions>
+                        <Button onClick={() => clearFilterError()}>{TranslateText('Close')}</Button>
+                    </Dialog.Actions>
+                </Dialog>
+            )}
             <StyledTable>
                 <HideColumnsOnSmallScreen>
                     <SmallScreenInfoText />
@@ -322,7 +305,13 @@ const MissionHistoryViewComponent = () => {
                         )}
                         <StyledTableCaption captionSide={'bottom'}>
                             {paginationDetails && paginationDetails.TotalPages > 1 && !isResettingPage && (
-                                <PaginationComponent />
+                                <StyledPagination
+                                    totalItems={paginationDetails.TotalCount}
+                                    itemsPerPage={paginationDetails.PageSize}
+                                    withItemIndicator
+                                    defaultPage={page}
+                                    onChange={(_, newPage) => onPageChange(newPage)}
+                                ></StyledPagination>
                             )}
                         </StyledTableCaption>
                         <Table.Head sticky>
