@@ -5,6 +5,7 @@ import { Pose } from 'models/Pose'
 import { tokens } from '@equinor/eds-tokens'
 import { MissionTaskDefinition } from 'models/MissionDefinition'
 import { Position } from 'models/Position'
+import { InspectionData } from 'models/InspectionRecord'
 
 const robotIcon = L.icon({
     iconUrl: robotPictogram,
@@ -51,6 +52,9 @@ export const getTaskMarkers = (map: L.Map, tasks: Task[]) => {
 export const getTaskDefinitionMarkers = (map: L.Map, tasks: MissionTaskDefinition[]) => {
     return tasks.map((task, index) => getPositionMarker(map, task.targetPosition, index + 1))
 }
+
+export const getInspectionMarkers = (map: L.Map, inspections: InspectionData[]) =>
+    inspections.map((inspection, index) => getPositionMarker(map, inspection.targetPosition, index + 1))
 
 const getRobotAuraMarker = (map: L.Map, robotPose: Pose) => {
     const msFromMinToMax = 2000

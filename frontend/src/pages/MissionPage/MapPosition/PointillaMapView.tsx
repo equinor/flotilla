@@ -7,14 +7,16 @@ import { PointillaMapInfo } from 'models/PointillaMapInfo'
 import styled, { createGlobalStyle } from 'styled-components'
 import { MapCompass } from 'utils/MapCompass'
 import { phone_width } from 'utils/constants'
-import { Mission } from 'models/Mission'
-import { getRobotMarker, getTaskDefinitionMarkers, getTaskMarkers } from './PointillaMapMarkers'
+import { getInspectionMarkers, getRobotMarker, getTaskDefinitionMarkers, getTaskMarkers } from './PointillaMapMarkers'
 import { useAllRobotPosesTelemetry, useRobotTelemetry } from 'hooks/useRobotTelemetry'
 import { InspectionArea, PolygonPoint } from 'models/InspectionArea'
 import 'utils/leaflet-overrides.css'
 import { useBackendApi } from 'api/UseBackendApi'
 import { useAssetContext } from 'components/Contexts/AssetContext'
-import { MissionDefinition } from 'models/MissionDefinition'
+import { MissionTaskDefinition } from 'models/MissionDefinition'
+import { RobotWithoutTelemetry } from 'models/Robot'
+import { Task } from 'models/Task'
+import { InspectionData } from 'models/InspectionRecord'
 
 const LeafletTooltipStyles = createGlobalStyle`
     .leaflet-tooltip.circleLabel {
@@ -56,13 +58,14 @@ const StyledMapContainer = styled(MapContainer)`
 type PlantMapProps = {
     plantCode: string
     floorId: string
-    mission: Mission
+    tasks: Task[]
+    robot: RobotWithoutTelemetry
 }
 
 type MissionDefinitionPlantMapProps = {
     plantCode: string
     floorId: string
-    missionDefinition: MissionDefinition
+    tasks: MissionTaskDefinition[]
 }
 
 type PlantPolygonMapProps = {
@@ -97,13 +100,11 @@ const setMapOptions = (map: L.Map, info: PointillaMapInfo) => {
 
 const updateIntervalRobotAuraInMS = 50
 
-export function PlantMap({ plantCode, floorId, mission }: PlantMapProps) {
+export function PlantMap({ plantCode, floorId, tasks, robot }: PlantMapProps) {
     const [mapInfo, setMapInfo] = useState<PointillaMapInfo | undefined>(undefined)
     const [map, setMap] = useState<L.Map | null>(null)
-    const { robotPose } = useRobotTelemetry(mission.robot)
+    const { robotPose } = useRobotTelemetry(robot)
     const backendApi = useBackendApi()
-
-    const tasks = mission?.tasks
 
     const loadMap = async () => {
         if (!map) return
@@ -170,12 +171,10 @@ export function PlantMap({ plantCode, floorId, mission }: PlantMapProps) {
     )
 }
 
-export function MissionDefinitionPlantMap({ plantCode, floorId, missionDefinition }: MissionDefinitionPlantMapProps) {
+export function MissionDefinitionPlantMap({ plantCode, floorId, tasks }: MissionDefinitionPlantMapProps) {
     const [mapInfo, setMapInfo] = useState<PointillaMapInfo | undefined>(undefined)
     const [map, setMap] = useState<L.Map | null>(null)
     const backendApi = useBackendApi()
-
-    const tasks = missionDefinition.tasks
 
     const loadMap = async () => {
         if (!map) return
@@ -197,6 +196,66 @@ export function MissionDefinitionPlantMap({ plantCode, floorId, missionDefinitio
     useEffect(() => {
         if (!tasks?.length || !map) return
         const taskMarkers = getTaskDefinitionMarkers(map, tasks)
+
+        const group = L.featureGroup(taskMarkers)
+        map.fitBounds(group.getBounds())
+
+        return () => {
+            taskMarkers.forEach((marker) => marker.remove())
+        }
+    }, [mapInfo])
+
+    return (
+        <div className="map-root">
+            <StyledElements>
+                <LeafletTooltipStyles />
+                <StyledMapContainer ref={setMap} attributionControl={false}>
+                    {mapInfo && <AuthTileLayer mapInfo={mapInfo} />}
+                </StyledMapContainer>
+                <MapCompass />
+            </StyledElements>
+        </div>
+    )
+}
+
+export function InspectionsPlantMap({
+    plantCode,
+    floorId,
+    inspections,
+}: {
+    plantCode: string
+    floorId: string
+    inspections: InspectionData[]
+}) {
+    const [mapInfo, setMapInfo] = useState<PointillaMapInfo | undefined>(undefined)
+    const [map, setMap] = useState<L.Map | null>(null)
+    const backendApi = useBackendApi()
+
+    const inspectionWithPositions = inspections.filter(
+        (i) => i.targetPosition !== null && i.targetPosition !== undefined
+    )
+
+    const loadMap = async () => {
+        if (!map) return
+        backendApi
+            .getFloorMapInfo(plantCode, floorId)
+            .then((info) => {
+                setMapInfo(info)
+                if (info) setMapOptions(map, info)
+            })
+            .catch((error) => {
+                console.error('Error loading map:', error)
+            })
+    }
+
+    useEffect(() => {
+        loadMap()
+    }, [plantCode, floorId, map])
+
+    useEffect(() => {
+        if (inspectionWithPositions.length <= 0 || !map) return
+
+        const taskMarkers = getInspectionMarkers(map, inspectionWithPositions)
 
         const group = L.featureGroup(taskMarkers)
         map.fitBounds(group.getBounds())

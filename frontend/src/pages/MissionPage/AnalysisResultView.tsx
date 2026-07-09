@@ -1,9 +1,7 @@
 import { Icon, Typography } from '@equinor/eds-core-react'
-import { Task } from 'models/Task'
 import { Icons } from 'utils/icons'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { formatDateTime } from 'utils/StringFormatting'
-import { useInspectionsContext } from 'components/Contexts/InspectionsContext'
 import {
     HiddenOnSmallScreen,
     StyledBottomContent,
@@ -18,89 +16,84 @@ import { TextAsImage, PendingResultPlaceholder } from 'pages/InspectionReportPag
 import styled from 'styled-components'
 import { useInspectionId } from 'pages/InspectionReportPage/SetInspectionIdHook'
 import { AnalysisOverviewDialogView } from 'pages/InspectionReportPage/ImageOverview'
+import { InspectionData } from 'models/InspectionRecord'
 
 interface InspectionDialogViewProps {
-    selectedAnalysisId: string
-    tasks: Task[]
+    selectedInspectionId: string
+    inspectionData: InspectionData[]
 }
 const StyledImage = styled.img<{ $otherContentHeight?: string }>`
     max-height: calc(60vh - ${(props) => props.$otherContentHeight});
     max-width: 100%;
     border: none;
 `
-const AnalysisImage = ({ inspectionId }: { inspectionId: string }) => {
-    const { useAnalysisData } = useInspectionsContext()
-    const { data, isPending } = useAnalysisData(inspectionId)
-
+const AnalysisImage = ({ sasURI, isPending }: { sasURI: string | undefined; isPending: boolean }) => {
     if (isPending) return <PendingResultPlaceholder isLargeImage={true} />
-    if (!data) return <TextAsImage isLargeImage={true} text="No inspection could be found" />
+    if (!sasURI) return <TextAsImage isLargeImage={true} text="No inspection could be found" />
 
-    return <StyledImage $otherContentHeight="0px" src={data} />
+    return <StyledImage $otherContentHeight="0px" src={sasURI} />
 }
 
-export const AnalysisResultDialogContent = ({ currentTask }: { currentTask: Task }) => {
+export const AnalysisResultDialogContent = ({ inspection }: { inspection: InspectionData }) => {
     const { TranslateText } = useLanguageContext()
 
     return (
         <div>
-            {currentTask.inspection.analysisResult?.storageAccount ? (
-                <AnalysisImage inspectionId={currentTask.inspection.isarInspectionId} />
+            {inspection.visualisedSAS ? (
+                <AnalysisImage sasURI={inspection.visualisedSAS} isPending={false} />
             ) : (
                 <>{/* No image to display*/}</>
             )}
             <StyledBottomContent>
                 <StyledInfoContent>
                     <Typography variant="caption">{TranslateText('Tag') + ':'}</Typography>
-                    <Typography variant="body_short">{currentTask.tagId}</Typography>
+                    <Typography variant="body_short">{inspection.tag}</Typography>
                 </StyledInfoContent>
-                {currentTask.description && (
+                {inspection.inspectionDescription && (
                     <StyledInfoContent>
                         <Typography variant="caption">{TranslateText('Description') + ':'}</Typography>
-                        <Typography variant="body_short">{currentTask.description}</Typography>
+                        <Typography variant="body_short">{inspection.inspectionDescription}</Typography>
                     </StyledInfoContent>
                 )}
-                {currentTask.endTime && (
+                {inspection.createdAt && (
                     <StyledInfoContent>
                         <Typography variant="caption">{TranslateText('Timestamp') + ':'}</Typography>
-                        <Typography variant="body_short">{formatDateTime(currentTask.endTime)}</Typography>
+                        <Typography variant="body_short">{formatDateTime(inspection.createdAt)}</Typography>
                     </StyledInfoContent>
                 )}
-                {currentTask.inspection.analysisResult?.warning && (
+                {inspection?.warning && (
                     <StyledInfoContent>
                         <Typography variant="caption">{TranslateText('Warning') + ':'}</Typography>
-                        <Typography variant="body_short">{currentTask.inspection.analysisResult.warning}</Typography>
+                        <Typography variant="body_short">{inspection.warning}</Typography>
                     </StyledInfoContent>
                 )}
-                {currentTask.inspection.analysisResult?.value && (
+                {inspection?.value && (
                     <StyledInfoContent>
                         <Typography variant="caption">{TranslateText('Value') + ':'}</Typography>
-                        <Typography variant="body_short">{currentTask.inspection.analysisResult.value}</Typography>
+                        <Typography variant="body_short">{inspection.value}</Typography>
                     </StyledInfoContent>
                 )}
-                {currentTask.inspection.analysisResult?.confidence !== undefined &&
-                    currentTask.inspection.analysisResult?.confidence !== null && (
-                        <StyledInfoContent>
-                            <Typography variant="caption">{TranslateText('Confidence') + ':'}</Typography>
-                            <Typography variant="body_short">
-                                {Math.round(currentTask.inspection.analysisResult.confidence) + '%'}
-                            </Typography>
-                        </StyledInfoContent>
-                    )}
+                {inspection?.confidence && (
+                    <StyledInfoContent>
+                        <Typography variant="caption">{TranslateText('Confidence') + ':'}</Typography>
+                        <Typography variant="body_short">{Math.round(inspection.confidence) + '%'}</Typography>
+                    </StyledInfoContent>
+                )}
             </StyledBottomContent>
         </div>
     )
 }
 
-export const AnalysisResultDialogView = ({ selectedAnalysisId, tasks }: InspectionDialogViewProps) => {
+export const AnalysisResultDialogView = ({ selectedInspectionId, inspectionData }: InspectionDialogViewProps) => {
     const { TranslateText } = useLanguageContext()
     const { switchSelectedAnalysisId } = useInspectionId()
 
     const onClose = () => switchSelectedAnalysisId(undefined)
 
-    const taskIndex = tasks.findIndex((t) => t.inspection.isarInspectionId == selectedAnalysisId)
-    const currentTask = tasks[taskIndex]
+    const inspectionIndex = inspectionData.findIndex((i) => i.inspectionId == selectedInspectionId)
+    const currentInspection = inspectionData[inspectionIndex]
 
-    if (!currentTask) {
+    if (!currentInspection) {
         return (
             <StyledDialog open={true} isDismissable onClose={onClose}>
                 <StyledDialogContent>
@@ -117,16 +110,16 @@ export const AnalysisResultDialogView = ({ selectedAnalysisId, tasks }: Inspecti
             <StyledDialogContent>
                 <StyledDialogHeader>
                     <Typography variant="accordion_header" group="ui">
-                        {TranslateText('Analysis result for task') + ' ' + (taskIndex + 1)}
+                        {TranslateText('Analysis result for task') + ' ' + (inspectionIndex + 1)}
                     </Typography>
                     <StyledCloseButton variant="ghost" onClick={onClose}>
                         <Icon name={Icons.Clear} size={24} />
                     </StyledCloseButton>
                 </StyledDialogHeader>
                 <StyledDialogInspectionView>
-                    <AnalysisResultDialogContent currentTask={currentTask} />
+                    <AnalysisResultDialogContent inspection={currentInspection} />
                     <HiddenOnSmallScreen>
-                        <AnalysisOverviewDialogView tasks={tasks} />
+                        <AnalysisOverviewDialogView inspectionData={inspectionData} />
                     </HiddenOnSmallScreen>
                 </StyledDialogInspectionView>
             </StyledDialogContent>

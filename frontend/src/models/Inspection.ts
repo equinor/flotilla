@@ -6,7 +6,6 @@ export interface Inspection {
     isarInspectionId: string
     isCompleted: boolean
     inspectionType: SensorType
-    analysisResult?: AnalysisResult
     inspectionTarget: Position
     videoDuration?: number
     acousticInspectionMetadata?: AcousticInspectionMetadata
@@ -15,18 +14,6 @@ export interface Inspection {
     taskDescription?: string
     startTime?: Date
     endTime?: Date
-}
-
-interface AnalysisResult {
-    inspectionId: string
-    analysisType: string
-    value?: string
-    unit?: string
-    confidence?: number
-    warning?: string
-    storageAccount?: string
-    blobContainer?: string
-    blobName?: string
 }
 
 export enum SensorType {
@@ -56,13 +43,6 @@ export interface AcousticInspectionMetadata {
     roi?: Roi
 }
 
-export enum DisplayMethod {
-    Image = 'Image',
-    Video = 'Video',
-    Number = 'Number',
-    None = 'None',
-}
-
 export const ValidInspectionReportInspectionTypes: SensorType[] = [
     SensorType.Image,
     SensorType.ThermalImage,
@@ -70,27 +50,3 @@ export const ValidInspectionReportInspectionTypes: SensorType[] = [
     SensorType.ThermalVideo,
     SensorType.AcousticMeasurement,
 ]
-
-export const SensorTypeToDisplayMethod: { [sensorType in SensorType]: DisplayMethod } = {
-    [SensorType.Image]: DisplayMethod.Image,
-    [SensorType.ThermalImage]: DisplayMethod.Image,
-    [SensorType.CO2Measurement]: DisplayMethod.Number,
-    [SensorType.Video]: DisplayMethod.Video,
-    [SensorType.ThermalVideo]: DisplayMethod.Video,
-    [SensorType.Audio]: DisplayMethod.None,
-    [SensorType.AcousticMeasurement]: DisplayMethod.Video,
-}
-
-export interface SaraInspectionVisualizationReady {
-    inspectionId: string
-}
-
-export interface SaraAnalysisResultReady {
-    inspectionId: string
-    analysisType: string
-    value?: number
-    unit?: string
-    class?: string
-    confidence?: number
-    warning?: string
-}

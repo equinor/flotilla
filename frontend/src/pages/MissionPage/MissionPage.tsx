@@ -11,7 +11,7 @@ import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'compon
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { useMediaStreamContext } from 'components/Contexts/MediaStreamContext'
 import { StyledCardsWidth, VideoStreamSection } from 'components/Styles/StyledComponents'
-import { InspectionDialogView } from '../InspectionReportPage/InspectionView'
+import { InspectionTaskDialogView } from '../InspectionReportPage/InspectionView'
 import { AnalysisOverviewSection, InspectionOverviewSection } from '../InspectionReportPage/ImageOverview'
 import { TaskTableAndMap } from './TaskTableAndMap'
 import { AnalysisResultDialogView } from './AnalysisResultView'
@@ -19,6 +19,8 @@ import { tokens } from '@equinor/eds-tokens'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useBackendApi } from 'api/UseBackendApi'
 import { InstallationContext } from 'components/Contexts/InstallationContext'
+import { useInspectionsContext } from 'components/Contexts/InspectionsContext'
+import { PendingResultPlaceholder, TextAsImage } from 'pages/InspectionReportPage/InspectionReportImage'
 
 const StyledMissionPageContent = styled.div`
     display: flex;
@@ -116,105 +118,102 @@ const useMissionSelector = (missionId: string | undefined, inspectionId: string 
     return { selectedMission, videoMediaStreams }
 }
 
-export const MissionPage = ({
-    missionId,
+const MissionPageWithMission = ({
+    mission,
+    videoMediaStreams,
     inspectionId,
     analysisId,
+    includeHeader = true,
 }: {
-    missionId: string | undefined
+    mission: Mission
+    videoMediaStreams: MediaStreamTrack[]
     inspectionId: string | undefined
     analysisId: string | undefined
+    includeHeader: boolean
 }) => {
-    const { selectedMission, videoMediaStreams } = useMissionSelector(missionId, undefined)
     const { alerts } = useAlertContext()
     const { installation } = useContext(InstallationContext)
-    const hasAnalysisType = selectedMission
-        ? selectedMission.tasks.some((task) => task.analysisTypes.length > 0)
-        : false
+    const { useSaraListData } = useInspectionsContext()
+
+    const hasAnalysisType = mission.tasks.some((task) => task.analysisTypes.length > 0)
+
+    const { data, isPending, isError } = useSaraListData(
+        mission.tasks.map((t) => t.inspection.isarInspectionId),
+        null,
+        null,
+        null,
+        null,
+        null
+    )
+
+    const taskDataInSelectedMission = mission.tasks.map((t) => ({
+        task: t,
+        data: data?.find((d) => d.inspectionId === t.inspection.isarInspectionId),
+    }))
 
     return (
         <>
-            <Header alertDict={alerts} installation={installation} />
+            {includeHeader ? <Header alertDict={alerts} installation={installation} /> : <></>}
             <StyledMissionPage>
-                {selectedMission !== undefined && (
-                    <StyledMissionPageContent>
-                        <MissionHeader mission={selectedMission} />
-                        <StyledMissionPageBody>
-                            <StyledCardsWidth>
-                                <TaskTableAndMap mission={selectedMission} />
-                                <VideoStreamSection>
-                                    {videoMediaStreams && videoMediaStreams.length > 0 && (
-                                        <VideoStreamWindow videoStreams={videoMediaStreams} />
-                                    )}
-                                </VideoStreamSection>
-                                {inspectionId && (
-                                    <InspectionDialogView
-                                        selectedInspectionId={inspectionId}
-                                        tasks={selectedMission.tasks}
-                                    />
-                                )}
-                                {analysisId && (
-                                    <AnalysisResultDialogView
-                                        selectedAnalysisId={analysisId}
-                                        tasks={selectedMission.tasks}
-                                    />
-                                )}
-                                <InspectionOverviewSection tasks={selectedMission.tasks} />
-                                {hasAnalysisType && <AnalysisOverviewSection tasks={selectedMission.tasks} />}
-                            </StyledCardsWidth>
-                        </StyledMissionPageBody>
-                    </StyledMissionPageContent>
-                )}
-            </StyledMissionPage>
-        </>
-    )
-}
-
-export const SimpleMissionPage = ({
-    missionId,
-    inspectionId,
-    analysisId,
-}: {
-    missionId: string | undefined
-    inspectionId: string | undefined
-    analysisId: string | undefined
-}) => {
-    const { selectedMission, videoMediaStreams } = useMissionSelector(missionId, inspectionId ?? analysisId)
-    const hasAnalysisType = selectedMission
-        ? selectedMission.tasks.some((task) => task.analysisTypes.length > 0)
-        : false
-
-    return (
-        <StyledMissionPage>
-            {selectedMission !== undefined && (
                 <StyledMissionPageContent>
-                    <SimpleMissionHeader mission={selectedMission} />
+                    {includeHeader ? <MissionHeader mission={mission} /> : <SimpleMissionHeader mission={mission} />}
                     <StyledMissionPageBody>
                         <StyledCardsWidth>
-                            <TaskTableAndMap mission={selectedMission} />
+                            <TaskTableAndMap
+                                tasksAndData={taskDataInSelectedMission}
+                                plantCode={mission.inspectionArea.plantCode}
+                                robot={mission.robot}
+                            />
                             <VideoStreamSection>
                                 {videoMediaStreams && videoMediaStreams.length > 0 && (
                                     <VideoStreamWindow videoStreams={videoMediaStreams} />
                                 )}
                             </VideoStreamSection>
-                            {inspectionId && (
-                                <InspectionDialogView
-                                    selectedInspectionId={inspectionId}
-                                    tasks={selectedMission.tasks}
-                                />
+                            {inspectionId && data && (
+                                <InspectionTaskDialogView selectedInspectionId={inspectionId} inspectionData={data} />
                             )}
-                            {analysisId && (
-                                <AnalysisResultDialogView
-                                    selectedAnalysisId={analysisId}
-                                    tasks={selectedMission.tasks}
-                                />
+                            {analysisId && data && (
+                                <AnalysisResultDialogView selectedInspectionId={analysisId} inspectionData={data} />
                             )}
-                            <InspectionOverviewSection tasks={selectedMission.tasks} />
-                            {hasAnalysisType && <AnalysisOverviewSection tasks={selectedMission.tasks} />}
+                            {!isPending && data && <InspectionOverviewSection inspectionData={data} />}
+                            {!isPending && hasAnalysisType && data && <AnalysisOverviewSection inspectionData={data} />}
+                            {isPending && <PendingResultPlaceholder isLargeImage={true} />}
+                            {isError && <TextAsImage isLargeImage={true} text={'No inspection could be found'} />}
                         </StyledCardsWidth>
                     </StyledMissionPageBody>
                 </StyledMissionPageContent>
-            )}
-        </StyledMissionPage>
+            </StyledMissionPage>
+        </>
+    )
+}
+
+export const MissionPage = ({
+    missionId,
+    inspectionId,
+    analysisId,
+    includeHeader = true,
+}: {
+    missionId: string | undefined
+    inspectionId: string | undefined
+    analysisId: string | undefined
+    includeHeader: boolean
+}) => {
+    const { selectedMission, videoMediaStreams } = useMissionSelector(missionId, undefined)
+    const { alerts } = useAlertContext()
+    const { installation } = useContext(InstallationContext)
+
+    return selectedMission ? (
+        <MissionPageWithMission
+            mission={selectedMission}
+            videoMediaStreams={videoMediaStreams}
+            inspectionId={inspectionId}
+            analysisId={analysisId}
+            includeHeader={includeHeader}
+        />
+    ) : (
+        <>
+            {includeHeader ? <Header alertDict={alerts} installation={installation} /> : <></>}
+            <StyledMissionPage />
+        </>
     )
 }

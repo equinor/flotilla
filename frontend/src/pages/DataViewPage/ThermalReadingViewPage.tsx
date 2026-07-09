@@ -1,7 +1,8 @@
 import { useContext } from 'react'
 import { Navigate } from 'react-router-dom'
 import { InstallationContext } from 'components/Contexts/InstallationContext'
-import { AnalysisTypes, DataView } from './DataView'
+import { DataView } from './DataView'
+import { AnalysisType } from 'models/MissionDefinition'
 
 const THERMAL_READING_INSTALLATION_CODE = 'KAA'
 
@@ -14,7 +15,7 @@ export const ThermalReadingViewPage = () => {
 
     return (
         <DataView
-            analysisType={AnalysisTypes.ThermalReading}
+            analysisType={AnalysisType.ThermalReading}
             pageTitle="Data View for Thermal Reading for Pumps"
             plotTitle="Estimated maximum temperature"
             plotAriaLabel="Estimated maximum temperature"

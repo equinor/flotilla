@@ -3,8 +3,8 @@ import { tokens } from '@equinor/eds-tokens'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { StyledTable, StyledTableCell } from 'components/Styles/StyledComponents'
 import { DescriptionDisplay, TagIdDisplay } from 'components/Displays/TaskDisplay'
-import { Task } from 'models/Task'
 import { formatDateTime } from 'utils/StringFormatting'
+import { InspectionData } from 'models/InspectionRecord'
 
 const unitDisplaySymbols: Record<string, string> = {
     celsius: '°C',
@@ -21,13 +21,13 @@ const formatUnit = (unit?: string): string => {
 }
 
 export const DataViewTable = ({
-    tasks,
-    selectedTagId,
-    onSelectTag,
+    inspectionData,
+    selectedInspectionId,
+    onSelectInspection,
 }: {
-    tasks: Task[]
-    selectedTagId: string | null
-    onSelectTag: (tagId: string | null) => void
+    inspectionData: InspectionData[]
+    selectedInspectionId: string | undefined
+    onSelectInspection: (inspectionId: string | undefined) => void
 }) => {
     const { TranslateText } = useLanguageContext()
 
@@ -43,25 +43,21 @@ export const DataViewTable = ({
                 </Table.Row>
             </Table.Head>
             <Table.Body>
-                {tasks &&
-                    tasks.map((task, index) => {
-                        const isSelected = !!task.tagId && task.tagId === selectedTagId
-                        const taskHasWarning = !!task.inspection.analysisResult?.warning
+                {inspectionData &&
+                    inspectionData.map((inspection, index) => {
+                        const isSelected = inspection.inspectionId === selectedInspectionId
+                        const taskHasWarning = inspection.warning
                         const backgroundColor = isSelected
                             ? tokens.colors.interactive.primary__selected_highlight.hex
                             : taskHasWarning
                               ? tokens.colors.interactive.danger__highlight.hex
                               : undefined
-
                         return (
                             <Table.Row
-                                key={task.id}
-                                onClick={() => {
-                                    if (!task.tagId) return
-                                    onSelectTag(isSelected ? null : task.tagId)
-                                }}
+                                key={inspection.inspectionId + 'data view table row'}
+                                onClick={() => onSelectInspection(isSelected ? undefined : inspection.inspectionId)}
                                 style={{
-                                    cursor: task.tagId ? 'pointer' : 'default',
+                                    cursor: inspection.tag ? 'pointer' : 'default',
                                     backgroundColor,
                                 }}
                             >
@@ -71,16 +67,15 @@ export const DataViewTable = ({
                                     </Chip>
                                 </Table.Cell>
                                 <Table.Cell>
-                                    <TagIdDisplay task={task} index={index} />
+                                    <TagIdDisplay tagId={inspection.tag} index={index} />
                                 </Table.Cell>
                                 <Table.Cell>
-                                    <DescriptionDisplay task={task} index={index} />
+                                    <DescriptionDisplay description={inspection.inspectionDescription} index={index} />
                                 </Table.Cell>
-                                {task.inspection.analysisResult?.value ? (
+                                {inspection.value ? (
                                     <Table.Cell>
                                         <Typography>
-                                            {Math.round(parseFloat(task.inspection.analysisResult?.value)) +
-                                                formatUnit(task.inspection.analysisResult?.unit)}
+                                            {Math.round(parseFloat(inspection.value)) + formatUnit(inspection.unit)}
                                         </Typography>
                                     </Table.Cell>
                                 ) : (
@@ -88,9 +83,9 @@ export const DataViewTable = ({
                                         <Typography>{TranslateText('Not available')}</Typography>
                                     </Table.Cell>
                                 )}
-                                {task.endTime && (
+                                {inspection.createdAt && (
                                     <Table.Cell>
-                                        <Typography>{formatDateTime(task.endTime)}</Typography>
+                                        <Typography>{formatDateTime(inspection.createdAt)}</Typography>
                                     </Table.Cell>
                                 )}
                             </Table.Row>

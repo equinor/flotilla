@@ -1,5 +1,4 @@
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { Task, TaskStatus } from 'models/Task'
 import {
     StyledImageCard,
     StyledImagesSection,
@@ -13,81 +12,98 @@ import { Typography } from '@equinor/eds-core-react'
 import { formatDateTime } from 'utils/StringFormatting'
 import { SmallAnalysisResult, SmallInspectionResult } from 'pages/InspectionReportPage/InspectionReportImage'
 import { useInspectionId } from './SetInspectionIdHook'
+import { InspectionData } from 'models/InspectionRecord'
 
 type OverviewVariant = 'inspection' | 'analysis'
 
-const ImageOverview = ({ tasks, variant }: { tasks: Task[]; variant: OverviewVariant }) => {
+const ImageOverview = ({ inspectionData, variant }: { inspectionData: InspectionData[]; variant: OverviewVariant }) => {
     const { TranslateText } = useLanguageContext()
     const { switchSelectedInspectionId, switchSelectedAnalysisId } = useInspectionId()
 
     const onSelect = variant === 'analysis' ? switchSelectedAnalysisId : switchSelectedInspectionId
-    const renderImage = (task: Task) =>
-        variant === 'analysis' ? <SmallAnalysisResult task={task} /> : <SmallInspectionResult task={task} />
+    const renderImage = (inspection: InspectionData) =>
+        variant === 'analysis' ? (
+            <SmallAnalysisResult inspectionId={inspection.inspectionId} />
+        ) : (
+            <SmallInspectionResult inspection={inspection} />
+        )
 
     return (
         <StyledImagesSection>
             <StyledInspectionCards>
-                {tasks.map(
-                    (task) =>
-                        task.status === TaskStatus.Successful && (
-                            <StyledImageCard key={task.id} onClick={() => onSelect(task.inspection.isarInspectionId)}>
-                                {renderImage(task)}
-                                <StyledInspectionData>
-                                    {task.tagId && (
-                                        <StyledInspectionContent>
-                                            <Typography variant="caption">{TranslateText('Tag') + ':'}</Typography>
-                                            <Typography variant="body_short">{task.tagId}</Typography>
-                                        </StyledInspectionContent>
-                                    )}
-                                    {task.endTime && (
-                                        <StyledInspectionContent>
-                                            <Typography variant="caption">
-                                                {TranslateText('Timestamp') + ':'}
-                                            </Typography>
-                                            <Typography variant="body_short">
-                                                {formatDateTime(task.endTime!)}
-                                            </Typography>
-                                        </StyledInspectionContent>
-                                    )}
-                                </StyledInspectionData>
-                            </StyledImageCard>
-                        )
-                )}
+                {inspectionData.map((inspection) => (
+                    <StyledImageCard key={inspection.inspectionId} onClick={() => onSelect(inspection.inspectionId)}>
+                        {renderImage(inspection)}
+                        <StyledInspectionData>
+                            {inspection.tag && (
+                                <StyledInspectionContent>
+                                    <Typography variant="caption">{TranslateText('Tag') + ':'}</Typography>
+                                    <Typography variant="body_short">{inspection.tag}</Typography>
+                                </StyledInspectionContent>
+                            )}
+                            {inspection.createdAt && (
+                                <StyledInspectionContent>
+                                    <Typography variant="caption">{TranslateText('Timestamp') + ':'}</Typography>
+                                    <Typography variant="body_short">{formatDateTime(inspection.createdAt)}</Typography>
+                                </StyledInspectionContent>
+                            )}
+                        </StyledInspectionData>
+                    </StyledImageCard>
+                ))}
             </StyledInspectionCards>
         </StyledImagesSection>
     )
 }
 
-const OverviewSection = ({ tasks, variant, title }: { tasks: Task[]; variant: OverviewVariant; title: string }) => {
-    if (!tasks.some((task) => task.status === TaskStatus.Successful)) return <></>
-    return (
-        <StyledInspectionOverviewSection>
-            <Typography variant="h4">{title}</Typography>
-            <ImageOverview tasks={tasks} variant={variant} />
-        </StyledInspectionOverviewSection>
-    )
-}
+const OverviewSection = ({
+    inspectionData,
+    variant,
+    title,
+}: {
+    inspectionData: InspectionData[]
+    variant: OverviewVariant
+    title: string
+}) => (
+    <StyledInspectionOverviewSection>
+        <Typography variant="h4">{title}</Typography>
+        <ImageOverview inspectionData={inspectionData} variant={variant} />
+    </StyledInspectionOverviewSection>
+)
 
-const OverviewDialogView = ({ tasks, variant }: { tasks: Task[]; variant: OverviewVariant }) => (
+const OverviewDialogView = ({
+    inspectionData,
+    variant,
+}: {
+    inspectionData: InspectionData[]
+    variant: OverviewVariant
+}) => (
     <StyledInspectionOverviewDialogView>
-        <ImageOverview tasks={tasks} variant={variant} />
+        <ImageOverview inspectionData={inspectionData} variant={variant} />
     </StyledInspectionOverviewDialogView>
 )
 
-export const InspectionOverviewSection = ({ tasks }: { tasks: Task[] }) => {
+export const InspectionOverviewSection = ({ inspectionData }: { inspectionData: InspectionData[] }) => {
     const { TranslateText } = useLanguageContext()
-    return <OverviewSection tasks={tasks} variant="inspection" title={TranslateText('Inspection result')} />
+    return (
+        <OverviewSection
+            inspectionData={inspectionData}
+            variant="inspection"
+            title={TranslateText('Inspection result')}
+        />
+    )
 }
 
-export const AnalysisOverviewSection = ({ tasks }: { tasks: Task[] }) => {
+export const AnalysisOverviewSection = ({ inspectionData }: { inspectionData: InspectionData[] }) => {
     const { TranslateText } = useLanguageContext()
-    return <OverviewSection tasks={tasks} variant="analysis" title={TranslateText('Analysis result')} />
+    return (
+        <OverviewSection inspectionData={inspectionData} variant="analysis" title={TranslateText('Analysis result')} />
+    )
 }
 
-export const InspectionOverviewDialogView = ({ tasks }: { tasks: Task[] }) => (
-    <OverviewDialogView tasks={tasks} variant="inspection" />
+export const InspectionOverviewDialogView = ({ inspectionData }: { inspectionData: InspectionData[] }) => (
+    <OverviewDialogView inspectionData={inspectionData} variant="inspection" />
 )
 
-export const AnalysisOverviewDialogView = ({ tasks }: { tasks: Task[] }) => (
-    <OverviewDialogView tasks={tasks} variant="analysis" />
+export const AnalysisOverviewDialogView = ({ inspectionData }: { inspectionData: InspectionData[] }) => (
+    <OverviewDialogView inspectionData={inspectionData} variant="analysis" />
 )

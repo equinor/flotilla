@@ -10,16 +10,22 @@ import { useInspectionId } from 'pages/InspectionReportPage/SetInspectionIdHook'
 import { DescriptionDisplay, TagIdDisplay } from 'components/Displays/TaskDisplay'
 import { StyledTable, StyledTableBody, StyledTableCell, StyledTableRow } from 'components/Styles/StyledComponents'
 import { MissionTaskDefinition } from 'models/MissionDefinition'
+import { InspectionData } from 'models/InspectionRecord'
+
+export interface TaskAndData {
+    task: Task
+    data: InspectionData | undefined
+}
 
 interface TaskTableProps {
-    tasks: Task[]
+    tasksAndData: TaskAndData[]
 }
 
 interface MissionDefinitionTaskTableProps {
     tasks: MissionTaskDefinition[]
 }
 
-export const TaskTable = ({ tasks }: TaskTableProps) => {
+export const TaskTable = ({ tasksAndData }: TaskTableProps) => {
     const { TranslateText } = useLanguageContext()
 
     return (
@@ -31,12 +37,20 @@ export const TaskTable = ({ tasks }: TaskTableProps) => {
                     <StyledTableCell>{TranslateText('Description')}</StyledTableCell>
                     <StyledTableCell>{TranslateText('Inspection Types')}</StyledTableCell>
                     <StyledTableCell>{TranslateText('Status')}</StyledTableCell>
-                    {tasks.some((t) => t.inspection.analysisResult) && (
-                        <StyledTableCell>{TranslateText('Analysis')}</StyledTableCell>
-                    )}
+                    <StyledTableCell>{TranslateText('Analysis')}</StyledTableCell>
                 </Table.Row>
             </Table.Head>
-            <StyledTableBody>{tasks && <TaskTableRows tasks={tasks} />}</StyledTableBody>
+            <StyledTableBody>
+                {tasksAndData &&
+                    tasksAndData.map((taskAndData, index) => (
+                        <TaskTableRow
+                            key={taskAndData.task.id + 'tasktable'}
+                            task={taskAndData.task}
+                            inspectionData={taskAndData.data}
+                            index={index}
+                        />
+                    ))}
+            </StyledTableBody>
         </StyledTable>
     )
 }
@@ -58,47 +72,48 @@ export const MissionDefinitionTaskTable = ({ tasks }: MissionDefinitionTaskTable
     )
 }
 
-const TaskTableRows = ({ tasks }: TaskTableProps) => {
-    const rows = tasks.map((task, index) => {
-        const order: number = index + 1
-        const rowStyle =
-            task.status === TaskStatus.InProgress || task.status === TaskStatus.Paused
-                ? { background: tokens.colors.infographic.primary__mist_blue.hex }
-                : task.inspection.analysisResult?.warning
-                  ? { background: tokens.colors.interactive.danger__highlight.hex }
-                  : {}
-        const markerColors = getColorsFromTaskStatus(task.status)
+const TaskTableRow = ({
+    task,
+    inspectionData,
+    index,
+}: {
+    task: Task
+    inspectionData: InspectionData | undefined
+    index: number
+}) => {
+    const order: number = index + 1
+    const rowStyle =
+        task.status === TaskStatus.InProgress || task.status === TaskStatus.Paused
+            ? { background: tokens.colors.infographic.primary__mist_blue.hex }
+            : inspectionData?.warning
+              ? { background: tokens.colors.interactive.danger__highlight.hex }
+              : {}
+    const markerColors = getColorsFromTaskStatus(task.status)
 
-        return (
-            <StyledTableRow key={task.id} style={rowStyle}>
-                <Table.Cell>
-                    <Chip style={{ background: markerColors.fillColor }}>
-                        <Typography variant="body_short_bold" style={{ color: markerColors.textColor }}>
-                            {order}
-                        </Typography>
-                    </Chip>
-                </Table.Cell>
-                <Table.Cell>
-                    <TagIdDisplay task={task} index={index} />
-                </Table.Cell>
-                <Table.Cell>
-                    <DescriptionDisplay task={task} index={index} />
-                </Table.Cell>
-                <Table.Cell>
-                    <InspectionTypesDisplay task={task} />
-                </Table.Cell>
-                <Table.Cell>
-                    <TaskStatusDisplay status={task.status} errorMessage={task.errorDescription} />
-                </Table.Cell>
-                {tasks.some((t) => t.inspection.analysisResult) && (
-                    <Table.Cell>
-                        {task.inspection.analysisResult ? <TaskAnalysisDisplay task={task} /> : <></>}
-                    </Table.Cell>
-                )}
-            </StyledTableRow>
-        )
-    })
-    return <>{rows}</>
+    return (
+        <StyledTableRow key={task.id} style={rowStyle}>
+            <Table.Cell>
+                <Chip style={{ background: markerColors.fillColor }}>
+                    <Typography variant="body_short_bold" style={{ color: markerColors.textColor }}>
+                        {order}
+                    </Typography>
+                </Chip>
+            </Table.Cell>
+            <Table.Cell>
+                <TagIdDisplay tagId={task.tagId} index={index} />
+            </Table.Cell>
+            <Table.Cell>
+                <DescriptionDisplay description={task.description} index={index} />
+            </Table.Cell>
+            <Table.Cell>
+                <InspectionTypesDisplay task={task} />
+            </Table.Cell>
+            <Table.Cell>
+                <TaskStatusDisplay status={task.status} errorMessage={task.errorDescription} />
+            </Table.Cell>
+            <Table.Cell>{inspectionData ? <TaskAnalysisDisplay inspectionData={inspectionData} /> : <></>}</Table.Cell>
+        </StyledTableRow>
+    )
 }
 
 const MissionDefinitionTaskTableRows = ({ tasks }: MissionDefinitionTaskTableProps) => {
@@ -113,10 +128,10 @@ const MissionDefinitionTaskTableRows = ({ tasks }: MissionDefinitionTaskTablePro
                     </Chip>
                 </Table.Cell>
                 <Table.Cell>
-                    <TagIdDisplay task={task} index={index} />
+                    <TagIdDisplay tagId={task.tagId} index={index} />
                 </Table.Cell>
                 <Table.Cell>
-                    <DescriptionDisplay task={task} index={index} />
+                    <DescriptionDisplay description={task.description} index={index} />
                 </Table.Cell>
             </StyledTableRow>
         )

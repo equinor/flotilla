@@ -913,18 +913,8 @@ namespace Api.EventHandlers
             // the full list and emit one persist + SignalR event per inspection.
             var inspectionId = saraAnalysisResult.InspectionIds[0];
 
-            var analysisResult = new AnalysisResultDto
-            {
-                InspectionId = inspectionId,
-                AnalysisType = saraAnalysisResult.AnalysisType,
-                Value = saraAnalysisResult.Value,
-                Unit = saraAnalysisResult.Unit,
-                Warning = saraAnalysisResult.Warning,
-                Confidence = saraAnalysisResult.Confidence,
-            };
-
             var missionRun = await MissionRunService.ReadByIsarInspectionId(
-                analysisResult.InspectionId,
+                inspectionId,
                 readOnly: true
             );
 
@@ -942,7 +932,12 @@ namespace Api.EventHandlers
             _ = SignalRService.SendMessageAsync(
                 "Analysis Result Ready",
                 installation,
-                analysisResult
+                new AnalysisResultMessage()
+                {
+                    InspectionId = inspectionId,
+                    AnalysisType = saraAnalysisResult.AnalysisType,
+                    InstallationCode = installation.InstallationCode,
+                }
             );
         }
     }

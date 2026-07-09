@@ -44,4 +44,16 @@ namespace Api.Mqtt.MessageModels
         [JsonPropertyName("blobName")]
         public string? BlobName { get; set; }
     }
+
+    public class AnalysisResultMessage
+    {
+        [JsonPropertyName("inspectionId")]
+        public required string InspectionId { get; set; }
+
+        [JsonPropertyName("analysisType")]
+        public required AnalysisType AnalysisType { get; set; }
+
+        [JsonPropertyName("installationCode")]
+        public required string InstallationCode { get; set; }
+    }
 }
