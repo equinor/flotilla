@@ -7,6 +7,7 @@ import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'compon
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { useBackendApi } from 'api/UseBackendApi'
 import { InstallationContext } from './InstallationContext'
+import { useOnPageVisible } from 'hooks/usePageVisibility'
 
 interface IMissionDefinitionsContext {
     missionDefinitions: MissionDefinition[]
@@ -67,37 +68,42 @@ const useMissionDefinitions = (): IMissionDefinitionsContext => {
         }
     }, [registerEvent, connectionReady])
 
+    const fetchAndUpdateMissionDefinitions = () => {
+        backendApi
+            .getMissionDefinitions({
+                installationCode: installation.installationCode,
+                pageSize: 100,
+                orderBy: 'InstallationCode installationCode',
+            })
+            .then((response) => {
+                const missionDefinitionsInInstallation = response.content
+                setMissionDefinitions(missionDefinitionsInInstallation ?? [])
+            })
+            .catch(() => {
+                setAlert(
+                    AlertType.RequestFail,
+                    <FailedRequestAlertContent
+                        translatedMessage={TranslateText('Failed to retrieve inspection plans')}
+                    />,
+                    AlertCategory.ERROR
+                )
+                setListAlert(
+                    AlertType.RequestFail,
+                    <FailedRequestAlertListContent
+                        translatedMessage={TranslateText('Failed to retrieve inspection plans')}
+                    />,
+                    AlertCategory.ERROR
+                )
+            })
+    }
+
     useEffect(() => {
-        const fetchAndUpdateMissionDefinitions = () => {
-            backendApi
-                .getMissionDefinitions({
-                    installationCode: installation.installationCode,
-                    pageSize: 100,
-                    orderBy: 'InstallationCode installationCode',
-                })
-                .then((response) => {
-                    const missionDefinitionsInInstallation = response.content
-                    setMissionDefinitions(missionDefinitionsInInstallation ?? [])
-                })
-                .catch(() => {
-                    setAlert(
-                        AlertType.RequestFail,
-                        <FailedRequestAlertContent
-                            translatedMessage={TranslateText('Failed to retrieve inspection plans')}
-                        />,
-                        AlertCategory.ERROR
-                    )
-                    setListAlert(
-                        AlertType.RequestFail,
-                        <FailedRequestAlertListContent
-                            translatedMessage={TranslateText('Failed to retrieve inspection plans')}
-                        />,
-                        AlertCategory.ERROR
-                    )
-                })
-        }
         fetchAndUpdateMissionDefinitions()
     }, [installation])
+
+    useOnPageVisible(() => {
+        fetchAndUpdateMissionDefinitions()
+    })
 
     const filteredMissionDefinitions = useMemo(
         () =>

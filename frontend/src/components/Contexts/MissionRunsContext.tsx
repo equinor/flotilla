@@ -9,6 +9,7 @@ import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { useBackendApi } from 'api/UseBackendApi'
 import { AuthContext } from './AuthContext'
 import { InstallationContext } from './InstallationContext'
+import { useOnPageVisible } from 'hooks/usePageVisibility'
 
 const upsertMissionList = (list: Mission[], mission: Mission) => {
     const newMissionList = [...list]
@@ -135,55 +136,53 @@ const useMissionRuns = (): IMissionRunsContext => {
         }
     }, [registerEvent, connectionReady])
 
+    const fetchAndUpdateMissions = () => {
+        const onFetchError = () => {
+            setAlert(
+                AlertType.RequestFail,
+                <FailedRequestAlertContent translatedMessage={TranslateText('Failed to retrieve mission runs')} />,
+                AlertCategory.ERROR
+            )
+            setListAlert(
+                AlertType.RequestFail,
+                <FailedRequestAlertListContent translatedMessage={TranslateText('Failed to retrieve mission runs')} />,
+                AlertCategory.ERROR
+            )
+        }
+
+        fetchMissionRuns({
+            installationCode: installation.installationCode,
+            statuses: [MissionStatus.Ongoing, MissionStatus.Pending, MissionStatus.Paused],
+            pageSize: 100,
+            orderBy: 'StartTime desc',
+        })
+            .then((ongoing) => setOngoingMissions(ongoing ?? []))
+            .catch(() => {
+                onFetchError()
+                setOngoingMissions([])
+            })
+
+        fetchMissionRuns({
+            installationCode: installation.installationCode,
+            statuses: [MissionStatus.Queued],
+            pageSize: 100,
+            orderBy: 'CreationTime',
+        })
+            .then((queue) => setMissionQueue(queue ?? []))
+            .catch(() => {
+                onFetchError()
+                setMissionQueue([])
+            })
+    }
+
     useEffect(() => {
         if (!isAuthenticated) return
-        const fetchAndUpdateMissions = async () => {
-            const ongoing = await fetchMissionRuns({
-                installationCode: installation.installationCode,
-                statuses: [MissionStatus.Ongoing, MissionStatus.Pending, MissionStatus.Paused],
-                pageSize: 100,
-                orderBy: 'StartTime desc',
-            }).catch(() => {
-                setAlert(
-                    AlertType.RequestFail,
-                    <FailedRequestAlertContent translatedMessage={TranslateText('Failed to retrieve mission runs')} />,
-                    AlertCategory.ERROR
-                )
-                setListAlert(
-                    AlertType.RequestFail,
-                    <FailedRequestAlertListContent
-                        translatedMessage={TranslateText('Failed to retrieve mission runs')}
-                    />,
-                    AlertCategory.ERROR
-                )
-            })
-
-            setOngoingMissions(ongoing ?? [])
-
-            const queue = await fetchMissionRuns({
-                installationCode: installation.installationCode,
-                statuses: [MissionStatus.Queued],
-                pageSize: 100,
-                orderBy: 'CreationTime',
-            }).catch(() => {
-                setAlert(
-                    AlertType.RequestFail,
-                    <FailedRequestAlertContent translatedMessage={TranslateText('Failed to retrieve mission runs')} />,
-                    AlertCategory.ERROR
-                )
-                setListAlert(
-                    AlertType.RequestFail,
-                    <FailedRequestAlertListContent
-                        translatedMessage={TranslateText('Failed to retrieve mission runs')}
-                    />,
-                    AlertCategory.ERROR
-                )
-            })
-
-            setMissionQueue(queue ?? [])
-        }
         fetchAndUpdateMissions()
     }, [installation])
+
+    useOnPageVisible(() => {
+        if (isAuthenticated) fetchAndUpdateMissions()
+    })
 
     const filteredOngoingMissions = useMemo(
         () => ongoingMissions.filter((m) => m.installationCode === installation.installationCode),
