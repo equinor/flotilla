@@ -8,6 +8,7 @@ import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { InspectionArea } from 'models/InspectionArea'
 import { useBackendApi } from 'api/UseBackendApi'
 import { InstallationContext } from './InstallationContext'
+import { useOnPageVisible } from 'hooks/usePageVisibility'
 
 const upsertRobotList = (list: RobotWithoutTelemetry[], robot: RobotWithoutTelemetry) => {
     const newList = [...list]
@@ -98,27 +99,28 @@ export const AssetProvider: FC<Props> = ({ children }) => {
         }
     }, [registerEvent, connectionReady])
 
+    const fetchEnabledRobots = () => {
+        backendApi
+            .getEnabledRobots()
+            .then((robots) => {
+                setEnabledRobots(robots)
+            })
+            .catch(() => {
+                setAlert(
+                    AlertType.RequestFail,
+                    <FailedRequestAlertContent translatedMessage={TranslateText('Failed to retrieve robots')} />,
+                    AlertCategory.ERROR
+                )
+                setListAlert(
+                    AlertType.RequestFail,
+                    <FailedRequestAlertListContent translatedMessage={TranslateText('Failed to retrieve robots')} />,
+                    AlertCategory.ERROR
+                )
+            })
+    }
+
     useEffect(() => {
-        if (!enabledRobots || enabledRobots.length === 0)
-            backendApi
-                .getEnabledRobots()
-                .then((robots) => {
-                    setEnabledRobots(robots)
-                })
-                .catch(() => {
-                    setAlert(
-                        AlertType.RequestFail,
-                        <FailedRequestAlertContent translatedMessage={TranslateText('Failed to retrieve robots')} />,
-                        AlertCategory.ERROR
-                    )
-                    setListAlert(
-                        AlertType.RequestFail,
-                        <FailedRequestAlertListContent
-                            translatedMessage={TranslateText('Failed to retrieve robots')}
-                        />,
-                        AlertCategory.ERROR
-                    )
-                })
+        if (!enabledRobots || enabledRobots.length === 0) fetchEnabledRobots()
     }, [])
 
     const filteredRobots = useMemo(
@@ -126,7 +128,7 @@ export const AssetProvider: FC<Props> = ({ children }) => {
         [enabledRobots, installation.id]
     )
 
-    useEffect(() => {
+    const fetchInstallationInspectionAreas = () => {
         backendApi
             .getInspectionAreasByInstallationCode(installation.installationCode)
             .then((inspectionAreas: InspectionArea[]) => {
@@ -152,7 +154,16 @@ export const AssetProvider: FC<Props> = ({ children }) => {
                     AlertCategory.ERROR
                 )
             })
+    }
+
+    useEffect(() => {
+        fetchInstallationInspectionAreas()
     }, [])
+
+    useOnPageVisible(() => {
+        fetchEnabledRobots()
+        fetchInstallationInspectionAreas()
+    })
 
     useEffect(() => {
         if (connectionReady) {
