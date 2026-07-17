@@ -1,4 +1,4 @@
-FROM eclipse-mosquitto:2.0.22
+FROM eclipse-mosquitto:2.1.2-alpine
 
 COPY mosquitto/config/ mosquitto/config/
 COPY entrypoint.sh entrypoint.sh
