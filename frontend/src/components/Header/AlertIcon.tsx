@@ -6,6 +6,7 @@ import { useState } from 'react'
 import styled from 'styled-components'
 import { Icons } from 'utils/icons'
 import { AlertListItem } from 'components/Alerts/AlertsListItem'
+import { AlertListItemContent } from 'components/Alerts/AlertContent'
 
 const Circle = styled.div`
     position: absolute;
@@ -36,7 +37,7 @@ const StyledPopover = styled(Popover)`
 `
 
 export const AlertIcon = () => {
-    const { listAlerts } = useAlertContext()
+    const { alerts } = useAlertContext()
     const { TranslateText } = useLanguageContext()
     const [isAlertDialogOpen, setIsAlertDialogOpen] = useState<boolean>(false)
 
@@ -58,7 +59,7 @@ export const AlertIcon = () => {
                 ref={setReferenceElementNotifications}
             >
                 <Icon name={Icons.Notifications} size={24} />
-                {Object.entries(listAlerts).length !== 0 && ( //Alert banners
+                {Object.entries(alerts).length !== 0 && ( //Alert banners
                     <Circle style={{ background: tokens.colors.interactive.danger__resting.hex }} />
                 )}
             </Button>
@@ -75,18 +76,14 @@ export const AlertIcon = () => {
                     </Button>
                 </StyledAlertPopoverHeader>
                 <Popover.Content>
-                    {Object.entries(listAlerts).length === 0 && (
+                    {Object.entries(alerts).length === 0 && (
                         <Typography variant="h6">{TranslateText('No alerts')}</Typography>
                     )}
-                    {Object.entries(listAlerts).length > 0 && (
+                    {Object.entries(alerts).length > 0 && (
                         <StyledAlertList>
-                            {Object.entries(listAlerts).map(([key, value]) => (
-                                <AlertListItem
-                                    key={key}
-                                    dismissAlert={value.dismissFunction}
-                                    alertCategory={value.alertCategory}
-                                >
-                                    {value.content}
+                            {Object.entries(alerts).map(([key, value]) => (
+                                <AlertListItem key={key} dismissAlert={value.dismiss}>
+                                    <AlertListItemContent content={value.content} />
                                 </AlertListItem>
                             ))}
                         </StyledAlertList>

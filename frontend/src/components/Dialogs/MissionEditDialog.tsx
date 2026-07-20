@@ -1,8 +1,7 @@
 import { Button, Checkbox, Chip, Textarea, TextField, Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
-import { AlertCategory } from 'components/Alerts/AlertsBanner'
-import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
+import { AlertKind } from 'components/Alerts/AlertContent'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import {
     ButtonSection,
@@ -76,7 +75,7 @@ const SectionLabel = styled.p`
 
 const useMissionUpdater = () => {
     const { TranslateText } = useLanguageContext()
-    const { setAlert, setListAlert } = useAlertContext()
+    const { raiseAlert } = useAlertContext()
     const backendApi = useBackendApi()
 
     const updateMission = (
@@ -95,16 +94,10 @@ const useMissionUpdater = () => {
             .updateMissionDefinition(mission.id, form)
             .then(onSuccess)
             .catch(() => {
-                setAlert(
-                    AlertType.RequestFail,
-                    <FailedRequestAlertContent translatedMessage={TranslateText('Failed to update inspection')} />,
-                    AlertCategory.ERROR
-                )
-                setListAlert(
-                    AlertType.RequestFail,
-                    <FailedRequestAlertListContent translatedMessage={TranslateText('Failed to update inspection')} />,
-                    AlertCategory.ERROR
-                )
+                raiseAlert(AlertType.RequestFail, {
+                    kind: AlertKind.RequestFail,
+                    message: TranslateText('Failed to update inspection'),
+                })
             })
     }
 

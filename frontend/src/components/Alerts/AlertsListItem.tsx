@@ -5,7 +5,6 @@ import { TaskStatus } from 'models/Task'
 import { ReactNode } from 'react'
 import styled from 'styled-components'
 import { Icons } from 'utils/icons'
-import { AlertCategory } from './AlertsBanner'
 
 const StyledListContainer = styled.div`
     width: 330px;
@@ -70,7 +69,6 @@ interface AlertListInfo {
 interface AlertProps {
     children: ReactNode
     dismissAlert: () => void
-    alertCategory: AlertCategory
 }
 
 export const AlertListContents = ({ icon, iconColor, alertTitle, alertText, mission }: AlertListInfo) => {
