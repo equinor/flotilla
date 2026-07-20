@@ -5,8 +5,6 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useContext, useState } from 'react'
 import { useMissionControlContext } from 'components/Contexts/MissionControlContext'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
-import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
-import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 import { RobotStatus } from 'models/Robot'
 import { useBackendApi } from 'api/UseBackendApi'
@@ -106,7 +104,7 @@ export const StopRobotDialog = () => {
     const { enabledRobots } = useAssetContext()
     const { installation } = useContext(InstallationContext)
     const { TranslateText } = useLanguageContext()
-    const { setAlert, setListAlert } = useAlertContext()
+    const { raiseAlert } = useAlertContext()
     const backendApi = useBackendApi()
 
     const dockActivated =
@@ -123,16 +121,10 @@ export const StopRobotDialog = () => {
 
     const stopAll = () => {
         backendApi.sendRobotsToDockingPosition(installation.installationCode).catch(() => {
-            setAlert(
-                AlertType.RequestFail,
-                <FailedRequestAlertContent translatedMessage={TranslateText('Failed to send robots to a dock')} />,
-                AlertCategory.ERROR
-            )
-            setListAlert(
-                AlertType.RequestFail,
-                <FailedRequestAlertListContent translatedMessage={TranslateText('Failed to send robots to a dock')} />,
-                AlertCategory.ERROR
-            )
+            raiseAlert(AlertType.RequestFail, {
+                kind: 'requestFail',
+                message: TranslateText('Failed to send robots to a dock'),
+            })
         })
         closeDialog()
         return
@@ -140,18 +132,10 @@ export const StopRobotDialog = () => {
 
     const resetRobots = () => {
         backendApi.clearEmergencyState(installation.installationCode).catch(() => {
-            setAlert(
-                AlertType.RequestFail,
-                <FailedRequestAlertContent translatedMessage={TranslateText('Failed to release robots from dock')} />,
-                AlertCategory.ERROR
-            )
-            setListAlert(
-                AlertType.RequestFail,
-                <FailedRequestAlertListContent
-                    translatedMessage={TranslateText('Failed to release robots from dock')}
-                />,
-                AlertCategory.ERROR
-            )
+            raiseAlert(AlertType.RequestFail, {
+                kind: 'requestFail',
+                message: TranslateText('Failed to release robots from dock'),
+            })
         })
         closeDialog()
     }

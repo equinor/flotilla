@@ -1,8 +1,6 @@
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { RobotWithoutTelemetry } from 'models/Robot'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
-import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
-import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { Button } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import styled from 'styled-components'
@@ -18,7 +16,7 @@ const StyledTextButton = styled(Button)`
 
 export const ReturnHomeButton = ({ robot }: { robot: RobotWithoutTelemetry }) => {
     const { TranslateText } = useLanguageContext()
-    const { setAlert, setListAlert } = useAlertContext()
+    const { raiseAlert } = useAlertContext()
     const [isDisabled, setIsDisabled] = useState(false)
     const backendApi = useBackendApi()
 
@@ -26,20 +24,10 @@ export const ReturnHomeButton = ({ robot }: { robot: RobotWithoutTelemetry }) =>
         disableButton()
 
         backendApi.returnRobotToHome(robot.id).catch(() => {
-            setAlert(
-                AlertType.RequestFail,
-                <FailedRequestAlertContent
-                    translatedMessage={TranslateText('Failed to send robot {0} home', [robot.name ?? ''])}
-                />,
-                AlertCategory.ERROR
-            )
-            setListAlert(
-                AlertType.RequestFail,
-                <FailedRequestAlertListContent
-                    translatedMessage={TranslateText('Failed to send robot {0} home', [robot.name ?? ''])}
-                />,
-                AlertCategory.ERROR
-            )
+            raiseAlert(AlertType.RequestFail, {
+                kind: 'requestFail',
+                message: TranslateText('Failed to send robot {0} home', [robot.name ?? '']),
+            })
         })
     }
 

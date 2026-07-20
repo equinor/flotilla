@@ -4,8 +4,6 @@ import { Mission, placeholderMission } from 'models/Mission'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
-import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
-import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { RobotWithoutTelemetry } from 'models/Robot'
 import { tokens } from '@equinor/eds-tokens'
 import { useEffect, useState } from 'react'
@@ -36,7 +34,7 @@ const StyledWrapper = styled.div`
 export const RobotMissionQueueView = ({ robot }: { robot: RobotWithoutTelemetry }) => {
     const { TranslateText } = useLanguageContext()
     const { missionQueue, ongoingMissions, loadingRobotMissionSet, setLoadingRobotMissionSet } = useMissionsContext()
-    const { setAlert, setListAlert } = useAlertContext()
+    const { raiseAlert } = useAlertContext()
     const [isdialogOpen, setIsDialogOpen] = useState(false)
 
     const robotMissionQueue = missionQueue.filter((mission) => mission.robot.id === robot.id)
@@ -48,36 +46,18 @@ export const RobotMissionQueueView = ({ robot }: { robot: RobotWithoutTelemetry 
 
     const onDeleteMission = (mission: Mission) =>
         backendApi.deleteMission(mission.id).catch(() => {
-            setAlert(
-                AlertType.RequestFail,
-                <FailedRequestAlertContent translatedMessage={TranslateText('Failed to delete mission from queue')} />,
-                AlertCategory.ERROR
-            )
-            setListAlert(
-                AlertType.RequestFail,
-                <FailedRequestAlertListContent
-                    translatedMessage={TranslateText('Failed to delete mission from queue')}
-                />,
-                AlertCategory.ERROR
-            )
+            raiseAlert(AlertType.RequestFail, {
+                kind: 'requestFail',
+                message: TranslateText('Failed to delete mission from queue'),
+            })
         })
 
     const onDeleteAllMissions = () =>
         backendApi.deleteAllMissions().catch(() => {
-            setAlert(
-                AlertType.RequestFail,
-                <FailedRequestAlertContent
-                    translatedMessage={TranslateText('Failed to delete all missions from queue')}
-                />,
-                AlertCategory.ERROR
-            )
-            setListAlert(
-                AlertType.RequestFail,
-                <FailedRequestAlertListContent
-                    translatedMessage={TranslateText('Failed to delete all missions from queue')}
-                />,
-                AlertCategory.ERROR
-            )
+            raiseAlert(AlertType.RequestFail, {
+                kind: 'requestFail',
+                message: TranslateText('Failed to delete all missions from queue'),
+            })
         })
 
     const handleButton = () => {
