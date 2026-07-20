@@ -1,25 +1,16 @@
-import { createContext, FC, ReactNode, useContext, useEffect, useState } from 'react'
+import { createContext, FC, useContext, useEffect, useState } from 'react'
 import { addMinutes, max } from 'date-fns'
 import { Mission, MissionStatus } from 'models/Mission'
-import { FailedMissionAlertContent, FailedMissionAlertListContent } from 'components/Alerts/FailedMissionAlert'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { Alert } from 'models/Alert'
 import { useAssetContext } from './AssetContext'
 import { RobotStatus } from 'models/Robot'
-import {
-    FailedAlertContent,
-    FailedAlertListContent,
-    FailedAutoMissionAlertContent,
-} from 'components/Alerts/FailedAlertContent'
 import { convertUTCDateToLocalDate } from 'utils/StringFormatting'
-import { AlertCategory } from 'components/Alerts/AlertsBanner'
-import { DockAlertContent, DockAlertListContent } from 'components/Alerts/DockAlert'
 import { useLanguageContext } from './LanguageContext'
-import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
-import { InfoAlertContent, InfoAlertListContent } from 'components/Alerts/InfoAlertContent'
 import { useBackendApi } from 'api/UseBackendApi'
 import { AuthContext } from './AuthContext'
 import { InstallationContext } from './InstallationContext'
+import type { AlertContent } from 'components/Alerts/AlertContent'
 
 export enum AlertType {
     MissionFail,
@@ -40,52 +31,48 @@ const alertTypeEnumMap: { [key: string]: AlertType } = {
     skipAutoMission: AlertType.InfoAlert,
 }
 
-export type AlertDictionaryType = {
-    [key in AlertType]?: { content: ReactNode | undefined; dismissFunction: () => void; alertCategory: AlertCategory }
+interface ActiveAlert {
+    content: AlertContent
+    dismiss: () => void
 }
 
+export type AlertMap = Partial<Record<AlertType, ActiveAlert>>
+
 interface IAlertContext {
-    alerts: AlertDictionaryType
-    setAlert: (source: AlertType, alert: ReactNode, category: AlertCategory) => void
-    clearAlerts: () => void
+    alerts: AlertMap
+    raiseAlert: (source: AlertType, content: AlertContent) => void
     clearAlert: (source: AlertType) => void
-    listAlerts: AlertDictionaryType
-    setListAlert: (source: AlertType, listAlert: ReactNode, category: AlertCategory) => void
-    clearListAlerts: () => void
-    clearListAlert: (source: AlertType) => void
+    clearAlerts: () => void
 }
 
 interface Props {
     children: React.ReactNode
 }
 
-const defaultAlertInterface = {
+const defaultAlertInterface: IAlertContext = {
     alerts: {},
-    setAlert: () => {},
-    clearAlerts: () => {},
+    raiseAlert: () => {},
     clearAlert: () => {},
-    listAlerts: {},
-    setListAlert: () => {},
-    clearListAlerts: () => {},
-    clearListAlert: () => {},
+    clearAlerts: () => {},
 }
 
 export interface AutoScheduleFailedMissionDict {
     [key: string]: string
 }
 
+const autoScheduleStorageKey = 'autoScheduleFailedMissionDict'
+
 const AlertContext = createContext<IAlertContext>(defaultAlertInterface)
 
 export const AlertProvider: FC<Props> = ({ children }) => {
-    const [alerts, setAlerts] = useState<AlertDictionaryType>(defaultAlertInterface.alerts)
-    const [listAlerts, setListAlerts] = useState<AlertDictionaryType>(defaultAlertInterface.listAlerts)
+    const [alerts, setAlerts] = useState<AlertMap>({})
     const [recentFailedMissions, setRecentFailedMissions] = useState<Mission[]>([])
     const { registerEvent, connectionReady } = useSignalRContext()
     const { TranslateText } = useLanguageContext()
     const { enabledRobots } = useAssetContext()
     const { installation } = useContext(InstallationContext)
     const [autoScheduleFailedMissionDict, setAutoScheduleFailedMissionDict] = useState<AutoScheduleFailedMissionDict>(
-        JSON.parse(window.localStorage.getItem('autoScheduleFailedMissionDict') || '{}')
+        JSON.parse(window.localStorage.getItem(autoScheduleStorageKey) || '{}')
     )
     const backendApi = useBackendApi()
     const { isAuthenticated } = useContext(AuthContext)
@@ -97,28 +84,19 @@ export const AlertProvider: FC<Props> = ({ children }) => {
     const maxTimeInterval: number = 60
     const dismissMissionFailTimeKey: string = 'lastMissionFailDismissalTime'
 
-    const setAlert = (source: AlertType, alert: ReactNode, category: AlertCategory) => {
-        setAlerts((oldAlerts) => {
-            return {
-                ...oldAlerts,
-                [source]: { content: alert, dismissFunction: () => clearAlert(source), alertCategory: category },
-            }
-        })
-    }
-
-    const clearAlerts = () => setAlerts({})
-
-    const clearAlert = (source: AlertType) => {
+    const applyDismissSideEffects = (source: AlertType) => {
         if (source === AlertType.MissionFail) {
             sessionStorage.setItem(dismissMissionFailTimeKey, JSON.stringify(Date.now()))
             setRecentFailedMissions([])
         }
-
         if (source === AlertType.AutoScheduleFail) {
             setAutoScheduleFailedMissionDict({})
-            window.localStorage.setItem('autoScheduleFailedMissionDict', JSON.stringify({}))
+            window.localStorage.setItem(autoScheduleStorageKey, JSON.stringify({}))
         }
+    }
 
+    const clearAlert = (source: AlertType) => {
+        applyDismissSideEffects(source)
         setAlerts((oldAlerts) => {
             const newAlerts = { ...oldAlerts }
             delete newAlerts[source]
@@ -126,36 +104,14 @@ export const AlertProvider: FC<Props> = ({ children }) => {
         })
     }
 
-    const setListAlert = (source: AlertType, listAlert: ReactNode, category: AlertCategory) => {
-        setListAlerts((oldListAlerts) => {
-            return {
-                ...oldListAlerts,
-                [source]: {
-                    content: listAlert,
-                    dismissFunction: () => clearListAlert(source),
-                    alertCategory: category,
-                },
-            }
-        })
+    const raiseAlert = (source: AlertType, content: AlertContent) => {
+        setAlerts((oldAlerts) => ({
+            ...oldAlerts,
+            [source]: { content, dismiss: () => clearAlert(source) },
+        }))
     }
 
-    const clearListAlerts = () => setListAlerts({})
-
-    const clearListAlert = (source: AlertType) => {
-        if (source === AlertType.MissionFail)
-            sessionStorage.setItem(dismissMissionFailTimeKey, JSON.stringify(Date.now()))
-
-        if (source === AlertType.AutoScheduleFail) {
-            setAutoScheduleFailedMissionDict({})
-            window.localStorage.setItem('autoScheduleFailedMissionDict', JSON.stringify({}))
-        }
-
-        setListAlerts((oldListAlerts) => {
-            const newListAlerts = { ...oldListAlerts }
-            delete newListAlerts[source]
-            return newListAlerts
-        })
-    }
+    const clearAlerts = () => setAlerts({})
 
     const getLastDismissalTime = (): Date => {
         const sessionValue = sessionStorage.getItem(dismissMissionFailTimeKey)
@@ -188,20 +144,10 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                     setRecentFailedMissions(newRecentFailedMissions)
                 })
                 .catch(() => {
-                    setAlert(
-                        AlertType.RequestFail,
-                        <FailedRequestAlertContent
-                            translatedMessage={TranslateText('Failed to retrieve failed missions')}
-                        />,
-                        AlertCategory.ERROR
-                    )
-                    setListAlert(
-                        AlertType.RequestFail,
-                        <FailedRequestAlertListContent
-                            translatedMessage={TranslateText('Failed to retrieve failed missions')}
-                        />,
-                        AlertCategory.ERROR
-                    )
+                    raiseAlert(AlertType.RequestFail, {
+                        kind: 'requestFail',
+                        message: TranslateText('Failed to retrieve failed missions'),
+                    })
                 })
         }
         if (!recentFailedMissions || recentFailedMissions.length === 0) updateRecentFailedMissions()
@@ -247,40 +193,26 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                 if (backendAlert.robotId !== null && !enabledRobots.filter((r) => r.id === backendAlert.robotId)) return
 
                 if (alertType === AlertType.AutoScheduleFail) {
-                    const newAutoScheduleFailedMissionDict: AutoScheduleFailedMissionDict = {
-                        ...autoScheduleFailedMissionDict,
-                    }
-                    newAutoScheduleFailedMissionDict[backendAlert.alertTitle] = backendAlert.alertMessage
-                    setAutoScheduleFailedMissionDict(newAutoScheduleFailedMissionDict)
-                    window.localStorage.setItem(
-                        'autoScheduleFailedMissionDict',
-                        JSON.stringify(newAutoScheduleFailedMissionDict)
-                    )
+                    setAutoScheduleFailedMissionDict((oldDict) => {
+                        const newDict = { ...oldDict, [backendAlert.alertTitle]: backendAlert.alertMessage }
+                        window.localStorage.setItem(autoScheduleStorageKey, JSON.stringify(newDict))
+                        return newDict
+                    })
                     return
                 }
 
                 if (alertType === AlertType.InfoAlert) {
-                    setAlert(
-                        alertType,
-                        <InfoAlertContent title={backendAlert.alertTitle} message={backendAlert.alertMessage} />,
-                        AlertCategory.INFO
-                    )
-                    setListAlert(
-                        alertType,
-                        <InfoAlertListContent title={backendAlert.alertTitle} message={backendAlert.alertMessage} />,
-                        AlertCategory.INFO
-                    )
+                    raiseAlert(alertType, {
+                        kind: 'info',
+                        title: backendAlert.alertTitle,
+                        message: backendAlert.alertMessage,
+                    })
                 } else {
-                    setAlert(
-                        alertType,
-                        <FailedAlertContent title={backendAlert.alertTitle} message={backendAlert.alertMessage} />,
-                        AlertCategory.ERROR
-                    )
-                    setListAlert(
-                        alertType,
-                        <FailedAlertListContent title={backendAlert.alertTitle} message={backendAlert.alertMessage} />,
-                        AlertCategory.ERROR
-                    )
+                    raiseAlert(alertType, {
+                        kind: 'failure',
+                        title: backendAlert.alertTitle,
+                        message: backendAlert.alertMessage,
+                    })
                 }
             })
         }
@@ -316,63 +248,31 @@ export const AlertProvider: FC<Props> = ({ children }) => {
     const showDockAlert =
         activeSendToDockAlertType !== undefined && activeSendToDockAlertType !== dismissedDockAlertType
 
-    const combinedAlerts: AlertDictionaryType = { ...alerts }
-    const combinedListAlerts: AlertDictionaryType = { ...listAlerts }
+    const allAlerts: AlertMap = { ...alerts }
 
     if (recentFailedMissions.length > 0) {
-        combinedAlerts[AlertType.MissionFail] = {
-            content: <FailedMissionAlertContent missions={recentFailedMissions} />,
-            dismissFunction: () => clearAlert(AlertType.MissionFail),
-            alertCategory: AlertCategory.ERROR,
-        }
-        combinedListAlerts[AlertType.MissionFail] = {
-            content: <FailedMissionAlertListContent missions={recentFailedMissions} />,
-            dismissFunction: () => clearListAlert(AlertType.MissionFail),
-            alertCategory: AlertCategory.ERROR,
+        allAlerts[AlertType.MissionFail] = {
+            content: { kind: 'failedMissions', missions: recentFailedMissions },
+            dismiss: () => clearAlert(AlertType.MissionFail),
         }
     }
 
     if (Object.keys(autoScheduleFailedMissionDict).length > 0) {
-        combinedAlerts[AlertType.AutoScheduleFail] = {
-            content: <FailedAutoMissionAlertContent autoScheduleFailedMissionDict={autoScheduleFailedMissionDict} />,
-            dismissFunction: () => clearAlert(AlertType.AutoScheduleFail),
-            alertCategory: AlertCategory.ERROR,
-        }
-        combinedListAlerts[AlertType.AutoScheduleFail] = {
-            content: <FailedAutoMissionAlertContent autoScheduleFailedMissionDict={autoScheduleFailedMissionDict} />,
-            dismissFunction: () => clearListAlert(AlertType.AutoScheduleFail),
-            alertCategory: AlertCategory.ERROR,
+        allAlerts[AlertType.AutoScheduleFail] = {
+            content: { kind: 'autoScheduleFail', failedMissions: autoScheduleFailedMissionDict },
+            dismiss: () => clearAlert(AlertType.AutoScheduleFail),
         }
     }
 
     if (showDockAlert) {
-        const dockAlertCategory =
-            activeSendToDockAlertType === AlertType.RequestDock ? AlertCategory.WARNING : AlertCategory.INFO
-        combinedAlerts[AlertType.RequestDock] = {
-            content: <DockAlertContent alertType={activeSendToDockAlertType!} />,
-            dismissFunction: () => setDismissedDockAlertType(activeSendToDockAlertType),
-            alertCategory: dockAlertCategory,
-        }
-        combinedListAlerts[AlertType.RequestDock] = {
-            content: <DockAlertListContent alertType={activeSendToDockAlertType!} />,
-            dismissFunction: () => setDismissedDockAlertType(activeSendToDockAlertType),
-            alertCategory: dockAlertCategory,
+        allAlerts[AlertType.RequestDock] = {
+            content: { kind: 'dock', dockType: activeSendToDockAlertType! },
+            dismiss: () => setDismissedDockAlertType(activeSendToDockAlertType),
         }
     }
 
     return (
-        <AlertContext.Provider
-            value={{
-                alerts: combinedAlerts,
-                setAlert,
-                clearAlerts,
-                clearAlert,
-                listAlerts: combinedListAlerts,
-                setListAlert,
-                clearListAlerts,
-                clearListAlert,
-            }}
-        >
+        <AlertContext.Provider value={{ alerts: allAlerts, raiseAlert, clearAlert, clearAlerts }}>
             {children}
         </AlertContext.Provider>
     )

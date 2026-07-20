@@ -3,8 +3,9 @@ import { tokens } from '@equinor/eds-tokens'
 import styled from 'styled-components'
 import { SelectLanguage } from 'components/Header/LanguageSelector'
 import { Icons } from 'utils/icons'
-import { AlertDictionaryType } from 'components/Contexts/AlertContext'
+import { AlertMap } from 'components/Contexts/AlertContext'
 import { AlertBanner } from 'components/Alerts/AlertsBanner'
+import { AlertBannerContent, getAlertCategory } from 'components/Alerts/AlertContent'
 import { FrontPageSectionId } from 'models/FrontPageSectionId'
 import { AlertIcon } from 'components/Header/AlertIcon'
 import { useNavigate } from 'react-router-dom'
@@ -77,7 +78,7 @@ const AppWrapper = styled.div`
 `
 
 interface Props {
-    alertDict?: AlertDictionaryType
+    alertDict?: AlertMap
     installation?: Installation
 }
 
@@ -111,8 +112,12 @@ export const Header = ({ alertDict, installation }: Props) => {
             {alertDict && Object.entries(alertDict).length > 0 && (
                 <StyledAlertList>
                     {Object.entries(alertDict).map(([key, value]) => (
-                        <AlertBanner key={key} dismissAlert={value.dismissFunction} alertCategory={value.alertCategory}>
-                            {value.content}
+                        <AlertBanner
+                            key={key}
+                            dismissAlert={value.dismiss}
+                            alertCategory={getAlertCategory(value.content)}
+                        >
+                            <AlertBannerContent content={value.content} />
                         </AlertBanner>
                     ))}
                 </StyledAlertList>

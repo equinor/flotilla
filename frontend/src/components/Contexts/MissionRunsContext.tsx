@@ -4,8 +4,6 @@ import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { TaskStatus } from 'models/Task'
 import { useLanguageContext } from './LanguageContext'
 import { AlertType, useAlertContext } from './AlertContext'
-import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
-import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { useBackendApi } from 'api/UseBackendApi'
 import { AuthContext } from './AuthContext'
 import { InstallationContext } from './InstallationContext'
@@ -81,7 +79,7 @@ const useMissionRuns = (): IMissionRunsContext => {
     const [loadingRobotMissionSet, setLoadingRobotMissionSet] = useState<Set<string>>(new Set())
     const { registerEvent, connectionReady } = useSignalRContext()
     const { TranslateText } = useLanguageContext()
-    const { setAlert, setListAlert } = useAlertContext()
+    const { raiseAlert } = useAlertContext()
     const { installation } = useContext(InstallationContext)
     const { isAuthenticated } = useContext(AuthContext)
     const backendApi = useBackendApi()
@@ -144,18 +142,10 @@ const useMissionRuns = (): IMissionRunsContext => {
                 pageSize: 100,
                 orderBy: 'StartTime desc',
             }).catch(() => {
-                setAlert(
-                    AlertType.RequestFail,
-                    <FailedRequestAlertContent translatedMessage={TranslateText('Failed to retrieve mission runs')} />,
-                    AlertCategory.ERROR
-                )
-                setListAlert(
-                    AlertType.RequestFail,
-                    <FailedRequestAlertListContent
-                        translatedMessage={TranslateText('Failed to retrieve mission runs')}
-                    />,
-                    AlertCategory.ERROR
-                )
+                raiseAlert(AlertType.RequestFail, {
+                    kind: 'requestFail',
+                    message: TranslateText('Failed to retrieve mission runs'),
+                })
             })
 
             setOngoingMissions(ongoing ?? [])
@@ -166,18 +156,10 @@ const useMissionRuns = (): IMissionRunsContext => {
                 pageSize: 100,
                 orderBy: 'CreationTime',
             }).catch(() => {
-                setAlert(
-                    AlertType.RequestFail,
-                    <FailedRequestAlertContent translatedMessage={TranslateText('Failed to retrieve mission runs')} />,
-                    AlertCategory.ERROR
-                )
-                setListAlert(
-                    AlertType.RequestFail,
-                    <FailedRequestAlertListContent
-                        translatedMessage={TranslateText('Failed to retrieve mission runs')}
-                    />,
-                    AlertCategory.ERROR
-                )
+                raiseAlert(AlertType.RequestFail, {
+                    kind: 'requestFail',
+                    message: TranslateText('Failed to retrieve mission runs'),
+                })
             })
 
             setMissionQueue(queue ?? [])
