@@ -3,6 +3,7 @@ import React, { createContext, FC, useContext, useEffect, useCallback, useState,
 import { AuthContext } from './AuthContext'
 import { config } from 'config'
 import { useMsal } from '@azure/msal-react'
+import { useOnPageVisible } from 'hooks/usePageVisibility'
 
 /**
  * SignalR provides asynchronous communication between backend and frontend. This
@@ -127,6 +128,12 @@ export const SignalRProvider: FC<Props> = ({ children }) => {
             newConnection.stop()
         }
     }, [accounts, inProgress])
+
+    useOnPageVisible(() => {
+        if (!accounts[0] || inProgress !== 'none') return
+        if (connectionRef.current?.state === signalR.HubConnectionState.Connected) return
+        resetConnection()
+    })
 
     const registerEvent = (eventName: string, onMessageReceived: (username: string, message: string) => void) => {
         if (connectionRef.current)
