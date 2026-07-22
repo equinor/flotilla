@@ -12,6 +12,7 @@ import { MissionDefinitionUpdateForm } from 'models/MissionDefinitionUpdateForm'
 import { filterRobots } from 'utils/filtersAndSorts'
 import { PointillaMapInfo } from 'models/PointillaMapInfo'
 import { Installation } from 'models/Installation'
+import { RobotStatistics } from 'models/RobotStatistics'
 
 export class BackendApi {
     constructor(private readonly api: BackendAPICaller) {}
@@ -35,6 +36,16 @@ export class BackendApi {
     async getRobotMediaConfig(robotId: string): Promise<MediaStreamConfig | null | undefined> {
         const path: string = 'media-stream/' + robotId
         const result = await this.api.GET<MediaStreamConfig>(path).catch(handleError('GET', path))
+        return result.content
+    }
+
+    async getRobotStatistics(
+        robotId: string,
+        minCreationTime: number,
+        maxCreationTime: number
+    ): Promise<RobotStatistics> {
+        const path: string = `statistics/robots/${robotId}/missions?minCreationTime=${minCreationTime}&maxCreationTime=${maxCreationTime}`
+        const result = await this.api.GET<RobotStatistics>(path).catch(handleError('GET', path))
         return result.content
     }
 
