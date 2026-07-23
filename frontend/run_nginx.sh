@@ -7,7 +7,6 @@ if [ ! -f /app/index.html ]; then
 fi
 
 envsubst '
-  ${VITE_AI_CONNECTION_STRING}
   ${VITE_BACKEND_URL}
   ${VITE_SARA_URL}
   ${VITE_SARA_API_SCOPE}
