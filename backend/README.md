@@ -254,8 +254,4 @@ avoided by letting the SignalR code run asynchronously after the current thread 
 
 ## Monitoring
 
-We use [Azure Application Insights](https://docs.microsoft.com/en-us/azure/azure-monitor/app/asp-net-core)
-to monitor the backend of our application.
-
-We have one application insight instance for each environment.
-The connection strings for the AI instances are stored in the keyvault.
+We use [OpenTelemetry](https://opentelemetry.io/) to monitor the backend of our application. Traces, metrics, and logs are exported via the OTLP exporter to a Grafana-compatible backend.

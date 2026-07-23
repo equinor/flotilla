@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
-using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Npgsql;
 using OpenTelemetry;
 using OpenTelemetry.Exporter;
@@ -55,28 +54,6 @@ public static class TelemetryConfigurations
                     .AddRuntimeInstrumentation()
                     .AddProcessInstrumentation();
             });
-
-        // Conditionally connect to Azure Monitor
-        var azureMonitorExportEnabled =
-            builder.Configuration.GetValue<bool?>("OpenTelemetry:AzureMonitorExportEnabled")
-            ?? false;
-
-        if (azureMonitorExportEnabled)
-        {
-            var applicationInsightsConnectionString = builder.Configuration[
-                "ApplicationInsights:ConnectionString"
-            ];
-
-            if (!string.IsNullOrEmpty(applicationInsightsConnectionString))
-            {
-                builder
-                    .Services.AddOpenTelemetry()
-                    .UseAzureMonitor(o =>
-                    {
-                        o.ConnectionString = applicationInsightsConnectionString;
-                    });
-            }
-        }
 
         // Connect to OpenTelemetry OTLP exporter if endpoint is provided, used for local aspire dashboard
         var openTelemetryEndpoint = builder.Configuration["OpenTelemetry:OtelExporterOtlpEndpoint"];

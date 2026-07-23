@@ -69,10 +69,6 @@ if (openTelemetryEnabled)
     var otelActivitySource = new ActivitySource(applicationName);
     builder.AddCustomOpenTelemetry(otelActivitySource, otelMeter);
 }
-else
-{
-    builder.Services.AddApplicationInsightsTelemetry();
-}
 
 builder.Services.AddScoped<IAccessRoleService, AccessRoleService>();
 
