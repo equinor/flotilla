@@ -97,6 +97,16 @@ To spin up only the broker, collector and aspire dashboard use
 docker compose up broker aspire-dashboard otel-collector
 ```
 
+## Connecting to the development database instead of initDb
+
+Write in `backend/api/.env`:
+```bash
+Database__UseInMemoryDatabase=false
+Database__PostgreSqlConnectionString=...
+```
+The database connection string can be found in the keyvault in the development resource group in Azure.
+Remember to add your IP address to the accepted IPs for cennecting to the database. 
+
 ## Contributions
 
 Equinor welcomes all kinds of contributions, including code, bug reports, issues, feature requests, and documentation.
