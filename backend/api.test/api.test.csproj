@@ -6,6 +6,9 @@
     <RootNamespace>Api.Test</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <!-- Explicit pins to override lower versions pulled in transitively by Testcontainers.PostgreSql -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.10" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="10.0.10" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.10" />

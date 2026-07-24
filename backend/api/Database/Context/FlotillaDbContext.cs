@@ -2,8 +2,6 @@
 using Api.Database.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Api.Database.Context
 {
@@ -30,23 +28,10 @@ namespace Api.Database.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            bool isSqlLite = Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite";
-
             // https://docs.microsoft.com/en-us/ef/core/modeling/owned-entities
             // https://docs.microsoft.com/en-us/ef/core/modeling/owned-entities#collections-of-owned-types
-            modelBuilder.Entity<MissionRun>(missionRunEntity =>
-            {
-                if (isSqlLite)
-                {
-                    AddConverterForDateTimeOffsets(ref missionRunEntity);
-                }
-            });
             modelBuilder.Entity<MissionTask>(missionTaskEntity =>
             {
-                if (isSqlLite)
-                {
-                    AddConverterForDateTimeOffsets(ref missionTaskEntity);
-                }
                 missionTaskEntity.OwnsOne(
                     task => task.RobotPose,
                     poseEntity =>
@@ -57,18 +42,6 @@ namespace Api.Database.Context
                 );
             });
 
-            AddConverterForNullableListOfEnums(
-                modelBuilder.Entity<Robot>().Property(r => r.RobotCapabilities)
-            );
-
-            AddConverterForNullableListOfEnums(
-                modelBuilder.Entity<MissionTask>().Property(r => r.AnalysisTypes)
-            );
-
-            AddConverterForNullableListOfEnums(
-                modelBuilder.Entity<Inspection>().Property(r => r.AnalysisTypes)
-            );
-
             modelBuilder
                 .Entity<MissionDefinition>()
                 .OwnsMany(
@@ -77,7 +50,6 @@ namespace Api.Database.Context
                     {
                         tasks.WithOwner();
                         tasks.HasKey("MissionDefinitionId", "Index");
-                        AddConverterForListOfEnums(tasks.Property(t => t.AnalysisTypes));
                     }
                 );
 
@@ -172,71 +144,6 @@ namespace Api.Database.Context
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
         {
             configurationBuilder.Properties(typeof(Enum)).HaveConversion<string>();
-        }
-
-        private static void AddConverterForDateTimeOffsets<T>(ref EntityTypeBuilder<T> entity)
-            where T : class
-        {
-            var properties = entity
-                .Metadata.ClrType.GetProperties()
-                .Where(p =>
-                    p.PropertyType == typeof(DateTimeOffset)
-                    || p.PropertyType == typeof(DateTimeOffset?)
-                );
-            foreach (var property in properties)
-            {
-                entity.Property(property.Name).HasConversion(new DateTimeOffsetToBinaryConverter());
-            }
-        }
-
-        private static void AddConverterForNullableListOfEnums<T>(
-            PropertyBuilder<IList<T>?> propertyBuilder
-        )
-            where T : Enum
-        {
-#pragma warning disable IDE0305
-            var valueComparer = new ValueComparer<IList<T>?>(
-                (c1, c2) =>
-                    (c1 == null && c2 == null)
-                    || ((c1 != null == (c2 != null)) && c1!.SequenceEqual(c2!)),
-                c => c == null ? 0 : c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
-                c => c == null ? null : (IList<T>?)c.ToList()
-            );
-#pragma warning restore IDE0305
-
-            propertyBuilder
-                .HasConversion(
-                    r => r != null ? string.Join(';', r) : "",
-                    r =>
-                        r.Split(';', StringSplitOptions.RemoveEmptyEntries)
-                            .Select(r => (T)Enum.Parse(typeof(T), r))
-                            .ToList()
-                )
-                .Metadata.SetValueComparer(valueComparer);
-        }
-
-        private static void AddConverterForListOfEnums<T>(PropertyBuilder<IList<T>> propertyBuilder)
-            where T : Enum
-        {
-#pragma warning disable IDE0305
-            var valueComparer = new ValueComparer<IList<T>?>(
-                (c1, c2) =>
-                    (c1 == null && c2 == null)
-                    || ((c1 != null == (c2 != null)) && c1!.SequenceEqual(c2!)),
-                c => c == null ? 0 : c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
-                c => c == null ? null : (IList<T>?)c.ToList()
-            );
-#pragma warning restore IDE0305
-
-            propertyBuilder
-                .HasConversion(
-                    r => r != null ? string.Join(';', r) : "",
-                    r =>
-                        r.Split(';', StringSplitOptions.RemoveEmptyEntries)
-                            .Select(r => (T)Enum.Parse(typeof(T), r))
-                            .ToList()
-                )
-                .Metadata.SetValueComparer(valueComparer);
         }
     }
 }
