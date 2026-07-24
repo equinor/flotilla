@@ -8,23 +8,19 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Api.Test
 {
-    public class TestWebApplicationFactory<TProgram>(
-        string? sqLiteDatabaseName = null,
-        string? postgresConnectionString = null
-    ) : WebApplicationFactory<Program>
+    public class TestWebApplicationFactory<TProgram>(string? postgresConnectionString = null)
+        : WebApplicationFactory<Program>
         where TProgram : class
     {
         public IConfiguration? Configuration;
         public MockIsarService MockIsarService = new();
         public MockSignalRService MockSignalRService = new();
-        private readonly string? sqLiteDatabaseName = sqLiteDatabaseName;
         private readonly string? postgresConnectionString = postgresConnectionString;
 
         protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -45,22 +41,7 @@ namespace Api.Test
             );
             builder.ConfigureTestServices(services =>
             {
-                if (sqLiteDatabaseName != null)
-                {
-                    string sqlLiteConnectionString = new SqliteConnectionStringBuilder
-                    {
-                        DataSource = $"file:{sqLiteDatabaseName}?mode=memory",
-                        Cache = SqliteCacheMode.Shared,
-                    }.ToString();
-
-                    services.AddDbContext<FlotillaDbContext>(options =>
-                        options.UseSqlite(
-                            sqlLiteConnectionString,
-                            o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery)
-                        )
-                    );
-                }
-                else if (postgresConnectionString != null)
+                if (postgresConnectionString != null)
                 {
                     services.AddDbContext<FlotillaDbContext>(
                         options =>
