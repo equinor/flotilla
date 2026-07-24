@@ -16,7 +16,6 @@ namespace Api.Database.Context
         public DbSet<Robot> Robots => Set<Robot>();
         public DbSet<MissionRun> MissionRuns => Set<MissionRun>();
         public DbSet<MissionTask> MissionTasks => Set<MissionTask>();
-        public DbSet<Inspection> Inspections => Set<Inspection>();
         public DbSet<MissionDefinition> MissionDefinitions => Set<MissionDefinition>();
         public DbSet<Plant> Plants => Set<Plant>();
         public DbSet<Installation> Installations => Set<Installation>();
@@ -61,12 +60,6 @@ namespace Api.Database.Context
             // Store enum arrays as text[] — HaveConversion<string>() does not cover collection elements
             modelBuilder
                 .Entity<MissionTask>()
-                .PrimitiveCollection(t => t.AnalysisTypes)
-                .ElementType()
-                .HasConversion<string>();
-
-            modelBuilder
-                .Entity<Inspection>()
                 .PrimitiveCollection(t => t.AnalysisTypes)
                 .ElementType()
                 .HasConversion<string>();

@@ -172,7 +172,7 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
         mission.robot.status !== RobotStatus.RechargingWithMission
 
     const analysisType = mission.tasks
-        .flatMap((task) => task.inspection?.analysisTypes ?? [])
+        .flatMap((task) => task.analysisTypes)
         .find((type) => type === AnalysisType.Fencilla || type === AnalysisType.CLOE)
 
     const getDataOverviewUrl = (type: AnalysisType): string | undefined => {

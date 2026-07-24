@@ -45,7 +45,7 @@ namespace Api.Controllers
             }
 
             var task = missionRun.Tasks.FirstOrDefault(t =>
-                t.Inspection != null && t.Inspection.IsarInspectionId.Equals(isarInspectionId)
+                t.IsarInspectionId.Equals(isarInspectionId)
             );
             if (task is null)
             {
@@ -63,10 +63,10 @@ namespace Api.Controllers
                 return NotFound(errorMessage);
             }
 
-            if (task.Inspection?.InspectionType != SensorType.CO2Measurement)
+            if (task.SensorType != SensorType.CO2Measurement)
             {
                 string errorMessage =
-                    $"Inspection with ISAR Inspection ID {isarInspectionId} is of type {task.Inspection?.InspectionType}. Fetching of inspection value is not supported for this inspection type.";
+                    $"Inspection with ISAR Inspection ID {isarInspectionId} is of type {task.SensorType}. Fetching of inspection value is not supported for this inspection type.";
                 logger.LogError("{Message}", errorMessage);
                 return NotFound(errorMessage);
             }

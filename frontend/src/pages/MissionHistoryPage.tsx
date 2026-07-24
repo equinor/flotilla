@@ -9,7 +9,6 @@ import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { PaginationHeader } from 'models/PaginatedResponse'
 import { useMissionFilterContext, IFilterState, MissionFilterProvider } from 'components/Contexts/MissionFilterContext'
-import { SensorType } from 'models/Inspection'
 import { tokens } from '@equinor/eds-tokens'
 import { SmallScreenInfoText } from 'utils/InfoText'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
@@ -28,6 +27,7 @@ import { SignalREventLabels, useSignalRContext } from 'components/Contexts/Signa
 import { useBackendApi } from 'api/UseBackendApi'
 import { HistoricMissionCard } from './MissionHistory/HistoricMissionCard'
 import { FilterSection } from './MissionHistory/FilterSection'
+import { SensorType } from 'models/Task'
 
 enum InspectionTableColumns {
     StatusShort = 'StatusShort',

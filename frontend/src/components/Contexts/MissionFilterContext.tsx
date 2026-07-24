@@ -1,10 +1,10 @@
 import { createContext, FC, useContext, useEffect, useState, useMemo } from 'react'
 import { MissionStatusFilterOptions, missionStatusFilterOptionsIterable } from 'models/Mission'
-import { SensorType } from 'models/Inspection'
 import { useLanguageContext } from './LanguageContext'
 import { MissionRunQueryParameters } from 'models/MissionRunQueryParameters'
 import { useSearchParams } from 'react-router-dom'
 import { InstallationContext } from './InstallationContext'
+import { SensorType } from 'models/Task'
 
 interface IMissionFilterContext {
     page: number

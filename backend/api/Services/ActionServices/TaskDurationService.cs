@@ -47,7 +47,7 @@ namespace Api.Services.ActionServices
                         .Tasks.Where(task => task.EndTime is not null && task.StartTime is not null)
                         .Select(task =>
                             (task.EndTime! - task.StartTime!).Value.TotalSeconds
-                            - (task.Inspection?.VideoDuration ?? 0)
+                            - (task.VideoDuration ?? 0)
                         )
                 )
                 .ToList();

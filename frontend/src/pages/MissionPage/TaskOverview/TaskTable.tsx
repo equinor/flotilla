@@ -2,10 +2,9 @@ import { Button, Chip, Table, Typography } from '@equinor/eds-core-react'
 import { TaskStatusDisplay } from './TaskStatusDisplay'
 import { TaskAnalysisDisplay } from './TaskAnalysisDisplay'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { Task, TaskStatus } from 'models/Task'
+import { Task, TaskStatus, ValidInspectionReportInspectionTypes } from 'models/Task'
 import { tokens } from '@equinor/eds-tokens'
 import { getColorsFromTaskStatus } from 'utils/MarkerStyles'
-import { ValidInspectionReportInspectionTypes } from 'models/Inspection'
 import { useInspectionId } from 'pages/InspectionReportPage/SetInspectionIdHook'
 import { DescriptionDisplay, TagIdDisplay } from 'components/Displays/TaskDisplay'
 import { StyledTable, StyledTableBody, StyledTableCell, StyledTableRow } from 'components/Styles/StyledComponents'
@@ -149,24 +148,18 @@ const InspectionTypesDisplay = ({ task }: InspectionTypesDisplayProps) => {
 
     return (
         <>
-            {task.inspection &&
-                (ValidInspectionReportInspectionTypes.includes(task.inspection.inspectionType) &&
-                task.status === TaskStatus.Successful ? (
-                    <Button
-                        key={task.id + task.inspection.isarInspectionId + 'insp'}
-                        variant="ghost"
-                        onClick={() => switchSelectedInspectionId(task.inspection.isarInspectionId)}
-                        style={{ padding: 0 }}
-                    >
-                        <Typography variant="body_short_link">
-                            {TranslateText(task.inspection.inspectionType as string)}
-                        </Typography>
-                    </Button>
-                ) : (
-                    <Typography key={task.id + task.inspection.isarInspectionId + 'insp'}>
-                        {TranslateText(task.inspection.inspectionType as string)}
-                    </Typography>
-                ))}
+            {ValidInspectionReportInspectionTypes.includes(task.sensorType) && task.status === TaskStatus.Successful ? (
+                <Button
+                    key={task.id + task.id + 'insp'}
+                    variant="ghost"
+                    onClick={() => switchSelectedInspectionId(task.id)}
+                    style={{ padding: 0 }}
+                >
+                    <Typography variant="body_short_link">{TranslateText(task.sensorType as string)}</Typography>
+                </Button>
+            ) : (
+                <Typography key={task.id + task.id + 'insp'}>{TranslateText(task.sensorType as string)}</Typography>
+            )}
         </>
     )
 }

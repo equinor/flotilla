@@ -96,7 +96,7 @@ const useMissionSelector = (missionId: string | undefined, inspectionId: string 
                 })
         else if (inspectionId) {
             backendApi
-                .getMissionRunByIsarInspectionId(inspectionId)
+                .getMissionRunByTaskId(inspectionId)
                 .then((mission) => {
                     setSearchParams(
                         (prev) => {
@@ -138,7 +138,7 @@ const MissionPageWithMission = ({
     const hasAnalysisType = mission.tasks.some((task) => task.analysisTypes.length > 0)
 
     const { data, isPending, isError } = useSaraListData(
-        mission.tasks.map((t) => t.inspection.isarInspectionId),
+        mission.tasks.map((t) => t.id),
         null,
         null,
         null,
@@ -148,7 +148,7 @@ const MissionPageWithMission = ({
 
     const taskDataInSelectedMission = mission.tasks.map((t) => ({
         task: t,
-        data: data?.find((d) => d.inspectionId === t.inspection.isarInspectionId),
+        data: data?.find((d) => d.inspectionId === t.id),
     }))
 
     return (

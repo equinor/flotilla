@@ -1,5 +1,5 @@
-import { SensorType } from './Inspection'
 import { MissionStatus } from './Mission'
+import { SensorType } from './Task'
 
 export interface MissionRunQueryParameters {
     installationCode: string

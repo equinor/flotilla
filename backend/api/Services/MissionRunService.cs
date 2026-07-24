@@ -68,8 +68,6 @@ namespace Api.Services
             bool includeDeprecated = false
         );
 
-        public Task<MissionRun> UpdateWithIsarInfo(string missionRunId, IsarMission isarMission);
-
         public Task<MissionRun> SetMissionRunToFailed(
             string missionRunId,
             string failureDescription
@@ -185,14 +183,7 @@ namespace Api.Services
                     readOnly: readOnly,
                     includeDeprecated: includeDeprecated
                 )
-                .Where(
-                    (m) =>
-                        m.Tasks.Any(
-                            (t) =>
-                                t.Inspection != null
-                                && t.Inspection.IsarInspectionId == isarInspectionId
-                        )
-                )
+                .Where((m) => m.Tasks.Any((t) => t.IsarInspectionId == isarInspectionId))
                 .FirstOrDefaultAsync();
         }
 
@@ -271,35 +262,11 @@ namespace Api.Services
                 return false;
 
             return missionRun.Tasks.Any(task =>
-                task.Inspection != null
-                && !task.Inspection.IsSupportedSensorType(missionRun.Robot.RobotCapabilities)
+                !task.IsSupportedSensorType(missionRun.Robot.RobotCapabilities)
             );
         }
 
         public async Task Update(MissionRun missionRun)
-        {
-            if (missionRun.Robot is not null)
-            {
-                context.Entry(missionRun.Robot).State = EntityState.Unchanged;
-            }
-            context.Entry(missionRun.InspectionArea).State = EntityState.Unchanged;
-            foreach (var task in missionRun.Tasks)
-            {
-                if (task.Inspection != null)
-                    context.Entry(task.Inspection).State = EntityState.Unchanged;
-            }
-
-            var entry = context.Update(missionRun);
-            await ApplyDatabaseUpdate(missionRun.InspectionArea.Installation);
-            _ = signalRService.SendMessageAsync(
-                "Mission run updated",
-                missionRun.InspectionArea.Installation,
-                new MissionRunResponse(missionRun)
-            );
-            DetachTracking(context, missionRun!);
-        }
-
-        public async Task UpdateWithInspections(MissionRun missionRun)
         {
             if (missionRun.Robot is not null)
             {
@@ -358,7 +325,6 @@ namespace Api.Services
                 .Include(missionRun => missionRun.InspectionArea)
                 .Include(missionRun => missionRun.Robot)
                 .Include(missionRun => missionRun.Tasks)
-                    .ThenInclude(task => task.Inspection)
                 .Include(missionRun => missionRun.Robot)
                     .ThenInclude(robot => robot.CurrentInstallation)
                 .Where(m =>
@@ -503,10 +469,7 @@ namespace Api.Services
                 is null
                 ? mission => true
                 : mission =>
-                    mission.Tasks.Any(task =>
-                        task.Inspection != null
-                        && parameters.InspectionTypes.Contains(task.Inspection.InspectionType)
-                    );
+                    mission.Tasks.Any(task => parameters.InspectionTypes.Contains(task.SensorType));
 
             var minStartTime = DateTimeUtilities.UnixTimeStampToDateTime(parameters.MinStartTime);
             var maxStartTime = DateTimeUtilities.UnixTimeStampToDateTime(parameters.MaxStartTime);
@@ -757,26 +720,6 @@ namespace Api.Services
                 && context.Entry(missionRun.Robot).State != EntityState.Detached
             )
                 robotService.DetachTracking(context, missionRun.Robot);
-        }
-
-        public async Task<MissionRun> UpdateWithIsarInfo(
-            string missionRunId,
-            IsarMission isarMission
-        )
-        {
-            var missionRun =
-                await ReadById(missionRunId, readOnly: true)
-                ?? throw new MissionRunNotFoundException(
-                    $"Could not find mission run with ID {missionRunId}"
-                );
-
-            foreach (var isarTask in isarMission.Tasks)
-            {
-                var task = missionRun.GetTaskById(isarTask.IsarTaskId);
-                task?.UpdateWithIsarInfo(isarTask);
-            }
-            await UpdateWithInspections(missionRun);
-            return missionRun;
         }
     }
 }

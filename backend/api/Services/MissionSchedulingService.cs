@@ -384,8 +384,6 @@ namespace Api.Services
                 throw new IsarCommunicationException(ErrorMessage);
             }
 
-            await missionRunService.UpdateWithIsarInfo(queuedMissionRun.Id, isarMission);
-
             logger.LogInformation("Started mission run '{Id}'", queuedMissionRun.Id);
         }
     }

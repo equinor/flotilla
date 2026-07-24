@@ -5,7 +5,6 @@ namespace Api.Database.Context
 {
     public static class InitDb
     {
-        private static readonly List<Inspection> inspections = GetInspections();
         private static readonly List<Installation> installations = GetInstallations();
         private static readonly List<Plant> plants = GetPlants();
         private static readonly List<InspectionArea> inspectionAreas = GetInspectionAreas();
@@ -15,23 +14,6 @@ namespace Api.Database.Context
             GetMissionDefinitions();
         private static readonly List<MissionRun> missionRuns = GetMissionRuns();
         private static readonly List<AccessRole> accessRoles = GetAccessRoles();
-
-        private static List<Inspection> GetInspections()
-        {
-            var inspection1 = new Inspection
-            {
-                Id = Guid.NewGuid().ToString(),
-                InspectionType = SensorType.Image,
-            };
-
-            var inspection2 = new Inspection
-            {
-                Id = Guid.NewGuid().ToString(),
-                InspectionType = SensorType.ThermalImage,
-            };
-
-            return new List<Inspection>([inspection1, inspection2]);
-        }
 
         private static List<AccessRole> GetAccessRoles()
         {
@@ -370,7 +352,6 @@ namespace Api.Database.Context
         {
             var task1 = new MissionTask
             {
-                Inspection = new Inspection(),
                 RobotPose = new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
                 TagId = "ABCD",
                 Description = "Task description",
@@ -379,7 +360,6 @@ namespace Api.Database.Context
 
             var task2 = new MissionTask
             {
-                Inspection = new Inspection(),
                 RobotPose = new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
                 TagId = "ABCDE",
                 Description = "Task description",
@@ -388,7 +368,6 @@ namespace Api.Database.Context
 
             var task3 = new MissionTask
             {
-                Inspection = new Inspection(),
                 RobotPose = new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
                 TagId = "ABCDEF",
                 Description = "Task description",
@@ -397,7 +376,6 @@ namespace Api.Database.Context
 
             var task4 = new MissionTask
             {
-                Inspection = new Inspection(),
                 RobotPose = new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
                 TagId = "ABCDEFG",
                 Description = "Task description",
@@ -406,7 +384,6 @@ namespace Api.Database.Context
 
             var task5 = new MissionTask
             {
-                Inspection = new Inspection(),
                 RobotPose = new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
                 TagId = "ABCDEFGH",
                 Description = "Task description",
@@ -415,7 +392,6 @@ namespace Api.Database.Context
 
             var task6 = new MissionTask
             {
-                Inspection = new Inspection(),
                 RobotPose = new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
                 TagId = "ABCDEFGHI",
                 Description = "Task description",
@@ -424,7 +400,6 @@ namespace Api.Database.Context
 
             var task7 = new MissionTask
             {
-                Inspection = new Inspection(),
                 RobotPose = new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
                 TagId = "ABCDEFGHIJ",
                 Description = "Task description",
@@ -542,7 +517,6 @@ namespace Api.Database.Context
                 return;
             }
 
-            context.AddRange(inspections);
             context.AddRange(installations);
             context.SaveChanges();
 
@@ -551,10 +525,6 @@ namespace Api.Database.Context
             context.AddRange(inspectionAreas);
 
             var tasks = GetMissionTasks();
-            foreach (var task in tasks)
-            {
-                task.Inspection = inspections[0];
-            }
             missionRuns[0].Tasks = tasks;
             context.AddRange(tasks);
             context.AddRange(missionDefinitions);
