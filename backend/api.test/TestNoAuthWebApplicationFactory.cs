@@ -4,7 +4,6 @@ using Api.Test.Database;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,7 +11,6 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Api.Test
 {
     public class UnauthenticatedWebApplicationFactory<TProgram>(
-        string? sqLiteDatabaseName = null,
         string? postgresConnectionString = null
     ) : WebApplicationFactory<Program>
         where TProgram : class
@@ -33,22 +31,7 @@ namespace Api.Test
             );
             builder.ConfigureTestServices(services =>
             {
-                if (sqLiteDatabaseName != null)
-                {
-                    string sqlLiteConnectionString = new SqliteConnectionStringBuilder
-                    {
-                        DataSource = $"file:{sqLiteDatabaseName}?mode=memory",
-                        Cache = SqliteCacheMode.Shared,
-                    }.ToString();
-
-                    services.AddDbContext<FlotillaDbContext>(options =>
-                        options.UseSqlite(
-                            sqlLiteConnectionString,
-                            o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery)
-                        )
-                    );
-                }
-                else if (postgresConnectionString != null)
+                if (postgresConnectionString != null)
                 {
                     services.AddDbContext<FlotillaDbContext>(
                         options =>

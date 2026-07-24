@@ -28,7 +28,7 @@
     <PackageReference Include="Npgsql" Version="10.0.2" />
     <PackageReference Include="Npgsql.OpenTelemetry" Version="10.0.2" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.10" />
+    <PackageReference Include="Testcontainers.PostgreSql" Version="4.10.0" />
     <PackageReference Include="Microsoft.Identity.Web" Version="4.3.0" />
     <PackageReference Include="Microsoft.Identity.Web.DownstreamApi" Version="4.3.0" />
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.10" />
@@ -51,14 +51,6 @@
     <PackageReference Include="MQTTnet.Extensions.ManagedClient" Version="4.3.7.1207" />
     <PackageReference Include="System.Linq.Dynamic.Core" Version="1.7.1" />
     <PackageReference Include="NCrontab" Version="3.4.0" />
-    <!--
-      Pin SQLitePCLRaw.bundle_e_sqlite3 to the 3.x line so the native SQLite library is
-      sourced from SourceGear.sqlite3 (SQLite >= 3.50.4) instead of the deprecated and
-      unpatched SQLitePCLRaw.lib.e_sqlite3 2.1.11 (CVE-2025-6965 / GHSA-2m69-gcr7-jv3q)
-      pulled in transitively by Microsoft.EntityFrameworkCore.Sqlite. Bundle 3.x is
-      API/ABI compatible with consumers expecting SQLitePCLRaw.core 2.x.
-    -->
-    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.3" />
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="api" />

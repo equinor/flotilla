@@ -2,11 +2,11 @@
 using Api.Database.Context;
 using Azure.Core;
 using Azure.Identity;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using Npgsql;
 using StackExchange.Redis;
+using Testcontainers.PostgreSql;
 
 namespace Api.Configurations
 {
@@ -55,32 +55,31 @@ namespace Api.Configurations
             }
             else if (useInMemoryDatabase)
             {
-                Console.WriteLine("Using InMemory Database");
-                DbContextOptionsBuilder dbBuilder =
-                    new DbContextOptionsBuilder<FlotillaDbContext>();
-                string sqlConnectionString = new SqliteConnectionStringBuilder
-                {
-                    DataSource = "file::memory:",
-                    Cache = SqliteCacheMode.Shared,
-                }.ToString();
+                Console.WriteLine("Starting PostgreSQL container for local development...");
+                var container = new PostgreSqlBuilder("postgres:17.10").Build();
+                container.StartAsync().GetAwaiter().GetResult();
+                Console.WriteLine("PostgreSQL container started.");
 
-                // In-memory sqlite requires an open connection throughout the whole lifetime of the database
-                var connectionToInMemorySqlite = new SqliteConnection(sqlConnectionString);
-                connectionToInMemorySqlite.Open();
-                dbBuilder.UseSqlite(connectionToInMemorySqlite);
+                string connectionString = container.GetConnectionString();
 
-                using var context = new FlotillaDbContext(dbBuilder.Options);
-                context.Database.EnsureCreated();
+                var optionsBuilder = new DbContextOptionsBuilder<FlotillaDbContext>();
+                optionsBuilder.UseNpgsql(
+                    connectionString,
+                    o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery)
+                );
+
+                using var context = new FlotillaDbContext(optionsBuilder.Options);
+                context.Database.MigrateAsync().GetAwaiter().GetResult();
+
                 bool initializeDb = configuration
                     .GetSection("Database")
                     .GetValue<bool>("InitializeInMemDb");
                 if (initializeDb)
                     InitDb.PopulateDb(context);
 
-                // Setting splitting behavior explicitly to avoid warning
                 services.AddDbContext<FlotillaDbContext>(options =>
-                    options.UseSqlite(
-                        sqlConnectionString,
+                    options.UseNpgsql(
+                        connectionString,
                         o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery)
                     )
                 );
