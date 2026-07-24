@@ -590,7 +590,7 @@ namespace Api.Test.MQTT
                 missionStatus: MissionStatus.Ongoing,
                 tasks: [task]
             );
-            var isarInspectionId = missionRun.Tasks[0].Inspection!.IsarInspectionId;
+            var isarInspectionId = missionRun.Tasks[0]!.IsarInspectionId;
 
             const string VALUE = "testvalue";
             var message = new SaraAnalysisResultMessage

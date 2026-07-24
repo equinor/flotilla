@@ -31,8 +31,6 @@ namespace Api.Controllers.Models
 
         public IsarZoomDescription? IsarZoomDescription { get; set; }
 
-        public Inspection? Inspection { get; set; }
-
         [JsonConstructor]
 #nullable disable
         public MissionTaskResponse() { }
@@ -53,7 +51,6 @@ namespace Api.Controllers.Models
             ErrorDescription = task.ErrorDescription;
             RobotPose = task.RobotPose;
             IsarZoomDescription = task.IsarZoomDescription;
-            Inspection = task.Inspection;
         }
     }
 }

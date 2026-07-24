@@ -53,6 +53,7 @@ export interface RobotWithoutTelemetry {
     isarUri?: string
     currentInspectionAreaId?: string
     type: RobotType
+    averageDurationPerTag?: number
 }
 interface RobotTelemetry {
     batteryLevel: number

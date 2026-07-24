@@ -13,10 +13,10 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { MissionStatusFilterOptions, missionStatusFilterOptionsIterable } from 'models/Mission'
 import { ChangeEvent, useState } from 'react'
 import { Icons } from 'utils/icons'
-import { SensorType } from 'models/Inspection'
 import { useMissionFilterContext } from 'components/Contexts/MissionFilterContext'
 import { tokens } from '@equinor/eds-tokens'
 import { phone_width } from 'utils/constants'
+import { SensorType } from 'models/Task'
 
 const StyledHeader = styled.div`
     display: flex;

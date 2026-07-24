@@ -75,14 +75,12 @@ namespace Api.Services.Models
 
         public IsarTaskDefinition(MissionTask missionTask)
         {
-            Id = missionTask.Id;
-            Type = MissionTask.GetIsarInspectionTaskType();
+            Id = missionTask.IsarInspectionId;
+            Type = "inspection";
             Pose = new IsarPose(missionTask.RobotPose);
             Tag = missionTask.TagId;
             Zoom = missionTask.IsarZoomDescription;
-
-            if (missionTask.Inspection != null)
-                Inspection = new IsarInspectionDefinition(missionTask);
+            Inspection = new IsarInspectionDefinition(missionTask);
         }
     }
 
@@ -109,23 +107,22 @@ namespace Api.Services.Models
 
         public IsarInspectionDefinition(MissionTask missionTask)
         {
-            var inspection = missionTask.Inspection!;
-            Type = inspection.InspectionType.ToString();
+            Type = missionTask.SensorType.ToString();
             InspectionTarget =
-                inspection.InspectionTarget != null
+                missionTask.TargetPosition != null
                     ? new IsarPosition(
-                        inspection.InspectionTarget.X,
-                        inspection.InspectionTarget.Y,
-                        inspection.InspectionTarget.Z,
+                        missionTask.TargetPosition.X,
+                        missionTask.TargetPosition.Y,
+                        missionTask.TargetPosition.Z,
                         "asset"
                     )
                     : null;
             InspectionDescription = missionTask.Description;
-            Duration = inspection.VideoDuration;
-            AnalysisTypes = ToSaraAnalysisKeys(inspection.AnalysisTypes);
+            Duration = missionTask.VideoDuration;
+            AnalysisTypes = ToSaraAnalysisKeys(missionTask.AnalysisTypes);
             Acoustic =
-                inspection.AcousticInspectionMetadata != null
-                    ? new IsarAcousticInspection(inspection.AcousticInspectionMetadata)
+                missionTask.AcousticInspectionMetadata != null
+                    ? new IsarAcousticInspection(missionTask.AcousticInspectionMetadata)
                     : null;
         }
 

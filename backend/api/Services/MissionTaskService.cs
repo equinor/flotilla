@@ -61,10 +61,7 @@ namespace Api.Services
             if (!string.IsNullOrWhiteSpace(parameters.MissionRunId))
                 missionRunQuery = missionRunQuery.Where(r => r.Id == parameters.MissionRunId);
 
-            var taskQuery = missionRunQuery
-                .SelectMany(r => r.Tasks)
-                .Include(t => t.Inspection)
-                .AsQueryable();
+            var taskQuery = missionRunQuery.SelectMany(r => r.Tasks).AsQueryable();
 
             if (parameters.Statuses is { Count: > 0 })
                 taskQuery = taskQuery.Where(t => parameters.Statuses.Contains(t.Status));
@@ -76,10 +73,7 @@ namespace Api.Services
                 );
 
             if (parameters.InspectionTypes is { Count: > 0 })
-                taskQuery = taskQuery.Where(t =>
-                    t.Inspection != null
-                    && parameters.InspectionTypes.Contains(t.Inspection.InspectionType)
-                );
+                taskQuery = taskQuery.Where(t => parameters.InspectionTypes.Contains(t.SensorType));
 
             if (!string.IsNullOrWhiteSpace(parameters.TagSearch))
                 taskQuery = taskQuery.Where(t =>
@@ -129,9 +123,6 @@ namespace Api.Services
 
         private async Task<MissionTask> Update(MissionTask missionTask)
         {
-            if (missionTask.Inspection != null)
-                context.Entry(missionTask.Inspection).State = EntityState.Unchanged;
-
             var entry = context.Update(missionTask);
             await context.SaveChangesAsync();
             DetachTracking(context, missionTask);
@@ -146,16 +137,14 @@ namespace Api.Services
 
         private IQueryable<MissionTask> GetMissionTasks(bool readOnly = true)
         {
-            return (
-                readOnly ? context.MissionTasks.AsNoTracking() : context.MissionTasks.AsTracking()
-            ).Include(missionTask => missionTask.Inspection);
+            return readOnly
+                ? context.MissionTasks.AsNoTracking()
+                : context.MissionTasks.AsTracking();
         }
 
         public void DetachTracking(FlotillaDbContext context, MissionTask missionTask)
         {
             context.Entry(missionTask).State = EntityState.Detached;
-            if (missionTask.Inspection != null)
-                context.Entry(missionTask.Inspection).State = EntityState.Detached;
         }
     }
 }

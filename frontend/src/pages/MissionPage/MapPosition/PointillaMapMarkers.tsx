@@ -44,9 +44,7 @@ const getPositionMarker = (map: L.Map, pos: Position, index: number) => {
 }
 
 export const getTaskMarkers = (map: L.Map, tasks: Task[]) => {
-    return orderTasksByDrawOrder(tasks).map((task) =>
-        getPositionMarker(map, task.inspection.inspectionTarget, task.taskOrder)
-    )
+    return orderTasksByDrawOrder(tasks).map((task) => getPositionMarker(map, task.targetPosition, task.taskOrder))
 }
 
 export const getTaskDefinitionMarkers = (map: L.Map, tasks: MissionTaskDefinition[]) => {

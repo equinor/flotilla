@@ -67,13 +67,10 @@ namespace Api.Database.Models
                 Status = TaskStatus.NotStarted,
                 IsarZoomDescription = this.ZoomDescription,
                 AnalysisTypes = this.AnalysisTypes,
-                Inspection = new Inspection(
-                    this.SensorType,
-                    this.TargetPosition,
-                    this.AnalysisTypes,
-                    this.VideoDuration,
-                    this.AcousticInspectionMetadata
-                ),
+                SensorType = this.SensorType,
+                TargetPosition = this.TargetPosition,
+                VideoDuration = this.VideoDuration,
+                AcousticInspectionMetadata = this.AcousticInspectionMetadata,
             };
         }
     }

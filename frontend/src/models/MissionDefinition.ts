@@ -3,7 +3,7 @@ import { Mission } from './Mission'
 import { AutoScheduleFrequency } from './AutoScheduleFrequency'
 import { Pose } from './Pose'
 import { Position } from './Position'
-import { AcousticInspectionMetadata, SensorType } from './Inspection'
+import { AcousticInspectionMetadata, SensorType } from './Task'
 
 export enum AnalysisType {
     Fencilla = 'Fencilla',

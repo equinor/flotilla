@@ -10,23 +10,21 @@ namespace Api.Test.Services.Models
         [Fact]
         public void AnalysisTypesSerialiseAsSnakeCaseSaraKeys()
         {
-            var inspection = new Inspection(
-                SensorType.Image,
-                new Position(0, 0, 0),
+            var task = new MissionTask
+            {
+                TaskOrder = 0,
+                RobotPose = new Pose(),
+                Status = TaskStatus.NotStarted,
+                SensorType = SensorType.Image,
+                TargetPosition = new Position(0, 0, 0),
+                AnalysisTypes =
                 [
                     AnalysisType.Fencilla,
                     AnalysisType.CLOE,
                     AnalysisType.ThermalReading,
                     AnalysisType.CO2,
                 ],
-                videoDuration: null
-            );
-            var task = new MissionTask
-            {
-                TaskOrder = 0,
-                RobotPose = new Pose(),
-                Status = TaskStatus.NotStarted,
-                Inspection = inspection,
+                VideoDuration = null,
             };
 
             var json = JsonSerializer.Serialize(new IsarInspectionDefinition(task));
@@ -52,24 +50,20 @@ namespace Api.Test.Services.Models
             var task = def.ToMissionRunTask();
 
             Assert.Equal([AnalysisType.Fencilla], task.AnalysisTypes);
-            Assert.Equal([AnalysisType.Fencilla], task.Inspection!.AnalysisTypes);
         }
 
         [Fact]
         public void AcousticIsOmittedWhenMetadataIsNull()
         {
-            var inspection = new Inspection(
-                SensorType.Image,
-                new Position(0, 0, 0),
-                [],
-                videoDuration: null
-            );
             var task = new MissionTask
             {
                 TaskOrder = 0,
                 RobotPose = new Pose(),
                 Status = TaskStatus.NotStarted,
-                Inspection = inspection,
+                SensorType = SensorType.Image,
+                TargetPosition = new Position(0, 0, 0),
+                AnalysisTypes = [],
+                VideoDuration = null,
             };
 
             var json = JsonSerializer.Serialize(new IsarInspectionDefinition(task));
@@ -80,24 +74,21 @@ namespace Api.Test.Services.Models
         [Fact]
         public void AcousticSerialisesWithSnakeCaseFieldNamesAndLowercaseDetectionType()
         {
-            var inspection = new Inspection(
-                SensorType.AcousticMeasurement,
-                new Position(0, 0, 0),
-                [],
-                videoDuration: null,
-                acousticInspectionMetadata: new AcousticInspectionMetadata(
-                    100f,
-                    200f,
-                    3.0f,
-                    AcousticDetectionType.Leak
-                )
-            );
             var task = new MissionTask
             {
                 TaskOrder = 0,
                 RobotPose = new Pose(),
                 Status = TaskStatus.NotStarted,
-                Inspection = inspection,
+                SensorType = SensorType.AcousticMeasurement,
+                TargetPosition = new Position(0, 0, 0),
+                AnalysisTypes = [],
+                VideoDuration = null,
+                AcousticInspectionMetadata = new AcousticInspectionMetadata(
+                    100f,
+                    200f,
+                    3.0f,
+                    AcousticDetectionType.Leak
+                ),
             };
 
             var json = JsonSerializer.Serialize(new IsarInspectionDefinition(task));
@@ -111,24 +102,21 @@ namespace Api.Test.Services.Models
         [Fact]
         public void RoiIsOmittedWhenNull()
         {
-            var inspection = new Inspection(
-                SensorType.AcousticMeasurement,
-                new Position(0, 0, 0),
-                [],
-                videoDuration: null,
-                acousticInspectionMetadata: new AcousticInspectionMetadata(
-                    100f,
-                    200f,
-                    3.0f,
-                    AcousticDetectionType.Leak
-                )
-            );
             var task = new MissionTask
             {
                 TaskOrder = 0,
                 RobotPose = new Pose(),
                 Status = TaskStatus.NotStarted,
-                Inspection = inspection,
+                SensorType = SensorType.AcousticMeasurement,
+                TargetPosition = new Position(0, 0, 0),
+                AnalysisTypes = [],
+                VideoDuration = null,
+                AcousticInspectionMetadata = new AcousticInspectionMetadata(
+                    100f,
+                    200f,
+                    3.0f,
+                    AcousticDetectionType.Leak
+                ),
             };
 
             var json = JsonSerializer.Serialize(new IsarInspectionDefinition(task));
@@ -139,12 +127,16 @@ namespace Api.Test.Services.Models
         [Fact]
         public void RoiSerialisesWithSnakeCaseFields()
         {
-            var inspection = new Inspection(
-                SensorType.AcousticMeasurement,
-                new Position(0, 0, 0),
-                [],
-                videoDuration: null,
-                acousticInspectionMetadata: new AcousticInspectionMetadata(
+            var task = new MissionTask
+            {
+                TaskOrder = 0,
+                RobotPose = new Pose(),
+                Status = TaskStatus.NotStarted,
+                SensorType = SensorType.AcousticMeasurement,
+                TargetPosition = new Position(0, 0, 0),
+                AnalysisTypes = [],
+                VideoDuration = null,
+                AcousticInspectionMetadata = new AcousticInspectionMetadata(
                     100f,
                     200f,
                     3.0f,
@@ -152,14 +144,7 @@ namespace Api.Test.Services.Models
                 )
                 {
                     Roi = new Roi(760, 400, 133, 160),
-                }
-            );
-            var task = new MissionTask
-            {
-                TaskOrder = 0,
-                RobotPose = new Pose(),
-                Status = TaskStatus.NotStarted,
-                Inspection = inspection,
+                },
             };
 
             var json = JsonSerializer.Serialize(new IsarInspectionDefinition(task));

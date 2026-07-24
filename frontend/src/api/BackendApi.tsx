@@ -133,8 +133,8 @@ export class BackendApi {
         return result.content
     }
 
-    async getMissionRunByIsarInspectionId(inspectionId: string): Promise<Mission> {
-        const path: string = 'missions/runs/inspection/' + inspectionId
+    async getMissionRunByTaskId(taskId: string): Promise<Mission> {
+        const path: string = 'missions/runs/task/' + taskId
         const result = await this.api.GET<Mission>(path).catch(handleError('GET', path))
         return result.content
     }
