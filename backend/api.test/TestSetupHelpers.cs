@@ -12,7 +12,6 @@ using Api.Test.Database;
 using Api.Test.Mocks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -23,24 +22,7 @@ namespace Api.Test;
 
 public static class TestSetupHelpers
 {
-    private const string PostgresVersion = "postgres:17.6";
-
-    public static async Task<(string, DbConnection)> ConfigureSqLiteDatabase(string databaseName)
-    {
-        string connectionString = new SqliteConnectionStringBuilder
-        {
-            DataSource = $"file:{databaseName}?mode=memory",
-            Cache = SqliteCacheMode.Shared,
-        }.ToString();
-
-        var context = ConfigureSqLiteContext(connectionString);
-        await context.Database.EnsureCreatedAsync();
-
-        var connection = context.Database.GetDbConnection();
-        await connection.OpenAsync();
-
-        return (connectionString, connection);
-    }
+    private const string PostgresVersion = "postgres:17.10";
 
     public static async Task<(
         PostgreSqlContainer,
@@ -77,16 +59,6 @@ public static class TestSetupHelpers
         return factory.Services;
     }
 
-    public static FlotillaDbContext ConfigureSqLiteContext(string connectionString)
-    {
-        var optionsBuilder = new DbContextOptionsBuilder<FlotillaDbContext>();
-        optionsBuilder.EnableSensitiveDataLogging();
-        optionsBuilder.UseSqlite(connectionString);
-
-        var context = new FlotillaDbContext(optionsBuilder.Options);
-        return context;
-    }
-
     public static FlotillaDbContext ConfigurePostgreSqlContext(string connectionString)
     {
         var optionsBuilder = new DbContextOptionsBuilder<FlotillaDbContext>();
@@ -99,11 +71,10 @@ public static class TestSetupHelpers
     }
 
     public static TestWebApplicationFactory<Program> ConfigureWebApplicationFactory(
-        string? databaseName = null,
         string? postgreSqlConnectionString = null
     )
     {
-        return new TestWebApplicationFactory<Program>(databaseName, postgreSqlConnectionString);
+        return new TestWebApplicationFactory<Program>(postgreSqlConnectionString);
     }
 
     public static HttpClient ConfigureHttpClient(TestWebApplicationFactory<Program> factory)
@@ -123,14 +94,10 @@ public static class TestSetupHelpers
     }
 
     public static UnauthenticatedWebApplicationFactory<Program> ConfigureUnauthenticatedWebApplicationFactory(
-        string? databaseName = null,
         string? postgreSqlConnectionString = null
     )
     {
-        return new UnauthenticatedWebApplicationFactory<Program>(
-            databaseName,
-            postgreSqlConnectionString
-        );
+        return new UnauthenticatedWebApplicationFactory<Program>(postgreSqlConnectionString);
     }
 
     public static HttpClient ConfigureUnauthenticatedHttpClient(
