@@ -129,6 +129,7 @@ public static class TestSetupHelpers
         );
         var _missionTaskService = new MissionTaskService(
             context,
+            _accessRoleService,
             new Mock<ILogger<MissionTaskService>>().Object
         );
         var _plantService = new PlantService(context, _installationService, _accessRoleService);
