@@ -25,8 +25,8 @@ namespace Api.Services
             bool includeDeprecated = false
         );
 
-        public Task<MissionRun?> ReadByIsarInspectionId(
-            string isarInspectionId,
+        public Task<MissionRun?> ReadByTaskId(
+            string taskId,
             bool readOnly = true,
             bool includeDeprecated = false
         );
@@ -173,8 +173,8 @@ namespace Api.Services
                 .FirstOrDefaultAsync(missionRun => missionRun.Id.Equals(id));
         }
 
-        public async Task<MissionRun?> ReadByIsarInspectionId(
-            string isarInspectionId,
+        public async Task<MissionRun?> ReadByTaskId(
+            string taskId,
             bool readOnly = true,
             bool includeDeprecated = false
         )
@@ -183,7 +183,7 @@ namespace Api.Services
                     readOnly: readOnly,
                     includeDeprecated: includeDeprecated
                 )
-                .Where((m) => m.Tasks.Any((t) => t.IsarInspectionId == isarInspectionId))
+                .Where((m) => m.Tasks.Any((t) => t.Id == taskId))
                 .FirstOrDefaultAsync();
         }
 

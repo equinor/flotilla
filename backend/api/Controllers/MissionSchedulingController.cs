@@ -74,7 +74,6 @@ namespace Api.Controllers
             foreach (var task in missionTasks)
             {
                 task.Id = Guid.NewGuid().ToString();
-                task.IsarInspectionId = Guid.NewGuid().ToString();
             }
 
             var newMissionRun = new MissionRun

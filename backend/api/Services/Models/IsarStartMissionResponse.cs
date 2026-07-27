@@ -19,9 +19,6 @@ namespace Api.Services.Models
         [JsonPropertyName("tag_id")]
         public required string TagId { get; set; }
 
-        [JsonPropertyName("inspection_id")]
-        public string? IsarInspectionId { get; set; }
-
         [JsonPropertyName("type")]
         public required string TaskType { get; set; }
     }
