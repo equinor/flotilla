@@ -359,10 +359,9 @@ namespace Api.Services
                 );
             }
 
-            IsarMission isarMission;
             try
             {
-                isarMission = await isarService.StartMission(robot, queuedMissionRun);
+                var isarMission = await isarService.StartMission(robot, queuedMissionRun);
             }
             catch (HttpRequestException e)
             {

@@ -32,10 +32,6 @@ namespace Api.Database.Models
         public string Id { get; set; }
 
         [Required]
-        [MaxLength(200)]
-        public string IsarInspectionId { get; set; } = Guid.NewGuid().ToString();
-
-        [Required]
         public int TaskOrder { get; set; }
 
         [MaxLength(200)]

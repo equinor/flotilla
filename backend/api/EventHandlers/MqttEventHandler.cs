@@ -913,10 +913,7 @@ namespace Api.EventHandlers
             // the full list and emit one persist + SignalR event per inspection.
             var inspectionId = saraAnalysisResult.InspectionIds[0];
 
-            var missionRun = await MissionRunService.ReadByIsarInspectionId(
-                inspectionId,
-                readOnly: true
-            );
+            var missionRun = await MissionRunService.ReadByTaskId(inspectionId, readOnly: true);
 
             var installation = missionRun?.InspectionArea?.Installation;
 

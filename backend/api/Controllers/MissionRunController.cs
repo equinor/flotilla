@@ -105,17 +105,17 @@ namespace Api.Controllers
         /// </summary>
         [HttpGet]
         [Authorize(Roles = Role.Any)]
-        [Route("inspection/{id}")]
+        [Route("task/{id}")]
         [ProducesResponseType(typeof(MissionRunResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<MissionRunResponse>> GetMissionRunByIsarInspectionId(
+        public async Task<ActionResult<MissionRunResponse>> GetMissionRunByTaskId(
             [FromRoute] string id
         )
         {
-            var missionRun = await missionRunService.ReadByIsarInspectionId(id, readOnly: true);
+            var missionRun = await missionRunService.ReadByTaskId(id, readOnly: true);
             if (missionRun == null)
             {
                 return NotFound($"Could not find mission run with inspection with id {id}");
