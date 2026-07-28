@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Autocomplete, Button, CircularProgress } from '@equinor/eds-core-react'
+import { Autocomplete, Button, CircularProgress, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Header } from 'components/Header/Header'
@@ -51,15 +51,18 @@ const InstallationPicker = () => {
 
     const [selectedInstallation, setSelectedInstallation] = useState<Installation | undefined>(undefined)
     const [installations, setInstallations] = useState<Installation[] | undefined>(undefined)
+    const [isLoadingInstallations, setIsLoadingInstallations] = useState<boolean>(true)
 
     useEffect(() => {
         backendApi
             .getInstallations()
             .then((installations) => {
                 setInstallations(installations)
+                setIsLoadingInstallations(false)
             })
             .catch(() => {
                 console.error(`Failed to retrieve list of installations`)
+                setIsLoadingInstallations(false)
             })
     }, [])
 
@@ -67,10 +70,16 @@ const InstallationPicker = () => {
         navigate(selectedInstallation!.installationCode)
     }
 
-    if (installations === undefined) {
+    if (isLoadingInstallations) {
         return (
             <>
                 <CircularProgress />
+            </>
+        )
+    } else if (!installations) {
+        return (
+            <>
+                <Typography>Not able to load installations. </Typography>
             </>
         )
     }
