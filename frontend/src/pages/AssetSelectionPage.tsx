@@ -64,7 +64,7 @@ const InstallationPicker = () => {
                 console.error(`Failed to retrieve list of installations`)
                 setIsLoadingInstallations(false)
             })
-    }, [])
+    }, [backendApi])
 
     const handleClick = () => {
         navigate(selectedInstallation!.installationCode)
