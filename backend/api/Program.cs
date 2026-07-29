@@ -80,6 +80,7 @@ builder.Services.AddScoped<IMissionTaskService, MissionTaskService>();
 builder.Services.AddScoped<IInspectionService, InspectionService>();
 builder.Services.AddScoped<IExclusionAreaService, ExclusionAreaService>();
 
+builder.Services.AddSingleton<IMissionSchedulingLock, MissionSchedulingLock>();
 builder.Services.AddScoped<IMissionSchedulingService, MissionSchedulingService>();
 
 builder.Services.AddScoped<IIsarService, IsarService>();

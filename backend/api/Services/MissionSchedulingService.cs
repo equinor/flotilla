@@ -28,10 +28,20 @@ namespace Api.Services
         ISignalRService signalRService,
         IErrorHandlingService errorHandlingService,
         IInspectionAreaService inspectionAreaService,
-        IExclusionAreaService exclusionAreaService
+        IExclusionAreaService exclusionAreaService,
+        IMissionSchedulingLock missionSchedulingLock
     ) : IMissionSchedulingService
     {
         public async Task StartNextMissionRunIfSystemIsAvailable(Robot robot)
+        {
+            // Serialize mission-start attempts per robot so that concurrent callers
+            // (scheduling controller, auto scheduler, MQTT event handler) cannot both
+            // pick and start the same queued mission run at the same time.
+            using var _ = await missionSchedulingLock.LockAsync(robot.Id);
+            await StartNextMissionRunIfSystemIsAvailableInternal(robot);
+        }
+
+        private async Task StartNextMissionRunIfSystemIsAvailableInternal(Robot robot)
         {
             logger.LogInformation(
                 "Robot {robotName} has status {robotStatus} and current inspection area id {areaId}",
@@ -110,7 +120,7 @@ namespace Api.Services
                         robot.Id
                     );
                 }
-                await StartNextMissionRunIfSystemIsAvailable(robot);
+                await StartNextMissionRunIfSystemIsAvailableInternal(robot);
                 return;
             }
 
@@ -142,7 +152,7 @@ namespace Api.Services
                         robot.Id
                     );
                 }
-                await StartNextMissionRunIfSystemIsAvailable(robot);
+                await StartNextMissionRunIfSystemIsAvailableInternal(robot);
                 return;
             }
 
@@ -183,7 +193,7 @@ namespace Api.Services
                     );
                 }
 
-                await StartNextMissionRunIfSystemIsAvailable(robot);
+                await StartNextMissionRunIfSystemIsAvailableInternal(robot);
                 return;
             }
 
@@ -385,6 +395,17 @@ namespace Api.Services
             }
 
             await missionRunService.UpdateWithIsarInfo(queuedMissionRun.Id, isarMission);
+
+            // Move the run out of the Queued state immediately (while still holding
+            // the per-robot scheduling lock) so a subsequent scheduling attempt does
+            // not re-read and start the same mission run before ISAR reports its
+            // status over MQTT. The MQTT status update remains the source of truth
+            // and will overwrite this with the reported status.
+            await missionRunService.UpdateMissionRunProperty(
+                queuedMissionRun.Id,
+                "Status",
+                MissionStatus.Ongoing
+            );
 
             logger.LogInformation("Started mission run '{Id}'", queuedMissionRun.Id);
         }

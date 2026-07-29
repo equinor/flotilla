@@ -190,7 +190,8 @@ public static class TestSetupHelpers
             signalRService,
             _errorHandlingService,
             _inspectionAreaService,
-            _exclusionAreaService
+            _exclusionAreaService,
+            new MissionSchedulingLock()
         );
         var _missionDefinitionService = new MissionDefinitionService(
             context,
