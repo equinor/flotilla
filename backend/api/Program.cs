@@ -107,6 +107,7 @@ builder.Services.AddTransient<ISignalRService, SignalRService>();
 
 builder.Services.AddSingleton<EventAggregatorSingletonService>();
 
+builder.Services.AddHostedService<MsalWarmupHostedService>();
 builder.Services.AddHostedService<MqttEventHandler>();
 builder.Services.AddHostedService<MissionEventHandler>();
 builder.Services.AddHostedService<MqttService>();
