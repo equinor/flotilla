@@ -12,6 +12,10 @@ import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'compon
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { ScheduleMissionWithInspectionAreaVerification } from 'components/Displays/InspectionAreaVerificationDialogs/ScheduleMissionWithInspectionAreaVerification'
+import {
+    getInspectionAreaDialogType,
+    InspectionAreaDialogType,
+} from 'components/Displays/InspectionAreaVerificationDialogs/getInspectionAreaDialogType'
 import { phone_width } from 'utils/constants'
 import { useBackendApi } from 'api/UseBackendApi'
 
@@ -61,6 +65,7 @@ export const ScheduleMissionDialog = (props: IProps) => {
     const { setLoadingRobotMissionSet } = useMissionsContext()
     const { setAlert, setListAlert } = useAlertContext()
     const [isInspectionAreaVerificationDialogOpen, setIsInspectionAreaVerificationDialogOpen] = useState<boolean>(false)
+    const [verificationDialogType, setVerificationDialogType] = useState<InspectionAreaDialogType | null>(null)
     const [missionsToSchedule, setMissionsToSchedule] = useState<MissionDefinition[]>()
     const backendApi = useBackendApi()
     const filteredRobots = enabledRobots.filter(
@@ -82,16 +87,27 @@ export const ScheduleMissionDialog = (props: IProps) => {
     const onScheduleButtonPress = (missions: MissionDefinition[]) => () => {
         if (!selectedRobot) return
 
+        const dialogType = getInspectionAreaDialogType(
+            selectedRobot,
+            missions.map((mission) => mission.inspectionArea)
+        )
+
+        if (dialogType === null) {
+            scheduleMissions(missions)
+            return
+        }
+
         setMissionsToSchedule(missions)
+        setVerificationDialogType(dialogType)
         setIsInspectionAreaVerificationDialogOpen(true)
     }
 
-    const scheduleMissions = () => {
+    const scheduleMissions = (missions: MissionDefinition[]) => {
         setIsInspectionAreaVerificationDialogOpen(false)
 
-        if (!selectedRobot || !missionsToSchedule) return
+        if (!selectedRobot) return
 
-        missionsToSchedule.forEach((mission) => {
+        missions.forEach((mission) => {
             backendApi.scheduleMissionDefinition(mission.id, selectedRobot.id).catch((e) => {
                 setAlert(
                     AlertType.RequestFail,
@@ -193,12 +209,12 @@ export const ScheduleMissionDialog = (props: IProps) => {
                     </StyledDialogContent>
                 </StyledDialog>
             </StyledMissionDialog>
-            {isInspectionAreaVerificationDialogOpen && (
+            {isInspectionAreaVerificationDialogOpen && verificationDialogType !== null && (
                 <ScheduleMissionWithInspectionAreaVerification
-                    scheduleMissions={scheduleMissions}
+                    dialogType={verificationDialogType}
                     closeDialog={closeScheduleDialogs}
-                    robotId={selectedRobot!.id}
-                    missionInspectionAreas={props.selectedMissions.map((mission) => mission.inspectionArea)}
+                    robot={selectedRobot}
+                    missionInspectionAreas={missionsToSchedule?.map((mission) => mission.inspectionArea) ?? []}
                 />
             )}
         </>
