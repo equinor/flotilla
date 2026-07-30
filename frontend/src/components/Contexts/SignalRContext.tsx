@@ -77,7 +77,7 @@ export const SignalRProvider: FC<Props> = ({ children }) => {
                     signalR.HttpTransportType.LongPolling,
             })
             .withAutomaticReconnect()
-            .configureLogging(signalR.LogLevel.Error)
+            .configureLogging(signalR.LogLevel.Critical)
             .build()
 
         newConnection.onclose((error) => {
@@ -113,15 +113,19 @@ export const SignalRProvider: FC<Props> = ({ children }) => {
                 setConnectionReady(true)
             })
             .catch((error) => {
-                console.error('SignalR connection failed:', error)
-                setConnectionReady(false)
+                if (error instanceof Error && error.constructor?.name === 'AbortError') {
+                    // Aborting a connection is expected when the user navigates away or the react dev remounts.
+                    setConnectionReady(false)
+                } else {
+                    console.error('SignalR connection failed:', error)
+                    setConnectionReady(false)
+                }
             })
         return newConnection
     }
 
     useEffect(() => {
         if (!accounts[0] || inProgress !== 'none') return
-
         const newConnection = resetConnection()
 
         return () => {
