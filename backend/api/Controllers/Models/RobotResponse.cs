@@ -33,6 +33,8 @@ namespace Api.Controllers.Models
 
         public RobotType Type { get; set; }
 
+        public float? AverageDurationPerTag { get; set; }
+
         public IList<RobotCapabilitiesEnum>? RobotCapabilities { get; set; }
 
         [JsonConstructor]
@@ -58,6 +60,7 @@ namespace Api.Controllers.Models
             IsarUri = robot.IsarUri;
             RobotCapabilities = robot.RobotCapabilities;
             Type = robot.Type;
+            AverageDurationPerTag = robot.AverageDurationPerTag;
         }
     }
 }
