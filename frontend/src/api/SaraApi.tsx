@@ -23,7 +23,9 @@ export class SaraApi {
             .GET<InspectionRecord>(path)
             .then((response) => {
                 if (!response.content.analyses || response.content.analyses.length < 1) throw Error('No analysis found')
-                return inspectionRecordToInspectionData(response.content)
+                const data = inspectionRecordToInspectionData(response.content)
+                if (!data) throw Error('No analysis found')
+                return data
             })
             .catch(handleError('GET', path))
         return content
@@ -51,7 +53,7 @@ export class SaraApi {
             .then((response) => {
                 if (!response.content) throw Error('No inspection records found')
 
-                return response.content.items.map((r) => inspectionRecordToInspectionData(r))
+                return response.content.items.map((r) => inspectionRecordToInspectionData(r)).filter((r) => r !== null)
             })
             .catch(handleError('GET', path))
         return content
