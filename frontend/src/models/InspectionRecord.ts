@@ -15,8 +15,8 @@ interface Analysis {
     id: string
     name: string
     createdAt: string
-    anonymizedSAS: string
-    visualizedSAS: string
+    anonymizedSAS?: string
+    visualizedSAS?: string
     result?: AnalysisResult
 }
 
@@ -52,10 +52,10 @@ export interface FlotillaAnalysisResultMessage {
 export interface InspectionData {
     inspectionId: string
     analysisId: string
-    visualisedSAS: string
+    visualisedSAS?: string
     fileType: FileType
     anonymizedSAS: string
-    analysisType: string
+    analysisType?: string
     tag: string
     createdAt: Date
     targetPosition: Position
@@ -80,15 +80,18 @@ const sasURLToFileType = (sasURL: string): FileType => {
     return FileType.VALUE
 }
 
-export const inspectionRecordToInspectionData = (record: InspectionRecord): InspectionData => {
+export const inspectionRecordToInspectionData = (record: InspectionRecord): InspectionData | null => {
     const analysis = record.analyses[record.analyses.length - 1]
     const sas = analysis.visualizedSAS ?? analysis.anonymizedSAS
+
+    if (!sas) return null
+
     const fileType = sasURLToFileType(sas)
     return {
         inspectionId: record.inspectionId,
         analysisId: analysis.id,
         visualisedSAS: analysis.visualizedSAS,
-        anonymizedSAS: analysis.anonymizedSAS,
+        anonymizedSAS: analysis.anonymizedSAS!,
         analysisType: record.inspectionType,
         tag: record.tag,
         createdAt: record.createdAt,
