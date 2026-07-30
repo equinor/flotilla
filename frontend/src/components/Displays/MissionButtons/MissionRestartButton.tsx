@@ -8,9 +8,13 @@ import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { Mission } from 'models/Mission'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
-import { ScheduleMissionWithInspectionAreaVerification } from '../InspectionAreaVerificationDialogs/ScheduleMissionWithInspectionAreaVerification'
+import {
+    ScheduleMissionWithInspectionAreaVerification,
+    getInspectionAreaDialogType,
+} from '../InspectionAreaVerificationDialogs/ScheduleMissionWithInspectionAreaVerification'
 import { useBackendApi } from 'api/UseBackendApi'
 import { InstallationContext } from 'components/Contexts/InstallationContext'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 
 const Centered = styled.div`
     display: flex;
@@ -37,11 +41,13 @@ enum ReRunOptions {
 export const MissionRestartButton = ({ mission, hasFailedTasks, smallButton }: MissionProps) => {
     const { TranslateText } = useLanguageContext()
     const { installation } = useContext(InstallationContext)
+    const { enabledRobots } = useAssetContext()
     const { setAlert, setListAlert } = useAlertContext()
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const [isLocationVerificationOpen, setIsLocationVerificationOpen] = useState<boolean>(false)
-    const [selectedRerunOption, setSelectedRerunOption] = useState<ReRunOptions>()
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
+
+    const liveRobot = enabledRobots.find((robot) => robot.id === mission.robot.id)
 
     const navigate = useNavigate()
     const navigateToHome = () => {
@@ -70,7 +76,10 @@ export const MissionRestartButton = ({ mission, hasFailedTasks, smallButton }: M
     }
 
     const selectRerunOption = (rerunOption: ReRunOptions) => {
-        setSelectedRerunOption(rerunOption)
+        if (getInspectionAreaDialogType(liveRobot, [mission.inspectionArea]) === undefined) {
+            startReRun(rerunOption)
+            return
+        }
         setIsLocationVerificationOpen(true)
     }
 
@@ -118,7 +127,6 @@ export const MissionRestartButton = ({ mission, hasFailedTasks, smallButton }: M
             </EdsProvider>
             {isLocationVerificationOpen && (
                 <ScheduleMissionWithInspectionAreaVerification
-                    scheduleMissions={() => startReRun(selectedRerunOption!)}
                     closeDialog={() => setIsLocationVerificationOpen(false)}
                     robotId={mission.robot.id}
                     missionInspectionAreas={[mission.inspectionArea]}

@@ -11,7 +11,10 @@ import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
-import { ScheduleMissionWithInspectionAreaVerification } from 'components/Displays/InspectionAreaVerificationDialogs/ScheduleMissionWithInspectionAreaVerification'
+import {
+    ScheduleMissionWithInspectionAreaVerification,
+    getInspectionAreaDialogType,
+} from 'components/Displays/InspectionAreaVerificationDialogs/ScheduleMissionWithInspectionAreaVerification'
 import { phone_width } from 'utils/constants'
 import { useBackendApi } from 'api/UseBackendApi'
 
@@ -82,16 +85,25 @@ export const ScheduleMissionDialog = (props: IProps) => {
     const onScheduleButtonPress = (missions: MissionDefinition[]) => () => {
         if (!selectedRobot) return
 
+        const dialogType = getInspectionAreaDialogType(
+            selectedRobot,
+            missions.map((mission) => mission.inspectionArea)
+        )
+        if (dialogType === undefined) {
+            scheduleMissions(missions)
+            return
+        }
+
         setMissionsToSchedule(missions)
         setIsInspectionAreaVerificationDialogOpen(true)
     }
 
-    const scheduleMissions = () => {
+    const scheduleMissions = (missions: MissionDefinition[]) => {
         setIsInspectionAreaVerificationDialogOpen(false)
 
-        if (!selectedRobot || !missionsToSchedule) return
+        if (!selectedRobot) return
 
-        missionsToSchedule.forEach((mission) => {
+        missions.forEach((mission) => {
             backendApi.scheduleMissionDefinition(mission.id, selectedRobot.id).catch((e) => {
                 setAlert(
                     AlertType.RequestFail,
@@ -195,10 +207,9 @@ export const ScheduleMissionDialog = (props: IProps) => {
             </StyledMissionDialog>
             {isInspectionAreaVerificationDialogOpen && (
                 <ScheduleMissionWithInspectionAreaVerification
-                    scheduleMissions={scheduleMissions}
                     closeDialog={closeScheduleDialogs}
                     robotId={selectedRobot!.id}
-                    missionInspectionAreas={props.selectedMissions.map((mission) => mission.inspectionArea)}
+                    missionInspectionAreas={missionsToSchedule?.map((mission) => mission.inspectionArea) ?? []}
                 />
             )}
         </>

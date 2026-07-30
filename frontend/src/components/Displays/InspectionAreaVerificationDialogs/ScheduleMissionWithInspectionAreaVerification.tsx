@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import {
     ConflictingMissionInspectionAreasDialog,
     ConflictingRobotInspectionAreaDialog,
@@ -6,9 +5,9 @@ import {
 import { UnknownInspectionAreaDialog } from './UnknownInspectionAreaDialog'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 import { InspectionArea } from 'models/InspectionArea'
+import { RobotWithoutTelemetry } from 'models/Robot'
 
 interface IProps {
-    scheduleMissions: () => void
     closeDialog: () => void
     robotId: string
     missionInspectionAreas: InspectionArea[]
@@ -21,42 +20,42 @@ enum DialogTypes {
     unknown,
 }
 
+const getUniqueInspectionAreas = (missionInspectionAreas: InspectionArea[]) =>
+    missionInspectionAreas.filter(
+        (inspectionArea, index, self) => self.findIndex((i) => i.id === inspectionArea.id) === index
+    )
+
+// Returns which verification dialog to show, or undefined when the mission can
+// be scheduled without asking the operator to confirm.
+export const getInspectionAreaDialogType = (
+    robot: RobotWithoutTelemetry | undefined,
+    missionInspectionAreas: InspectionArea[]
+): DialogTypes | undefined => {
+    if (!robot) return DialogTypes.unknown
+
+    const uniqueInspectionAreas = getUniqueInspectionAreas(missionInspectionAreas)
+    if (uniqueInspectionAreas.length > 1) return DialogTypes.conflictingMissionInspectionAreas
+    if (uniqueInspectionAreas.length === 0) return DialogTypes.unknownNewInspectionArea
+    if (robot.currentInspectionAreaId && uniqueInspectionAreas[0]?.id !== robot.currentInspectionAreaId) {
+        return DialogTypes.conflictingRobotInspectionArea
+    }
+    return undefined
+}
+
 export const ScheduleMissionWithInspectionAreaVerification = ({
     robotId,
     missionInspectionAreas,
-    scheduleMissions,
     closeDialog,
 }: IProps) => {
     const { enabledRobots } = useAssetContext()
 
-    const unikMissionInspectionAreas = missionInspectionAreas.filter(
-        (inspectionArea, index, self) => self.findIndex((i) => i.id === inspectionArea.id) === index
-    )
-
     const selectedRobot = enabledRobots.find((robot) => robot.id === robotId)
 
-    const getDialogToOpen = (): DialogTypes | undefined => {
-        if (!selectedRobot) return DialogTypes.unknown
-        if (unikMissionInspectionAreas.length > 1) return DialogTypes.conflictingMissionInspectionAreas
-        if (unikMissionInspectionAreas.length === 0) return DialogTypes.unknownNewInspectionArea
-        if (
-            selectedRobot.currentInspectionAreaId &&
-            unikMissionInspectionAreas[0]?.id !== selectedRobot.currentInspectionAreaId
-        ) {
-            return DialogTypes.conflictingRobotInspectionArea
-        }
-        return undefined
-    }
+    const dialogToOpen = getInspectionAreaDialogType(selectedRobot, missionInspectionAreas) ?? DialogTypes.unknown
 
-    const resolvedDialog = getDialogToOpen()
-    const dialogToOpen = resolvedDialog ?? DialogTypes.unknown
-    const shouldScheduleDirectly = !!selectedRobot && resolvedDialog === undefined
-
-    useEffect(() => {
-        if (shouldScheduleDirectly) scheduleMissions()
-    }, [shouldScheduleDirectly])
-
-    const unikMissionInspectionAreaNames = unikMissionInspectionAreas.map((area) => area?.inspectionAreaName ?? '')
+    const unikMissionInspectionAreaNames = getUniqueInspectionAreas(missionInspectionAreas).map(
+        (area) => area?.inspectionAreaName ?? ''
+    )
 
     return (
         <>
