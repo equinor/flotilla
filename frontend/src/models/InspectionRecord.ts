@@ -82,6 +82,9 @@ const sasURLToFileType = (sasURL: string): FileType => {
 
 export const inspectionRecordToInspectionData = (record: InspectionRecord): InspectionData | null => {
     const analysis = record.analyses[record.analyses.length - 1]
+
+    if (!analysis) return null
+
     const sas = analysis.visualizedSAS ?? analysis.anonymizedSAS
 
     if (!sas) return null
