@@ -876,16 +876,18 @@ namespace Api.EventHandlers
                 InspectionId = inspectionResult.InspectionId,
             };
 
-            var installation = await InstallationService.ReadByInstallationCode(
-                inspectionResult.BlobContainer,
+            var missionRun = await MissionRunService.ReadByTaskId(
+                inspectionResult.InspectionId,
                 readOnly: true
             );
+
+            var installation = missionRun?.InspectionArea?.Installation;
 
             if (installation == null)
             {
                 _logger.LogError(
-                    "Installation with code {Code} not found when processing SARA inspection result update",
-                    inspectionResult.BlobContainer
+                    "Installation could not be found when processing SARA inspection result update with inspection ID {InspectionId}",
+                    inspectionResult.InspectionId
                 );
                 return;
             }

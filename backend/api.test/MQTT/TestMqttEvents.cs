@@ -526,16 +526,43 @@ namespace Api.Test.MQTT
         public async Task TestMQTTSaraInspectionResult()
         {
             var installation = await DatabaseUtilities.NewInstallation();
+            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
+            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
+                installation.InstallationCode,
+                plant.PlantCode
+            );
+            var robot = await DatabaseUtilities.NewRobot(
+                RobotStatus.Busy,
+                installation,
+                inspectionArea.Id
+            );
+            var task = new TaskDefinition(
+                new TaskQuery
+                {
+                    TagId = "test",
+                    TargetPosition = new Position(),
+                    SensorType = SensorType.Image,
+                    AnalysisTypes = [AnalysisType.Fencilla],
+                    RobotPose = new Pose(11, 11, 11, 0, 0, 0, 1),
+                },
+                1
+            ).ToMissionRunTask();
+            var missionRun = await DatabaseUtilities.NewMissionRun(
+                installation.InstallationCode,
+                robot,
+                inspectionArea,
+                writeToDatabase: true,
+                missionStatus: MissionStatus.Ongoing,
+                tasks: [task]
+            );
+            var isarInspectionId = missionRun.Tasks[0]!.Id;
 
             var message = new SaraInspectionResultMessage
             {
-                InspectionId = Guid.NewGuid().ToString(),
+                InspectionId = isarInspectionId,
                 WorkflowId = Guid.NewGuid(),
                 AnalysisRunId = Guid.NewGuid(),
                 AnalysisId = Guid.NewGuid(),
-                StorageAccount = "testaccount",
-                BlobContainer = installation.InstallationCode,
-                BlobName = "testblob",
             };
             var messageString = JsonSerializer.Serialize(message);
             await MqttService.PublishMessageBasedOnTopic(
