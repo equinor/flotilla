@@ -16,7 +16,7 @@ import { AnalysisOverviewSection, InspectionOverviewSection } from '../Inspectio
 import { TaskTableAndMap } from './TaskTableAndMap'
 import { AnalysisResultDialogView } from './AnalysisResultView'
 import { tokens } from '@equinor/eds-tokens'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router'
 import { useBackendApi } from 'api/UseBackendApi'
 import { InstallationContext } from 'components/Contexts/InstallationContext'
 import { useInspectionsContext } from 'components/Contexts/InspectionsContext'

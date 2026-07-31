@@ -8,7 +8,7 @@ import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinit
 import { allDaysStartingSunday, DaysOfWeek } from 'models/AutoScheduleFrequency'
 import { MissionStatusType, selectMissionStatusType } from './AutoScheduleMissionTableRow'
 import { tokens } from '@equinor/eds-tokens'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Button, Icon, Typography } from '@equinor/eds-core-react'
 import { StyledDialog } from 'components/Styles/StyledComponents'

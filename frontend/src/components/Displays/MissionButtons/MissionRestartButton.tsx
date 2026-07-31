@@ -1,6 +1,6 @@
 import { Button, EdsProvider, Icon, Menu } from '@equinor/eds-core-react'
 import { Icons } from 'utils/icons'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import styled from 'styled-components'
 import { useContext, useState } from 'react'

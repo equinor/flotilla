@@ -7,7 +7,7 @@ import { AlertDictionaryType } from 'components/Contexts/AlertContext'
 import { AlertBanner } from 'components/Alerts/AlertsBanner'
 import { FrontPageSectionId } from 'models/FrontPageSectionId'
 import { AlertIcon } from 'components/Header/AlertIcon'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { phone_width } from 'utils/constants'
 import { Installation } from 'models/Installation'
 

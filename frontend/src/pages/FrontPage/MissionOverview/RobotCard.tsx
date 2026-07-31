@@ -5,7 +5,7 @@ import { RobotStatusChip } from 'components/Displays/RobotDisplays/RobotStatusIc
 import { BatteryStatusDisplay } from 'components/Displays/RobotDisplays/BatteryStatusDisplay'
 import styled from 'styled-components'
 import { RobotImage } from 'components/Displays/RobotDisplays/RobotImage'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { PressureStatusDisplay } from 'components/Displays/RobotDisplays/PressureStatusDisplay'
 import { AttributeTitleTypography } from 'components/Styles/StyledComponents'

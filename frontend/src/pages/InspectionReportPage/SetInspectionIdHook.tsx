@@ -1,4 +1,4 @@
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router'
 
 export const useInspectionId = () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
