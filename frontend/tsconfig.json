@@ -9,7 +9,7 @@
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler", // Required by react-router v8+ (uses package.json exports fields). "bundler" is the correct mode for Vite projects and avoids needing file extensions on relative imports.
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
