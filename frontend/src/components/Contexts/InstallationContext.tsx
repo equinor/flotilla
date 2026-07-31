@@ -1,7 +1,7 @@
 import { createContext, useState, useEffect } from 'react'
 import { Installation } from 'models/Installation'
 import { useBackendApi } from 'api/UseBackendApi'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
 interface IInstallationContext {
     installation: Installation

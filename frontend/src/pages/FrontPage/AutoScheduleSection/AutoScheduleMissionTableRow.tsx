@@ -4,7 +4,7 @@ import { allDays, allDaysIndexOfToday, DaysOfWeek, parseAutoScheduledJobIds } fr
 import styled from 'styled-components'
 import { convertUTCDateToLocalDate } from 'utils/StringFormatting'
 import { MissionDefinition } from 'models/MissionDefinition'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { StyledDialog } from 'components/Styles/StyledComponents'
 import { useContext, useState } from 'react'
 import { Icons } from 'utils/icons'

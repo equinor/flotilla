@@ -12,7 +12,7 @@ import { MissionRestartButton } from 'components/Displays/MissionButtons/Mission
 import { TaskStatus } from 'models/Task'
 import { convertUTCDateToLocalDate, formatDateTime } from 'utils/StringFormatting'
 import { calculateRemaindingTimeInMinutes } from 'utils/CalculateRemaingingTime'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { phone_width } from 'utils/constants'
 import { FieldLabel } from 'components/Styles/StyledComponents'
 import { useContext } from 'react'

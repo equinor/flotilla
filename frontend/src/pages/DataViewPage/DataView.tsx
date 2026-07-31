@@ -18,7 +18,7 @@ import {
 import { AnalysisResultDialogContent } from 'pages/MissionPage/AnalysisResultView'
 import { InspectionDialogView } from 'pages/InspectionReportPage/InspectionView'
 import { AnalysisResultDialogView } from 'pages/MissionPage/AnalysisResultView'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router'
 import { DataViewTable } from './DataViewTable'
 import {
     DataViewChartArea,

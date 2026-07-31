@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { Button, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import notfound from 'mediaAssets/404notfound.png'

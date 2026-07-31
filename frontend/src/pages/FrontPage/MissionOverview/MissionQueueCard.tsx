@@ -1,7 +1,7 @@
 import { Button, Card, Dialog, Icon, Typography, DotProgress } from '@equinor/eds-core-react'
 import { Mission } from 'models/Mission'
 import styled from 'styled-components'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { useContext, useState } from 'react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'

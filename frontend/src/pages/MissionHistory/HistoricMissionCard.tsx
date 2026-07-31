@@ -7,7 +7,7 @@ import {
 } from 'components/Displays/MissionDisplays/MissionStatusDisplay'
 import { MissionRestartButton } from 'components/Displays/MissionButtons/MissionRestartButton'
 import { TaskStatus } from 'models/Task'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { formatDateTime } from 'utils/StringFormatting'
 import { useContext } from 'react'
 import { InstallationContext } from 'components/Contexts/InstallationContext'

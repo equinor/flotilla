@@ -2,7 +2,7 @@ import { createContext, FC, useContext, useEffect, useState, useMemo } from 'rea
 import { MissionStatusFilterOptions, missionStatusFilterOptionsIterable } from 'models/Mission'
 import { useLanguageContext } from './LanguageContext'
 import { MissionRunQueryParameters } from 'models/MissionRunQueryParameters'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router'
 import { InstallationContext } from './InstallationContext'
 import { SensorType } from 'models/Task'
 

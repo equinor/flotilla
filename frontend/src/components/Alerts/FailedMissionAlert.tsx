@@ -1,6 +1,6 @@
 import { Mission, MissionStatus } from 'models/Mission'
 import { MissionStatusDisplay } from 'components/Displays/MissionDisplays/MissionStatusDisplay'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { AlertListContents } from './AlertsListItem'
 import { Icons } from 'utils/icons'
