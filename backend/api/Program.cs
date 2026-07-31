@@ -17,10 +17,8 @@ using Azure.Core;
 using Azure.Identity;
 using DotEnv.Core;
 using Hangfire;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Rewrite;
-using Microsoft.Identity.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 new EnvLoader().Load();
@@ -130,55 +128,9 @@ builder
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.ConfigureSwagger(builder.Configuration);
 
-// Configure Redis with Microsoft Entra Authentication
-if (builder.Configuration.GetSection("Redis").GetValue<bool>("UseRedis"))
-{
-    builder.Services.ConfigureRedisCache(builder.Configuration);
-    builder
-        .Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-        .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"))
-        .EnableTokenAcquisitionToCallDownstreamApi()
-        .AddDistributedTokenCaches()
-        .AddDownstreamApi(InspectionService.ServiceName, builder.Configuration.GetSection("SARA"))
-        .AddDownstreamApi(IsarService.ServiceName, builder.Configuration.GetSection("Isar"))
-        .AddDownstreamApi(
-            PointillaService.ServiceName,
-            builder.Configuration.GetSection("Pointilla")
-        );
-}
-else
-{
-    builder
-        .Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-        .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"))
-        .EnableTokenAcquisitionToCallDownstreamApi()
-        .AddInMemoryTokenCaches()
-        .AddDownstreamApi(InspectionService.ServiceName, builder.Configuration.GetSection("SARA"))
-        .AddDownstreamApi(IsarService.ServiceName, builder.Configuration.GetSection("Isar"))
-        .AddDownstreamApi(
-            PointillaService.ServiceName,
-            builder.Configuration.GetSection("Pointilla")
-        );
-}
-
-builder.Services.Configure<JwtBearerOptions>(
-    JwtBearerDefaults.AuthenticationScheme,
-    options =>
-    {
-        options.Events ??= new JwtBearerEvents();
-        options.Events.OnMessageReceived = context =>
-        {
-            if (
-                context.HttpContext.Request.Path.StartsWithSegments("/hub")
-                && context.Request.Query.TryGetValue("access_token", out var token)
-            )
-            {
-                context.Token = token;
-            }
-            return Task.CompletedTask;
-        };
-    }
-);
+// Configures JWT bearer authentication, the token caches (Redis-backed when
+// Redis:UseRedis is set) and the ISAR / SARA / Pointilla downstream API clients.
+builder.Services.ConfigureAuthentication(builder.Configuration, builder.Environment);
 
 builder
     .Services.AddAuthorizationBuilder()
