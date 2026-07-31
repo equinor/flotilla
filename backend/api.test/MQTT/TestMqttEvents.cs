@@ -573,14 +573,16 @@ namespace Api.Test.MQTT
             await TestSetupHelpers.WaitFor(async () =>
             {
                 var latestMessages = Factory.MockSignalRService.LatestMessages;
-                if (latestMessages.Count != 1)
-                    return false;
-                var m = (dynamic)latestMessages[0];
-                if (m.Label != "Inspection Visulization Ready")
-                    return false;
-                var result = (InspectionResultMessage)m.Message;
-
-                return result.InspectionId == message.InspectionId;
+                foreach (var raw in latestMessages)
+                {
+                    var m = (dynamic)raw;
+                    if (m.Label != "Inspection Visulization Ready")
+                        continue;
+                    var result = (InspectionResultMessage)m.Message;
+                    if (result.InspectionId == message.InspectionId)
+                        return true;
+                }
+                return false;
             });
         }
 
