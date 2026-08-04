@@ -14,7 +14,7 @@ interface IProps {
     missionInspectionAreas: InspectionArea[]
 }
 
-export const ScheduleMissionWithInspectionAreaVerification = ({
+export const InspectionAreaVerificationDialog = ({
     dialogType,
     closeDialog,
     robot,
@@ -24,25 +24,24 @@ export const ScheduleMissionWithInspectionAreaVerification = ({
         (area) => area?.inspectionAreaName ?? ''
     )
 
-    return (
-        <>
-            {dialogType === InspectionAreaDialogType.conflictingMissionInspectionAreas && (
+    switch (dialogType) {
+        case InspectionAreaDialogType.conflictingMissionInspectionAreas:
+            return (
                 <ConflictingMissionInspectionAreasDialog
                     closeDialog={closeDialog}
                     missionInspectionAreaNames={uniqueMissionInspectionAreaNames}
                 />
-            )}
-            {dialogType === InspectionAreaDialogType.conflictingRobotInspectionArea &&
-                robot?.currentInspectionAreaId && (
-                    <ConflictingRobotInspectionAreaDialog
-                        closeDialog={closeDialog}
-                        robotInspectionAreaId={robot.currentInspectionAreaId}
-                        desiredInspectionAreaName={uniqueMissionInspectionAreaNames[0]}
-                    />
-                )}
-            {dialogType === InspectionAreaDialogType.unknownNewInspectionArea && (
-                <UnknownInspectionAreaDialog closeDialog={closeDialog} />
-            )}
-        </>
-    )
+            )
+        case InspectionAreaDialogType.conflictingRobotInspectionArea:
+            if (!robot?.currentInspectionAreaId) return null
+            return (
+                <ConflictingRobotInspectionAreaDialog
+                    closeDialog={closeDialog}
+                    robotInspectionAreaId={robot.currentInspectionAreaId}
+                    desiredInspectionAreaName={uniqueMissionInspectionAreaNames[0]}
+                />
+            )
+        case InspectionAreaDialogType.unknownNewInspectionArea:
+            return <UnknownInspectionAreaDialog closeDialog={closeDialog} />
+    }
 }
