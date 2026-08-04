@@ -36,7 +36,7 @@ export interface InspectionRecord {
     tag: string
     targetPosition: Position
     robotPose: Pose
-    analyses: Analysis[]
+    analyses?: Analysis[]
     inspectionDescription: string
     robotName: string
     timestamp: number
@@ -81,6 +81,8 @@ const sasURLToFileType = (sasURL: string): FileType => {
 }
 
 export const inspectionRecordToInspectionData = (record: InspectionRecord): InspectionData | null => {
+    if (!record.analyses || record.analyses.length === 0) return null
+
     const analysis = record.analyses[record.analyses.length - 1]
 
     if (!analysis) return null
