@@ -191,7 +191,7 @@ is making migrations at the same time as you!**
 
 Updates to the database structure (applying migrations) are done in GitHub Actions.
 
-When a pull request contains changes in the `backend/api/Database/Migrations` folder,
+When a pull request contains changes in the `backend/api/Migrations` folder,
 a workflow is triggered to notify that the pull request has database changes.
 
 After the pull request is merged, apply the migrations to the Development database by
@@ -201,13 +201,9 @@ workflow from the Actions tab.
 
 ### Applying migrations to staging and production databases
 
-This is done automatically as part of the promotion workflows
-([promoteToProduction](https://github.com/equinor/flotilla/blob/main/.github/workflows/promoteToProduction.yml)
-and [promoteToStaging](https://github.com/equinor/flotilla/blob/main/.github/workflows/promoteToStaging.yml)).
-
-## Database setup
-
-If resetting database, but still using PostgreSQL (removing old migrations and adding them manually again).
+This is done automatically as part of the deployment workflows
+([deploy_to_staging](https://github.com/equinor/flotilla/blob/main/.github/workflows/deploy_to_staging.yml)
+and [promote_to_production](https://github.com/equinor/flotilla/blob/main/.github/workflows/promote_to_production.yml)).
 
 ## Database backup and cloning
 

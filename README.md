@@ -1,7 +1,7 @@
 # Flotilla
 
 [![Backend](https://github.com/equinor/flotilla/actions/workflows/backend_lint_and_test.yml/badge.svg)](https://github.com/equinor/flotilla/actions/workflows/backend_lint_and_test.yml)
-[![Frontend](https://github.com/equinor/flotilla/actions/workflows/frontend_lint_and_test.yml/badge.svg)](https://github.com/equinor/flotilla/actions/workflows/frontend_lint_and_test.yml)
+[![Frontend](https://github.com/equinor/flotilla/actions/workflows/lint_frontend_package.yml/badge.svg)](https://github.com/equinor/flotilla/actions/workflows/lint_frontend_package.yml)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/0b37a44f66044dbc81fff906344b476e)](https://www.codacy.com/gh/equinor/flotilla/dashboard?utm_source=github.com&utm_medium=referral&utm_content=equinor/flotilla&utm_campaign=Badge_Grade)
 
 Flotilla is the main point of access for operators to interact with multiple robots in multiple facilities.  

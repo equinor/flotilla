@@ -39,7 +39,7 @@ The current roles with their permissions per topic are described in the table be
 To change the password see [this guide](https://mosquitto.org/documentation/authentication-methods/)
 on how to manage the [password file](./mosquitto/config/passwd_file).
 
-To change the roles see [this guide]()
+To change the roles see [this guide](https://mosquitto.org/documentation/authentication-methods/)
 on how to manage the role-based access control.
 They are defined in the [access_control file](./mosquitto/config/access_control).
 
