@@ -4,7 +4,7 @@ This document describes how to run the frontend. For information on best practic
 
 ## Setup
 
-The app uses TypeScript and React. For development, Node v20.x needs to be installed. Installation instructions can be found
+The app uses TypeScript and React. For development, Node v24.x needs to be installed. Installation instructions can be found
 [here](https://github.com/nodesource/distributions/blob/master/README.md).
 
 The application reads environment variables from the `.env` file in the `frontend` folder.
@@ -33,7 +33,7 @@ To start the app, run the following command in the root folder:
 pnpm dev
 ```
 
-This command runs the app in development mode. Open [http://localhost:3001/robotics-frontend](http://localhost:3001/robotics-frontend) to view it in the browser.
+This command runs the app in development mode. Open [http://localhost:3001](http://localhost:3001) to view it in the browser.
 
 The page will reload if you make edits. You will also be able to see any lint errors in the console.
 
@@ -48,15 +48,6 @@ docker compose up --build frontend
 ## Authentication
 
 Authentication is implemented for the frontend following the [official Microsoft tutorial on OAuth2 flow in React](https://docs.microsoft.com/en-us/azure/active-directory/develop/tutorial-v2-react).
-
-## Automatically generated models
-
-The TypeScript models have been automatically generated using an [openapi-to-typescript npm package](https://www.npmjs.com/package/openapi-typescript).
-This can be updated by cloning the [flotilla-openapi](https://github.com/equinor/flotilla-openapi) repository and then running:
-
-```bash
-pnpm dlx openapi-typescript <path-to-flotilla-openapi>/openapi.yaml --output ./src/models/schema.ts
-```
 
 ## Formatting
 
