@@ -72,6 +72,44 @@ dotnet ef migrations remove
 - **Development**: after merging a PR that touches `backend/api/Migrations`, manually run the ["Run database migrations (Development)"](https://github.com/equinor/flotilla/actions/workflows/run_development_migrations.yml) workflow.
 - **Staging / Production**: applied automatically by the [deploy_to_staging](https://github.com/equinor/flotilla/blob/main/.github/workflows/deploy_to_staging.yml) and [promote_to_production](https://github.com/equinor/flotilla/blob/main/.github/workflows/promote_to_production.yml) workflows.
 
+## Authentication
+
+The backend validates access tokens against Microsoft Entra ID by default. `Authentication:Provider` selects the issuer: `EntraId` (default), or `Oidc` for any conformant OpenID Connect issuer given by `AzureAd:Authority`.
+
+This is not a way to turn authentication off — issuer, audience, signature, lifetime and roles are validated under either value. An `http://` authority is accepted only in the `Local` and `IntegrationTest` environments and fails at startup anywhere else. Note that the frontend still signs in against Entra ID; only the backend is covered here.
+
+### Running against a local Keycloak
+
+```bash
+make keycloak     # docker compose --profile keycloak up keycloak
+```
+
+Keycloak comes up on `http://localhost:8080` with the same realm the integration tests use. The realm is read from `../armada/robotics_integration_tests/custom_realms`; set `KEYCLOAK_REALM_DIR` if armada is not checked out beside this repository. Then add to `backend/api/.env`:
+
+```
+Authentication__Provider=Oidc
+AzureAd__Authority=http://localhost:8080/realms/robotics
+AzureAd__ClientId=flotilla-test
+AzureAd__ClientSecret=flotilla-test-secret
+Isar__Scopes__0=isar-api
+SARA__Scopes__0=sara-api
+Pointilla__Scopes__0=pointilla-api
+```
+
+The realm's `dev` user (password `dev`) holds `Role.Admin` and the per-installation roles. A token for calling the API directly, or from Swagger:
+
+```bash
+curl -s -X POST http://localhost:8080/realms/robotics/protocol/openid-connect/token \
+  -d grant_type=client_credentials \
+  -d client_id=integration-tests \
+  -d client_secret=integration-tests-secret \
+  -d scope=flotilla-api | jq -r .access_token
+```
+
+Request one `*-api` scope at a time: two audience mappers make Keycloak emit `aud` as an array, which ISAR rejects.
+
+The armada integration tests run the backend against the same realm, under `ASPNETCORE_ENVIRONMENT=IntegrationTest`. That environment has no appsettings file here on purpose: its configuration is passed in as environment variables from [`armada/robotics_integration_tests/custom_containers/flotilla_backend.py`](https://github.com/equinor/armada/blob/main/robotics_integration_tests/custom_containers/flotilla_backend.py), alongside the realm that defines the clients and scopes. Change it there, not here.
+
 ## Monitoring
 
 The backend is instrumented with [OpenTelemetry](https://opentelemetry.io/). Traces, metrics, and logs are exported via OTLP to a Grafana-compatible backend.
