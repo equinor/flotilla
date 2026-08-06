@@ -157,14 +157,20 @@ namespace Api.Test.MQTT
                     RobotPose = new Pose(11, 11, 11, 0, 0, 0, 1),
                 },
                 1
-            ).ToMissionRunTask();
+            );
+            var missionDefinition = await DatabaseUtilities.NewMissionDefinition(
+                id: null,
+                installationCode: installation.InstallationCode,
+                inspectionArea: inspectionArea,
+                tasks: [task],
+                lastSuccessfulRun: null,
+                writeToDatabase: false
+            );
             var missionRun = await DatabaseUtilities.NewMissionRun(
-                installation.InstallationCode,
-                robot,
-                inspectionArea,
+                missionDefinition: missionDefinition,
+                robot: robot,
                 writeToDatabase: true,
-                missionStatus: MissionStatus.Ongoing,
-                tasks: [task]
+                missionStatus: MissionStatus.Ongoing
             );
 
             var message = new IsarMissionAbortedMessage
@@ -204,13 +210,19 @@ namespace Api.Test.MQTT
                 installation,
                 inspectionArea.Id
             );
+            var missionDefinition = await DatabaseUtilities.NewMissionDefinition(
+                id: null,
+                installationCode: installation.InstallationCode,
+                inspectionArea: inspectionArea,
+                tasks: [new() { RobotPose = new Pose { } }],
+                lastSuccessfulRun: null,
+                writeToDatabase: false
+            );
             var missionRun = await DatabaseUtilities.NewMissionRun(
-                installation.InstallationCode,
-                robot,
-                inspectionArea,
+                missionDefinition: missionDefinition,
+                robot: robot,
                 writeToDatabase: true,
-                missionStatus: MissionStatus.Ongoing,
-                tasks: [new() { RobotPose = new Pose { } }]
+                missionStatus: MissionStatus.Ongoing
             );
 
             var message = new IsarMissionMessage
@@ -251,16 +263,23 @@ namespace Api.Test.MQTT
                 installation,
                 inspectionArea.Id
             );
-            MissionTask task = new MissionTask { RobotPose = new Pose { } };
-            var missionRun = await DatabaseUtilities.NewMissionRun(
-                installation.InstallationCode,
-                robot,
-                inspectionArea,
-                writeToDatabase: true,
-                missionStatus: MissionStatus.Ongoing,
-                tasks: new MissionTask[] { task }
+            TaskDefinition task = new TaskDefinition { RobotPose = new Pose { } };
+            var missionDefinition = await DatabaseUtilities.NewMissionDefinition(
+                id: null,
+                installationCode: installation.InstallationCode,
+                inspectionArea: inspectionArea,
+                tasks: [task],
+                lastSuccessfulRun: null,
+                writeToDatabase: false
             );
-            task = (await MissionRunService.ReadById(missionRun.Id))!.Tasks[0];
+            var missionRun = await DatabaseUtilities.NewMissionRun(
+                missionDefinition: missionDefinition,
+                robot: robot,
+                writeToDatabase: true,
+                missionStatus: MissionStatus.Ongoing
+            );
+
+            MissionTask missionTask = (await MissionRunService.ReadById(missionRun.Id))!.Tasks[0];
             var message = new IsarTaskMessage
             {
                 RobotName = robot.Name,
@@ -268,12 +287,12 @@ namespace Api.Test.MQTT
                 MissionId = missionRun.Id,
                 Timestamp = DateTime.UtcNow,
                 Status = "successful",
-                TaskId = task.Id,
+                TaskId = missionTask.Id,
                 TaskType = "take_image",
             };
             var messageString = JsonSerializer.Serialize(message);
             await MqttService.PublishMessageBasedOnTopic(
-                $"isar/{robot.Id}/task/{task.Id}",
+                $"isar/{robot.Id}/task/{missionTask.Id}",
                 messageString
             );
 
@@ -491,14 +510,20 @@ namespace Api.Test.MQTT
                     RobotPose = new Pose(11, 11, 11, 0, 0, 0, 1),
                 },
                 1
-            ).ToMissionRunTask();
+            );
+            var missionDefinition = await DatabaseUtilities.NewMissionDefinition(
+                id: null,
+                installationCode: installation.InstallationCode,
+                inspectionArea: inspectionArea,
+                tasks: [task],
+                lastSuccessfulRun: null,
+                writeToDatabase: false
+            );
             var missionRun = await DatabaseUtilities.NewMissionRun(
-                installation.InstallationCode,
-                robot,
-                inspectionArea,
+                missionDefinition: missionDefinition,
+                robot: robot,
                 writeToDatabase: true,
-                missionStatus: MissionStatus.Ongoing,
-                tasks: [task]
+                missionStatus: MissionStatus.Ongoing
             );
 
             var message = new IsarStartupMessage
@@ -546,14 +571,20 @@ namespace Api.Test.MQTT
                     RobotPose = new Pose(11, 11, 11, 0, 0, 0, 1),
                 },
                 1
-            ).ToMissionRunTask();
+            );
+            var missionDefinition = await DatabaseUtilities.NewMissionDefinition(
+                id: null,
+                installationCode: installation.InstallationCode,
+                inspectionArea: inspectionArea,
+                tasks: [task],
+                lastSuccessfulRun: null,
+                writeToDatabase: false
+            );
             var missionRun = await DatabaseUtilities.NewMissionRun(
-                installation.InstallationCode,
-                robot,
-                inspectionArea,
+                missionDefinition: missionDefinition,
+                robot: robot,
                 writeToDatabase: true,
-                missionStatus: MissionStatus.Ongoing,
-                tasks: [task]
+                missionStatus: MissionStatus.Ongoing
             );
             var isarInspectionId = missionRun.Tasks[0]!.Id;
 
@@ -610,14 +641,20 @@ namespace Api.Test.MQTT
                     RobotPose = new Pose(11, 11, 11, 0, 0, 0, 1),
                 },
                 1
-            ).ToMissionRunTask();
+            );
+            var missionDefinition = await DatabaseUtilities.NewMissionDefinition(
+                id: null,
+                installationCode: installation.InstallationCode,
+                inspectionArea: inspectionArea,
+                tasks: [task],
+                lastSuccessfulRun: null,
+                writeToDatabase: false
+            );
             var missionRun = await DatabaseUtilities.NewMissionRun(
-                installation.InstallationCode,
-                robot,
-                inspectionArea,
+                missionDefinition: missionDefinition,
+                robot: robot,
                 writeToDatabase: true,
-                missionStatus: MissionStatus.Ongoing,
-                tasks: [task]
+                missionStatus: MissionStatus.Ongoing
             );
             var isarInspectionId = missionRun.Tasks[0]!.Id;
 
