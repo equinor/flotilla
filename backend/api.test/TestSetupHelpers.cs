@@ -30,7 +30,7 @@ public static class TestSetupHelpers
         DbConnection
     )> ConfigurePostgreSqlDatabase()
     {
-        var container = new PostgreSqlBuilder(PostgresVersion).Build();
+        var container = new PostgreSqlBuilder(PostgresVersion).Build(); // Cannot bind to specific port since the tests will run many in parallel.
         await container.StartAsync();
 
         string? connectionString = container.GetConnectionString();
