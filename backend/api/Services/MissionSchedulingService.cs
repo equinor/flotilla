@@ -89,7 +89,7 @@ namespace Api.Services
 
             if (missionRun.Tasks.Count == 0)
             {
-                logger.LogWarning(
+                logger.LogError(
                     "MissionRun {RobotName} was not started on robot {RobotId} as the mission has no tasks",
                     missionRun.Id,
                     robot.Id
