@@ -173,6 +173,11 @@ namespace Api.Controllers
                 return NotFound("Mission definition not found");
             }
 
+            if (missionDefinition.Tasks.Count == 0)
+            {
+                return BadRequest("Mission definition has no tasks");
+            }
+
             if (missionDefinition.InspectionArea.Id != robot.CurrentInspectionAreaId)
                 return BadRequest("Robot is not in the same inspection area as the mission.");
 
