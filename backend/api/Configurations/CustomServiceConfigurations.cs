@@ -56,7 +56,7 @@ namespace Api.Configurations
             else if (useInMemoryDatabase)
             {
                 Console.WriteLine("Starting PostgreSQL container for local development...");
-                var container = new PostgreSqlBuilder("postgres:17.10").Build();
+                var container = new PostgreSqlBuilder("postgres:17.10").Build(); // Cannot bind to specific port since the tests will run many in parallel.
                 container.StartAsync().GetAwaiter().GetResult();
                 Console.WriteLine("PostgreSQL container started.");
 
