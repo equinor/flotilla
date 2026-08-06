@@ -64,6 +64,11 @@ namespace Api.Services
     {
         public async Task<MissionDefinition> Create(MissionDefinition missionDefinition)
         {
+            if (!missionDefinition.Tasks.Any())
+            {
+                throw new ArgumentException("Mission definition must have at least one task.");
+            }
+
             if (missionDefinition.LastSuccessfulRun is not null)
             {
                 context.Entry(missionDefinition.LastSuccessfulRun).State = EntityState.Unchanged;
@@ -180,6 +185,10 @@ namespace Api.Services
 
         public async Task<MissionDefinition> Update(MissionDefinition missionDefinition)
         {
+            if (!missionDefinition.Tasks.Any())
+            {
+                throw new ArgumentException("Mission definition must have at least one task.");
+            }
             if (missionDefinition.LastSuccessfulRun is not null)
             {
                 context.Entry(missionDefinition.LastSuccessfulRun).State = EntityState.Unchanged;

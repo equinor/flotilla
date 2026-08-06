@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Api.Controllers.Models;
 using Api.Database.Models;
@@ -22,25 +23,12 @@ namespace Api.Test.Database
         private readonly string _testInspectionAreaName = "InspectionArea";
 
         public async Task<MissionRun> NewMissionRun(
-            string installationCode,
+            MissionDefinition missionDefinition,
             Robot robot,
-            InspectionArea inspectionArea,
             bool writeToDatabase = false,
-            MissionStatus missionStatus = MissionStatus.Queued,
-            MissionTask[] tasks = null!
+            MissionStatus missionStatus = MissionStatus.Queued
         )
         {
-            tasks ??= [];
-
-            var missionDefinition = await NewMissionDefinition(
-                null,
-                installationCode,
-                inspectionArea,
-                null,
-                null,
-                writeToDatabase
-            );
-
             var missionRun = new MissionRun
             {
                 Name = "testMission",
@@ -48,9 +36,9 @@ namespace Api.Test.Database
                 MissionId = missionDefinition.Id,
                 Status = missionStatus,
                 CreationTime = DateTime.UtcNow,
-                InspectionArea = inspectionArea,
-                Tasks = tasks,
-                InstallationCode = installationCode,
+                InspectionArea = missionDefinition.InspectionArea,
+                Tasks = [.. missionDefinition.Tasks.Select((t) => t.ToMissionRunTask())],
+                InstallationCode = missionDefinition.InstallationCode,
             };
 
             if (writeToDatabase)
@@ -69,7 +57,7 @@ namespace Api.Test.Database
             string? id,
             string installationCode,
             InspectionArea inspectionArea,
-            List<TaskDefinition>? tasks = null,
+            List<TaskDefinition> tasks,
             MissionRun? lastSuccessfulRun = null,
             bool writeToDatabase = false
         )
@@ -86,7 +74,7 @@ namespace Api.Test.Database
                 Name = "testMissionDefinition",
                 InspectionArea = inspectionArea,
                 InstallationCode = installationCode,
-                Tasks = tasks ?? [],
+                Tasks = tasks,
                 LastSuccessfulRun = lastSuccessfulRun,
                 AutoScheduleFrequency = new AutoScheduleFrequency
                 {

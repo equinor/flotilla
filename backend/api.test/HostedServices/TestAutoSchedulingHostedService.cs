@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
 using Api.HostedServices;
@@ -92,19 +93,38 @@ namespace Api.Test.HostedServices
                 installation,
                 inspectionArea.Id
             );
+            var missionDefinition = await DatabaseUtilities.NewMissionDefinition(
+                id: null,
+                installationCode: installation.InstallationCode,
+                inspectionArea: inspectionArea,
+                tasks: [new() { RobotPose = new Pose { } }],
+                lastSuccessfulRun: null,
+                writeToDatabase: false
+            );
             var missionRun = await DatabaseUtilities.NewMissionRun(
-                installation.InstallationCode,
-                robot,
-                inspectionArea,
-                writeToDatabase: true
+                missionDefinition: missionDefinition,
+                robot: robot,
+                writeToDatabase: true,
+                missionStatus: MissionStatus.Queued
             );
 
-            await DatabaseUtilities.NewMissionDefinition(
-                "1",
-                installation.InstallationCode,
-                inspectionArea,
-                null,
-                missionRun,
+            var task = new TaskDefinition(
+                new TaskQuery
+                {
+                    TagId = "test",
+                    TargetPosition = new Position(),
+                    SensorType = SensorType.Image,
+                    AnalysisTypes = [AnalysisType.Fencilla],
+                    RobotPose = new Pose(11, 11, 11, 0, 0, 0, 1),
+                },
+                1
+            );
+            await DatabaseUtilities.NewMissionDefinition( // TODO
+                id: "1",
+                installationCode: installation.InstallationCode,
+                inspectionArea: inspectionArea,
+                tasks: [task],
+                lastSuccessfulRun: missionRun,
                 writeToDatabase: true
             );
 
