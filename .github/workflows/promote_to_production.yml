@@ -56,9 +56,38 @@ jobs:
       working_directory: backend/api
       azure_subscription_id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
+  copy-images-to-robotics-prod-registry:
+    name: Copy staging images to robotics prod registry
+    needs: [get_staging_version, trigger-github-deployment]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        component: [broker, backend, frontend]
+    steps:
+      - name: Log in to robotics staging registry
+        uses: docker/login-action@v3
+        with:
+          registry: roboticsstagingacr.azurecr.io
+          username: ${{ secrets.ROBOTICS_ROBOTICSSTAGINGACR_USERNAME }}
+          password: ${{ secrets.ROBOTICS_ROBOTICSSTAGINGACR_PASSWORD }}
+
+      - name: Log in to robotics prod registry
+        uses: docker/login-action@v3
+        with:
+          registry: roboticsprodacr.azurecr.io
+          username: ${{ secrets.ROBOTICS_ROBOTICSPRODACR_USERNAME }}
+          password: ${{ secrets.ROBOTICS_ROBOTICSPRODACR_PASSWORD }}
+
+      - name: Copy image from staging to prod registry
+        run: |
+          docker buildx imagetools create \
+            --tag roboticsprodacr.azurecr.io/robotics/flotilla-${{ matrix.component }}:${{ needs.get_staging_version.outputs.versionTag }} \
+            --tag roboticsprodacr.azurecr.io/robotics/flotilla-${{ matrix.component }}:latest \
+            roboticsstagingacr.azurecr.io/robotics/flotilla-${{ matrix.component }}:${{ needs.get_staging_version.outputs.versionTag }}
+
   deploy:
     name: Update deployment in Production
-    needs: [get_staging_version, trigger-github-deployment]
+    needs: [get_staging_version, trigger-github-deployment, copy-images-to-robotics-prod-registry]
     strategy:
       max-parallel: 1
       matrix:
