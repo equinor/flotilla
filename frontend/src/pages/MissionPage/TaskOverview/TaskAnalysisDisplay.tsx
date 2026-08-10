@@ -20,7 +20,7 @@ export const TaskAnalysisDisplay = ({ inspectionData }: { inspectionData: Inspec
 
     return (
         <StyledButton
-            hasFinding={inspectionData.warning}
+            hasFinding={inspectionData.warning ? true : false}
             color={inspectionData.warning ? 'danger' : 'primary'}
             variant="ghost"
             onClick={() => switchSelectedAnalysisId(inspectionData.inspectionId)}
