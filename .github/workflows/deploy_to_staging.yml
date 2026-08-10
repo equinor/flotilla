@@ -66,6 +66,26 @@ jobs:
       registry_password: ${{ secrets.AURORA_CONTAINER_REGISTRY_PROD_PASSWORD }}
       registry_username: ${{ secrets.AURORA_CONTAINER_REGISTRY_PROD_USERNAME }}
 
+  build-and-push-latest-release-flotilla-component-to-robotics-staging-container-registry:
+    name: Build and push latest release flotilla components to robotics staging container registry
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        component: [broker, backend, frontend]
+    uses: equinor/armada/.github/workflows/build_and_publish_docker_image_to_container_registry.yml@main
+    with:
+      registry: roboticsstagingacr.azurecr.io
+      image_name: robotics/flotilla-${{ matrix.component }}
+      tag: ${{ github.event.release.tag_name }}
+      secondary_tag: latest
+      path_to_dockerfile: ${{ matrix.component}}/Dockerfile
+      path_to_context: ./${{ matrix.component}}
+    secrets:
+      registry_password: ${{ secrets.ROBOTICS_ROBOTICSSTAGINGACR_PASSWORD }}
+      registry_username: ${{ secrets.ROBOTICS_ROBOTICSSTAGINGACR_USERNAME }}
+
   deploy:
     name: Update deployment in Staging
     permissions:
