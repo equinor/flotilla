@@ -54,7 +54,7 @@ export interface InspectionData {
     analysisId: string
     visualisedSAS?: string
     fileType: FileType
-    anonymizedSAS: string
+    anonymizedSAS?: string
     analysisType?: string
     tag: string
     createdAt: Date
@@ -88,15 +88,13 @@ export const inspectionRecordToInspectionData = (record: InspectionRecord): Insp
     if (!analysis) return null
 
     const sas = analysis.visualizedSAS ?? analysis.anonymizedSAS
+    const fileType = sas ? sasURLToFileType(sas) : FileType.VALUE
 
-    if (!sas) return null
-
-    const fileType = sasURLToFileType(sas)
     return {
         inspectionId: record.inspectionId,
         analysisId: analysis.id,
         visualisedSAS: analysis.visualizedSAS,
-        anonymizedSAS: analysis.anonymizedSAS!,
+        anonymizedSAS: analysis.anonymizedSAS,
         analysisType: record.inspectionType,
         tag: record.tag,
         createdAt: record.createdAt,
