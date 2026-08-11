@@ -230,17 +230,9 @@ export const DataView = ({
         return <TextAsImage isLargeImage={true} text={'No inspection could be found'} />
     }
 
-    // Fetches only the latest inspection data per tag
-    const filteredInspectionData = data.reduce((accumulator: InspectionData[], item) => {
-        const index = accumulator.findIndex((i) => i.tag === item.tag)
-        if (index >= 0) accumulator[index] = item
-        else accumulator.push(item)
-        return accumulator
-    }, [])
-
     return (
         <DataViewContent
-            inspectionData={filteredInspectionData}
+            inspectionData={data}
             numberOfDaysOfData={numberOfDaysOfData}
             setNumberOfDaysOfData={setNumberOfDaysOfData}
             pageTitle={pageTitle}
