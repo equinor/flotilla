@@ -122,9 +122,8 @@ const InspectionVideoWithPlaceholder = ({
     isLargeImage: boolean
 }) => (isLargeImage ? <LargeVideoWithPlaceholder inspection={inspection} /> : <VideoPlaceholder />)
 
-const LargeVideoWithPlaceholder = ({ inspection }: { inspection: InspectionData }) => (
-    <VideoPlayer src={inspection.anonymizedSAS} />
-)
+const LargeVideoWithPlaceholder = ({ inspection }: { inspection: InspectionData }) =>
+    inspection.anonymizedSAS ? <VideoPlayer src={inspection.anonymizedSAS} /> : <VideoPlaceholder />
 
 const InspectionResultWithPlaceholder = ({
     inspection,
