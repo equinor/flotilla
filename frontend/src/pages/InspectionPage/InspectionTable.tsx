@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router'
 import { Icons } from 'utils/icons'
 import { compareMissionDefinitions } from './InspectionUtilities'
 import { formatDateTime } from 'utils/StringFormatting'
-import { AlreadyScheduledMissionDialog, ScheduleMissionDialog } from './ScheduleMissionDialogs'
+import { AlreadyScheduledMissionDialog } from './ScheduleMissionDialogs'
 import { useContext, useState } from 'react'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { useAssetContext } from 'components/Contexts/AssetContext'
@@ -199,86 +199,6 @@ export const InspectionTable = ({ inspectionArea, missionDefinitions, openDialog
             {isScheduledDialogOpen && (
                 <AlreadyScheduledMissionDialog openDialog={openDialog} closeDialog={closeScheduleDialog} />
             )}
-        </StyledTable>
-    )
-}
-
-interface Props {
-    missionDefinitions: MissionDefinition[]
-}
-
-export const MissionDefinitionsTable = ({ missionDefinitions }: Props) => {
-    const { TranslateText } = useLanguageContext()
-    const { ongoingMissions, missionQueue } = useMissionsContext()
-    const [selectedMissions, setSelectedMissions] = useState<MissionDefinition[]>()
-    const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
-    const [isScheduledDialogOpen, setIsScheduledDialogOpen] = useState<boolean>(false)
-
-    const openDialog = () => {
-        setIsDialogOpen(true)
-    }
-
-    const openScheduleDialog = () => {
-        setIsScheduledDialogOpen(true)
-    }
-
-    const closeDialog = () => {
-        setSelectedMissions([])
-        setIsDialogOpen(false)
-    }
-
-    const closeScheduleDialog = () => {
-        setIsScheduledDialogOpen(false)
-    }
-
-    const isScheduled = (mission: MissionDefinition) => missionQueue.map((m) => m.missionId).includes(mission.id)
-    const isOngoing = (mission: MissionDefinition) => ongoingMissions.map((m) => m.missionId).includes(mission.id)
-    const isAlreadyScheduled =
-        !!selectedMissions && selectedMissions.some((mission) => isOngoing(mission) || isScheduled(mission))
-    const unscheduledMissions =
-        selectedMissions?.filter((mission) => !isOngoing(mission) && !isScheduled(mission)) ?? []
-
-    return (
-        <StyledTable>
-            <HideColumnsOnSmallScreen>
-                <Table>
-                    <Table.Caption>
-                        <SmallScreenInfoText />
-                    </Table.Caption>
-                    <Table.Head sticky>
-                        <Table.Row>
-                            {Object.values(InspectionTableColumns).map((col) => (
-                                <StyledTableCell id={col} key={col}>
-                                    {TranslateText(col)}
-                                </StyledTableCell>
-                            ))}
-                        </Table.Row>
-                    </Table.Head>
-                    <Table.Body style={{ backgroundColor: tokens.colors.ui.background__default.hex }}>
-                        {missionDefinitions.sort(compareMissionDefinitions).map((mission) => (
-                            <MissionRow
-                                key={mission.id}
-                                mission={mission}
-                                openDialog={openDialog}
-                                setMissions={setSelectedMissions}
-                                openScheduledDialog={openScheduleDialog}
-                            />
-                        ))}
-                    </Table.Body>
-                </Table>
-                {isDialogOpen && (
-                    <ScheduleMissionDialog
-                        selectedMissions={selectedMissions!}
-                        closeDialog={closeDialog}
-                        setMissions={setSelectedMissions}
-                        unscheduledMissions={unscheduledMissions}
-                        isAlreadyScheduled={isAlreadyScheduled}
-                    />
-                )}
-                {isScheduledDialogOpen && (
-                    <AlreadyScheduledMissionDialog openDialog={openDialog} closeDialog={closeScheduleDialog} />
-                )}
-            </HideColumnsOnSmallScreen>
         </StyledTable>
     )
 }

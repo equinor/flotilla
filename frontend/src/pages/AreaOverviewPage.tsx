@@ -2,8 +2,7 @@ import { useAlertContext } from 'components/Contexts/AlertContext'
 import { InstallationContext } from 'components/Contexts/InstallationContext'
 import { Header } from 'components/Header/Header'
 import { NavBar } from 'components/Header/NavBar'
-import { useContext } from 'react'
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 import { InspectionArea } from 'models/InspectionArea'
 import { MissionDefinition } from 'models/MissionDefinition'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
@@ -17,15 +16,12 @@ import { InspectionTable } from './InspectionPage/InspectionTable'
 import { ScheduleMissionDialog } from './InspectionPage/ScheduleMissionDialogs'
 import { InspectionAreaInspectionTuple } from './InspectionPage/InspectionSection'
 import { StyledPage } from 'components/Styles/StyledComponents'
-
-interface InspectionAreaAreaTuple {
-    inspectionArea: InspectionArea
-}
+import { useLanguageContext } from 'components/Contexts/LanguageContext'
 
 export const AreaOverviewPage = () => {
     const { alerts } = useAlertContext()
     const { installation } = useContext(InstallationContext)
-
+    const { TranslateText } = useLanguageContext()
     const { ongoingMissions, missionQueue } = useMissionsContext()
     const { installationInspectionAreas } = useAssetContext()
     const { missionDefinitions } = useMissionDefinitionsContext()
@@ -34,14 +30,8 @@ export const AreaOverviewPage = () => {
     const [selectedInspectionArea, setSelectedInspectionArea] = useState<InspectionArea>()
     const [scrollOnToggle, setScrollOnToggle] = useState<boolean>(true)
 
-    const inspectionAreas: InspectionAreaAreaTuple[] = installationInspectionAreas.map((inspectionArea) => {
-        return {
-            inspectionArea: inspectionArea,
-        }
-    })
-
     const inspectionAreaInspections: InspectionAreaInspectionTuple[] =
-        inspectionAreas?.map(({ inspectionArea }) => {
+        installationInspectionAreas?.map((inspectionArea) => {
             const missionDefinitionsInInspectionArea = missionDefinitions.filter(
                 (m) => m.inspectionArea.inspectionAreaName === inspectionArea.inspectionAreaName
             )
@@ -89,26 +79,29 @@ export const AreaOverviewPage = () => {
             <StyledPage>
                 <InspectionAreaOverview>
                     {installationInspectionAreas.length !== 1 && (
-                        <>
-                            <InspectionAreaOverview>
-                                <InspectionAreaCards
-                                    inspectionAreaMissions={inspectionAreaInspections}
-                                    onClickInspectionArea={onClickInspectionArea}
-                                    selectedInspectionArea={selectedInspectionArea}
-                                    handleScheduleAll={handleScheduleAll}
-                                />
-                            </InspectionAreaOverview>
-                            {inspectionArea && selectedAreaMissionDefinitions && (
-                                <InspectionTable
-                                    inspectionArea={inspectionArea}
-                                    scrollOnToggle={scrollOnToggle}
-                                    openDialog={() => setIsDialogOpen(true)}
-                                    setSelectedMissions={setSelectedMissions}
-                                    missionDefinitions={selectedAreaMissionDefinitions}
-                                />
-                            )}{' '}
-                        </>
+                        <InspectionAreaCards
+                            inspectionAreaMissions={inspectionAreaInspections}
+                            onClickInspectionArea={onClickInspectionArea}
+                            selectedInspectionArea={selectedInspectionArea}
+                            handleScheduleAll={handleScheduleAll}
+                        />
                     )}
+                    {inspectionArea && selectedAreaMissionDefinitions && selectedAreaMissionDefinitions.length > 0 && (
+                        <InspectionTable
+                            inspectionArea={inspectionArea}
+                            scrollOnToggle={scrollOnToggle}
+                            openDialog={() => setIsDialogOpen(true)}
+                            setSelectedMissions={setSelectedMissions}
+                            missionDefinitions={selectedAreaMissionDefinitions}
+                        />
+                    )}
+                    {inspectionArea &&
+                        selectedAreaMissionDefinitions &&
+                        selectedAreaMissionDefinitions.length === 0 && (
+                            <Typography variant="h4" color="disabled">
+                                {TranslateText('No missions defined in this area')}
+                            </Typography>
+                        )}
                     {inspectionArea?.plantCode && inspectionArea.areaPolygon?.positions && (
                         <>
                             {installationInspectionAreas.length === 1 && (
