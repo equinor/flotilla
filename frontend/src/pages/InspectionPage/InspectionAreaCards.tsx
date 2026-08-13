@@ -45,11 +45,7 @@ const InspectionAreaCard = ({
         <StyledInspectionAreaCard key={inspectionAreaData.inspectionArea.inspectionAreaName}>
             <StyledCard
                 key={inspectionAreaData.inspectionArea.inspectionAreaName}
-                onClick={
-                    inspectionAreaData.missionDefinitions.length > 0
-                        ? () => onClickInspectionArea(inspectionAreaData.inspectionArea)
-                        : undefined
-                }
+                onClick={() => onClickInspectionArea(inspectionAreaData.inspectionArea)}
                 style={
                     selectedInspectionArea === inspectionAreaData.inspectionArea
                         ? { border: `solid ${tokens.colors.interactive.focus.hex} 1px` }
