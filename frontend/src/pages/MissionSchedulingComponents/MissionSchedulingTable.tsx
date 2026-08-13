@@ -46,7 +46,7 @@ const Centered = styled.div`
     justify-content: center;
 `
 
-enum InspectionTableColumns {
+enum Columns {
     Name = 'Name',
     Description = 'Description',
     LastCompleted = 'LastCompleted',
@@ -58,10 +58,10 @@ const HideColumnsOnSmallScreen = styled.div`
         display: none;
     }
     @media (max-width: ${phone_width}) {
-        #${InspectionTableColumns.Description} {
+        #${Columns.Description} {
             display: none;
         }
-        #${InspectionTableColumns.LastCompleted} {
+        #${Columns.LastCompleted} {
             display: none;
         }
         #SmallScreenInfoText {
@@ -107,7 +107,7 @@ const MissionRow = ({ mission, openDialog, setMissions, openScheduledDialog }: I
 
     return (
         <StyledTableRow key={mission.id}>
-            <Table.Cell id={InspectionTableColumns.Name}>
+            <Table.Cell id={Columns.Name}>
                 <Typography
                     link
                     onClick={() => navigate(`/${installation.installationCode}/missiondefinition/${mission.id}`)}
@@ -115,11 +115,11 @@ const MissionRow = ({ mission, openDialog, setMissions, openScheduledDialog }: I
                     {mission.name}
                 </Typography>
             </Table.Cell>
-            <Table.Cell id={InspectionTableColumns.Description} style={{ wordBreak: 'break-word' }}>
+            <Table.Cell id={Columns.Description} style={{ wordBreak: 'break-word' }}>
                 {mission.comment}
             </Table.Cell>
-            <Table.Cell id={InspectionTableColumns.LastCompleted}>{lastCompleted}</Table.Cell>
-            <Table.Cell id={InspectionTableColumns.AddToQueue}>
+            <Table.Cell id={Columns.LastCompleted}>{lastCompleted}</Table.Cell>
+            <Table.Cell id={Columns.AddToQueue}>
                 <Centered>
                     {!isScheduled && (
                         <Button
@@ -153,7 +153,12 @@ const MissionRow = ({ mission, openDialog, setMissions, openScheduledDialog }: I
     )
 }
 
-export const InspectionTable = ({ inspectionArea, missionDefinitions, openDialog, setSelectedMissions }: IProps) => {
+export const MissionSchedulingTable = ({
+    inspectionArea,
+    missionDefinitions,
+    openDialog,
+    setSelectedMissions,
+}: IProps) => {
     const { TranslateText } = useLanguageContext()
 
     const [isScheduledDialogOpen, setIsScheduledDialogOpen] = useState<boolean>(false)
@@ -176,7 +181,7 @@ export const InspectionTable = ({ inspectionArea, missionDefinitions, openDialog
                     </Table.Caption>
                     <Table.Head sticky>
                         <Table.Row>
-                            {Object.values(InspectionTableColumns).map((col) => (
+                            {Object.values(Columns).map((col) => (
                                 <StyledTableCell id={col} key={col}>
                                     {TranslateText(col)}
                                 </StyledTableCell>

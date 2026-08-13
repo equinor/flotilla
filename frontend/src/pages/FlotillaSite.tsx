@@ -6,7 +6,7 @@ import { MissionDefinitionPageRouter, MissionPageRouter, RobotPageRouter, Simple
 import { PageNotFound } from './NotFoundPage'
 import { FencillaViewPage } from './DataViewPage/FencillaViewPage'
 import { MissionControlPage } from './MissionControlPage'
-import { AreaOverviewPage } from './AreaOverviewPage'
+import { MissionSchedulingPage } from './MissionSchedulingPage'
 import { MissionHistoryPage } from './MissionHistoryPage'
 import { AutoSchedulePage } from './AutoSchedulePage'
 import { CircularProgress } from '@equinor/eds-core-react'
@@ -42,7 +42,7 @@ export const FlotillaSite = () => {
                     <Route path=":installationCode" element={<InstallationLayout />}>
                         <Route index element={<Navigate to="mission-control" replace />} />
                         <Route path="mission-control" element={<MissionControlPage />} />
-                        <Route path="mission-scheduling" element={<AreaOverviewPage />} />
+                        <Route path="mission-scheduling" element={<MissionSchedulingPage />} />
                         <Route path="history" element={<MissionHistoryPage />} />
                         <Route path="auto-schedule" element={<AutoSchedulePage />} />
                         <Route path="data-overview" element={<DataOverviewPage />} />
