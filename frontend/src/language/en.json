@@ -265,6 +265,8 @@
     "InterventionNeeded": "Intervention Needed",
     "ReturnHomePaused": "Returning home paused",
     "Current Inspection Area": "Current Inspection Area",
+    "Loading...": "Loading...",
+    "No inspection area found": "No inspection area found",
     "GoingToRecharging": "Returning to recharge",
     "GoingToLockdown": "Returning due to lockdown",
     "Set maintenance mode": "Set maintenance mode",

@@ -144,7 +144,11 @@ export const RobotPage = ({ robot }: RobotPageProps) => {
             <></>
         )
 
-    const currentInspectionArea = useQuery({
+    const {
+        data: currentInspectionArea,
+        isLoading: isLoadingCurrentInspectionArea,
+        error: currentInspectionAreaError,
+    } = useQuery({
         queryKey: ['fetchCurrentInspectionArea', robot.id],
         queryFn: async () => {
             if (robot && robot.currentInspectionAreaId)
@@ -154,7 +158,7 @@ export const RobotPage = ({ robot }: RobotPageProps) => {
         retry: 2,
         retryDelay: 2000,
         enabled: robot && robot.currentInspectionAreaId != null,
-    }).data
+    })
 
     return (
         <>
@@ -197,6 +201,24 @@ export const RobotPage = ({ robot }: RobotPageProps) => {
                                         <FieldLabel>{TranslateText('Current Inspection Area')}</FieldLabel>
                                         <Typography style={{ fontSize: '24px' }}>
                                             {currentInspectionArea.inspectionAreaName}
+                                        </Typography>
+                                    </MetricCard>
+                                )}
+                                {isLoadingCurrentInspectionArea && (
+                                    <MetricCard>
+                                        <FieldLabel>{TranslateText('Current Inspection Area')}</FieldLabel>
+                                        <Typography style={{ fontSize: '24px' }}>
+                                            {TranslateText('Loading...')}
+                                        </Typography>
+                                    </MetricCard>
+                                )}
+                                {((!isLoadingCurrentInspectionArea && !currentInspectionArea) ||
+                                    currentInspectionAreaError ||
+                                    robot.currentInspectionAreaId === null) && (
+                                    <MetricCard>
+                                        <FieldLabel>{TranslateText('Current Inspection Area')}</FieldLabel>
+                                        <Typography style={{ fontSize: '24px' }}>
+                                            {TranslateText('No inspection area found')}
                                         </Typography>
                                     </MetricCard>
                                 )}

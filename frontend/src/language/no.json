@@ -265,6 +265,8 @@
     "InterventionNeeded": "Intervensjon nødvendig",
     "ReturnHomePaused": "Kjøring hjem pauset",
     "Current Inspection Area": "Nåværende inspeksjonsområde",
+    "Loading...": "Laster...",
+    "No inspection area found": "Ingen inspeksjonsområde funnet",
     "GoingToRecharging": "Returnerer for å lade",
     "GoingToLockdown": "Returnerer på grunn av lockdown",
     "Set maintenance mode": "Sett vedlikeholdsmodus",
