@@ -10,15 +10,15 @@ import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinit
 import { useAssetContext } from 'components/Contexts/AssetContext'
 import { PlantPolygonMap } from 'pages/MissionPage/MapPosition/PointillaMapView'
 import { Typography } from '@equinor/eds-core-react'
-import { compareMissionDefinitions, InspectionAreaOverview } from './InspectionPage/InspectionUtilities'
-import { InspectionAreaCards } from './InspectionPage/InspectionAreaCards'
-import { InspectionTable } from './InspectionPage/InspectionTable'
-import { ScheduleMissionDialog } from './InspectionPage/ScheduleMissionDialogs'
-import { InspectionAreaInspectionTuple } from './InspectionPage/InspectionSection'
+import { compareMissionDefinitions, InspectionAreaOverview } from './MissionSchedulingComponents/InspectionUtilities'
+import { InspectionAreaCards } from './MissionSchedulingComponents/InspectionAreaCards'
+import { MissionSchedulingTable } from './MissionSchedulingComponents/MissionSchedulingTable'
+import { ScheduleMissionDialog } from './MissionSchedulingComponents/ScheduleMissionDialogs'
+import { InspectionAreaInspectionTuple } from './MissionSchedulingComponents/InspectionSection'
 import { StyledPage } from 'components/Styles/StyledComponents'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 
-export const AreaOverviewPage = () => {
+export const MissionSchedulingPage = () => {
     const { alerts } = useAlertContext()
     const { installation } = useContext(InstallationContext)
     const { TranslateText } = useLanguageContext()
@@ -87,7 +87,7 @@ export const AreaOverviewPage = () => {
                         />
                     )}
                     {inspectionArea && selectedAreaMissionDefinitions && selectedAreaMissionDefinitions.length > 0 && (
-                        <InspectionTable
+                        <MissionSchedulingTable
                             inspectionArea={inspectionArea}
                             scrollOnToggle={scrollOnToggle}
                             openDialog={() => setIsDialogOpen(true)}
