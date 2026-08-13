@@ -108,6 +108,9 @@ const NavBarAsButton = () => {
                 <Menu.Item onClick={() => navigate(`/${installation.installationCode}/auto-schedule`)}>
                     {TranslateText('Auto Scheduling')}
                 </Menu.Item>
+                <Menu.Item onClick={() => navigate(`/${installation.installationCode}/data-overview`)}>
+                    {TranslateText('Data Overview')}
+                </Menu.Item>
             </Menu>
         </>
     )
