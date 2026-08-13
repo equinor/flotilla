@@ -29,6 +29,8 @@
     <PackageReference Include="Npgsql.OpenTelemetry" Version="10.0.2" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.1" />
     <PackageReference Include="Testcontainers.PostgreSql" Version="4.10.0" />
+    <!-- Override transitive SSH.NET pulled in by Testcontainers to patch GHSA-q939-rpr3-3284 -->
+    <PackageReference Include="SSH.NET" Version="2026.0.0" />
     <PackageReference Include="Microsoft.Identity.Web" Version="4.3.0" />
     <PackageReference Include="Microsoft.Identity.Web.DownstreamApi" Version="4.3.0" />
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.10" />
