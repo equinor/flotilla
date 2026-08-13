@@ -11,7 +11,7 @@ import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
-import { ScheduleMissionWithInspectionAreaVerification } from 'components/Displays/InspectionAreaVerificationDialogs/ScheduleMissionWithInspectionAreaVerification'
+import { InspectionAreaVerificationDialog } from 'components/Displays/InspectionAreaVerificationDialogs/InspectionAreaVerificationDialog'
 import {
     getInspectionAreaDialogType,
     InspectionAreaDialogType,
@@ -210,7 +210,7 @@ export const ScheduleMissionDialog = (props: IProps) => {
                 </StyledDialog>
             </StyledMissionDialog>
             {isInspectionAreaVerificationDialogOpen && verificationDialogType !== null && (
-                <ScheduleMissionWithInspectionAreaVerification
+                <InspectionAreaVerificationDialog
                     dialogType={verificationDialogType}
                     closeDialog={closeScheduleDialogs}
                     robot={selectedRobot}
