@@ -30,14 +30,16 @@ Console.WriteLine($"\nENVIRONMENT IS SET TO '{builder.Environment.EnvironmentNam
 builder.Configuration.AddEnvironmentVariables();
 if (builder.Configuration.GetSection("KeyVault").GetValue<bool>("UseKeyVault"))
 {
-    // The ExcludeSharedTokenCacheCredential option is a recommended workaround by Azure for dockerization
-    // See https://github.com/Azure/azure-sdk-for-net/issues/17052
+    // Key Vault is read before the runtime credential exists, so it uses its own credential
+    // pinned to the same identity. See CustomServiceConfigurations.ResolveIdentity.
     string? vaultUri = builder.Configuration.GetSection("KeyVault")["VaultUri"];
     if (!string.IsNullOrEmpty(vaultUri))
     {
         builder.Configuration.AddAzureKeyVault(
             new Uri(vaultUri),
-            new DefaultAzureCredential(new DefaultAzureCredentialOptions())
+            new DefaultAzureCredential(
+                CustomServiceConfigurations.CreateKeyVaultCredentialOptions(builder.Configuration)
+            )
         );
     }
     else
