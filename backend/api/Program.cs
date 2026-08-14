@@ -93,6 +93,7 @@ builder.Services.AddScoped<IAreaPolygonService, AreaPolygonService>();
 builder.Services.AddScoped<IErrorHandlingService, ErrorHandlingService>();
 builder.Services.AddScoped<ITaskDurationService, TaskDurationService>();
 builder.Services.AddScoped<ILastMissionRunService, LastMissionRunService>();
+builder.Services.AddScoped<IStatisticsService, StatisticsService>();
 
 bool useInMemoryDatabase = builder
     .Configuration.GetSection("Database")
