@@ -15,4 +15,4 @@ jobs:
     uses: equinor/armada/.github/workflows/notify_migrations_on_pr.yml@main
     with:
       stage_one_workflow_run_id: ${{ github.event.workflow_run.id }}
-      migration_docs_url: https://github.com/equinor/flotilla/tree/main/backend#Database-model-and-EF-Core
+      migration_docs_url: https://github.com/equinor/flotilla/tree/main/backend#database-migrations-ef-core

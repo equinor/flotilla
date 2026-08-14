@@ -21,13 +21,13 @@ metadata:
     github.com/project-slug: equinor/flotilla
     github.com/team-slug: equinor/eq-robot-developer
   links:
-    - url: https://shared.dev.aurora.equinor.com/robotics-frontend/
+    - url: https://flotilla.dev.robotics.equinor.com/
       title: Flotilla Frontend Dev
       icon: public
-    - url: https://shared.aurora.equinor.com/robotics-staging-frontend/
+    - url: https://flotilla.staging.robotics.equinor.com/
       title: Flotilla Frontend Staging
       icon: public
-    - url: https://shared.aurora.equinor.com/robotics-prod-frontend/
+    - url: https://flotilla.robotics.equinor.com/
       title: Flotilla Frontend Prod
       icon: public
 spec:
@@ -49,13 +49,13 @@ metadata:
     github.com/project-slug: equinor/flotilla
     github.com/team-slug: equinor/eq-robot-developer
   links:
-    - url: https://shared.dev.aurora.equinor.com/robotics-backend/swagger
+    - url: https://flotilla.dev.robotics.equinor.com/api/swagger
       title: Flotilla Backend Dev
       icon: public
-    - url: https://shared.aurora.equinor.com/robotics-staging-backend/swagger
+    - url: https://flotilla.staging.robotics.equinor.com/api/swagger
       title: Flotilla Backend Staging
       icon: public
-    - url: https://shared.aurora.equinor.com/robotics-prod-backend/swagger
+    - url: https://flotilla.robotics.equinor.com/api/swagger
       title: Flotilla Backend Prod
       icon: public
 spec:

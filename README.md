@@ -75,6 +75,8 @@ Each component reads its configuration from a `.env` file. The matching `.env.ex
 | Backend   | `backend/api/.env`  | `backend/api/.env.example`  | Set `Local__DevUserId` to your own user id for local development.     |
 | Broker    | `broker/.env`       | `broker/.env.example`       | `TLS_SERVER_KEY` is a secret and is found in our key vault.           |
 
+> **Note on Docker:** `backend/api/.env` is only read when the backend is run directly (`make run`). The backend *container* does not load it — [docker-compose.yml](./docker-compose.yml) sets `ASPNETCORE_ENVIRONMENT=Development` and reads `AZURE_CLIENT_SECRET` from a `.env` file in the repository root, which `setup.sh` does not create. To run the full stack against Azure AD you currently have to add `AZURE_CLIENT_SECRET=...` to a root `.env` yourself.
+
 ## Other make commands
 
 Common commands are defined in the [root Makefile](./Makefile), the [backend Makefile](./backend/Makefile), and the [frontend Makefile](./frontend/Makefile):
