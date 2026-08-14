@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Api.Database.Models;
 using Api.Services;
@@ -7,7 +8,25 @@ namespace Api.Test.Mocks
 {
     public class MockSignalRService : ISignalRService
     {
-        public List<object> LatestMessages { get; set; } = [];
+        // Messages are added from MQTT background threads while tests poll this collection,
+        // so access is locked and readers get a snapshot to enumerate safely.
+        private readonly object _lock = new();
+        private readonly List<object> _latestMessages = [];
+
+        public IReadOnlyList<object> LatestMessages
+        {
+            get
+            {
+                lock (_lock)
+                    return _latestMessages.ToList();
+            }
+        }
+
+        private void AddMessage(string label, object? messageObject)
+        {
+            lock (_lock)
+                _latestMessages.Add(new { Label = label, Message = messageObject });
+        }
 
         public async Task SendMessageAsync<T>(
             string label,
@@ -15,7 +34,7 @@ namespace Api.Test.Mocks
             T messageObject
         )
         {
-            LatestMessages.Add(new { Label = label, Message = messageObject });
+            AddMessage(label, messageObject);
             await Task.CompletedTask;
         }
 
@@ -25,7 +44,7 @@ namespace Api.Test.Mocks
             T messageObject
         )
         {
-            LatestMessages.Add(new { Label = label, Message = messageObject });
+            AddMessage(label, messageObject);
             await Task.CompletedTask;
         }
 
