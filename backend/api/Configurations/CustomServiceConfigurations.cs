@@ -229,15 +229,57 @@ namespace Api.Configurations
             );
         }
 
+        /// <summary>
+        /// Resolves the identity the backend authenticates as. Used by both the Key Vault and the
+        /// runtime credential so they cannot disagree. Appsettings wins; AZURE_* is only a fallback.
+        /// In AKS, AZURE_CLIENT_ID is injected from the <c>azure.workload.identity/client-id</c>
+        /// annotation in robotics-infrastructure, which must match <c>AzureAd:ClientId</c>.
+        /// </summary>
+        private static (string? TenantId, string? ClientId) ResolveIdentity(IConfiguration config)
+        {
+            return (
+                config["AzureAd:TenantId"] ?? config["AZURE_TENANT_ID"],
+                config["AzureAd:ClientId"] ?? config["AZURE_CLIENT_ID"]
+            );
+        }
+
+        /// <summary>
+        /// Options for the credential that reads Key Vault. It needs its own credential because
+        /// Key Vault is read before <see cref="CreateCredential"/> can run — the client secret
+        /// that method may use is itself stored there. DefaultAzureCredential keeps local
+        /// development working via <c>az login</c>, pinned to <see cref="ResolveIdentity"/>.
+        /// </summary>
+        public static DefaultAzureCredentialOptions CreateKeyVaultCredentialOptions(
+            IConfiguration config
+        )
+        {
+            var (tenantId, clientId) = ResolveIdentity(config);
+
+            var options = new DefaultAzureCredentialOptions();
+
+            if (!string.IsNullOrWhiteSpace(tenantId))
+                options.TenantId = tenantId;
+
+            if (!string.IsNullOrWhiteSpace(clientId))
+                options.WorkloadIdentityClientId = clientId;
+
+            return options;
+        }
+
         public static TokenCredential CreateCredential(IConfiguration config)
         {
-            string? tenantId = config["AzureAd:TenantId"];
-            string? clientId = config["AzureAd:ClientId"];
-            string? clientSecret = config["AzureAd:ClientSecret"];
+            var (tenantId, clientId) = ResolveIdentity(config);
+            string? clientSecret = config["AzureAd:ClientSecret"] ?? config["AZURE_CLIENT_SECRET"];
 
-            tenantId ??= config["AZURE_TENANT_ID"];
-            clientId ??= config["AZURE_CLIENT_ID"];
-            clientSecret ??= config["AZURE_CLIENT_SECRET"];
+            Console.WriteLine(
+                $"Backend identity: clientId={clientId} (source: "
+                    + (
+                        config["AzureAd:ClientId"] is not null
+                            ? "appsettings"
+                            : "AZURE_CLIENT_ID environment variable"
+                    )
+                    + ")"
+            );
 
             var workloadOptions = new WorkloadIdentityCredentialOptions();
             if (!string.IsNullOrWhiteSpace(clientId))
@@ -247,7 +289,7 @@ namespace Api.Configurations
 
             var workloadIdentity = new WorkloadIdentityCredential(workloadOptions);
 
-            bool allowUsingClientSecret = config.GetValue<bool>("AllowUsingClientSecret");
+            bool allowUsingClientSecret = config.GetValue<bool>("AzureAd:AllowUsingClientSecret");
 
             if (
                 allowUsingClientSecret
