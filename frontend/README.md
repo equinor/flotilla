@@ -1,75 +1,47 @@
 # Flotilla frontend
 
-This document describes how to run the frontend. For information on best practices related to development, [see the best practices document](./best_practices.md).
+The Flotilla frontend is a React application written in TypeScript and built with Vite.
 
-## Setup
+For development conventions, folder structure, and formatting, see [best_practices.md](./best_practices.md).
 
-The app uses TypeScript and React. For development, Node v24.x needs to be installed. Installation instructions can be found
-[here](https://github.com/nodesource/distributions/blob/master/README.md).
+## Prerequisites
 
-The application reads environment variables from the `.env` file in the `frontend` folder.
+- [Node.js 24.x](https://github.com/nodesource/distributions)
+- [pnpm](https://pnpm.io/installation)
 
-### Automatic environment setup
+## Configuration
 
-See [Flotilla readme](../README.md#automatic-environment-setup).
+The application reads environment variables from `frontend/.env`. Create it by running [`setup.sh`](../setup.sh) from the repository root, or by copying the template manually:
 
-### Manual environment setup
+```bash
+cp .env.example .env
+```
 
-As a starting point, make a copy of the `.env.example` file and rename it to `.env`.
+Only variables prefixed with `VITE_` are included in the application. They are parsed and defined in [config.ts](./src/config.ts).
 
 ## Install
 
-To install the application, navigate to the frontend folder and run the following command:
+From the `frontend` folder:
 
-```
+```bash
 pnpm install --frozen-lockfile
 ```
 
 ## Run
 
-To start the app, run the following command in the root folder:
-
-```
-pnpm dev
+```bash
+pnpm dev      # or: make run
 ```
 
-This command runs the app in development mode. Open [http://localhost:3001](http://localhost:3001) to view it in the browser.
+The app is served at <http://localhost:3001> in development mode. The page reloads when you make edits, and lint errors appear in the console.
 
-The page will reload if you make edits. You will also be able to see any lint errors in the console.
+To run the frontend in Docker, run the following from the repository root:
 
-## Run in Docker
-
-To run the frontend in Docker, run the following command in the root folder of Flotilla:
-
-```
+```bash
 docker compose up --build frontend
 ```
 
-## Authentication
+## Run against the Staging or Production backend
 
-Authentication is implemented for the frontend following the [official Microsoft tutorial on OAuth2 flow in React](https://docs.microsoft.com/en-us/azure/active-directory/develop/tutorial-v2-react).
-
-## Formatting
-
-We use Prettier for formatting.
-To test the formatting locally, run:
-
-```
-pnpm prettier_check
-```
-
-We recommend installing the [Prettier extension for VS Code](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
-and setting the `format on save` option for VS Code to true.
-You can do this by going to `File` -> `Preferences` -> `Settings` and then searching for "Format On Save" and ticking the box.
-
-## Config
-
-The application reads custom environment variables from the `.env` file on startup. The variables need to be prefixed with `VITE_` to be included in the application.
-These are parsed and defined in [config.ts](./src/config.ts).
-
-## Run locally with Staging and Prod Databases
-
-To run locally towards the databases, follow the steps below:
-
-1. Change `UseInMemoryDatabase` to `false` in `appsettings.Local` and set `ASPNETCORE_ENVIRONMENT` to the correct environment in `launchSettings.json`.
-3. Update `VITE_BACKEND_API_SCOPE` in the `.env` file located in the `frontend` folder.
+1. Update `VITE_BACKEND_API_SCOPE` in `frontend/.env` to the scope of the environment you want to target.
+2. Point the backend at that environment as well — see the [backend README](../backend/README.md#connecting-to-the-development-database).

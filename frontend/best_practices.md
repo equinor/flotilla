@@ -4,6 +4,7 @@
     -   [Setup](#setup)
         -   [Prettier](#prettier)
         -   [ESLint](#eslint)
+    -   [Authentication](#authentication)
     -   [Folder structure](#folder-structure)
     -   [Components](#react-components)
         -   [React arguments](#react-arguments)
@@ -18,20 +19,44 @@
 
 ## Setup
 
-See the [README](./README.md) for more information.
+For installation and how to run the frontend, see the [README](./README.md).
 
 ### Prettier
 
-We abide by the formatting provided by Prettier. To run it, type
-npx prettier --write [path to source]
+We abide by the formatting provided by Prettier. To format the code, run:
+
+```bash
+pnpm exec prettier --write src
+```
+
+To check the formatting without changing anything, run:
+
+```bash
+pnpm prettier_check
+```
+
+We recommend installing the [Prettier extension for VS Code](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) and enabling `format on save`. You can do this by going to `File` -> `Preferences` -> `Settings`, searching for "Format On Save", and ticking the box.
 
 ### ESLint
 
 We also avoid any warnings or errors from ESLint before we merge in any code. These warnings appear
 when compiling the code using
-npm run dev
+
+```bash
+pnpm dev
+```
+
 but can also be run with
-npx eslint [path to src]
+
+```bash
+pnpm lint
+```
+
+`make format` runs Prettier, ESLint, and the unused-exports check in one go.
+
+## Authentication
+
+Authentication is implemented following the [official Microsoft tutorial on OAuth2 flow in React](https://docs.microsoft.com/en-us/azure/active-directory/develop/tutorial-v2-react).
 
 ## Folder structure
 
