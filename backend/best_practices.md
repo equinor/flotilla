@@ -4,7 +4,7 @@ Conventions and gotchas for working on the Flotilla backend. For installation an
 
 ## Formatting
 
-Formatting rules are defined in the [.editorconfig](../.editorconfig). We use [CSharpier](https://csharpier.com/) to auto-format on save (see [installation](https://csharpier.com/docs/About)). To format locally:
+Formatting is handled entirely by [CSharpier](https://csharpier.com/), which is opinionated and takes no configuration. The version is pinned in [.config/dotnet-tools.json](./.config/dotnet-tools.json). We recommend setting it up to format on save (see [installation](https://csharpier.com/docs/About)). To format locally:
 
 ```bash
 make format

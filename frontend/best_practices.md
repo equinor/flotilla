@@ -60,17 +60,22 @@ Authentication is implemented following the [official Microsoft tutorial on OAut
 
 ## Folder structure
 
-The frontend src folder is organized into 6 main folders.
+The frontend `src` folder is organized into 8 main folders.
 
--   Alerts contains code which displays alerts on the top of the page
--   Contexts contain react contexts (see [the context section for more information](#contexts))
--   Displays contains visual react components which are used on more than one page
--   Header contains code related to the page header
--   Pages contains the bulk of the code, as all the code related to the website pages are kept here, if there are no other relevant folders
--   Language contains translations between the supported languages for text on the Flotilla web page
--   MediaAssets contains the static image files displayed on the page
--   Models contains the data models
--   Utils contains utility functions which are relevant in several parts of the code
+-   `api` contains the clients for the Flotilla backend and SARA, authentication config, and error handling
+-   `components` contains React components shared across more than one page, grouped into:
+    -   `Alerts` — code which displays alerts at the top of the page
+    -   `Contexts` — React contexts (see [the context section for more information](#contexts))
+    -   `Dialogs` — modal dialogs
+    -   `Displays` — visual components reused across pages
+    -   `Header` — code related to the page header
+    -   `Styles` — shared styled-components and style constants
+-   `hooks` contains reusable React hooks
+-   `language` contains translations between the supported languages for text on the Flotilla web page
+-   `mediaAssets` contains the static image files displayed on the page
+-   `models` contains the data models
+-   `pages` contains the bulk of the code, as all the code related to the website pages is kept here
+-   `utils` contains utility functions which are relevant in several parts of the code
 
 ## Function syntax
 
