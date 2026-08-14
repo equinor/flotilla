@@ -16,19 +16,4 @@ namespace Api.Services.Models
         public int ZoomMax { get; set; }
         public int TileSize { get; set; }
     }
-
-    public struct PointillaMapQuery
-    {
-        public string PlantCode { get; set; }
-        public int FloorId { get; set; }
-    }
-
-    public struct PointillaMapTilesQuery
-    {
-        public string PlantCode { get; set; }
-        public int FloorId { get; set; }
-        public int ZoomLevel { get; set; }
-        public int X { get; set; }
-        public int Y { get; set; }
-    }
 }
