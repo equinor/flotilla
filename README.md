@@ -9,13 +9,13 @@ The application consists of a [frontend](frontend) in React, a [backend](backend
 
 ## Deployments
 
-We currently have 3 environments (Development, Staging, and Production) deployed to Aurora.
+We currently have 3 environments (Development, Staging, and Production) deployed to AKS under `robotics.equinor.com`.
 
-| Environment | Deployment                                                                                                                                                | Status                                                                                                                                                                                      |
-| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Development | [Frontend](https://shared.dev.aurora.equinor.com/robotics-frontend/)<br>[Backend](https://shared.dev.aurora.equinor.com/robotics-backend/swagger)         | [![Dev](https://github.com/equinor/flotilla/actions/workflows/deploy_to_development.yml/badge.svg)](https://github.com/equinor/flotilla/actions/workflows/deploy_to_development.yml)        |
-| Staging     | [Frontend](https://shared.aurora.equinor.com/robotics-staging-frontend/)<br>[Backend](https://shared.aurora.equinor.com/robotics-staging-backend/swagger) | [![Staging](https://github.com/equinor/flotilla/actions/workflows/deploy_to_staging.yml/badge.svg)](https://github.com/equinor/flotilla/actions/workflows/deploy_to_staging.yml)            |
-| Production  | [Frontend](https://shared.aurora.equinor.com/robotics-prod-frontend/)<br>[Backend](https://shared.aurora.equinor.com/robotics-prod-backend/swagger)       | [![Production](https://github.com/equinor/flotilla/actions/workflows/promote_to_production.yml/badge.svg)](https://github.com/equinor/flotilla/actions/workflows/promote_to_production.yml) |
+| Environment | Deployment                                                                                                                                            | Status                                                                                                                                                                                      |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Development | [Frontend](https://flotilla.dev.robotics.equinor.com/)<br>[Backend](https://flotilla.dev.robotics.equinor.com/api/swagger)         | [![Dev](https://github.com/equinor/flotilla/actions/workflows/deploy_to_development.yml/badge.svg)](https://github.com/equinor/flotilla/actions/workflows/deploy_to_development.yml)        |
+| Staging     | [Frontend](https://flotilla.staging.robotics.equinor.com/)<br>[Backend](https://flotilla.staging.robotics.equinor.com/api/swagger) | [![Staging](https://github.com/equinor/flotilla/actions/workflows/deploy_to_staging.yml/badge.svg)](https://github.com/equinor/flotilla/actions/workflows/deploy_to_staging.yml)            |
+| Production  | [Frontend](https://flotilla.robotics.equinor.com/)<br>[Backend](https://flotilla.robotics.equinor.com/api/swagger)                 | [![Production](https://github.com/equinor/flotilla/actions/workflows/promote_to_production.yml/badge.svg)](https://github.com/equinor/flotilla/actions/workflows/promote_to_production.yml) |
 
 ## Setup
 
