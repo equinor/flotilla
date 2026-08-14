@@ -46,10 +46,10 @@ fi
 
 if [ "$backend_abort" != "true" ]; then
 
-    echo "Local__DevUserId=$local_dev_username" >> $flotilla_dir/backend/api/.env
-    echo -e "Added local development username to .env file"
+    cp $flotilla_dir/backend/api/.env.example $flotilla_dir/backend/api/.env
+    echo -e "Created backend/api/.env file from backend/api/.env.example"
 
-    echo -e "Backup setup - Done!"
+    echo -e "Backend setup - Done!"
     echo -e "-----------------------------\n"
 fi
 
@@ -65,7 +65,7 @@ if [ -f $flotilla_dir/broker/.env ]; then
 
     read reply
     if [ "$reply" = "n" ] || [ "$reply" = "N" ]; then
-        echo -e "\Broker setup - Aborted!\n"
+        echo -e "\nBroker setup - Aborted!\n"
         broker_abort="true"
     fi
 fi
@@ -86,10 +86,9 @@ if [ "$broker_abort" != "true" ]; then
     done
 
 
-    echo "TLS_SERVER_KEY='$broker_server_key'" >> $flotilla_dir/broker/.env
-    echo -e "Added broker server key to .env file"
+    echo "TLS_SERVER_KEY='$broker_server_key'" > $flotilla_dir/broker/.env
+    echo -e "Created broker/.env file with the broker server key"
 
-    echo -e "Added broker server key to .env file"
     echo -e "Broker setup - Done!"
     echo -e "-----------------------------\n"
     #-----------------------------
