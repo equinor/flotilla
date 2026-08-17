@@ -38,7 +38,7 @@ jobs:
       - name: Get Flotilla version in staging
         id: get_version_tag
         run: |
-          TAG_LINE_NUMBER=$(($(grep -n "auroraprodacr.azurecr.io/robotics/flotilla-frontend" k8s_kustomize/overlays/staging/kustomization.yaml |  cut --delimiter=":" --fields=1)+1))
+          TAG_LINE_NUMBER=$(($(grep -n "roboticsstagingacr.azurecr.io/robotics/flotilla-frontend" k8s_kustomize/overlays/staging/kustomization.yaml |  cut --delimiter=":" --fields=1)+1))
           VERSION_TAG=$(sed -n "${TAG_LINE_NUMBER}p" k8s_kustomize/overlays/staging/kustomization.yaml  |  cut --delimiter=":" --fields=2 | tr -d '[:space:]')
           echo "tag=$VERSION_TAG" >> "$GITHUB_OUTPUT"
 
@@ -96,7 +96,7 @@ jobs:
     with:
       environment: production
       tag: ${{ needs.get_staging_version.outputs.versionTag }}
-      registry: auroraprodacr.azurecr.io
+      registry: roboticsprodacr.azurecr.io
       image_name: robotics/flotilla-${{ matrix.component }}
       author_name: ${{ github.actor }}
       infrastructure_repository: equinor/robotics-infrastructure
