@@ -30,6 +30,7 @@ jobs:
     name: Build and push latest release flotilla components to robotics staging container registry
     permissions:
       contents: read
+      packages: write
     strategy:
       matrix:
         component: [broker, backend, frontend]
@@ -49,6 +50,7 @@ jobs:
     name: Update deployment in Staging
     permissions:
       contents: read
+      packages: write
     needs: build-and-push-latest-release-flotilla-component-to-robotics-staging-container-registry
     strategy:
       max-parallel: 1

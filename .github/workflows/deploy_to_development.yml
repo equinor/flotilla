@@ -29,6 +29,7 @@ jobs:
     needs: get-short-sha
     permissions:
       contents: read
+      packages: write
     strategy:
       matrix:
         component: [broker, backend, frontend]
@@ -49,6 +50,7 @@ jobs:
     needs: [build-and-push-flotilla-components-to-robotics-staging-registry, get-short-sha]
     permissions:
       contents: read
+      packages: write
     strategy:
       max-parallel: 1
       matrix:
