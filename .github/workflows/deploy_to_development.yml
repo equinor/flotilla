@@ -25,7 +25,7 @@ jobs:
           echo "tag=$SHA_SHORT" >> "$GITHUB_OUTPUT"
 
   build-and-push-flotilla-components-to-robotics-staging-registry:
-    name: Build and push flotilla components to robotics staging container registry
+    name: Build and push flotilla components to robotics dev container registry
     needs: get-short-sha
     permissions:
       contents: read
@@ -35,15 +35,15 @@ jobs:
         component: [broker, backend, frontend]
     uses: equinor/armada/.github/workflows/build_and_publish_docker_image_to_container_registry.yml@main
     with:
-      registry: roboticsstagingacr.azurecr.io
+      registry: roboticsdevacr.azurecr.io
       image_name: robotics/flotilla-${{ matrix.component }}
       tag: "dev.${{ needs.get-short-sha.outputs.tag }}"
       secondary_tag: dev
       path_to_dockerfile: ${{ matrix.component}}/Dockerfile
       path_to_context: ./${{ matrix.component}}
     secrets:
-      registry_password: ${{ secrets.ROBOTICS_ROBOTICSSTAGINGACR_PASSWORD }}
-      registry_username: ${{ secrets.ROBOTICS_ROBOTICSSTAGINGACR_USERNAME }}
+      registry_password: ${{ secrets.ROBOTICS_ROBOTICSDEVACR_PASSWORD }}
+      registry_username: ${{ secrets.ROBOTICS_ROBOTICSDEVACR_USERNAME }}
 
   deploy:
     name: Update deployment in Development
@@ -58,7 +58,7 @@ jobs:
     uses: equinor/armada/.github/workflows/update_kubernetes_deployment.yml@main
     with:
       environment: development
-      registry: roboticsstagingacr.azurecr.io
+      registry: roboticsdevacr.azurecr.io
       image_name: robotics/flotilla-${{ matrix.component }}
       tag: "dev.${{ needs.get-short-sha.outputs.tag }}"
       author_email: ${{ github.event.head_commit.author.email }}
