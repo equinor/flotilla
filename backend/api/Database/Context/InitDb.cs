@@ -198,7 +198,7 @@ namespace Api.Database.Context
             var task1 = new TaskDefinition
             {
                 Index = 1,
-                TagId = "dummy tag id 1",
+                TagId = "dummy-tag-id-1",
                 Description = "dummy task 1",
                 RobotPose = new Pose(),
                 AnalysisTypes = [AnalysisType.Fencilla],
@@ -213,7 +213,7 @@ namespace Api.Database.Context
             var task2 = new TaskDefinition
             {
                 Index = 2,
-                TagId = "dummy tag id 1",
+                TagId = "dummy-tag-id-2",
                 Description = "dummy task 2",
                 RobotPose = new Pose(),
                 AnalysisTypes = [AnalysisType.CLOE],
@@ -228,7 +228,7 @@ namespace Api.Database.Context
             var task3 = new TaskDefinition
             {
                 Index = 3,
-                TagId = "dummy tag id 2",
+                TagId = "dummy-tag-id-3",
                 Description = "dummy task 3",
                 RobotPose = new Pose(),
                 AnalysisTypes = [AnalysisType.CO2],
