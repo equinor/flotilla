@@ -5,10 +5,10 @@ import { useInspectionId } from 'pages/InspectionReportPage/SetInspectionIdHook'
 import { tokens } from '@equinor/eds-tokens'
 import { InspectionData } from 'models/InspectionRecord'
 
-const StyledButton = styled(Button)<{ hasFinding: boolean }>`
+const StyledButton = styled(Button)`
     &:hover {
-        ${({ $hasFinding }) =>
-            $hasFinding
+        ${({ color }) =>
+            color === 'danger'
                 ? `border-color: ${tokens.colors.interactive.danger__hover.hex};`
                 : `border-color: ${tokens.colors.interactive.primary__hover.hex};`};
     }
@@ -20,7 +20,6 @@ export const TaskAnalysisDisplay = ({ inspectionData }: { inspectionData: Inspec
 
     return (
         <StyledButton
-            hasFinding={inspectionData.warning ? true : false}
             color={inspectionData.warning ? 'danger' : 'primary'}
             variant="ghost"
             onClick={() => switchSelectedAnalysisId(inspectionData.inspectionId)}
