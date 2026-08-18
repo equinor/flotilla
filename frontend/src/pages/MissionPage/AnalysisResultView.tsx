@@ -73,7 +73,7 @@ export const AnalysisResultDialogContent = ({ inspection }: { inspection: Inspec
                         <Typography variant="body_short">{inspection.value}</Typography>
                     </StyledInfoContent>
                 )}
-                {inspection?.confidence && (
+                {inspection?.confidence !== undefined && inspection?.confidence !== null && (
                     <StyledInfoContent>
                         <Typography variant="caption">{TranslateText('Confidence') + ':'}</Typography>
                         <Typography variant="body_short">{Math.round(inspection.confidence) + '%'}</Typography>
