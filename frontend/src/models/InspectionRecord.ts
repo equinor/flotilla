@@ -72,12 +72,13 @@ const imageFileEndings = ['jpg', 'jpeg', 'png', 'gif']
 const videoFileEndings = ['mp4', 'mpg', 'mpeg', 'm4v']
 
 const sasURLToFileType = (sasURL: string): FileType => {
-    const reg: RegExp = /\.([a-zA-Z0-9]+)(\?skoid=)/
-    const fileEnding = sasURL.match(reg)?.[1]
-    if (!fileEnding) return FileType.VALUE
-    if (imageFileEndings.includes(fileEnding?.toLowerCase())) return FileType.IMAGE
+    const pathname = new URL(sasURL).pathname
+    const filename = pathname.split('/').pop()
+    const fileEnding = filename!.split('.').pop()!.toLowerCase()
+
+    if (imageFileEndings.includes(fileEnding.toLowerCase())) return FileType.IMAGE
     if (videoFileEndings.includes(fileEnding.toLowerCase())) return FileType.VIDEO
-    return FileType.VALUE
+    throw new Error(`Unsupported file type for SAS URL: ${sasURL}`)
 }
 
 export const inspectionRecordToInspectionData = (record: InspectionRecord): InspectionData | null => {
