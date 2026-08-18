@@ -337,6 +337,16 @@ namespace Api.Database.Context
                 LastSuccessfulRun = null,
             };
 
+            var cloeMission = new MissionDefinition
+            {
+                Id = Guid.NewGuid().ToString(),
+                Name = "Constant Level Oiler Mission",
+                InstallationCode = inspectionAreas[5].Installation.InstallationCode,
+                InspectionArea = inspectionAreas[5],
+                Tasks = [GetMissionTaskDefinitions()[1]],
+                LastSuccessfulRun = null,
+            };
+
             return new List<MissionDefinition>([
                 missionDefinition1,
                 missionDefinition2,
@@ -345,6 +355,7 @@ namespace Api.Database.Context
                 missionDefinition5,
                 missionDefinition6,
                 thermalReadingMission,
+                cloeMission,
             ]);
         }
 
