@@ -50,7 +50,7 @@ namespace Api.Database.Models
 
         public IList<AnalysisType> AnalysisTypes { get; set; } = [];
 
-        public SensorType SensorType { get; set; }
+        public SensorType SensorType { get; set; } // Note that the enum will get SensorType.Image as default
 
         public float? VideoDuration { get; set; }
 
