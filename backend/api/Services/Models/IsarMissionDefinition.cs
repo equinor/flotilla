@@ -126,7 +126,7 @@ namespace Api.Services.Models
                     : null;
         }
 
-        private static List<string>? ToSaraAnalysisKeys(IList<AnalysisType>? types)
+        private static List<string>? ToSaraAnalysisKeys(IList<AnalysisType> types)
         {
             if (types is null || types.Count == 0)
                 return null;

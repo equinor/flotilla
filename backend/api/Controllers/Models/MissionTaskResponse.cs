@@ -19,7 +19,7 @@ namespace Api.Controllers.Models
 
         public bool IsCompleted { get; set; }
 
-        public IList<AnalysisType>? AnalysisTypes { get; set; }
+        public IList<AnalysisType> AnalysisTypes { get; set; }
 
         public DateTime? StartTime { get; set; }
 
