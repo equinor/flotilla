@@ -162,7 +162,7 @@ const AnalysisImageWithPlaceholder = ({
     const { useSaraData } = useInspectionsContext()
     const { data, isPending, isError } = useSaraData(inspectionId)
 
-    if (!data?.visualisedSAS) {
+    if (!data?.visualizedSAS) {
         return <TextAsImage isLargeImage={isLargeImage} text={'No analysis available'} />
     } else if (isPending) {
         return <PendingResultPlaceholder isLargeImage={isLargeImage} />
@@ -170,9 +170,9 @@ const AnalysisImageWithPlaceholder = ({
         return <TextAsImage isLargeImage={isLargeImage} text={'No analysis could be found'} />
     } else
         return isLargeImage ? (
-            <StyledInspection $otherContentHeight={'174px'} src={data.visualisedSAS} />
+            <StyledInspection $otherContentHeight={'174px'} src={data.visualizedSAS} />
         ) : (
-            <StyledInspectionImage src={data.visualisedSAS} />
+            <StyledInspectionImage src={data.visualizedSAS} />
         )
 }
 

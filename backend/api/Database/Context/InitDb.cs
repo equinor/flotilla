@@ -330,6 +330,36 @@ namespace Api.Database.Context
                 LastSuccessfulRun = null,
             };
 
+            var onlyImagesWithoutAnalysisMissionDefinition = new MissionDefinition
+            {
+                Id = Guid.NewGuid().ToString(),
+                Name = "Only Images Without Analysis Mission",
+                InstallationCode = inspectionAreas[5].Installation.InstallationCode,
+                InspectionArea = inspectionAreas[5],
+                Tasks =
+                [
+                    new TaskDefinition
+                    {
+                        TagId = "image-tag-1",
+                        Description = "Tag to take image of",
+                        RobotPose = new Pose(),
+                        AnalysisTypes = [],
+                        SensorType = SensorType.Image,
+                        TargetPosition = new Position(),
+                    },
+                    new TaskDefinition
+                    {
+                        TagId = "image-tag-2",
+                        Description = "Tag to take image of",
+                        RobotPose = new Pose(),
+                        AnalysisTypes = [],
+                        SensorType = SensorType.Image,
+                        TargetPosition = new Position(),
+                    },
+                ],
+                LastSuccessfulRun = null,
+            };
+
             return new List<MissionDefinition>([
                 missionDefinition1,
                 missionDefinition2,
@@ -339,6 +369,7 @@ namespace Api.Database.Context
                 missionDefinition6,
                 thermalReadingMission,
                 cloeMission,
+                onlyImagesWithoutAnalysisMissionDefinition,
             ]);
         }
 

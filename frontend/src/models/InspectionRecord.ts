@@ -52,7 +52,7 @@ export interface FlotillaAnalysisResultMessage {
 export interface InspectionData {
     inspectionId: string
     analysisId: string
-    visualisedSAS?: string
+    visualizedSAS?: string
     fileType: FileType
     anonymizedSAS?: string
     analysisType?: string
@@ -94,7 +94,7 @@ export const inspectionRecordToInspectionData = (record: InspectionRecord): Insp
     return {
         inspectionId: record.inspectionId,
         analysisId: analysis.id,
-        visualisedSAS: analysis.visualizedSAS,
+        visualizedSAS: analysis.visualizedSAS,
         anonymizedSAS: analysis.anonymizedSAS,
         analysisType: record.inspectionType,
         tag: record.tag,

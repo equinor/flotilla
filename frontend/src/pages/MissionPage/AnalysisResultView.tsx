@@ -39,8 +39,8 @@ export const AnalysisResultDialogContent = ({ inspection }: { inspection: Inspec
 
     return (
         <div>
-            {inspection.visualisedSAS ? (
-                <AnalysisImage sasURI={inspection.visualisedSAS} isPending={false} />
+            {inspection.visualizedSAS ? (
+                <AnalysisImage sasURI={inspection.visualizedSAS} isPending={false} />
             ) : (
                 <>{/* No image to display*/}</>
             )}

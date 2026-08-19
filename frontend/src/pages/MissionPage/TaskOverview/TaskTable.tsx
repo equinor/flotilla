@@ -110,7 +110,13 @@ const TaskTableRow = ({
             <Table.Cell>
                 <TaskStatusDisplay status={task.status} errorMessage={task.errorDescription} />
             </Table.Cell>
-            <Table.Cell>{inspectionData ? <TaskAnalysisDisplay inspectionData={inspectionData} /> : <></>}</Table.Cell>
+            <Table.Cell>
+                {inspectionData && (inspectionData.visualizedSAS || inspectionData.value) ? (
+                    <TaskAnalysisDisplay inspectionData={inspectionData} />
+                ) : (
+                    <></>
+                )}
+            </Table.Cell>
         </StyledTableRow>
     )
 }
