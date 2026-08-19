@@ -202,12 +202,8 @@ namespace Api.Database.Context
                 Description = "dummy task 1",
                 RobotPose = new Pose(),
                 AnalysisTypes = [AnalysisType.Fencilla],
-                TargetPosition = new Position
-                {
-                    X = 0,
-                    Y = 0,
-                    Z = 0,
-                },
+                SensorType = SensorType.Image,
+                TargetPosition = new Position(),
             };
 
             var task2 = new TaskDefinition
@@ -216,13 +212,9 @@ namespace Api.Database.Context
                 TagId = "dummy-tag-id-2",
                 Description = "dummy task 2",
                 RobotPose = new Pose(),
+                SensorType = SensorType.Image,
                 AnalysisTypes = [AnalysisType.CLOE],
-                TargetPosition = new Position
-                {
-                    X = 0,
-                    Y = 0,
-                    Z = 0,
-                },
+                TargetPosition = new Position(),
             };
 
             var task3 = new TaskDefinition
@@ -232,12 +224,8 @@ namespace Api.Database.Context
                 Description = "dummy task 3",
                 RobotPose = new Pose(),
                 AnalysisTypes = [AnalysisType.CO2],
-                TargetPosition = new Position
-                {
-                    X = 0,
-                    Y = 0,
-                    Z = 0,
-                },
+                SensorType = SensorType.CO2Measurement,
+                TargetPosition = new Position(),
             };
 
             var task4 = new TaskDefinition
@@ -248,12 +236,7 @@ namespace Api.Database.Context
                 RobotPose = new Pose(),
                 SensorType = SensorType.ThermalImage,
                 AnalysisTypes = [AnalysisType.ThermalReading],
-                TargetPosition = new Position
-                {
-                    X = 0,
-                    Y = 0,
-                    Z = 0,
-                },
+                TargetPosition = new Position(),
             };
 
             return new List<TaskDefinition>([task1, task2, task3, task4]);
