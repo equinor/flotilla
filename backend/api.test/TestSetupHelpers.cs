@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Testcontainers.Azurite;
 using Testcontainers.PostgreSql;
 using Xunit.Sdk;
 
@@ -22,7 +23,16 @@ namespace Api.Test;
 
 public static class TestSetupHelpers
 {
+    private const string AzuriteVersion = "mcr.microsoft.com/azure-storage/azurite:3.36.0";
     private const string PostgresVersion = "postgres:17.10";
+
+    public static async Task<(AzuriteContainer, string)> ConfigureAzuriteStorage()
+    {
+        var container = new AzuriteBuilder(AzuriteVersion).Build();
+        await container.StartAsync();
+
+        return (container, container.GetConnectionString());
+    }
 
     public static async Task<(
         PostgreSqlContainer,
