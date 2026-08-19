@@ -8,9 +8,7 @@ import { useNavigate } from 'react-router'
 import { Icons } from 'utils/icons'
 import { compareMissionDefinitions } from './InspectionUtilities'
 import { formatDateTime } from 'utils/StringFormatting'
-import { AlreadyScheduledMissionDialog } from './ScheduleMissionDialogs'
-import { useContext, useState } from 'react'
-import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
+import { useContext } from 'react'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 import { FrontPageSectionId } from 'models/FrontPageSectionId'
 import { SmallScreenInfoText } from 'utils/InfoText'
@@ -74,36 +72,22 @@ const HideColumnsOnSmallScreen = styled.div`
     }
 `
 
-interface IProps {
-    inspectionArea: InspectionArea
-    missionDefinitions: MissionDefinition[]
-    scrollOnToggle: boolean
-    openDialog: () => void
-    setSelectedMissions: (selectedMissions: MissionDefinition[]) => void
-}
-
 interface IMissionRowProps {
     mission: MissionDefinition
-    openDialog: () => void
     setMissions: (selectedMissions: MissionDefinition[]) => void
-    openScheduledDialog: () => void
 }
 
-const MissionRow = ({ mission, openDialog, setMissions, openScheduledDialog }: IMissionRowProps) => {
+const MissionRow = ({ mission, setMissions }: IMissionRowProps) => {
     const { TranslateText } = useLanguageContext()
-    const { missionQueue } = useMissionsContext()
     const { enabledRobots } = useAssetContext()
     const { installation } = useContext(InstallationContext)
     const navigate = useNavigate()
 
-    const isScheduled = missionQueue.map((m) => m.missionId).includes(mission.id)
     const isScheduleButtonDisabled = enabledRobots.length === 0
 
     const lastCompleted = mission.lastSuccessfulRun?.endTime
         ? formatDateTime(mission.lastSuccessfulRun.endTime)
         : TranslateText('Never')
-
-    const noRobotReadyForMissionsText = TranslateText('No robot available')
 
     return (
         <StyledTableRow key={mission.id}>
@@ -121,55 +105,31 @@ const MissionRow = ({ mission, openDialog, setMissions, openScheduledDialog }: I
             <Table.Cell id={Columns.LastCompleted}>{lastCompleted}</Table.Cell>
             <Table.Cell id={Columns.AddToQueue}>
                 <Centered>
-                    {!isScheduled && (
-                        <Button
-                            style={{ width: isScheduleButtonDisabled ? '110px' : '' }}
-                            variant="ghost_icon"
-                            disabled={isScheduleButtonDisabled}
-                            onClick={() => {
-                                openDialog()
-                                setMissions([mission])
-                            }}
-                        >
-                            <StyledIcon color={`${tokens.colors.interactive.focus.hex}`} name={Icons.Add} size={24} />
-                            {isScheduleButtonDisabled && noRobotReadyForMissionsText}
-                        </Button>
-                    )}
-                    {isScheduled && (
-                        <Button
-                            variant="ghost_icon"
-                            disabled={enabledRobots.length === 0}
-                            onClick={() => {
-                                openScheduledDialog()
-                                setMissions([mission])
-                            }}
-                        >
-                            <StyledIcon color={`${tokens.colors.interactive.focus.hex}`} name={Icons.Add} size={24} />
-                        </Button>
-                    )}
+                    <Button
+                        style={{ width: isScheduleButtonDisabled ? '110px' : '' }}
+                        variant="ghost_icon"
+                        disabled={isScheduleButtonDisabled}
+                        onClick={() => {
+                            setMissions([mission])
+                        }}
+                    >
+                        <StyledIcon color={`${tokens.colors.interactive.focus.hex}`} name={Icons.Add} size={24} />
+                        {isScheduleButtonDisabled && <>{TranslateText('No robot available')}</>}
+                    </Button>
                 </Centered>
             </Table.Cell>
         </StyledTableRow>
     )
 }
 
-export const MissionSchedulingTable = ({
-    inspectionArea,
-    missionDefinitions,
-    openDialog,
-    setSelectedMissions,
-}: IProps) => {
+interface IProps {
+    inspectionArea: InspectionArea
+    missionDefinitions: MissionDefinition[]
+    setSelectedMissions: (selectedMissions: MissionDefinition[]) => void
+}
+
+export const MissionSchedulingTable = ({ inspectionArea, missionDefinitions, setSelectedMissions }: IProps) => {
     const { TranslateText } = useLanguageContext()
-
-    const [isScheduledDialogOpen, setIsScheduledDialogOpen] = useState<boolean>(false)
-
-    const openScheduleDialog = () => {
-        setIsScheduledDialogOpen(true)
-    }
-
-    const closeScheduleDialog = () => {
-        setIsScheduledDialogOpen(false)
-    }
 
     return (
         <StyledTable id={FrontPageSectionId.InspectionTable}>
@@ -190,20 +150,11 @@ export const MissionSchedulingTable = ({
                     </Table.Head>
                     <Table.Body style={{ backgroundColor: tokens.colors.ui.background__default.hex }}>
                         {missionDefinitions.sort(compareMissionDefinitions).map((mission) => (
-                            <MissionRow
-                                key={mission.id}
-                                mission={mission}
-                                openDialog={openDialog}
-                                setMissions={setSelectedMissions}
-                                openScheduledDialog={openScheduleDialog}
-                            />
+                            <MissionRow key={mission.id} mission={mission} setMissions={setSelectedMissions} />
                         ))}
                     </Table.Body>
                 </Table>
             </HideColumnsOnSmallScreen>
-            {isScheduledDialogOpen && (
-                <AlreadyScheduledMissionDialog openDialog={openDialog} closeDialog={closeScheduleDialog} />
-            )}
         </StyledTable>
     )
 }
