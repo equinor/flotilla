@@ -43,7 +43,7 @@ namespace Api.Database.Models
         [Required]
         public Pose RobotPose { get; set; }
 
-        public IList<AnalysisType>? AnalysisTypes { get; set; } = [];
+        public IList<AnalysisType> AnalysisTypes { get; set; } = [];
 
         private TaskStatus _status;
 
