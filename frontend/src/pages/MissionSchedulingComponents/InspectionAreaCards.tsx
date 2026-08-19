@@ -1,74 +1,66 @@
 import { InspectionArea } from 'models/InspectionArea'
-import { MissionDefinition } from 'models/MissionDefinition'
-import { InspectionAreaInspectionTuple } from './InspectionSection'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import {
     CardComponent,
     Content,
     InspectionAreaText,
-    Placeholder,
     StyledCard,
     StyledInspectionAreaCard,
-    StyledInspectionAreaCards,
     TopInspectionAreaText,
 } from './InspectionUtilities'
 import { Button, Icon, Tooltip, Typography } from '@equinor/eds-core-react'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
-import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 
 interface InspectionAreaCardProps {
-    inspectionAreaData: InspectionAreaInspectionTuple
+    inspectionArea: InspectionArea
+    nMissions: number
     onClickInspectionArea: (inspectionArea: InspectionArea) => void
-    selectedInspectionArea: InspectionArea | undefined
-    handleScheduleAll: (missionDefinitions: MissionDefinition[]) => void
+    isSelected: boolean
+    isMissionOngoing: boolean
+    onClickScheduleAll: (inspectionArea: InspectionArea) => void
 }
 
-const InspectionAreaCard = ({
-    inspectionAreaData,
+export const InspectionAreaCard = ({
+    inspectionArea,
+    nMissions,
     onClickInspectionArea,
-    selectedInspectionArea,
-    handleScheduleAll,
+    isSelected,
+    isMissionOngoing,
+    onClickScheduleAll,
 }: InspectionAreaCardProps) => {
     const { TranslateText } = useLanguageContext()
-    const { ongoingMissions } = useMissionsContext()
     const { enabledRobots } = useAssetContext()
 
-    const isScheduleMissionsDisabled = enabledRobots.length === 0 || inspectionAreaData.missionDefinitions.length === 0
+    const isScheduleMissionsDisabled = enabledRobots.length === 0 || nMissions === 0
 
     let queueMissionsTooltip = ''
-    if (inspectionAreaData.missionDefinitions.length === 0) queueMissionsTooltip = TranslateText('No available mission')
+    if (nMissions === 0) queueMissionsTooltip = TranslateText('No available mission')
     else if (isScheduleMissionsDisabled) queueMissionsTooltip = TranslateText('No robot available')
 
     return (
-        <StyledInspectionAreaCard key={inspectionAreaData.inspectionArea.inspectionAreaName}>
+        <StyledInspectionAreaCard key={inspectionArea.inspectionAreaName}>
             <StyledCard
-                key={inspectionAreaData.inspectionArea.inspectionAreaName}
-                onClick={() => onClickInspectionArea(inspectionAreaData.inspectionArea)}
-                style={
-                    selectedInspectionArea === inspectionAreaData.inspectionArea
-                        ? { border: `solid ${tokens.colors.interactive.focus.hex} 1px` }
-                        : {}
-                }
+                key={inspectionArea.inspectionAreaName}
+                onClick={() => onClickInspectionArea(inspectionArea)}
+                style={isSelected ? { border: `solid ${tokens.colors.interactive.focus.hex} 1px` } : {}}
             >
                 <InspectionAreaText>
                     <TopInspectionAreaText>
                         <Typography variant={'body_short_bold'}>
-                            {inspectionAreaData.inspectionArea.inspectionAreaName.toString()}
+                            {inspectionArea.inspectionAreaName.toString()}
                         </Typography>
-                        {inspectionAreaData.missionDefinitions
-                            .filter((m) => ongoingMissions.find((om) => om.missionId === m.id))
-                            .map((mission) => (
-                                <Content key={mission.id}>
-                                    <Icon name={Icons.Ongoing} size={16} />
-                                    {TranslateText('InProgress')}
-                                </Content>
-                            ))}
+                        {isMissionOngoing && (
+                            <Content>
+                                <Icon name={Icons.Ongoing} size={16} />
+                                {TranslateText('InProgress')}
+                            </Content>
+                        )}
                     </TopInspectionAreaText>
                     <Typography color={tokens.colors.text.static_icons__secondary.hex}>
-                        {inspectionAreaData.missionDefinitions.length}{' '}
-                        {inspectionAreaData.missionDefinitions.length === 1
+                        {nMissions}{' '}
+                        {nMissions === 1
                             ? TranslateText('Mission').toLowerCase()
                             : TranslateText('Missions').toLowerCase()}
                     </Typography>
@@ -78,13 +70,10 @@ const InspectionAreaCard = ({
                         <Button
                             disabled={isScheduleMissionsDisabled}
                             variant="ghost"
-                            onClick={() => handleScheduleAll(inspectionAreaData.missionDefinitions)}
+                            onClick={() => onClickScheduleAll(inspectionArea)}
                             color="secondary"
                         >
-                            <Icon
-                                name={Icons.Add}
-                                color={inspectionAreaData.missionDefinitions.length > 0 ? '' : 'grey'}
-                            />
+                            <Icon name={Icons.Add} color={nMissions > 0 ? '' : 'grey'} />
                             <Typography color={tokens.colors.text.static_icons__secondary.hex}>
                                 {TranslateText('Queue the missions')}
                             </Typography>
@@ -93,45 +82,5 @@ const InspectionAreaCard = ({
                 </CardComponent>
             </StyledCard>
         </StyledInspectionAreaCard>
-    )
-}
-
-interface IInspectionAreaCardProps {
-    inspectionAreaMissions: InspectionAreaInspectionTuple[]
-    onClickInspectionArea: (inspectionArea: InspectionArea) => void
-    selectedInspectionArea: InspectionArea | undefined
-    handleScheduleAll: (missionDefinitions: MissionDefinition[]) => void
-}
-
-export const InspectionAreaCards = ({
-    inspectionAreaMissions,
-    onClickInspectionArea,
-    selectedInspectionArea,
-    handleScheduleAll,
-}: IInspectionAreaCardProps) => {
-    const { TranslateText } = useLanguageContext()
-
-    return (
-        <>
-            {Object.keys(inspectionAreaMissions).length > 0 ? (
-                <StyledInspectionAreaCards>
-                    {inspectionAreaMissions.map((inspectionAreaMission) => (
-                        <InspectionAreaCard
-                            key={'inspectionAreaCard' + inspectionAreaMission.inspectionArea.inspectionAreaName}
-                            inspectionAreaData={inspectionAreaMission}
-                            onClickInspectionArea={onClickInspectionArea}
-                            selectedInspectionArea={selectedInspectionArea}
-                            handleScheduleAll={handleScheduleAll}
-                        />
-                    ))}
-                </StyledInspectionAreaCards>
-            ) : (
-                <Placeholder>
-                    <Typography variant="h4" color="disabled">
-                        {TranslateText('No inspections available')}
-                    </Typography>
-                </Placeholder>
-            )}
-        </>
     )
 }

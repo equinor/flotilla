@@ -1,7 +1,6 @@
 import { Card } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { MissionDefinition } from 'models/MissionDefinition'
-import { tokens } from '@equinor/eds-tokens'
 import { cardShadow } from 'components/Styles/StyledComponents'
 
 export const StyledCard = styled(Card)`
@@ -51,11 +50,6 @@ export const InspectionAreaOverview = styled.div`
     display: flex;
     flex-direction: column;
     gap: 48px;
-`
-export const Placeholder = styled.div`
-    padding: 24px;
-    border: 1px solid ${tokens.colors.ui.background__medium.hex};
-    border-radius: 4px;
 `
 export const Content = styled.div`
     display: flex;

@@ -1,4 +1,4 @@
-import { Autocomplete, Dialog, Typography, Icon } from '@equinor/eds-core-react'
+import { Autocomplete, Typography, Icon } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useState } from 'react'
@@ -18,19 +18,6 @@ import {
 } from 'components/Displays/InspectionAreaVerificationDialogs/getInspectionAreaDialogType'
 import { phone_width } from 'utils/constants'
 import { useBackendApi } from 'api/UseBackendApi'
-
-interface IProps {
-    selectedMissions: MissionDefinition[]
-    closeDialog: () => void
-    setMissions: (selectedMissions: MissionDefinition[] | undefined) => void
-    unscheduledMissions: MissionDefinition[]
-    isAlreadyScheduled: boolean
-}
-
-interface IScheduledProps {
-    openDialog: () => void
-    closeDialog: () => void
-}
 
 const StyledMissionDialog = styled.div`
     display: flex;
@@ -58,6 +45,13 @@ const StyledDangerContent = styled.div`
     flex-direction: row;
     gap: 2px;
 `
+
+interface IProps {
+    selectedMissions: MissionDefinition[]
+    closeDialog: () => void
+    unscheduledMissions: MissionDefinition[]
+    isAlreadyScheduled: boolean
+}
 
 export const ScheduleMissionDialog = (props: IProps) => {
     const { TranslateText } = useLanguageContext()
@@ -217,43 +211,6 @@ export const ScheduleMissionDialog = (props: IProps) => {
                     missionInspectionAreas={missionsToSchedule?.map((mission) => mission.inspectionArea) ?? []}
                 />
             )}
-        </>
-    )
-}
-
-export const AlreadyScheduledMissionDialog = (props: IScheduledProps) => {
-    const { TranslateText } = useLanguageContext()
-
-    return (
-        <>
-            <StyledDialog open={true}>
-                <Dialog.Header>{TranslateText('The mission is already in the queue')}</Dialog.Header>
-                <Dialog.CustomContent>
-                    <Typography variant="body_short">{TranslateText('AlreadyScheduledText')}</Typography>
-                </Dialog.CustomContent>
-                <Dialog.Actions>
-                    <StyledMissionSection>
-                        <StyledButton
-                            onClick={() => {
-                                props.closeDialog()
-                            }}
-                            variant="outlined"
-                        >
-                            {' '}
-                            {TranslateText('Cancel')}{' '}
-                        </StyledButton>
-                        <StyledButton
-                            onClick={() => {
-                                props.openDialog()
-                                props.closeDialog()
-                            }}
-                        >
-                            {' '}
-                            {TranslateText('Queue mission')}
-                        </StyledButton>
-                    </StyledMissionSection>
-                </Dialog.Actions>
-            </StyledDialog>
         </>
     )
 }
