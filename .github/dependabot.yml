@@ -1,0 +1,23 @@
+version: 2
+updates:
+  - package-ecosystem: docker
+    directory: /frontend
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: docker
+    directory: /broker
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: docker
+    directory: /backend
+    schedule:
+      interval: weekly
+    ignore:
+      - dependency-name: dotnet/sdk
+        update-types:
+          - version-update:semver-major
+      - dependency-name: dotnet/aspnet
+        update-types:
+          - version-update:semver-major
