@@ -100,6 +100,7 @@ jobs:
       image_name: robotics/flotilla-${{ matrix.component }}
       author_name: ${{ github.actor }}
       infrastructure_repository: equinor/robotics-infrastructure
+      kustomization_base_path: k8s_kustomize/robotics/overlays
       commit_message_service_name: Flotilla
     secrets:
       deploy_key: ${{ secrets.ROBOTICS_INFRASTRUCTURE_DEPLOY_KEY }}
