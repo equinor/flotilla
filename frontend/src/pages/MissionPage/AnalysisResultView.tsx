@@ -1,4 +1,4 @@
-import { Icon, Typography } from '@equinor/eds-core-react'
+import { Divider, Icon, Typography } from '@equinor/eds-core-react'
 import { Icons } from 'utils/icons'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { formatDateTime } from 'utils/StringFormatting'
@@ -17,16 +17,19 @@ import styled from 'styled-components'
 import { useInspectionId } from 'pages/InspectionReportPage/SetInspectionIdHook'
 import { AnalysisOverviewDialogView } from 'pages/InspectionReportPage/ImageOverview'
 import { InspectionData } from 'models/InspectionRecord'
+import { AnalysisFeedback } from './AnalysisFeedback'
 
 interface InspectionDialogViewProps {
     selectedInspectionId: string
     inspectionData: InspectionData[]
 }
+
 const StyledImage = styled.img<{ $otherContentHeight?: string }>`
     max-height: calc(60vh - ${(props) => props.$otherContentHeight});
     max-width: 100%;
     border: none;
 `
+
 const AnalysisImage = ({ sasURI, isPending }: { sasURI: string | undefined; isPending: boolean }) => {
     if (isPending) return <PendingResultPlaceholder isLargeImage={true} />
     if (!sasURI) return <TextAsImage isLargeImage={true} text="No inspection could be found" />
@@ -80,6 +83,16 @@ export const AnalysisResultDialogContent = ({ inspection }: { inspection: Inspec
                     </StyledInfoContent>
                 )}
             </StyledBottomContent>
+            {inspection.analysisRunId && (
+                <>
+                    <Divider color="light" variant="medium" />
+                    <AnalysisFeedback
+                        inspectionId={inspection.inspectionId}
+                        analysisRunId={inspection.analysisRunId}
+                        feedback={inspection.feedback}
+                    />
+                </>
+            )}
         </div>
     )
 }

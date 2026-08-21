@@ -1,4 +1,4 @@
-import { InspectionData, InspectionRecord, inspectionRecordToInspectionData } from 'models/InspectionRecord'
+import { Feedback, InspectionData, InspectionRecord, inspectionRecordToInspectionData } from 'models/InspectionRecord'
 import { BackendAPICaller } from './ApiCaller'
 import { handleError } from './ApiError'
 import { AnalysisType } from 'models/MissionDefinition'
@@ -57,5 +57,21 @@ export class SaraApi {
             })
             .catch(handleError('GET', path))
         return content
+    }
+
+    async upsertFeedback(analysisRunId: string, isCorrect: boolean): Promise<Feedback> {
+        const path: string = 'api/feedback/analysis-run/' + analysisRunId
+
+        const content = this.api
+            .PUT<{ isCorrect: boolean }, Feedback>(path, { isCorrect })
+            .then((response) => response.content)
+            .catch(handleError('PUT', path))
+        return content
+    }
+
+    async deleteFeedback(analysisRunId: string): Promise<void> {
+        const path: string = 'api/feedback/analysis-run/' + analysisRunId
+
+        await this.api.DELETE(path).catch(handleError('DELETE', path))
     }
 }
