@@ -1,3 +1,4 @@
+import '@equinor/eds-tokens/css/variables'
 import App from './App'
 import { StrictMode } from 'react'
 import { PublicClientApplication, EventType, AccountInfo } from '@azure/msal-browser'
