@@ -1,4 +1,4 @@
-import { Icon, Typography } from '@equinor/eds-core-react'
+import { Button, Divider, Icon, Typography } from '@equinor/eds-core-react'
 import { Icons } from 'utils/icons'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { formatDateTime } from 'utils/StringFormatting'
@@ -22,16 +22,108 @@ interface InspectionDialogViewProps {
     selectedInspectionId: string
     inspectionData: InspectionData[]
 }
+
+const FEEDBACK_ICON_SIZE = 24
+
 const StyledImage = styled.img<{ $otherContentHeight?: string }>`
     max-height: calc(60vh - ${(props) => props.$otherContentHeight});
     max-width: 100%;
     border: none;
 `
+
+const FeedbackSection = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--eds-spacing-horizontal-md);
+    padding: var(--eds-spacing-vertical-md) var(--eds-spacing-horizontal-md);
+`
+
+const FeedbackPrompt = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: var(--eds-spacing-vertical-2xs);
+`
+
+const FeedbackButtons = styled.div`
+    display: flex;
+    flex-shrink: 0;
+    gap: var(--eds-spacing-horizontal-sm);
+`
+
+const FeedbackButton = styled(Button)`
+    color: var(--eds-color-text-subtle);
+`
+
+const ThumbsUpButton = styled(FeedbackButton)`
+    &[aria-pressed='true'] {
+        color: var(--eds-color-text-success-subtle);
+        background: var(--eds-color-bg-success-fill-muted-default);
+
+        &:hover {
+            background: var(--eds-color-bg-success-fill-muted-hover);
+        }
+        &:active {
+            background: var(--eds-color-bg-success-fill-muted-active);
+        }
+    }
+`
+
+const ThumbsDownButton = styled(FeedbackButton)`
+    &[aria-pressed='true'] {
+        color: var(--eds-color-text-danger-subtle);
+        background: var(--eds-color-bg-danger-fill-muted-default);
+
+        &:hover {
+            background: var(--eds-color-bg-danger-fill-muted-hover);
+        }
+        &:active {
+            background: var(--eds-color-bg-danger-fill-muted-active);
+        }
+    }
+`
+
 const AnalysisImage = ({ sasURI, isPending }: { sasURI: string | undefined; isPending: boolean }) => {
     if (isPending) return <PendingResultPlaceholder isLargeImage={true} />
     if (!sasURI) return <TextAsImage isLargeImage={true} text="No inspection could be found" />
 
     return <StyledImage $otherContentHeight="0px" src={sasURI} />
+}
+
+type AnalysisFeedbackValue = 'positive' | 'negative'
+
+interface Props {
+    givenFeedback?: AnalysisFeedbackValue
+}
+
+// TODO: pass the persisted feedback once the backend exposes it on InspectionData
+const AnalysisFeedback = ({ givenFeedback }: Props) => {
+    const { TranslateText } = useLanguageContext()
+
+    return (
+        <FeedbackSection>
+            <FeedbackPrompt>
+                <Typography variant="h6">{TranslateText('Feedback')}</Typography>
+                <Typography variant="body_short">{TranslateText('Feedback description')}</Typography>
+            </FeedbackPrompt>
+            <FeedbackButtons>
+                <ThumbsUpButton
+                    variant="ghost_icon"
+                    aria-label={TranslateText('The analysis is correct')}
+                    aria-pressed={givenFeedback === 'positive'}
+                >
+                    <Icon name={Icons.ThumbsUp} size={FEEDBACK_ICON_SIZE} />
+                </ThumbsUpButton>
+                <ThumbsDownButton
+                    variant="ghost_icon"
+                    aria-label={TranslateText('Something is wrong with the analysis')}
+                    aria-pressed={givenFeedback === 'negative'}
+                >
+                    <Icon name={Icons.ThumbsDown} size={FEEDBACK_ICON_SIZE} />
+                </ThumbsDownButton>
+            </FeedbackButtons>
+        </FeedbackSection>
+    )
 }
 
 export const AnalysisResultDialogContent = ({ inspection }: { inspection: InspectionData }) => {
@@ -80,6 +172,8 @@ export const AnalysisResultDialogContent = ({ inspection }: { inspection: Inspec
                     </StyledInfoContent>
                 )}
             </StyledBottomContent>
+            <Divider color="light" variant="medium" />
+            <AnalysisFeedback givenFeedback="negative" />
         </div>
     )
 }
