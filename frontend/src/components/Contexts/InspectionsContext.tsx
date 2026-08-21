@@ -27,6 +27,8 @@ interface IInspectionsContext {
         minDate?: Date | null,
         maxDate?: Date | null
     ) => IInspectionListData
+    setFeedback: (inspectionId: string, analysisRunId: string, isCorrect: boolean) => Promise<void>
+    removeFeedback: (inspectionId: string, analysisRunId: string) => Promise<void>
 }
 
 interface Props {
@@ -36,6 +38,8 @@ interface Props {
 const defaultInspectionsContext = {
     useSaraData: () => ({ data: undefined, isPending: false, isError: true }),
     useSaraListData: () => ({ data: undefined, isPending: false, isError: true }),
+    setFeedback: async () => {},
+    removeFeedback: async () => {},
 }
 
 const InspectionsContext = createContext<IInspectionsContext>(defaultInspectionsContext)
@@ -136,11 +140,35 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
         return { data: result.data, isPending: result.isPending, isError: result.isError }
     }
 
+    // Feedback is shared by all users, so refetch afterwards to pick up whatever is now
+    // stored rather than assuming our own write won. Both the single-inspection query and
+    // the list queries carry feedback, and the analysis dialog is fed by the list.
+    const refetchInspection = async (inspectionId: string) => {
+        await queryClient.invalidateQueries({
+            queryKey: ['fetchInspectionData', inspectionId],
+        })
+        await queryClient.invalidateQueries({
+            queryKey: ['fetchInspectionListData'],
+        })
+    }
+
+    const setFeedback = async (inspectionId: string, analysisRunId: string, isCorrect: boolean) => {
+        await saraApiRef.current.upsertFeedback(analysisRunId, isCorrect)
+        await refetchInspection(inspectionId)
+    }
+
+    const removeFeedback = async (inspectionId: string, analysisRunId: string) => {
+        await saraApiRef.current.deleteFeedback(analysisRunId)
+        await refetchInspection(inspectionId)
+    }
+
     return (
         <InspectionsContext.Provider
             value={{
                 useSaraData,
                 useSaraListData,
+                setFeedback,
+                removeFeedback,
             }}
         >
             {children}
