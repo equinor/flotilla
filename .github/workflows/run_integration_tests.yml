@@ -28,3 +28,7 @@ jobs:
 
     secrets:
       INTEGRATION_TEST_AZURE_CLIENT_SECRET: ${{ secrets.INTEGRATION_TEST_AZURE_CLIENT_SECRET }}
+      dev_registry_username: ${{ secrets.ROBOTICS_ROBOTICSDEVACR_USERNAME }}
+      dev_registry_password: ${{ secrets.ROBOTICS_ROBOTICSDEVACR_PASSWORD }}
+      staging_registry_username: ${{ secrets.ROBOTICS_ROBOTICSSTAGINGACR_USERNAME }}
+      staging_registry_password: ${{ secrets.ROBOTICS_ROBOTICSSTAGINGACR_PASSWORD }}
