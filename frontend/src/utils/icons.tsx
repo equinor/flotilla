@@ -51,6 +51,7 @@ import {
     menu,
     view_week,
     list,
+    thumbs_up_down,
     thumbs_up,
     thumbs_down,
 } from '@equinor/eds-icons'
@@ -107,6 +108,7 @@ Icon.add({
     menu,
     view_week,
     list,
+    thumbs_up_down,
     thumbs_up,
     thumbs_down,
 })
@@ -163,6 +165,7 @@ export enum Icons {
     Menu = 'menu',
     ViewWeek = 'view_week',
     List = 'list',
+    Feedback = 'thumbs_up_down',
     ThumbsUp = 'thumbs_up',
     ThumbsDown = 'thumbs_down',
 }

@@ -12,7 +12,6 @@ using Api.Services;
 using Api.Services.ActionServices;
 using Api.Services.Events;
 using Api.SignalRHubs;
-using Api.Utilities;
 using Azure.Core;
 using Azure.Identity;
 using DotEnv.Core;
@@ -93,6 +92,9 @@ builder.Services.AddScoped<IAreaPolygonService, AreaPolygonService>();
 builder.Services.AddScoped<IErrorHandlingService, ErrorHandlingService>();
 builder.Services.AddScoped<ITaskDurationService, TaskDurationService>();
 builder.Services.AddScoped<ILastMissionRunService, LastMissionRunService>();
+
+builder.Services.AddHttpClient();
+builder.Services.AddSingleton<ITeamsNotificationService, TeamsNotificationService>();
 
 bool useInMemoryDatabase = builder
     .Configuration.GetSection("Database")

@@ -10,6 +10,9 @@ import { AlertIcon } from 'components/Header/AlertIcon'
 import { useNavigate } from 'react-router'
 import { phone_width } from 'utils/constants'
 import { Installation } from 'models/Installation'
+import { useState } from 'react'
+import { FeedbackDialog } from 'components/Dialogs/FeedbackDialog'
+import { useLanguageContext } from 'components/Contexts/LanguageContext'
 
 const StyledTopBar = styled(TopBar)`
     align-items: center;
@@ -83,6 +86,8 @@ interface Props {
 
 export const Header = ({ alertDict, installation }: Props) => {
     const navigate = useNavigate()
+    const { TranslateText } = useLanguageContext()
+    const [isFeedbackOpen, setIsFeedbackOpen] = useState(false)
 
     return (
         <>
@@ -102,6 +107,13 @@ export const Header = ({ alertDict, installation }: Props) => {
                         <Button variant="ghost_icon" onClick={() => navigate(`/info`)}>
                             <Icon name={Icons.Info} size={24} title="Info Page" />
                         </Button>
+                        <Button
+                            variant="ghost_icon"
+                            aria-label={TranslateText('Send feedback')}
+                            onClick={() => setIsFeedbackOpen(true)}
+                        >
+                            <Icon name={Icons.Feedback} size={24} title={TranslateText('Send feedback')} />
+                        </Button>
                     </IconStyle>
                     <SelectLanguageWrapper>
                         <SelectLanguage />
@@ -117,6 +129,7 @@ export const Header = ({ alertDict, installation }: Props) => {
                     ))}
                 </StyledAlertList>
             )}
+            {isFeedbackOpen && <FeedbackDialog isOpen onClose={() => setIsFeedbackOpen(false)} />}
         </>
     )
 }
