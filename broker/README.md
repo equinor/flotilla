@@ -10,9 +10,41 @@ For authentication details, testing, and certificate management, see [best_pract
 
 ## Configuration
 
-The broker expects the private key for its server x509 certificate, used for TLS, in the environment variable `TLS_SERVER_KEY`. This is a secret and should be treated as such — it is found in our key vault.
+The broker assembles its identity material — TLS certificates and the password file — on
+startup, from the environment. Anything not supplied falls back to the defaults committed to
+this repository, so existing deployments keep working unchanged.
 
-Create the configuration by running [`setup.sh`](../setup.sh) from the repository root, which prompts you for the key. Alternatively, copy the template and fill it in manually:
+| Variable | Secret | Meaning |
+| --- | --- | --- |
+| `MQTT_PASSWORDS` | yes | Comma separated `user:password` pairs. Must cover every user in [`access_control`](./mosquitto/config/access_control). Falls back to the committed `passwd_file`. |
+| `TLS_SERVER_KEY` | yes | Private key for the server certificate, as PEM or as the bare base64 body. Required unless TLS is disabled. |
+| `TLS_SERVER_CERT` | no | Server certificate as PEM. Falls back to the committed one. |
+| `TLS_CA_CERT` | no | CA certificate as PEM. Falls back to the committed one. |
+| `MQTT_ALLOW_INSECURE_LOCAL_CONNECTIONS` | no | `true` disables TLS. Authentication and ACLs are still enforced. Local development only. |
+
+Secrets belong in the key vault of the environment the broker runs in, never in this
+repository.
+
+### Minting credentials for an environment
+
+Each environment should have its own credentials, so that a compromise in one does not reach
+another:
+
+```bash
+broker/scripts/generate-mqtt-credentials.sh <broker-hostname> <output-directory>
+```
+
+`<broker-hostname>` must be the host clients connect to — the certificate is issued for it.
+The script writes a CA, a server certificate and a random password per ACL user, and prints
+which of them are secret. Store those in that environment's key vault.
+
+Clients need the matching CA certificate to verify the broker: ISAR reads it from
+`ISAR_MQTT_CA_CERT`. Flotilla and SARA do not verify the certificate chain.
+
+### Local development
+
+Create the configuration by running [`setup.sh`](../setup.sh) from the repository root, which
+prompts you for the key. Alternatively, copy the template and fill it in manually:
 
 ```bash
 cp .env.example .env
