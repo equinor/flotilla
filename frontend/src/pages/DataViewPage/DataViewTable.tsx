@@ -21,11 +21,11 @@ const formatUnit = (unit?: string): string => {
 }
 
 export const DataViewTable = ({
-    inspectionData,
+    uniqueTagInspectionData,
     selectedInspectionId,
     onSelectInspection,
 }: {
-    inspectionData: InspectionData[]
+    uniqueTagInspectionData: InspectionData[]
     selectedInspectionId: string | undefined
     onSelectInspection: (inspectionId: string | undefined) => void
 }) => {
@@ -43,8 +43,8 @@ export const DataViewTable = ({
                 </Table.Row>
             </Table.Head>
             <Table.Body>
-                {inspectionData &&
-                    inspectionData.map((inspection, index) => {
+                {uniqueTagInspectionData &&
+                    uniqueTagInspectionData.map((inspection, index) => {
                         const isSelected = inspection.inspectionId === selectedInspectionId
                         const taskHasWarning = inspection.warning
                         const backgroundColor = isSelected
