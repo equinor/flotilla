@@ -77,28 +77,27 @@ const DataViewContent = ({
 
     const plantCode =
         installationInspectionAreas.find((i) => i.installationCode === installation.installationCode)?.plantCode ?? null
+    const selectedInspection = useMemo(() => {
+        return inspectionData.find((i) => i.inspectionId === selectedInspectionId)
+    }, [inspectionData, selectedInspectionId])
 
     const linePlotData = useMemo(() => {
         const plotData: TimeseriesLinePlotData = {}
-        const inspectionLookup = new Map<string, InspectionData>()
         inspectionData.forEach((inspection) => {
             const tagId = inspection.tag
             const sampleTimestamp = inspection.createdAt
 
             if (inspection.value == null || inspection.value === '' || !sampleTimestamp) return
-            if (selectedInspectionId && inspection.inspectionId !== selectedInspectionId) return
+            if (selectedInspection && tagId !== selectedInspection.tag) return
             if (!Object.hasOwn(plotData, tagId)) plotData[tagId] = []
             plotData[tagId].push({
                 time: sampleTimestamp,
                 value: parseFloat(inspection.value),
                 inspectionId: inspection.inspectionId,
             })
-            inspectionLookup.set(inspection.inspectionId, inspection)
         })
         return plotData
-    }, [inspectionData, selectedInspectionId])
-
-    const selectedInspection = inspectionData.find((i) => i.inspectionId === selectedInspectionId)
+    }, [inspectionData, selectedInspection])
 
     const inspectionImageTitle = selectedInspection
         ? TranslateText('Selected inspection')
@@ -107,13 +106,27 @@ const DataViewContent = ({
         ? TranslateText('Selected analysis result')
         : TranslateText('Latest analysis result')
 
+    // The table shall only show one line per tag
+    // Assumes it is already sorted
+    const uniqueTagInspectionData = useMemo(() => {
+        const tagToInspectionMap = new Map<string, InspectionData>()
+        inspectionData.forEach((inspection) => {
+            if (!tagToInspectionMap.has(inspection.tag)) {
+                tagToInspectionMap.set(inspection.tag, inspection)
+            } else if (tagToInspectionMap.get(inspection.tag)!.value == null && inspection.value != null) {
+                tagToInspectionMap.set(inspection.tag, inspection)
+            }
+        })
+        return Array.from(tagToInspectionMap.values())
+    }, [inspectionData])
+
     return (
         <StyledPage>
             <Typography variant="h2">{TranslateText(pageTitle)}</Typography>
             <WhiteBackgroundBand>
                 <StyledTableAndMap>
                     <DataViewTable
-                        inspectionData={inspectionData}
+                        uniqueTagInspectionData={uniqueTagInspectionData}
                         selectedInspectionId={selectedInspectionId}
                         onSelectInspection={(inspectionId) => setSelectedInspectionId(inspectionId)}
                     />
@@ -123,7 +136,7 @@ const DataViewContent = ({
                                 key={selectedInspectionId ?? 'all'}
                                 plantCode={plantCode}
                                 floorId="0"
-                                inspections={inspectionData}
+                                inspections={uniqueTagInspectionData}
                             />
                         </DataViewMapWrapper>
                     ) : (
