@@ -60,7 +60,7 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
     useEffect(() => {
         if (connectionReady) {
             registerEvent(SignalREventLabels.inspectionVisualizationReady, (username: string, message: string) => {
-                const inspectionId: string = JSON.parse(message)
+                const { inspectionId } = JSON.parse(message)
                 queryClient.invalidateQueries({
                     queryKey: ['fetchInspectionData', inspectionId],
                 })
