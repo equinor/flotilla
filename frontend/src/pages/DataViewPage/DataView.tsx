@@ -9,7 +9,6 @@ import {
     TimeseriesLinePlotDataPoint,
 } from 'components/Displays/TimeseriesLinePlot'
 import { InspectionsPlantMap } from 'pages/MissionPage/MapPosition/PointillaMapView'
-import { AnalysisOverviewSection, InspectionOverviewSection } from 'pages/InspectionReportPage/ImageOverview'
 import {
     InspectionImageWithPlaceholder,
     PendingResultPlaceholder,
@@ -197,12 +196,6 @@ const DataViewContent = ({
                     <Typography>{TranslateText('No data available in the selected time range')}</Typography>
                 )}
             </DataViewChartArea>
-            {!selectedInspectionId && (
-                <WhiteBackgroundBand>
-                    <InspectionOverviewSection inspectionData={inspectionData} />
-                    <AnalysisOverviewSection inspectionData={inspectionData} />
-                </WhiteBackgroundBand>
-            )}
             {inspectionId && !selectedInspectionId && (
                 <InspectionDialogView selectedInspectionId={inspectionId} inspectionData={inspectionData} />
             )}
