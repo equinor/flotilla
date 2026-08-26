@@ -326,7 +326,27 @@ namespace Api.Database.Context
                 Name = "Constant Level Oiler Mission",
                 InstallationCode = inspectionAreas[5].Installation.InstallationCode,
                 InspectionArea = inspectionAreas[5],
-                Tasks = [GetMissionTaskDefinitions()[1]],
+                Tasks =
+                [
+                    new TaskDefinition
+                    {
+                        TagId = "cloe-tag-1",
+                        Description = "CLOE tag 1",
+                        RobotPose = new Pose(),
+                        AnalysisTypes = [AnalysisType.CLOE],
+                        SensorType = SensorType.Image,
+                        TargetPosition = new Position(),
+                    },
+                    new TaskDefinition
+                    {
+                        TagId = "cloe-tag-2",
+                        Description = "CLOE tag 2",
+                        RobotPose = new Pose(),
+                        AnalysisTypes = [AnalysisType.CLOE],
+                        SensorType = SensorType.Image,
+                        TargetPosition = new Position(),
+                    },
+                ],
                 LastSuccessfulRun = null,
             };
 
