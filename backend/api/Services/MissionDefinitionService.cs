@@ -103,8 +103,7 @@ namespace Api.Services
             var filter = ConstructFilter(parameters);
 
             query = query.Where(filter);
-
-            SearchByName(ref query, parameters.NameSearch);
+            // TODO: compare to other filters
 
             SortingService.ApplySort(ref query, parameters.OrderBy);
 
@@ -276,25 +275,11 @@ namespace Api.Services
             return readOnly ? query.AsNoTracking() : query.AsTracking();
         }
 
-        private static void SearchByName(
-            ref IQueryable<MissionDefinition> missionDefinitions,
-            string? name
-        )
-        {
-            if (!missionDefinitions.Any() || string.IsNullOrWhiteSpace(name))
-                return;
-
-#pragma warning disable CA1862
-            missionDefinitions = missionDefinitions.Where(missionDefinition =>
-                missionDefinition.Name != null && missionDefinition.Name.Contains(name.Trim())
-            );
-#pragma warning restore CA1862
-        }
-
         /// <summary>
         ///     Filters by <see cref="MissionDefinitionQueryStringParameters.InstallationCode" />
         ///     and <see cref="MissionDefinitionQueryStringParameters.InspectionArea" />
         ///     and <see cref="MissionDefinitionQueryStringParameters.NameSearch" />
+        ///     and <see cref="MissionDefinitionQueryStringParameters.AnalysisTypes" />
         ///     <para>
         ///         Uses LINQ Expression trees (see
         ///         <seealso href="https://docs.microsoft.com/en-us/dotnet/csharp/expression-trees" />)
@@ -322,13 +307,34 @@ namespace Api.Services
                             .InstallationCode.ToLower()
                             .Equals(parameters.InstallationCode.Trim().ToLower());
 
+            Expression<Func<MissionDefinition, bool>> nameFilter = parameters.NameSearch is null
+                ? missionDefinition => true
+                : missionDefinition =>
+                    missionDefinition.Name != null
+                    && missionDefinition.Name.Contains(parameters.NameSearch.Trim());
+
+            Expression<Func<MissionDefinition, bool>> analysisTypesFilter = parameters.AnalysisTypes
+                is null
+                ? missionDefinition => true
+                : missionDefinition =>
+                    missionDefinition.Tasks != null
+                    && missionDefinition
+                        .Tasks.SelectMany((t) => t.AnalysisTypes)
+                        .Any((a) => parameters.AnalysisTypes.Contains(a));
+
             // The parameter of the filter expression
             var missionDefinitionExpression = Expression.Parameter(typeof(MissionDefinition));
 
             // Combining the body of the filters to create the combined filter, using invoke to force parameter substitution
             Expression body = Expression.AndAlso(
                 Expression.Invoke(installationFilter, missionDefinitionExpression),
-                Expression.Invoke(inspectionAreaFilter, missionDefinitionExpression)
+                Expression.AndAlso(
+                    Expression.Invoke(inspectionAreaFilter, missionDefinitionExpression),
+                    Expression.AndAlso(
+                        Expression.Invoke(nameFilter, missionDefinitionExpression),
+                        Expression.Invoke(analysisTypesFilter, missionDefinitionExpression)
+                    )
+                )
             );
 
             // Constructing the resulting lambda expression by combining parameter and body

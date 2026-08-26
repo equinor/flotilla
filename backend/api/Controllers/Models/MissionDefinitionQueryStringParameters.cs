@@ -1,4 +1,6 @@
-﻿namespace Api.Controllers.Models
+﻿using Api.Database.Models;
+
+namespace Api.Controllers.Models
 {
     public class MissionDefinitionQueryStringParameters : QueryStringParameters
     {
@@ -22,5 +24,10 @@
         /// The search parameter for the mission name
         /// </summary>
         public string? NameSearch { get; set; }
+
+        /// <summary>
+        /// The search parameter for the task analysis types
+        /// </summary>
+        public IList<AnalysisType>? AnalysisTypes { get; set; }
     }
 }
