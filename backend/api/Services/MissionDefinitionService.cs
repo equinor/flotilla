@@ -103,7 +103,6 @@ namespace Api.Services
             var filter = ConstructFilter(parameters);
 
             query = query.Where(filter);
-            // TODO: compare to other filters
 
             SortingService.ApplySort(ref query, parameters.OrderBy);
 
