@@ -70,24 +70,33 @@ if [ -f $flotilla_dir/broker/.env ]; then
     fi
 fi
 if [ "$broker_abort" != "true" ]; then
-    echo -e "Broker server key needed for broker dockerization."
-    echo -en "Input MQTT broker server key (copy-paste from KeyVault):\n"
+    # Local development gets its own throwaway credentials. Nothing here is
+    # shared with a deployed environment, so a laptop cannot leak one.
+    credentials_dir=$flotilla_dir/broker/.local-credentials
+    echo -e "Generating local broker credentials in $credentials_dir ..."
 
-    while [ true ]
-    do
-        read -s broker_server_key
+    rm -rf "$credentials_dir"
+    $flotilla_dir/broker/scripts/generate-mqtt-credentials.sh \
+        -o "$credentials_dir" broker localhost host.docker.internal IP:127.0.0.1 > /dev/null
 
-        if [ -z "$broker_server_key" ]; then
-            echo "Flotilla broker server key cannot be empty"
-            echo "Try again:"
-        else
-            break
-        fi
-    done
+    # docker compose reads broker/.env through env_file, which cannot hold a
+    # multi-line value, so the PEM bodies go in on a single line. The broker
+    # reassembles them; see broker/entrypoint.sh.
+    pem_body() {
+        grep -v -- '-----' "$1" | tr -d '\n'
+    }
 
+    {
+        echo "TLS_SERVER_KEY='$(pem_body "$credentials_dir/server-key.pem")'"
+        echo "TLS_SERVER_CERT='$(pem_body "$credentials_dir/server-cert.pem")'"
+        echo "TLS_CA_CERT='$(pem_body "$credentials_dir/ca-cert.pem")'"
+        cat "$credentials_dir/mqtt-passwords.env"
+    } > $flotilla_dir/broker/.env
 
-    echo "TLS_SERVER_KEY='$broker_server_key'" > $flotilla_dir/broker/.env
-    echo -e "Created broker/.env file with the broker server key"
+    echo -e "Created broker/.env with freshly generated local credentials"
+    echo -e "\nThe backend connects as the 'flotilla' user. Put its password in the"
+    echo -e "ASP.NET Secret Manager as Mqtt:Password:\n"
+    echo -e "  cd backend/api && dotnet user-secrets set \"Mqtt:Password\" \"$(sed -n 's/^flotilla=//p' "$credentials_dir/passwords")\"\n"
 
     echo -e "Broker setup - Done!"
     echo -e "-----------------------------\n"
