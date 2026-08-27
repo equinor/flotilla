@@ -39,6 +39,7 @@ jobs:
       image_name: robotics/flotilla-${{ matrix.component }}
       tag: "dev.${{ needs.get-short-sha.outputs.tag }}"
       secondary_tag: dev
+      push_to_ghcr: true
       path_to_dockerfile: ${{ matrix.component}}/Dockerfile
       path_to_context: ./${{ matrix.component}}
     secrets:

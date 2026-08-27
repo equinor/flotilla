@@ -40,6 +40,7 @@ jobs:
       image_name: robotics/flotilla-${{ matrix.component }}
       tag: ${{ github.event.release.tag_name }}
       secondary_tag: latest
+      push_to_ghcr: true
       path_to_dockerfile: ${{ matrix.component}}/Dockerfile
       path_to_context: ./${{ matrix.component}}
     secrets:
