@@ -18,6 +18,7 @@ import { useInspectionId } from 'pages/InspectionReportPage/SetInspectionIdHook'
 import { AnalysisOverviewDialogView } from 'pages/InspectionReportPage/ImageOverview'
 import { InspectionData } from 'models/InspectionRecord'
 import { AnalysisFeedback } from './AnalysisFeedback'
+import { AnalysisValueDisplay } from 'components/Displays/TaskDisplay'
 
 interface InspectionDialogViewProps {
     selectedInspectionId: string
@@ -73,7 +74,11 @@ export const AnalysisResultDialogContent = ({ inspection }: { inspection: Inspec
                 {inspection?.value && (
                     <StyledInfoContent>
                         <Typography variant="caption">{TranslateText('Value') + ':'}</Typography>
-                        <Typography variant="body_short">{inspection.value}</Typography>
+                        <AnalysisValueDisplay
+                            value={inspection.value}
+                            unit={inspection.unit}
+                            analysisType={inspection.analysisType}
+                        />
                     </StyledInfoContent>
                 )}
                 {inspection?.confidence !== undefined && inspection?.confidence !== null && (

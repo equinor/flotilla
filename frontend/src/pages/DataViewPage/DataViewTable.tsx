@@ -2,23 +2,9 @@ import { Chip, Table, Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { StyledTable, StyledTableCell } from 'components/Styles/StyledComponents'
-import { DescriptionDisplay, TagIdDisplay } from 'components/Displays/TaskDisplay'
+import { AnalysisValueDisplay, DescriptionDisplay, TagIdDisplay } from 'components/Displays/TaskDisplay'
 import { formatDateTime } from 'utils/StringFormatting'
 import { InspectionData } from 'models/InspectionRecord'
-
-const unitDisplaySymbols: Record<string, string> = {
-    celsius: '°C',
-    percentage: '%',
-}
-
-const formatUnit = (unit?: string): string => {
-    if (!unit) return ''
-    const normalizedUnit = unit
-        .toLowerCase()
-        .replace(/\s*\[.*\]\s*/, '')
-        .trim()
-    return unitDisplaySymbols[normalizedUnit] ?? unit
-}
 
 export const DataViewTable = ({
     uniqueTagInspectionData,
@@ -74,9 +60,11 @@ export const DataViewTable = ({
                                 </Table.Cell>
                                 {inspection.value ? (
                                     <Table.Cell>
-                                        <Typography>
-                                            {Math.round(parseFloat(inspection.value)) + formatUnit(inspection.unit)}
-                                        </Typography>
+                                        <AnalysisValueDisplay
+                                            value={inspection.value}
+                                            unit={inspection.unit}
+                                            analysisType={inspection.analysisType}
+                                        />
                                     </Table.Cell>
                                 ) : (
                                     <Table.Cell>
