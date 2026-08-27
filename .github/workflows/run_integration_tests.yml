@@ -1,10 +1,15 @@
 name: Run integration tests
 
+# Chained off the deploy workflows rather than triggered directly by push or
+# release. Both used to fire on the same event, so the tests started while the
+# images were still building and pulled the previous :dev or :latest image.
+#
+# The names below must match the `name:` of deploy_to_development.yml and
+# deploy_to_staging.yml. Renaming either one silently breaks this chain.
 on:
-  push:
-    branches: [ main ]
-  release:
-    types: [ published ]
+  workflow_run:
+    workflows: ["Deploy to Development", "Deploy to Staging"]
+    types: [completed]
   workflow_dispatch:
     inputs:
       lane:
@@ -16,15 +21,21 @@ permissions:
   contents: read
   packages: read
 
+concurrency:
+  group: integration-tests-${{ github.event.workflow_run.name || inputs.lane }}
+  cancel-in-progress: true
+
 jobs:
   run-integration-tests:
+    # A cancelled or failed deploy leaves the registry tag pointing at the
+    # previous image, which is exactly what this workflow must not test.
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     uses: equinor/armada/.github/workflows/run_integration_tests.yml@main
     with:
-      # Pick lane automatically based on event, or honor manual input
-      lane: ${{ github.event_name == 'push' && 'dev'
-            || github.event_name == 'release' && 'latest'
-            || github.event_name == 'workflow_dispatch' && inputs.lane
-            || 'latest' }}
+      # Pick lane from the deploy workflow that triggered us, or honor manual input
+      lane: ${{ github.event_name == 'workflow_run'
+            && (github.event.workflow_run.name == 'Deploy to Development' && 'dev' || 'latest')
+            || inputs.lane }}
 
     secrets:
       INTEGRATION_TEST_AZURE_CLIENT_SECRET: ${{ secrets.INTEGRATION_TEST_AZURE_CLIENT_SECRET }}
