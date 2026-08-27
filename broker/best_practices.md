@@ -71,4 +71,9 @@ that environment's key vault. See the [README](./README.md#minting-credentials-f
 
 The certificates committed to [mosquitto/config/certs](./mosquitto/config/certs) are the
 fallback used when `TLS_SERVER_CERT` and `TLS_CA_CERT` are not set. They are being phased out
-in favour of per-environment credentials.
+in favour of per-environment credentials, and every environment that has been migrated sets
+`MQTT_REQUIRE_ENV_CREDENTIALS=true` so it can never quietly fall back to them. Once all three
+environments are migrated, delete them and the committed `passwd_file`.
+
+The older shared-certificate flow, where one CA covered every environment and was regenerated
+with `cert_gen.sh` in `equinor/eq_robot_utility_scripts`, is retired. Do not use it.
