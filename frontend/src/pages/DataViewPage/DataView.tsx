@@ -32,6 +32,7 @@ import { useInspectionsContext } from 'components/Contexts/InspectionsContext'
 import { AnalysisType } from 'models/MissionDefinition'
 import { InspectionData } from 'models/InspectionRecord'
 import { useAssetContext } from 'components/Contexts/AssetContext'
+import { saraAnalysisTypeToEnum } from 'models/SaraAnalysisTypeMapping'
 
 interface DataViewProps {
     analysisType: AnalysisType
@@ -89,9 +90,14 @@ const DataViewContent = ({
             if (inspection.value == null || inspection.value === '' || !sampleTimestamp) return
             if (selectedInspection && tagId !== selectedInspection.tag) return
             if (!Object.hasOwn(plotData, tagId)) plotData[tagId] = []
+
+            const value: number =
+                saraAnalysisTypeToEnum(inspection.analysisType) === AnalysisType.CLOE
+                    ? parseFloat(inspection.value) * 100
+                    : parseFloat(inspection.value)
             plotData[tagId].push({
                 time: sampleTimestamp,
-                value: parseFloat(inspection.value),
+                value: value,
                 inspectionId: inspection.inspectionId,
             })
         })

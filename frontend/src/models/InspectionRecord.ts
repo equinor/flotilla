@@ -27,6 +27,7 @@ interface AnalysisRun {
 interface Analysis {
     id: string
     name: string
+    analysisType: string
     createdAt: string
     anonymizedSAS?: string
     visualizedSAS?: string
@@ -118,7 +119,7 @@ export const inspectionRecordToInspectionData = (record: InspectionRecord): Insp
         feedback: latestRun?.feedback ?? undefined,
         visualizedSAS: analysis.visualizedSAS,
         anonymizedSAS: analysis.anonymizedSAS,
-        analysisType: record.inspectionType,
+        analysisType: analysis.analysisType,
         tag: record.tag,
         createdAt: record.createdAt,
         targetPosition: record.targetPosition,

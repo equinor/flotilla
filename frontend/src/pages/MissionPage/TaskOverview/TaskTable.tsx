@@ -1,15 +1,21 @@
-import { Button, Chip, Table, Typography } from '@equinor/eds-core-react'
+import { Button, Chip, Icon, Table, Typography } from '@equinor/eds-core-react'
 import { TaskStatusDisplay } from './TaskStatusDisplay'
-import { TaskAnalysisDisplay } from './TaskAnalysisDisplay'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { Task, TaskStatus, ValidInspectionReportInspectionTypes } from 'models/Task'
+import { Task, TaskStatus } from 'models/Task'
 import { tokens } from '@equinor/eds-tokens'
 import { getColorsFromTaskStatus } from 'utils/MarkerStyles'
 import { useInspectionId } from 'pages/InspectionReportPage/SetInspectionIdHook'
-import { DescriptionDisplay, TagIdDisplay } from 'components/Displays/TaskDisplay'
+import { AnalysisValueDisplay, DescriptionDisplay, TagIdDisplay } from 'components/Displays/TaskDisplay'
 import { StyledTable, StyledTableBody, StyledTableCell, StyledTableRow } from 'components/Styles/StyledComponents'
+import styled from 'styled-components'
 import { MissionTaskDefinition } from 'models/MissionDefinition'
 import { InspectionData } from 'models/InspectionRecord'
+import { Icons } from 'utils/icons'
+
+const IconWithLabel = styled.div`
+    display: flex;
+    align-items: center;
+`
 
 export interface TaskAndData {
     task: Task
@@ -34,7 +40,7 @@ export const TaskTable = ({ tasksAndData }: TaskTableProps) => {
                     <StyledTableCell>#</StyledTableCell>
                     <StyledTableCell>{TranslateText('Tag-ID')}</StyledTableCell>
                     <StyledTableCell>{TranslateText('Description')}</StyledTableCell>
-                    <StyledTableCell>{TranslateText('Inspection Types')}</StyledTableCell>
+                    <StyledTableCell>{TranslateText('Sensor Types')}</StyledTableCell>
                     <StyledTableCell>{TranslateText('Status')}</StyledTableCell>
                     <StyledTableCell>{TranslateText('Analysis')}</StyledTableCell>
                 </Table.Row>
@@ -43,7 +49,7 @@ export const TaskTable = ({ tasksAndData }: TaskTableProps) => {
                 {tasksAndData &&
                     tasksAndData.map((taskAndData, index) => (
                         <TaskTableRow
-                            key={taskAndData.task.id + 'tasktable'}
+                            key={taskAndData.task.id}
                             task={taskAndData.task}
                             inspectionData={taskAndData.data}
                             index={index}
@@ -51,6 +57,74 @@ export const TaskTable = ({ tasksAndData }: TaskTableProps) => {
                     ))}
             </StyledTableBody>
         </StyledTable>
+    )
+}
+
+const TaskTableRow = ({
+    task,
+    inspectionData,
+    index,
+}: {
+    task: Task
+    inspectionData: InspectionData | undefined
+    index: number
+}) => {
+    const { TranslateText } = useLanguageContext()
+    const { switchSelectedInspectionId, switchSelectedAnalysisId } = useInspectionId()
+
+    const rowStyle =
+        task.status === TaskStatus.InProgress || task.status === TaskStatus.Paused
+            ? { background: tokens.colors.infographic.primary__mist_blue.hex }
+            : inspectionData?.warning
+              ? { background: tokens.colors.interactive.danger__highlight.hex }
+              : {}
+    const markerColors = getColorsFromTaskStatus(task.status)
+
+    return (
+        <StyledTableRow style={rowStyle}>
+            <Table.Cell>
+                <Chip style={{ background: markerColors.fillColor }}>
+                    <Typography variant="body_short_bold" style={{ color: markerColors.textColor }}>
+                        {index + 1}
+                    </Typography>
+                </Chip>
+            </Table.Cell>
+            <Table.Cell>
+                <TagIdDisplay tagId={task.tagId} index={index} />
+            </Table.Cell>
+            <Table.Cell>
+                <DescriptionDisplay description={task.description} index={index} />
+            </Table.Cell>
+            <Table.Cell>
+                <IconWithLabel>
+                    <Typography>{TranslateText(task.sensorType as string)}</Typography>
+                    {inspectionData && inspectionData.anonymizedSAS && (
+                        <Button variant="ghost_icon" onClick={() => switchSelectedInspectionId(task.id)}>
+                            <Icon name={Icons.Image}></Icon>
+                        </Button>
+                    )}
+                </IconWithLabel>
+            </Table.Cell>
+            <Table.Cell>
+                <TaskStatusDisplay status={task.status} errorMessage={task.errorDescription} />
+            </Table.Cell>
+            <Table.Cell>
+                <IconWithLabel>
+                    {inspectionData && inspectionData.value && (
+                        <AnalysisValueDisplay
+                            value={inspectionData.value}
+                            unit={inspectionData.unit}
+                            analysisType={inspectionData.analysisType}
+                        />
+                    )}
+                    {inspectionData && inspectionData.visualizedSAS && (
+                        <Button variant="ghost_icon" onClick={() => switchSelectedAnalysisId(task.id)}>
+                            <Icon name={Icons.Image}></Icon>
+                        </Button>
+                    )}
+                </IconWithLabel>
+            </Table.Cell>
+        </StyledTableRow>
     )
 }
 
@@ -68,56 +142,6 @@ export const MissionDefinitionTaskTable = ({ tasks }: MissionDefinitionTaskTable
             </Table.Head>
             <StyledTableBody>{tasks && <MissionDefinitionTaskTableRows tasks={tasks} />}</StyledTableBody>
         </StyledTable>
-    )
-}
-
-const TaskTableRow = ({
-    task,
-    inspectionData,
-    index,
-}: {
-    task: Task
-    inspectionData: InspectionData | undefined
-    index: number
-}) => {
-    const order: number = index + 1
-    const rowStyle =
-        task.status === TaskStatus.InProgress || task.status === TaskStatus.Paused
-            ? { background: tokens.colors.infographic.primary__mist_blue.hex }
-            : inspectionData?.warning
-              ? { background: tokens.colors.interactive.danger__highlight.hex }
-              : {}
-    const markerColors = getColorsFromTaskStatus(task.status)
-
-    return (
-        <StyledTableRow key={task.id} style={rowStyle}>
-            <Table.Cell>
-                <Chip style={{ background: markerColors.fillColor }}>
-                    <Typography variant="body_short_bold" style={{ color: markerColors.textColor }}>
-                        {order}
-                    </Typography>
-                </Chip>
-            </Table.Cell>
-            <Table.Cell>
-                <TagIdDisplay tagId={task.tagId} index={index} />
-            </Table.Cell>
-            <Table.Cell>
-                <DescriptionDisplay description={task.description} index={index} />
-            </Table.Cell>
-            <Table.Cell>
-                <InspectionTypesDisplay task={task} />
-            </Table.Cell>
-            <Table.Cell>
-                <TaskStatusDisplay status={task.status} errorMessage={task.errorDescription} />
-            </Table.Cell>
-            <Table.Cell>
-                {inspectionData && (inspectionData.visualizedSAS || inspectionData.value) ? (
-                    <TaskAnalysisDisplay inspectionData={inspectionData} />
-                ) : (
-                    <></>
-                )}
-            </Table.Cell>
-        </StyledTableRow>
     )
 }
 
@@ -142,30 +166,4 @@ const MissionDefinitionTaskTableRows = ({ tasks }: MissionDefinitionTaskTablePro
         )
     })
     return <>{rows}</>
-}
-
-interface InspectionTypesDisplayProps {
-    task: Task
-}
-
-const InspectionTypesDisplay = ({ task }: InspectionTypesDisplayProps) => {
-    const { TranslateText } = useLanguageContext()
-    const { switchSelectedInspectionId } = useInspectionId()
-
-    return (
-        <>
-            {ValidInspectionReportInspectionTypes.includes(task.sensorType) && task.status === TaskStatus.Successful ? (
-                <Button
-                    key={task.id + task.id + 'insp'}
-                    variant="ghost"
-                    onClick={() => switchSelectedInspectionId(task.id)}
-                    style={{ padding: 0 }}
-                >
-                    <Typography variant="body_short_link">{TranslateText(task.sensorType as string)}</Typography>
-                </Button>
-            ) : (
-                <Typography key={task.id + task.id + 'insp'}>{TranslateText(task.sensorType as string)}</Typography>
-            )}
-        </>
-    )
 }
