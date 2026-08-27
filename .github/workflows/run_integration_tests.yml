@@ -36,6 +36,3 @@ jobs:
       lane: ${{ github.event_name == 'workflow_run'
             && (github.event.workflow_run.name == 'Deploy to Development' && 'dev' || 'latest')
             || inputs.lane }}
-
-    secrets:
-      INTEGRATION_TEST_AZURE_CLIENT_SECRET: ${{ secrets.INTEGRATION_TEST_AZURE_CLIENT_SECRET }}
