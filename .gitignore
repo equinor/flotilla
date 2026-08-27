@@ -20,6 +20,7 @@ backend/backend.sln.DotSettings.user
 
 # Broker
 broker/mosquitto/config/certs/server-key.pem
+broker/.local-credentials/
 *.DS_Store
 
 # Local missions
