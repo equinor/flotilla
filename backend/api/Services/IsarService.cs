@@ -13,7 +13,7 @@ namespace Api.Services
 
         public Task ReturnHome(Robot robot);
 
-        public Task StopMission(Robot robot, string? missionId = "");
+        public Task StopMission(Robot robot);
 
         public Task PauseMission(Robot robot);
 
@@ -137,7 +137,7 @@ namespace Api.Services
             }
         }
 
-        public async Task StopMission(Robot robot, string? missionId = "")
+        public async Task StopMission(Robot robot)
         {
             logger.LogInformation(
                 "Stopping mission on robot '{Id}' on ISAR at '{Uri}'",
@@ -145,13 +145,11 @@ namespace Api.Services
                 robot.IsarUri
             );
 
-            var content = new { mission_id = new IsarStopMissionDefinition(missionId) };
-
             var response = await CallApi(
                 HttpMethod.Post,
                 robot.IsarUri,
                 "schedule/stop-mission",
-                content
+                null
             );
 
             if (response.StatusCode == HttpStatusCode.Conflict)
@@ -169,10 +167,6 @@ namespace Api.Services
                     response
                 );
                 string errorResponse = await response.Content.ReadAsStringAsync();
-                if (response.StatusCode == HttpStatusCode.NotFound)
-                {
-                    logger.LogError($"No mission found for the mission_id sent: {missionId}");
-                }
                 if (response.StatusCode == HttpStatusCode.Conflict)
                 {
                     logger.LogError("No mission found to stop");
