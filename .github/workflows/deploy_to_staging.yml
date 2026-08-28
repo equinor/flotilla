@@ -44,6 +44,12 @@ jobs:
       push_to_ghcr: true
       path_to_dockerfile: ${{ matrix.component}}/Dockerfile
       path_to_context: ./${{ matrix.component}}
+      # Authenticate to the registry with a federated credential instead
+      # of the registry password. The environment below is what the OIDC
+      # subject binds to on the Azure side.
+      environment: Staging
+      use_oidc: true
+      azure_subscription_id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
     secrets:
       registry_password: ${{ secrets.ROBOTICS_ROBOTICSSTAGINGACR_PASSWORD }}
       registry_username: ${{ secrets.ROBOTICS_ROBOTICSSTAGINGACR_USERNAME }}
