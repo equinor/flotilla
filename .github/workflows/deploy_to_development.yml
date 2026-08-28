@@ -34,7 +34,7 @@ jobs:
     strategy:
       matrix:
         component: [broker, backend, frontend]
-    uses: equinor/armada/.github/workflows/build_and_publish_docker_image_to_container_registry.yml@main
+    uses: Christdej/armada/.github/workflows/build_and_publish_docker_image_to_container_registry.yml@bisect/b-env-nonempty
     with:
       registry: roboticsdevacr.azurecr.io
       image_name: robotics/flotilla-${{ matrix.component }}
@@ -43,12 +43,6 @@ jobs:
       push_to_ghcr: true
       path_to_dockerfile: ${{ matrix.component}}/Dockerfile
       path_to_context: ./${{ matrix.component}}
-      # Authenticate to the registry with a federated credential instead
-      # of the registry password. The environment below is what the OIDC
-      # subject binds to on the Azure side.
-      environment: Development
-      use_oidc: true
-      azure_subscription_id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
     secrets:
       registry_password: ${{ secrets.ROBOTICS_ROBOTICSDEVACR_PASSWORD }}
       registry_username: ${{ secrets.ROBOTICS_ROBOTICSDEVACR_USERNAME }}
