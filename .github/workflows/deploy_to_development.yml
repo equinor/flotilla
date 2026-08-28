@@ -34,7 +34,7 @@ jobs:
     strategy:
       matrix:
         component: [broker, backend, frontend]
-    uses: equinor/armada/.github/workflows/build_and_publish_docker_image_to_container_registry.yml@main
+    uses: Christdej/armada/.github/workflows/build_and_publish_docker_image_to_container_registry.yml@bisect/b-env-nonempty
     with:
       registry: roboticsdevacr.azurecr.io
       image_name: robotics/flotilla-${{ matrix.component }}
