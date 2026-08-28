@@ -352,5 +352,7 @@
     "Sending feedback": "Sending feedback...",
     "Failed to send feedback": "Feedback could not be sent. Please try again.",
     "Feedback sent": "Feedback sent",
-    "Thank you for helping us improve Flotilla.": "Thank you for helping us improve Flotilla."
+    "Thank you for helping us improve Flotilla.": "Thank you for helping us improve Flotilla.",
+    "Finding": "Finding",
+    "No finding": "No finding"
 }
