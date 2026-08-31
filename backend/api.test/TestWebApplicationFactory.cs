@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Api.Database.Context;
 using Api.Services;
@@ -15,8 +16,10 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Api.Test
 {
-    public class TestWebApplicationFactory<TProgram>(string? postgresConnectionString = null)
-        : WebApplicationFactory<Program>
+    public class TestWebApplicationFactory<TProgram>(
+        string? postgresConnectionString = null,
+        Action<IServiceCollection>? configureTestServices = null
+    ) : WebApplicationFactory<Program>
         where TProgram : class
     {
         public IConfiguration? Configuration;
@@ -83,6 +86,7 @@ namespace Api.Test
                         TestAuthHandler.AuthenticationScheme,
                         options => { }
                     );
+                configureTestServices?.Invoke(services);
             });
         }
     }

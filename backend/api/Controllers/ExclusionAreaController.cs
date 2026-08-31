@@ -42,7 +42,7 @@ namespace Api.Controllers
             catch (Exception e)
             {
                 logger.LogError(e, "Error during GET of exclusion areas from database");
-                throw;
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
 
@@ -77,7 +77,7 @@ namespace Api.Controllers
             catch (Exception e)
             {
                 logger.LogError(e, "Error during GET of exclusion areas from database");
-                throw;
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
 
@@ -106,7 +106,7 @@ namespace Api.Controllers
             catch (Exception e)
             {
                 logger.LogError(e, "Error during GET of exclusion area from database");
-                throw;
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
 
@@ -158,6 +158,7 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<ActionResult<ExclusionAreaResponse>> Create(
             [FromBody] CreateExclusionAreaQuery exclusionArea
@@ -221,6 +222,21 @@ namespace Api.Controllers
             {
                 logger.LogError(e, "Invalid polygon");
                 return BadRequest("Invalid polygon");
+            }
+            catch (InstallationNotFoundException e)
+            {
+                logger.LogWarning(e, "Installation not found while creating an exclusion area");
+                return NotFound();
+            }
+            catch (PlantNotFoundException e)
+            {
+                logger.LogWarning(e, "Plant not found while creating an exclusion area");
+                return NotFound();
+            }
+            catch (ExclusionAreaExistsException e)
+            {
+                logger.LogWarning(e, "Exclusion area already exists");
+                return Conflict();
             }
             catch (Exception e)
             {

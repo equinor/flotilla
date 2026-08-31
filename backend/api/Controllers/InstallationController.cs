@@ -36,7 +36,7 @@ namespace Api.Controllers
             catch (Exception e)
             {
                 logger.LogError(e, "Error during GET of installations from database");
-                throw;
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
 
@@ -63,7 +63,7 @@ namespace Api.Controllers
             catch (Exception e)
             {
                 logger.LogError(e, "Error during GET of installation from database");
-                throw;
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
 
@@ -113,7 +113,7 @@ namespace Api.Controllers
             catch (Exception e)
             {
                 logger.LogError(e, "Error while creating new installation");
-                throw;
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
 

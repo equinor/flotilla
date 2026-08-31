@@ -13,6 +13,7 @@ using Api.Test.Mocks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Testcontainers.PostgreSql;
@@ -71,10 +72,14 @@ public static class TestSetupHelpers
     }
 
     public static TestWebApplicationFactory<Program> ConfigureWebApplicationFactory(
-        string? postgreSqlConnectionString = null
+        string? postgreSqlConnectionString = null,
+        Action<IServiceCollection>? configureTestServices = null
     )
     {
-        return new TestWebApplicationFactory<Program>(postgreSqlConnectionString);
+        return new TestWebApplicationFactory<Program>(
+            postgreSqlConnectionString,
+            configureTestServices
+        );
     }
 
     public static HttpClient ConfigureHttpClient(TestWebApplicationFactory<Program> factory)

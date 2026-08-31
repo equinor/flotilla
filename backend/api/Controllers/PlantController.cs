@@ -1,6 +1,7 @@
 ﻿using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
+using Api.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -37,7 +38,7 @@ namespace Api.Controllers
             catch (Exception e)
             {
                 logger.LogError(e, "Error during GET of plants from database");
-                throw;
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
 
@@ -64,7 +65,7 @@ namespace Api.Controllers
             catch (Exception e)
             {
                 logger.LogError(e, "Error during GET of plant from database");
-                throw;
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
 
@@ -80,6 +81,7 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<Plant>> Create([FromBody] CreatePlantQuery plant)
         {
@@ -114,10 +116,15 @@ namespace Api.Controllers
                 );
                 return CreatedAtAction(nameof(GetPlantById), new { id = newPlant.Id }, newPlant);
             }
+            catch (InstallationNotFoundException e)
+            {
+                logger.LogWarning(e, "Installation not found while creating a plant");
+                return NotFound();
+            }
             catch (Exception e)
             {
                 logger.LogError(e, "Error while creating new plant");
-                throw;
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
 
