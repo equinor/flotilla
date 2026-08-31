@@ -50,9 +50,6 @@ jobs:
       environment: Staging
       use_oidc: true
       azure_subscription_id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-    secrets:
-      registry_password: ${{ secrets.ROBOTICS_ROBOTICSSTAGINGACR_PASSWORD }}
-      registry_username: ${{ secrets.ROBOTICS_ROBOTICSSTAGINGACR_USERNAME }}
 
   deploy:
     name: Update deployment in Staging
