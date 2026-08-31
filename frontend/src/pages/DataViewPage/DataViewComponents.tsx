@@ -23,6 +23,7 @@ export const WhiteBackgroundBand = styled.div`
 export const TimeRangeToggle = styled.div`
     display: inline-flex;
     align-self: flex-start;
+    flex-wrap: wrap;
     gap: 4px;
     padding: 4px;
     border-radius: 6px;
@@ -30,6 +31,20 @@ export const TimeRangeToggle = styled.div`
 `
 export const TimeRangeToggleButton = styled(Button)`
     border-radius: 4px;
+`
+export const CustomTimeRangeForm = styled.div`
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 12px;
+    max-width: 600px;
+`
+export const CustomTimeRangeField = styled.div`
+    flex: 1 1 180px;
+`
+export const CustomTimeRangeError = styled.div`
+    color: ${tokens.colors.interactive.danger__text.hex};
+    min-height: 20px;
 `
 export const DataViewChartArea = styled.div`
     display: flex;

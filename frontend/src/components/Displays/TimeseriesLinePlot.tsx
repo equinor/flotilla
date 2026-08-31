@@ -110,6 +110,10 @@ export const TimeseriesLinePlot = ({ data, yLabel, ymin, ymax, onPointClick, sel
                             year: 'yyyy',
                         },
                     },
+                    ticks: {
+                        autoSkip: true,
+                        maxTicksLimit: 21,
+                    },
                     title: {
                         display: true,
                         text: 'Time',
