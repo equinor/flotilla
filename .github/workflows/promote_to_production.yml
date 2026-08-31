@@ -80,11 +80,6 @@ jobs:
       use_oidc: true
       environment: Production
       azure_subscription_id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-    secrets:
-      source_registry_username: ${{ secrets.ROBOTICS_ROBOTICSSTAGINGACR_USERNAME }}
-      source_registry_password: ${{ secrets.ROBOTICS_ROBOTICSSTAGINGACR_PASSWORD }}
-      destination_registry_username: ${{ secrets.ROBOTICS_ROBOTICSPRODACR_USERNAME }}
-      destination_registry_password: ${{ secrets.ROBOTICS_ROBOTICSPRODACR_PASSWORD }}
 
   deploy:
     name: Update deployment in Production
