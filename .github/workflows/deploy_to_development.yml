@@ -49,9 +49,6 @@ jobs:
       environment: Development
       use_oidc: true
       azure_subscription_id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-    secrets:
-      registry_password: ${{ secrets.ROBOTICS_ROBOTICSDEVACR_PASSWORD }}
-      registry_username: ${{ secrets.ROBOTICS_ROBOTICSDEVACR_USERNAME }}
 
   deploy:
     name: Update deployment in Development
