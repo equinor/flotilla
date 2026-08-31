@@ -73,6 +73,13 @@ jobs:
       destination_registry: roboticsprodacr.azurecr.io
       image_name: robotics/flotilla-${{ matrix.component }}
       tag: ${{ needs.get_staging_version.outputs.versionTag }}
+      # Authenticate to both registries with a federated credential
+      # instead of the registry passwords. The identity holds AcrPull
+      # on staging and AcrPush on production, because promotion reads
+      # from one and writes to the other.
+      use_oidc: true
+      environment: Production
+      azure_subscription_id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
     secrets:
       source_registry_username: ${{ secrets.ROBOTICS_ROBOTICSSTAGINGACR_USERNAME }}
       source_registry_password: ${{ secrets.ROBOTICS_ROBOTICSSTAGINGACR_PASSWORD }}
