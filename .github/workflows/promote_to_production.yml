@@ -59,31 +59,25 @@ jobs:
   copy-images-to-robotics-prod-registry:
     name: Copy staging images to robotics prod registry
     needs: [get_staging_version, trigger-github-deployment]
-    runs-on: ubuntu-latest
     strategy:
       matrix:
-        component: [broker, backend, frontend]
-    steps:
-      - name: Log in to robotics staging registry
-        uses: docker/login-action@v3
-        with:
-          registry: roboticsstagingacr.azurecr.io
-          username: ${{ secrets.ROBOTICS_ROBOTICSSTAGINGACR_USERNAME }}
-          password: ${{ secrets.ROBOTICS_ROBOTICSSTAGINGACR_PASSWORD }}
-
-      - name: Log in to robotics prod registry
-        uses: docker/login-action@v3
-        with:
-          registry: roboticsprodacr.azurecr.io
-          username: ${{ secrets.ROBOTICS_ROBOTICSPRODACR_USERNAME }}
-          password: ${{ secrets.ROBOTICS_ROBOTICSPRODACR_PASSWORD }}
-
-      - name: Copy image from staging to prod registry
-        run: |
-          docker buildx imagetools create \
-            --tag roboticsprodacr.azurecr.io/robotics/flotilla-${{ matrix.component }}:${{ needs.get_staging_version.outputs.versionTag }} \
-            --tag roboticsprodacr.azurecr.io/robotics/flotilla-${{ matrix.component }}:latest \
-            roboticsstagingacr.azurecr.io/robotics/flotilla-${{ matrix.component }}:${{ needs.get_staging_version.outputs.versionTag }}
+        component: ['broker', 'backend', 'frontend']
+    permissions:
+      contents: read
+      # Declared by the shared workflow for its OIDC path; a called
+      # workflow can never exceed the calling job.
+      id-token: write
+    uses: equinor/armada/.github/workflows/copy_image_between_registries.yml@main
+    with:
+      source_registry: roboticsstagingacr.azurecr.io
+      destination_registry: roboticsprodacr.azurecr.io
+      image_name: robotics/flotilla-${{ matrix.component }}
+      tag: ${{ needs.get_staging_version.outputs.versionTag }}
+    secrets:
+      source_registry_username: ${{ secrets.ROBOTICS_ROBOTICSSTAGINGACR_USERNAME }}
+      source_registry_password: ${{ secrets.ROBOTICS_ROBOTICSSTAGINGACR_PASSWORD }}
+      destination_registry_username: ${{ secrets.ROBOTICS_ROBOTICSPRODACR_USERNAME }}
+      destination_registry_password: ${{ secrets.ROBOTICS_ROBOTICSPRODACR_PASSWORD }}
 
   deploy:
     name: Update deployment in Production
