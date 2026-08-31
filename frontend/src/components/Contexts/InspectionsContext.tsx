@@ -1,6 +1,6 @@
 import { createContext, FC, useContext, useEffect, useRef } from 'react'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { queryClient } from '../../App'
 import { useBackendApi } from 'api/UseBackendApi'
 import { useSaraApi } from 'api/UseSaraApi'
@@ -83,7 +83,8 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
                 queryClient.invalidateQueries({
                     queryKey: [
                         'fetchInspectionListData',
-                        [inspectionResult.installationCode, inspectionResult.analysisType],
+                        inspectionResult.installationCode,
+                        inspectionResult.analysisType,
                     ],
                 })
                 queryClient.invalidateQueries({
@@ -123,7 +124,17 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
         maxDate?: Date | null
     ): IInspectionListData => {
         const result = useQuery({
-            queryKey: ['fetchInspectionListData', [installationCode, analysisType, inspectionIds]],
+            queryKey: [
+                'fetchInspectionListData',
+                installationCode,
+                analysisType,
+                {
+                    inspectionIds,
+                    tagId,
+                    minDate: minDate?.toISOString(),
+                    maxDate: maxDate?.toISOString(),
+                },
+            ],
             queryFn: async () => {
                 return await saraApiRef.current.getSaraData(
                     inspectionIds,
@@ -136,6 +147,9 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
             },
             retry: 1,
             staleTime: 10 * 60 * 1000, // If data is received, stale time is 10 min before making new API call
+            // Changing the time range changes the query key, so keep the previous series on screen
+            // instead of tearing the page down to a loading state and losing the current selection.
+            placeholderData: keepPreviousData,
         })
         return { data: result.data, isPending: result.isPending, isError: result.isError }
     }
