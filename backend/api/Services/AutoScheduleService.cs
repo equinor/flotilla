@@ -7,7 +7,7 @@ namespace Api.Services
 {
     public interface IAutoScheduleService
     {
-        public Task<List<(TimeSpan, TimeOnly)>?> StartJobsForMissionDefinition(
+        public Task<List<(DateTimeOffset, TimeOnly)>?> StartJobsForMissionDefinition(
             MissionDefinition missionDefinition,
             bool? scheduleJobs = true
         );
@@ -101,7 +101,7 @@ namespace Api.Services
             );
         }
 
-        public async Task<List<(TimeSpan, TimeOnly)>?> StartJobsForMissionDefinition(
+        public async Task<List<(DateTimeOffset, TimeOnly)>?> StartJobsForMissionDefinition(
             MissionDefinition missionDefinition,
             bool? scheduleJobs = true
         )
@@ -109,8 +109,7 @@ namespace Api.Services
             if (missionDefinition.AutoScheduleFrequency is null)
                 return null;
 
-            var jobDelays = new List<(TimeSpan, TimeOnly)>();
-            jobDelays = missionDefinition
+            var jobDelays = missionDefinition
                 .AutoScheduleFrequency!.GetSchedulingTimesUntilMidnight()
                 ?.ToList();
 
@@ -136,9 +135,9 @@ namespace Api.Services
                     continue;
 
                 logger.LogInformation(
-                    "Scheduling mission run for mission definition {MissionDefinitionId} in {TimeLeft}.",
+                    "Scheduling mission run for mission definition {MissionDefinitionId} at {EnqueueAt}.",
                     missionDefinition.Id,
-                    jobDelay
+                    jobDelay.Item1
                 );
 
                 var jobId = BackgroundJob.Schedule(

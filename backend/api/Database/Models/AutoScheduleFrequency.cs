@@ -1,4 +1,5 @@
 using System;
+using Api.Utilities;
 
 #pragma warning disable CS8618
 namespace Api.Database.Models
@@ -42,25 +43,26 @@ namespace Api.Database.Models
             return true;
         }
 
-        public IList<(TimeSpan, TimeOnly)>? GetSchedulingTimesUntilMidnight()
+        public IList<(DateTimeOffset, TimeOnly)>? GetSchedulingTimesUntilMidnight()
         {
-            // NCS is always in CET
-            TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById(
-                "Central European Standard Time"
-            );
-            DateTime nowLocal = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, tzi);
+            DateTime nowLocal = TimeZoneUtilities.NowCet();
             TimeOnly nowLocalTimeOnly = TimeOnly.FromDateTime(nowLocal);
+            DateOnly todayLocal = DateOnly.FromDateTime(nowLocal);
 
-            var autoScheduleNext = new List<(TimeSpan, TimeOnly)>();
-
-            autoScheduleNext.AddRange(
-                SchedulingTimesCETperWeek
-                    .Where(schedulingTime => schedulingTime.DayOfWeek == nowLocal.DayOfWeek)
-                    .Where(schedulingTime => schedulingTime.TimeOfDay > nowLocalTimeOnly)
-                    .Select(schedulingTime =>
-                        (schedulingTime.TimeOfDay - nowLocalTimeOnly, schedulingTime.TimeOfDay)
+            var autoScheduleNext = SchedulingTimesCETperWeek
+                .Where(schedulingTime => schedulingTime.DayOfWeek == nowLocal.DayOfWeek)
+                .Where(schedulingTime => schedulingTime.TimeOfDay > nowLocalTimeOnly)
+                .Select(schedulingTime =>
+                    (
+                        TimeZoneUtilities.CetWallClockToUtcInstant(
+                            todayLocal,
+                            schedulingTime.TimeOfDay
+                        ),
+                        schedulingTime.TimeOfDay
                     )
-            );
+                )
+                .ToList();
+
             return autoScheduleNext.Count > 0 ? autoScheduleNext : null;
         }
     }
