@@ -250,9 +250,7 @@ namespace Api.Services
                 AccessMode.Read
             );
             var query = context
-                .MissionDefinitions.Include(missionDefinition =>
-                    missionDefinition.InspectionArea
-                )
+                .MissionDefinitions.Include(missionDefinition => missionDefinition.InspectionArea)
                     .ThenInclude(inspectionArea => inspectionArea!.Plant)
                 .Include(missionDefinition => missionDefinition.InspectionArea)
                     .ThenInclude(inspectionArea => inspectionArea!.Plant)
