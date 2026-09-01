@@ -146,10 +146,15 @@ namespace Api.Services
         )
         {
             var missions = await GetMissionDefinitionsWithSubModels(readOnly: readOnly)
-                .Where(m => m.IsDeprecated == false && m.AutoScheduleFrequency != null)
+                .Where(m => m.IsDeprecated == false)
                 .ToListAsync();
 
-            return missions;
+            return
+            [
+                .. missions.Where(m =>
+                    m.AutoScheduleFrequency != null && m.AutoScheduleFrequency.HasValidValue()
+                ),
+            ];
         }
 
         public async Task<MissionDefinition> UpdateLastSuccessfulMissionRun(
@@ -192,9 +197,6 @@ namespace Api.Services
                 context.Entry(missionDefinition.LastSuccessfulRun).State = EntityState.Unchanged;
             }
             context.Entry(missionDefinition.InspectionArea).State = EntityState.Unchanged;
-
-            // Owned optional properties are not nullable
-            missionDefinition.AutoScheduleFrequency ??= new AutoScheduleFrequency();
 
             var entry = context.Update(missionDefinition);
             await ApplyDatabaseUpdate(missionDefinition.InspectionArea.Installation);
@@ -249,12 +251,8 @@ namespace Api.Services
             );
             var query = context
                 .MissionDefinitions.Include(missionDefinition =>
-                    missionDefinition.AutoScheduleFrequency
+                    missionDefinition.InspectionArea
                 )
-                    .ThenInclude(autoScheduleFrequency =>
-                        autoScheduleFrequency!.SchedulingTimesCETperWeek
-                    )
-                .Include(missionDefinition => missionDefinition.InspectionArea)
                     .ThenInclude(inspectionArea => inspectionArea!.Plant)
                 .Include(missionDefinition => missionDefinition.InspectionArea)
                     .ThenInclude(inspectionArea => inspectionArea!.Plant)
