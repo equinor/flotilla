@@ -88,7 +88,8 @@ namespace Api.Services
 
         public async Task<MissionDefinition?> ReadById(string id, bool readOnly = true)
         {
-            return await GetMissionDefinitionsWithSubModels(readOnly: readOnly)
+            var query = await GetMissionDefinitionsWithSubModels(readOnly: readOnly);
+            return await query
                 .Where(m => m.IsDeprecated == false)
                 .FirstOrDefaultAsync(missionDefinition => missionDefinition.Id.Equals(id));
         }
@@ -98,8 +99,8 @@ namespace Api.Services
             bool readOnly = true
         )
         {
-            var query = GetMissionDefinitionsWithSubModels(readOnly: readOnly)
-                .Where(m => m.IsDeprecated == false);
+            var query = await GetMissionDefinitionsWithSubModels(readOnly: readOnly);
+            query = query.Where(m => m.IsDeprecated == false);
             var filter = ConstructFilter(parameters);
 
             query = query.Where(filter);
@@ -118,7 +119,8 @@ namespace Api.Services
             bool readOnly = true
         )
         {
-            var missionDefinitions = await GetMissionDefinitionsWithSubModels(readOnly: readOnly)
+            var query = await GetMissionDefinitionsWithSubModels(readOnly: readOnly);
+            var missionDefinitions = await query
                 .Where(m =>
                     m.IsDeprecated == false
                     && m.InstallationCode.ToLower().Equals(installationCode.ToLower())
@@ -132,7 +134,8 @@ namespace Api.Services
             bool readOnly = true
         )
         {
-            return await GetMissionDefinitionsWithSubModels(readOnly: readOnly)
+            var query = await GetMissionDefinitionsWithSubModels(readOnly: readOnly);
+            return await query
                 .Where(m =>
                     m.IsDeprecated == false
                     && m.InspectionArea != null
@@ -145,9 +148,8 @@ namespace Api.Services
             bool readOnly = true
         )
         {
-            var missions = await GetMissionDefinitionsWithSubModels(readOnly: readOnly)
-                .Where(m => m.IsDeprecated == false)
-                .ToListAsync();
+            var query = await GetMissionDefinitionsWithSubModels(readOnly: readOnly);
+            var missions = await query.Where(m => m.IsDeprecated == false).ToListAsync();
 
             return
             [
@@ -242,11 +244,11 @@ namespace Api.Services
                 );
         }
 
-        private IQueryable<MissionDefinition> GetMissionDefinitionsWithSubModels(
+        private async Task<IQueryable<MissionDefinition>> GetMissionDefinitionsWithSubModels(
             bool readOnly = true
         )
         {
-            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes(
+            var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes(
                 AccessMode.Read
             );
             var query = context
@@ -263,7 +265,7 @@ namespace Api.Services
                         .ThenInclude(metadata => metadata != null ? metadata.Roi : null)
                 .Include(missionDefinition => missionDefinition.InspectionArea)
                 .Where(m =>
-                    accessibleInstallationCodes.Result.Contains(
+                    accessibleInstallationCodes.Contains(
                         m.InspectionArea.Installation.InstallationCode.ToUpper()
                     )
                 );

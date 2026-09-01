@@ -39,7 +39,7 @@ namespace Api.Services
             bool readOnly = true
         );
 
-        public InspectionArea? TryFindInspectionAreaForMissionTasks(
+        public Task<InspectionArea?> TryFindInspectionAreaForMissionTasks(
             List<TaskDefinition> missionTasks,
             string installationCode
         );
@@ -75,13 +75,14 @@ namespace Api.Services
     {
         public async Task<IEnumerable<InspectionArea>> ReadAll(bool readOnly = true)
         {
-            return await GetInspectionAreas(readOnly: readOnly).ToListAsync();
+            var query = await GetInspectionAreas(readOnly: readOnly);
+            return await query.ToListAsync();
         }
 
         public async Task<InspectionArea?> ReadById(string id, bool readOnly = true)
         {
-            return await GetInspectionAreas(readOnly: readOnly)
-                .FirstOrDefaultAsync(a => a.Id.Equals(id));
+            var query = await GetInspectionAreas(readOnly: readOnly);
+            return await query.FirstOrDefaultAsync(a => a.Id.Equals(id));
         }
 
         public async Task<IEnumerable<InspectionArea>> ReadByInstallation(
@@ -97,7 +98,8 @@ namespace Api.Services
             {
                 return [];
             }
-            return await GetInspectionAreas(readOnly: readOnly)
+            var query = await GetInspectionAreas(readOnly: readOnly);
+            return await query
                 .Where(a => a.Installation != null && a.Installation.Id.Equals(installation.Id))
                 .ToListAsync();
         }
@@ -112,7 +114,8 @@ namespace Api.Services
             {
                 return null;
             }
-            return await GetInspectionAreas(readOnly: readOnly)
+            var query = await GetInspectionAreas(readOnly: readOnly);
+            return await query
                 .Where(a =>
                     a.Installation != null
                     && a.Installation.InstallationCode.ToLower().Equals(installationCode.ToLower())
@@ -128,7 +131,8 @@ namespace Api.Services
             bool readOnly = true
         )
         {
-            return await GetInspectionAreas(readOnly: readOnly)
+            var query = await GetInspectionAreas(readOnly: readOnly);
+            return await query
                 .Where(a =>
                     a.Plant != null
                     && a.Plant.Id.Equals(plant.Id)
@@ -141,12 +145,13 @@ namespace Api.Services
                 .FirstOrDefaultAsync();
         }
 
-        public InspectionArea? TryFindInspectionAreaForMissionTasks(
+        public async Task<InspectionArea?> TryFindInspectionAreaForMissionTasks(
             List<TaskDefinition> missionTasks,
             string installationCode
         )
         {
-            var inspectionAreas = GetInspectionAreas()
+            var query = await GetInspectionAreas();
+            var inspectionAreas = query
                 .Where(a =>
                     a.Installation != null
                     && a.Installation.InstallationCode.ToLower().Equals(installationCode.ToLower())
@@ -187,7 +192,8 @@ namespace Api.Services
             bool readOnly = true
         )
         {
-            var inspectionAreas = await GetInspectionAreas(readOnly: readOnly)
+            var query = await GetInspectionAreas(readOnly: readOnly);
+            var inspectionAreas = await query
                 .Where(a =>
                     a.Installation != null
                     && a.Installation.InstallationCode.Equals(installationCode)
@@ -274,8 +280,8 @@ namespace Api.Services
 
         public async Task<InspectionArea?> Delete(string id)
         {
-            var inspectionArea = await GetInspectionAreas()
-                .FirstOrDefaultAsync(ev => ev.Id.Equals(id));
+            var query = await GetInspectionAreas();
+            var inspectionArea = await query.FirstOrDefaultAsync(ev => ev.Id.Equals(id));
             if (inspectionArea is null)
             {
                 return null;
@@ -292,11 +298,11 @@ namespace Api.Services
             return inspectionArea;
         }
 
-        private IQueryable<InspectionArea> GetInspectionAreas(bool readOnly = true)
+        private async Task<IQueryable<InspectionArea>> GetInspectionAreas(bool readOnly = true)
         {
-            var accessibleInstallationCodes = accessRoleService
-                .GetAllowedInstallationCodes(AccessMode.Read)
-                .Result;
+            var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes(
+                AccessMode.Read
+            );
             var query = context
                 .InspectionAreas.Include(p => p.Plant)
                     .ThenInclude(p => p.Installation)

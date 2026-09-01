@@ -60,12 +60,14 @@ namespace Api.Services
     {
         public async Task<IEnumerable<Plant>> ReadAll(bool readOnly = true)
         {
-            return await GetPlants(readOnly: readOnly).ToListAsync();
+            var query = await GetPlants(readOnly: readOnly);
+            return await query.ToListAsync();
         }
 
         public async Task<Plant?> ReadById(string id, bool readOnly = true)
         {
-            return await GetPlants(readOnly: readOnly).FirstOrDefaultAsync(a => a.Id.Equals(id));
+            var query = await GetPlants(readOnly: readOnly);
+            return await query.FirstOrDefaultAsync(a => a.Id.Equals(id));
         }
 
         public async Task<IEnumerable<Plant>> ReadByInstallation(
@@ -81,14 +83,16 @@ namespace Api.Services
             {
                 return [];
             }
-            return await GetPlants(readOnly: readOnly)
+            var query = await GetPlants(readOnly: readOnly);
+            return await query
                 .Where(a => a.Installation != null && a.Installation.Id.Equals(installation.Id))
                 .ToListAsync();
         }
 
         public async Task<Plant?> ReadByPlantCode(string plantCode, bool readOnly = true)
         {
-            return await GetPlants(readOnly: readOnly)
+            var query = await GetPlants(readOnly: readOnly);
+            return await query
                 .Where(a => a.PlantCode.ToLower().Equals(plantCode.ToLower()))
                 .FirstOrDefaultAsync();
         }
@@ -99,7 +103,8 @@ namespace Api.Services
             bool readOnly = true
         )
         {
-            return await GetPlants(readOnly: readOnly)
+            var query = await GetPlants(readOnly: readOnly);
+            return await query
                 .Where(a =>
                     a.PlantCode.ToLower().Equals(plantCode.ToLower())
                     && a.Installation != null
@@ -122,7 +127,8 @@ namespace Api.Services
             {
                 return null;
             }
-            return await GetPlants(readOnly: readOnly)
+            var query = await GetPlants(readOnly: readOnly);
+            return await query
                 .Where(a =>
                     a.Installation != null
                     && a.Installation.Id.Equals(installation.Id)
@@ -173,7 +179,8 @@ namespace Api.Services
 
         public async Task<Plant?> Delete(string id)
         {
-            var plant = await GetPlants().FirstOrDefaultAsync(ev => ev.Id.Equals(id));
+            var query = await GetPlants();
+            var plant = await query.FirstOrDefaultAsync(ev => ev.Id.Equals(id));
             if (plant is null)
             {
                 return null;
@@ -185,17 +192,15 @@ namespace Api.Services
             return plant;
         }
 
-        private IQueryable<Plant> GetPlants(bool readOnly = true)
+        private async Task<IQueryable<Plant>> GetPlants(bool readOnly = true)
         {
-            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes(
+            var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes(
                 AccessMode.Read
             );
             var query = context
                 .Plants.Include(i => i.Installation)
                 .Where(p =>
-                    accessibleInstallationCodes.Result.Contains(
-                        p.Installation.InstallationCode.ToUpper()
-                    )
+                    accessibleInstallationCodes.Contains(p.Installation.InstallationCode.ToUpper())
                 );
             return readOnly ? query.AsNoTracking() : query.AsTracking();
         }
