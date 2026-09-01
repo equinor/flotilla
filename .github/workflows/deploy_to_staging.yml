@@ -31,6 +31,7 @@ jobs:
     permissions:
       contents: read
       packages: write
+      id-token: write
     strategy:
       matrix:
         component: [broker, backend, frontend]
@@ -40,11 +41,15 @@ jobs:
       image_name: robotics/flotilla-${{ matrix.component }}
       tag: ${{ github.event.release.tag_name }}
       secondary_tag: latest
+      push_to_ghcr: true
       path_to_dockerfile: ${{ matrix.component}}/Dockerfile
       path_to_context: ./${{ matrix.component}}
-    secrets:
-      registry_password: ${{ secrets.ROBOTICS_ROBOTICSSTAGINGACR_PASSWORD }}
-      registry_username: ${{ secrets.ROBOTICS_ROBOTICSSTAGINGACR_USERNAME }}
+      # Authenticate to the registry with a federated credential instead
+      # of the registry password. The environment below is what the OIDC
+      # subject binds to on the Azure side.
+      environment: Staging
+      use_oidc: true
+      azure_subscription_id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
   deploy:
     name: Update deployment in Staging
@@ -64,6 +69,7 @@ jobs:
       tag: ${{ github.event.release.tag_name }}
       author_name: ${{ github.event.release.author.login }}
       infrastructure_repository: equinor/robotics-infrastructure
+      kustomization_base_path: k8s_kustomize/robotics/overlays
       commit_message_service_name: Flotilla
     secrets:
       deploy_key: ${{ secrets.ROBOTICS_INFRASTRUCTURE_DEPLOY_KEY }}

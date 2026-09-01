@@ -54,7 +54,7 @@ export const InspectionAreaCard = ({
                         {isMissionOngoing && (
                             <Content>
                                 <Icon name={Icons.Ongoing} size={16} />
-                                {TranslateText('InProgress')}
+                                <Typography>{TranslateText('InProgress')}</Typography>
                             </Content>
                         )}
                     </TopInspectionAreaText>

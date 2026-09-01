@@ -18,12 +18,6 @@ namespace Api.HostedServices
                 .CreateScope()
                 .ServiceProvider.GetRequiredService<IMissionDefinitionService>();
 
-        private IMissionRunService MissionRunService =>
-            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionRunService>();
-
-        private IRobotService RobotService =>
-            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IRobotService>();
-
         private IAutoScheduleService AutoScheduleService =>
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IAutoScheduleService>();
 
@@ -61,8 +55,6 @@ namespace Api.HostedServices
 
         private async Task<IList<(TimeSpan, TimeOnly)>?> DoWork(bool? scheduleJobs = true)
         {
-            var missionQuery = new MissionDefinitionQueryStringParameters();
-
             List<MissionDefinition>? missionDefinitions;
             try
             {

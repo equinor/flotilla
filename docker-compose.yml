@@ -1,4 +1,19 @@
 services:
+  # Local OpenID Connect issuer, an alternative to Microsoft Entra ID. See backend/README.md.
+  # Behind a profile, so the default `docker compose up` is unchanged. The realm is the
+  # one the armada integration tests import; override the path with KEYCLOAK_REALM_DIR.
+  keycloak:
+    profiles: ["keycloak"]
+    image: quay.io/keycloak/keycloak:26.4
+    command: ["start-dev", "--import-realm"]
+    ports:
+      - "8080:8080"
+    environment:
+      - KC_BOOTSTRAP_ADMIN_USERNAME=admin
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=admin
+    volumes:
+      - ${KEYCLOAK_REALM_DIR:-../armada/robotics_integration_tests/custom_realms}:/opt/keycloak/data/import:ro
+
   frontend:
     build: frontend
     ports:

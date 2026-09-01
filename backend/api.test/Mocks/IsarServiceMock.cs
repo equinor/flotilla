@@ -51,7 +51,7 @@ namespace Api.Test.Mocks
             await Task.Run(() => Thread.Sleep(1));
         }
 
-        public async Task StopMission(Robot robot, string? missionId = null)
+        public async Task StopMission(Robot robot)
         {
             await Task.Run(() => Thread.Sleep(1));
         }

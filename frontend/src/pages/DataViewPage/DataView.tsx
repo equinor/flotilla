@@ -9,7 +9,6 @@ import {
     TimeseriesLinePlotDataPoint,
 } from 'components/Displays/TimeseriesLinePlot'
 import { InspectionsPlantMap } from 'pages/MissionPage/MapPosition/PointillaMapView'
-import { AnalysisOverviewSection, InspectionOverviewSection } from 'pages/InspectionReportPage/ImageOverview'
 import {
     InspectionImageWithPlaceholder,
     PendingResultPlaceholder,
@@ -25,14 +24,15 @@ import {
     DataViewMapWrapper,
     StyledDataViewImageCard,
     StyledTopAlignedImagesSection,
-    TimeRangeToggle,
-    TimeRangeToggleButton,
     WhiteBackgroundBand,
 } from './DataViewComponents'
 import { useInspectionsContext } from 'components/Contexts/InspectionsContext'
 import { AnalysisType } from 'models/MissionDefinition'
 import { InspectionData } from 'models/InspectionRecord'
 import { useAssetContext } from 'components/Contexts/AssetContext'
+import { saraAnalysisTypeToEnum } from 'models/SaraAnalysisTypeMapping'
+import { DataViewTimeRangeSelector } from './DataViewTimeRangeSelector'
+import { createPresetTimeRange, DataViewTimeRange, TimeRangeMode } from './DataViewTimeRange'
 
 interface DataViewProps {
     analysisType: AnalysisType
@@ -46,8 +46,9 @@ interface DataViewProps {
 
 interface DataViewContentProps {
     inspectionData: InspectionData[]
-    numberOfDaysOfData: number
-    setNumberOfDaysOfData: (days: number) => void
+    activeTimeRangeMode: TimeRangeMode
+    activeTimeRange: DataViewTimeRange
+    onApplyTimeRange: (mode: TimeRangeMode, range: DataViewTimeRange) => void
     pageTitle: string
     plotTitle: string
     plotAriaLabel: string
@@ -58,8 +59,9 @@ interface DataViewContentProps {
 
 const DataViewContent = ({
     inspectionData,
-    numberOfDaysOfData,
-    setNumberOfDaysOfData,
+    activeTimeRangeMode,
+    activeTimeRange,
+    onApplyTimeRange,
     pageTitle,
     plotTitle,
     plotAriaLabel,
@@ -77,28 +79,32 @@ const DataViewContent = ({
 
     const plantCode =
         installationInspectionAreas.find((i) => i.installationCode === installation.installationCode)?.plantCode ?? null
+    const selectedInspection = useMemo(() => {
+        return inspectionData.find((i) => i.inspectionId === selectedInspectionId)
+    }, [inspectionData, selectedInspectionId])
 
     const linePlotData = useMemo(() => {
         const plotData: TimeseriesLinePlotData = {}
-        const inspectionLookup = new Map<string, InspectionData>()
         inspectionData.forEach((inspection) => {
             const tagId = inspection.tag
             const sampleTimestamp = inspection.createdAt
 
             if (inspection.value == null || inspection.value === '' || !sampleTimestamp) return
-            if (selectedInspectionId && inspection.inspectionId !== selectedInspectionId) return
+            if (selectedInspection && tagId !== selectedInspection.tag) return
             if (!Object.hasOwn(plotData, tagId)) plotData[tagId] = []
+
+            const value: number =
+                saraAnalysisTypeToEnum(inspection.analysisType) === AnalysisType.CLOE
+                    ? parseFloat(inspection.value) * 100
+                    : parseFloat(inspection.value)
             plotData[tagId].push({
                 time: sampleTimestamp,
-                value: parseFloat(inspection.value),
+                value: value,
                 inspectionId: inspection.inspectionId,
             })
-            inspectionLookup.set(inspection.inspectionId, inspection)
         })
         return plotData
-    }, [inspectionData, selectedInspectionId])
-
-    const selectedInspection = inspectionData.find((i) => i.inspectionId === selectedInspectionId)
+    }, [inspectionData, selectedInspection])
 
     const inspectionImageTitle = selectedInspection
         ? TranslateText('Selected inspection')
@@ -107,13 +113,27 @@ const DataViewContent = ({
         ? TranslateText('Selected analysis result')
         : TranslateText('Latest analysis result')
 
+    // The table shall only show one line per tag
+    // Assumes it is already sorted
+    const uniqueTagInspectionData = useMemo(() => {
+        const tagToInspectionMap = new Map<string, InspectionData>()
+        inspectionData.forEach((inspection) => {
+            if (!tagToInspectionMap.has(inspection.tag)) {
+                tagToInspectionMap.set(inspection.tag, inspection)
+            } else if (tagToInspectionMap.get(inspection.tag)!.value == null && inspection.value != null) {
+                tagToInspectionMap.set(inspection.tag, inspection)
+            }
+        })
+        return Array.from(tagToInspectionMap.values())
+    }, [inspectionData])
+
     return (
         <StyledPage>
             <Typography variant="h2">{TranslateText(pageTitle)}</Typography>
             <WhiteBackgroundBand>
                 <StyledTableAndMap>
                     <DataViewTable
-                        inspectionData={inspectionData}
+                        uniqueTagInspectionData={uniqueTagInspectionData}
                         selectedInspectionId={selectedInspectionId}
                         onSelectInspection={(inspectionId) => setSelectedInspectionId(inspectionId)}
                     />
@@ -123,7 +143,7 @@ const DataViewContent = ({
                                 key={selectedInspectionId ?? 'all'}
                                 plantCode={plantCode}
                                 floorId="0"
-                                inspections={inspectionData}
+                                inspections={uniqueTagInspectionData}
                             />
                         </DataViewMapWrapper>
                     ) : (
@@ -145,28 +165,15 @@ const DataViewContent = ({
             )}
             <DataViewChartArea>
                 <Typography variant="h3">{TranslateText(plotTitle)}</Typography>
-                <TimeRangeToggle role="group" aria-label={TranslateText(plotAriaLabel)}>
-                    <TimeRangeToggleButton
-                        variant={numberOfDaysOfData === 7 ? 'contained' : 'ghost'}
-                        aria-pressed={numberOfDaysOfData === 7}
-                        onClick={() => {
-                            setNumberOfDaysOfData(7)
-                            setSelectedInspectionId(undefined)
-                        }}
-                    >
-                        {TranslateText('7 days')}
-                    </TimeRangeToggleButton>
-                    <TimeRangeToggleButton
-                        variant={numberOfDaysOfData === 30 ? 'contained' : 'ghost'}
-                        aria-pressed={numberOfDaysOfData === 30}
-                        onClick={() => {
-                            setNumberOfDaysOfData(30)
-                            setSelectedInspectionId(undefined)
-                        }}
-                    >
-                        {TranslateText('1 month')}
-                    </TimeRangeToggleButton>
-                </TimeRangeToggle>
+                <DataViewTimeRangeSelector
+                    ariaLabel={TranslateText(plotAriaLabel)}
+                    activeMode={activeTimeRangeMode}
+                    activeRange={activeTimeRange}
+                    onApplyRange={(mode, range) => {
+                        onApplyTimeRange(mode, range)
+                        setSelectedInspectionId(undefined)
+                    }}
+                />
                 {Object.keys(linePlotData).length > 0 ? (
                     <TimeseriesLinePlot
                         data={linePlotData}
@@ -184,12 +191,6 @@ const DataViewContent = ({
                     <Typography>{TranslateText('No data available in the selected time range')}</Typography>
                 )}
             </DataViewChartArea>
-            {!selectedInspectionId && (
-                <WhiteBackgroundBand>
-                    <InspectionOverviewSection inspectionData={inspectionData} />
-                    <AnalysisOverviewSection inspectionData={inspectionData} />
-                </WhiteBackgroundBand>
-            )}
             {inspectionId && !selectedInspectionId && (
                 <InspectionDialogView selectedInspectionId={inspectionId} inspectionData={inspectionData} />
             )}
@@ -211,17 +212,18 @@ export const DataView = ({
 }: DataViewProps) => {
     const { installation } = useContext(InstallationContext)
     const { useSaraListData } = useInspectionsContext()
-    const [numberOfDaysOfData, setNumberOfDaysOfData] = useState<number>(30)
-    const [currentTime] = useState<Date>(new Date())
-    const minDate = new Date(new Date().setDate(currentTime.getDate() - numberOfDaysOfData))
+    const [timeRangeSelection, setTimeRangeSelection] = useState<{
+        mode: TimeRangeMode
+        range: DataViewTimeRange
+    }>(() => ({ mode: 30, range: createPresetTimeRange(30) }))
 
     const { data, isPending, isError } = useSaraListData(
         null,
         installation.installationCode,
         null,
         analysisType,
-        minDate,
-        null
+        timeRangeSelection.range.minDate,
+        timeRangeSelection.range.maxDate
     )
 
     if (isPending) {
@@ -233,8 +235,9 @@ export const DataView = ({
     return (
         <DataViewContent
             inspectionData={data}
-            numberOfDaysOfData={numberOfDaysOfData}
-            setNumberOfDaysOfData={setNumberOfDaysOfData}
+            activeTimeRangeMode={timeRangeSelection.mode}
+            activeTimeRange={timeRangeSelection.range}
+            onApplyTimeRange={(mode, range) => setTimeRangeSelection({ mode, range })}
             pageTitle={pageTitle}
             plotTitle={plotTitle}
             plotAriaLabel={plotAriaLabel}

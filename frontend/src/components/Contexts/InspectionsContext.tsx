@@ -1,6 +1,6 @@
 import { createContext, FC, useContext, useEffect, useRef } from 'react'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { queryClient } from '../../App'
 import { useBackendApi } from 'api/UseBackendApi'
 import { useSaraApi } from 'api/UseSaraApi'
@@ -27,6 +27,8 @@ interface IInspectionsContext {
         minDate?: Date | null,
         maxDate?: Date | null
     ) => IInspectionListData
+    setFeedback: (inspectionId: string, analysisRunId: string, isCorrect: boolean) => Promise<void>
+    removeFeedback: (inspectionId: string, analysisRunId: string) => Promise<void>
 }
 
 interface Props {
@@ -36,6 +38,8 @@ interface Props {
 const defaultInspectionsContext = {
     useSaraData: () => ({ data: undefined, isPending: false, isError: true }),
     useSaraListData: () => ({ data: undefined, isPending: false, isError: true }),
+    setFeedback: async () => {},
+    removeFeedback: async () => {},
 }
 
 const InspectionsContext = createContext<IInspectionsContext>(defaultInspectionsContext)
@@ -79,7 +83,8 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
                 queryClient.invalidateQueries({
                     queryKey: [
                         'fetchInspectionListData',
-                        [inspectionResult.installationCode, inspectionResult.analysisType],
+                        inspectionResult.installationCode,
+                        inspectionResult.analysisType,
                     ],
                 })
                 queryClient.invalidateQueries({
@@ -119,7 +124,17 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
         maxDate?: Date | null
     ): IInspectionListData => {
         const result = useQuery({
-            queryKey: ['fetchInspectionListData', [installationCode, analysisType, inspectionIds]],
+            queryKey: [
+                'fetchInspectionListData',
+                installationCode,
+                analysisType,
+                {
+                    inspectionIds,
+                    tagId,
+                    minDate: minDate?.toISOString(),
+                    maxDate: maxDate?.toISOString(),
+                },
+            ],
             queryFn: async () => {
                 return await saraApiRef.current.getSaraData(
                     inspectionIds,
@@ -132,8 +147,33 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
             },
             retry: 1,
             staleTime: 10 * 60 * 1000, // If data is received, stale time is 10 min before making new API call
+            // Changing the time range changes the query key, so keep the previous series on screen
+            // instead of tearing the page down to a loading state and losing the current selection.
+            placeholderData: keepPreviousData,
         })
         return { data: result.data, isPending: result.isPending, isError: result.isError }
+    }
+
+    // Feedback is shared by all users, so refetch afterwards to pick up whatever is now
+    // stored rather than assuming our own write won. Both the single-inspection query and
+    // the list queries carry feedback, and the analysis dialog is fed by the list.
+    const refetchInspection = async (inspectionId: string) => {
+        await queryClient.invalidateQueries({
+            queryKey: ['fetchInspectionData', inspectionId],
+        })
+        await queryClient.invalidateQueries({
+            queryKey: ['fetchInspectionListData'],
+        })
+    }
+
+    const setFeedback = async (inspectionId: string, analysisRunId: string, isCorrect: boolean) => {
+        await saraApiRef.current.upsertFeedback(analysisRunId, isCorrect)
+        await refetchInspection(inspectionId)
+    }
+
+    const removeFeedback = async (inspectionId: string, analysisRunId: string) => {
+        await saraApiRef.current.deleteFeedback(analysisRunId)
+        await refetchInspection(inspectionId)
     }
 
     return (
@@ -141,6 +181,8 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
             value={{
                 useSaraData,
                 useSaraListData,
+                setFeedback,
+                removeFeedback,
             }}
         >
             {children}

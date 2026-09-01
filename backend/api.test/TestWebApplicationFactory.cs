@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using Api.Database.Context;
 using Api.Services;
 using Api.Test.Database;
@@ -21,6 +22,7 @@ namespace Api.Test
         public IConfiguration? Configuration;
         public MockIsarService MockIsarService = new();
         public MockSignalRService MockSignalRService = new();
+        public MockTeamsNotificationService MockTeamsNotificationService = new();
         private readonly string? postgresConnectionString = postgresConnectionString;
 
         protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -60,6 +62,9 @@ namespace Api.Test
                 services.AddScoped<IAccessRoleService, AccessRoleService>();
                 services.AddScoped<IIsarService, MockIsarService>(_ => MockIsarService);
                 services.AddSingleton<ISignalRService, MockSignalRService>(_ => MockSignalRService);
+                services.AddSingleton<ITeamsNotificationService, MockTeamsNotificationService>(_ =>
+                    MockTeamsNotificationService
+                );
                 services.AddScoped<DatabaseUtilities>();
                 services.AddSingleton<IHttpContextAccessor, MockHttpContextAccessor>();
                 services

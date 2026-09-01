@@ -198,7 +198,7 @@ export const MissionPage = ({
     analysisId: string | undefined
     includeHeader: boolean
 }) => {
-    const { selectedMission, videoMediaStreams } = useMissionSelector(missionId, undefined)
+    const { selectedMission, videoMediaStreams } = useMissionSelector(missionId, analysisId ?? inspectionId)
     const { alerts } = useAlertContext()
     const { installation } = useContext(InstallationContext)
 

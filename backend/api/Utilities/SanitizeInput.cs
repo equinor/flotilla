@@ -67,5 +67,14 @@ namespace Api.Utilities
             inputQuery.TimeOfDay = SanitizeUserInput(inputQuery.TimeOfDay);
             return inputQuery;
         }
+
+        public static FeedbackQuery SanitizeUserInput(FeedbackQuery inputQuery)
+        {
+            inputQuery.Title = SanitizeUserInput(inputQuery.Title);
+            inputQuery.Email = SanitizeUserInput(inputQuery.Email);
+            inputQuery.ShortName = SanitizeUserInput(inputQuery.ShortName);
+            inputQuery.Url = SanitizeUserInput(inputQuery.Url);
+            return inputQuery;
+        }
     }
 }

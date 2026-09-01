@@ -42,17 +42,6 @@ namespace Api.Services.Models
         }
     }
 
-    public struct IsarStopMissionDefinition
-    {
-        [JsonPropertyName("mission_id")]
-        public string? MissionId { get; set; }
-
-        public IsarStopMissionDefinition(string? missionId)
-        {
-            MissionId = missionId;
-        }
-    }
-
     public struct IsarTaskDefinition
     {
         [JsonPropertyName("id")]

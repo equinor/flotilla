@@ -38,8 +38,8 @@ jobs:
       - name: Get Flotilla version in staging
         id: get_version_tag
         run: |
-          TAG_LINE_NUMBER=$(($(grep -n "roboticsstagingacr.azurecr.io/robotics/flotilla-frontend" k8s_kustomize/overlays/staging/kustomization.yaml |  cut --delimiter=":" --fields=1)+1))
-          VERSION_TAG=$(sed -n "${TAG_LINE_NUMBER}p" k8s_kustomize/overlays/staging/kustomization.yaml  |  cut --delimiter=":" --fields=2 | tr -d '[:space:]')
+          TAG_LINE_NUMBER=$(($(grep -n "roboticsstagingacr.azurecr.io/robotics/flotilla-frontend" k8s_kustomize/robotics/overlays/staging/kustomization.yaml |  cut --delimiter=":" --fields=1)+1))
+          VERSION_TAG=$(sed -n "${TAG_LINE_NUMBER}p" k8s_kustomize/robotics/overlays/staging/kustomization.yaml  |  cut --delimiter=":" --fields=2 | tr -d '[:space:]')
           echo "tag=$VERSION_TAG" >> "$GITHUB_OUTPUT"
 
   run_migrations:
@@ -59,31 +59,27 @@ jobs:
   copy-images-to-robotics-prod-registry:
     name: Copy staging images to robotics prod registry
     needs: [get_staging_version, trigger-github-deployment]
-    runs-on: ubuntu-latest
     strategy:
       matrix:
-        component: [broker, backend, frontend]
-    steps:
-      - name: Log in to robotics staging registry
-        uses: docker/login-action@v3
-        with:
-          registry: roboticsstagingacr.azurecr.io
-          username: ${{ secrets.ROBOTICS_ROBOTICSSTAGINGACR_USERNAME }}
-          password: ${{ secrets.ROBOTICS_ROBOTICSSTAGINGACR_PASSWORD }}
-
-      - name: Log in to robotics prod registry
-        uses: docker/login-action@v3
-        with:
-          registry: roboticsprodacr.azurecr.io
-          username: ${{ secrets.ROBOTICS_ROBOTICSPRODACR_USERNAME }}
-          password: ${{ secrets.ROBOTICS_ROBOTICSPRODACR_PASSWORD }}
-
-      - name: Copy image from staging to prod registry
-        run: |
-          docker buildx imagetools create \
-            --tag roboticsprodacr.azurecr.io/robotics/flotilla-${{ matrix.component }}:${{ needs.get_staging_version.outputs.versionTag }} \
-            --tag roboticsprodacr.azurecr.io/robotics/flotilla-${{ matrix.component }}:latest \
-            roboticsstagingacr.azurecr.io/robotics/flotilla-${{ matrix.component }}:${{ needs.get_staging_version.outputs.versionTag }}
+        component: ['broker', 'backend', 'frontend']
+    permissions:
+      contents: read
+      # Declared by the shared workflow for its OIDC path; a called
+      # workflow can never exceed the calling job.
+      id-token: write
+    uses: equinor/armada/.github/workflows/copy_image_between_registries.yml@main
+    with:
+      source_registry: roboticsstagingacr.azurecr.io
+      destination_registry: roboticsprodacr.azurecr.io
+      image_name: robotics/flotilla-${{ matrix.component }}
+      tag: ${{ needs.get_staging_version.outputs.versionTag }}
+      # Authenticate to both registries with a federated credential
+      # instead of the registry passwords. The identity holds AcrPull
+      # on staging and AcrPush on production, because promotion reads
+      # from one and writes to the other.
+      use_oidc: true
+      environment: Production
+      azure_subscription_id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
   deploy:
     name: Update deployment in Production
@@ -100,6 +96,7 @@ jobs:
       image_name: robotics/flotilla-${{ matrix.component }}
       author_name: ${{ github.actor }}
       infrastructure_repository: equinor/robotics-infrastructure
+      kustomization_base_path: k8s_kustomize/robotics/overlays
       commit_message_service_name: Flotilla
     secrets:
       deploy_key: ${{ secrets.ROBOTICS_INFRASTRUCTURE_DEPLOY_KEY }}

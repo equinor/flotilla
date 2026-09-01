@@ -11,13 +11,28 @@ interface AnalysisResult {
     warning?: string
 }
 
+export interface Feedback {
+    id: string
+    analysisRunId: string
+    isCorrect: boolean
+}
+
+interface AnalysisRun {
+    id: string
+    runNumber: number
+    status: string
+    feedback?: Feedback | null
+}
+
 interface Analysis {
     id: string
     name: string
+    analysisType: string
     createdAt: string
     anonymizedSAS?: string
     visualizedSAS?: string
     result?: AnalysisResult
+    runs?: AnalysisRun[]
 }
 
 export enum FileType {
@@ -52,6 +67,8 @@ export interface FlotillaAnalysisResultMessage {
 export interface InspectionData {
     inspectionId: string
     analysisId: string
+    analysisRunId?: string
+    feedback?: Feedback
     visualizedSAS?: string
     fileType: FileType
     anonymizedSAS?: string
@@ -91,12 +108,18 @@ export const inspectionRecordToInspectionData = (record: InspectionRecord): Insp
     const sas = analysis.visualizedSAS ?? analysis.anonymizedSAS
     const fileType = sas ? sasURLToFileType(sas) : FileType.VALUE
 
+    // Feedback is given per analysis run, so mirror the choice of analysis above
+    // and use the latest run.
+    const latestRun = analysis.runs?.[analysis.runs.length - 1]
+
     return {
         inspectionId: record.inspectionId,
         analysisId: analysis.id,
+        analysisRunId: latestRun?.id,
+        feedback: latestRun?.feedback ?? undefined,
         visualizedSAS: analysis.visualizedSAS,
         anonymizedSAS: analysis.anonymizedSAS,
-        analysisType: record.inspectionType,
+        analysisType: analysis.analysisType,
         tag: record.tag,
         createdAt: record.createdAt,
         targetPosition: record.targetPosition,

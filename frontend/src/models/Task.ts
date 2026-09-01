@@ -29,14 +29,6 @@ export interface AcousticInspectionMetadata {
     roi?: Roi
 }
 
-export const ValidInspectionReportInspectionTypes: SensorType[] = [
-    SensorType.Image,
-    SensorType.ThermalImage,
-    SensorType.Video,
-    SensorType.ThermalVideo,
-    SensorType.AcousticMeasurement,
-]
-
 export interface Task {
     id: string
     taskOrder: number

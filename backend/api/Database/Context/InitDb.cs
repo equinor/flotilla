@@ -326,7 +326,27 @@ namespace Api.Database.Context
                 Name = "Constant Level Oiler Mission",
                 InstallationCode = inspectionAreas[5].Installation.InstallationCode,
                 InspectionArea = inspectionAreas[5],
-                Tasks = [GetMissionTaskDefinitions()[1]],
+                Tasks =
+                [
+                    new TaskDefinition
+                    {
+                        TagId = "cloe-tag-1",
+                        Description = "CLOE tag 1",
+                        RobotPose = new Pose(),
+                        AnalysisTypes = [AnalysisType.CLOE],
+                        SensorType = SensorType.Image,
+                        TargetPosition = new Position(),
+                    },
+                    new TaskDefinition
+                    {
+                        TagId = "cloe-tag-2",
+                        Description = "CLOE tag 2",
+                        RobotPose = new Pose(),
+                        AnalysisTypes = [AnalysisType.CLOE],
+                        SensorType = SensorType.Image,
+                        TargetPosition = new Position(),
+                    },
+                ],
                 LastSuccessfulRun = null,
             };
 
@@ -360,6 +380,66 @@ namespace Api.Database.Context
                 LastSuccessfulRun = null,
             };
 
+            var fencillaMission = new MissionDefinition
+            {
+                Id = Guid.NewGuid().ToString(),
+                Name = "Fencilla Mission",
+                InstallationCode = inspectionAreas[5].Installation.InstallationCode,
+                InspectionArea = inspectionAreas[5],
+                Tasks =
+                [
+                    new TaskDefinition
+                    {
+                        TagId = "fence-tag-1",
+                        Description = "Fence tag 1",
+                        RobotPose = new Pose(),
+                        AnalysisTypes = [AnalysisType.Fencilla],
+                        SensorType = SensorType.Image,
+                        TargetPosition = new Position(),
+                    },
+                    new TaskDefinition
+                    {
+                        TagId = "fence-tag-2",
+                        Description = "Fence tag 2",
+                        RobotPose = new Pose(),
+                        AnalysisTypes = [AnalysisType.Fencilla],
+                        SensorType = SensorType.Image,
+                        TargetPosition = new Position(),
+                    },
+                ],
+                LastSuccessfulRun = null,
+            };
+
+            var co2Mission = new MissionDefinition
+            {
+                Id = Guid.NewGuid().ToString(),
+                Name = "CO2 Mission",
+                InstallationCode = inspectionAreas[5].Installation.InstallationCode,
+                InspectionArea = inspectionAreas[5],
+                Tasks =
+                [
+                    new TaskDefinition
+                    {
+                        TagId = "co2-tag-1",
+                        Description = "CO2 tag 1",
+                        RobotPose = new Pose(),
+                        AnalysisTypes = [AnalysisType.CO2],
+                        SensorType = SensorType.CO2Measurement,
+                        TargetPosition = new Position(),
+                    },
+                    new TaskDefinition
+                    {
+                        TagId = "co2-tag-2",
+                        Description = "CO2 tag 2",
+                        RobotPose = new Pose(),
+                        AnalysisTypes = [AnalysisType.CO2],
+                        SensorType = SensorType.CO2Measurement,
+                        TargetPosition = new Position(),
+                    },
+                ],
+                LastSuccessfulRun = null,
+            };
+
             return new List<MissionDefinition>([
                 missionDefinition1,
                 missionDefinition2,
@@ -370,6 +450,8 @@ namespace Api.Database.Context
                 thermalReadingMission,
                 cloeMission,
                 onlyImagesWithoutAnalysisMissionDefinition,
+                fencillaMission,
+                co2Mission,
             ]);
         }
 

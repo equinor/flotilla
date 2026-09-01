@@ -8,7 +8,7 @@ import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { Mission } from 'models/Mission'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
-import { ScheduleMissionWithInspectionAreaVerification } from '../InspectionAreaVerificationDialogs/ScheduleMissionWithInspectionAreaVerification'
+import { InspectionAreaVerificationDialog } from '../InspectionAreaVerificationDialogs/InspectionAreaVerificationDialog'
 import {
     getInspectionAreaDialogType,
     InspectionAreaDialogType,
@@ -132,7 +132,7 @@ export const MissionRestartButton = ({ mission, hasFailedTasks, smallButton }: M
                 </Menu>
             </EdsProvider>
             {isLocationVerificationOpen && verificationDialogType !== null && (
-                <ScheduleMissionWithInspectionAreaVerification
+                <InspectionAreaVerificationDialog
                     dialogType={verificationDialogType}
                     closeDialog={() => setIsLocationVerificationOpen(false)}
                     robot={liveRobot}

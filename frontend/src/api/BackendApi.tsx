@@ -12,9 +12,15 @@ import { MissionDefinitionUpdateForm } from 'models/MissionDefinitionUpdateForm'
 import { filterRobots } from 'utils/filtersAndSorts'
 import { PointillaMapInfo } from 'models/PointillaMapInfo'
 import { Installation } from 'models/Installation'
+import { FeedbackQuery } from 'models/Feedback'
 
 export class BackendApi {
     constructor(private readonly api: BackendAPICaller) {}
+
+    async submitFeedback(feedback: FeedbackQuery): Promise<void> {
+        const path = 'submit-feedback'
+        await this.api.POST<FeedbackQuery, void>(path, feedback).catch(handleError('POST', path))
+    }
 
     async postControlMissionRequest(path: string, robotId: string): Promise<void> {
         const body = { robotId: robotId }

@@ -85,7 +85,10 @@ Common commands are defined in the [root Makefile](./Makefile), the [backend Mak
 make compose         # run the full stack in Docker
 make broker          # run only the MQTT broker
 make broker-aspire   # run the broker, OpenTelemetry collector, and Aspire dashboard
+make keycloak        # run a local OpenID Connect issuer instead of Entra ID
 ```
+
+`make keycloak` starts the same realm the integration tests use, so the backend can be run without Entra ID. It needs a little configuration in `backend/api/.env` — see [Running against a local Keycloak](backend/README.md#running-against-a-local-keycloak).
 
 ## Deployments
 

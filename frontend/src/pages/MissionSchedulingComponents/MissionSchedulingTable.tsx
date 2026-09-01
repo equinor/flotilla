@@ -15,6 +15,7 @@ import { SmallScreenInfoText } from 'utils/InfoText'
 import { phone_width } from 'utils/constants'
 import { InstallationContext } from 'components/Contexts/InstallationContext'
 import { StyledTableCell, StyledTableRow } from 'components/Styles/StyledComponents'
+import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 
 const StyledIcon = styled(Icon)`
     display: flex;
@@ -43,10 +44,18 @@ const Centered = styled.div`
     display: flex;
     justify-content: center;
 `
+const StyledContent = styled.div`
+    display: grid;
+    grid-template-columns: 14px auto;
+    align-items: center;
+    gap: 4px;
+    color: ${tokens.colors.text.static_icons__secondary.hex};
+`
 
 enum Columns {
     Name = 'Name',
     Description = 'Description',
+    Status = 'Status',
     LastCompleted = 'LastCompleted',
     AddToQueue = 'AddToQueue',
 }
@@ -57,6 +66,9 @@ const HideColumnsOnSmallScreen = styled.div`
     }
     @media (max-width: ${phone_width}) {
         #${Columns.Description} {
+            display: none;
+        }
+        #${Columns.Status} {
             display: none;
         }
         #${Columns.LastCompleted} {
@@ -79,11 +91,31 @@ interface IMissionRowProps {
 
 const MissionRow = ({ mission, setMissions }: IMissionRowProps) => {
     const { TranslateText } = useLanguageContext()
+    const { ongoingMissions, missionQueue } = useMissionsContext()
     const { enabledRobots } = useAssetContext()
     const { installation } = useContext(InstallationContext)
     const navigate = useNavigate()
 
+    const isScheduled = missionQueue.map((m) => m.missionId).includes(mission.id)
+    const isOngoing = ongoingMissions.map((m) => m.missionId).includes(mission.id)
     const isScheduleButtonDisabled = enabledRobots.length === 0
+
+    let status = <></>
+    if (isOngoing) {
+        status = (
+            <StyledContent>
+                <Icon name={Icons.Ongoing} size={16} />
+                {TranslateText('InProgress')}
+            </StyledContent>
+        )
+    } else if (isScheduled) {
+        status = (
+            <StyledContent>
+                <Icon name={Icons.Queued} size={16} />
+                {TranslateText('Queued')}
+            </StyledContent>
+        )
+    }
 
     const lastCompleted = mission.lastSuccessfulRun?.endTime
         ? formatDateTime(mission.lastSuccessfulRun.endTime)
@@ -102,6 +134,7 @@ const MissionRow = ({ mission, setMissions }: IMissionRowProps) => {
             <Table.Cell id={Columns.Description} style={{ wordBreak: 'break-word' }}>
                 {mission.comment}
             </Table.Cell>
+            <Table.Cell id={Columns.Status}>{status}</Table.Cell>
             <Table.Cell id={Columns.LastCompleted}>{lastCompleted}</Table.Cell>
             <Table.Cell id={Columns.AddToQueue}>
                 <Centered>
