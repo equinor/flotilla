@@ -1,18 +1,10 @@
 using System;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
 
 #pragma warning disable CS8618
 namespace Api.Database.Models
 {
     public class AutoScheduleFrequency
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public string Id { get; set; }
-
-        [Required]
         public IList<TimeAndDay> SchedulingTimesCETperWeek { get; set; } = [];
 
         public string? AutoScheduledJobs { get; set; }
@@ -73,12 +65,8 @@ namespace Api.Database.Models
         }
     }
 
-    [Owned]
     public class TimeAndDay
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public string Id { get; set; }
         public DayOfWeek DayOfWeek { get; set; }
         public TimeOnly TimeOfDay { get; set; }
 

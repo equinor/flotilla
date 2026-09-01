@@ -23,7 +23,6 @@ namespace Api.Database.Context
         public DbSet<ExclusionArea> ExclusionAreas => Set<ExclusionArea>();
         public DbSet<AccessRole> AccessRoles => Set<AccessRole>();
         public DbSet<UserInfo> UserInfos => Set<UserInfo>();
-        public DbSet<AutoScheduleFrequency> AutoScheduleFrequency => Set<AutoScheduleFrequency>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -154,6 +153,36 @@ namespace Api.Database.Context
                             )
                             .Metadata.SetValueComparer(polygonPointsComparer);
 #pragma warning restore CS8603
+                    }
+                );
+
+            var schedulingTimesComparer = new ValueComparer<IList<TimeAndDay>>(
+                (c1, c2) =>
+                    (c1 == null && c2 == null)
+                    || (c1 != null && c2 != null && c1.SequenceEqual(c2)),
+                c => c == null ? 0 : c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                c => c == null ? new List<TimeAndDay>() : c.ToList()
+            );
+
+            // Owned inline on the MissionDefinitions row; scheduling times stored as a JSON column.
+            modelBuilder
+                .Entity<MissionDefinition>()
+                .OwnsOne(
+                    m => m.AutoScheduleFrequency,
+                    autoSchedule =>
+                    {
+                        autoSchedule.WithOwner();
+                        autoSchedule
+                            .Property(a => a.SchedulingTimesCETperWeek)
+                            .HasConversion(
+                                v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                                v =>
+                                    JsonSerializer.Deserialize<IList<TimeAndDay>>(
+                                        v,
+                                        (JsonSerializerOptions?)null
+                                    ) ?? new List<TimeAndDay>()
+                            )
+                            .Metadata.SetValueComparer(schedulingTimesComparer);
                     }
                 );
         }
