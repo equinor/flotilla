@@ -142,7 +142,7 @@ namespace Api.Services
             bool readOnly = true
         )
         {
-            var query = GetMissionRunsWithSubModels(readOnly: readOnly);
+            var query = await GetMissionRunsWithSubModels(readOnly: readOnly);
             var filter = ConstructFilter(parameters);
 
             query = query.Where(filter);
@@ -166,11 +166,11 @@ namespace Api.Services
             bool includeDeprecated = false
         )
         {
-            return await GetMissionRunsWithSubModels(
-                    readOnly: readOnly,
-                    includeDeprecated: includeDeprecated
-                )
-                .FirstOrDefaultAsync(missionRun => missionRun.Id.Equals(id));
+            var query = await GetMissionRunsWithSubModels(
+                readOnly: readOnly,
+                includeDeprecated: includeDeprecated
+            );
+            return await query.FirstOrDefaultAsync(missionRun => missionRun.Id.Equals(id));
         }
 
         public async Task<MissionRun?> ReadByTaskId(
@@ -179,10 +179,11 @@ namespace Api.Services
             bool includeDeprecated = false
         )
         {
-            return await GetMissionRunsWithSubModels(
-                    readOnly: readOnly,
-                    includeDeprecated: includeDeprecated
-                )
+            var query = await GetMissionRunsWithSubModels(
+                readOnly: readOnly,
+                includeDeprecated: includeDeprecated
+            );
+            return await query
                 .Where((m) => m.Tasks.Any((t) => t.Id == taskId))
                 .FirstOrDefaultAsync();
         }
@@ -192,7 +193,8 @@ namespace Api.Services
             bool readOnly = true
         )
         {
-            return await GetMissionRunsWithSubModels(readOnly: readOnly)
+            var query = await GetMissionRunsWithSubModels(readOnly: readOnly);
+            return await query
                 .Where(missionRun =>
                     missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Queued
                 )
@@ -205,7 +207,8 @@ namespace Api.Services
             bool readOnly = true
         )
         {
-            return await GetMissionRunsWithSubModels(readOnly: readOnly)
+            var query = await GetMissionRunsWithSubModels(readOnly: readOnly);
+            return await query
                 .OrderBy(missionRun => missionRun.CreationTime)
                 .FirstOrDefaultAsync(missionRun =>
                     missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Queued
@@ -227,7 +230,8 @@ namespace Api.Services
                 }
             );
 
-            return await GetMissionRunsWithSubModels(readOnly: readOnly)
+            var query = await GetMissionRunsWithSubModels(readOnly: readOnly);
+            return await query
                 .Where(missionFilter)
                 .OrderBy(missionRun => missionRun.CreationTime)
                 .ToListAsync();
@@ -238,7 +242,8 @@ namespace Api.Services
             bool readOnly = true
         )
         {
-            return await GetMissionRunsWithSubModels(readOnly: readOnly)
+            var query = await GetMissionRunsWithSubModels(readOnly: readOnly);
+            return await query
                 .Where(m => m.MissionId == missionId && m.EndTime == null)
                 .OrderBy(m => m.CreationTime)
                 .FirstOrDefaultAsync();
@@ -249,7 +254,8 @@ namespace Api.Services
             bool readOnly = true
         )
         {
-            return await GetMissionRunsWithSubModels(readOnly: readOnly)
+            var query = await GetMissionRunsWithSubModels(readOnly: readOnly);
+            return await query
                 .Where(m => m.Robot.Id == robotId)
                 .Where(m => m.EndTime != null)
                 .OrderByDescending(m => m.EndTime)
@@ -286,8 +292,8 @@ namespace Api.Services
 
         public async Task<MissionRun?> Delete(string id)
         {
-            var missionRun = await GetMissionRunsWithSubModels()
-                .FirstOrDefaultAsync(ev => ev.Id.Equals(id));
+            var query = await GetMissionRunsWithSubModels();
+            var missionRun = await query.FirstOrDefaultAsync(ev => ev.Id.Equals(id));
             if (missionRun is null)
             {
                 return null;
@@ -303,12 +309,12 @@ namespace Api.Services
             return missionRun;
         }
 
-        private IQueryable<MissionRun> GetMissionRunsWithSubModels(
+        private async Task<IQueryable<MissionRun>> GetMissionRunsWithSubModels(
             bool readOnly = true,
             bool includeDeprecated = false
         )
         {
-            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes(
+            var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes(
                 AccessMode.Read
             );
             var query = context
@@ -328,7 +334,7 @@ namespace Api.Services
                 .Include(missionRun => missionRun.Robot)
                     .ThenInclude(robot => robot.CurrentInstallation)
                 .Where(m =>
-                    accessibleInstallationCodes.Result.Contains(
+                    accessibleInstallationCodes.Contains(
                         m.InspectionArea.Installation.InstallationCode.ToUpper()
                     )
                 );

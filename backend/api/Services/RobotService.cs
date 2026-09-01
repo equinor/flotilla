@@ -171,12 +171,12 @@ namespace Api.Services
                 currentMissionId
             );
 
-            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes(
+            var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes(
                 AccessMode.Write
             );
             var robotQuery = context.Robots.Where(r =>
                 r.Id == robotId
-                && accessibleInstallationCodes.Result.Contains(
+                && accessibleInstallationCodes.Contains(
                     r.CurrentInstallation.InstallationCode.ToUpper()
                 )
             );
@@ -212,12 +212,12 @@ namespace Api.Services
                 }
             }
 
-            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes(
+            var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes(
                 AccessMode.Write
             );
             var robotQuery = context.Robots.Where(r =>
                 r.Id == robotId
-                && accessibleInstallationCodes.Result.Contains(
+                && accessibleInstallationCodes.Contains(
                     r.CurrentInstallation.InstallationCode.ToUpper()
                 )
             );
@@ -240,12 +240,12 @@ namespace Api.Services
                 deprecated
             );
 
-            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes(
+            var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes(
                 AccessMode.Write
             );
             var robotQuery = context.Robots.Where(r =>
                 r.Id == robotId
-                && accessibleInstallationCodes.Result.Contains(
+                && accessibleInstallationCodes.Contains(
                     r.CurrentInstallation.InstallationCode.ToUpper()
                 )
             );
@@ -264,12 +264,12 @@ namespace Api.Services
                 averageDurationPerTag
             );
 
-            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes(
+            var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes(
                 AccessMode.Write
             );
             var robotQuery = context.Robots.Where(r =>
                 r.Id == robotId
-                && accessibleInstallationCodes.Result.Contains(
+                && accessibleInstallationCodes.Contains(
                     r.CurrentInstallation.InstallationCode.ToUpper()
                 )
             );
@@ -286,24 +286,26 @@ namespace Api.Services
 
         public async Task<IEnumerable<Robot>> ReadAll(bool readOnly = true)
         {
-            return await GetRobotsWithSubModels(readOnly: readOnly).ToListAsync();
+            var query = await GetRobotsWithSubModels(readOnly: readOnly);
+            return await query.ToListAsync();
         }
 
         public async Task<Robot?> ReadById(string id, bool readOnly = true)
         {
-            return await GetRobotsWithSubModels(readOnly: readOnly)
-                .FirstOrDefaultAsync(robot => robot.Id.Equals(id));
+            var query = await GetRobotsWithSubModels(readOnly: readOnly);
+            return await query.FirstOrDefaultAsync(robot => robot.Id.Equals(id));
         }
 
         public async Task<Robot?> ReadByIsarId(string isarId, bool readOnly = true)
         {
-            return await GetRobotsWithSubModels(readOnly: readOnly)
-                .FirstOrDefaultAsync(robot => robot.IsarId.Equals(isarId));
+            var query = await GetRobotsWithSubModels(readOnly: readOnly);
+            return await query.FirstOrDefaultAsync(robot => robot.IsarId.Equals(isarId));
         }
 
         public async Task<IEnumerable<string>> ReadAllActivePlants(bool readOnly = true)
         {
-            return await GetRobotsWithSubModels(readOnly: readOnly)
+            var query = await GetRobotsWithSubModels(readOnly: readOnly);
+            return await query
                 .Where(r => r.CurrentInstallation != null)
                 .Select(r => r.CurrentInstallation!.InstallationCode)
                 .ToListAsync();
@@ -323,7 +325,8 @@ namespace Api.Services
 
         public async Task<Robot?> Delete(string id)
         {
-            var robot = await GetRobotsWithSubModels().FirstOrDefaultAsync(ev => ev.Id.Equals(id));
+            var query = await GetRobotsWithSubModels();
+            var robot = await query.FirstOrDefaultAsync(ev => ev.Id.Equals(id));
             if (robot is null)
                 return null;
 
@@ -342,7 +345,8 @@ namespace Api.Services
             bool readOnly = true
         )
         {
-            return await GetRobotsWithSubModels(readOnly: readOnly)
+            var query = await GetRobotsWithSubModels(readOnly: readOnly);
+            return await query
                 .Where(robot =>
 #pragma warning disable CA1304
                     robot.CurrentInstallation != null
@@ -354,11 +358,11 @@ namespace Api.Services
                 .ToListAsync();
         }
 
-        private IQueryable<Robot> GetRobotsWithSubModels(bool readOnly = true)
+        private async Task<IQueryable<Robot>> GetRobotsWithSubModels(bool readOnly = true)
         {
-            var accessibleInstallationCodes = accessRoleService
-                .GetAllowedInstallationCodes(AccessMode.Read)
-                .Result;
+            var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes(
+                AccessMode.Read
+            );
 
             var query = context
                 .Robots.Include(r => r.Documentation)

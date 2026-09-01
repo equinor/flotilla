@@ -189,7 +189,7 @@ namespace Api.Controllers
             try
             {
                 var inspectionAreaForMission =
-                    inspectionAreaService.TryFindInspectionAreaForMissionTasks(
+                    await inspectionAreaService.TryFindInspectionAreaForMissionTasks(
                         missionTasks,
                         customMissionQuery.InstallationCode
                     );

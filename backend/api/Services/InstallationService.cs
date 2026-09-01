@@ -50,16 +50,17 @@ namespace Api.Services
     {
         public async Task<IList<Installation>> ReadAll(bool readOnly = true)
         {
-            return await GetInstallations(readOnly: readOnly).ToListAsync();
+            var query = await GetInstallations(readOnly: readOnly);
+            return await query.ToListAsync();
         }
 
-        private IQueryable<Installation> GetInstallations(bool readOnly = true)
+        private async Task<IQueryable<Installation>> GetInstallations(bool readOnly = true)
         {
-            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes(
+            var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes(
                 AccessMode.Read
             );
             var query = context.Installations.Where(i =>
-                accessibleInstallationCodes.Result.Contains(i.InstallationCode.ToUpper())
+                accessibleInstallationCodes.Contains(i.InstallationCode.ToUpper())
             );
             return readOnly ? query.AsNoTracking() : query.AsTracking();
         }
@@ -89,8 +90,8 @@ namespace Api.Services
 
         public async Task<Installation?> ReadById(string id, bool readOnly = true)
         {
-            return await GetInstallations(readOnly: readOnly)
-                .FirstOrDefaultAsync(a => a.Id.Equals(id));
+            var query = await GetInstallations(readOnly: readOnly);
+            return await query.FirstOrDefaultAsync(a => a.Id.Equals(id));
         }
 
         public async Task<Installation?> ReadByInstallationCode(
@@ -100,7 +101,8 @@ namespace Api.Services
         {
             if (installationCode == null)
                 return null;
-            return await GetInstallations(readOnly: readOnly)
+            var query = await GetInstallations(readOnly: readOnly);
+            return await query
                 .Where(a => a.InstallationCode.ToLower().Equals(installationCode.ToLower()))
                 .FirstOrDefaultAsync();
         }
@@ -136,7 +138,8 @@ namespace Api.Services
 
         public async Task<Installation?> Delete(string id)
         {
-            var installation = await GetInstallations().FirstOrDefaultAsync(ev => ev.Id.Equals(id));
+            var query = await GetInstallations();
+            var installation = await query.FirstOrDefaultAsync(ev => ev.Id.Equals(id));
             if (installation is null)
             {
                 return null;

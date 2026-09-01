@@ -72,13 +72,14 @@ namespace Api.Services
     {
         public async Task<IEnumerable<ExclusionArea>> ReadAll(bool readOnly = true)
         {
-            return await GetExclusionAreas(readOnly: readOnly).ToListAsync();
+            var query = await GetExclusionAreas(readOnly: readOnly);
+            return await query.ToListAsync();
         }
 
         public async Task<ExclusionArea?> ReadById(string id, bool readOnly = true)
         {
-            return await GetExclusionAreas(readOnly: readOnly)
-                .FirstOrDefaultAsync(a => a.Id.Equals(id));
+            var query = await GetExclusionAreas(readOnly: readOnly);
+            return await query.FirstOrDefaultAsync(a => a.Id.Equals(id));
         }
 
         public async Task<IEnumerable<ExclusionArea>> ReadByInstallationCode(
@@ -94,7 +95,8 @@ namespace Api.Services
             {
                 return [];
             }
-            return await GetExclusionAreas(readOnly: readOnly)
+            var query = await GetExclusionAreas(readOnly: readOnly);
+            return await query
                 .Where(a => a.Installation != null && a.Installation.Id.Equals(installation.Id))
                 .ToListAsync();
         }
@@ -109,7 +111,8 @@ namespace Api.Services
             {
                 return null;
             }
-            return await GetExclusionAreas(readOnly: readOnly)
+            var query = await GetExclusionAreas(readOnly: readOnly);
+            return await query
                 .Where(a =>
                     a.Name != null
                     && a.Installation != null
@@ -126,7 +129,8 @@ namespace Api.Services
             bool readOnly = true
         )
         {
-            return await GetExclusionAreas(readOnly: readOnly)
+            var query = await GetExclusionAreas(readOnly: readOnly);
+            return await query
                 .Where(a =>
                     a.Name != null
                     && a.Plant != null
@@ -145,7 +149,8 @@ namespace Api.Services
             bool readOnly = true
         )
         {
-            var exclusionAreas = await GetExclusionAreas(readOnly: readOnly)
+            var query = await GetExclusionAreas(readOnly: readOnly);
+            var exclusionAreas = await query
                 .Where(a =>
                     a.Installation != null
                     && a.Installation.InstallationCode.Equals(installationCode)
@@ -258,8 +263,8 @@ namespace Api.Services
 
         public async Task<ExclusionArea?> Delete(string id)
         {
-            var exclusionArea = await GetExclusionAreas(readOnly: false)
-                .FirstOrDefaultAsync(ev => ev.Id.Equals(id));
+            var query = await GetExclusionAreas(readOnly: false);
+            var exclusionArea = await query.FirstOrDefaultAsync(ev => ev.Id.Equals(id));
             if (exclusionArea is null)
             {
                 return null;
@@ -276,11 +281,11 @@ namespace Api.Services
             return exclusionArea;
         }
 
-        private IQueryable<ExclusionArea> GetExclusionAreas(bool readOnly = true)
+        private async Task<IQueryable<ExclusionArea>> GetExclusionAreas(bool readOnly = true)
         {
-            var accessibleInstallationCodes = accessRoleService
-                .GetAllowedInstallationCodes(AccessMode.Read)
-                .Result;
+            var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes(
+                AccessMode.Read
+            );
             var query = context
                 .ExclusionAreas.Include(p => p.Plant)
                     .ThenInclude(p => p.Installation)
