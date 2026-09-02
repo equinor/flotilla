@@ -90,6 +90,12 @@ export const AlertProvider: FC<Props> = ({ children }) => {
     const backendApi = useBackendApi()
     const { isAuthenticated } = useContext(AuthContext)
 
+    // Persisting from an effect rather than from each of the call sites below keeps the
+    // state updaters pure, which StrictMode and the React compiler both require.
+    useEffect(() => {
+        window.localStorage.setItem('autoScheduleFailedMissionDict', JSON.stringify(autoScheduleFailedMissionDict))
+    }, [autoScheduleFailedMissionDict])
+
     const pageSize: number = 100
     // The default amount of minutes in the past for failed missions to generate an alert
     const defaultTimeInterval: number = 10
@@ -114,10 +120,7 @@ export const AlertProvider: FC<Props> = ({ children }) => {
             setRecentFailedMissions([])
         }
 
-        if (source === AlertType.AutoScheduleFail) {
-            setAutoScheduleFailedMissionDict({})
-            window.localStorage.setItem('autoScheduleFailedMissionDict', JSON.stringify({}))
-        }
+        if (source === AlertType.AutoScheduleFail) setAutoScheduleFailedMissionDict({})
 
         setAlerts((oldAlerts) => {
             const newAlerts = { ...oldAlerts }
@@ -145,10 +148,7 @@ export const AlertProvider: FC<Props> = ({ children }) => {
         if (source === AlertType.MissionFail)
             sessionStorage.setItem(dismissMissionFailTimeKey, JSON.stringify(Date.now()))
 
-        if (source === AlertType.AutoScheduleFail) {
-            setAutoScheduleFailedMissionDict({})
-            window.localStorage.setItem('autoScheduleFailedMissionDict', JSON.stringify({}))
-        }
+        if (source === AlertType.AutoScheduleFail) setAutoScheduleFailedMissionDict({})
 
         setListAlerts((oldListAlerts) => {
             const newListAlerts = { ...oldListAlerts }
@@ -205,7 +205,10 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                 })
         }
         if (!recentFailedMissions || recentFailedMissions.length === 0) updateRecentFailedMissions()
-    }, [installation])
+        // Same guard, and so the same missing dependency, as the mission run fetch in
+        // MissionRunsContext: without isAuthenticated the early return above is never
+        // reconsidered once authentication completes.
+    }, [installation, isAuthenticated])
 
     // Register a signalR event handler that listens for new failed missions
     useEffect(() => {
@@ -243,15 +246,13 @@ export const AlertProvider: FC<Props> = ({ children }) => {
             if (backendAlert.robotId !== null && !enabledRobots.filter((r) => r.id === backendAlert.robotId)) return
 
             if (alertType === AlertType.AutoScheduleFail) {
-                const newAutoScheduleFailedMissionDict: AutoScheduleFailedMissionDict = {
-                    ...autoScheduleFailedMissionDict,
-                }
-                newAutoScheduleFailedMissionDict[backendAlert.alertTitle] = backendAlert.alertMessage
-                setAutoScheduleFailedMissionDict(newAutoScheduleFailedMissionDict)
-                window.localStorage.setItem(
-                    'autoScheduleFailedMissionDict',
-                    JSON.stringify(newAutoScheduleFailedMissionDict)
-                )
+                // Functional update: the handler is registered once, so reading the dict
+                // from the closure loses the first of two failures arriving in quick
+                // succession.
+                setAutoScheduleFailedMissionDict((previous) => ({
+                    ...previous,
+                    [backendAlert.alertTitle]: backendAlert.alertMessage,
+                }))
                 return
             }
 

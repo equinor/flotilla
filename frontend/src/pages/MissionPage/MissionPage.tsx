@@ -44,7 +44,11 @@ const StyledMissionPageBody = styled.div`
     }
 `
 
-const useMissionSelector = (missionId: string | undefined, inspectionId: string | undefined) => {
+// lookupInspectionId is only set on the mission-simple route, where the mission is
+// identified by an inspection and this hook writes the resolved id back into the URL.
+// On /mission/:missionId it is undefined: there the inspection id merely selects which
+// dialog is open, and must not send us looking for a different mission.
+const useMissionSelector = (missionId: string | undefined, lookupInspectionId: string | undefined) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [searchParams, setSearchParams] = useSearchParams()
     const navigate = useNavigate()
@@ -71,48 +75,59 @@ const useMissionSelector = (missionId: string | undefined, inspectionId: string 
     const videoMediaStreams = (selectedMission ? mediaStreams[selectedMission.robot.id]?.streams : undefined) ?? []
 
     useEffect(() => {
-        if (missionId)
-            backendApi
-                .getMissionRunById(missionId)
-                .then((mission) => {
-                    setSelectedMission(mission)
-                })
-                .catch(() => {
-                    setAlert(
-                        AlertType.RequestFail,
-                        <FailedRequestAlertContent
-                            translatedMessage={TranslateText('Failed to find mission with ID {0}', [missionId])}
-                        />,
-                        AlertCategory.ERROR
-                    )
-                    setListAlert(
-                        AlertType.RequestFail,
-                        <FailedRequestAlertListContent
-                            translatedMessage={TranslateText('Failed to find mission with ID {0}', [missionId])}
-                        />,
-                        AlertCategory.ERROR
-                    )
-                })
-        else if (inspectionId) {
-            backendApi
-                .getMissionRunByTaskId(inspectionId)
-                .then((mission) => {
-                    setSearchParams(
-                        (prev) => {
-                            prev.set('id', mission.id)
-                            return prev
-                        },
-                        { replace: true }
-                    )
-                    setSelectedMission(mission)
-                })
-                .catch(() => {
-                    navigate(`/not-found`)
-                })
-        } else {
+        if (!lookupInspectionId) return
+        backendApi
+            .getMissionRunByTaskId(lookupInspectionId)
+            .then((mission) => {
+                setSearchParams(
+                    (prev) => {
+                        prev.set('id', mission.id)
+                        return prev
+                    },
+                    { replace: true }
+                )
+                setSelectedMission(mission)
+            })
+            .catch(() => {
+                navigate(`/not-found`)
+            })
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [lookupInspectionId, backendApi])
+
+    useEffect(() => {
+        // The id in the URL is written by the effect above once the inspection resolves,
+        // so refetching it here would only duplicate that request with a mission id that
+        // is stale whenever lookupInspectionId has just changed.
+        if (lookupInspectionId) return
+
+        if (!missionId) {
             navigate(`/not-found`)
+            return
         }
-    }, [missionId])
+
+        backendApi
+            .getMissionRunById(missionId)
+            .then((mission) => {
+                setSelectedMission(mission)
+            })
+            .catch(() => {
+                setAlert(
+                    AlertType.RequestFail,
+                    <FailedRequestAlertContent
+                        translatedMessage={TranslateText('Failed to find mission with ID {0}', [missionId])}
+                    />,
+                    AlertCategory.ERROR
+                )
+                setListAlert(
+                    AlertType.RequestFail,
+                    <FailedRequestAlertListContent
+                        translatedMessage={TranslateText('Failed to find mission with ID {0}', [missionId])}
+                    />,
+                    AlertCategory.ERROR
+                )
+            })
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [missionId, lookupInspectionId, backendApi])
 
     return { selectedMission, videoMediaStreams }
 }
@@ -190,14 +205,17 @@ export const MissionPage = ({
     missionId,
     inspectionId,
     analysisId,
+    lookupInspectionId,
     includeHeader = true,
 }: {
     missionId: string | undefined
     inspectionId: string | undefined
     analysisId: string | undefined
+    /** Set by the mission-simple route only; see useMissionSelector. */
+    lookupInspectionId: string | undefined
     includeHeader: boolean
 }) => {
-    const { selectedMission, videoMediaStreams } = useMissionSelector(missionId, analysisId ?? inspectionId)
+    const { selectedMission, videoMediaStreams } = useMissionSelector(missionId, lookupInspectionId)
     const { alerts } = useAlertContext()
     const { installation } = useContext(InstallationContext)
 

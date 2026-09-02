@@ -130,11 +130,11 @@ export const AssetProvider: FC<Props> = ({ children }) => {
         [enabledRobots, installation.id]
     )
 
-    const fetchInstallationInspectionAreas = () => {
+    const fetchInstallationInspectionAreas = (isCurrent: () => boolean = () => true) => {
         backendApi
             .getInspectionAreasByInstallationCode(installation.installationCode)
             .then((inspectionAreas: InspectionArea[]) => {
-                setInstallationInspectionAreas(inspectionAreas)
+                if (isCurrent()) setInstallationInspectionAreas(inspectionAreas)
             })
             .catch(() => {
                 setAlert(
@@ -159,8 +159,18 @@ export const AssetProvider: FC<Props> = ({ children }) => {
     }
 
     useEffect(() => {
-        fetchInstallationInspectionAreas()
-    }, [])
+        // AssetProvider is not remounted when the installation changes, so a mount-only
+        // fetch leaves the previous installation's areas in state and the filter below
+        // then yields an empty list. Discard responses for an installation we have since
+        // navigated away from, so that switching twice in quick succession cannot let the
+        // first response overwrite the second.
+        let isCurrent = true
+        fetchInstallationInspectionAreas(() => isCurrent)
+        return () => {
+            isCurrent = false
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [installation.installationCode])
 
     useOnPageVisible(() => {
         fetchEnabledRobots()

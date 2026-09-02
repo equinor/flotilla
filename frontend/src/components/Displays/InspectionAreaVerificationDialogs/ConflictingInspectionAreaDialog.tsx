@@ -36,7 +36,7 @@ export const ConflictingRobotInspectionAreaDialog = ({
                 console.error('Error fetching inspection area:', error)
                 setRobotInspectionAreaName('Unknown Inspection Area')
             })
-    }, [robotInspectionAreaId])
+    }, [robotInspectionAreaId, backendApi])
 
     return (
         <StyledDialog open={true} onClose={closeDialog}>

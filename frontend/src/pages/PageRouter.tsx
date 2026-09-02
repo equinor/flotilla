@@ -12,7 +12,15 @@ export const SimpleMissionPageRouter = () => {
     const inspectionId = searchParams.get('inspectionId') ?? undefined
     const analysisId = searchParams.get('analysisId') ?? undefined
 
-    return <MissionPage missionId={id} inspectionId={inspectionId} analysisId={analysisId} includeHeader={false} />
+    return (
+        <MissionPage
+            missionId={id}
+            inspectionId={inspectionId}
+            analysisId={analysisId}
+            lookupInspectionId={analysisId ?? inspectionId}
+            includeHeader={false}
+        />
+    )
 }
 
 export const MissionPageRouter = () => {
@@ -24,7 +32,15 @@ export const MissionPageRouter = () => {
     const inspectionId = searchParams.get('inspectionId') ?? undefined
     const analysisId = searchParams.get('analysisId') ?? undefined
 
-    return <MissionPage missionId={missionId} inspectionId={inspectionId} analysisId={analysisId} includeHeader />
+    return (
+        <MissionPage
+            missionId={missionId}
+            inspectionId={inspectionId}
+            analysisId={analysisId}
+            lookupInspectionId={undefined}
+            includeHeader
+        />
+    )
 }
 
 export const MissionDefinitionPageRouter = () => {
