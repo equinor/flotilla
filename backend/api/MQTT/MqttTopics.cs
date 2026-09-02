@@ -15,7 +15,6 @@ namespace Api.Mqtt
         {
             { "isar/+/status", typeof(IsarStatusMessage) },
             { "isar/+/robot_info", typeof(IsarRobotInfoMessage) },
-            { "isar/+/robot_heartbeat", typeof(IsarRobotHeartbeatMessage) },
             { "isar/+/aborted_mission", typeof(IsarMissionAbortedMessage) },
             { "isar/+/mission/+", typeof(IsarMissionMessage) },
             { "isar/+/task/+", typeof(IsarTaskMessage) },

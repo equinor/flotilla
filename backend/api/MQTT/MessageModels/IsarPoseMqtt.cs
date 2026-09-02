@@ -30,18 +30,6 @@ namespace Api.Mqtt.MessageModels
 
         [JsonPropertyName("frame")]
         public IsarFrame Frame { get; set; }
-
-        public void CopyIsarPoseToRobotPose(Pose robotPose)
-        {
-            robotPose.Position.X = Position.X;
-            robotPose.Position.Y = Position.Y;
-            robotPose.Position.Z = Position.Z;
-
-            robotPose.Orientation.X = Orientation.X;
-            robotPose.Orientation.Y = Orientation.Y;
-            robotPose.Orientation.Z = Orientation.Z;
-            robotPose.Orientation.W = Orientation.W;
-        }
     }
 
     public class IsarPosition
