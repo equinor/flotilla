@@ -93,8 +93,6 @@ namespace Api.Controllers
                 newMissionRun.SetEstimatedTaskDuration();
             }
 
-            // Compare with GetTasksFromSource
-
             try
             {
                 newMissionRun = await missionRunService.Create(newMissionRun);
