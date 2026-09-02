@@ -10,8 +10,8 @@ import { MissionStatusType, selectMissionStatusType } from './AutoScheduleMissio
 import { tokens } from '@equinor/eds-tokens'
 import { useNavigate } from 'react-router'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { Button, Icon, Typography } from '@equinor/eds-core-react'
-import { StyledDialog } from 'components/Styles/StyledComponents'
+import { Button, Chip, Icon, Typography } from '@equinor/eds-core-react'
+import { StyledDialog, subtleCardShadow } from 'components/Styles/StyledComponents'
 import { useBackendApi } from 'api/UseBackendApi'
 import { InstallationContext } from 'components/Contexts/InstallationContext'
 import { Icons } from 'utils/icons'
@@ -36,7 +36,7 @@ const CalendarColors = {
         border: tokens.colors.interactive.disabled__text.hex,
     },
     Passed: {
-        background: '#f7f7f7',
+        background: tokens.colors.ui.background__light.hex,
         border: tokens.colors.interactive.disabled__text.hex,
     },
 }
@@ -71,6 +71,12 @@ const CalendarWrapper = styled.div`
         background-color: ${tokens.colors.ui.background__default.hex};
     }
 
+    .rbc-header.rbc-today {
+        color: ${tokens.colors.interactive.primary__resting.hex};
+        font-weight: 600;
+        border-bottom: 2px solid ${tokens.colors.interactive.primary__resting.hex};
+    }
+
     .rbc-day-bg {
         display: none;
     }
@@ -81,6 +87,12 @@ const CalendarWrapper = styled.div`
 
     .rbc-event {
         padding: 2px !important;
+        cursor: pointer;
+        transition: box-shadow 0.15s ease-in-out;
+    }
+
+    .rbc-event:hover {
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18) !important;
     }
 
     .rbc-event-content {
@@ -105,37 +117,37 @@ const CalendarWrapper = styled.div`
         border-top: none;
     }
 
+    .rbc-timeslot-group {
+        border-bottom: 1px solid ${tokens.colors.ui.background__medium.hex};
+    }
+
+    .rbc-time-content > * + * > * {
+        border-left: none;
+    }
+
+    .rbc-day-slot .rbc-time-slot {
+        border-top: none;
+    }
+
     .rbc-time-gutter {
         text-align: center;
         background-color: ${tokens.colors.ui.background__default.hex};
+    }
+
+    .rbc-current-time-indicator {
+        height: 1.5px;
+        background-color: ${tokens.colors.interactive.primary__resting.hex};
     }
 `
 
 const LegendWrapper = styled.div`
     display: flex;
-    gap: 16px;
+    gap: 8px;
     margin-bottom: 12px;
-    font-size: 14px;
     align-items: center;
     flex-wrap: wrap;
     align-self: flex-start;
-    font-family: Equinor;
 `
-
-const LegendItem = styled.div`
-    display: flex;
-    align-items: center;
-    gap: 6px;
-`
-
-const LegendColor = styled.span<{ color: string }>`
-    width: 20px;
-    height: 16px;
-    background-color: ${({ color }) => color};
-    border: 1px solid #ccc;
-    border-radius: 0;
-`
-
 const StyledEvent = styled.div`
     position: relative,
     width: 100%;
@@ -161,6 +173,7 @@ const StyledSkipButton = styled(Button)`
     cursor: pointer;
     font-size: 12px;
     height: 25px;
+    border-radius: 4px;
     background-color: ${CalendarColors.Planned.background};
     color: ${tokens.colors.text.static_icons__default.hex};
     border: 1px solid ${CalendarColors.Planned.border};
@@ -181,7 +194,12 @@ const StyledEditButton = styled(Button)`
     position: absolute;
     bottom: 4px;
     right: 4px;
+    width: 25px;
     height: 25px;
+
+    &:hover {
+        background-color: ${tokens.colors.ui.background__default.hex};
+    }
 `
 
 const legendItems = [
@@ -292,9 +310,11 @@ export const CalendarPro = () => {
     const CustomEvent = ({ event }: { event: any }) => {
         return (
             <StyledEvent>
-                <span>{event.title}</span>
+                <Typography variant="caption" as="span" color={tokens.colors.text.static_icons__default.hex}>
+                    {event.title}
+                </Typography>
                 <StyledEditButton variant="ghost_icon" onClick={() => handleSelectEditEvent(event)}>
-                    <Icon name={Icons.Edit} size={16} />
+                    <Icon name={Icons.Edit} size={16} color={event.color.border} />
                 </StyledEditButton>
                 {event.skip && (
                     <StyledSkipButton onClick={() => handleSelectSkipEvent(event)}>
@@ -322,10 +342,9 @@ export const CalendarPro = () => {
         <>
             <LegendWrapper>
                 {legendItems.map(({ color, label }) => (
-                    <LegendItem key={label}>
-                        <LegendColor color={color.background} />
-                        <span>{TranslateText(label)}</span>
-                    </LegendItem>
+                    <Chip key={label} style={{ background: color.background, borderColor: color.border }}>
+                        {TranslateText(label)}
+                    </Chip>
                 ))}
             </LegendWrapper>
             <CalendarWrapper>
@@ -353,8 +372,10 @@ export const CalendarPro = () => {
                         style: {
                             backgroundColor: event.color.background,
                             borderRadius: '4px',
-                            border: `1px solid ${event.color.border}`,
-                            color: '#000',
+                            border: `1px solid ${tokens.colors.ui.background__medium.hex}`,
+                            borderLeft: `4px solid ${event.color.border}`,
+                            boxShadow: subtleCardShadow,
+                            color: tokens.colors.text.static_icons__default.hex,
                         },
                     })}
                     onDoubleClickEvent={(event) =>
