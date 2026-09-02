@@ -5,7 +5,7 @@ import 'react-big-calendar/lib/css/react-big-calendar.css'
 import styled from 'styled-components'
 import { useContext, useMemo, useState } from 'react'
 import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
-import { allDaysStartingSunday, DaysOfWeek } from 'models/AutoScheduleFrequency'
+import { allDaysStartingSunday, DaysOfWeek, getAutoScheduledOccurrences } from 'models/AutoScheduleFrequency'
 import { MissionStatusType, selectMissionStatusType } from './AutoScheduleMissionTableRow'
 import { tokens } from '@equinor/eds-tokens'
 import { useNavigate } from 'react-router'
@@ -17,6 +17,7 @@ import { InstallationContext } from 'components/Contexts/InstallationContext'
 import { Icons } from 'utils/icons'
 import { MissionSchedulingEditDialog } from 'components/Dialogs/MissionEditDialog'
 import { MissionDefinition } from 'models/MissionDefinition'
+import { useNow } from 'hooks/useNow'
 
 const locales = { nb }
 const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales })
@@ -190,6 +191,13 @@ const legendItems = [
     { color: CalendarColors.Passed, label: 'Passed' },
 ]
 
+const statusToColor: Record<MissionStatusType, (typeof CalendarColors)[keyof typeof CalendarColors]> = {
+    [MissionStatusType.ScheduledJob]: CalendarColors.Planned,
+    [MissionStatusType.FutureUnstartedJob]: CalendarColors.Future,
+    [MissionStatusType.SkippedJob]: CalendarColors.Skipped,
+    [MissionStatusType.PastJob]: CalendarColors.Passed,
+}
+
 export const CalendarPro = () => {
     const { missionDefinitions } = useMissionDefinitionsContext()
     const { TranslateText } = useLanguageContext()
@@ -199,12 +207,12 @@ export const CalendarPro = () => {
     const [skipDialogOpen, setSkipDialogOpen] = useState<boolean>(false)
     const [selectedMissionToEdit, setSelectedMissionToEdit] = useState<MissionDefinition>()
     const [selectedEvent, setSelectedEvent] = useState<any>(null)
+    const now = useNow()
 
-    const getTargetDate = (day: DaysOfWeek, time: string) => {
-        const today = new Date()
-        const offset = (allDaysStartingSunday.indexOf(day) - today.getDay() + 7) % 7
-        const targetDate = new Date(today)
-        targetDate.setDate(today.getDate() + offset)
+    const getTargetDate = (day: DaysOfWeek, time: string, now: Date) => {
+        const offset = (allDaysStartingSunday.indexOf(day) - now.getDay() + 7) % 7
+        const targetDate = new Date(now)
+        targetDate.setDate(now.getDate() + offset)
         const hours = time.split(':').map(Number)[0]
         let minutes = time.split(':').map(Number)[1]
         if (hours === 23) minutes = 0 // To prevent wrapping over to next day
@@ -213,41 +221,28 @@ export const CalendarPro = () => {
     }
 
     const events = useMemo(() => {
-        return missionDefinitions
-            .filter((m) => m.autoScheduleFrequency)
-            .flatMap((mission) => {
-                return mission.autoScheduleFrequency!.schedulingTimesCETperWeek.flatMap((timeAndDay) => {
-                    const day = timeAndDay.dayOfWeek
-                    const time = timeAndDay.timeOfDay
-                    const targetDate = getTargetDate(day, time)
-                    const status = selectMissionStatusType(day, time, mission)
-                    const color =
-                        status === MissionStatusType.ScheduledJob
-                            ? CalendarColors.Planned
-                            : status === MissionStatusType.FutureUnstartedJob
-                              ? CalendarColors.Future
-                              : status === MissionStatusType.SkippedJob
-                                ? CalendarColors.Skipped
-                                : CalendarColors.Passed
+        return getAutoScheduledOccurrences(missionDefinitions).map(({ mission, dayOfWeek, timeOfDay }) => {
+            const targetDate = getTargetDate(dayOfWeek, timeOfDay, now)
+            const status = selectMissionStatusType(dayOfWeek, timeOfDay, mission, now)
+            const color = statusToColor[status]
 
-                    return {
-                        id: `${mission.id}-${day}-${time}`,
-                        title: `${mission.name}${status === MissionStatusType.SkippedJob ? ' (' + TranslateText('Skipped') + ')' : ''}`,
-                        start: targetDate,
-                        end: new Date(targetDate.getTime() + 59 * 60 * 1000),
-                        skip: status === MissionStatusType.ScheduledJob,
-                        resource: mission.id,
-                        color,
-                        status,
-                        metadata: {
-                            missionName: mission.name,
-                            missionId: mission.id,
-                            time,
-                        },
-                    }
-                })
-            })
-    }, [missionDefinitions])
+            return {
+                id: `${mission.id}-${dayOfWeek}-${timeOfDay}`,
+                title: `${mission.name}${status === MissionStatusType.SkippedJob ? ' (' + TranslateText('Skipped') + ')' : ''}`,
+                start: targetDate,
+                end: new Date(targetDate.getTime() + 59 * 60 * 1000),
+                skip: status === MissionStatusType.ScheduledJob,
+                resource: mission.id,
+                color,
+                status,
+                metadata: {
+                    missionName: mission.name,
+                    missionId: mission.id,
+                    time: timeOfDay,
+                },
+            }
+        })
+    }, [missionDefinitions, now])
 
     const handleCloseSkipDialog = () => {
         setSkipDialogOpen(false)

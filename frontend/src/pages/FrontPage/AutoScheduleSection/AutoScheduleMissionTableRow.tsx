@@ -1,8 +1,13 @@
 import { Button, Icon, Popover, Table, Typography } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { allDays, allDaysIndexOfToday, DaysOfWeek, parseAutoScheduledJobIds } from 'models/AutoScheduleFrequency'
+import {
+    allDays,
+    DaysOfWeek,
+    getAllDaysIndexOfToday,
+    getCetTimeOnly,
+    isJobScheduledAt,
+} from 'models/AutoScheduleFrequency'
 import styled from 'styled-components'
-import { convertUTCDateToLocalDate } from 'utils/StringFormatting'
 import { MissionDefinition } from 'models/MissionDefinition'
 import { Link } from 'react-router'
 import { StyledDialog } from 'components/Styles/StyledComponents'
@@ -13,6 +18,7 @@ import { useBackendApi } from 'api/UseBackendApi'
 import { InstallationContext } from 'components/Contexts/InstallationContext'
 import { MissionSchedulingEditDialog } from 'components/Dialogs/MissionEditDialog'
 import { phone_width } from 'utils/constants'
+import { useNow } from 'hooks/useNow'
 
 const StyledTableRow = styled.div`
     display: grid;
@@ -53,24 +59,16 @@ export enum MissionStatusType {
     FutureUnstartedJob = 'FutureUnstartedJob',
 }
 
-const currentDayOfTheWeek = allDays[allDaysIndexOfToday]
-
-const getNowAsTimeOnly = () => {
-    return convertUTCDateToLocalDate(new Date()).toISOString().substring(11, 19)
-}
-
-export const selectMissionStatusType = (day: DaysOfWeek, time: string, mission: MissionDefinition) => {
+export const selectMissionStatusType = (day: DaysOfWeek, time: string, mission: MissionDefinition, now: Date) => {
+    const currentDayOfTheWeek = allDays[getAllDaysIndexOfToday(now)]
     if (day !== currentDayOfTheWeek) {
         return MissionStatusType.FutureUnstartedJob
     }
-    if (time < getNowAsTimeOnly()) {
+    const nowAsTimeOnly = getCetTimeOnly(now)
+    if (time <= nowAsTimeOnly) {
         return MissionStatusType.PastJob
     }
-    if (
-        mission.autoScheduleFrequency &&
-        mission.autoScheduleFrequency.autoScheduledJobs &&
-        parseAutoScheduledJobIds(mission.autoScheduleFrequency.autoScheduledJobs)[time]
-    ) {
+    if (isJobScheduledAt(mission, time)) {
         return MissionStatusType.ScheduledJob
     }
     return MissionStatusType.SkippedJob
@@ -92,8 +90,9 @@ export const AutoScheduleMissionTableRow = ({
     const [isEditDialogOpen, setIsEditDialogOpen] = useState<boolean>(false)
     const [referenceElement, setReferenceElement] = useState<HTMLButtonElement | null>(null)
     const [isOpen, setIsOpen] = useState(false)
+    const now = useNow()
 
-    const missionStatusType = selectMissionStatusType(day, time, mission)
+    const missionStatusType = selectMissionStatusType(day, time, mission, now)
 
     const typographyColor =
         missionStatusType === MissionStatusType.SkippedJob || missionStatusType === MissionStatusType.PastJob

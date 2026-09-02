@@ -6,11 +6,12 @@ import { Autocomplete, Button, Icon, Table, Typography } from '@equinor/eds-core
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
 import { StyledDialog, StyledPage, StyledTableBody, StyledTableCell } from 'components/Styles/StyledComponents'
-import { allDays, allDaysIndexOfToday, DaysOfWeek } from 'models/AutoScheduleFrequency'
+import { allDays, DaysOfWeek, getAllDaysIndexOfToday, getTimeMissionPairsForDay } from 'models/AutoScheduleFrequency'
 import styled from 'styled-components'
 import { capitalizeFirstLetter } from 'utils/StringFormatting'
 import { Icons } from 'utils/icons'
 import { memo, useContext, useState } from 'react'
+import { useNow } from 'hooks/useNow'
 import { MissionDefinition } from 'models/MissionDefinition'
 import { phone_width } from 'utils/constants'
 import { MissionSchedulingEditDialog } from 'components/Dialogs/MissionEditDialog'
@@ -102,6 +103,9 @@ const DayOverview = () => {
     const { TranslateText } = useLanguageContext()
     const { missionDefinitions } = useMissionDefinitionsContext()
 
+    const now = useNow()
+    const allDaysIndexOfToday = getAllDaysIndexOfToday(now)
+
     const autoScheduleMissionDefinitions = missionDefinitions.filter((m) => m.autoScheduleFrequency)
     const allDaysSortedByToday = allDays.slice(allDaysIndexOfToday).concat(allDays.slice(0, allDaysIndexOfToday))
 
@@ -129,17 +133,7 @@ const DayTable = ({ day, isToday }: { day: DaysOfWeek; isToday: boolean }) => {
     const { TranslateText } = useLanguageContext()
     const { missionDefinitions } = useMissionDefinitionsContext()
 
-    const timeMissionPairs = missionDefinitions
-        .filter((m) => m.autoScheduleFrequency)
-        .map((mission) =>
-            mission
-                .autoScheduleFrequency!.schedulingTimesCETperWeek.filter((timeAndDay) => timeAndDay.dayOfWeek === day)
-                .map((timeAndDay) => {
-                    return { time: timeAndDay.timeOfDay, mission }
-                })
-        )
-        .flat()
-        .sort((a, b) => (a.time === b.time ? 0 : a.time > b.time ? 1 : -1))
+    const timeMissionPairs = getTimeMissionPairsForDay(missionDefinitions, day)
 
     return (
         <Table key={day}>

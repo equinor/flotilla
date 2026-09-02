@@ -2,11 +2,17 @@ import { Button, Icon, Table } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
-import { allDays, allDaysIndexOfToday, parseAutoScheduledJobIds } from 'models/AutoScheduleFrequency'
+import {
+    allDays,
+    getAllDaysIndexOfToday,
+    getTimeMissionPairsForDay,
+    isJobScheduledAt,
+} from 'models/AutoScheduleFrequency'
 import styled from 'styled-components'
 import { Icons } from 'utils/icons'
 import { useState } from 'react'
 import { AutoScheduleMissionTableRow } from './AutoScheduleMissionTableRow'
+import { useNow } from 'hooks/useNow'
 
 const StyledNextAutoMission = styled.div`
     margin-top: 30px;
@@ -72,21 +78,12 @@ export const NextAutoScheduleMissionView = () => {
     const { missionDefinitions } = useMissionDefinitionsContext()
     const [showMore, setShowMore] = useState(false)
 
-    const autoScheduleMissionDefinitions = missionDefinitions.filter((m) => m.autoScheduleFrequency)
-    const currentDayOfTheWeek = allDays[allDaysIndexOfToday]
+    const now = useNow()
+    const currentDayOfTheWeek = allDays[getAllDaysIndexOfToday(now)]
 
-    const timeMissionPairs = autoScheduleMissionDefinitions
-        .filter((m) => m.autoScheduleFrequency?.autoScheduledJobs)
-        .flatMap((m) =>
-            m
-                .autoScheduleFrequency!.schedulingTimesCETperWeek.filter(
-                    (timeAndDay) =>
-                        timeAndDay.dayOfWeek === currentDayOfTheWeek &&
-                        parseAutoScheduledJobIds(m.autoScheduleFrequency!.autoScheduledJobs!)[timeAndDay.timeOfDay]
-                )
-                .map((timeAndDay) => ({ time: timeAndDay.timeOfDay, mission: m }))
-        )
-        .sort((a, b) => (a.time === b.time ? 0 : a.time > b.time ? 1 : -1))
+    const timeMissionPairs = getTimeMissionPairsForDay(missionDefinitions, currentDayOfTheWeek).filter(
+        ({ time, mission }) => isJobScheduledAt(mission, time)
+    )
 
     return (
         <>
