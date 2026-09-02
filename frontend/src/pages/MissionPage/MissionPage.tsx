@@ -169,10 +169,18 @@ const MissionPageWithMission = ({
                                 )}
                             </VideoStreamSection>
                             {inspectionId && data && (
-                                <InspectionTaskDialogView selectedInspectionId={inspectionId} inspectionData={data} />
+                                <InspectionTaskDialogView
+                                    selectedInspectionId={inspectionId}
+                                    inspectionData={data}
+                                    tasks={mission.tasks}
+                                />
                             )}
                             {analysisId && data && (
-                                <AnalysisResultDialogView selectedInspectionId={analysisId} inspectionData={data} />
+                                <AnalysisResultDialogView
+                                    selectedInspectionId={analysisId}
+                                    inspectionData={data}
+                                    tasks={mission.tasks}
+                                />
                             )}
                             {!isPending && data && <InspectionOverviewSection inspectionData={data} />}
                             {!isPending && hasAnalysisType && data && <AnalysisOverviewSection inspectionData={data} />}
