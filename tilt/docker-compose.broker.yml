@@ -1,0 +1,24 @@
+# MQTT broker for the flotilla stack.
+#
+# Shared by both consumers: flotilla's standalone Tiltfile and the robotics
+# local-orchestration Tiltfile (which passes this file as an extra path to
+# docker_compose([...])). The build context is an absolute path via
+# ${FLOTILLA_ROOT} because, when multiple compose files are combined, Docker
+# Compose resolves relative build contexts against the FIRST file's directory --
+# which is the robotics dir, not this one. Both callers export FLOTILLA_ROOT.
+services:
+  mqtt-broker:
+    build:
+      context: ${FLOTILLA_ROOT}/broker
+    container_name: flotilla-mqtt-broker
+    ports:
+      - "1883:1883"
+    environment:
+      MQTT_ALLOW_INSECURE_LOCAL_CONNECTIONS: "true"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep mosquitto || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 3s
