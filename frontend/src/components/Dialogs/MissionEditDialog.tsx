@@ -37,11 +37,16 @@ const StyledSelectSection = styled.div`
 `
 const StyledDaySelector = styled.div`
     display: flex;
-    gap: 2px;
+    gap: 6px;
 `
 const DayButton = styled(Button)`
-    width: 42px;
-    border-radius: 2px !important;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+
+    &:hover {
+        border-radius: 50%;
+    }
 `
 const StyledTimeSelector = styled.div`
     display: flex;
@@ -144,9 +149,14 @@ export const MissionSchedulingEditDialog = ({ mission, isOpen, onClose }: Missio
             <StyledDialog open={isOpen} isDismissable={true} onClose={onClose}>
                 <StyledDialog.Header>
                     <StyledDialog.Title>
-                        <Typography variant="h4">
-                            {TranslateText('Edit auto scheduling of mission') + ' ' + mission.name}
+                        <Typography
+                            variant="caption"
+                            color={tokens.colors.text.static_icons__tertiary.hex}
+                            style={{ marginBottom: 2 }}
+                        >
+                            {TranslateText('Edit auto scheduling of mission')}
                         </Typography>
+                        <Typography variant="h4">{mission.name}</Typography>
                     </StyledDialog.Title>
                 </StyledDialog.Header>
                 <FormCard>
