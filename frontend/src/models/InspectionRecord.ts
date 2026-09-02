@@ -58,6 +58,12 @@ export interface InspectionRecord {
     analysisGroupId: string
 }
 
+// Mirrors the backend InspectionResultMessage sent with the
+// "Inspection Visulization Ready" SignalR event.
+export interface FlotillaInspectionResultMessage {
+    inspectionId: string
+}
+
 export interface FlotillaAnalysisResultMessage {
     inspectionId: string
     analysisType: AnalysisType

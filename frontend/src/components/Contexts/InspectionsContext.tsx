@@ -4,7 +4,7 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { queryClient } from '../../App'
 import { useBackendApi } from 'api/UseBackendApi'
 import { useSaraApi } from 'api/UseSaraApi'
-import { FlotillaAnalysisResultMessage, InspectionData } from 'models/InspectionRecord'
+import { FlotillaAnalysisResultMessage, FlotillaInspectionResultMessage, InspectionData } from 'models/InspectionRecord'
 import { AnalysisType } from 'models/MissionDefinition'
 
 interface IInspectionData {
@@ -60,9 +60,15 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
     useEffect(() => {
         if (connectionReady) {
             registerEvent(SignalREventLabels.inspectionVisualizationReady, (username: string, message: string) => {
-                const { inspectionId } = JSON.parse(message)
+                const { inspectionId }: FlotillaInspectionResultMessage = JSON.parse(message)
                 queryClient.invalidateQueries({
                     queryKey: ['fetchInspectionData', inspectionId],
+                })
+                // The mission page reads inspections through the list query with a null
+                // installation code and analysis type, so invalidate the whole prefix rather
+                // than trying to reconstruct a key that would not match.
+                queryClient.invalidateQueries({
+                    queryKey: ['fetchInspectionListData'],
                 })
                 queryClient.fetchQuery({
                     queryKey: ['fetchInspectionData', inspectionId],
@@ -80,12 +86,10 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
         if (connectionReady) {
             registerEvent(SignalREventLabels.analysisResultReady, (username: string, message: string) => {
                 const inspectionResult: FlotillaAnalysisResultMessage = JSON.parse(message)
+                // The mission page passes null for both installation code and analysis type,
+                // so a prefixed key never matches it. Invalidate every list query instead.
                 queryClient.invalidateQueries({
-                    queryKey: [
-                        'fetchInspectionListData',
-                        inspectionResult.installationCode,
-                        inspectionResult.analysisType,
-                    ],
+                    queryKey: ['fetchInspectionListData'],
                 })
                 queryClient.invalidateQueries({
                     queryKey: ['fetchInspectionData', inspectionResult.inspectionId],
