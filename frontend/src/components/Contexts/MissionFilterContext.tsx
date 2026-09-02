@@ -324,7 +324,9 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
                 }
             },
         }),
-        [filterState, TranslateText]
+        // installation.installationCode is read by getFormattedFilter above. Without it
+        // the memo keeps returning a filter for the previously selected installation.
+        [filterState, TranslateText, installation.installationCode]
     )
 
     const isAllNotSet = () => {

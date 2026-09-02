@@ -180,7 +180,11 @@ const useMissionRuns = (): IMissionRunsContext => {
     useEffect(() => {
         if (!isAuthenticated) return
         fetchAndUpdateMissions()
-    }, [installation])
+        // isAuthenticated must be listed: when the provider mounts before MSAL has an
+        // active account the guard returns early, and without it the missions are never
+        // fetched once authentication completes.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [installation, isAuthenticated])
 
     useOnPageVisible(() => {
         if (isAuthenticated) fetchAndUpdateMissions()

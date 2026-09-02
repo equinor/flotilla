@@ -115,7 +115,7 @@ const AuthTileLayer: React.FC<AuthTileLayerProps> = ({ mapInfo }) => {
                 tileLayerRef.current = null
             }
         }
-    }, [map, mapInfo])
+    }, [map, mapInfo, backendApi])
     return null
 }
 
