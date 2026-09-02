@@ -61,13 +61,12 @@ const useMissionSelector = (missionId: string | undefined, inspectionId: string 
     }, [selectedMission])
 
     useEffect(() => {
-        if (connectionReady) {
-            registerEvent(SignalREventLabels.missionRunUpdated, (username: string, message: string) => {
-                const updatedMission: Mission = JSON.parse(message)
-                setSelectedMission((oldMission) => (updatedMission.id === oldMission?.id ? updatedMission : oldMission))
-            })
-        }
-    }, [connectionReady])
+        if (!connectionReady) return
+        return registerEvent(SignalREventLabels.missionRunUpdated, (username: string, message: string) => {
+            const updatedMission: Mission = JSON.parse(message)
+            setSelectedMission((oldMission) => (updatedMission.id === oldMission?.id ? updatedMission : oldMission))
+        })
+    }, [registerEvent, connectionReady])
 
     const videoMediaStreams = (selectedMission ? mediaStreams[selectedMission.robot.id]?.streams : undefined) ?? []
 

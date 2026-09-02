@@ -209,81 +209,76 @@ export const AlertProvider: FC<Props> = ({ children }) => {
 
     // Register a signalR event handler that listens for new failed missions
     useEffect(() => {
-        if (connectionReady) {
-            registerEvent(SignalREventLabels.missionRunFailed, (username: string, message: string) => {
-                const newFailedMission: Mission = JSON.parse(message)
-                const lastDismissTime: Date = getLastDismissalTime()
+        if (!connectionReady) return
+        return registerEvent(SignalREventLabels.missionRunFailed, (username: string, message: string) => {
+            const newFailedMission: Mission = JSON.parse(message)
+            const lastDismissTime: Date = getLastDismissalTime()
 
-                setRecentFailedMissions((failedMissions) => {
-                    if (
-                        !newFailedMission.installationCode ||
-                        newFailedMission.installationCode.toLocaleLowerCase() !==
-                            installation.installationCode.toLocaleLowerCase()
-                    )
-                        return failedMissions // Ignore missions for other installations
-                    // Ignore missions shortly after the user dismissed the last one
-                    if (convertUTCDateToLocalDate(new Date(newFailedMission.endTime!)) <= lastDismissTime)
-                        return failedMissions
-                    const isDuplicate = failedMissions.filter((m) => m.id === newFailedMission.id).length > 0
-                    if (isDuplicate) return failedMissions // Ignore duplicate failed missions
-                    return [...failedMissions, newFailedMission]
-                })
+            setRecentFailedMissions((failedMissions) => {
+                if (
+                    !newFailedMission.installationCode ||
+                    newFailedMission.installationCode.toLocaleLowerCase() !==
+                        installation.installationCode.toLocaleLowerCase()
+                )
+                    return failedMissions // Ignore missions for other installations
+                // Ignore missions shortly after the user dismissed the last one
+                if (convertUTCDateToLocalDate(new Date(newFailedMission.endTime!)) <= lastDismissTime)
+                    return failedMissions
+                const isDuplicate = failedMissions.filter((m) => m.id === newFailedMission.id).length > 0
+                if (isDuplicate) return failedMissions // Ignore duplicate failed missions
+                return [...failedMissions, newFailedMission]
             })
-        }
+        })
     }, [registerEvent, connectionReady, installation])
 
     useEffect(() => {
-        if (connectionReady) {
-            registerEvent(SignalREventLabels.alert, (username: string, message: string) => {
-                const backendAlert: Alert = JSON.parse(message)
-                if (
-                    backendAlert.installationCode.toLocaleLowerCase() !==
-                    installation.installationCode.toLocaleLowerCase()
+        if (!connectionReady) return
+        return registerEvent(SignalREventLabels.alert, (username: string, message: string) => {
+            const backendAlert: Alert = JSON.parse(message)
+            if (backendAlert.installationCode.toLocaleLowerCase() !== installation.installationCode.toLocaleLowerCase())
+                return
+
+            const alertType = alertTypeEnumMap[backendAlert.alertCode]
+
+            if (backendAlert.robotId !== null && !enabledRobots.filter((r) => r.id === backendAlert.robotId)) return
+
+            if (alertType === AlertType.AutoScheduleFail) {
+                const newAutoScheduleFailedMissionDict: AutoScheduleFailedMissionDict = {
+                    ...autoScheduleFailedMissionDict,
+                }
+                newAutoScheduleFailedMissionDict[backendAlert.alertTitle] = backendAlert.alertMessage
+                setAutoScheduleFailedMissionDict(newAutoScheduleFailedMissionDict)
+                window.localStorage.setItem(
+                    'autoScheduleFailedMissionDict',
+                    JSON.stringify(newAutoScheduleFailedMissionDict)
                 )
-                    return
+                return
+            }
 
-                const alertType = alertTypeEnumMap[backendAlert.alertCode]
-
-                if (backendAlert.robotId !== null && !enabledRobots.filter((r) => r.id === backendAlert.robotId)) return
-
-                if (alertType === AlertType.AutoScheduleFail) {
-                    const newAutoScheduleFailedMissionDict: AutoScheduleFailedMissionDict = {
-                        ...autoScheduleFailedMissionDict,
-                    }
-                    newAutoScheduleFailedMissionDict[backendAlert.alertTitle] = backendAlert.alertMessage
-                    setAutoScheduleFailedMissionDict(newAutoScheduleFailedMissionDict)
-                    window.localStorage.setItem(
-                        'autoScheduleFailedMissionDict',
-                        JSON.stringify(newAutoScheduleFailedMissionDict)
-                    )
-                    return
-                }
-
-                if (alertType === AlertType.InfoAlert) {
-                    setAlert(
-                        alertType,
-                        <InfoAlertContent title={backendAlert.alertTitle} message={backendAlert.alertMessage} />,
-                        AlertCategory.INFO
-                    )
-                    setListAlert(
-                        alertType,
-                        <InfoAlertListContent title={backendAlert.alertTitle} message={backendAlert.alertMessage} />,
-                        AlertCategory.INFO
-                    )
-                } else {
-                    setAlert(
-                        alertType,
-                        <FailedAlertContent title={backendAlert.alertTitle} message={backendAlert.alertMessage} />,
-                        AlertCategory.ERROR
-                    )
-                    setListAlert(
-                        alertType,
-                        <FailedAlertListContent title={backendAlert.alertTitle} message={backendAlert.alertMessage} />,
-                        AlertCategory.ERROR
-                    )
-                }
-            })
-        }
+            if (alertType === AlertType.InfoAlert) {
+                setAlert(
+                    alertType,
+                    <InfoAlertContent title={backendAlert.alertTitle} message={backendAlert.alertMessage} />,
+                    AlertCategory.INFO
+                )
+                setListAlert(
+                    alertType,
+                    <InfoAlertListContent title={backendAlert.alertTitle} message={backendAlert.alertMessage} />,
+                    AlertCategory.INFO
+                )
+            } else {
+                setAlert(
+                    alertType,
+                    <FailedAlertContent title={backendAlert.alertTitle} message={backendAlert.alertMessage} />,
+                    AlertCategory.ERROR
+                )
+                setListAlert(
+                    alertType,
+                    <FailedAlertListContent title={backendAlert.alertTitle} message={backendAlert.alertMessage} />,
+                    AlertCategory.ERROR
+                )
+            }
+        })
     }, [registerEvent, connectionReady, installation, enabledRobots])
 
     const robotsWithFrozenQueue = enabledRobots.filter((robot) => robot.status === RobotStatus.Lockdown)
