@@ -1,0 +1,26 @@
+# PostgreSQL for the flotilla standalone stack.
+#
+# Only used by flotilla's own Tiltfile. The robotics stack runs its own shared
+# postgres (SARA uses the same instance), so it does NOT include this file --
+# it would collide on the service name and host port.
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: flotilla-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ${FLOTILLA_ROOT}/tilt/postgres-init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - flotilla-postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  flotilla-postgres-data:
