@@ -12,8 +12,7 @@ import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinit
 import { StyledPage, subtleCardShadow } from 'components/Styles/StyledComponents'
 import styled from 'styled-components'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
-import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
-import { AlertCategory } from 'components/Alerts/AlertsBanner'
+import { AlertKind } from 'components/Alerts/AlertContent'
 import { MissionDefinitionTaskTableAndMap } from '../MissionPage/TaskTableAndMap'
 import { EditButton, FormContainer, FormItem, TitleComponent } from './MissionDefinitionStyledComponents'
 import {
@@ -111,7 +110,7 @@ const MetadataItem = ({
 
 const MissionDefinitionPageBody = ({ missionDefinition }: { missionDefinition: MissionDefinition }) => {
     const { TranslateText } = useLanguageContext()
-    const { setAlert, setListAlert } = useAlertContext()
+    const { raiseAlert } = useAlertContext()
     const backendApi = useBackendApi()
 
     const [isEditingName, setIsEditingName] = useState<boolean>(false)
@@ -125,20 +124,10 @@ const MissionDefinitionPageBody = ({ missionDefinition }: { missionDefinition: M
             name: missionDefinition.name,
         }
         backendApi.updateMissionDefinition(missionDefinition.id, defaultMissionDefinitionForm).catch(() => {
-            setAlert(
-                AlertType.RequestFail,
-                <FailedRequestAlertContent
-                    translatedMessage={TranslateText('Failed to delete auto schedule frequency')}
-                />,
-                AlertCategory.ERROR
-            )
-            setListAlert(
-                AlertType.RequestFail,
-                <FailedRequestAlertListContent
-                    translatedMessage={TranslateText('Failed to delete auto schedule frequency')}
-                />,
-                AlertCategory.ERROR
-            )
+            raiseAlert(AlertType.RequestFail, {
+                kind: AlertKind.RequestFail,
+                message: TranslateText('Failed to delete auto schedule frequency'),
+            })
         })
     }
 

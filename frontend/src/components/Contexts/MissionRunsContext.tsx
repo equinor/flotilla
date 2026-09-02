@@ -4,8 +4,7 @@ import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { TaskStatus } from 'models/Task'
 import { useLanguageContext } from './LanguageContext'
 import { AlertType, useAlertContext } from './AlertContext'
-import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
-import { AlertCategory } from 'components/Alerts/AlertsBanner'
+import { AlertKind } from 'components/Alerts/AlertContent'
 import { useBackendApi } from 'api/UseBackendApi'
 import { AuthContext } from './AuthContext'
 import { InstallationContext } from './InstallationContext'
@@ -82,7 +81,7 @@ const useMissionRuns = (): IMissionRunsContext => {
     const [loadingRobotMissionSet, setLoadingRobotMissionSet] = useState<Set<string>>(new Set())
     const { registerEvent, connectionReady } = useSignalRContext()
     const { TranslateText } = useLanguageContext()
-    const { setAlert, setListAlert } = useAlertContext()
+    const { raiseAlert } = useAlertContext()
     const { installation } = useContext(InstallationContext)
     const { isAuthenticated } = useContext(AuthContext)
     const backendApi = useBackendApi()
@@ -138,16 +137,10 @@ const useMissionRuns = (): IMissionRunsContext => {
 
     const fetchAndUpdateMissions = () => {
         const onFetchError = () => {
-            setAlert(
-                AlertType.RequestFail,
-                <FailedRequestAlertContent translatedMessage={TranslateText('Failed to retrieve mission runs')} />,
-                AlertCategory.ERROR
-            )
-            setListAlert(
-                AlertType.RequestFail,
-                <FailedRequestAlertListContent translatedMessage={TranslateText('Failed to retrieve mission runs')} />,
-                AlertCategory.ERROR
-            )
+            raiseAlert(AlertType.RequestFail, {
+                kind: AlertKind.RequestFail,
+                message: TranslateText('Failed to retrieve mission runs'),
+            })
         }
 
         fetchMissionRuns({
