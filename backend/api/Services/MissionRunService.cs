@@ -4,7 +4,6 @@ using System.Linq.Expressions;
 using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
-using Api.Services.Models;
 using Api.Utilities;
 using Microsoft.EntityFrameworkCore;
 
@@ -33,23 +32,7 @@ namespace Api.Services
 
         public Task<IList<MissionRun>> ReadMissionRunQueue(string robotId, bool readOnly = true);
 
-        public Task<MissionRun?> ReadNextScheduledRunByMissionId(
-            string missionId,
-            bool readOnly = true
-        );
-
         public Task<MissionRun?> ReadNextScheduledMissionRun(string robotId, bool readOnly = true);
-
-        public Task<IList<MissionRun>> ReadMissionRuns(
-            string robotId,
-            IList<MissionStatus>? filterStatuses = null,
-            bool readOnly = true
-        );
-
-        public Task<MissionRun?> ReadLastExecutedMissionRunByRobot(
-            string robotId,
-            bool readOnly = true
-        );
 
         public bool IncludesUnsupportedInspectionType(MissionRun missionRun);
 
@@ -213,53 +196,6 @@ namespace Api.Services
                 .FirstOrDefaultAsync(missionRun =>
                     missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Queued
                 );
-        }
-
-        public async Task<IList<MissionRun>> ReadMissionRuns(
-            string robotId,
-            IList<MissionStatus>? filterStatuses = null,
-            bool readOnly = true
-        )
-        {
-            var missionFilter = ConstructFilter(
-                new MissionRunQueryStringParameters
-                {
-                    Statuses = filterStatuses as List<MissionStatus> ?? null,
-                    RobotId = robotId,
-                    PageSize = 100,
-                }
-            );
-
-            var query = await GetMissionRunsWithSubModels(readOnly: readOnly);
-            return await query
-                .Where(missionFilter)
-                .OrderBy(missionRun => missionRun.CreationTime)
-                .ToListAsync();
-        }
-
-        public async Task<MissionRun?> ReadNextScheduledRunByMissionId(
-            string missionId,
-            bool readOnly = true
-        )
-        {
-            var query = await GetMissionRunsWithSubModels(readOnly: readOnly);
-            return await query
-                .Where(m => m.MissionId == missionId && m.EndTime == null)
-                .OrderBy(m => m.CreationTime)
-                .FirstOrDefaultAsync();
-        }
-
-        public async Task<MissionRun?> ReadLastExecutedMissionRunByRobot(
-            string robotId,
-            bool readOnly = true
-        )
-        {
-            var query = await GetMissionRunsWithSubModels(readOnly: readOnly);
-            return await query
-                .Where(m => m.Robot.Id == robotId)
-                .Where(m => m.EndTime != null)
-                .OrderByDescending(m => m.EndTime)
-                .FirstOrDefaultAsync();
         }
 
         public bool IncludesUnsupportedInspectionType(MissionRun missionRun)

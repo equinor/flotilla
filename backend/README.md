@@ -92,7 +92,6 @@ AzureAd__Authority=http://localhost:8080/realms/robotics
 AzureAd__ClientId=flotilla-test
 AzureAd__ClientSecret=flotilla-test-secret
 Isar__Scopes__0=isar-api
-SARA__Scopes__0=sara-api
 Pointilla__Scopes__0=pointilla-api
 ```
 

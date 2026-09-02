@@ -14,28 +14,13 @@ namespace Api.Services
 
         public Task<Plant?> ReadById(string id, bool readOnly = true);
 
-        public Task<IEnumerable<Plant>> ReadByInstallation(
-            string installationCode,
-            bool readOnly = true
-        );
-
-        public Task<Plant?> ReadByPlantCode(string plantCode, bool readOnly = true);
-
         public Task<Plant?> ReadByInstallationAndPlantCode(
             Installation installation,
             string plantCode,
             bool readOnly = true
         );
 
-        public Task<Plant?> ReadByInstallationAndPlantCode(
-            string installationCode,
-            string plantCode,
-            bool readOnly = true
-        );
-
         public Task<Plant> Create(CreatePlantQuery newPlant);
-
-        public Task<Plant> Update(Plant plant);
 
         public Task<Plant?> Delete(string id);
 
@@ -89,14 +74,6 @@ namespace Api.Services
                 .ToListAsync();
         }
 
-        public async Task<Plant?> ReadByPlantCode(string plantCode, bool readOnly = true)
-        {
-            var query = await GetPlants(readOnly: readOnly);
-            return await query
-                .Where(a => a.PlantCode.ToLower().Equals(plantCode.ToLower()))
-                .FirstOrDefaultAsync();
-        }
-
         public async Task<Plant?> ReadByInstallationAndPlantCode(
             Installation installation,
             string plantCode,
@@ -109,30 +86,6 @@ namespace Api.Services
                     a.PlantCode.ToLower().Equals(plantCode.ToLower())
                     && a.Installation != null
                     && a.Installation.Id.Equals(installation.Id)
-                )
-                .FirstOrDefaultAsync();
-        }
-
-        public async Task<Plant?> ReadByInstallationAndPlantCode(
-            string installationCode,
-            string plantCode,
-            bool readOnly = true
-        )
-        {
-            var installation = await installationService.ReadByInstallationCode(
-                installationCode,
-                readOnly: true
-            );
-            if (installation == null)
-            {
-                return null;
-            }
-            var query = await GetPlants(readOnly: readOnly);
-            return await query
-                .Where(a =>
-                    a.Installation != null
-                    && a.Installation.Id.Equals(installation.Id)
-                    && a.PlantCode.ToLower().Equals(plantCode.ToLower())
                 )
                 .FirstOrDefaultAsync();
         }
@@ -167,14 +120,6 @@ namespace Api.Services
                 DetachTracking(context, plant);
             }
             return plant!;
-        }
-
-        public async Task<Plant> Update(Plant plant)
-        {
-            var entry = context.Update(plant);
-            await ApplyDatabaseUpdate(plant.Installation);
-            DetachTracking(context, plant);
-            return entry.Entity;
         }
 
         public async Task<Plant?> Delete(string id)

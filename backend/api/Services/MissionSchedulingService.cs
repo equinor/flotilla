@@ -16,8 +16,6 @@ namespace Api.Services
             string? isarMissionRunId,
             string? stopReason = null
         );
-
-        public Task DeleteAllScheduledMissions(string robotId, string? abortReason = null);
     }
 
     public class MissionSchedulingService(
@@ -291,38 +289,6 @@ namespace Api.Services
                 "StatusReason",
                 abortReason
             );
-        }
-
-        public async Task DeleteAllScheduledMissions(string robotId, string? abortReason)
-        {
-            var robot = await robotService.ReadById(robotId, readOnly: true);
-            if (robot == null)
-            {
-                string errorMessage = $"Robot with ID: {robotId} was not found in the database";
-                logger.LogError("{Message}", errorMessage);
-                throw new RobotNotFoundException(errorMessage);
-            }
-
-            var queuedMissionRuns = await missionRunService.ReadMissionRunQueue(
-                robotId,
-                readOnly: true
-            );
-            if (queuedMissionRuns is null)
-            {
-                string infoMessage =
-                    $"There were no mission runs in the queue to abort for robot {robotId}";
-                logger.LogWarning("{Message}", infoMessage);
-                return;
-            }
-
-            IList<string> queuedMissionRunIds = queuedMissionRuns
-                .Select(missionRun => missionRun.Id)
-                .ToList();
-
-            foreach (var queuedMissionRunId in queuedMissionRunIds)
-            {
-                await missionRunService.Delete(queuedMissionRunId);
-            }
         }
 
         private async Task StartMissionRun(MissionRun queuedMissionRun, Robot robot)

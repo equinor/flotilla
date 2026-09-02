@@ -80,8 +80,6 @@ namespace Api.Controllers.Models
 
         public string Name { get; set; }
 
-        public string? Description { get; set; }
-
         public List<TaskQuery> Tasks { get; set; }
     }
 }

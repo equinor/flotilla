@@ -21,21 +21,10 @@ namespace Api.Services
             bool readOnly = true
         );
 
-        public Task<InspectionArea?> ReadByInstallationAndName(
-            string installationCode,
-            string inspectionAreaName,
-            bool readOnly = true
-        );
-
         public Task<InspectionArea?> ReadByInstallationAndPlantAndName(
             Installation installation,
             Plant plant,
             string inspectionAreaName,
-            bool readOnly = true
-        );
-
-        public Task<List<InspectionArea>> ReadInspectionAreasByInstallation(
-            string installationCode,
             bool readOnly = true
         );
 
@@ -104,26 +93,6 @@ namespace Api.Services
                 .ToListAsync();
         }
 
-        public async Task<InspectionArea?> ReadByInstallationAndName(
-            string installationCode,
-            string inspectionAreaName,
-            bool readOnly = true
-        )
-        {
-            if (inspectionAreaName == null)
-            {
-                return null;
-            }
-            var query = await GetInspectionAreas(readOnly: readOnly);
-            return await query
-                .Where(a =>
-                    a.Installation != null
-                    && a.Installation.InstallationCode.ToLower().Equals(installationCode.ToLower())
-                    && a.Name.ToLower().Equals(inspectionAreaName.ToLower())
-                )
-                .FirstOrDefaultAsync();
-        }
-
         public async Task<InspectionArea?> ReadByInstallationAndPlantAndName(
             Installation installation,
             Plant plant,
@@ -185,21 +154,6 @@ namespace Api.Services
                 );
             }
             return inspectionAreas.FirstOrDefault();
-        }
-
-        public async Task<List<InspectionArea>> ReadInspectionAreasByInstallation(
-            string installationCode,
-            bool readOnly = true
-        )
-        {
-            var query = await GetInspectionAreas(readOnly: readOnly);
-            var inspectionAreas = await query
-                .Where(a =>
-                    a.Installation != null
-                    && a.Installation.InstallationCode.Equals(installationCode)
-                )
-                .ToListAsync();
-            return inspectionAreas;
         }
 
         public async Task<InspectionArea> Create(CreateInspectionAreaQuery newInspectionAreaQuery)

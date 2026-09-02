@@ -7,16 +7,6 @@ namespace Api.Services
 {
     public interface IUserInfoService
     {
-        public Task<IEnumerable<UserInfo>> ReadAll(bool readOnly = true);
-
-        public Task<UserInfo?> ReadById(string id, bool readOnly = true);
-
-        public Task<UserInfo> Create(UserInfo userInfo);
-
-        public Task<UserInfo> Update(UserInfo userInfo);
-
-        public Task<UserInfo?> Delete(string id);
-
         public Task<UserInfo?> GetRequestedUserInfo();
     }
 
@@ -31,19 +21,9 @@ namespace Api.Services
         ILogger<UserInfoService> logger
     ) : IUserInfoService
     {
-        public async Task<IEnumerable<UserInfo>> ReadAll(bool readOnly = true)
-        {
-            return await GetUsersInfo(readOnly: readOnly).ToListAsync();
-        }
-
         private IQueryable<UserInfo> GetUsersInfo(bool readOnly = true)
         {
             return readOnly ? context.UserInfos.AsNoTracking() : context.UserInfos.AsTracking();
-        }
-
-        public async Task<UserInfo?> ReadById(string id, bool readOnly = true)
-        {
-            return await GetUsersInfo(readOnly: readOnly).FirstOrDefaultAsync(a => a.Id.Equals(id));
         }
 
         public async Task<UserInfo?> ReadByOid(string oid, bool readOnly = true)
@@ -56,28 +36,6 @@ namespace Api.Services
         {
             await context.UserInfos.AddAsync(userInfo);
             await context.SaveChangesAsync();
-            return userInfo;
-        }
-
-        public async Task<UserInfo> Update(UserInfo userInfo)
-        {
-            var entry = context.Update(userInfo);
-            await context.SaveChangesAsync();
-            return entry.Entity;
-        }
-
-        public async Task<UserInfo?> Delete(string id)
-        {
-            var userInfo = await GetUsersInfo(readOnly: true)
-                .FirstOrDefaultAsync(ev => ev.Id.Equals(id));
-            if (userInfo is null)
-            {
-                return null;
-            }
-
-            context.UserInfos.Remove(userInfo);
-            await context.SaveChangesAsync();
-
             return userInfo;
         }
 
