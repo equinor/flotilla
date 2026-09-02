@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, FC, useEffect, useMemo } from 'react'
 import { RobotPropertyUpdate, RobotWithoutTelemetry, robotTelemetryPropsList } from 'models/Robot'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
+import { unsubscribeAll } from 'utils/signalR'
 import { useLanguageContext } from './LanguageContext'
 import { AlertType, useAlertContext } from './AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
@@ -46,7 +47,8 @@ export const AssetProvider: FC<Props> = ({ children }) => {
     const backendApi = useBackendApi()
 
     useEffect(() => {
-        if (connectionReady) {
+        if (!connectionReady) return
+        return unsubscribeAll([
             registerEvent(SignalREventLabels.robotAdded, (username: string, message: string) => {
                 const updatedRobot: RobotWithoutTelemetry = JSON.parse(message)
                 setEnabledRobots((oldRobotList) => {
@@ -54,7 +56,7 @@ export const AssetProvider: FC<Props> = ({ children }) => {
                     oldRobotListCopy = upsertRobotList(oldRobotListCopy, updatedRobot)
                     return [...oldRobotListCopy]
                 })
-            })
+            }),
             registerEvent(SignalREventLabels.robotUpdated, (username: string, message: string) => {
                 const updatedRobot: RobotWithoutTelemetry = JSON.parse(message)
                 // The check below makes it so that it is not treated as null in the code.
@@ -67,7 +69,7 @@ export const AssetProvider: FC<Props> = ({ children }) => {
                     oldRobotListCopy = upsertRobotList(oldRobotListCopy, updatedRobot)
                     return [...oldRobotListCopy]
                 })
-            })
+            }),
             registerEvent(SignalREventLabels.robotPropertyUpdated, (username: string, message: string) => {
                 const robotPropertyUpdate: RobotPropertyUpdate = JSON.parse(message)
                 if (!robotTelemetryPropsList.includes(robotPropertyUpdate.propertyName)) {
@@ -86,7 +88,7 @@ export const AssetProvider: FC<Props> = ({ children }) => {
                         return [...oldRobotListCopy]
                     })
                 }
-            })
+            }),
             registerEvent(SignalREventLabels.robotDeleted, (username: string, message: string) => {
                 const updatedRobot: RobotWithoutTelemetry = JSON.parse(message)
                 setEnabledRobots((oldRobotList) => {
@@ -95,8 +97,8 @@ export const AssetProvider: FC<Props> = ({ children }) => {
                     if (index !== -1) newRobotList.splice(index, 1) // Remove deleted robot
                     return newRobotList
                 })
-            })
-        }
+            }),
+        ])
     }, [registerEvent, connectionReady])
 
     const fetchEnabledRobots = () => {
@@ -166,14 +168,15 @@ export const AssetProvider: FC<Props> = ({ children }) => {
     })
 
     useEffect(() => {
-        if (connectionReady) {
+        if (!connectionReady) return
+        return unsubscribeAll([
             registerEvent(SignalREventLabels.inspectionAreaCreated, (username: string, message: string) => {
                 const newInspectionArea: InspectionArea = JSON.parse(message)
                 if (newInspectionArea.installationCode !== installation.installationCode) return
                 setInstallationInspectionAreas((oldInspectionAreas) => {
                     return [...oldInspectionAreas, newInspectionArea]
                 })
-            })
+            }),
             registerEvent(SignalREventLabels.inspectionAreaUpdated, (username: string, message: string) => {
                 const updatedInspectionArea: InspectionArea = JSON.parse(message)
                 if (updatedInspectionArea.installationCode !== installation.installationCode) return
@@ -187,7 +190,7 @@ export const AssetProvider: FC<Props> = ({ children }) => {
                         return oldInspectionAreasCopy
                     }
                 })
-            })
+            }),
             registerEvent(SignalREventLabels.inspectionAreaDeleted, (username: string, message: string) => {
                 const deletedInspectionArea: InspectionArea = JSON.parse(message)
                 if (deletedInspectionArea.installationCode !== installation.installationCode) return
@@ -200,9 +203,11 @@ export const AssetProvider: FC<Props> = ({ children }) => {
                     }
                     return oldInspectionAreas
                 })
-            })
-        }
-    }, [registerEvent, connectionReady])
+            }),
+        ])
+        // installationCode is read inside the handlers, so re-subscribe when it changes
+        // rather than letting the handlers keep comparing against a stale value.
+    }, [registerEvent, connectionReady, installation.installationCode])
 
     const filteredInstallationInspectionAreas = useMemo(
         () => installationInspectionAreas.filter((d) => d.installationCode === installation.installationCode),

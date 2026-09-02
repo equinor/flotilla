@@ -14,6 +14,7 @@ import {
     StyledTableCell,
 } from 'components/Styles/StyledComponents'
 import { SignalREventLabels, useSignalRContext } from 'components/Contexts/SignalRContext'
+import { unsubscribeAll } from 'utils/signalR'
 import { useBackendApi } from 'api/UseBackendApi'
 import { InstallationContext } from 'components/Contexts/InstallationContext'
 
@@ -98,17 +99,18 @@ const FencillaViewComponent = () => {
     }, [lastChangedMission])
 
     useEffect(() => {
-        if (connectionReady) {
+        if (!connectionReady) return
+        return unsubscribeAll([
             registerEvent(SignalREventLabels.missionRunCreated, (username: string, message: string) => {
                 setLastChangedMission(JSON.parse(message))
-            })
+            }),
             registerEvent(SignalREventLabels.missionRunUpdated, (username: string, message: string) => {
                 setLastChangedMission(JSON.parse(message))
-            })
+            }),
             registerEvent(SignalREventLabels.missionRunDeleted, (username: string, message: string) => {
                 setLastChangedMission(JSON.parse(message))
-            })
-        }
+            }),
+        ])
     }, [registerEvent, connectionReady])
 
     const missionsDisplay = filteredMissions.map((mission) => (

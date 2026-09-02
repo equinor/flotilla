@@ -1,5 +1,6 @@
 import { createContext, FC, useContext, useEffect, useMemo, useState } from 'react'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
+import { unsubscribeAll } from 'utils/signalR'
 import { MissionDefinition } from 'models/MissionDefinition'
 import { useLanguageContext } from './LanguageContext'
 import { AlertType, useAlertContext } from './AlertContext'
@@ -43,19 +44,20 @@ const useMissionDefinitions = (): IMissionDefinitionsContext => {
     const backendApi = useBackendApi()
 
     useEffect(() => {
-        if (connectionReady) {
+        if (!connectionReady) return
+        return unsubscribeAll([
             registerEvent(SignalREventLabels.missionDefinitionUpdated, (username: string, message: string) => {
                 const missionDefinition: MissionDefinition = JSON.parse(message)
                 setMissionDefinitions((oldMissionDefinitions) =>
                     upsertMissionDefinition(oldMissionDefinitions, missionDefinition)
                 )
-            })
+            }),
             registerEvent(SignalREventLabels.missionDefinitionCreated, (username: string, message: string) => {
                 const missionDefinition: MissionDefinition = JSON.parse(message)
                 setMissionDefinitions((oldMissionDefinitions) =>
                     upsertMissionDefinition(oldMissionDefinitions, missionDefinition)
                 )
-            })
+            }),
             registerEvent(SignalREventLabels.missionDefinitionDeleted, (username: string, message: string) => {
                 const mDef: MissionDefinition = JSON.parse(message)
                 setMissionDefinitions((oldMissionDefs) => {
@@ -64,8 +66,8 @@ const useMissionDefinitions = (): IMissionDefinitionsContext => {
                     if (queueIndex !== -1) oldListCopy.splice(queueIndex, 1) // Remove deleted mission definition
                     return oldListCopy
                 })
-            })
-        }
+            }),
+        ])
     }, [registerEvent, connectionReady])
 
     const fetchAndUpdateMissionDefinitions = () => {

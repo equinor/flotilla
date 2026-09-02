@@ -1,9 +1,10 @@
 import * as signalR from '@microsoft/signalr'
-import React, { createContext, FC, useContext, useEffect, useCallback, useState, useRef } from 'react'
+import React, { createContext, FC, useContext, useEffect, useCallback, useMemo, useState, useRef } from 'react'
 import { AuthContext } from './AuthContext'
 import { config } from 'config'
 import { useMsal } from '@azure/msal-react'
 import { useOnPageVisible } from 'hooks/usePageVisibility'
+import { noopUnsubscribe, UnsubscribeFromEvent } from 'utils/signalR'
 
 /**
  * SignalR provides asynchronous communication between backend and frontend. This
@@ -14,6 +15,11 @@ import { useOnPageVisible } from 'hooks/usePageVisibility'
  * provided, which must correspond to the event name used on the backend. The event
  * handler should receive a username and a message, though the username is typically
  * not relevant for broadcasted messages.
+ *
+ * "registerEvent" returns an unsubscribe function. Callers MUST return it from their
+ * effect cleanup, otherwise handlers accumulate on the shared connection every time
+ * the effect re-runs (on reconnect, or when a component remounts on navigation) and
+ * each stale handler keeps firing against an unmounted component.
  *
  * It is important to note that event handlers can only see the scope at which they
  * are defined, which means that any React state will be outdated once they receive
@@ -36,7 +42,10 @@ import { useOnPageVisible } from 'hooks/usePageVisibility'
  */
 
 interface ISignalRContext {
-    registerEvent: (eventName: string, onMessageReceived: (username: string, message: string) => void) => void
+    registerEvent: (
+        eventName: string,
+        onMessageReceived: (username: string, message: string) => void
+    ) => UnsubscribeFromEvent
     connectionReady: boolean
 }
 
@@ -45,7 +54,7 @@ interface Props {
 }
 
 const defaultSignalRInterface = {
-    registerEvent: () => {},
+    registerEvent: () => noopUnsubscribe,
     connectionReady: false,
 }
 
@@ -139,27 +148,32 @@ export const SignalRProvider: FC<Props> = ({ children }) => {
         resetConnection()
     })
 
-    const registerEvent = (eventName: string, onMessageReceived: (username: string, message: string) => void) => {
-        if (connectionRef.current)
-            connectionRef.current.on(eventName, (username, message) => {
+    // Stable identity: consumers list registerEvent in their effect dependencies, so a
+    // new identity on every render would re-subscribe them on every render.
+    const registerEvent = useCallback(
+        (eventName: string, onMessageReceived: (username: string, message: string) => void): UnsubscribeFromEvent => {
+            const connection = connectionRef.current
+            if (!connection) return noopUnsubscribe
+
+            const handler = (username: string, message: string) => {
                 if (message === 'null') {
                     console.warn(`Received signalR message for event ${eventName} is 'null'`)
                     return
                 }
                 onMessageReceived(username, message)
-            })
-    }
+            }
 
-    return (
-        <SignalRContext.Provider
-            value={{
-                registerEvent,
-                connectionReady,
-            }}
-        >
-            {children}
-        </SignalRContext.Provider>
+            connection.on(eventName, handler)
+            return () => connection.off(eventName, handler)
+        },
+        []
     )
+
+    // Memoised so that a provider re-render does not hand consumers a new object and
+    // re-trigger every effect that depends on this context.
+    const contextValue = useMemo(() => ({ registerEvent, connectionReady }), [registerEvent, connectionReady])
+
+    return <SignalRContext.Provider value={contextValue}>{children}</SignalRContext.Provider>
 }
 
 export const useSignalRContext = () => useContext(SignalRContext)

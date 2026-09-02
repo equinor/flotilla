@@ -80,37 +80,35 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
     )
 
     useEffect(() => {
-        if (connectionReady) {
-            registerEvent(SignalREventLabels.inspectionVisualizationReady, (username: string, message: string) => {
-                const { inspectionId }: FlotillaInspectionResultMessage = JSON.parse(message)
-                // The mission page reads inspections through the list query with a null
-                // installation code and analysis type, so invalidate the whole prefix rather
-                // than trying to reconstruct a key that would not match.
-                queryClient.invalidateQueries({
-                    queryKey: ['fetchInspectionListData'],
-                })
-                // Not invalidated first: invalidateQueries refetches the key, then
-                // fetchQuery cancels that in-flight refetch (it defaults to
-                // cancelRefetch), and the rejected promise surfaces as an unhandled
-                // CancelledError. fetchQuery alone refreshes the key and also
-                // populates it when no component is observing.
-                refreshInspectionData(inspectionId)
+        if (!connectionReady) return
+        return registerEvent(SignalREventLabels.inspectionVisualizationReady, (username: string, message: string) => {
+            const { inspectionId }: FlotillaInspectionResultMessage = JSON.parse(message)
+            // The mission page reads inspections through the list query with a null
+            // installation code and analysis type, so invalidate the whole prefix rather
+            // than trying to reconstruct a key that would not match.
+            queryClient.invalidateQueries({
+                queryKey: ['fetchInspectionListData'],
             })
-        }
+            // Not invalidated first: invalidateQueries refetches the key, then
+            // fetchQuery cancels that in-flight refetch (it defaults to
+            // cancelRefetch), and the rejected promise surfaces as an unhandled
+            // CancelledError. fetchQuery alone refreshes the key and also
+            // populates it when no component is observing.
+            refreshInspectionData(inspectionId)
+        })
     }, [registerEvent, connectionReady, refreshInspectionData])
 
     useEffect(() => {
-        if (connectionReady) {
-            registerEvent(SignalREventLabels.analysisResultReady, (username: string, message: string) => {
-                const inspectionResult: FlotillaAnalysisResultMessage = JSON.parse(message)
-                // The mission page passes null for both installation code and analysis type,
-                // so a prefixed key never matches it. Invalidate every list query instead.
-                queryClient.invalidateQueries({
-                    queryKey: ['fetchInspectionListData'],
-                })
-                refreshInspectionData(inspectionResult.inspectionId)
+        if (!connectionReady) return
+        return registerEvent(SignalREventLabels.analysisResultReady, (username: string, message: string) => {
+            const inspectionResult: FlotillaAnalysisResultMessage = JSON.parse(message)
+            // The mission page passes null for both installation code and analysis type,
+            // so a prefixed key never matches it. Invalidate every list query instead.
+            queryClient.invalidateQueries({
+                queryKey: ['fetchInspectionListData'],
             })
-        }
+            refreshInspectionData(inspectionResult.inspectionId)
+        })
     }, [registerEvent, connectionReady, refreshInspectionData])
 
     const useSaraData = (inspectionId: string): IInspectionData => {

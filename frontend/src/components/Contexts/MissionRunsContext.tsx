@@ -1,6 +1,7 @@
 import { createContext, FC, useContext, useEffect, useMemo, useState } from 'react'
 import { Mission, MissionStatus } from 'models/Mission'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
+import { unsubscribeAll } from 'utils/signalR'
 import { TaskStatus } from 'models/Task'
 import { useLanguageContext } from './LanguageContext'
 import { AlertType, useAlertContext } from './AlertContext'
@@ -98,14 +99,15 @@ const useMissionRuns = (): IMissionRunsContext => {
     }
 
     useEffect(() => {
-        if (connectionReady) {
+        if (!connectionReady) return
+        return unsubscribeAll([
             registerEvent(SignalREventLabels.missionRunCreated, (username: string, message: string) => {
                 const newMission: Mission = JSON.parse(message)
                 setMissionQueue((oldQueue) => {
                     const missionQueueCopy = upsertMissionList(oldQueue, newMission)
                     return [...missionQueueCopy]
                 })
-            })
+            }),
             registerEvent(SignalREventLabels.missionRunUpdated, (username: string, message: string) => {
                 const updatedMission: Mission = JSON.parse(message)
 
@@ -117,7 +119,7 @@ const useMissionRuns = (): IMissionRunsContext => {
                     const oldMissionListCopy = [...oldMissionList]
                     return updateOngoingMissionsWithUpdatedMission(oldMissionListCopy, updatedMission)
                 })
-            })
+            }),
             registerEvent(SignalREventLabels.missionRunDeleted, (username: string, message: string) => {
                 const deletedMission: Mission = JSON.parse(message)
                 setOngoingMissions((missions) => {
@@ -132,8 +134,8 @@ const useMissionRuns = (): IMissionRunsContext => {
                     if (queueIndex !== -1) oldQueueCopy.splice(queueIndex, 1) // Remove deleted mission
                     return oldQueueCopy
                 })
-            })
-        }
+            }),
+        ])
     }, [registerEvent, connectionReady])
 
     const fetchAndUpdateMissions = () => {
