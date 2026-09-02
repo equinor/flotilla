@@ -1,0 +1,142 @@
+# Flotilla local-orchestration module.
+#
+# Exports flotilla_stack(): registers the flotilla-backend and flotilla-frontend
+# Tilt resources. Used by two callers:
+#   - flotilla/Tiltfile         -- standalone, self-contained local stack
+#   - robotics local-orchestration -- imports this via load_dynamic() and reuses
+#     it alongside SARA, ISAR and the rest of the platform
+#
+# The module is infrastructure- and SARA-agnostic: the caller supplies the
+# Postgres connection string, MQTT coordinates, resource dependencies and any
+# extra backend/frontend env (e.g. SARA + Azurite wiring in the robotics stack).
+#
+# Secrets are resolved here, inside the module, via Azure Key Vault (az login
+# required). Callers do not pass secrets in.
+
+# Paths are anchored on this file's location, never the caller's working
+# directory: a function defined here but called from another Tiltfile resolves
+# relative paths against *that* Tiltfile's dir, so everything below is absolute.
+_TILT_DIR = os.path.dirname(__file__)
+_FLOTILLA_ROOT = os.path.dirname(_TILT_DIR)
+
+# Exported so callers can set the FLOTILLA_ROOT env var that the compose files'
+# build/volume paths resolve against, before calling docker_compose().
+FLOTILLA_ROOT = _FLOTILLA_ROOT
+
+# ---------------------------------------------------------------------------
+# Key Vault secrets (fetched at Tiltfile evaluation time)
+# ---------------------------------------------------------------------------
+_kv_secrets_config = read_yaml(os.path.join(_TILT_DIR, "kv-secrets-ref.yaml"))
+_kv_secret_script = os.path.join(_TILT_DIR, "key_vault_secret.py")
+
+def kv_secret(key):
+    """Fetch a secret with retries by its logical name."""
+    entry = _kv_secrets_config["secrets"][key]
+    return str(local(
+        [
+            "uv", "run", "--script", _kv_secret_script,
+            "--vault-name", entry["vault"],
+            "--name", entry["name"],
+        ],
+        quiet=True,
+    )).strip()
+
+# ---------------------------------------------------------------------------
+# Public entrypoint
+# ---------------------------------------------------------------------------
+def flotilla_stack(
+        pg_conn,
+        mqtt_host="localhost",
+        mqtt_port=1883,
+        backend_port=8000,
+        frontend_port=3001,
+        resource_deps=[],
+        extra_backend_env={},
+        extra_frontend_env={},
+        labels=["flotilla"]):
+    """Register the flotilla-backend and flotilla-frontend resources.
+
+    Args:
+        pg_conn: PostgreSQL connection string for the flotilla database.
+        mqtt_host, mqtt_port: MQTT broker coordinates the backend connects to.
+        backend_port, frontend_port: host ports for the two services.
+        resource_deps: Tilt resources the backend must wait for (e.g. the broker
+            and a database-reset step in the robotics stack).
+        extra_backend_env / extra_frontend_env: caller-supplied env that extends
+            or overrides the defaults below (SARA + Azurite wiring, OTel, ...).
+        labels: Tilt UI labels for both resources.
+    """
+    backend_env = {
+        "ASPNETCORE_ENVIRONMENT": "Local",
+        "ASPNETCORE_URLS": "http://localhost:%d" % backend_port,
+        "Database__UseInMemoryDatabase": "false",
+        "Database__PostgreSqlConnectionString": pg_conn,
+        "Database__postgresConnectionString": pg_conn,
+        "Mqtt__Host": mqtt_host,
+        "Mqtt__Port": str(mqtt_port),
+        "Mqtt__Password": kv_secret("flotilla-mqtt-password"),
+        "Mqtt__AllowInsecureLocalConnections": "true",
+        "KeyVault__UseKeyVault": "false",
+        "Database__SeedExampleDataPostgres": "true",
+        "AzureAd__ClientSecret": kv_secret("azure-client-secret"),
+    }
+    backend_env.update(extra_backend_env)
+
+    local_resource(
+        "flotilla-backend",
+        # Build restores cold checkouts. Apply pending migrations before each
+        # restart using that build; Tilt keeps the old API running if either
+        # command fails.
+        cmd="dotnet build api && dotnet ef database update --no-build --project api",
+        dir=_FLOTILLA_ROOT + "/backend",
+        deps=[_FLOTILLA_ROOT + "/backend"],
+        ignore=["**/bin", "**/obj", "**/.git", "**/api.test"],
+        env=backend_env,
+        # Run the DLL directly: one foreground process, no watcher/launcher
+        # children that would escape Tilt's process-group teardown.
+        serve_cmd=["dotnet", "bin/Debug/net10.0/api.dll"],
+        serve_dir=_FLOTILLA_ROOT + "/backend/api",
+        serve_env=backend_env,
+        resource_deps=resource_deps,
+        readiness_probe=probe(
+            http_get=http_get_action(port=backend_port, path="/swagger/index.html"),
+            initial_delay_secs=15,
+            period_secs=10,
+            timeout_secs=5,
+        ),
+        labels=labels,
+        links=[
+            link("http://localhost:%d/swagger" % backend_port, "Flotilla API Swagger"),
+        ],
+    )
+
+    # src/config.ts requires all of these and throws on the first one it cannot
+    # resolve. Vite exposes VITE_-prefixed process env vars through
+    # import.meta.env, so setting them here removes the need for a frontend/.env,
+    # which flotilla gitignores and only creates via its own setup.sh. Keep in
+    # sync with flotilla/frontend/.env.example.
+    frontend_env = {
+        "PORT": str(frontend_port),
+        "VITE_BACKEND_URL": "http://localhost:%d" % backend_port,
+        "VITE_BACKEND_API_SCOPE": "api://ea4c7b92-47b3-45fb-bd25-a8070f0c495c/user_impersonation",
+        "VITE_SARA_URL": "http://localhost:8100",
+        "VITE_SARA_API_SCOPE": "api://dd7e115a-037e-4846-99c4-07561158a9cd/user_impersonation",
+        "VITE_FRONTEND_URL": "http://localhost:%d" % frontend_port,
+        "VITE_FRONTEND_BASE_ROUTE": "",
+        "VITE_AD_CLIENT_ID": "f5993820-b7e2-4791-886f-f9f5027dc7be",
+        "VITE_AD_TENANT_ID": "3aa4a235-b6e2-48d5-9195-7fcf05b459b0",
+    }
+    frontend_env.update(extra_frontend_env)
+
+    local_resource(
+        "flotilla-frontend",
+        cmd="cd " + _FLOTILLA_ROOT + "/frontend && pnpm install --frozen-lockfile",
+        serve_cmd="pnpm run dev",
+        serve_dir=_FLOTILLA_ROOT + "/frontend",
+        serve_env=frontend_env,
+        resource_deps=["flotilla-backend"],
+        labels=labels,
+        links=[
+            link("http://localhost:%d" % frontend_port, "Flotilla UI"),
+        ],
+    )
