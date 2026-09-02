@@ -11,9 +11,12 @@ The application consists of a [frontend](frontend) in React, a [backend](backend
 
 | Tool                                                                                                         | Version | Needed for                       |
 | ------------------------------------------------------------------------------------------------------------ | ------- | -------------------------------- |
-| [Docker](https://docs.docker.com/engine/install/) and [Docker Compose](https://docs.docker.com/compose/install/) | latest  | Running the full stack           |
-| [.NET SDK](https://dotnet.microsoft.com/download)                                                            | 10.x    | Running the backend directly     |
-| [Node.js](https://github.com/nodesource/distributions)                                                       | 24.x    | Running the frontend directly    |
+| [Docker](https://docs.docker.com/engine/install/) and [Docker Compose](https://docs.docker.com/compose/install/) | latest  | Full stack (`make compose`) + Tilt broker/Postgres |
+| [Tilt](https://docs.tilt.dev/install.html)                                                                   | latest  | Running the stack locally (`make run`) |
+| [uv](https://docs.astral.sh/uv/getting-started/installation/)                                                | latest  | Preflight + Key Vault scripts    |
+| [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)                                         | latest  | Fetching local secrets (`az login`) |
+| [.NET SDK](https://dotnet.microsoft.com/download)                                                            | 10.x    | Running the backend              |
+| [Node.js](https://github.com/nodesource/distributions)                                                       | 24.x    | Running the frontend             |
 | [pnpm](https://pnpm.io/installation)                                                                         | latest  | Frontend package management      |
 | `make`                                                                                                       | any     | The shorthand commands below     |
 
@@ -43,25 +46,34 @@ git clone https://github.com/equinor/flotilla
 cd flotilla
 ```
 
-Create the local configuration files:
+Log in to Azure so the stack can fetch its local secrets from Key Vault, then
+start everything with Tilt:
 
 ```bash
-./setup.sh
+az login
+make run          # runs preflight, then `tilt up`
 ```
 
-The script creates `frontend/.env`, `backend/api/.env`, and `broker/.env` from their `.env.example` files. It prompts you for the **MQTT broker server key**, which is found in our key vault. Everything else can be configured manually afterwards — see [Configuration](#configuration).
-
-Start the full stack:
-
-```bash
-make compose      # docker compose up --build
-```
+`make run` brings up a self-contained local stack — MQTT broker and PostgreSQL
+in Docker, and the backend and frontend as hot-reloading host processes:
 
 | Service          | URL                                     |
 | ---------------- | --------------------------------------- |
 | Frontend         | <http://localhost:3001>                 |
 | Backend Swagger  | <http://localhost:8000/swagger>         |
-| Aspire dashboard | <http://localhost:18888>                |
+| Tilt UI          | <http://localhost:10350>                |
+
+Stop it with `make down` (or `make clean` to also wipe the database volume).
+
+Authentication uses Microsoft Entra ID, so `az login` is required; there is no
+offline auth option yet. To drive a mission, run an [ISAR](https://github.com/equinor/isar)
+robot on the host pointed at this stack's broker (`localhost:1883`) and backend
+(`localhost:8000`).
+
+The Tilt definition lives in [`tilt/`](tilt/) and is reused by the
+[robotics](https://github.com/equinor/robotics) local-orchestration stack, which
+imports `flotilla_stack()` from `tilt/flotilla.tilt` and runs it alongside SARA,
+ISAR and the rest of the platform.
 
 To run a single component instead, see the [frontend](frontend/README.md), [backend](backend/README.md), and [broker](broker/README.md) guides.
 
@@ -75,11 +87,14 @@ Each component reads its configuration from a `.env` file. The matching `.env.ex
 | Backend   | `backend/api/.env`  | `backend/api/.env.example`  | Set `Local__DevUserId` to your own user id for local development.     |
 | Broker    | `broker/.env`       | `broker/.env.example`       | `TLS_SERVER_KEY` is a secret and is found in our key vault.           |
 
-> **Note on Docker:** `backend/api/.env` is only read when the backend is run directly (`make run`). The backend *container* does not load it — [docker-compose.yml](./docker-compose.yml) sets `ASPNETCORE_ENVIRONMENT=Development` and reads `AZURE_CLIENT_SECRET` from a `.env` file in the repository root, which `setup.sh` does not create. To run the full stack against Azure AD you currently have to add `AZURE_CLIENT_SECRET=...` to a root `.env` yourself.
+> **Note:** these `.env` files configure the Docker Compose targets (`make broker`, `make keycloak`, …) and running a component directly. The Tilt path (`make run`) does not use them — it sets the backend and frontend environment itself and fetches secrets from Key Vault. The backend *container* started by compose does not load `backend/api/.env` either — [docker-compose.yml](./docker-compose.yml) reads `AZURE_CLIENT_SECRET` from a `.env` file in the repository root, which `setup.sh` does not create. To run the full stack against Azure AD you currently have to add `AZURE_CLIENT_SECRET=...` to a root `.env` yourself.
 
 ## Other make commands
 
-Common commands are defined in the [root Makefile](./Makefile), the [backend Makefile](./backend/Makefile), and the [frontend Makefile](./frontend/Makefile):
+`make run` is the recommended way to develop locally. The remaining targets in
+the [root Makefile](./Makefile) drive the production-shaped container images
+through Docker Compose (independent of the Tilt path, still configured via
+`./setup.sh` and the per-component `.env` files):
 
 ```bash
 make compose         # run the full stack in Docker
@@ -87,6 +102,9 @@ make broker          # run only the MQTT broker
 make broker-aspire   # run the broker, OpenTelemetry collector, and Aspire dashboard
 make keycloak        # run a local OpenID Connect issuer instead of Entra ID
 ```
+
+Per-component commands live in the [backend Makefile](./backend/Makefile) and
+[frontend Makefile](./frontend/Makefile).
 
 `make keycloak` starts the same realm the integration tests use, so the backend can be run without Entra ID. It needs a little configuration in `backend/api/.env` — see [Running against a local Keycloak](backend/README.md#running-against-a-local-keycloak).
 
