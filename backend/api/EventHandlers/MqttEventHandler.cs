@@ -189,11 +189,24 @@ namespace Api.EventHandlers
             }
         }
 
-        private async void CreateRobot(
-            IsarRobotInfoMessage isarRobotInfo,
-            Installation installation
-        )
+        private async void CreateRobot(IsarRobotInfoMessage isarRobotInfo)
         {
+            var installation = await InstallationService.ReadByInstallationCode(
+                isarRobotInfo.CurrentInstallation,
+                readOnly: true
+            );
+
+            if (installation is null)
+            {
+                _logger.LogError(
+                    new InstallationNotFoundException(
+                        $"No installation with code {isarRobotInfo.CurrentInstallation} found"
+                    ),
+                    "Could not create new robot due to missing installation"
+                );
+                return;
+            }
+
             _logger.LogInformation(
                 "Received message from new ISAR instance '{Id}' with robot name '{Name}'. Adding new robot to database",
                 isarRobotInfo.IsarId,
@@ -234,29 +247,13 @@ namespace Api.EventHandlers
 
         private async void OnIsarRobotInfo(IsarRobotInfoMessage isarRobotInfo)
         {
-            var installation = await InstallationService.ReadByInstallationCode(
-                isarRobotInfo.CurrentInstallation,
-                readOnly: true
-            );
-
-            if (installation is null)
-            {
-                _logger.LogError(
-                    new InstallationNotFoundException(
-                        $"No installation with code {isarRobotInfo.CurrentInstallation} found"
-                    ),
-                    "Could not create new robot due to missing installation"
-                );
-                return;
-            }
-
             try
             {
                 var robot = await RobotService.ReadByIsarId(isarRobotInfo.IsarId, readOnly: true);
 
                 if (robot == null)
                 {
-                    CreateRobot(isarRobotInfo, installation);
+                    CreateRobot(isarRobotInfo);
                     return;
                 }
                 List<string> updatedFields = [];
@@ -266,8 +263,30 @@ namespace Api.EventHandlers
 
                 UpdatePortIfChanged(isarRobotInfo.Port, ref robot, ref updatedFields);
 
-                if (isarRobotInfo.CurrentInstallation is not null)
+                if (
+                    isarRobotInfo.CurrentInstallation is not null
+                    && robot.CurrentInstallation.InstallationCode.ToLowerInvariant()
+                        != isarRobotInfo.CurrentInstallation.ToLowerInvariant()
+                )
+                {
+                    var installation = await InstallationService.ReadByInstallationCode(
+                        isarRobotInfo.CurrentInstallation,
+                        readOnly: true
+                    );
+
+                    if (installation is null)
+                    {
+                        _logger.LogError(
+                            new InstallationNotFoundException(
+                                $"No installation with code {isarRobotInfo.CurrentInstallation} found"
+                            ),
+                            "Could not update robot installation as the installation was not found"
+                        );
+                        return;
+                    }
                     UpdateCurrentInstallationIfChanged(installation, ref robot, ref updatedFields);
+                }
+
                 if (isarRobotInfo.Capabilities is not null)
                     UpdateRobotCapabilitiesIfChanged(
                         isarRobotInfo.Capabilities,
