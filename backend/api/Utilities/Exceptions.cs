@@ -95,7 +95,5 @@ namespace Api.Utilities
 
     public class MultipleInspectionAreasFoundException(string message) : Exception(message) { }
 
-    public class NoUnfinishedTasksInMissionException(string message) : Exception(message) { }
-
     public class TeamsNotificationException(string message) : Exception(message) { }
 }
