@@ -20,8 +20,6 @@ namespace Api.Services
 
         public Task<Installation> Create(CreateInstallationQuery newInstallation);
 
-        public Task<Installation> Update(Installation installation);
-
         public Task<Installation?> Delete(string id);
 
         public Task AssertRobotIsOnSameInstallationAsMission(
@@ -126,14 +124,6 @@ namespace Api.Services
             }
 
             return installation;
-        }
-
-        public async Task<Installation> Update(Installation installation)
-        {
-            var entry = context.Update(installation);
-            await ApplyDatabaseUpdate(installation);
-            DetachTracking(context, installation);
-            return entry.Entity;
         }
 
         public async Task<Installation?> Delete(string id)

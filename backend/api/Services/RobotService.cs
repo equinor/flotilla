@@ -15,7 +15,6 @@ namespace Api.Services
         public Task<Robot> CreateFromQuery(CreateRobotQuery robotQuery);
         public Task<Robot> GetRobotWithSchedulingPreCheck(string robotId, bool readOnly = true);
         public Task<IEnumerable<Robot>> ReadAll(bool readOnly = true);
-        public Task<IEnumerable<string>> ReadAllActivePlants(bool readOnly = true);
         public Task<Robot?> ReadById(string id, bool readOnly = true);
         public Task<Robot?> ReadByIsarId(string isarId, bool readOnly = true);
         public Task<IList<Robot>> ReadRobotsForInstallation(
@@ -300,15 +299,6 @@ namespace Api.Services
         {
             var query = await GetRobotsWithSubModels(readOnly: readOnly);
             return await query.FirstOrDefaultAsync(robot => robot.IsarId.Equals(isarId));
-        }
-
-        public async Task<IEnumerable<string>> ReadAllActivePlants(bool readOnly = true)
-        {
-            var query = await GetRobotsWithSubModels(readOnly: readOnly);
-            return await query
-                .Where(r => r.CurrentInstallation != null)
-                .Select(r => r.CurrentInstallation!.InstallationCode)
-                .ToListAsync();
         }
 
         public async Task Update(Robot robot)

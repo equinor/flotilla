@@ -19,21 +19,10 @@ namespace Api.Services
             bool readOnly = true
         );
 
-        public Task<ExclusionArea?> ReadByInstallationAndName(
-            string installationCode,
-            string exclusionAreaName,
-            bool readOnly = true
-        );
-
         public Task<ExclusionArea?> ReadByInstallationAndPlantAndName(
             Installation installation,
             Plant plant,
             string exclusionAreaName,
-            bool readOnly = true
-        );
-
-        public Task<List<ExclusionArea>> ReadExclusionAreasByInstallationCode(
-            string installationCode,
             bool readOnly = true
         );
 
@@ -101,27 +90,6 @@ namespace Api.Services
                 .ToListAsync();
         }
 
-        public async Task<ExclusionArea?> ReadByInstallationAndName(
-            string installationCode,
-            string exclusionAreaName,
-            bool readOnly = true
-        )
-        {
-            if (exclusionAreaName == null)
-            {
-                return null;
-            }
-            var query = await GetExclusionAreas(readOnly: readOnly);
-            return await query
-                .Where(a =>
-                    a.Name != null
-                    && a.Installation != null
-                    && a.Installation.InstallationCode.ToLower().Equals(installationCode.ToLower())
-                    && a.Name.ToLower().Equals(exclusionAreaName.ToLower())
-                )
-                .FirstOrDefaultAsync();
-        }
-
         public async Task<ExclusionArea?> ReadByInstallationAndPlantAndName(
             Installation installation,
             Plant plant,
@@ -142,21 +110,6 @@ namespace Api.Services
                 .Include(d => d.Plant)
                 .Include(i => i.Installation)
                 .FirstOrDefaultAsync();
-        }
-
-        public async Task<List<ExclusionArea>> ReadExclusionAreasByInstallationCode(
-            string installationCode,
-            bool readOnly = true
-        )
-        {
-            var query = await GetExclusionAreas(readOnly: readOnly);
-            var exclusionAreas = await query
-                .Where(a =>
-                    a.Installation != null
-                    && a.Installation.InstallationCode.Equals(installationCode)
-                )
-                .ToListAsync();
-            return exclusionAreas;
         }
 
         public async Task<List<MissionTask>> FilterOutExcludedMissionTasks(

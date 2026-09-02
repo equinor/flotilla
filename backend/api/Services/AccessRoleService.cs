@@ -18,7 +18,6 @@ namespace Api.Services
             ClaimsPrincipal user,
             AccessMode accessMode
         );
-        public bool IsUserAdmin();
         public bool IsAuthenticationAvailable();
         public Task<AccessRole> Create(
             Installation installation,
@@ -200,11 +199,6 @@ namespace Api.Services
         {
             ThrowExceptionIfNotAdmin();
             return await GetAccessRoles(readOnly: true).Include(r => r.Installation).ToListAsync();
-        }
-
-        public bool IsUserAdmin()
-        {
-            return httpContextAccessor.HttpContext?.User?.IsInRole(SUPER_ADMIN_ROLE_NAME) ?? false;
         }
 
         public bool IsAuthenticationAvailable()

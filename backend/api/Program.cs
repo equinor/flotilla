@@ -76,7 +76,6 @@ builder.Services.AddScoped<IRobotService, RobotService>();
 builder.Services.AddScoped<IMissionRunService, MissionRunService>();
 builder.Services.AddScoped<IMissionDefinitionService, MissionDefinitionService>();
 builder.Services.AddScoped<IMissionTaskService, MissionTaskService>();
-builder.Services.AddScoped<IInspectionService, InspectionService>();
 builder.Services.AddScoped<IExclusionAreaService, ExclusionAreaService>();
 
 builder.Services.AddScoped<IMissionSchedulingService, MissionSchedulingService>();

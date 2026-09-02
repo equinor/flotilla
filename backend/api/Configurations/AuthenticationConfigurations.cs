@@ -65,7 +65,6 @@ namespace Api.Configurations
             }
 
             authenticationBuilder
-                .AddDownstreamApi(InspectionService.ServiceName, configuration.GetSection("SARA"))
                 .AddDownstreamApi(IsarService.ServiceName, configuration.GetSection("Isar"))
                 .AddDownstreamApi(
                     PointillaService.ServiceName,

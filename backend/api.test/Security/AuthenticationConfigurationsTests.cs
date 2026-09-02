@@ -43,7 +43,6 @@ namespace Api.Test.Security
                 ["AzureAd:ClientId"] = "flotilla-test",
                 ["Redis:UseRedis"] = "false",
                 ["Isar:Scopes:0"] = "isar-api",
-                ["SARA:Scopes:0"] = "sara-api",
                 ["Pointilla:Scopes:0"] = "pointilla-api",
             };
 

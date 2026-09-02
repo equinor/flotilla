@@ -31,7 +31,6 @@ namespace Api.Test.MQTT
         public required DatabaseUtilities DatabaseUtilities;
         public required IRobotService RobotService;
         public required IMissionRunService MissionRunService;
-        public required IInspectionService InspectionService;
 
         public async ValueTask InitializeAsync()
         {
@@ -54,7 +53,6 @@ namespace Api.Test.MQTT
             );
             RobotService = ServiceProvider.GetRequiredService<IRobotService>();
             MissionRunService = ServiceProvider.GetRequiredService<IMissionRunService>();
-            InspectionService = ServiceProvider.GetRequiredService<IInspectionService>();
         }
 
         public async ValueTask DisposeAsync()

@@ -86,8 +86,6 @@ namespace Api.EventHandlers
             Subscribe();
         }
 
-        private IInspectionService InspectionService =>
-            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IInspectionService>();
         private IInstallationService InstallationService =>
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IInstallationService>();
         private ILastMissionRunService LastMissionRunService =>
