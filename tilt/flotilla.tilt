@@ -1,0 +1,196 @@
+# Flotilla local-orchestration module.
+#
+# Exports flotilla_stack(): registers the flotilla-backend and flotilla-frontend
+# Tilt resources. Used by two callers:
+#   - flotilla/Tiltfile         -- standalone, self-contained local stack
+#   - robotics local-orchestration -- imports this via load_dynamic() and reuses
+#     it alongside SARA, ISAR and the rest of the platform
+#
+# The module is infrastructure- and SARA-agnostic: the caller supplies the
+# Postgres connection string, MQTT coordinates, resource dependencies and any
+# extra backend/frontend env (e.g. SARA + Azurite wiring in the robotics stack).
+#
+# Secrets are resolved here, inside the module, via Azure Key Vault (az login
+# required). Callers do not pass secrets in.
+
+# Paths are anchored on this file's location, never the caller's working
+# directory: a function defined here but called from another Tiltfile resolves
+# relative paths against *that* Tiltfile's dir, so everything below is absolute.
+_TILT_DIR = os.path.dirname(__file__)
+_FLOTILLA_ROOT = os.path.dirname(_TILT_DIR)
+
+# Exported so callers can set the FLOTILLA_ROOT env var that the compose files'
+# build/volume paths resolve against, before calling docker_compose().
+FLOTILLA_ROOT = _FLOTILLA_ROOT
+
+# ---------------------------------------------------------------------------
+# Key Vault secrets (fetched at Tiltfile evaluation time)
+# ---------------------------------------------------------------------------
+_kv_secrets_config = read_yaml(os.path.join(_TILT_DIR, "kv-secrets-ref.yaml"))
+_kv_secret_script = os.path.join(_TILT_DIR, "key_vault_secret.py")
+
+def kv_secret(key):
+    """Fetch a secret with retries by its logical name."""
+    entry = _kv_secrets_config["secrets"][key]
+    return str(local(
+        [
+            "uv", "run", "--script", _kv_secret_script,
+            "--vault-name", entry["vault"],
+            "--name", entry["name"],
+        ],
+        quiet=True,
+    )).strip()
+
+# ---------------------------------------------------------------------------
+# dotnet watch teardown wrapper
+# ---------------------------------------------------------------------------
+# Tilt runs each serve_cmd in its own session (setsid) and, on teardown/Ctrl+C,
+# sends SIGTERM then SIGKILL to the whole process GROUP.  That should reap
+# everything -- but `dotnet watch` relaunches the app (the compiled apphost,
+# named after the project, e.g. `api`) in a SEPARATE session, so the app process
+# escapes Tilt's group kill and is orphaned, keeping its port bound.  The next
+# `make run` then trips preflight's port check.
+#
+# Refuse to start if another process already owns the port. On shutdown, stop
+# and reap the watcher before repeatedly clearing detached apphosts from the
+# port. preflight detects any leak if teardown is pre-empted by SIGKILL.
+def _dotnet_watch_serve(project, port):
+    return "\n".join([
+        "port=%d" % port,
+        '_port_pids() { lsof -nP -iTCP:"$port" -sTCP:LISTEN -t 2>/dev/null; }',
+        'if pids="$(_port_pids)" && [ -n "$pids" ]; then',
+        '  echo "Cannot start %s: port $port is already held by PID(s): $pids" >&2' % project,
+        "  exit 1",
+        "fi",
+        "dotnet watch run --project %s &" % project,
+        "watch_pid=$!",
+        "_cleanup() {",
+        "  trap - INT TERM",
+        '  kill -TERM "$watch_pid" 2>/dev/null',
+        "  for attempt in $(seq 1 30); do",
+        '    kill -0 "$watch_pid" 2>/dev/null || break',
+        "    sleep 0.1",
+        "  done",
+        '  if kill -0 "$watch_pid" 2>/dev/null; then',
+        '    kill -KILL "$watch_pid" 2>/dev/null',
+        "  fi",
+        '  wait "$watch_pid" 2>/dev/null',
+        "  for attempt in $(seq 1 30); do",
+        '    pids="$(_port_pids)"',
+        '    [ -z "$pids" ] && return 0',
+        '    signal=TERM; [ "$attempt" -gt 20 ] && signal=KILL',
+        "    for pid in $pids; do",
+        '      kill -"$signal" "$pid" 2>/dev/null',
+        "    done",
+        "    sleep 0.1",
+        "  done",
+        '  echo "Failed to free port $port; remaining PID(s): $(_port_pids)" >&2',
+        "  return 1",
+        "}",
+        '_shutdown() { _cleanup; exit $?; }',
+        "trap _shutdown INT TERM",
+        'wait "$watch_pid"',
+        "watch_status=$?",
+        "_cleanup || watch_status=$?",
+        'exit "$watch_status"',
+    ])
+
+# ---------------------------------------------------------------------------
+# Public entrypoint
+# ---------------------------------------------------------------------------
+def flotilla_stack(
+        pg_conn,
+        mqtt_host="localhost",
+        mqtt_port=1883,
+        backend_port=8000,
+        frontend_port=3001,
+        resource_deps=[],
+        extra_backend_env={},
+        extra_frontend_env={},
+        labels=["flotilla"]):
+    """Register the flotilla-backend and flotilla-frontend resources.
+
+    Args:
+        pg_conn: PostgreSQL connection string for the flotilla database.
+        mqtt_host, mqtt_port: MQTT broker coordinates the backend connects to.
+        backend_port, frontend_port: host ports for the two services.
+        resource_deps: Tilt resources the backend must wait for (e.g. the broker
+            and a database-reset step in the robotics stack).
+        extra_backend_env / extra_frontend_env: caller-supplied env that extends
+            or overrides the defaults below (SARA + Azurite wiring, OTel, ...).
+        labels: Tilt UI labels for both resources.
+    """
+    backend_env = {
+        "ASPNETCORE_ENVIRONMENT": "Local",
+        "ASPNETCORE_URLS": "http://localhost:%d" % backend_port,
+        # dotnet watch's FSEvents watcher recurses into a stack overflow on
+        # macOS; polling avoids the crash so the backend reliably binds its port.
+        "DOTNET_USE_POLLING_FILE_WATCHER": "true",
+        "Database__UseInMemoryDatabase": "false",
+        "Database__PostgreSqlConnectionString": pg_conn,
+        "Database__postgresConnectionString": pg_conn,
+        "Mqtt__Host": mqtt_host,
+        "Mqtt__Port": str(mqtt_port),
+        "Mqtt__Password": kv_secret("flotilla-mqtt-password"),
+        "Mqtt__AllowInsecureLocalConnections": "true",
+        "KeyVault__UseKeyVault": "false",
+        "Database__SeedExampleDataPostgres": "true",
+        "AzureAd__ClientSecret": kv_secret("azure-client-secret"),
+    }
+    backend_env.update(extra_backend_env)
+
+    local_resource(
+        "flotilla-backend",
+        # `dotnet ef` reads project metadata through MSBuild before building, and
+        # that step does not restore. On a checkout that has never been built it
+        # therefore fails with NETSDK1004 instead of running the migrations, so
+        # restore explicitly first. This is a no-op once the checkout is warm.
+        cmd="dotnet restore && dotnet ef database update --project api",
+        dir=_FLOTILLA_ROOT + "/backend",
+        env=backend_env,
+        serve_cmd=_dotnet_watch_serve("api", backend_port),
+        serve_dir=_FLOTILLA_ROOT + "/backend",
+        serve_env=backend_env,
+        resource_deps=resource_deps,
+        readiness_probe=probe(
+            http_get=http_get_action(port=backend_port, path="/swagger/index.html"),
+            initial_delay_secs=15,
+            period_secs=10,
+            timeout_secs=5,
+        ),
+        labels=labels,
+        links=[
+            link("http://localhost:%d/swagger" % backend_port, "Flotilla API Swagger"),
+        ],
+    )
+
+    # src/config.ts requires all of these and throws on the first one it cannot
+    # resolve. Vite exposes VITE_-prefixed process env vars through
+    # import.meta.env, so setting them here removes the need for a frontend/.env,
+    # which flotilla gitignores and only creates via its own setup.sh. Keep in
+    # sync with flotilla/frontend/.env.example.
+    frontend_env = {
+        "PORT": str(frontend_port),
+        "VITE_BACKEND_URL": "http://localhost:%d" % backend_port,
+        "VITE_BACKEND_API_SCOPE": "api://ea4c7b92-47b3-45fb-bd25-a8070f0c495c/user_impersonation",
+        "VITE_SARA_URL": "http://localhost:8100",
+        "VITE_SARA_API_SCOPE": "api://dd7e115a-037e-4846-99c4-07561158a9cd/user_impersonation",
+        "VITE_FRONTEND_URL": "http://localhost:%d" % frontend_port,
+        "VITE_FRONTEND_BASE_ROUTE": "",
+        "VITE_AD_CLIENT_ID": "f5993820-b7e2-4791-886f-f9f5027dc7be",
+        "VITE_AD_TENANT_ID": "3aa4a235-b6e2-48d5-9195-7fcf05b459b0",
+    }
+    frontend_env.update(extra_frontend_env)
+
+    local_resource(
+        "flotilla-frontend",
+        cmd="cd " + _FLOTILLA_ROOT + "/frontend && pnpm install --frozen-lockfile",
+        serve_cmd="pnpm run dev",
+        serve_dir=_FLOTILLA_ROOT + "/frontend",
+        serve_env=frontend_env,
+        resource_deps=["flotilla-backend"],
+        labels=labels,
+        links=[
+            link("http://localhost:%d" % frontend_port, "Flotilla UI"),
+        ],
+    )
