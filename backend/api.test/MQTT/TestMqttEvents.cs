@@ -192,7 +192,7 @@ namespace Api.Test.MQTT
                     missionRun.Id,
                     readOnly: true
                 );
-                return postTestMissionRun!.Status == MissionStatus.Queued;
+                return postTestMissionRun!.Status == MissionStatus.Aborted;
             });
         }
 
@@ -542,7 +542,7 @@ namespace Api.Test.MQTT
                     readOnly: true
                 );
                 Robot postTestRobot = (await RobotService.ReadById(robot.Id))!;
-                return postTestMissionRun!.Status == MissionStatus.Queued
+                return postTestMissionRun!.Status == MissionStatus.Aborted
                     && postTestRobot.CurrentMissionId == null;
             });
         }

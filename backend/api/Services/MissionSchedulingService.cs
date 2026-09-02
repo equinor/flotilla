@@ -11,7 +11,7 @@ namespace Api.Services
     {
         public Task StartNextMissionRunIfSystemIsAvailable(Robot robot);
 
-        public Task<MissionRun> MoveMissionRunBackToQueue(
+        public Task<MissionRun> UpdateAbortedMission(
             string robotId,
             string? isarMissionRunId,
             string? stopReason = null
@@ -223,7 +223,7 @@ namespace Api.Services
             catch (RobotBusyException) { }
         }
 
-        public async Task<MissionRun> MoveMissionRunBackToQueue(
+        public async Task<MissionRun> UpdateAbortedMission(
             string robotId,
             string? isarMissionRunId,
             string? stopReason = null
@@ -257,30 +257,8 @@ namespace Api.Services
                 logger.LogWarning("{Message}", errorMessage);
                 throw new MissionRunNotFoundException(errorMessage);
             }
-            else if (missionRun.Tasks.All(task => task.IsCompleted))
-            {
-                string errorMessage =
-                    $"Mission {isarMissionRunId} on robot {robotId} contains no unfinished tasks and cannot be put back on the queue";
-                logger.LogWarning("{Message}", errorMessage);
-                throw new NoUnfinishedTasksInMissionException(errorMessage);
-            }
 
-            await missionRunService.UpdateMissionRunProperty(
-                missionRun.Id,
-                "StatusReason",
-                stopReason
-            );
-
-            await missionRunService.UpdateMissionRunProperty(
-                missionRun.Id,
-                "Status",
-                MissionStatus.Queued
-            );
-            _ = signalRService.SendMessageAsync(
-                "Mission run created",
-                missionRun.InspectionArea.Installation,
-                new MissionRunResponse(missionRun)
-            );
+            await AbortMissionRun(missionRun, stopReason ?? "");
 
             try
             {

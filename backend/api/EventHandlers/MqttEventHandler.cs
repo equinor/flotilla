@@ -376,7 +376,7 @@ namespace Api.EventHandlers
 
             try
             {
-                var missionRun = await MissionScheduling.MoveMissionRunBackToQueue(
+                var missionRun = await MissionScheduling.UpdateAbortedMission(
                     robot.Id,
                     isarAbortedMission.MissionId,
                     isarAbortedMission.Reason
@@ -391,7 +391,6 @@ namespace Api.EventHandlers
                     isarAbortedMission.Reason
                 );
             }
-            catch (NoUnfinishedTasksInMissionException) { }
             catch (RobotNotFoundException)
             {
                 _logger.LogWarning(
@@ -828,7 +827,7 @@ namespace Api.EventHandlers
 
             try
             {
-                var missionRun = await MissionScheduling.MoveMissionRunBackToQueue(
+                var missionRun = await MissionScheduling.UpdateAbortedMission(
                     robot.Id,
                     missionToAbort,
                     "Isar restarted during mission"
@@ -840,7 +839,6 @@ namespace Api.EventHandlers
                     robot.Name
                 );
             }
-            catch (NoUnfinishedTasksInMissionException) { }
             catch (RobotNotFoundException)
             {
                 _logger.LogWarning(
