@@ -1,4 +1,4 @@
-import { createContext, FC, useContext, useEffect, useRef } from 'react'
+import { createContext, FC, useContext, useEffect, useRef, useCallback } from 'react'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { queryClient } from '../../App'
@@ -57,20 +57,14 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
         saraApiRef.current = saraApi
     }, [backendApi, saraApi])
 
-    useEffect(() => {
-        if (connectionReady) {
-            registerEvent(SignalREventLabels.inspectionVisualizationReady, (username: string, message: string) => {
-                const { inspectionId }: FlotillaInspectionResultMessage = JSON.parse(message)
-                queryClient.invalidateQueries({
-                    queryKey: ['fetchInspectionData', inspectionId],
-                })
-                // The mission page reads inspections through the list query with a null
-                // installation code and analysis type, so invalidate the whole prefix rather
-                // than trying to reconstruct a key that would not match.
-                queryClient.invalidateQueries({
-                    queryKey: ['fetchInspectionListData'],
-                })
-                queryClient.fetchQuery({
+    // Pulls the record for one inspection into the cache. Rejections are absorbed
+    // on purpose: SARA answers 404 until the analysis exists, and an uncaught
+    // rejection here becomes a console error on every SignalR event. Components
+    // observing the key still surface the error state through useQuery.
+    const refreshInspectionData = useCallback(
+        (inspectionId: string) => {
+            queryClient
+                .fetchQuery({
                     queryKey: ['fetchInspectionData', inspectionId],
                     queryFn: async () => {
                         return await saraApiRef.current.getSaraDataByInspectionId(inspectionId)
@@ -78,9 +72,32 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
                     retry: 1,
                     staleTime: 10 * 60 * 1000,
                 })
+                .catch(() => {})
+        },
+        // queryClient is a module singleton and saraApiRef is a ref, so this
+        // callback is stable and safe to list in the effects below.
+        []
+    )
+
+    useEffect(() => {
+        if (connectionReady) {
+            registerEvent(SignalREventLabels.inspectionVisualizationReady, (username: string, message: string) => {
+                const { inspectionId }: FlotillaInspectionResultMessage = JSON.parse(message)
+                // The mission page reads inspections through the list query with a null
+                // installation code and analysis type, so invalidate the whole prefix rather
+                // than trying to reconstruct a key that would not match.
+                queryClient.invalidateQueries({
+                    queryKey: ['fetchInspectionListData'],
+                })
+                // Not invalidated first: invalidateQueries refetches the key, then
+                // fetchQuery cancels that in-flight refetch (it defaults to
+                // cancelRefetch), and the rejected promise surfaces as an unhandled
+                // CancelledError. fetchQuery alone refreshes the key and also
+                // populates it when no component is observing.
+                refreshInspectionData(inspectionId)
             })
         }
-    }, [registerEvent, connectionReady])
+    }, [registerEvent, connectionReady, refreshInspectionData])
 
     useEffect(() => {
         if (connectionReady) {
@@ -91,20 +108,10 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
                 queryClient.invalidateQueries({
                     queryKey: ['fetchInspectionListData'],
                 })
-                queryClient.invalidateQueries({
-                    queryKey: ['fetchInspectionData', inspectionResult.inspectionId],
-                })
-                queryClient.fetchQuery({
-                    queryKey: ['fetchInspectionData', inspectionResult.inspectionId],
-                    queryFn: async () => {
-                        return await saraApiRef.current.getSaraDataByInspectionId(inspectionResult.inspectionId)
-                    },
-                    retry: 1,
-                    staleTime: 10 * 60 * 1000,
-                })
+                refreshInspectionData(inspectionResult.inspectionId)
             })
         }
-    }, [registerEvent, connectionReady])
+    }, [registerEvent, connectionReady, refreshInspectionData])
 
     const useSaraData = (inspectionId: string): IInspectionData => {
         const result = useQuery({
