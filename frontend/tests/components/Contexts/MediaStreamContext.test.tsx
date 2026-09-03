@@ -3,9 +3,9 @@ import { createRoot, Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { RoomEvent } from 'livekit-client'
 import { MediaConnectionType, MediaStreamConfig } from 'models/VideoStream'
-import { MediaStreamProvider } from 'components/Contexts/MediaStreamContext'
+import { MediaStreamProvider } from 'contexts/MediaStreamContext'
 import { VideoStreamWindow } from 'pages/MissionPage/VideoStream/VideoStreamWindow'
-import { LanguageProvider } from 'components/Contexts/LanguageContext'
+import { LanguageProvider } from 'contexts/LanguageContext'
 
 const { rooms, MockRoom, backendApi, connectRoom } = vi.hoisted(() => {
     const connectRoom = vi.fn<() => Promise<void>>()

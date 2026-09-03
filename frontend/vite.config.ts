@@ -20,6 +20,7 @@ export default defineConfig({
       'config': '/src/config',
       'pages': '/src/pages',
       'hooks': '/src/hooks',
+      'contexts': '/src/contexts',
     }
   },
   server: {

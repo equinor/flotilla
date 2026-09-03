@@ -1,7 +1,7 @@
 import { Icon, Typography } from '@equinor/eds-core-react'
 import { RobotStatus } from 'models/Robot'
 import { tokens } from '@equinor/eds-tokens'
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'contexts/LanguageContext'
 import { Icons } from 'utils/icons'
 import { styled } from 'styled-components'
 

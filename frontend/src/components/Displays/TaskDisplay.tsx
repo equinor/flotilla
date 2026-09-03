@@ -1,5 +1,5 @@
 import { Typography } from '@equinor/eds-core-react'
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'contexts/LanguageContext'
 import { AnalysisType } from 'models/MissionDefinition'
 import { saraAnalysisTypeToEnum } from 'models/SaraAnalysisTypeMapping'
 

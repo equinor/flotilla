@@ -1,6 +1,6 @@
 import { Chip, Table, Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'contexts/LanguageContext'
 import { StyledTable, StyledTableCell } from 'components/Styles/StyledComponents'
 import { AnalysisValueDisplay, DescriptionDisplay, TagIdDisplay } from 'components/Displays/TaskDisplay'
 import { formatDateTime } from 'utils/StringFormatting'

@@ -1,13 +1,13 @@
 import { Button, Icon, Menu, Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'contexts/LanguageContext'
 import { useContext, useState } from 'react'
 import { NavLink, useNavigate } from 'react-router'
 import { styled } from 'styled-components'
 import { Icons } from 'utils/icons'
 import { phone_width } from 'utils/constants'
-import { InstallationContext } from 'components/Contexts/InstallationContext'
-import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
+import { InstallationContext } from 'contexts/InstallationContext'
+import { useMissionsContext } from 'contexts/MissionRunsContext'
 import { StopRobotDialog } from 'pages/FrontPage/MissionOverview/StopDialogs'
 
 const StyledButton = styled(Button)`

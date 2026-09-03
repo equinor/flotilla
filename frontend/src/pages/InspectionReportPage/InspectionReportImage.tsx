@@ -1,9 +1,9 @@
-import { useInspectionsContext } from 'components/Contexts/InspectionsContext'
+import { useInspectionsContext } from 'contexts/InspectionsContext'
 import { StyledInspection, StyledInspectionImage } from './InspectionStyles'
 import { tokens } from '@equinor/eds-tokens'
 import { CircularProgress, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'contexts/LanguageContext'
 import { VideoPlaceholder, VideoPlayer } from './InspectionVideoPlayer'
 import { FileType, InspectionData } from 'models/InspectionRecord'
 

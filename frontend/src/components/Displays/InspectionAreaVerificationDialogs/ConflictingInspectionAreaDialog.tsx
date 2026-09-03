@@ -1,6 +1,6 @@
 import { Button, Dialog, List, Typography } from '@equinor/eds-core-react'
 import { StyledDialog, VerticalContent } from './ScheduleMissionStyles'
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'contexts/LanguageContext'
 import { useEffect, useState } from 'react'
 import { useBackendApi } from 'api/UseBackendApi'
 

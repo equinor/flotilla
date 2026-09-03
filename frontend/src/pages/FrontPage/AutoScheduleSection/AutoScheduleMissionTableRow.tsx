@@ -1,5 +1,4 @@
 import { Button, Icon, Popover, Table, Typography } from '@equinor/eds-core-react'
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import {
     allDays,
     DaysOfWeek,
@@ -7,6 +6,7 @@ import {
     getCetTimeOnly,
     isJobScheduledAt,
 } from 'models/AutoScheduleFrequency'
+import { useLanguageContext } from 'contexts/LanguageContext'
 import styled from 'styled-components'
 import { MissionDefinition } from 'models/MissionDefinition'
 import { Link } from 'react-router'
@@ -15,7 +15,7 @@ import { useContext, useState } from 'react'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
 import { useBackendApi } from 'api/UseBackendApi'
-import { InstallationContext } from 'components/Contexts/InstallationContext'
+import { InstallationContext } from 'contexts/InstallationContext'
 import { MissionSchedulingEditDialog } from 'components/Dialogs/MissionEditDialog'
 import { phone_width } from 'utils/constants'
 import { useNow } from 'hooks/useNow'

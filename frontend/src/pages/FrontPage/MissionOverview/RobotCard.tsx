@@ -6,13 +6,13 @@ import { BatteryStatusDisplay } from 'components/Displays/RobotDisplays/BatteryS
 import styled from 'styled-components'
 import { RobotImage } from 'components/Displays/RobotDisplays/RobotImage'
 import { useNavigate } from 'react-router'
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'contexts/LanguageContext'
 import { PressureStatusDisplay } from 'components/Displays/RobotDisplays/PressureStatusDisplay'
 import { AttributeTitleTypography } from 'components/Styles/StyledComponents'
 import { Icons } from 'utils/icons'
 import { useRobotTelemetry } from 'hooks/useRobotTelemetry'
 import { useContext } from 'react'
-import { InstallationContext } from 'components/Contexts/InstallationContext'
+import { InstallationContext } from 'contexts/InstallationContext'
 
 const StyledRobotCard = styled.div`
     display: flex;

@@ -1,6 +1,6 @@
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'contexts/LanguageContext'
 import { RobotWithoutTelemetry } from 'models/Robot'
-import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
+import { AlertType, useAlertContext } from 'contexts/AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { StyledDialog } from 'components/Styles/StyledComponents'

@@ -3,9 +3,9 @@ import { Mission, MissionStatus } from 'models/Mission'
 import { useCallback, useContext, useEffect, useState } from 'react'
 import { SimpleHistoricMissionCard } from '../MissionHistory/HistoricMissionCard'
 import styled from 'styled-components'
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'contexts/LanguageContext'
 import { PaginationHeader } from 'models/PaginatedResponse'
-import { useMissionFilterContext, MissionFilterProvider } from 'components/Contexts/MissionFilterContext'
+import { useMissionFilterContext, MissionFilterProvider } from 'contexts/MissionFilterContext'
 import {
     StyledLoading,
     StyledPagination,
@@ -13,10 +13,10 @@ import {
     StyledTableCaption,
     StyledTableCell,
 } from 'components/Styles/StyledComponents'
-import { SignalREventLabels, useSignalRContext } from 'components/Contexts/SignalRContext'
+import { SignalREventLabels, useSignalRContext } from 'contexts/SignalRContext'
 import { unsubscribeAll } from 'utils/signalR'
 import { useBackendApi } from 'api/UseBackendApi'
-import { InstallationContext } from 'components/Contexts/InstallationContext'
+import { InstallationContext } from 'contexts/InstallationContext'
 
 enum InspectionTableColumns {
     Status = 'Status',

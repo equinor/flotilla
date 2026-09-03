@@ -1,7 +1,7 @@
 import { Button, NativeSelect, Textarea, TextField, Typography } from '@equinor/eds-core-react'
 import { useMsal } from '@azure/msal-react'
 import { useBackendApi } from 'api/UseBackendApi'
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'contexts/LanguageContext'
 import { StyledDialog } from 'components/Styles/StyledComponents'
 import {
     FeedbackErrors,

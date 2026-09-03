@@ -1,8 +1,8 @@
 import { Typography } from '@equinor/eds-core-react'
 import { useContext, useMemo, useState } from 'react'
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'contexts/LanguageContext'
 import { StyledPage, StyledTableAndMap } from 'components/Styles/StyledComponents'
-import { InstallationContext } from 'components/Contexts/InstallationContext'
+import { InstallationContext } from 'contexts/InstallationContext'
 import {
     TimeseriesLinePlot,
     TimeseriesLinePlotData,
@@ -26,10 +26,10 @@ import {
     StyledTopAlignedImagesSection,
     WhiteBackgroundBand,
 } from './DataViewComponents'
-import { useInspectionsContext } from 'components/Contexts/InspectionsContext'
+import { useInspectionsContext } from 'contexts/InspectionsContext'
 import { AnalysisType } from 'models/MissionDefinition'
 import { InspectionData } from 'models/InspectionRecord'
-import { useAssetContext } from 'components/Contexts/AssetContext'
+import { useAssetContext } from 'contexts/AssetContext'
 import { saraAnalysisTypeToEnum } from 'models/SaraAnalysisTypeMapping'
 import { DataViewTimeRangeSelector } from './DataViewTimeRangeSelector'
 import { createPresetTimeRange, DataViewTimeRange, TimeRangeMode } from './DataViewTimeRange'

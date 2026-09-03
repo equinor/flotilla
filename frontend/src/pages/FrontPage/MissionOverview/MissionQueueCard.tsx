@@ -3,12 +3,12 @@ import { Mission } from 'models/Mission'
 import styled from 'styled-components'
 import { useNavigate } from 'react-router'
 import { useContext, useState } from 'react'
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'contexts/LanguageContext'
 import { Icons } from 'utils/icons'
 import { StyledDialog } from 'components/Styles/StyledComponents'
 import { tokens } from '@equinor/eds-tokens'
 import { calculateRemaindingTimeInMinutes } from 'utils/CalculateRemaingingTime'
-import { InstallationContext } from 'components/Contexts/InstallationContext'
+import { InstallationContext } from 'contexts/InstallationContext'
 
 interface MissionQueueCardProps {
     order: number

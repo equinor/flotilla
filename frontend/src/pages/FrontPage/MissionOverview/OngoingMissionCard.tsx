@@ -6,13 +6,13 @@ import { MissionProgressDisplay } from 'components/Displays/MissionDisplays/Miss
 import { MissionStatusDisplayWithHeader } from 'components/Displays/MissionDisplays/MissionStatusDisplay'
 import { useNavigate } from 'react-router'
 import { MissionControlButtons } from 'components/Displays/MissionButtons/MissionControlButtons'
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'contexts/LanguageContext'
 import { Icons } from 'utils/icons'
 import { RobotWithoutTelemetry } from 'models/Robot'
 import { NoMissionReason } from 'utils/IsRobotReadyToRunMissions'
-import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
+import { useMissionsContext } from 'contexts/MissionRunsContext'
 import { useContext } from 'react'
-import { InstallationContext } from 'components/Contexts/InstallationContext'
+import { InstallationContext } from 'contexts/InstallationContext'
 
 interface MissionProps {
     mission: Mission
