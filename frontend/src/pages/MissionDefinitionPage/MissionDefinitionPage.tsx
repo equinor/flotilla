@@ -11,9 +11,7 @@ import { tokens } from '@equinor/eds-tokens'
 import { useMissionDefinitionsContext } from 'contexts/MissionDefinitionsContext'
 import { StyledPage, subtleCardShadow } from 'components/Styles/StyledComponents'
 import styled from 'styled-components'
-import { AlertType, useAlertContext } from 'contexts/AlertContext'
-import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
-import { AlertCategory } from 'components/Alerts/AlertsBanner'
+import { useAlertContext } from 'contexts/AlertContext'
 import { MissionDefinitionTaskTableAndMap } from '../MissionPage/TaskTableAndMap'
 import { EditButton, FormContainer, FormItem, TitleComponent } from './MissionDefinitionStyledComponents'
 import {
@@ -111,7 +109,7 @@ const MetadataItem = ({
 
 const MissionDefinitionPageBody = ({ missionDefinition }: { missionDefinition: MissionDefinition }) => {
     const { TranslateText } = useLanguageContext()
-    const { setAlert, setListAlert } = useAlertContext()
+    const { setBanner } = useAlertContext()
     const backendApi = useBackendApi()
 
     const [isEditingName, setIsEditingName] = useState<boolean>(false)
@@ -125,20 +123,8 @@ const MissionDefinitionPageBody = ({ missionDefinition }: { missionDefinition: M
             name: missionDefinition.name,
         }
         backendApi.updateMissionDefinition(missionDefinition.id, defaultMissionDefinitionForm).catch(() => {
-            setAlert(
-                AlertType.RequestFail,
-                <FailedRequestAlertContent
-                    translatedMessage={TranslateText('Failed to delete auto schedule frequency')}
-                />,
-                AlertCategory.ERROR
-            )
-            setListAlert(
-                AlertType.RequestFail,
-                <FailedRequestAlertListContent
-                    translatedMessage={TranslateText('Failed to delete auto schedule frequency')}
-                />,
-                AlertCategory.ERROR
-            )
+            const errorMessage = TranslateText('Failed to delete auto schedule frequency')
+            setBanner(errorMessage, 'error')
         })
     }
 
@@ -205,14 +191,13 @@ export const MissionDefinitionPage = ({ missionId }: { missionId: string }) => {
     const { missionDefinitions } = useMissionDefinitionsContext()
     const { installation } = useContext(InstallationContext)
     const { TranslateText } = useLanguageContext()
-    const { alerts } = useAlertContext()
     const navigate = useNavigate()
 
     const selectedMissionDefinition = missionDefinitions.find((m) => m.id === missionId)
 
     return (
         <>
-            <Header alertDict={alerts} installation={installation} />
+            <Header installation={installation} />
             {selectedMissionDefinition !== undefined && (
                 <StyledPage>
                     <StyledTopComponents>

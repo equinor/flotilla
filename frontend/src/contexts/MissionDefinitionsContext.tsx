@@ -3,9 +3,7 @@ import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { unsubscribeAll } from 'utils/signalR'
 import { MissionDefinition } from 'models/MissionDefinition'
 import { useLanguageContext } from './LanguageContext'
-import { AlertType, useAlertContext } from './AlertContext'
-import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
-import { AlertCategory } from 'components/Alerts/AlertsBanner'
+import { useAlertContext } from './AlertContext'
 import { useBackendApi } from 'api/UseBackendApi'
 import { InstallationContext } from './InstallationContext'
 import { useOnPageVisible } from 'hooks/usePageVisibility'
@@ -40,7 +38,7 @@ const useMissionDefinitions = (): IMissionDefinitionsContext => {
     const { registerEvent, connectionReady } = useSignalRContext()
     const { installation } = useContext(InstallationContext)
     const { TranslateText } = useLanguageContext()
-    const { setAlert, setListAlert } = useAlertContext()
+    const { setBanner } = useAlertContext()
     const backendApi = useBackendApi()
 
     useEffect(() => {
@@ -82,20 +80,8 @@ const useMissionDefinitions = (): IMissionDefinitionsContext => {
                 setMissionDefinitions(missionDefinitionsInInstallation ?? [])
             })
             .catch(() => {
-                setAlert(
-                    AlertType.RequestFail,
-                    <FailedRequestAlertContent
-                        translatedMessage={TranslateText('Failed to retrieve inspection plans')}
-                    />,
-                    AlertCategory.ERROR
-                )
-                setListAlert(
-                    AlertType.RequestFail,
-                    <FailedRequestAlertListContent
-                        translatedMessage={TranslateText('Failed to retrieve inspection plans')}
-                    />,
-                    AlertCategory.ERROR
-                )
+                const errorMessage = TranslateText('Failed to retrieve inspection plans')
+                setBanner(errorMessage, 'error')
             })
     }
 

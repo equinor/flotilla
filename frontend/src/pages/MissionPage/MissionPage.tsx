@@ -5,10 +5,8 @@ import styled from 'styled-components'
 import { MissionHeader, SimpleMissionHeader } from './MissionHeader/MissionHeader'
 import { Header } from 'components/Header/Header'
 import { SignalREventLabels, useSignalRContext } from 'contexts/SignalRContext'
-import { AlertType, useAlertContext } from 'contexts/AlertContext'
+import { useAlertContext } from 'contexts/AlertContext'
 import { useLanguageContext } from 'contexts/LanguageContext'
-import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
-import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { useMediaStreamContext } from 'contexts/MediaStreamContext'
 import { StyledCardsWidth, VideoStreamSection } from 'components/Styles/StyledComponents'
 import { InspectionTaskDialogView } from '../InspectionReportPage/InspectionView'
@@ -53,7 +51,7 @@ const useMissionSelector = (missionId: string | undefined, lookupInspectionId: s
     const [searchParams, setSearchParams] = useSearchParams()
     const navigate = useNavigate()
     const { TranslateText } = useLanguageContext()
-    const { setAlert, setListAlert } = useAlertContext()
+    const { setBanner } = useAlertContext()
     const [selectedMission, setSelectedMission] = useState<Mission>()
     const { registerEvent, connectionReady } = useSignalRContext()
     const { mediaStreams, addMediaStreamConfigIfItDoesNotExist } = useMediaStreamContext()
@@ -111,20 +109,8 @@ const useMissionSelector = (missionId: string | undefined, lookupInspectionId: s
                 setSelectedMission(mission)
             })
             .catch(() => {
-                setAlert(
-                    AlertType.RequestFail,
-                    <FailedRequestAlertContent
-                        translatedMessage={TranslateText('Failed to find mission with ID {0}', [missionId])}
-                    />,
-                    AlertCategory.ERROR
-                )
-                setListAlert(
-                    AlertType.RequestFail,
-                    <FailedRequestAlertListContent
-                        translatedMessage={TranslateText('Failed to find mission with ID {0}', [missionId])}
-                    />,
-                    AlertCategory.ERROR
-                )
+                const errorMessage = TranslateText('Failed to find mission with ID {0}', [missionId])
+                setBanner(errorMessage, 'error')
             })
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [missionId, lookupInspectionId, backendApi])
@@ -145,7 +131,6 @@ const MissionPageWithMission = ({
     analysisId: string | undefined
     includeHeader: boolean
 }) => {
-    const { alerts } = useAlertContext()
     const { installation } = useContext(InstallationContext)
     const { useSaraListData } = useInspectionsContext()
 
@@ -167,7 +152,7 @@ const MissionPageWithMission = ({
 
     return (
         <>
-            {includeHeader ? <Header alertDict={alerts} installation={installation} /> : <></>}
+            {includeHeader ? <Header installation={installation} /> : <></>}
             <StyledMissionPage>
                 <StyledMissionPageContent>
                     {includeHeader ? <MissionHeader mission={mission} /> : <SimpleMissionHeader mission={mission} />}
@@ -216,7 +201,6 @@ export const MissionPage = ({
     includeHeader: boolean
 }) => {
     const { selectedMission, videoMediaStreams } = useMissionSelector(missionId, lookupInspectionId)
-    const { alerts } = useAlertContext()
     const { installation } = useContext(InstallationContext)
 
     return selectedMission ? (
@@ -229,7 +213,7 @@ export const MissionPage = ({
         />
     ) : (
         <>
-            {includeHeader ? <Header alertDict={alerts} installation={installation} /> : <></>}
+            {includeHeader ? <Header installation={installation} /> : <></>}
             <StyledMissionPage />
         </>
     )

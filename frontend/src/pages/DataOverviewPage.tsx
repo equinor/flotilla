@@ -1,4 +1,3 @@
-import { useAlertContext } from 'contexts/AlertContext'
 import { InstallationContext } from 'contexts/InstallationContext'
 import { Header } from 'components/Header/Header'
 import { NavBar } from 'components/Header/NavBar'
@@ -49,7 +48,6 @@ const DataCardContent = styled.div`
 `
 
 export const DataOverviewPage = () => {
-    const { alerts } = useAlertContext()
     const { installation } = useContext(InstallationContext)
     const { TranslateText } = useLanguageContext()
     const navigate = useNavigate()
@@ -89,7 +87,7 @@ export const DataOverviewPage = () => {
 
     return (
         <>
-            <Header alertDict={alerts} installation={installation} />
+            <Header installation={installation} />
             <NavBar />
             <StyledPage>
                 {analysisPages.map((page) => (

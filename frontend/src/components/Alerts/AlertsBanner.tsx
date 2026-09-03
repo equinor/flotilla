@@ -4,6 +4,7 @@ import { ReactNode, useState } from 'react'
 import styled from 'styled-components'
 import { Icons } from 'utils/icons'
 import { phone_width } from 'utils/constants'
+import { AlertSeverity } from 'models/Alert'
 
 const StyledCard = styled.div`
     display: flex;
@@ -29,24 +30,18 @@ const Center = styled.div`
     align-items: center;
 `
 
-export enum AlertCategory {
-    ERROR,
-    WARNING,
-    INFO,
-}
-
 interface AlertProps {
     children: ReactNode
     dismissAlert: () => void
-    alertCategory: AlertCategory
+    severity: AlertSeverity
 }
 
-export const AlertBanner = ({ children, dismissAlert, alertCategory }: AlertProps) => {
+export const AlertBanner = ({ children, dismissAlert, severity }: AlertProps) => {
     let bannerColor = tokens.colors.ui.background__danger.hex
     const hoverColor = tokens.colors.ui.background__light.hex
 
-    if (alertCategory === AlertCategory.WARNING) bannerColor = tokens.colors.interactive.warning__highlight.hex
-    if (alertCategory === AlertCategory.INFO) bannerColor = tokens.colors.infographic.primary__mist_blue.hex
+    if (severity === 'warning') bannerColor = tokens.colors.interactive.warning__highlight.hex
+    if (severity === 'info') bannerColor = tokens.colors.infographic.primary__mist_blue.hex
 
     const [buttonBackgroundColor, setButtonBackgroundColor] = useState<string>(bannerColor)
 

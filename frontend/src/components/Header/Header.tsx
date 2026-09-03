@@ -1,9 +1,8 @@
-import { Button, Icon, TopBar } from '@equinor/eds-core-react'
+import { Button, Icon, TopBar, Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import styled from 'styled-components'
 import { SelectLanguage } from 'components/Header/LanguageSelector'
 import { Icons } from 'utils/icons'
-import { AlertDictionaryType } from 'contexts/AlertContext'
 import { AlertBanner } from 'components/Alerts/AlertsBanner'
 import { FrontPageSectionId } from 'models/FrontPageSectionId'
 import { AlertIcon } from 'components/Header/AlertIcon'
@@ -13,6 +12,7 @@ import { Installation } from 'models/Installation'
 import { useState } from 'react'
 import { FeedbackDialog } from 'components/Dialogs/FeedbackDialog'
 import { useLanguageContext } from 'contexts/LanguageContext'
+import { useAlertContext } from 'contexts/AlertContext'
 
 const StyledTopBar = styled(TopBar)`
     align-items: center;
@@ -64,11 +64,6 @@ const IconStyle = styled.div`
 const SelectLanguageWrapper = styled.div`
     margin-left: 1rem;
 `
-const StyledAlertList = styled.div`
-    display: grid;
-    align-items: center;
-    gap: 0.5rem;
-`
 const AppWrapper = styled.div`
     display: flex;
     align-items: center;
@@ -80,13 +75,13 @@ const AppWrapper = styled.div`
 `
 
 interface Props {
-    alertDict?: AlertDictionaryType
     installation?: Installation
 }
 
-export const Header = ({ alertDict, installation }: Props) => {
+export const Header = ({ installation }: Props) => {
     const navigate = useNavigate()
     const { TranslateText } = useLanguageContext()
+    const { banner, clearBanner } = useAlertContext()
     const [isFeedbackOpen, setIsFeedbackOpen] = useState(false)
 
     return (
@@ -100,7 +95,7 @@ export const Header = ({ alertDict, installation }: Props) => {
                 </TopBar.Header>
                 <TopBar.Actions>
                     <IconStyle>
-                        {alertDict && <AlertIcon />}
+                        <AlertIcon />
                         <Button variant="ghost_icon" onClick={() => navigate(`/`)}>
                             <Icon name={Icons.Platform} size={24} title="Change Asset" />
                         </Button>
@@ -120,14 +115,17 @@ export const Header = ({ alertDict, installation }: Props) => {
                     </SelectLanguageWrapper>
                 </TopBar.Actions>
             </StyledTopBar>
-            {alertDict && Object.entries(alertDict).length > 0 && (
-                <StyledAlertList>
-                    {Object.entries(alertDict).map(([key, value]) => (
-                        <AlertBanner key={key} dismissAlert={value.dismissFunction} alertCategory={value.alertCategory}>
-                            {value.content}
-                        </AlertBanner>
-                    ))}
-                </StyledAlertList>
+            {banner && (
+                <AlertBanner dismissAlert={clearBanner} severity={banner.severity}>
+                    <div>
+                        {banner.title && (
+                            <Typography variant="body_short" style={{ fontWeight: 500 }}>
+                                {banner.title}
+                            </Typography>
+                        )}
+                        {banner.message && <Typography variant="body_short">{banner.message}</Typography>}
+                    </div>
+                </AlertBanner>
             )}
             {isFeedbackOpen && <FeedbackDialog isOpen onClose={() => setIsFeedbackOpen(false)} />}
         </>

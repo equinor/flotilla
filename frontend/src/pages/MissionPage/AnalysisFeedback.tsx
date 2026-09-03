@@ -4,9 +4,7 @@ import styled from 'styled-components'
 import { Icons } from 'utils/icons'
 import { useLanguageContext } from 'contexts/LanguageContext'
 import { useInspectionsContext } from 'contexts/InspectionsContext'
-import { AlertType, useAlertContext } from 'contexts/AlertContext'
-import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
-import { AlertCategory } from 'components/Alerts/AlertsBanner'
+import { useAlertContext } from 'contexts/AlertContext'
 import { StyledDialog as ConfirmDialog } from 'components/Styles/StyledComponents'
 import { Feedback } from 'models/InspectionRecord'
 
@@ -76,7 +74,7 @@ interface AnalysisFeedbackProps {
 export const AnalysisFeedback = ({ inspectionId, analysisRunId, feedback }: AnalysisFeedbackProps) => {
     const { TranslateText } = useLanguageContext()
     const { setFeedback, removeFeedback } = useInspectionsContext()
-    const { setAlert, setListAlert } = useAlertContext()
+    const { setBanner } = useAlertContext()
     const [pendingAction, setPendingAction] = useState<PendingAction | undefined>(undefined)
     const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -99,16 +97,7 @@ export const AnalysisFeedback = ({ inspectionId, analysisRunId, feedback }: Anal
         request
             .catch(() => {
                 const message = TranslateText('Failed to update the feedback')
-                setAlert(
-                    AlertType.RequestFail,
-                    <FailedRequestAlertContent translatedMessage={message} />,
-                    AlertCategory.ERROR
-                )
-                setListAlert(
-                    AlertType.RequestFail,
-                    <FailedRequestAlertListContent translatedMessage={message} />,
-                    AlertCategory.ERROR
-                )
+                setBanner(message, 'error')
             })
             .finally(() => setIsSubmitting(false))
     }

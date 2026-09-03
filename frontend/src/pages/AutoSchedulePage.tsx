@@ -1,4 +1,3 @@
-import { useAlertContext } from 'contexts/AlertContext'
 import { InstallationContext } from 'contexts/InstallationContext'
 import { Header } from 'components/Header/Header'
 import { NavBar } from 'components/Header/NavBar'
@@ -65,7 +64,6 @@ const StyledButtons = styled.div`
 `
 
 export const AutoSchedulePage = () => {
-    const { alerts } = useAlertContext()
     const { installation } = useContext(InstallationContext)
 
     const [showListView, setShowListView] = useState(false)
@@ -73,7 +71,7 @@ export const AutoSchedulePage = () => {
 
     return (
         <>
-            <Header alertDict={alerts} installation={installation} />
+            <Header installation={installation} />
             <NavBar />
             <StyledPage>
                 <StyledView>

@@ -5,7 +5,7 @@ import { useLanguageContext } from 'contexts/LanguageContext'
 import { useState } from 'react'
 import styled from 'styled-components'
 import { Icons } from 'utils/icons'
-import { AlertListItem } from 'components/Alerts/AlertsListItem'
+import { useNavigate } from 'react-router'
 
 const Circle = styled.div`
     position: absolute;
@@ -35,9 +35,46 @@ const StyledPopover = styled(Popover)`
     border-radius: 6px;
 `
 
+const StyledNotificationItem = styled.div<{ severity: string }>`
+    width: 330px;
+    border-radius: 6px;
+    border: 1px solid lightgray;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+    background-color: ${(props) => {
+        switch (props.severity) {
+            case 'error':
+                return tokens.colors.ui.background__danger.hex
+            case 'warning':
+                return tokens.colors.interactive.warning__highlight.hex
+            case 'info':
+                return tokens.colors.infographic.primary__mist_blue.hex
+            default:
+                return tokens.colors.ui.background__light.hex
+        }
+    }};
+    opacity: 0.1;
+    cursor: pointer;
+`
+
+const NotificationContent = styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+`
+
+const ClearAllButton = styled(Button)`
+    width: 100%;
+    margin-top: 10px;
+`
+
 export const AlertIcon = () => {
-    const { listAlerts } = useAlertContext()
+    const { notifications, removeNotification, clearAllNotifications } = useAlertContext()
     const { TranslateText } = useLanguageContext()
+    const navigate = useNavigate()
     const [isAlertDialogOpen, setIsAlertDialogOpen] = useState<boolean>(false)
 
     const [referenceElementNotifications, setReferenceElementNotifications] = useState<HTMLButtonElement | null>(null)
@@ -50,6 +87,14 @@ export const AlertIcon = () => {
         setIsAlertDialogOpen(false)
     }
 
+    const handleNotificationClick = (notification: any) => {
+        // Navigate to mission if missionId is present
+        if (notification.missionId) {
+            navigate(`/mission/${notification.missionId}`)
+            onAlertClose()
+        }
+    }
+
     return (
         <>
             <Button
@@ -58,7 +103,7 @@ export const AlertIcon = () => {
                 ref={setReferenceElementNotifications}
             >
                 <Icon name={Icons.Notifications} size={24} />
-                {Object.entries(listAlerts).length !== 0 && ( //Alert banners
+                {notifications.length > 0 && (
                     <Circle style={{ background: tokens.colors.interactive.danger__resting.hex }} />
                 )}
             </Button>
@@ -75,21 +120,37 @@ export const AlertIcon = () => {
                     </Button>
                 </StyledAlertPopoverHeader>
                 <Popover.Content>
-                    {Object.entries(listAlerts).length === 0 && (
-                        <Typography variant="h6">{TranslateText('No alerts')}</Typography>
-                    )}
-                    {Object.entries(listAlerts).length > 0 && (
-                        <StyledAlertList>
-                            {Object.entries(listAlerts).map(([key, value]) => (
-                                <AlertListItem
-                                    key={key}
-                                    dismissAlert={value.dismissFunction}
-                                    alertCategory={value.alertCategory}
-                                >
-                                    {value.content}
-                                </AlertListItem>
-                            ))}
-                        </StyledAlertList>
+                    {notifications.length === 0 && <Typography variant="h6">{TranslateText('No alerts')}</Typography>}
+                    {notifications.length > 0 && (
+                        <>
+                            <StyledAlertList>
+                                {notifications.map((notification, index) => (
+                                    <NotificationContent key={index}>
+                                        <StyledNotificationItem
+                                            severity={notification.severity}
+                                            onClick={() => handleNotificationClick(notification)}
+                                        >
+                                            <Typography variant="body_short" style={{ fontWeight: 500 }}>
+                                                {notification.title}
+                                            </Typography>
+                                            {notification.message && (
+                                                <Typography variant="body_short">{notification.message}</Typography>
+                                            )}
+                                        </StyledNotificationItem>
+                                        <Button
+                                            variant="ghost_icon"
+                                            onClick={() => removeNotification(index)}
+                                            style={{ alignSelf: 'flex-start', marginTop: '8px' }}
+                                        >
+                                            <Icon name={Icons.Clear} size={18} />
+                                        </Button>
+                                    </NotificationContent>
+                                ))}
+                            </StyledAlertList>
+                            <ClearAllButton variant="ghost" onClick={clearAllNotifications}>
+                                {TranslateText('Clear all')}
+                            </ClearAllButton>
+                        </>
                     )}
                 </Popover.Content>
             </StyledPopover>

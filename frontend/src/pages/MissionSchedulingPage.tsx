@@ -1,4 +1,3 @@
-import { useAlertContext } from 'contexts/AlertContext'
 import { InstallationContext } from 'contexts/InstallationContext'
 import { Header } from 'components/Header/Header'
 import { NavBar } from 'components/Header/NavBar'
@@ -22,7 +21,6 @@ import { StyledPage } from 'components/Styles/StyledComponents'
 import { useLanguageContext } from 'contexts/LanguageContext'
 
 export const MissionSchedulingPage = () => {
-    const { alerts } = useAlertContext()
     const { installation } = useContext(InstallationContext)
     const { TranslateText } = useLanguageContext()
     const { ongoingMissions, missionQueue } = useMissionsContext()
@@ -65,7 +63,7 @@ export const MissionSchedulingPage = () => {
 
     return (
         <>
-            <Header alertDict={alerts} installation={installation} />
+            <Header installation={installation} />
             <NavBar />
             <StyledPage>
                 <InspectionAreaOverview>
