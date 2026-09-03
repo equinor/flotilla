@@ -1,7 +1,7 @@
 import { Typography } from '@equinor/eds-core-react'
 import { Mission } from 'models/Mission'
 import styled from 'styled-components'
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'contexts/LanguageContext'
 import { Task, TaskStatus } from 'models/Task'
 import { AttributeTitleTypography } from 'components/Styles/StyledComponents'
 

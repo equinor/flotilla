@@ -1,9 +1,9 @@
 import { Button, Typography } from '@equinor/eds-core-react'
 import { VideoStreamCard } from './VideoStreamCards'
 import styled from 'styled-components'
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { useMediaStreamContext } from 'components/Contexts/MediaStreamContext'
+import { useMediaStreamContext } from 'contexts/MediaStreamContext'
 import { useEffect } from 'react'
+import { useLanguageContext } from 'contexts/LanguageContext'
 
 const VideoStreamContent = styled.div`
     display: flex;

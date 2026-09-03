@@ -1,13 +1,13 @@
 import { Button, Icon, Table } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
 import {
     allDays,
     getAllDaysIndexOfToday,
     getTimeMissionPairsForDay,
     isJobScheduledAt,
 } from 'models/AutoScheduleFrequency'
+import { useLanguageContext } from 'contexts/LanguageContext'
+import { useMissionDefinitionsContext } from 'contexts/MissionDefinitionsContext'
 import styled from 'styled-components'
 import { Icons } from 'utils/icons'
 import { useState } from 'react'

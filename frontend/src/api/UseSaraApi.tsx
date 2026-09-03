@@ -1,5 +1,5 @@
 import { useContext, useMemo } from 'react'
-import { AuthContext } from 'components/Contexts/AuthContext'
+import { AuthContext } from 'contexts/AuthContext'
 import { BackendAPICaller } from './ApiCaller'
 import { config } from 'config'
 import { SaraApi } from './SaraApi'

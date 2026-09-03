@@ -2,7 +2,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router'
 import { MissionPage } from './MissionPage/MissionPage'
 import { RobotPage } from './RobotPage/RobotPage'
 import { MissionDefinitionPage } from './MissionDefinitionPage/MissionDefinitionPage'
-import { useAssetContext } from 'components/Contexts/AssetContext'
+import { useAssetContext } from 'contexts/AssetContext'
 
 export const SimpleMissionPageRouter = () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

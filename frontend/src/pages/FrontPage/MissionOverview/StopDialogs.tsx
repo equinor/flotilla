@@ -1,16 +1,16 @@
 import { Button, Dialog, Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import styled from 'styled-components'
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'contexts/LanguageContext'
 import { useContext, useState } from 'react'
-import { useMissionControlContext } from 'components/Contexts/MissionControlContext'
-import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
+import { useMissionControlContext } from 'contexts/MissionControlContext'
+import { AlertType, useAlertContext } from 'contexts/AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
-import { useAssetContext } from 'components/Contexts/AssetContext'
+import { useAssetContext } from 'contexts/AssetContext'
 import { RobotStatus } from 'models/Robot'
 import { useBackendApi } from 'api/UseBackendApi'
-import { InstallationContext } from 'components/Contexts/InstallationContext'
+import { InstallationContext } from 'contexts/InstallationContext'
 
 const StyledDisplayButtons = styled.div`
     display: flex;

@@ -1,6 +1,6 @@
 import { Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'contexts/LanguageContext'
 import { Header } from 'components/Header/Header'
 import { StyledPage } from 'components/Styles/StyledComponents'
 import styled from 'styled-components'

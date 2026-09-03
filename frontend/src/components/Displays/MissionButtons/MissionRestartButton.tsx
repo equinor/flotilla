@@ -1,10 +1,10 @@
 import { Button, EdsProvider, Icon, Menu } from '@equinor/eds-core-react'
 import { Icons } from 'utils/icons'
 import { useNavigate } from 'react-router'
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'contexts/LanguageContext'
 import styled from 'styled-components'
 import { useContext, useState } from 'react'
-import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
+import { AlertType, useAlertContext } from 'contexts/AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { Mission } from 'models/Mission'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
@@ -14,8 +14,8 @@ import {
     InspectionAreaDialogType,
 } from '../InspectionAreaVerificationDialogs/getInspectionAreaDialogType'
 import { useBackendApi } from 'api/UseBackendApi'
-import { InstallationContext } from 'components/Contexts/InstallationContext'
-import { useAssetContext } from 'components/Contexts/AssetContext'
+import { InstallationContext } from 'contexts/InstallationContext'
+import { useAssetContext } from 'contexts/AssetContext'
 
 const Centered = styled.div`
     display: flex;

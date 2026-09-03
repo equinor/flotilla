@@ -10,7 +10,7 @@ import { TaskStatus } from 'models/Task'
 import { useNavigate } from 'react-router'
 import { formatDateTime } from 'utils/StringFormatting'
 import { useContext } from 'react'
-import { InstallationContext } from 'components/Contexts/InstallationContext'
+import { InstallationContext } from 'contexts/InstallationContext'
 
 enum InspectionTableColumns {
     StatusShort = 'StatusShort',

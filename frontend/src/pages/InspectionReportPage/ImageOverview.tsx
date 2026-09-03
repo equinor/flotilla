@@ -1,4 +1,4 @@
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'contexts/LanguageContext'
 import {
     StyledImageCard,
     StyledImagesSection,
