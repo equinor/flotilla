@@ -45,7 +45,7 @@ namespace Api.Controllers
             catch (Exception e)
             {
                 logger.LogError(e, "Error during GET of inspection areas from database");
-                throw;
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
 
@@ -80,7 +80,7 @@ namespace Api.Controllers
             catch (Exception e)
             {
                 logger.LogError(e, "Error during GET of inspection areas from database");
-                throw;
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
 
@@ -109,7 +109,7 @@ namespace Api.Controllers
             catch (Exception e)
             {
                 logger.LogError(e, "Error during GET of inspection area from database");
-                throw;
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
 
@@ -149,7 +149,7 @@ namespace Api.Controllers
             catch (Exception e)
             {
                 logger.LogError(e, "Error during GET of inspection area missions from database");
-                throw;
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
 
@@ -201,6 +201,7 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<ActionResult<InspectionAreaResponse>> Create(
             [FromBody] CreateInspectionAreaQuery inspectionArea
@@ -258,6 +259,21 @@ namespace Api.Controllers
             {
                 logger.LogError(e, "Invalid polygon");
                 return BadRequest("Invalid polygon");
+            }
+            catch (InstallationNotFoundException e)
+            {
+                logger.LogWarning(e, "Installation not found while creating an inspection area");
+                return NotFound();
+            }
+            catch (PlantNotFoundException e)
+            {
+                logger.LogWarning(e, "Plant not found while creating an inspection area");
+                return NotFound();
+            }
+            catch (InspectionAreaExistsException e)
+            {
+                logger.LogWarning(e, "Inspection area already exists");
+                return Conflict();
             }
             catch (Exception e)
             {

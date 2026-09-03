@@ -41,7 +41,7 @@ namespace Api.Controllers
             catch (Exception e)
             {
                 logger.LogError(e, "Error during GET of access roles from database");
-                throw;
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
 
@@ -105,7 +105,7 @@ namespace Api.Controllers
             catch (Exception e)
             {
                 logger.LogError(e, "Error while creating new access role");
-                throw;
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
     }

@@ -68,7 +68,7 @@ namespace Api.Services
                     "Installation {CurrentInstallation} does not exist",
                     robotQuery.CurrentInstallationCode
                 );
-                throw new DbUpdateException(
+                throw new InstallationNotFoundException(
                     $"Could not create new robot in database as installation {robotQuery.CurrentInstallationCode} doesn't exist"
                 );
             }
