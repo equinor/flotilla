@@ -406,6 +406,15 @@ namespace Api.Database.Context
                         SensorType = SensorType.Image,
                         TargetPosition = new Position(),
                     },
+                    new TaskDefinition
+                    {
+                        TagId = "fence-tag-3",
+                        Description = "Fence tag 3 - rain drops",
+                        RobotPose = new Pose(),
+                        AnalysisTypes = [AnalysisType.Fencilla],
+                        SensorType = SensorType.Image,
+                        TargetPosition = new Position(),
+                    },
                 ],
                 LastSuccessfulRun = null,
             };
