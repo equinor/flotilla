@@ -1,6 +1,6 @@
 import { Button, Chip, Icon, Table, Typography } from '@equinor/eds-core-react'
 import { TaskStatusDisplay } from './TaskStatusDisplay'
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'contexts/LanguageContext'
 import { Task, TaskStatus } from 'models/Task'
 import { tokens } from '@equinor/eds-tokens'
 import { getColorsFromTaskStatus } from 'utils/MarkerStyles'

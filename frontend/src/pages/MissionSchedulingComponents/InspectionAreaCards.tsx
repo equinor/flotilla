@@ -1,5 +1,5 @@
 import { InspectionArea } from 'models/InspectionArea'
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'contexts/LanguageContext'
 import {
     CardComponent,
     Content,
@@ -11,7 +11,7 @@ import {
 import { Button, Icon, Tooltip, Typography } from '@equinor/eds-core-react'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
-import { useAssetContext } from 'components/Contexts/AssetContext'
+import { useAssetContext } from 'contexts/AssetContext'
 
 interface InspectionAreaCardProps {
     inspectionArea: InspectionArea

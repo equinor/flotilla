@@ -1,13 +1,13 @@
-import { useAlertContext } from 'components/Contexts/AlertContext'
-import { InstallationContext } from 'components/Contexts/InstallationContext'
+import { useAlertContext } from 'contexts/AlertContext'
+import { InstallationContext } from 'contexts/InstallationContext'
 import { Header } from 'components/Header/Header'
 import { NavBar } from 'components/Header/NavBar'
 import { useContext, useState } from 'react'
 import { InspectionArea } from 'models/InspectionArea'
 import { MissionDefinition } from 'models/MissionDefinition'
-import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
-import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
-import { useAssetContext } from 'components/Contexts/AssetContext'
+import { useMissionsContext } from 'contexts/MissionRunsContext'
+import { useMissionDefinitionsContext } from 'contexts/MissionDefinitionsContext'
+import { useAssetContext } from 'contexts/AssetContext'
 import { PlantPolygonMap } from 'pages/MissionPage/MapPosition/PointillaMapView'
 import { Typography } from '@equinor/eds-core-react'
 import {
@@ -19,7 +19,7 @@ import { InspectionAreaCard } from './MissionSchedulingComponents/InspectionArea
 import { MissionSchedulingTable } from './MissionSchedulingComponents/MissionSchedulingTable'
 import { ScheduleMissionDialog } from './MissionSchedulingComponents/ScheduleMissionDialogs'
 import { StyledPage } from 'components/Styles/StyledComponents'
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'contexts/LanguageContext'
 
 export const MissionSchedulingPage = () => {
     const { alerts } = useAlertContext()

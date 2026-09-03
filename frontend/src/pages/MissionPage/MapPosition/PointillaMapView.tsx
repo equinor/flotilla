@@ -12,7 +12,7 @@ import { useAllRobotPosesTelemetry, useRobotTelemetry } from 'hooks/useRobotTele
 import { InspectionArea, PolygonPoint } from 'models/InspectionArea'
 import 'utils/leaflet-overrides.css'
 import { useBackendApi } from 'api/UseBackendApi'
-import { useAssetContext } from 'components/Contexts/AssetContext'
+import { useAssetContext } from 'contexts/AssetContext'
 import { MissionTaskDefinition } from 'models/MissionDefinition'
 import { RobotWithoutTelemetry } from 'models/Robot'
 import { Task } from 'models/Task'

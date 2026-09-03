@@ -1,6 +1,6 @@
 import { Button, Dialog, Typography } from '@equinor/eds-core-react'
 import { StyledDialog, VerticalContent } from './ScheduleMissionStyles'
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'contexts/LanguageContext'
 
 interface UnknownInspectionAreaDialogProps {
     closeDialog: () => void

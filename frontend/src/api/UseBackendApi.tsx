@@ -1,6 +1,6 @@
 import { useContext, useMemo } from 'react'
 import { BackendApi } from './BackendApi'
-import { AuthContext } from 'components/Contexts/AuthContext'
+import { AuthContext } from 'contexts/AuthContext'
 import { BackendAPICaller } from './ApiCaller'
 import { config } from 'config'
 

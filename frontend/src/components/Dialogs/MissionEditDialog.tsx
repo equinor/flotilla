@@ -2,8 +2,8 @@ import { Button, Checkbox, Chip, Textarea, TextField, Typography } from '@equino
 import { tokens } from '@equinor/eds-tokens'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
-import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { AlertType, useAlertContext } from 'contexts/AlertContext'
+import { useLanguageContext } from 'contexts/LanguageContext'
 import {
     ButtonSection,
     FormCard,

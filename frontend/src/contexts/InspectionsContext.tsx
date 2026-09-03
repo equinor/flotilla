@@ -1,7 +1,7 @@
 import { createContext, FC, useContext, useEffect, useRef, useCallback } from 'react'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { queryClient } from '../../App'
+import { queryClient } from '../App'
 import { useBackendApi } from 'api/UseBackendApi'
 import { useSaraApi } from 'api/UseSaraApi'
 import { FlotillaAnalysisResultMessage, FlotillaInspectionResultMessage, InspectionData } from 'models/InspectionRecord'

@@ -1,6 +1,6 @@
 import { Button, TextField } from '@equinor/eds-core-react'
 import { ChangeEvent, useState } from 'react'
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'contexts/LanguageContext'
 import {
     CustomTimeRangeError,
     CustomTimeRangeField,
