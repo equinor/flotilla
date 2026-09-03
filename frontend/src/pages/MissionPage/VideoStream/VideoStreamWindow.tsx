@@ -1,7 +1,7 @@
 import { Typography } from '@equinor/eds-core-react'
 import { VideoStreamCard } from './VideoStreamCards'
 import styled from 'styled-components'
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'contexts/LanguageContext'
 
 const VideoStreamContent = styled.div`
     display: flex;

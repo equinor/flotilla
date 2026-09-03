@@ -1,5 +1,5 @@
 import { Typography } from '@equinor/eds-core-react'
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'contexts/LanguageContext'
 import { RobotWithoutTelemetry, RobotStatus } from 'models/Robot'
 
 export const NoMissionReason = ({ robot }: { robot: RobotWithoutTelemetry }) => {

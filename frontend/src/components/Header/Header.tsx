@@ -3,7 +3,7 @@ import { tokens } from '@equinor/eds-tokens'
 import styled from 'styled-components'
 import { SelectLanguage } from 'components/Header/LanguageSelector'
 import { Icons } from 'utils/icons'
-import { AlertDictionaryType } from 'components/Contexts/AlertContext'
+import { AlertDictionaryType } from 'contexts/AlertContext'
 import { AlertBanner } from 'components/Alerts/AlertsBanner'
 import { FrontPageSectionId } from 'models/FrontPageSectionId'
 import { AlertIcon } from 'components/Header/AlertIcon'
@@ -12,7 +12,7 @@ import { phone_width } from 'utils/constants'
 import { Installation } from 'models/Installation'
 import { useState } from 'react'
 import { FeedbackDialog } from 'components/Dialogs/FeedbackDialog'
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'contexts/LanguageContext'
 
 const StyledTopBar = styled(TopBar)`
     align-items: center;

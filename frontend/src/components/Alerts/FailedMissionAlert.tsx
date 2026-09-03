@@ -1,13 +1,13 @@
 import { Mission, MissionStatus } from 'models/Mission'
 import { MissionStatusDisplay } from 'components/Displays/MissionDisplays/MissionStatusDisplay'
 import { useNavigate } from 'react-router'
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'contexts/LanguageContext'
 import { AlertListContents } from './AlertsListItem'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
 import { AlertContainer, AlertButton } from './AlertStyles'
 import { useContext } from 'react'
-import { InstallationContext } from 'components/Contexts/InstallationContext'
+import { InstallationContext } from 'contexts/InstallationContext'
 
 interface MissionsProps {
     missions: Mission[]

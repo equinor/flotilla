@@ -2,7 +2,7 @@ import { Icon, Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import { MissionStatus } from 'models/Mission'
 import styled from 'styled-components'
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'contexts/LanguageContext'
 import { Icons } from 'utils/icons'
 import { AttributeTitleTypography } from 'components/Styles/StyledComponents'
 

@@ -1,6 +1,6 @@
 import { Icon, Typography } from '@equinor/eds-core-react'
 import { Icons } from 'utils/icons'
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'contexts/LanguageContext'
 import { formatDateTime } from 'utils/StringFormatting'
 import {
     HiddenOnSmallScreen,
@@ -16,7 +16,7 @@ import { InspectionOverviewDialogView } from './ImageOverview'
 import { useContext, useState } from 'react'
 import { LargeDialogInspectionResult, TextAsImage } from './InspectionReportImage'
 import { useInspectionId } from './SetInspectionIdHook'
-import { InstallationContext } from 'components/Contexts/InstallationContext'
+import { InstallationContext } from 'contexts/InstallationContext'
 import { InspectionData } from 'models/InspectionRecord'
 
 interface InspectionDialogViewProps {

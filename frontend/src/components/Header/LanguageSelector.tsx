@@ -1,4 +1,4 @@
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'contexts/LanguageContext'
 import styled from 'styled-components'
 import { Button, Divider } from '@equinor/eds-core-react'
 

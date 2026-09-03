@@ -3,7 +3,7 @@ import { Icon, Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import styled from 'styled-components'
 import { Icons } from 'utils/icons'
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'contexts/LanguageContext'
 import { phone_width, tablet_width } from 'utils/constants'
 
 const StyledVideoPlaceholder = styled.div`

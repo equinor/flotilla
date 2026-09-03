@@ -1,7 +1,7 @@
 import { Typography, Icon } from '@equinor/eds-core-react'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'contexts/LanguageContext'
 import styled from 'styled-components'
 import { DocumentInfo } from 'models/DocumentInfo'
 

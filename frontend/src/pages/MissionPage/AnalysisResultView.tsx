@@ -1,6 +1,6 @@
 import { Divider, Icon, Typography } from '@equinor/eds-core-react'
 import { Icons } from 'utils/icons'
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'contexts/LanguageContext'
 import { formatDateTime } from 'utils/StringFormatting'
 import {
     HiddenOnSmallScreen,

@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { RobotWithoutTelemetry, RobotTelemetryPropertyUpdate } from 'models/Robot'
-import { SignalREventLabels, useSignalRContext } from 'components/Contexts/SignalRContext'
+import { SignalREventLabels, useSignalRContext } from 'contexts/SignalRContext'
 import { Pose } from 'models/Pose'
 import { BatteryStatus } from 'models/Battery'
-import { useAssetContext } from 'components/Contexts/AssetContext'
+import { useAssetContext } from 'contexts/AssetContext'
 
 export const useRobotTelemetry = (robotWithoutDetails: RobotWithoutTelemetry) => {
     const { registerEvent, connectionReady } = useSignalRContext()

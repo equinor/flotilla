@@ -65,7 +65,7 @@ vi.mock('components/Contexts/AssetContext', () => ({
     useAssetContext: () => ({ enabledRobots: [] }),
 }))
 
-import { SignalRProvider } from 'components/Contexts/SignalRContext'
+import { SignalRProvider } from 'contexts/SignalRContext'
 import { useRobotTelemetry } from './useRobotTelemetry'
 import { RobotWithoutTelemetry } from 'models/Robot'
 

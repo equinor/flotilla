@@ -1,6 +1,6 @@
 import { useContext } from 'react'
 import { Navigate } from 'react-router'
-import { InstallationContext } from 'components/Contexts/InstallationContext'
+import { InstallationContext } from 'contexts/InstallationContext'
 import { DataView } from './DataView'
 import { AnalysisType } from 'models/MissionDefinition'
 

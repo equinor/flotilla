@@ -1,9 +1,9 @@
 import { Typography } from '@equinor/eds-core-react'
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'contexts/LanguageContext'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
 import { AlertListContents } from './AlertsListItem'
-import { AutoScheduleFailedMissionDict } from 'components/Contexts/AlertContext'
+import { AutoScheduleFailedMissionDict } from 'contexts/AlertContext'
 import { AlertContainer, AlertIndent, StyledAlertIcon, StyledAlertTitle } from './AlertStyles'
 
 export const FailedAlertContent = ({ title, message }: { title: string; message: string }) => {
