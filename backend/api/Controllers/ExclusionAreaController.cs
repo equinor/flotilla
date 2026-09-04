@@ -42,7 +42,7 @@ namespace Api.Controllers
             catch (Exception e)
             {
                 logger.LogError(e, "Error during GET of exclusion areas from database");
-                throw;
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
 
@@ -77,7 +77,7 @@ namespace Api.Controllers
             catch (Exception e)
             {
                 logger.LogError(e, "Error during GET of exclusion areas from database");
-                throw;
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
 
@@ -106,7 +106,7 @@ namespace Api.Controllers
             catch (Exception e)
             {
                 logger.LogError(e, "Error during GET of exclusion area from database");
-                throw;
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
 
