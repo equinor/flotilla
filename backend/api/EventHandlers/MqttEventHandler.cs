@@ -245,11 +245,38 @@ namespace Api.EventHandlers
             }
         }
 
+        private async Task<Robot?> GetCachedRobotByIsarId(string isarId)
+        {
+            if (!_cache.TryGetValue(isarId, out Robot? cachedRobot) || cachedRobot == null)
+            {
+                var robot = await RobotService.ReadByIsarId(isarId);
+
+                if (robot == null)
+                    return null;
+                var cacheEntryOptions = new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(1),
+                };
+                _cache.Set(isarId, robot, cacheEntryOptions);
+                cachedRobot = robot;
+            }
+            return cachedRobot;
+        }
+
+        private async void UpdateCachedRobot(Robot robot)
+        {
+            var cacheEntryOptions = new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(1),
+            };
+            _cache.Set(robot.IsarId, robot, cacheEntryOptions);
+        }
+
         private async void OnIsarRobotInfo(IsarRobotInfoMessage isarRobotInfo)
         {
             try
             {
-                var robot = await RobotService.ReadByIsarId(isarRobotInfo.IsarId, readOnly: true);
+                var robot = await GetCachedRobotByIsarId(isarRobotInfo.IsarId);
 
                 if (robot == null)
                 {
@@ -303,6 +330,8 @@ namespace Api.EventHandlers
                     robot.Name,
                     updatedFields
                 );
+
+                UpdateCachedRobot(robot);
             }
             catch (DbUpdateException e)
             {
@@ -664,24 +693,11 @@ namespace Api.EventHandlers
 
         private async Task<(string, string)?> GetRobotInstallationCodeAndId(string robotIsarId)
         {
-            if (!_cache.TryGetValue(robotIsarId, out (string, string)? installationCodeAndId))
-            {
-                var robot = await RobotService.ReadByIsarId(robotIsarId);
+            var cachedRobot = await GetCachedRobotByIsarId(robotIsarId);
+            if (cachedRobot == null)
+                return null;
 
-                if (robot == null)
-                    return null;
-                var cacheEntryOptions = new MemoryCacheEntryOptions
-                {
-                    AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(1),
-                };
-                _cache.Set(
-                    robotIsarId,
-                    (robot.CurrentInstallation.InstallationCode, robot.Id),
-                    cacheEntryOptions
-                );
-                installationCodeAndId = (robot.CurrentInstallation.InstallationCode, robot.Id);
-            }
-            return installationCodeAndId;
+            return (cachedRobot.CurrentInstallation.InstallationCode, cachedRobot.Id);
         }
 
         private async void OnIsarBatteryUpdate(IsarBatteryMessage batteryStatus)
