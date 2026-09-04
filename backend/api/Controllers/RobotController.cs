@@ -43,7 +43,7 @@ namespace Api.Controllers
             catch (Exception e)
             {
                 logger.LogError(e, "Error during GET of robots  from database");
-                throw;
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
 
@@ -76,7 +76,7 @@ namespace Api.Controllers
             catch (Exception e)
             {
                 logger.LogError(e, "Error during GET of robots  from database");
-                throw;
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
 
@@ -115,7 +115,7 @@ namespace Api.Controllers
             catch (Exception e)
             {
                 logger.LogError(e, "Error during GET of robot with id={Id}", id);
-                throw;
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
 
@@ -154,7 +154,7 @@ namespace Api.Controllers
             catch (Exception e)
             {
                 logger.LogError(e, "Error while creating new robot");
-                throw;
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
 
@@ -206,7 +206,7 @@ namespace Api.Controllers
             catch (Exception e)
             {
                 logger.LogError(e, "Error while updating robot with id={Id}", id);
-                throw;
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
 
@@ -270,7 +270,7 @@ namespace Api.Controllers
             catch (Exception e)
             {
                 logger.LogError(e, "Error while updating robot with id={Id}", id);
-                throw;
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
 
@@ -324,7 +324,7 @@ namespace Api.Controllers
             catch (Exception e)
             {
                 logger.LogError(e, "Error while updating robot with id={Id}", id);
-                throw;
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
 
@@ -386,7 +386,7 @@ namespace Api.Controllers
             catch (Exception e)
             {
                 logger.LogError(e, "Error while updating robot with id={Id}", id);
-                throw;
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
 
@@ -478,7 +478,7 @@ namespace Api.Controllers
             catch (Exception e)
             {
                 logger.LogError(e, "Error while updating status for robot with id={Id}", id);
-                throw;
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
 

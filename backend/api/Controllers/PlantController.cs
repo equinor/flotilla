@@ -37,7 +37,7 @@ namespace Api.Controllers
             catch (Exception e)
             {
                 logger.LogError(e, "Error during GET of plants from database");
-                throw;
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
 
@@ -64,7 +64,7 @@ namespace Api.Controllers
             catch (Exception e)
             {
                 logger.LogError(e, "Error during GET of plant from database");
-                throw;
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
 
@@ -117,7 +117,7 @@ namespace Api.Controllers
             catch (Exception e)
             {
                 logger.LogError(e, "Error while creating new plant");
-                throw;
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
 
