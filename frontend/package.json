@@ -51,7 +51,7 @@
         "globals": "^17.11.0",
         "jsdom": "^30.0.1",
         "ts-unused-exports": "^11.0.1",
-        "typescript": "^7.0.2",
+        "typescript": "^5.9.3",
         "typescript-eslint": "^8.67.0",
         "vitest": "^4.1.10"
     },

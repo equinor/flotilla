@@ -29,7 +29,7 @@ export const RobotStatusChip = ({ status, itemSize }: StatusProps) => {
     const { TranslateText } = useLanguageContext()
 
     let iconColor = tokens.colors.text.static_icons__default.hex
-    let statusIcon = Icons.CloudOff
+    let statusIcon: Icons
     switch (status) {
         case RobotStatus.Home:
         case RobotStatus.ReturningHome:
