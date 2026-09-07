@@ -4,16 +4,28 @@ updates:
     directory: /frontend
     schedule:
       interval: weekly
+      day: monday
+    groups:
+      docker-images:
+        patterns: ["*"]
 
   - package-ecosystem: docker
     directory: /broker
     schedule:
       interval: weekly
+      day: monday
+    groups:
+      docker-images:
+        patterns: ["*"]
 
   - package-ecosystem: docker
     directory: /backend
     schedule:
       interval: weekly
+      day: monday
+    groups:
+      docker-images:
+        patterns: ["*"]
     ignore:
       - dependency-name: dotnet/sdk
         update-types:
@@ -21,3 +33,31 @@ updates:
       - dependency-name: dotnet/aspnet
         update-types:
           - version-update:semver-major
+
+  - package-ecosystem: nuget
+    directory: /backend
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      nuget-patch-minor:
+        patterns: ["*"]
+        update-types: ["patch", "minor"]
+      nuget-major:
+        patterns: ["*"]
+        update-types: ["major"]
+
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      npm-patch-minor:
+        patterns: ["*"]
+        update-types: ["patch", "minor"]
+      npm-major:
+        patterns: ["*"]
+        update-types: ["major"]
