@@ -53,6 +53,9 @@ updates:
     schedule:
       interval: weekly
       day: monday
+    # Match minimumReleaseAge: 7200 in frontend/pnpm-workspace.yaml.
+    cooldown:
+      default-days: 5
     open-pull-requests-limit: 5
     groups:
       npm-patch-minor:
