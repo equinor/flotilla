@@ -37,8 +37,8 @@
         "build": "tsc -b && vite build",
         "preview": "vite preview",
         "test": "vitest",
-        "lint": "eslint src",
-        "prettier_check": "prettier --check src"
+        "lint": "eslint src tests",
+        "prettier_check": "prettier --check src tests"
     },
     "devDependencies": {
         "@eslint/js": "^10.0.1",

@@ -9,8 +9,7 @@ import { RobotStatus, RobotWithoutTelemetry } from 'models/Robot'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { VideoStreamSection, FieldLabel } from 'components/Styles/StyledComponents'
 import { DocumentationSection } from './Documentation'
-import { useMediaStreamContext } from 'components/Contexts/MediaStreamContext'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useState } from 'react'
 import { VideoStreamWindow } from '../MissionPage/VideoStream/VideoStreamWindow'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
@@ -98,16 +97,11 @@ interface RobotPageProps {
 
 export const RobotPage = ({ robot }: RobotPageProps) => {
     const { TranslateText } = useLanguageContext()
-    const { mediaStreams, addMediaStreamConfigIfItDoesNotExist } = useMediaStreamContext()
     const { ongoingMissions } = useMissionsContext()
     const { robotBatteryLevel, robotBatteryStatus, robotPressureLevel } = useRobotTelemetry(robot)
     const backendApi = useBackendApi()
     const { alerts } = useAlertContext()
     const { installation } = useContext(InstallationContext)
-
-    useEffect(() => {
-        if (robot.id && !Object.keys(mediaStreams).includes(robot.id)) addMediaStreamConfigIfItDoesNotExist(robot.id)
-    }, [robot.id])
 
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const toggleSkipMissionDialog = () => {
@@ -115,8 +109,6 @@ export const RobotPage = ({ robot }: RobotPageProps) => {
     }
 
     const mission = ongoingMissions.find((mission) => mission.robot.id === robot.id)
-
-    const videoMediaStreams = (robot.id ? mediaStreams[robot.id]?.streams : undefined) ?? []
 
     const stopButton =
         robot && [RobotStatus.Busy, RobotStatus.Paused].includes(robot.status) ? (
@@ -239,9 +231,7 @@ export const RobotPage = ({ robot }: RobotPageProps) => {
                             <DocumentationSection documentation={robot.documentation} />
                         )}
                         <VideoStreamSection>
-                            {videoMediaStreams && videoMediaStreams.length > 0 && (
-                                <VideoStreamWindow videoStreams={videoMediaStreams} />
-                            )}
+                            <VideoStreamWindow robotId={robot.id} />
                         </VideoStreamSection>
                     </>
                 )}

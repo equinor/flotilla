@@ -41,6 +41,29 @@ To run the frontend in Docker, run the following from the repository root:
 docker compose up --build frontend
 ```
 
+## Livestream recovery
+
+Mission and robot camera views share a LiveKit connection per robot while mounted. Starting a new
+viewing session or retry always fetches fresh media configuration from the backend: this also activates
+the robot's publisher, which connecting with a cached LiveKit token alone does not do. The frontend
+no longer reads or writes the legacy `mediaConfigs` credential cache.
+
+Activation, room connection, and waiting for video have a bounded deadline. Failed attempts retry
+with exponential backoff up to an attempt limit, then display **Stream unavailable** with a manual
+**Retry** action. Losing the last camera or a stalled native reconnect also has a recovery deadline;
+a disconnected room starts recovery after backoff. Partial camera loss does not interrupt remaining
+cameras. Sustained video replenishes the retry budget for a later independent outage; short-lived
+tracks do not reset it.
+
+The recovery policy is defined by `ATTEMPT_TIMEOUT_MS`, `MAX_ATTEMPTS`, `RETRY_DELAY_MS`, and
+`STABLE_VIDEO_MS` in [MediaStreamManager.ts](./src/components/Contexts/MediaStreamManager.ts).
+
+The last camera viewer leaving disconnects its room and cancels recovery. Re-rendering a page or
+receiving mission updates does not restart activation or reset the retry budget.
+
+Livestream regression tests live in `tests/components/Contexts/MediaStreamContext.test.tsx`.
+Run them with `pnpm test --run tests/components/Contexts/MediaStreamContext.test.tsx`.
+
 ## Run against the Staging or Production backend
 
 1. Update `VITE_BACKEND_API_SCOPE` in `frontend/.env` to the scope of the environment you want to target.
