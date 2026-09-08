@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -107,6 +108,74 @@ namespace Api.Test.Controllers
             >(SerializerOptions, cancellationToken: TestContext.Current.CancellationToken);
 
             Assert.Empty(missionDefinitions!);
+        }
+
+        [Fact]
+        public async Task CheckThatUpdateMissionFailsForInvalidInspectionArea()
+        {
+            // Arrange
+            var installation = await DatabaseUtilities.NewInstallation();
+            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
+            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
+                installation.InstallationCode,
+                plant.PlantCode,
+                areaPolygon: new AreaPolygon
+                {
+                    ZMin = 0,
+                    ZMax = 1,
+                    Positions =
+                    [
+                        new PolygonPoint { X = 0, Y = 0 },
+                        new PolygonPoint { X = 0, Y = 1 },
+                        new PolygonPoint { X = 1, Y = 1 },
+                        new PolygonPoint { X = 1, Y = 0 },
+                    ],
+                }
+            );
+            var missionDefinition = await DatabaseUtilities.NewMissionDefinition(
+                id: null,
+                installationCode: installation.InstallationCode,
+                inspectionArea,
+                tasks:
+                [
+                    new TaskDefinition(
+                        new TaskQuery
+                        {
+                            TagId = "existing-task",
+                            TargetPosition = new Position(),
+                            SensorType = SensorType.Image,
+                            AnalysisTypes = [AnalysisType.Fencilla],
+                            RobotPose = new Pose(),
+                        },
+                        1
+                    ),
+                ],
+                writeToDatabase: true
+            );
+            var query = new UpdateMissionDefinitionQuery
+            {
+                Tasks =
+                [
+                    new TaskQuery
+                    {
+                        TagId = "missing-inspection-area",
+                        TargetPosition = new Position(10, 10, 10),
+                        SensorType = SensorType.Image,
+                        AnalysisTypes = [AnalysisType.Fencilla],
+                        RobotPose = new Pose(10, 10, 10, 0, 0, 0, 1),
+                    },
+                ],
+            };
+
+            // Act
+            var response = await Client.PatchAsJsonAsync(
+                $"missions/definitions/{missionDefinition.Id}",
+                query,
+                TestContext.Current.CancellationToken
+            );
+
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
     }
 }
