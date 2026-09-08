@@ -20,5 +20,5 @@
     "outDir": "out",
     "sourceMap": true
   },
-  "include": ["src"]
+  "include": ["src", "tests"]
 }

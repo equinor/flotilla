@@ -9,7 +9,6 @@ import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
-import { useMediaStreamContext } from 'components/Contexts/MediaStreamContext'
 import { StyledCardsWidth, VideoStreamSection } from 'components/Styles/StyledComponents'
 import { InspectionTaskDialogView } from '../InspectionReportPage/InspectionView'
 import { AnalysisOverviewSection, InspectionOverviewSection } from '../InspectionReportPage/ImageOverview'
@@ -56,13 +55,7 @@ const useMissionSelector = (missionId: string | undefined, lookupInspectionId: s
     const { setAlert, setListAlert } = useAlertContext()
     const [selectedMission, setSelectedMission] = useState<Mission>()
     const { registerEvent, connectionReady } = useSignalRContext()
-    const { mediaStreams, addMediaStreamConfigIfItDoesNotExist } = useMediaStreamContext()
     const backendApi = useBackendApi()
-
-    useEffect(() => {
-        if (selectedMission && !Object.keys(mediaStreams).includes(selectedMission?.robot.id))
-            addMediaStreamConfigIfItDoesNotExist(selectedMission?.robot.id)
-    }, [selectedMission])
 
     useEffect(() => {
         if (!connectionReady) return
@@ -71,8 +64,6 @@ const useMissionSelector = (missionId: string | undefined, lookupInspectionId: s
             setSelectedMission((oldMission) => (updatedMission.id === oldMission?.id ? updatedMission : oldMission))
         })
     }, [registerEvent, connectionReady])
-
-    const videoMediaStreams = (selectedMission ? mediaStreams[selectedMission.robot.id]?.streams : undefined) ?? []
 
     useEffect(() => {
         if (!lookupInspectionId) return
@@ -129,18 +120,16 @@ const useMissionSelector = (missionId: string | undefined, lookupInspectionId: s
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [missionId, lookupInspectionId, backendApi])
 
-    return { selectedMission, videoMediaStreams }
+    return { selectedMission }
 }
 
 const MissionPageWithMission = ({
     mission,
-    videoMediaStreams,
     inspectionId,
     analysisId,
     includeHeader = true,
 }: {
     mission: Mission
-    videoMediaStreams: MediaStreamTrack[]
     inspectionId: string | undefined
     analysisId: string | undefined
     includeHeader: boolean
@@ -179,9 +168,7 @@ const MissionPageWithMission = ({
                                 robot={mission.robot}
                             />
                             <VideoStreamSection>
-                                {videoMediaStreams && videoMediaStreams.length > 0 && (
-                                    <VideoStreamWindow videoStreams={videoMediaStreams} />
-                                )}
+                                <VideoStreamWindow robotId={mission.robot.id} />
                             </VideoStreamSection>
                             {inspectionId && data && (
                                 <InspectionTaskDialogView selectedInspectionId={inspectionId} inspectionData={data} />
@@ -215,14 +202,13 @@ export const MissionPage = ({
     lookupInspectionId: string | undefined
     includeHeader: boolean
 }) => {
-    const { selectedMission, videoMediaStreams } = useMissionSelector(missionId, lookupInspectionId)
+    const { selectedMission } = useMissionSelector(missionId, lookupInspectionId)
     const { alerts } = useAlertContext()
     const { installation } = useContext(InstallationContext)
 
     return selectedMission ? (
         <MissionPageWithMission
             mission={selectedMission}
-            videoMediaStreams={videoMediaStreams}
             inspectionId={inspectionId}
             analysisId={analysisId}
             includeHeader={includeHeader}

@@ -1,7 +1,9 @@
-import { Typography } from '@equinor/eds-core-react'
+import { Button, Typography } from '@equinor/eds-core-react'
 import { VideoStreamCard } from './VideoStreamCards'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { useMediaStreamContext } from 'components/Contexts/MediaStreamContext'
+import { useEffect } from 'react'
 
 const VideoStreamContent = styled.div`
     display: flex;
@@ -12,15 +14,24 @@ const VideoStreamContent = styled.div`
 `
 
 interface VideoStreamWindowProps {
-    videoStreams: MediaStreamTrack[]
+    robotId: string
 }
 
-export const VideoStreamWindow = ({ videoStreams }: VideoStreamWindowProps) => {
+export const VideoStreamWindow = ({ robotId }: VideoStreamWindowProps) => {
     const { TranslateText } = useLanguageContext()
+    const { mediaStreams, acquireMediaStream, retryMediaStream } = useMediaStreamContext()
+    useEffect(() => acquireMediaStream(robotId), [robotId, acquireMediaStream])
 
+    const { streams: videoStreams, status } = mediaStreams[robotId] ?? { streams: [], status: 'connecting' }
+    const statusText = {
+        connecting: 'Connecting',
+        reconnecting: 'Reconnecting',
+        unavailable: 'Stream unavailable',
+        connected: '',
+    }[status]
     const videoCards = videoStreams.map((videoStream, index) => (
         <VideoStreamCard
-            key={index}
+            key={videoStream.id}
             videoStream={new MediaStream([videoStream])}
             videoStreamName={undefined}
             videoStreamId={'videostreamid-' + index}
@@ -30,6 +41,10 @@ export const VideoStreamWindow = ({ videoStreams }: VideoStreamWindowProps) => {
     return (
         <>
             <Typography variant="h2">{TranslateText('Camera')}</Typography>
+            {statusText && <Typography role="status">{TranslateText(statusText)}</Typography>}
+            {status === 'unavailable' && (
+                <Button onClick={() => retryMediaStream(robotId)}>{TranslateText('Retry')}</Button>
+            )}
             <VideoStreamContent>{videoCards}</VideoStreamContent>
         </>
     )

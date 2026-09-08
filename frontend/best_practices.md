@@ -26,7 +26,7 @@ For installation and how to run the frontend, see the [README](./README.md).
 We abide by the formatting provided by Prettier. To format the code, run:
 
 ```bash
-pnpm exec prettier --write src
+pnpm exec prettier --write src tests
 ```
 
 To check the formatting without changing anything, run:
