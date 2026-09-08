@@ -1,4 +1,3 @@
-import { useAlertContext } from 'contexts/AlertContext'
 import { InstallationContext } from 'contexts/InstallationContext'
 import { Header } from 'components/Header/Header'
 import { NavBar } from 'components/Header/NavBar'
@@ -59,7 +58,6 @@ const OngoingMissionControlCardStyle = styled.div`
 `
 
 export const MissionControlPage = () => {
-    const { alerts } = useAlertContext()
     const { installation } = useContext(InstallationContext)
     const { enabledRobots } = useAssetContext()
 
@@ -69,7 +67,7 @@ export const MissionControlPage = () => {
 
     return (
         <>
-            <Header alertDict={alerts} installation={installation} />
+            <Header installation={installation} />
             <NavBar />
             <StyledPage>
                 <MissionControlStyle>

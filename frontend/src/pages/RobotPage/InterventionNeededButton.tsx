@@ -1,8 +1,6 @@
 import { useLanguageContext } from 'contexts/LanguageContext'
 import { RobotWithoutTelemetry } from 'models/Robot'
-import { AlertType, useAlertContext } from 'contexts/AlertContext'
-import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
-import { AlertCategory } from 'components/Alerts/AlertsBanner'
+import { useAlertContext } from 'contexts/AlertContext'
 import { StyledDialog } from 'components/Styles/StyledComponents'
 import styled from 'styled-components'
 import { useState } from 'react'
@@ -19,7 +17,7 @@ const StyledTextButton = styled(Button)`
 
 export const InterventionNeededButton = ({ robot }: { robot: RobotWithoutTelemetry }) => {
     const { TranslateText } = useLanguageContext()
-    const { setAlert, setListAlert } = useAlertContext()
+    const { setBanner } = useAlertContext()
     const [isDisabled, setIsDisabled] = useState(false)
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const backendApi = useBackendApi()
@@ -28,24 +26,8 @@ export const InterventionNeededButton = ({ robot }: { robot: RobotWithoutTelemet
         disableButton()
 
         backendApi.releaseInterventionNeeded(robot.id).catch(() => {
-            setAlert(
-                AlertType.RequestFail,
-                <FailedRequestAlertContent
-                    translatedMessage={TranslateText('Unable to release robot {0} from intervention mode', [
-                        robot.name ?? '',
-                    ])}
-                />,
-                AlertCategory.ERROR
-            )
-            setListAlert(
-                AlertType.RequestFail,
-                <FailedRequestAlertListContent
-                    translatedMessage={TranslateText('Unable to release robot {0} from intervention mode', [
-                        robot.name ?? '',
-                    ])}
-                />,
-                AlertCategory.ERROR
-            )
+            const errorMessage = TranslateText('Unable to release robot {0} from intervention mode', [robot.name ?? ''])
+            setBanner(errorMessage, 'error')
         })
     }
 

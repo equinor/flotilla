@@ -1,69 +1,65 @@
-import { Button, Icon } from '@equinor/eds-core-react'
+import { Button, Icon, Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
-import { ReactNode, useState } from 'react'
 import styled from 'styled-components'
 import { Icons } from 'utils/icons'
 import { phone_width } from 'utils/constants'
+import { Alert } from 'models/Alert'
 
 const StyledCard = styled.div`
     display: flex;
-    width: 100vw - 10px;
+    width: 100%;
+    box-sizing: border-box;
     height: auto;
-    min-height: 65px;
-    padding: 6px 15px 2px 32px;
+    padding: 0.5rem 1.5rem;
     justify-content: space-between;
     align-items: center;
     overflow: hidden;
 
     @media (max-width: ${phone_width}) {
-        padding: 6px 8px 2px 10px;
+        padding: 0.5rem 1rem;
     }
 `
 const Horizontal = styled.div`
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
+    gap: 1rem;
     align-items: center;
 `
-const Center = styled.div`
-    align-items: center;
+const DismissButton = styled(Button)`
+    &:hover {
+        background-color: ${tokens.colors.ui.background__light.hex};
+    }
 `
 
-export enum AlertCategory {
-    ERROR,
-    WARNING,
-    INFO,
-}
-
-interface AlertProps {
-    children: ReactNode
+interface Props {
+    bannerAlert: Alert
     dismissAlert: () => void
-    alertCategory: AlertCategory
 }
 
-export const AlertBanner = ({ children, dismissAlert, alertCategory }: AlertProps) => {
+export const AlertBanner = ({ bannerAlert, dismissAlert }: Props) => {
     let bannerColor = tokens.colors.ui.background__danger.hex
-    const hoverColor = tokens.colors.ui.background__light.hex
-
-    if (alertCategory === AlertCategory.WARNING) bannerColor = tokens.colors.interactive.warning__highlight.hex
-    if (alertCategory === AlertCategory.INFO) bannerColor = tokens.colors.infographic.primary__mist_blue.hex
-
-    const [buttonBackgroundColor, setButtonBackgroundColor] = useState<string>(bannerColor)
+    let iconColor = tokens.colors.interactive.danger__resting.hex
+    if (bannerAlert.severity === 'warning') {
+        bannerColor = tokens.colors.interactive.warning__highlight.hex
+        iconColor = tokens.colors.interactive.warning__resting.hex
+    }
+    if (bannerAlert.severity === 'info') {
+        bannerColor = tokens.colors.infographic.primary__mist_blue.hex
+        iconColor = tokens.colors.text.static_icons__default.hex
+    }
 
     return (
         <StyledCard style={{ backgroundColor: bannerColor }}>
             <Horizontal>
-                <Center>{children}</Center>
+                <Icon name={Icons.Failed} style={{ color: iconColor }} />
+                <div>
+                    {bannerAlert.title && <Typography variant="h4">{bannerAlert.title}</Typography>}
+                    {bannerAlert.message && <Typography variant="body_short">{bannerAlert.message}</Typography>}
+                </div>
             </Horizontal>
-            <Button
-                variant="ghost_icon"
-                onClick={dismissAlert}
-                style={{ backgroundColor: buttonBackgroundColor }}
-                onPointerEnter={() => setButtonBackgroundColor(hoverColor)}
-                onPointerLeave={() => setButtonBackgroundColor(bannerColor)}
-            >
-                <Icon name={Icons.Clear} style={{ color: tokens.colors.text.static_icons__default.hex }}></Icon>
-            </Button>
+            <DismissButton variant="ghost_icon" onClick={dismissAlert}>
+                <Icon name={Icons.Clear}></Icon>
+            </DismissButton>
         </StyledCard>
     )
 }
