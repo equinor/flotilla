@@ -5,7 +5,9 @@ import { useLanguageContext } from 'contexts/LanguageContext'
 import { useState } from 'react'
 import styled from 'styled-components'
 import { Icons } from 'utils/icons'
-import { AlertListItem } from 'components/Alerts/AlertsListItem'
+import { useNavigate } from 'react-router'
+import { AlertNotification } from 'components/Alerts/AlertNotification'
+import { Installation } from 'models/Installation'
 
 const Circle = styled.div`
     position: absolute;
@@ -14,30 +16,20 @@ const Circle = styled.div`
     height: 9px;
     border-radius: 50%;
 `
-const StyledAlertPopoverHeader = styled.div`
+
+const Gaps = styled.div`
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px 16px 0px 16px;
-    margin-bottom: -10px;
-    width: 340px;
+    flex-direction: column;
+    gap: 10px;
 `
 
-const StyledAlertList = styled.div`
-    display: grid;
-    grid-template-rows: repeat(auto-fill);
-    align-items: center;
-    gap: 15px;
-`
-
-const StyledPopover = styled(Popover)`
-    width: 360px;
-    border-radius: 6px;
-`
-
-export const AlertIcon = () => {
-    const { listAlerts } = useAlertContext()
+interface Props {
+    installation: Installation
+}
+export const AlertIcon = ({ installation }: Props) => {
+    const { notifications, removeNotification } = useAlertContext()
     const { TranslateText } = useLanguageContext()
+    const navigate = useNavigate()
     const [isAlertDialogOpen, setIsAlertDialogOpen] = useState<boolean>(false)
 
     const [referenceElementNotifications, setReferenceElementNotifications] = useState<HTMLButtonElement | null>(null)
@@ -50,6 +42,15 @@ export const AlertIcon = () => {
         setIsAlertDialogOpen(false)
     }
 
+    const onNotificationClose = (index: number) => {
+        removeNotification(index)
+    }
+
+    const handleMissionClick = (missionId: string) => {
+        navigate(`/${installation.installationCode}/mission/${missionId}`)
+        onAlertClose()
+    }
+
     return (
         <>
             <Button
@@ -58,41 +59,35 @@ export const AlertIcon = () => {
                 ref={setReferenceElementNotifications}
             >
                 <Icon name={Icons.Notifications} size={24} />
-                {Object.entries(listAlerts).length !== 0 && ( //Alert banners
+                {notifications.length > 0 && (
                     <Circle style={{ background: tokens.colors.interactive.danger__resting.hex }} />
                 )}
             </Button>
-            <StyledPopover
+            <Popover
                 onClose={onAlertClose}
                 open={isAlertDialogOpen}
                 placement={'bottom-end'}
                 anchorEl={referenceElementNotifications}
             >
-                <StyledAlertPopoverHeader>
+                <Popover.Header>
                     <Typography variant="h4">{TranslateText('Alerts')}</Typography>
-                    <Button variant={'ghost_icon'} style={{ color: 'black' }} onClick={onAlertClose}>
-                        <Icon name="close" size={24} />
-                    </Button>
-                </StyledAlertPopoverHeader>
+                </Popover.Header>
                 <Popover.Content>
-                    {Object.entries(listAlerts).length === 0 && (
-                        <Typography variant="h6">{TranslateText('No alerts')}</Typography>
-                    )}
-                    {Object.entries(listAlerts).length > 0 && (
-                        <StyledAlertList>
-                            {Object.entries(listAlerts).map(([key, value]) => (
-                                <AlertListItem
-                                    key={key}
-                                    dismissAlert={value.dismissFunction}
-                                    alertCategory={value.alertCategory}
-                                >
-                                    {value.content}
-                                </AlertListItem>
+                    {notifications.length === 0 && <Typography variant="h6">{TranslateText('No alerts')}</Typography>}
+                    {notifications.length > 0 && (
+                        <Gaps>
+                            {notifications.map((notification, index) => (
+                                <AlertNotification
+                                    key={index}
+                                    notification={notification}
+                                    onCloseClick={() => onNotificationClose(index)}
+                                    onMissionClick={handleMissionClick}
+                                />
                             ))}
-                        </StyledAlertList>
+                        </Gaps>
                     )}
                 </Popover.Content>
-            </StyledPopover>
+            </Popover>
         </>
     )
 }

@@ -22,7 +22,6 @@ import { useQuery } from '@tanstack/react-query'
 import { useRobotTelemetry } from 'hooks/useRobotTelemetry'
 import { useBackendApi } from 'api/UseBackendApi'
 import { InstallationContext } from 'contexts/InstallationContext'
-import { useAlertContext } from 'contexts/AlertContext'
 
 const StyledRobotPage = styled.div`
     display: flex;
@@ -100,7 +99,6 @@ export const RobotPage = ({ robot }: RobotPageProps) => {
     const { ongoingMissions } = useMissionsContext()
     const { robotBatteryLevel, robotBatteryStatus, robotPressureLevel } = useRobotTelemetry(robot)
     const backendApi = useBackendApi()
-    const { alerts } = useAlertContext()
     const { installation } = useContext(InstallationContext)
 
     const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -154,7 +152,7 @@ export const RobotPage = ({ robot }: RobotPageProps) => {
 
     return (
         <>
-            <Header alertDict={alerts} installation={installation} />
+            <Header installation={installation} />
             <StyledRobotPage>
                 {robot && (
                     <>

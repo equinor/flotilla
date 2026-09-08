@@ -3,9 +3,7 @@ import { RobotPropertyUpdate, RobotWithoutTelemetry, robotTelemetryPropsList } f
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { unsubscribeAll } from 'utils/signalR'
 import { useLanguageContext } from './LanguageContext'
-import { AlertType, useAlertContext } from './AlertContext'
-import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
-import { AlertCategory } from 'components/Alerts/AlertsBanner'
+import { useAlertContext } from './AlertContext'
 import { InspectionArea } from 'models/InspectionArea'
 import { useBackendApi } from 'api/UseBackendApi'
 import { InstallationContext } from './InstallationContext'
@@ -42,7 +40,7 @@ export const AssetProvider: FC<Props> = ({ children }) => {
 
     const { registerEvent, connectionReady } = useSignalRContext()
     const { TranslateText } = useLanguageContext()
-    const { setAlert, setListAlert } = useAlertContext()
+    const { setBanner, addNotification } = useAlertContext()
 
     const backendApi = useBackendApi()
 
@@ -108,16 +106,9 @@ export const AssetProvider: FC<Props> = ({ children }) => {
                 setEnabledRobots(robots)
             })
             .catch(() => {
-                setAlert(
-                    AlertType.RequestFail,
-                    <FailedRequestAlertContent translatedMessage={TranslateText('Failed to retrieve robots')} />,
-                    AlertCategory.ERROR
-                )
-                setListAlert(
-                    AlertType.RequestFail,
-                    <FailedRequestAlertListContent translatedMessage={TranslateText('Failed to retrieve robots')} />,
-                    AlertCategory.ERROR
-                )
+                const errorMessage = TranslateText('Failed to retrieve robots')
+                setBanner(errorMessage, 'error')
+                addNotification(errorMessage, 'error')
             })
     }
 
@@ -137,24 +128,11 @@ export const AssetProvider: FC<Props> = ({ children }) => {
                 if (isCurrent()) setInstallationInspectionAreas(inspectionAreas)
             })
             .catch(() => {
-                setAlert(
-                    AlertType.RequestFail,
-                    <FailedRequestAlertContent
-                        translatedMessage={TranslateText('Failed to retrieve inspection areas on installation {0}', [
-                            installation.installationCode,
-                        ])}
-                    />,
-                    AlertCategory.ERROR
-                )
-                setListAlert(
-                    AlertType.RequestFail,
-                    <FailedRequestAlertListContent
-                        translatedMessage={TranslateText('Failed to retrieve inspection areas on installation {0}', [
-                            installation.installationCode,
-                        ])}
-                    />,
-                    AlertCategory.ERROR
-                )
+                const errorMessage = TranslateText('Failed to retrieve inspection areas on installation {0}', [
+                    installation.installationCode,
+                ])
+                setBanner(errorMessage, 'error')
+                addNotification(errorMessage, 'error')
             })
     }
 
