@@ -265,6 +265,27 @@ namespace Api.Controllers
                         (taskQuery, index) => new TaskDefinition(taskQuery, index + 1)
                     ),
                 ];
+                try
+                {
+                    var inspectionAreaForMission =
+                        await inspectionAreaService.TryFindInspectionAreaForMissionTasks(
+                            missionDefinition.Tasks,
+                            missionDefinition.InstallationCode
+                        );
+                    if (inspectionAreaForMission == null)
+                    {
+                        return BadRequest("No inspection area found for the mission tasks");
+                    }
+                    missionDefinition.InspectionArea = inspectionAreaForMission;
+                }
+                catch (MultipleInspectionAreasFoundException ex)
+                {
+                    logger.LogError(ex, "Error while finding inspection area for mission tasks");
+                    return StatusCode(
+                        StatusCodes.Status500InternalServerError,
+                        "Internal server error"
+                    );
+                }
             }
 
             if (missionDefinitionQuery.SchedulingTimesCETperWeek != null)
