@@ -18,7 +18,7 @@ namespace Api.Services
         );
     }
 
-    public class AreaPolygonService(ILogger<IAreaPolygonService> logger) : IAreaPolygonService
+    public class AreaPolygonService() : IAreaPolygonService
     {
         public bool MissionTasksAreInsideAreaPolygon(
             List<TaskDefinition> missionTasks,
@@ -40,13 +40,6 @@ namespace Api.Services
                     )
                 )
                 {
-                    logger.LogWarning(
-                        "Robot position (X={X}, Y={Y}, Z={Z}) is outside the inspection area polygon for task with description {descr}",
-                        robotPosition.X,
-                        robotPosition.Y,
-                        robotPosition.Z,
-                        Sanitize.SanitizeUserInput(missionTask.Description)
-                    );
                     return false;
                 }
             }

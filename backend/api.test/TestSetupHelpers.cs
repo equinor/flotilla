@@ -133,9 +133,7 @@ public static class TestSetupHelpers
             new Mock<ILogger<MissionTaskService>>().Object
         );
         var _plantService = new PlantService(context, _installationService, _accessRoleService);
-        var _areaPolygonService = new AreaPolygonService(
-            new Mock<ILogger<AreaPolygonService>>().Object
-        );
+        var _areaPolygonService = new AreaPolygonService();
         var signalRService = new MockSignalRService();
         var _inspectionAreaService = new InspectionAreaService(
             context,
