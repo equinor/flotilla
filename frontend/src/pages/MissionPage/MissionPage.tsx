@@ -5,10 +5,9 @@ import styled from 'styled-components'
 import { MissionHeader, SimpleMissionHeader } from './MissionHeader/MissionHeader'
 import { Header } from 'components/Header/Header'
 import { SignalREventLabels, useSignalRContext } from 'components/Contexts/SignalRContext'
-import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
+import { useAlertContext } from 'components/Contexts/AlertContext'
+import { AlertType, AlertKind } from 'models/Alert'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
-import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { useMediaStreamContext } from 'components/Contexts/MediaStreamContext'
 import { StyledCardsWidth, VideoStreamSection } from 'components/Styles/StyledComponents'
 import { InspectionTaskDialogView } from '../InspectionReportPage/InspectionView'
@@ -53,7 +52,7 @@ const useMissionSelector = (missionId: string | undefined, lookupInspectionId: s
     const [searchParams, setSearchParams] = useSearchParams()
     const navigate = useNavigate()
     const { TranslateText } = useLanguageContext()
-    const { setAlert, setListAlert } = useAlertContext()
+    const { raiseAlert } = useAlertContext()
     const [selectedMission, setSelectedMission] = useState<Mission>()
     const { registerEvent, connectionReady } = useSignalRContext()
     const { mediaStreams, addMediaStreamConfigIfItDoesNotExist } = useMediaStreamContext()
@@ -111,20 +110,10 @@ const useMissionSelector = (missionId: string | undefined, lookupInspectionId: s
                 setSelectedMission(mission)
             })
             .catch(() => {
-                setAlert(
-                    AlertType.RequestFail,
-                    <FailedRequestAlertContent
-                        translatedMessage={TranslateText('Failed to find mission with ID {0}', [missionId])}
-                    />,
-                    AlertCategory.ERROR
-                )
-                setListAlert(
-                    AlertType.RequestFail,
-                    <FailedRequestAlertListContent
-                        translatedMessage={TranslateText('Failed to find mission with ID {0}', [missionId])}
-                    />,
-                    AlertCategory.ERROR
-                )
+                raiseAlert(AlertType.RequestFail, {
+                    kind: AlertKind.RequestFail,
+                    message: TranslateText('Failed to find mission with ID {0}', [missionId]),
+                })
             })
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [missionId, lookupInspectionId, backendApi])

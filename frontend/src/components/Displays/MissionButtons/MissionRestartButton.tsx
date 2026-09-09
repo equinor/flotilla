@@ -4,10 +4,9 @@ import { useNavigate } from 'react-router'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import styled from 'styled-components'
 import { useContext, useState } from 'react'
-import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
-import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
+import { useAlertContext } from 'components/Contexts/AlertContext'
+import { AlertType, AlertKind } from 'models/Alert'
 import { Mission } from 'models/Mission'
-import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { InspectionAreaVerificationDialog } from '../InspectionAreaVerificationDialogs/InspectionAreaVerificationDialog'
 import {
     getInspectionAreaDialogType,
@@ -43,7 +42,7 @@ export const MissionRestartButton = ({ mission, hasFailedTasks, smallButton }: M
     const { TranslateText } = useLanguageContext()
     const { installation } = useContext(InstallationContext)
     const { enabledRobots } = useAssetContext()
-    const { setAlert, setListAlert } = useAlertContext()
+    const { raiseAlert } = useAlertContext()
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const [isLocationVerificationOpen, setIsLocationVerificationOpen] = useState<boolean>(false)
     const [verificationDialogType, setVerificationDialogType] = useState<InspectionAreaDialogType | null>(null)
@@ -63,16 +62,10 @@ export const MissionRestartButton = ({ mission, hasFailedTasks, smallButton }: M
             .reRunMission(mission.id, option === ReRunOptions.ReRunFailed)
             .then(() => navigateToHome())
             .catch(() => {
-                setAlert(
-                    AlertType.RequestFail,
-                    <FailedRequestAlertContent translatedMessage={TranslateText('Failed to rerun mission')} />,
-                    AlertCategory.ERROR
-                )
-                setListAlert(
-                    AlertType.RequestFail,
-                    <FailedRequestAlertListContent translatedMessage={TranslateText('Failed to rerun mission')} />,
-                    AlertCategory.ERROR
-                )
+                raiseAlert(AlertType.RequestFail, {
+                    kind: AlertKind.RequestFail,
+                    message: TranslateText('Failed to rerun mission'),
+                })
             })
         setIsLocationVerificationOpen(false)
     }

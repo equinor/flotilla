@@ -8,9 +8,8 @@ import { Icons } from 'utils/icons'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 import { StyledAutoComplete, StyledButton, StyledDialog } from 'components/Styles/StyledComponents'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
-import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
-import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
-import { AlertCategory } from 'components/Alerts/AlertsBanner'
+import { useAlertContext } from 'components/Contexts/AlertContext'
+import { AlertType, AlertKind } from 'models/Alert'
 import { InspectionAreaVerificationDialog } from 'components/Displays/InspectionAreaVerificationDialogs/InspectionAreaVerificationDialog'
 import {
     getInspectionAreaDialogType,
@@ -57,7 +56,7 @@ export const ScheduleMissionDialog = (props: IProps) => {
     const { TranslateText } = useLanguageContext()
     const { enabledRobots } = useAssetContext()
     const { setLoadingRobotMissionSet } = useMissionsContext()
-    const { setAlert, setListAlert } = useAlertContext()
+    const { raiseAlert } = useAlertContext()
     const [isInspectionAreaVerificationDialogOpen, setIsInspectionAreaVerificationDialogOpen] = useState<boolean>(false)
     const [verificationDialogType, setVerificationDialogType] = useState<InspectionAreaDialogType | null>(null)
     const [missionsToSchedule, setMissionsToSchedule] = useState<MissionDefinition[]>()
@@ -103,24 +102,10 @@ export const ScheduleMissionDialog = (props: IProps) => {
 
         missions.forEach((mission) => {
             backendApi.scheduleMissionDefinition(mission.id, selectedRobot.id).catch((e) => {
-                setAlert(
-                    AlertType.RequestFail,
-                    <FailedRequestAlertContent
-                        translatedMessage={
-                            TranslateText('Failed to schedule mission') + ` '${mission.name}'. ${e.message}`
-                        }
-                    />,
-                    AlertCategory.ERROR
-                )
-                setListAlert(
-                    AlertType.RequestFail,
-                    <FailedRequestAlertListContent
-                        translatedMessage={
-                            TranslateText('Failed to schedule mission') + ` '${mission.name}'. ${e.message}`
-                        }
-                    />,
-                    AlertCategory.ERROR
-                )
+                raiseAlert(AlertType.RequestFail, {
+                    kind: AlertKind.RequestFail,
+                    message: TranslateText('Failed to schedule mission') + ` '${mission.name}'. ${e.message}`,
+                })
                 setLoadingRobotMissionSet((currentSet: Set<string>) => {
                     const updatedSet: Set<string> = new Set(currentSet)
                     updatedSet.delete(String(mission.name + selectedRobot.id))

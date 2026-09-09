@@ -1,6 +1,6 @@
 import { Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
-import { AlertType } from 'components/Contexts/AlertContext'
+import { AlertType } from 'models/Alert'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { AlertListContents } from './AlertsListItem'
 import { Icons } from 'utils/icons'

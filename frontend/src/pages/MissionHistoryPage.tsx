@@ -11,9 +11,8 @@ import { PaginationHeader } from 'models/PaginatedResponse'
 import { useMissionFilterContext, IFilterState, MissionFilterProvider } from 'components/Contexts/MissionFilterContext'
 import { tokens } from '@equinor/eds-tokens'
 import { SmallScreenInfoText } from 'utils/InfoText'
-import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
-import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
-import { AlertCategory } from 'components/Alerts/AlertsBanner'
+import { useAlertContext } from 'components/Contexts/AlertContext'
+import { AlertType, AlertKind } from 'models/Alert'
 import {
     StyledLoading,
     StyledPage,
@@ -127,7 +126,7 @@ const MissionHistoryViewComponent = () => {
     const { installation } = useContext(InstallationContext)
     const { page, switchPage, filterState, filterIsSet, filterFunctions, filterError, clearFilterError } =
         useMissionFilterContext()
-    const { setAlert, setListAlert } = useAlertContext()
+    const { raiseAlert } = useAlertContext()
     const { registerEvent, connectionReady } = useSignalRContext()
     const [filteredMissions, setFilteredMissions] = useState<Mission[]>([])
     const [paginationDetails, setPaginationDetails] = useState<PaginationHeader>()
@@ -193,20 +192,10 @@ const MissionHistoryViewComponent = () => {
                 setIsLoading(false)
             })
             .catch(() => {
-                setAlert(
-                    AlertType.RequestFail,
-                    <FailedRequestAlertContent
-                        translatedMessage={TranslateText('Failed to retrieve previous mission runs')}
-                    />,
-                    AlertCategory.ERROR
-                )
-                setListAlert(
-                    AlertType.RequestFail,
-                    <FailedRequestAlertListContent
-                        translatedMessage={TranslateText('Failed to retrieve previous mission runs')}
-                    />,
-                    AlertCategory.ERROR
-                )
+                raiseAlert(AlertType.RequestFail, {
+                    kind: AlertKind.RequestFail,
+                    message: TranslateText('Failed to retrieve previous mission runs'),
+                })
             })
     }, [page, pageSize, filterFunctions])
 
