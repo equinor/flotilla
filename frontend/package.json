@@ -53,7 +53,7 @@
         "ts-unused-exports": "^11.0.1",
         "typescript": "^5.9.3",
         "typescript-eslint": "^8.67.0",
-        "vitest": "^4.1.10"
+        "vitest": "^5.0.0"
     },
     "packageManager": "pnpm@10.33.4"
 }
