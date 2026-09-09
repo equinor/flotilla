@@ -111,6 +111,159 @@ namespace Api.Test.Controllers
         }
 
         [Fact]
+        public async Task CheckThatUpdateMissionSucceedsForValidInspectionArea()
+        {
+            // Arrange
+            var installation = await DatabaseUtilities.NewInstallation();
+            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
+            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
+                installation.InstallationCode,
+                plant.PlantCode,
+                areaPolygon: new AreaPolygon
+                {
+                    ZMin = -10,
+                    ZMax = 10,
+                    Positions =
+                    [
+                        new PolygonPoint { X = 0, Y = 0 },
+                        new PolygonPoint { X = 0, Y = 10 },
+                        new PolygonPoint { X = 10, Y = 10 },
+                        new PolygonPoint { X = 10, Y = 0 },
+                    ],
+                }
+            );
+            var missionDefinition = await DatabaseUtilities.NewMissionDefinition(
+                id: null,
+                installationCode: installation.InstallationCode,
+                inspectionArea,
+                tasks:
+                [
+                    new TaskDefinition(
+                        new TaskQuery
+                        {
+                            TagId = "existing-task",
+                            TargetPosition = new Position(),
+                            SensorType = SensorType.Image,
+                            AnalysisTypes = [AnalysisType.Fencilla],
+                            RobotPose = new Pose(),
+                        },
+                        1
+                    ),
+                ],
+                writeToDatabase: true
+            );
+            var query = new UpdateMissionDefinitionQuery
+            {
+                Tasks =
+                [
+                    new TaskQuery
+                    {
+                        TagId = "task-with-valid-inspection-area",
+                        TargetPosition = new Position(10, 10, 10),
+                        SensorType = SensorType.Image,
+                        AnalysisTypes = [AnalysisType.Fencilla],
+                        RobotPose = new Pose(1, 1, 1, 0, 0, 0, 1),
+                    },
+                ],
+            };
+
+            // Act
+            var response = await Client.PatchAsJsonAsync(
+                $"missions/definitions/{missionDefinition.Id}",
+                query,
+                TestContext.Current.CancellationToken
+            );
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task CheckThatUpdateMissionSucceedsForChangedInspectionArea()
+        {
+            // Arrange
+            var installation = await DatabaseUtilities.NewInstallation();
+            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
+            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
+                installation.InstallationCode,
+                plant.PlantCode,
+                areaPolygon: new AreaPolygon
+                {
+                    ZMin = 0,
+                    ZMax = 1,
+                    Positions =
+                    [
+                        new PolygonPoint { X = 0, Y = 0 },
+                        new PolygonPoint { X = 0, Y = 1 },
+                        new PolygonPoint { X = 1, Y = 1 },
+                        new PolygonPoint { X = 1, Y = 0 },
+                    ],
+                }
+            );
+            var nextInspectionArea = await DatabaseUtilities.NewInspectionArea(
+                installation.InstallationCode,
+                plant.PlantCode,
+                inspectionAreaName: "next-inspection-area",
+                areaPolygon: new AreaPolygon
+                {
+                    ZMin = 10,
+                    ZMax = 20,
+                    Positions =
+                    [
+                        new PolygonPoint { X = 0, Y = 0 },
+                        new PolygonPoint { X = 0, Y = 1 },
+                        new PolygonPoint { X = 1, Y = 1 },
+                        new PolygonPoint { X = 1, Y = 0 },
+                    ],
+                }
+            );
+            var missionDefinition = await DatabaseUtilities.NewMissionDefinition(
+                id: null,
+                installationCode: installation.InstallationCode,
+                inspectionArea,
+                tasks:
+                [
+                    new TaskDefinition(
+                        new TaskQuery
+                        {
+                            TagId = "existing-task",
+                            TargetPosition = new Position(),
+                            SensorType = SensorType.Image,
+                            AnalysisTypes = [AnalysisType.Fencilla],
+                            RobotPose = new Pose(),
+                        },
+                        1
+                    ),
+                ],
+                writeToDatabase: true
+            );
+            var query = new UpdateMissionDefinitionQuery
+            {
+                Tasks =
+                [
+                    new TaskQuery
+                    {
+                        TagId = "in-next-inspection-area",
+                        TargetPosition = new Position(10, 10, 10),
+                        SensorType = SensorType.Image,
+                        AnalysisTypes = [AnalysisType.Fencilla],
+                        RobotPose = new Pose(0, 0, 15, 0, 0, 0, 1),
+                    },
+                ],
+            };
+
+            // Act
+            var response = await Client.PatchAsJsonAsync(
+                $"missions/definitions/{missionDefinition.Id}",
+                query,
+                TestContext.Current.CancellationToken
+            );
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Fact]
         public async Task CheckThatUpdateMissionFailsForInvalidInspectionArea()
         {
             // Arrange
