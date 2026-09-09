@@ -64,3 +64,12 @@ updates:
       npm-major:
         patterns: ["*"]
         update-types: ["major"]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      github-actions:
+        patterns: ["*"]
