@@ -276,7 +276,10 @@ namespace Api.Controllers
                     {
                         return BadRequest("No inspection area found for the mission tasks");
                     }
-                    missionDefinition.InspectionArea = inspectionAreaForMission;
+                    if (missionDefinition.InspectionArea.Id != inspectionAreaForMission.Id)
+                    {
+                        missionDefinition.InspectionArea = inspectionAreaForMission;
+                    }
                 }
                 catch (MultipleInspectionAreasFoundException ex)
                 {
