@@ -13,8 +13,15 @@ services:
     container_name: flotilla-mqtt-broker
     ports:
       - "1883:1883"
+    # Credentials generated for this machine by tilt/preflight.py, which both
+    # callers run before `tilt up`. Absolute for the same reason as the build
+    # context above. MQTT_REQUIRE_ENV_CREDENTIALS makes falling back to the
+    # credentials committed to the image a startup failure rather than a warning,
+    # so a broker that did not get this file fails loudly instead of running on
+    # material every environment shares.
+    env_file: ${FLOTILLA_ROOT}/broker/.env
     environment:
-      MQTT_ALLOW_INSECURE_LOCAL_CONNECTIONS: "true"
+      MQTT_REQUIRE_ENV_CREDENTIALS: "true"
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pgrep mosquitto || exit 1"]
