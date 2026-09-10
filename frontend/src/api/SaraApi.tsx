@@ -48,7 +48,7 @@ export class SaraApi {
         if (tagId) path = path + 'Tag=' + tagId + '&'
         if (analysisType) path = path + 'AnalysisTypes=' + [analysisType] + '&'
         if (minDate) path = path + 'MinCreationTime=' + minDate.toISOString() + '&'
-        if (maxDate) path = path + 'MaxCreationTime=' + maxDate + '&'
+        if (maxDate) path = path + 'MaxCreationTime=' + maxDate.toISOString() + '&'
         path = path + 'PageSize=' + inspectionRecordPageSize
 
         const content = this.api
