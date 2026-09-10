@@ -64,6 +64,13 @@ Alternatively, copy the template and fill it in manually:
 cp .env.example .env
 ```
 
+The Tilt stacks need no setup step: [`tilt/preflight.py`](../tilt/preflight.py) generates the
+same two artefacts if they are missing or the certificate is close to expiry, and
+[`tilt/flotilla.tilt`](../tilt/flotilla.tilt) hands each client its generated password. They run
+with `MQTT_REQUIRE_ENV_CREDENTIALS=true`, so a broker that did not receive them fails to start
+rather than falling back to the credentials committed here. Delete `broker/.local-credentials`
+to force a rotation.
+
 `broker/.env` is read through Compose's `env_file`, which cannot hold a multi-line value, so the
 PEM values go in as the base64 body on a single line. The broker reassembles them.
 

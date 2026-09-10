@@ -11,7 +11,8 @@
 # extra backend/frontend env (e.g. SARA + Azurite wiring in the robotics stack).
 #
 # Secrets are resolved here, inside the module, via Azure Key Vault (az login
-# required). Callers do not pass secrets in.
+# required) and, for MQTT, from the credentials tilt/preflight.py generates for
+# this machine. Callers do not pass secrets in.
 
 # Paths are anchored on this file's location, never the caller's working
 # directory: a function defined here but called from another Tiltfile resolves
@@ -40,6 +41,41 @@ def kv_secret(key):
         ],
         quiet=True,
     )).strip()
+
+# ---------------------------------------------------------------------------
+# MQTT credentials (generated per machine by tilt/preflight.py)
+# ---------------------------------------------------------------------------
+# This machine's own CA, broker certificate and one password per broker user.
+# Nothing here is shared with a deployed environment, so no MQTT password is
+# fetched from Key Vault. The broker reads the same material through broker/.env.
+# Exported for callers that run their own MQTT clients against this broker: the
+# robotics stack needs the isar and sara passwords and the CA for ISAR.
+_credentials_dir = os.path.join(_FLOTILLA_ROOT, "broker", ".local-credentials")
+
+watch_file(os.path.join(_credentials_dir, "passwords"))
+
+_mqtt_passwords = {}
+for _line in str(read_file(os.path.join(_credentials_dir, "passwords"))).splitlines():
+    _parts = _line.split("=", 1)
+    if len(_parts) == 2:
+        _mqtt_passwords[_parts[0].strip()] = _parts[1].strip()
+
+if not _mqtt_passwords:
+    fail("broker/.local-credentials/passwords is missing or empty. Run the preflight.")
+
+def mqtt_password(user):
+    """The generated password for one of the users in broker's access_control."""
+    if user not in _mqtt_passwords:
+        fail("No generated MQTT password for user '%s'." % user)
+    return _mqtt_passwords[user]
+
+def mqtt_ca_cert():
+    """The CA certificate, as PEM, that the broker's certificate is issued under.
+
+    Clients that verify the broker need this. The backend does not: it sets
+    IgnoreCertificateChainErrors, see api/MQTT/MqttService.cs.
+    """
+    return str(read_file(os.path.join(_credentials_dir, "ca-cert.pem")))
 
 # ---------------------------------------------------------------------------
 # Public entrypoint
@@ -74,8 +110,8 @@ def flotilla_stack(
         "Database__postgresConnectionString": pg_conn,
         "Mqtt__Host": mqtt_host,
         "Mqtt__Port": str(mqtt_port),
-        "Mqtt__Password": kv_secret("flotilla-mqtt-password"),
-        "Mqtt__AllowInsecureLocalConnections": "true",
+        "Mqtt__Password": mqtt_password("flotilla"),
+        "Mqtt__AllowInsecureLocalConnections": "false",
         "KeyVault__UseKeyVault": "false",
         "Database__SeedExampleDataPostgres": "true",
         "AzureAd__ClientSecret": kv_secret("azure-client-secret"),

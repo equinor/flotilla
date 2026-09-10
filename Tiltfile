@@ -1,7 +1,7 @@
 # Flotilla standalone local stack.
 #
 # Spins up a self-contained Flotilla development environment:
-#   - MQTT broker (Docker container, plain TCP -- TLS disabled for local dev)
+#   - MQTT broker (Docker container, TLS with credentials generated per machine)
 #   - PostgreSQL (Docker container)
 #   - Flotilla backend  (local process, dotnet — compiled DLL run directly)
 #   - Flotilla frontend (local process, pnpm/vite)
