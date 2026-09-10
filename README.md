@@ -63,7 +63,9 @@ in Docker, and the backend and frontend as hot-reloading host processes:
 | Backend Swagger  | <http://localhost:8000/swagger>         |
 | Tilt UI          | <http://localhost:10350>                |
 
-Stop it with `make down` (or `make clean` to also wipe the database volume).
+Press Ctrl+C to stop it; `make run` automatically runs `make down` before
+exiting. Press Ctrl+C again to cancel cleanup. You can still run `make down`
+directly, or `make clean` to also wipe the database volume.
 
 Authentication uses Microsoft Entra ID, so `az login` is required; there is no
 offline auth option yet. To drive a mission, run an [ISAR](https://github.com/equinor/isar)
