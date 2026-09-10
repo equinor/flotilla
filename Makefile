@@ -6,18 +6,31 @@
 export FLOTILLA_ROOT := $(CURDIR)
 
 TILT_COMPOSE := -f tilt/docker-compose.broker.yml -f tilt/docker-compose.postgres.yml
+TILT_DOWN := tilt down 2>/dev/null || true; docker compose $(TILT_COMPOSE) down
 
 preflight: ## Run local (Tilt) environment preflight checks
 	uv run --script tilt/preflight.py
 
 run: preflight ## Start the flotilla stack locally via Tilt
+	@cleanup() { \
+		status=$$?; \
+		trap - 0; \
+		trap 'printf "\nCleanup interrupted; run `make down` before restarting.\n" >&2; exit 130' INT TERM; \
+		printf "\nStopping Flotilla (press Ctrl+C again to cancel cleanup)...\n"; \
+		$(TILT_DOWN); \
+		cleanup_status=$$?; \
+		trap - INT TERM; \
+		if [ "$$status" -ne 0 ]; then exit "$$status"; fi; \
+		exit "$$cleanup_status"; \
+	}; \
+	trap cleanup 0; \
+	trap 'exit 130' INT TERM; \
 	tilt up
 
 up: run ## Alias for run
 
 down: ## Stop the Tilt stack and its containers
-	-tilt down 2>/dev/null
-	docker compose $(TILT_COMPOSE) down
+	@$(TILT_DOWN)
 
 clean: ## Stop the Tilt stack and remove volumes (DB data)
 	-tilt down 2>/dev/null
