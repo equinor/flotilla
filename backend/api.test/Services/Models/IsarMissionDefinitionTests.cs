@@ -27,7 +27,7 @@ namespace Api.Test.Services.Models
                 VideoDuration = null,
             };
 
-            var json = JsonSerializer.Serialize(new IsarInspectionDefinition(task));
+            var json = JsonSerializer.Serialize(new IsarTaskDefinition(task));
 
             Assert.Contains(
                 "\"analysis_types\":[\"fencilla\",\"cloe\",\"thermal-reading\",\"co2\"]",
@@ -66,7 +66,7 @@ namespace Api.Test.Services.Models
                 VideoDuration = null,
             };
 
-            var json = JsonSerializer.Serialize(new IsarInspectionDefinition(task));
+            var json = JsonSerializer.Serialize(new IsarTaskDefinition(task));
 
             Assert.DoesNotContain("acoustic", json);
         }
@@ -91,7 +91,7 @@ namespace Api.Test.Services.Models
                 ),
             };
 
-            var json = JsonSerializer.Serialize(new IsarInspectionDefinition(task));
+            var json = JsonSerializer.Serialize(new IsarTaskDefinition(task));
 
             Assert.Contains("\"frequency_from\":100", json);
             Assert.Contains("\"frequency_to\":200", json);
@@ -119,7 +119,7 @@ namespace Api.Test.Services.Models
                 ),
             };
 
-            var json = JsonSerializer.Serialize(new IsarInspectionDefinition(task));
+            var json = JsonSerializer.Serialize(new IsarTaskDefinition(task));
 
             Assert.DoesNotContain("\"roi\"", json);
         }
@@ -147,7 +147,7 @@ namespace Api.Test.Services.Models
                 },
             };
 
-            var json = JsonSerializer.Serialize(new IsarInspectionDefinition(task));
+            var json = JsonSerializer.Serialize(new IsarTaskDefinition(task));
 
             Assert.Contains("\"roi\":{\"x\":760,\"y\":400,\"width\":133,\"height\":160}", json);
         }
