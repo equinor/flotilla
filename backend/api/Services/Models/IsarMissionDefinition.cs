@@ -56,46 +56,6 @@ namespace Api.Services.Models
         [JsonPropertyName("tag")]
         public string? Tag { get; set; }
 
-        [JsonPropertyName("inspection")]
-        public IsarInspectionDefinition? Inspection { get; set; }
-
-        [JsonPropertyName("zoom")]
-        public IsarZoomDescription? Zoom { get; set; }
-
-        public IsarTaskDefinition(MissionTask missionTask)
-        {
-            Id = missionTask.Id;
-            Type = "inspection";
-            Pose = new IsarPose
-            {
-                Position = new IsarPosition
-                {
-                    X = missionTask.TargetPosition.X,
-                    Y = missionTask.TargetPosition.Y,
-                    Z = missionTask.TargetPosition.Z,
-                    Frame = new IsarFrame { Name = "asset" },
-                },
-                Orientation = new IsarOrientation
-                {
-                    X = missionTask.RobotPose.Orientation.X,
-                    Y = missionTask.RobotPose.Orientation.Y,
-                    Z = missionTask.RobotPose.Orientation.Z,
-                    W = missionTask.RobotPose.Orientation.W,
-                    Frame = new IsarFrame { Name = "asset" },
-                },
-                Frame = new IsarFrame { Name = "asset" },
-            };
-            Tag = missionTask.TagId;
-            Zoom = missionTask.IsarZoomDescription;
-            Inspection = new IsarInspectionDefinition(missionTask);
-        }
-    }
-
-    public struct IsarInspectionDefinition
-    {
-        [JsonPropertyName("type")]
-        public string Type { get; set; }
-
         [JsonPropertyName("inspection_target")]
         public IsarPosition? InspectionTarget { get; set; }
 
@@ -111,28 +71,6 @@ namespace Api.Services.Models
         [JsonPropertyName("acoustic")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public IsarAcousticInspection? Acoustic { get; set; }
-
-        public IsarInspectionDefinition(MissionTask missionTask)
-        {
-            Type = missionTask.SensorType.ToString();
-            InspectionTarget =
-                missionTask.TargetPosition != null
-                    ? new IsarPosition
-                    {
-                        X = missionTask.TargetPosition.X,
-                        Y = missionTask.TargetPosition.Y,
-                        Z = missionTask.TargetPosition.Z,
-                        Frame = new IsarFrame { Name = "asset" },
-                    }
-                    : null;
-            InspectionDescription = missionTask.Description;
-            Duration = missionTask.VideoDuration;
-            AnalysisTypes = ToSaraAnalysisKeys(missionTask.AnalysisTypes);
-            Acoustic =
-                missionTask.AcousticInspectionMetadata != null
-                    ? new IsarAcousticInspection(missionTask.AcousticInspectionMetadata)
-                    : null;
-        }
 
         private static List<string>? ToSaraAnalysisKeys(IList<AnalysisType> types)
         {
@@ -154,6 +92,53 @@ namespace Api.Services.Models
                 .Distinct()
                 .ToList();
             return mapped.Count == 0 ? null : mapped;
+        }
+
+        [JsonPropertyName("zoom")]
+        public IsarZoomDescription? Zoom { get; set; }
+
+        public IsarTaskDefinition(MissionTask missionTask)
+        {
+            Id = missionTask.Id;
+            Pose = new IsarPose
+            {
+                Position = new IsarPosition
+                {
+                    X = missionTask.RobotPose.Position.X,
+                    Y = missionTask.RobotPose.Position.Y,
+                    Z = missionTask.RobotPose.Position.Z,
+                    Frame = new IsarFrame { Name = "asset" },
+                },
+                Orientation = new IsarOrientation
+                {
+                    X = missionTask.RobotPose.Orientation.X,
+                    Y = missionTask.RobotPose.Orientation.Y,
+                    Z = missionTask.RobotPose.Orientation.Z,
+                    W = missionTask.RobotPose.Orientation.W,
+                    Frame = new IsarFrame { Name = "asset" },
+                },
+                Frame = new IsarFrame { Name = "asset" },
+            };
+            Tag = missionTask.TagId;
+            Zoom = missionTask.IsarZoomDescription;
+            Type = missionTask.SensorType.ToString();
+            InspectionTarget =
+                missionTask.TargetPosition != null
+                    ? new IsarPosition
+                    {
+                        X = missionTask.TargetPosition.X,
+                        Y = missionTask.TargetPosition.Y,
+                        Z = missionTask.TargetPosition.Z,
+                        Frame = new IsarFrame { Name = "asset" },
+                    }
+                    : null;
+            InspectionDescription = missionTask.Description;
+            Duration = missionTask.VideoDuration;
+            AnalysisTypes = ToSaraAnalysisKeys(missionTask.AnalysisTypes);
+            Acoustic =
+                missionTask.AcousticInspectionMetadata != null
+                    ? new IsarAcousticInspection(missionTask.AcousticInspectionMetadata)
+                    : null;
         }
     }
 
