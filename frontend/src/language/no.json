@@ -317,6 +317,7 @@
     "End date must not be in the future": "Sluttdato kan ikke være i fremtiden",
     "Fill [%]": "Fyll [%]",
     "No data available in the selected time range": "Ingen data tilgjengelig i det valgte tidsrommet",
+    "Could not load data for the selected time range": "Kunne ikke laste data for det valgte tidsrommet",
     "Not available": "Ikke tilgjengelig",
     "Selected inspection": "Utvalgt inspeksjon",
     "Selected analysis result": "Utvalgt analyseresultat",
