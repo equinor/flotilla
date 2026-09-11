@@ -54,7 +54,7 @@ export class SaraApi {
         const content = this.api
             .GET<PaginatedInspectionRecords>(path)
             .then((response) => {
-                if (!response.content) throw Error('No inspection records found')
+                if (!response.content) return []
 
                 return response.content.items.map((r) => inspectionRecordToInspectionData(r)).filter((r) => r !== null)
             })

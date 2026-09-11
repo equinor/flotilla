@@ -12,7 +12,6 @@ import { InspectionsPlantMap } from 'pages/MissionPage/MapPosition/PointillaMapV
 import {
     InspectionImageWithPlaceholder,
     PendingResultPlaceholder,
-    TextAsImage,
 } from 'pages/InspectionReportPage/InspectionReportImage'
 import { AnalysisResultDialogContent } from 'pages/MissionPage/AnalysisResultView'
 import { InspectionDialogView } from 'pages/InspectionReportPage/InspectionView'
@@ -33,6 +32,7 @@ import { useAssetContext } from 'contexts/AssetContext'
 import { saraAnalysisTypeToEnum } from 'models/SaraAnalysisTypeMapping'
 import { DataViewTimeRangeSelector } from './DataViewTimeRangeSelector'
 import { createPresetTimeRange, DataViewTimeRange, TimeRangeMode } from './DataViewTimeRange'
+import { AlertBanner } from 'components/Alerts/AlertsBanner'
 
 interface DataViewProps {
     analysisType: AnalysisType
@@ -46,6 +46,7 @@ interface DataViewProps {
 
 interface DataViewContentProps {
     inspectionData: InspectionData[]
+    hasLoadingError: boolean
     activeTimeRangeMode: TimeRangeMode
     activeTimeRange: DataViewTimeRange
     onApplyTimeRange: (mode: TimeRangeMode, range: DataViewTimeRange) => void
@@ -59,6 +60,7 @@ interface DataViewContentProps {
 
 const DataViewContent = ({
     inspectionData,
+    hasLoadingError,
     activeTimeRangeMode,
     activeTimeRange,
     onApplyTimeRange,
@@ -76,6 +78,11 @@ const DataViewContent = ({
     const [searchParams] = useSearchParams()
     const inspectionId = searchParams.get('inspectionId') ?? undefined
     const analysisId = searchParams.get('analysisId') ?? undefined
+
+    // Remembering which range was dismissed, rather than a bare boolean, lets a
+    // failure on the next range raise the banner again without an effect.
+    const [dismissedErrorRange, setDismissedErrorRange] = useState<DataViewTimeRange | undefined>(undefined)
+    const showLoadError = hasLoadingError && dismissedErrorRange !== activeTimeRange
 
     const plantCode =
         installationInspectionAreas.find((i) => i.installationCode === installation.installationCode)?.plantCode ?? null
@@ -130,6 +137,15 @@ const DataViewContent = ({
     return (
         <StyledPage>
             <Typography variant="h2">{TranslateText(pageTitle)}</Typography>
+            {showLoadError && (
+                <AlertBanner
+                    bannerAlert={{
+                        message: TranslateText('Could not load data for the selected time range'),
+                        severity: 'error',
+                    }}
+                    dismissAlert={() => setDismissedErrorRange(activeTimeRange)}
+                />
+            )}
             <WhiteBackgroundBand>
                 <StyledTableAndMap>
                     <DataViewTable
@@ -228,13 +244,13 @@ export const DataView = ({
 
     if (isPending) {
         return <PendingResultPlaceholder isLargeImage={true} />
-    } else if (isError || !data) {
-        return <TextAsImage isLargeImage={true} text={'No inspection could be found'} />
     }
 
+    // Keep the page mounted on error, or the time range selector goes with it.
     return (
         <DataViewContent
-            inspectionData={data}
+            inspectionData={data ?? []}
+            hasLoadingError={isError}
             activeTimeRangeMode={timeRangeSelection.mode}
             activeTimeRange={timeRangeSelection.range}
             onApplyTimeRange={(mode, range) => setTimeRangeSelection({ mode, range })}
