@@ -156,7 +156,7 @@ namespace Api.Database.Models
             Orientation = new Orientation(copy.Orientation);
         }
 
-        public Pose(IsarPoseMqtt isarPose)
+        public Pose(IsarPose isarPose)
         {
             Position = new Position(isarPose.Position.X, isarPose.Position.Y, isarPose.Position.Z);
             Orientation = new Orientation(
