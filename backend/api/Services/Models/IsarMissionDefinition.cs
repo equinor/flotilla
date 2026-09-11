@@ -197,6 +197,12 @@ namespace Api.Services.Models
         }
     }
 
+    public readonly struct IsarFrame(string name)
+    {
+        [JsonPropertyName("name")]
+        public string Name { get; } = name;
+    }
+
     public readonly struct IsarOrientation(float x, float y, float z, float w, string frameName)
     {
         [JsonPropertyName("x")]
@@ -211,8 +217,8 @@ namespace Api.Services.Models
         [JsonPropertyName("w")]
         public float W { get; } = w;
 
-        [JsonPropertyName("frame_name")]
-        public string FrameName { get; } = frameName;
+        [JsonPropertyName("frame")]
+        public IsarFrame Frame { get; } = new IsarFrame(frameName);
     }
 
     public readonly struct IsarPosition(float x, float y, float z, string frameName)
@@ -226,8 +232,8 @@ namespace Api.Services.Models
         [JsonPropertyName("z")]
         public float Z { get; } = z;
 
-        [JsonPropertyName("frame_name")]
-        public string FrameName { get; } = frameName;
+        [JsonPropertyName("frame")]
+        public IsarFrame Frame { get; } = new IsarFrame(frameName);
     }
 
     public readonly struct IsarPose(Pose pose)
@@ -246,8 +252,8 @@ namespace Api.Services.Models
                 "asset"
             );
 
-        [JsonPropertyName("frame_name")]
-        public string FrameName { get; } = "asset";
+        [JsonPropertyName("frame")]
+        public IsarFrame Frame { get; } = new IsarFrame("asset");
     }
 
     [Owned]
