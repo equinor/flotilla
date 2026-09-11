@@ -1,5 +1,6 @@
 import { Divider, Icon, Typography } from '@equinor/eds-core-react'
 import { Icons } from 'utils/icons'
+import { Task } from 'models/Task'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { formatDateTime } from 'utils/StringFormatting'
 import {
@@ -20,9 +21,10 @@ import { InspectionData } from 'models/InspectionRecord'
 import { AnalysisFeedback } from './AnalysisFeedback'
 import { AnalysisValueDisplay } from 'components/Displays/TaskDisplay'
 
-interface InspectionDialogViewProps {
+interface AnalysisResultDialogViewProps {
     selectedInspectionId: string
     inspectionData: InspectionData[]
+    tasks: Task[]
 }
 
 const StyledImage = styled.img<{ $otherContentHeight?: string }>`
@@ -102,7 +104,11 @@ export const AnalysisResultDialogContent = ({ inspection }: { inspection: Inspec
     )
 }
 
-export const AnalysisResultDialogView = ({ selectedInspectionId, inspectionData }: InspectionDialogViewProps) => {
+export const AnalysisResultDialogView = ({
+    selectedInspectionId,
+    inspectionData,
+    tasks,
+}: AnalysisResultDialogViewProps) => {
     const { TranslateText } = useLanguageContext()
     const { switchSelectedAnalysisId } = useInspectionId()
 
@@ -110,6 +116,7 @@ export const AnalysisResultDialogView = ({ selectedInspectionId, inspectionData 
 
     const inspectionIndex = inspectionData.findIndex((i) => i.inspectionId == selectedInspectionId)
     const currentInspection = inspectionData[inspectionIndex]
+    const taskNumber = tasks.findIndex((t) => t.id === selectedInspectionId)
 
     if (!currentInspection) {
         return (
@@ -128,7 +135,7 @@ export const AnalysisResultDialogView = ({ selectedInspectionId, inspectionData 
             <StyledDialogContent>
                 <StyledDialogHeader>
                     <Typography variant="accordion_header" group="ui">
-                        {TranslateText('Analysis result for task') + ' ' + (inspectionIndex + 1)}
+                        {TranslateText('Analysis result for task') + ' ' + (taskNumber + 1)}
                     </Typography>
                     <StyledCloseButton variant="ghost" onClick={onClose}>
                         <Icon name={Icons.Clear} size={24} />
