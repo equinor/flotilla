@@ -439,17 +439,17 @@ namespace Api.Test.MQTT
                 (Factory.MockSignalRService.LatestMessages[0] as dynamic).Label
             );
 
-            var frame = new IsarFrame { Name = "map" };
-            var pose = new IsarPoseMqtt
+            var frame = new IsarFrame { Name = "asset" };
+            var pose = new IsarPose
             {
-                Position = new Api.Mqtt.MessageModels.IsarPosition
+                Position = new IsarPosition
                 {
                     X = 1,
                     Y = 2,
                     Z = 3,
                     Frame = frame,
                 },
-                Orientation = new Api.Mqtt.MessageModels.IsarOrientation
+                Orientation = new IsarOrientation
                 {
                     X = 0,
                     Y = 0,
