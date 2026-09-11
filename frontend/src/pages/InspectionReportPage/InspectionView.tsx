@@ -20,7 +20,7 @@ import { useInspectionId } from './SetInspectionIdHook'
 import { InstallationContext } from 'components/Contexts/InstallationContext'
 import { InspectionData } from 'models/InspectionRecord'
 
-interface InspectionDialogViewProps {
+interface InspectionTaskDialogViewProps {
     selectedInspectionId: string
     inspectionData: InspectionData[]
     tasks: Task[]
