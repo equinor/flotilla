@@ -41,6 +41,13 @@ To run the frontend in Docker, run the following from the repository root:
 docker compose up --build frontend
 ```
 
+## Tests
+
+Keep frontend tests in `frontend/tests/`, with subfolders matching the source area
+(for example, `tests/contexts/` and `tests/hooks/`), rather than colocating them in `src/`.
+With `.env` configured as described above, run the suite from the frontend folder with
+`pnpm test --run`. The App test imports application configuration and requires those variables.
+
 ## Livestream recovery
 
 Mission and robot camera views share a LiveKit connection per robot while mounted. Starting a new

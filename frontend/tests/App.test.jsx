@@ -1,4 +1,4 @@
-import App from './App'
+import App from '../src/App'
 import { test } from 'vitest'
 import { createRoot } from 'react-dom/client'
 
