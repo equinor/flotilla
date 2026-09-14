@@ -61,12 +61,12 @@ vi.mock('config', () => ({
 
 // The hook only uses useAssetContext in the sibling useAllRobotPosesTelemetry hook,
 // but the module-level import has to resolve.
-vi.mock('components/Contexts/AssetContext', () => ({
+vi.mock('contexts/AssetContext', () => ({
     useAssetContext: () => ({ enabledRobots: [] }),
 }))
 
 import { SignalRProvider } from 'contexts/SignalRContext'
-import { useRobotTelemetry } from './useRobotTelemetry'
+import { useRobotTelemetry } from 'hooks/useRobotTelemetry'
 import { RobotWithoutTelemetry } from 'models/Robot'
 
 const TELEMETRY = 'Robot telemetry updated'

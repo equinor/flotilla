@@ -70,7 +70,8 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
                         return await saraApiRef.current.getSaraDataByInspectionId(inspectionId)
                     },
                     retry: 1,
-                    staleTime: 10 * 60 * 1000,
+                    // Readiness events must bypass fresh pre-analysis data cached by thumbnails.
+                    staleTime: 0,
                 })
                 .catch(() => {})
         },
@@ -89,11 +90,7 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
             queryClient.invalidateQueries({
                 queryKey: ['fetchInspectionListData'],
             })
-            // Not invalidated first: invalidateQueries refetches the key, then
-            // fetchQuery cancels that in-flight refetch (it defaults to
-            // cancelRefetch), and the rejected promise surfaces as an unhandled
-            // CancelledError. fetchQuery alone refreshes the key and also
-            // populates it when no component is observing.
+            // A single fetch refreshes the detail cache even without an observer.
             refreshInspectionData(inspectionId)
         })
     }, [registerEvent, connectionReady, refreshInspectionData])

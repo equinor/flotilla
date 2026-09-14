@@ -67,7 +67,7 @@ vi.mock('config', () => ({
     config: { BACKEND_API_SIGNALR_URL: 'http://localhost:8000/hub' },
 }))
 
-import { SignalRProvider, useSignalRContext } from './SignalRContext'
+import { SignalRProvider, useSignalRContext } from 'contexts/SignalRContext'
 import { unsubscribeAll } from 'utils/signalR'
 
 const EVENT = 'Mission run updated'
