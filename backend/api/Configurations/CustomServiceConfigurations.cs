@@ -86,6 +86,27 @@ namespace Api.Configurations
             }
             else
             {
+                bool requireTokenAuthentication =
+                    string.Equals(
+                        environmentName,
+                        Environments.Staging,
+                        StringComparison.OrdinalIgnoreCase
+                    )
+                    || string.Equals(
+                        environmentName,
+                        Environments.Production,
+                        StringComparison.OrdinalIgnoreCase
+                    );
+                if (
+                    requireTokenAuthentication
+                    && configuration.GetValue<bool>("Database:SeedExampleDataPostgres")
+                )
+                {
+                    throw new InvalidOperationException(
+                        $"[{environmentName}] Database:SeedExampleDataPostgres is not supported: runtime PostgreSQL requires token authentication."
+                    );
+                }
+
                 try
                 {
                     Console.WriteLine("Trying Managed Identity for PostgreSQL…");
@@ -98,6 +119,14 @@ namespace Api.Configurations
                 }
                 catch (Exception ex)
                 {
+                    if (requireTokenAuthentication)
+                    {
+                        Console.WriteLine(
+                            $"[{environmentName}] PostgreSQL token authentication setup failed ({ex.GetType().Name}). Password connection-string fallback is disabled."
+                        );
+                        throw;
+                    }
+
                     Console.WriteLine(
                         $"Managed Identity failed. Falling back to Key Vault. Reason: {ex.GetType().Name}: {ex.Message}"
                     );
