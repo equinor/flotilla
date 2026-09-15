@@ -53,11 +53,7 @@ builder.Logging.ClearProviders();
 builder.ConfigureLogger();
 
 builder.Services.AddMemoryCache();
-builder.Services.ConfigureDatabase(
-    builder.Configuration,
-    builder.Environment.EnvironmentName,
-    runtimeCredential
-);
+builder.Services.ConfigureDatabase(builder.Configuration, builder.Environment, runtimeCredential);
 
 var otelMeter = new Meter($"{applicationName}.Metrics", "0.0.1");
 builder.Services.AddSingleton(otelMeter);

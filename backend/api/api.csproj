@@ -53,5 +53,6 @@
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="api" />
+    <InternalsVisibleTo Include="api.test" />
   </ItemGroup>
 </Project>

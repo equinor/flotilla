@@ -38,10 +38,15 @@ namespace Api.Configurations
         public static IServiceCollection ConfigureDatabase(
             this IServiceCollection services,
             IConfiguration configuration,
-            string environmentName,
+            IHostEnvironment environment,
             TokenCredential runtimeCredential
         )
         {
+            var environmentName = environment.EnvironmentName;
+            bool tokenDiagnosticsEnabled = PostgresTokenDiagnostics.IsEnabled(
+                configuration,
+                environment
+            );
             Console.WriteLine("Configuring Database...");
             bool useInMemoryDatabase = configuration
                 .GetSection("Database")
@@ -55,6 +60,8 @@ namespace Api.Configurations
             }
             else if (useInMemoryDatabase)
             {
+                if (tokenDiagnosticsEnabled)
+                    PostgresTokenDiagnostics.ReportUnavailable("LocalContainer");
                 Console.WriteLine("Starting PostgreSQL container for local development...");
                 var container = new PostgreSqlBuilder("postgres:17.10").Build(); // Cannot bind to specific port since the tests will run many in parallel.
                 container.StartAsync().GetAwaiter().GetResult();
@@ -113,7 +120,8 @@ namespace Api.Configurations
                     ConfigureDatabaseWithManagedIdentity(
                         services,
                         configuration,
-                        runtimeCredential
+                        runtimeCredential,
+                        tokenDiagnosticsEnabled
                     );
                     Console.WriteLine("Managed Identity configured successfully.");
                 }
@@ -128,8 +136,12 @@ namespace Api.Configurations
                     }
 
                     Console.WriteLine(
-                        $"Managed Identity failed. Falling back to Key Vault. Reason: {ex.GetType().Name}: {ex.Message}"
+                        tokenDiagnosticsEnabled
+                            ? $"Managed Identity failed. Falling back to Key Vault. Reason: {ex.GetType().Name}"
+                            : $"Managed Identity failed. Falling back to Key Vault. Reason: {ex.GetType().Name}: {ex.Message}"
                     );
+                    if (tokenDiagnosticsEnabled)
+                        PostgresTokenDiagnostics.ReportUnavailable("ConnectionStringFallback");
                     ConfigureDatabaseWithKeyvaultConnString(services, configuration);
                 }
 
@@ -171,6 +183,14 @@ namespace Api.Configurations
             this IServiceCollection services,
             IConfiguration configuration,
             TokenCredential runtimeCredential
+        ) =>
+            ConfigureDatabaseWithManagedIdentity(services, configuration, runtimeCredential, false);
+
+        private static void ConfigureDatabaseWithManagedIdentity(
+            IServiceCollection services,
+            IConfiguration configuration,
+            TokenCredential runtimeCredential,
+            bool tokenDiagnosticsEnabled
         )
         {
             var server =
@@ -224,26 +244,49 @@ namespace Api.Configurations
             }
             // Setting splitting behavior explicitly to avoid warning
             services.AddDbContext<FlotillaDbContext>(
-                options =>
+                (serviceProvider, options) =>
+                {
+                    var diagnosticLogger = tokenDiagnosticsEnabled
+                        ? serviceProvider.GetRequiredService<ILogger<PostgresTokenDiagnostics>>()
+                        : null;
                     options.UseNpgsql(
                         baseConnString,
                         o =>
                         {
                             o.ConfigureDataSource(ds =>
                             {
+                                var diagnostics = diagnosticLogger is null
+                                    ? null
+                                    : new PostgresTokenDiagnostics(diagnosticLogger);
+                                if (diagnostics is not null)
+                                    ds.UsePhysicalConnectionInitializer(
+                                        diagnostics.InitializePhysicalConnection,
+                                        diagnostics.InitializePhysicalConnectionAsync
+                                    );
                                 ds.UsePeriodicPasswordProvider(
                                     async (_, ct) =>
                                     {
-                                        using var cts = new CancellationTokenSource(
-                                            TimeSpan.FromSeconds(5)
-                                        );
-                                        var token = await runtimeCredential.GetTokenAsync(
-                                            new TokenRequestContext([AzurePostgresScope]),
-                                            CancellationTokenSource
-                                                .CreateLinkedTokenSource(ct, cts.Token)
-                                                .Token
-                                        );
-                                        return token.Token;
+                                        async ValueTask<AccessToken> GetToken(
+                                            CancellationToken cancellationToken
+                                        )
+                                        {
+                                            using var cts = new CancellationTokenSource(
+                                                TimeSpan.FromSeconds(5)
+                                            );
+                                            using var linked =
+                                                CancellationTokenSource.CreateLinkedTokenSource(
+                                                    cancellationToken,
+                                                    cts.Token
+                                                );
+                                            return await runtimeCredential.GetTokenAsync(
+                                                new TokenRequestContext([AzurePostgresScope]),
+                                                linked.Token
+                                            );
+                                        }
+
+                                        return diagnostics is null
+                                            ? (await GetToken(ct)).Token
+                                            : await diagnostics.GetPasswordAsync(GetToken, ct);
                                     },
                                     successRefreshInterval: TimeSpan.FromMinutes(55),
                                     failureRefreshInterval: TimeSpan.FromSeconds(5)
@@ -253,7 +296,8 @@ namespace Api.Configurations
                             o.EnableRetryOnFailure();
                             o.CommandTimeout(DATABASE_TIMEOUT);
                         }
-                    ),
+                    );
+                },
                 ServiceLifetime.Scoped
             );
         }

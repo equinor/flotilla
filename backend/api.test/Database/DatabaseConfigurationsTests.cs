@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Api.Configurations;
@@ -8,6 +10,8 @@ using Azure.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Moq;
 using Npgsql;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure.Internal;
 using Xunit;
@@ -17,11 +21,15 @@ using Xunit;
 
 namespace Api.Test.Database
 {
+    [Collection("Postgres diagnostics")]
     public class DatabaseConfigurationsTests
     {
         private const string PasswordKey = "Database:PostgreSqlConnectionString";
         private const string PasswordConnection =
             "Host=localhost;Database=fallback;Username=local;Password=dummy-password";
+
+        private static IHostEnvironment Host(string name) =>
+            Mock.Of<IHostEnvironment>(environment => environment.EnvironmentName == name);
 
         private sealed class TrackingConfiguration : ConfigurationProvider, IConfigurationSource
         {
@@ -107,7 +115,7 @@ namespace Api.Test.Database
             var thrown = Assert.Throws<InvalidOperationException>(() =>
                 services.ConfigureDatabase(
                     configuration.BuildConfiguration(),
-                    environmentName,
+                    Host(environmentName),
                     credential
                 )
             );
@@ -131,7 +139,7 @@ namespace Api.Test.Database
 
             services.ConfigureDatabase(
                 configuration.BuildConfiguration(),
-                "Production",
+                Host("Production"),
                 credential
             );
 
@@ -164,7 +172,7 @@ namespace Api.Test.Database
             var thrown = Assert.Throws<InvalidOperationException>(() =>
                 services.ConfigureDatabase(
                     configuration.BuildConfiguration(),
-                    environmentName,
+                    Host(environmentName),
                     credential
                 )
             );
@@ -190,7 +198,7 @@ namespace Api.Test.Database
 
             services.ConfigureDatabase(
                 configuration.BuildConfiguration(),
-                environmentName,
+                Host(environmentName),
                 credential
             );
 
@@ -217,13 +225,154 @@ namespace Api.Test.Database
             var services = new ServiceCollection();
             var credential = new StubTokenCredential();
 
-            services.ConfigureDatabase(configuration.BuildConfiguration(), "Test", credential);
+            services.ConfigureDatabase(
+                configuration.BuildConfiguration(),
+                Host("Test"),
+                credential
+            );
 
             Assert.Empty(services);
             Assert.Equal(0, credential.SyncCalls);
             Assert.Equal(0, credential.AsyncCalls);
             Assert.DoesNotContain(PasswordKey, configuration.Reads);
             Assert.DoesNotContain("Database:SeedExampleDataPostgres", configuration.Reads);
+        }
+
+        [Theory]
+        [InlineData("Development", false, false)]
+        [InlineData("Development", true, true)]
+        [InlineData("dEvElOpMeNt", true, true)]
+        [InlineData("sTaGiNg", true, false)]
+        [InlineData("pRoDuCtIoN", true, false)]
+        [InlineData("Local", true, false)]
+        [InlineData("IntegrationTest", true, false)]
+        public async Task OnlyEnabledDevelopmentInstallsBothPhysicalHooksOnExistingProvider(
+            string environment,
+            bool enabled,
+            bool expectHooks
+        )
+        {
+            var configuration = new TrackingConfiguration();
+            configuration.Set(PostgresTokenDiagnostics.EnabledKey, enabled.ToString());
+            var services = new ServiceCollection();
+            services.AddLogging();
+            var credential = new StubTokenCredential();
+            services.ConfigureDatabase(
+                configuration.BuildConfiguration(),
+                Host(environment),
+                credential
+            );
+            using var provider = services.BuildServiceProvider();
+            var options = provider.GetRequiredService<DbContextOptions<FlotillaDbContext>>();
+            var npgsql = options.GetExtension<NpgsqlOptionsExtension>();
+            var builder = new NpgsqlDataSourceBuilder(npgsql.ConnectionString);
+            Assert.NotNull(npgsql.DataSourceBuilderAction);
+            npgsql.DataSourceBuilderAction(builder);
+            // Build only: Npgsql starts the synthetic credential callback, but no connection is opened.
+            await using var source = builder.Build();
+            var sync = ReadSourceProperty(source, "ConnectionInitializer");
+            var async = ReadSourceProperty(source, "ConnectionInitializerAsync");
+            if (expectHooks)
+            {
+                var syncHook = Assert.IsType<Action<NpgsqlConnection>>(sync);
+                var asyncHook = Assert.IsType<Func<NpgsqlConnection, Task>>(async);
+                Assert.IsType<PostgresTokenDiagnostics>(syncHook.Target);
+                Assert.Same(syncHook.Target, asyncHook.Target);
+                using var closed = new NpgsqlConnection();
+                Assert.Throws<InvalidOperationException>(() => syncHook(closed));
+                await Assert.ThrowsAsync<InvalidOperationException>(() => asyncHook(closed));
+            }
+            else
+            {
+                Assert.Null(sync);
+                Assert.Null(async);
+            }
+            var callback = Assert.IsType<
+                Func<NpgsqlConnectionStringBuilder, CancellationToken, ValueTask<string>>
+            >(ReadSourceField(source, "_periodicPasswordProvider"));
+            Assert.Equal(
+                "dummy-token",
+                await callback(new(), TestContext.Current.CancellationToken)
+            );
+            Assert.Equal(
+                TimeSpan.FromMinutes(55),
+                ReadSourceField(source, "_periodicPasswordSuccessRefreshInterval")
+            );
+            Assert.Equal(
+                TimeSpan.FromSeconds(5),
+                ReadSourceField(source, "_periodicPasswordFailureRefreshInterval")
+            );
+            Assert.Equal(1, credential.SyncCalls);
+            Assert.DoesNotContain(PasswordKey, configuration.Reads);
+        }
+
+        // Inspect pinned Npgsql 10.0.2 registrations without network I/O or exposing production hooks.
+        private static object? ReadSourceProperty(NpgsqlDataSource source, string name) =>
+            typeof(NpgsqlDataSource)
+                .GetProperty(name, BindingFlags.Instance | BindingFlags.NonPublic)!
+                .GetValue(source);
+
+        private static object? ReadSourceField(NpgsqlDataSource source, string name) =>
+            typeof(NpgsqlDataSource)
+                .GetField(name, BindingFlags.Instance | BindingFlags.NonPublic)!
+                .GetValue(source);
+
+        [Fact]
+        public void EnabledDevelopmentFallbackIsExplicitlyUnavailableWithoutLeakingFailure()
+        {
+            var configuration = new TrackingConfiguration();
+            configuration.Set(PostgresTokenDiagnostics.EnabledKey, "true");
+            var services = new ServiceCollection();
+            var original = Console.Out;
+            using var output = new StringWriter();
+            try
+            {
+                Console.SetOut(output);
+                services.ConfigureDatabase(
+                    configuration.BuildConfiguration(),
+                    Host("Development"),
+                    new StubTokenCredential(
+                        new InvalidOperationException("SENTINEL-TOKEN " + PasswordConnection)
+                    )
+                );
+            }
+            finally
+            {
+                Console.SetOut(original);
+            }
+            Assert.Contains(
+                "Unavailable: ConnectionStringFallback; token login not tested",
+                output.ToString()
+            );
+            Assert.DoesNotContain("SENTINEL-TOKEN", output.ToString());
+            Assert.DoesNotContain(PasswordConnection, output.ToString());
+            using var provider = services.BuildServiceProvider();
+            var options = provider.GetRequiredService<DbContextOptions<FlotillaDbContext>>();
+            var npgsql = options.GetExtension<NpgsqlOptionsExtension>();
+            Assert.Null(npgsql.DataSourceBuilderAction);
+            var connection = new NpgsqlConnectionStringBuilder(npgsql.ConnectionString);
+            Assert.Equal("localhost", connection.Host);
+            Assert.Equal("fallback", connection.Database);
+            Assert.Equal("local", connection.Username);
+            Assert.Equal("dummy-password", connection.Password);
+        }
+
+        [Fact]
+        public void EnabledFlagDoesNotChangeExactTestSkipOrStartContainer()
+        {
+            var configuration = new TrackingConfiguration();
+            configuration.Set(PostgresTokenDiagnostics.EnabledKey, "true");
+            configuration.Set("Database:UseInMemoryDatabase", "true");
+            var services = new ServiceCollection();
+            var credential = new StubTokenCredential();
+            services.ConfigureDatabase(
+                configuration.BuildConfiguration(),
+                Host("Test"),
+                credential
+            );
+            Assert.Empty(services);
+            Assert.Equal(0, credential.SyncCalls);
+            Assert.Equal(0, credential.AsyncCalls);
         }
     }
 }
