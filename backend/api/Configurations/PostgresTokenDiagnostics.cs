@@ -1,26 +1,14 @@
 using System.Data.Common;
-using System.Text.Json;
 using Azure.Core;
 using Npgsql;
 
 namespace Api.Configurations;
 
-internal sealed class PostgresTokenDiagnostics(
-    ILogger<PostgresTokenDiagnostics> logger,
-    TimeProvider? clock = null
-)
+internal sealed class PostgresTokenDiagnostics(ILogger<PostgresTokenDiagnostics> logger)
 {
     internal const string EnabledKey = "Database:TokenRenewalDiagnostics:Enabled";
-    private const string SessionQuery =
-        "SELECT 1, backend_start FROM pg_catalog.pg_stat_activity WHERE pid = pg_backend_pid()";
     private static readonly Guid ProcessInstanceId = Guid.NewGuid();
     private readonly Guid dataSourceId = Guid.NewGuid();
-    private readonly TimeProvider time = clock ?? TimeProvider.System;
-    private readonly object gate = new();
-    private long sequence;
-    private long? lastCompletedSequence;
-    private DateTimeOffset? lastExpiresOn;
-    private int pendingCallbacks;
 
     internal static bool IsEnabled(IConfiguration configuration, IHostEnvironment environment)
     {
@@ -45,195 +33,49 @@ internal sealed class PostgresTokenDiagnostics(
         CancellationToken cancellationToken
     )
     {
-        long callbackSequence;
-        DateTimeOffset startedUtc;
-        lock (gate)
-        {
-            callbackSequence = ++sequence;
-            startedUtc = time.GetUtcNow();
-            pendingCallbacks++;
-            Write(new("ProviderStarted", startedUtc, callbackSequence, startedUtc));
-        }
-
-        AccessToken token;
-        try
-        {
-            token = await getToken(cancellationToken);
-            cancellationToken.ThrowIfCancellationRequested();
-        }
-        catch (Exception exception)
-        {
-            lock (gate)
-            {
-                pendingCallbacks--;
-                Write(
-                    new(
-                        exception is OperationCanceledException
-                            ? "ProviderCanceled"
-                            : "ProviderFailed",
-                        time.GetUtcNow(),
-                        callbackSequence,
-                        startedUtc
-                    ),
-                    LogLevel.Warning
-                );
-            }
-            throw;
-        }
-
-        lock (gate)
-        {
-            pendingCallbacks--;
-            var previousExpiry = lastExpiresOn;
-            lastExpiresOn = token.ExpiresOn;
-            lastCompletedSequence = callbackSequence;
-            Write(
-                new(
-                    "ProviderCompleted",
-                    time.GetUtcNow(),
-                    callbackSequence,
-                    startedUtc,
-                    token.ExpiresOn,
-                    previousExpiry,
-                    previousExpiry.HasValue ? token.ExpiresOn > previousExpiry : null
-                )
-            );
-        }
+        var startedUtc = DateTimeOffset.UtcNow;
+        var token = await getToken(cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
+        logger.LogInformation(
+            new EventId(1, "PostgresTokenProvider"),
+            "PostgreSQL provider ProcessInstanceId={ProcessInstanceId} DataSourceId={DataSourceId} "
+                + "LocalProcessId={LocalProcessId} StartedUtc={StartedUtc:O} CompletedUtc={CompletedUtc:O} ExpiresOn={ExpiresOn:O}",
+            ProcessInstanceId,
+            dataSourceId,
+            Environment.ProcessId,
+            startedUtc,
+            DateTimeOffset.UtcNow,
+            token.ExpiresOn
+        );
         return token.Token;
     }
 
     internal void InitializePhysicalConnection(NpgsqlConnection connection)
     {
         using var command = CreateSessionCommand(connection);
-        ObservePhysicalRead(
-            connection.ProcessID,
-            () =>
-            {
-                using var reader = command.ExecuteReader();
-                return ReadBackendStart(reader);
-            }
-        );
+        using var reader = command.ExecuteReader();
+        ObservePhysicalSession(connection.ProcessID, reader);
     }
 
     internal async Task InitializePhysicalConnectionAsync(NpgsqlConnection connection)
     {
+        // Npgsql's physical initializer does not expose the original Open cancellation token.
+        using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(5));
         await using var command = CreateSessionCommand(connection);
-        await ObservePhysicalReadAsync(
-            connection.ProcessID,
-            async cancellationToken =>
-            {
-                await using var reader = await command.ExecuteReaderAsync(cancellationToken);
-                return await ReadBackendStartAsync(reader, cancellationToken);
-            }
-        );
+        await using var reader = await command.ExecuteReaderAsync(deadline.Token);
+        await ObservePhysicalSessionAsync(connection.ProcessID, reader, deadline.Token);
     }
 
     internal static NpgsqlCommand CreateSessionCommand(NpgsqlConnection connection) =>
-        new(SessionQuery, connection) { CommandTimeout = 5 };
-
-    // Npgsql's initializer runs after authentication, but exposes neither the password used
-    // nor the caller's cancellation token. These snapshots must never attribute a token to a login.
-    internal void ObservePhysicalRead(int backendProcessId, Func<DateTimeOffset> read)
-    {
-        var physicalConnectionId = ObserveAuthentication(backendProcessId);
-        DateTimeOffset backendStartedUtc;
-        try
+        new(
+            "SELECT 1, backend_start FROM pg_catalog.pg_stat_activity WHERE pid = pg_backend_pid()",
+            connection
+        )
         {
-            backendStartedUtc = read();
-            ValidateBackendStart(backendStartedUtc);
-        }
-        catch (Exception exception)
-        {
-            ObserveReadFailure(physicalConnectionId, backendProcessId, exception);
-            throw;
-        }
-        ObserveReadSuccess(physicalConnectionId, backendProcessId, backendStartedUtc);
-    }
+            CommandTimeout = 5,
+        };
 
-    internal async Task ObservePhysicalReadAsync(
-        int backendProcessId,
-        Func<CancellationToken, ValueTask<DateTimeOffset>> read,
-        CancellationToken cancellationToken = default
-    )
-    {
-        var physicalConnectionId = ObserveAuthentication(backendProcessId);
-
-        using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(5), time);
-        using var linked = CancellationTokenSource.CreateLinkedTokenSource(
-            cancellationToken,
-            deadline.Token
-        );
-        DateTimeOffset backendStartedUtc;
-        try
-        {
-            linked.Token.ThrowIfCancellationRequested();
-            backendStartedUtc = await read(linked.Token);
-            linked.Token.ThrowIfCancellationRequested();
-            ValidateBackendStart(backendStartedUtc);
-        }
-        catch (Exception exception)
-        {
-            ObserveReadFailure(physicalConnectionId, backendProcessId, exception);
-            throw;
-        }
-
-        ObserveReadSuccess(physicalConnectionId, backendProcessId, backendStartedUtc);
-    }
-
-    private Guid ObserveAuthentication(int backendProcessId)
-    {
-        var physicalConnectionId = Guid.NewGuid();
-        lock (gate)
-            Write(
-                new(
-                    "PhysicalAuthenticated",
-                    time.GetUtcNow(),
-                    PhysicalConnectionId: physicalConnectionId,
-                    BackendProcessId: backendProcessId
-                )
-            );
-        return physicalConnectionId;
-    }
-
-    private void ObserveReadSuccess(
-        Guid physicalConnectionId,
-        int backendProcessId,
-        DateTimeOffset backendStartedUtc
-    )
-    {
-        lock (gate)
-            Write(
-                new(
-                    "PhysicalReadSucceeded",
-                    time.GetUtcNow(),
-                    PhysicalConnectionId: physicalConnectionId,
-                    BackendProcessId: backendProcessId,
-                    BackendStartedUtc: backendStartedUtc
-                )
-            );
-    }
-
-    private void ObserveReadFailure(
-        Guid physicalConnectionId,
-        int backendProcessId,
-        Exception exception
-    )
-    {
-        lock (gate)
-            Write(
-                new(
-                    exception is OperationCanceledException
-                        ? "PhysicalReadCanceled"
-                        : "PhysicalReadFailed",
-                    time.GetUtcNow(),
-                    PhysicalConnectionId: physicalConnectionId,
-                    BackendProcessId: backendProcessId
-                ),
-                LogLevel.Warning
-            );
-    }
-
-    internal static DateTimeOffset ReadBackendStart(DbDataReader reader)
+    internal void ObservePhysicalSession(int backendProcessId, DbDataReader reader)
     {
         if (!reader.Read())
             throw new InvalidOperationException("PostgreSQL diagnostic session row is missing.");
@@ -242,10 +84,11 @@ internal sealed class PostgresTokenDiagnostics(
             throw new InvalidOperationException(
                 "PostgreSQL diagnostic returned multiple session rows."
             );
-        return backendStartedUtc;
+        LogSession(backendProcessId, backendStartedUtc);
     }
 
-    internal static async Task<DateTimeOffset> ReadBackendStartAsync(
+    internal async Task ObservePhysicalSessionAsync(
+        int backendProcessId,
         DbDataReader reader,
         CancellationToken cancellationToken
     )
@@ -257,7 +100,8 @@ internal sealed class PostgresTokenDiagnostics(
             throw new InvalidOperationException(
                 "PostgreSQL diagnostic returned multiple session rows."
             );
-        return backendStartedUtc;
+        cancellationToken.ThrowIfCancellationRequested();
+        LogSession(backendProcessId, backendStartedUtc);
     }
 
     private static DateTimeOffset ReadSessionRow(DbDataReader reader)
@@ -271,59 +115,29 @@ internal sealed class PostgresTokenDiagnostics(
             throw new InvalidOperationException(
                 "PostgreSQL diagnostic session metadata is invalid."
             );
-        var backendStartedUtc = reader.GetFieldValue<DateTimeOffset>(1);
-        ValidateBackendStart(backendStartedUtc);
-        return backendStartedUtc;
-    }
-
-    private static void ValidateBackendStart(DateTimeOffset backendStartedUtc)
-    {
+        var startedUtc = reader.GetFieldValue<DateTimeOffset>(1);
         if (
-            backendStartedUtc.Offset != TimeSpan.Zero
-            || backendStartedUtc == DateTimeOffset.MinValue
-            || backendStartedUtc == DateTimeOffset.MaxValue
+            startedUtc.Offset != TimeSpan.Zero
+            || startedUtc == DateTimeOffset.MinValue
+            || startedUtc == DateTimeOffset.MaxValue
         )
             throw new InvalidOperationException(
                 "PostgreSQL diagnostic backend start must be a finite UTC timestamp."
             );
+        return startedUtc;
     }
 
-    private void Write(Observation observation, LogLevel level = LogLevel.Information) =>
-        logger.Log(
-            level,
-            "PostgreSQL token diagnostics {Observation}",
-            JsonSerializer.Serialize(
-                observation with
-                {
-                    ProcessInstanceId = ProcessInstanceId,
-                    LocalProcessId = Environment.ProcessId,
-                    DataSourceId = dataSourceId,
-                    LastCompletedProviderSequence = lastCompletedSequence,
-                    LastObservedProviderExpiresOn = lastExpiresOn,
-                    PendingCallbacks = pendingCallbacks,
-                }
-            )
+    // No provider snapshot is attached: a concurrent refresh cannot identify the token used to log in.
+    private void LogSession(int backendProcessId, DateTimeOffset backendStartedUtc) =>
+        logger.LogInformation(
+            new EventId(2, "PostgresPhysicalSession"),
+            "PostgreSQL physical session read succeeded ProcessInstanceId={ProcessInstanceId} DataSourceId={DataSourceId} "
+                + "LocalProcessId={LocalProcessId} BackendProcessId={BackendProcessId} BackendStartedUtc={BackendStartedUtc:O} ObservedUtc={ObservedUtc:O}",
+            ProcessInstanceId,
+            dataSourceId,
+            Environment.ProcessId,
+            backendProcessId,
+            backendStartedUtc,
+            DateTimeOffset.UtcNow
         );
-
-    private sealed record Observation(
-        string Event,
-        DateTimeOffset ObservedUtc,
-        long? ProviderSequence = null,
-        DateTimeOffset? ProviderStartedUtc = null,
-        DateTimeOffset? ProviderExpiresOn = null,
-        DateTimeOffset? PreviousProviderExpiresOn = null,
-        bool? ExpiryAdvanced = null,
-        Guid? PhysicalConnectionId = null,
-        int? BackendProcessId = null,
-        DateTimeOffset? BackendStartedUtc = null
-    )
-    {
-        public Guid ProcessInstanceId { get; init; }
-        public int LocalProcessId { get; init; }
-        public Guid DataSourceId { get; init; }
-        public long? LastCompletedProviderSequence { get; init; }
-        public DateTimeOffset? LastObservedProviderExpiresOn { get; init; }
-        public int PendingCallbacks { get; init; }
-        public string TokenAttribution => "Unknown";
-    }
 }
