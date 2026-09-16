@@ -38,6 +38,17 @@ Swagger is served at <http://localhost:8000/swagger>.
 
 To run the backend in Docker together with the rest of the stack, see the [root README](../README.md#quick-start).
 
+## Ad hoc missions
+
+When creating a mission definition with `POST /missions/definitions`, clients can set
+`"isAdHoc": true` for a one-off mission. The field defaults to `false` when omitted,
+and existing definitions remain non-ad hoc after migration.
+
+Ad hoc definitions are excluded from the frontend mission-scheduling list, area
+counts, and **Schedule all** selection. They remain accessible through the API and
+mission-definition details; scheduling by ID, execution, and history are unchanged.
+Clients such as Pointilla must opt in when creating an ad hoc mission.
+
 ## Connecting to the development database
 
 By default the backend runs against an in-memory database. To use the development database instead, add the following to `backend/api/.env`:

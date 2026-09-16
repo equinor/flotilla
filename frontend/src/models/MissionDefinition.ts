@@ -32,6 +32,7 @@ export interface MissionTaskDefinition {
 export interface MissionDefinition {
     id: string
     name: string
+    isAdHoc: boolean
     installationCode: string
     comment?: string
     autoScheduleFrequency?: AutoScheduleFrequency

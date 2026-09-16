@@ -8,6 +8,7 @@ namespace Api.Controllers.Models
         public string Id { get; set; }
         public List<TaskDefinitionResponse> Tasks { get; set; }
         public string Name { get; set; }
+        public bool IsAdHoc { get; set; }
         public string InstallationCode { get; set; }
         public string? Comment { get; set; }
         public AutoScheduleFrequency? AutoScheduleFrequency { get; set; }
@@ -25,6 +26,7 @@ namespace Api.Controllers.Models
             Id = missionDefinition.Id ?? string.Empty;
             Tasks = [.. missionDefinition.Tasks.Select((t) => new TaskDefinitionResponse(t))];
             Name = missionDefinition.Name ?? string.Empty;
+            IsAdHoc = missionDefinition.IsAdHoc;
             InstallationCode = missionDefinition.InstallationCode ?? string.Empty;
             Comment = missionDefinition.Comment;
             AutoScheduleFrequency =

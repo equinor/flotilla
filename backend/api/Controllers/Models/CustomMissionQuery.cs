@@ -80,6 +80,12 @@ namespace Api.Controllers.Models
 
         public string Name { get; set; }
 
+        /// <summary>
+        /// Whether this is an ad hoc mission, excluded from the mission-scheduling list.
+        /// Defaults to false when omitted.
+        /// </summary>
+        public bool IsAdHoc { get; set; }
+
         public List<TaskQuery> Tasks { get; set; }
     }
 }
