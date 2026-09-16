@@ -2,15 +2,52 @@
 using Api.Database.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Npgsql;
 
 namespace Api.Database.Context
 {
     public class FlotillaDbContext : DbContext
     {
+        private readonly NpgsqlDataSource? ownedMigrationDataSource;
+
         public FlotillaDbContext(DbContextOptions options)
             : base(options)
         {
             ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+        }
+
+        internal FlotillaDbContext(
+            DbContextOptions options,
+            NpgsqlDataSource ownedMigrationDataSource
+        )
+            : this(options)
+        {
+            this.ownedMigrationDataSource = ownedMigrationDataSource;
+        }
+
+        public override void Dispose()
+        {
+            try
+            {
+                base.Dispose();
+            }
+            finally
+            {
+                ownedMigrationDataSource?.Dispose();
+            }
+        }
+
+        public override async ValueTask DisposeAsync()
+        {
+            try
+            {
+                await base.DisposeAsync().ConfigureAwait(false);
+            }
+            finally
+            {
+                if (ownedMigrationDataSource is not null)
+                    await ownedMigrationDataSource.DisposeAsync().ConfigureAwait(false);
+            }
         }
 
         public DbSet<Robot> Robots => Set<Robot>();

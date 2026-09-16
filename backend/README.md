@@ -74,6 +74,18 @@ dotnet ef migrations remove
 - **Development**: after merging a PR that touches `backend/api/Migrations`, manually run the ["Run database migrations (Development)"](https://github.com/equinor/flotilla/actions/workflows/run_development_migrations.yml) workflow.
 - **Staging / Production**: applied automatically by the [deploy_to_staging](https://github.com/equinor/flotilla/blob/main/.github/workflows/deploy_to_staging.yml) and [promote_to_production](https://github.com/equinor/flotilla/blob/main/.github/workflows/promote_to_production.yml) workflows.
 
+Staging migrates the published release tag; Production migrates the version currently staged. Both image-update jobs now require successful migrations, including in legacy mode: a failed, cancelled or skipped migration prevents deployment. Image builds/copies can still run in parallel with migrations.
+
+### Design-time migration authentication
+
+The EF design-time factory does not boot `Program` or use runtime database authentication policy. An absent `Migrations__AuthenticationMode` (or explicit `Legacy`, case-insensitive) preserves the existing `Database:postgresConnectionString` lookup, falling back to the Key Vault secret `Database--PostgreSqlConnectionString` using `DefaultAzureCredential`. This design-time key differs from the runtime `Database:PostgreSqlConnectionString` key. Empty or unknown modes fail rather than falling back.
+
+Explicit `AzureCli` (case-insensitive, no surrounding whitespace) selects only `AzureCliCredential` after the reusable workflow's dedicated-identity OIDC `azure/login`. It requires `Migrations__Postgres__Host` (single hostname/IP, no port), `Migrations__Postgres__Database`, `Migrations__Postgres__Username`, and an explicit tenant GUID in `AZURE_TENANT_ID`. Values must be nonempty without surrounding whitespace or control characters. It never reads password/Key Vault configuration or uses runtime `AzureAd` defaults. Connections use TLS `VerifyFull` and request `https://ossrdbms-aad.database.windows.net/.default` for each new physical connection, with a 30-second acquisition timeout and async cancellation. The design-time context owns and disposes its data source; EF migration locking and retry defaults are unchanged.
+
+`api/.migration-auth-contract` contains exactly `azure-cli-postgresql-v1` followed by one LF. This is a reviewed capability attestation for the reusable workflow's pre-login checked-out-ref gate, not executable proof of authentication. A later approved opt-in uses workflow input `migration_auth_mode: azure_cli` and GitHub environment variables `MIGRATION_CLIENT_ID`, `MIGRATION_POSTGRES_HOST`, `MIGRATION_POSTGRES_DATABASE`, `MIGRATION_POSTGRES_USERNAME`, plus the existing tenant/subscription configuration.
+
+**Preparation only:** no caller enables Azure CLI migration authentication yet, and no new migration is added. Opt-in requires a supported app release, approved infrastructure, a pre-provisioned database and a dedicated database principal with ownership/DDL/default privileges. Those roles have not been provisioned or verified here. Development/manual migrations, local/CI passwords, pgAdmin, runtime authentication and existing secrets are unchanged.
+
 ## Authentication
 
 The backend validates access tokens against Microsoft Entra ID by default. `Authentication:Provider` selects the issuer: `EntraId` (default), or `Oidc` for any conformant OpenID Connect issuer given by `AzureAd:Authority`.

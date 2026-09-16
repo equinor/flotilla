@@ -4,3 +4,4 @@
 *.csproj text eol=lf
 *.json text eol=lf
 *.cs text eol=lf
+.migration-auth-contract text eol=lf

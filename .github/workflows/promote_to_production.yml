@@ -83,7 +83,7 @@ jobs:
 
   deploy:
     name: Update deployment in Production
-    needs: [get_staging_version, trigger-github-deployment, copy-images-to-robotics-prod-registry]
+    needs: [get_staging_version, trigger-github-deployment, copy-images-to-robotics-prod-registry, run_migrations]
     strategy:
       max-parallel: 1
       matrix:
