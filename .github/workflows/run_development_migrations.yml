@@ -5,17 +5,98 @@ on:
 
 permissions:
   contents: read
-  pull-requests: read
+  id-token: write
 
 jobs:
   run_migrations:
     name: Update database in Development
-    uses: equinor/armada/.github/workflows/run_dotnet_migrations.yml@main
-    permissions:
-      contents: read
-      pull-requests: read
-      id-token: write
-    with:
-      environment: Development
-      working_directory: backend/api
-      azure_subscription_id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+    if: github.ref == 'refs/heads/main'
+    environment: Development
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend/api
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 #v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Build project and dependencies
+        run: dotnet build
+
+      - name: Install dotnet ef tool
+        run: dotnet tool install -g dotnet-ef --version '10.0.*'
+
+      - name: Azure login (migration identity)
+        uses: azure/login@7ddb5af1ef8758cf1353cf3b42f940aee27ba21c # v3.0.2
+        with:
+          client-id: e93b8669-7297-4c4a-9dae-6425edc0811f
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          allow-no-subscriptions: true
+
+      - name: Update database with a bounded Entra token
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import re
+          import subprocess
+          import sys
+          import time
+
+          def fail(message):
+              sys.exit(f"::error::{message}")
+
+          def mask(value):
+              escaped = value.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+              print(f"::add-mask::{escaped}", flush=True)
+
+          try:
+              result = subprocess.run(
+                  ["az", "account", "get-access-token", "--resource",
+                   "https://ossrdbms-aad.database.windows.net", "--output", "json",
+                   "--only-show-errors"],
+                  capture_output=True, text=True, timeout=60,
+              )
+          except (OSError, subprocess.TimeoutExpired):
+              fail("Could not acquire a PostgreSQL token.")
+          if result.returncode:
+              fail("PostgreSQL token acquisition failed.")
+          try:
+              response = json.loads(result.stdout)
+          except json.JSONDecodeError:
+              fail("Invalid PostgreSQL token response.")
+          if not isinstance(response, dict):
+              fail("Invalid PostgreSQL token response.")
+          token = response.get("accessToken")
+          expires_on = response.get("expires_on")
+          if not isinstance(token, str) or not re.fullmatch(r"[\w-]+\.[\w-]+\.[\w-]+", token, re.ASCII):
+              fail("Missing or malformed PostgreSQL token.")
+          if type(expires_on) is not int:
+              fail("Missing or invalid PostgreSQL token expiry.")
+          duration = 600
+          safety_margin = 120
+          if expires_on - time.time() < duration + safety_margin:
+              fail("PostgreSQL token has insufficient remaining lifetime.")
+          mask(token)
+          settings = {
+              "Host": "robotics-dev-psql-server.postgres.database.azure.com",
+              "Database": "postgres",
+              "Username": "robotics-dev-flotilla-migrations",
+              "Password": token,
+              "SSL Mode": "VerifyFull",
+          }
+          connection = ";".join(key + '="' + value.replace('"', '""') + '"' for key, value in settings.items())
+          mask(connection)
+          env = dict(os.environ, ASPNETCORE_ENVIRONMENT="Development",
+                     Database__postgresConnectionString=connection)
+          os.execvpe("timeout", ["timeout", "--signal=TERM", "--kill-after=10s",
+                                f"{duration}s", "dotnet", "ef", "database", "update", "--no-build"], env)
+          PY
