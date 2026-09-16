@@ -13,6 +13,12 @@ namespace Api.Services
 
         public Task ReturnHome(Robot robot);
 
+        public Task SetReturnHomeTimeout(
+            Robot robot,
+            int seconds,
+            CancellationToken cancellationToken = default
+        );
+
         public Task StopMission(Robot robot);
 
         public Task PauseMission(Robot robot);
@@ -134,6 +140,32 @@ namespace Api.Services
                 string errorResponse = await response.Content.ReadAsStringAsync();
                 logger.LogError("{Message}: {ErrorResponse}", message, errorResponse);
                 throw new MissionException(message, statusCode);
+            }
+        }
+
+        public async Task SetReturnHomeTimeout(
+            Robot robot,
+            int seconds,
+            CancellationToken cancellationToken = default
+        )
+        {
+            using var response = await CallApi(
+                HttpMethod.Post,
+                robot.IsarUri,
+                "schedule/set-return-home-timeout",
+                new { seconds },
+                cancellationToken
+            );
+
+            if (response.StatusCode == HttpStatusCode.Conflict)
+                throw new RobotBusyException("ISAR could not set the return-home timeout");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                (string message, _) = GetErrorDescriptionForFailedIsarRequest(response);
+                string errorResponse = await response.Content.ReadAsStringAsync(cancellationToken);
+                logger.LogError("{Message}: {ErrorResponse}", message, errorResponse);
+                throw new IsarCommunicationException(message);
             }
         }
 
@@ -420,12 +452,14 @@ namespace Api.Services
         /// <param name="isarBaseUri">The base uri from ISAR (Should come from robot object)</param>
         /// <param name="relativeUri">The endpoint at ISAR (Ex: schedule/start-mission) </param>
         /// <param name="contentObject">The object to send in a post method call</param>
+        /// <param name="cancellationToken">Cancellation for the downstream request</param>
         /// <returns></returns>
         private async Task<HttpResponseMessage> CallApi(
             HttpMethod method,
             string isarBaseUri,
             string relativeUri,
-            object? contentObject = null
+            object? contentObject = null,
+            CancellationToken cancellationToken = default
         )
         {
             var content = contentObject is null
@@ -443,7 +477,8 @@ namespace Api.Services
                     options.BaseUrl = isarBaseUri;
                     options.RelativePath = relativeUri;
                 },
-                content
+                content,
+                cancellationToken: cancellationToken
             );
             return response;
         }
