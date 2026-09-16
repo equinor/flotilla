@@ -1,6 +1,5 @@
 using Azure.Core;
 using Azure.Identity;
-using Azure.Security.KeyVault.Secrets;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Npgsql;
@@ -35,37 +34,26 @@ namespace Api.Database.Context
                 .AddEnvironmentVariables()
                 .Build();
 
-            return CreateDbContext(config);
-        }
-
-        internal static FlotillaDbContext CreateDbContext(
-            IConfiguration config,
-            Func<AzureCliCredentialOptions, TokenCredential>? createCredential = null,
-            Func<Uri, string>? readSecret = null
-        )
-        {
             string? mode = config["Migrations:AuthenticationMode"];
-            if (string.Equals(mode, "AzureCli", StringComparison.OrdinalIgnoreCase))
-                return CreateAzureCliContext(config, createCredential);
+            if (mode is null || string.Equals(mode, "AzureCli", StringComparison.OrdinalIgnoreCase))
+                return CreateAzureCliContext(config);
 
-            if (
-                mode is not null
-                && !string.Equals(mode, "Legacy", StringComparison.OrdinalIgnoreCase)
-            )
+            if (!string.Equals(mode, "LocalConnectionString", StringComparison.OrdinalIgnoreCase))
                 throw new InvalidOperationException(
-                    "Migrations:AuthenticationMode must be Legacy or AzureCli when specified."
+                    "Migrations:AuthenticationMode must be AzureCli or LocalConnectionString when specified."
                 );
 
-            string? connectionString = config.GetSection("Database")["postgresConnectionString"];
+            if (
+                !new[] { "Local", "Development", "IntegrationTest", "Test" }.Contains(
+                    environment,
+                    StringComparer.OrdinalIgnoreCase
+                )
+            )
+                throw new InvalidOperationException(
+                    "LocalConnectionString migration authentication is only allowed in Local, Development, IntegrationTest or Test."
+                );
 
-            if (string.IsNullOrEmpty(connectionString))
-            {
-                string? keyVaultUri =
-                    config.GetSection("KeyVault")["VaultUri"]
-                    ?? throw new KeyNotFoundException("No key vault in config");
-
-                connectionString = (readSecret ?? ReadLegacySecret)(new Uri(keyVaultUri));
-            }
+            string connectionString = RequiredValue(config, "Database:postgresConnectionString");
 
             var optionsBuilder = new DbContextOptionsBuilder<FlotillaDbContext>();
 
@@ -78,18 +66,7 @@ namespace Api.Database.Context
             return new FlotillaDbContext(optionsBuilder.Options);
         }
 
-        private static string ReadLegacySecret(Uri keyVaultUri) =>
-            new SecretClient(
-                keyVaultUri,
-                new DefaultAzureCredential(new DefaultAzureCredentialOptions())
-            )
-                .GetSecret("Database--PostgreSqlConnectionString")
-                .Value.Value;
-
-        private static FlotillaDbContext CreateAzureCliContext(
-            IConfiguration config,
-            Func<AzureCliCredentialOptions, TokenCredential>? createCredential
-        )
+        private static FlotillaDbContext CreateAzureCliContext(IConfiguration config)
         {
             string host = RequiredValue(config, "Migrations:Postgres:Host");
             if (Uri.CheckHostName(host) == UriHostNameType.Unknown)
@@ -110,9 +87,7 @@ namespace Api.Database.Context
                 TenantId = tenant,
                 ProcessTimeout = TokenTimeout,
             };
-            TokenCredential credential =
-                createCredential?.Invoke(credentialOptions)
-                ?? new AzureCliCredential(credentialOptions);
+            var credential = new AzureCliCredential(credentialOptions);
             var connectionString = new NpgsqlConnectionStringBuilder
             {
                 Host = host,
@@ -155,7 +130,7 @@ namespace Api.Database.Context
             return value;
         }
 
-        internal static string GetPassword(TokenCredential credential)
+        private static string GetPassword(AzureCliCredential credential)
         {
             using var cancellation = new CancellationTokenSource(TokenTimeout);
             try
@@ -183,8 +158,8 @@ namespace Api.Database.Context
             }
         }
 
-        internal static async ValueTask<string> GetPasswordAsync(
-            TokenCredential credential,
+        private static async ValueTask<string> GetPasswordAsync(
+            AzureCliCredential credential,
             CancellationToken cancellationToken
         )
         {
