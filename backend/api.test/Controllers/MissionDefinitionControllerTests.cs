@@ -110,6 +110,83 @@ namespace Api.Test.Controllers
             Assert.Empty(missionDefinitions!);
         }
 
+        [Theory]
+        [InlineData(null)]
+        [InlineData(false)]
+        [InlineData(true)]
+        public async Task CheckThatCreateMissionPersistsIsAdHoc(bool? isAdHoc)
+        {
+            var installation = await DatabaseUtilities.NewInstallation();
+            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
+            _ = await DatabaseUtilities.NewInspectionArea(
+                installation.InstallationCode,
+                plant.PlantCode,
+                areaPolygon: new AreaPolygon
+                {
+                    ZMin = 0,
+                    ZMax = 10,
+                    Positions =
+                    [
+                        new PolygonPoint { X = 0, Y = 0 },
+                        new PolygonPoint { X = 0, Y = 10 },
+                        new PolygonPoint { X = 10, Y = 10 },
+                        new PolygonPoint { X = 10, Y = 0 },
+                    ],
+                }
+            );
+            var query = new Dictionary<string, object>
+            {
+                ["installationCode"] = installation.InstallationCode,
+                ["name"] = "Test mission",
+                ["tasks"] = new List<TaskQuery>
+                {
+                    new()
+                    {
+                        TagId = "test",
+                        TargetPosition = new Position(1, 1, 1),
+                        SensorType = SensorType.Image,
+                        AnalysisTypes = [AnalysisType.Fencilla],
+                        RobotPose = new Pose(1, 1, 1, 0, 0, 0, 1),
+                    },
+                },
+            };
+            if (isAdHoc.HasValue)
+                query["isAdHoc"] = isAdHoc.Value;
+
+            var response = await Client.PostAsJsonAsync(
+                "missions/definitions",
+                query,
+                TestContext.Current.CancellationToken
+            );
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            var created = await response.Content.ReadFromJsonAsync<MissionDefinition>(
+                SerializerOptions,
+                TestContext.Current.CancellationToken
+            );
+            Assert.NotNull(created);
+            Assert.Equal(isAdHoc ?? false, created.IsAdHoc);
+
+            var saved = await MissionDefinitionService.ReadById(created.Id);
+            Assert.NotNull(saved);
+            Assert.Equal(isAdHoc ?? false, saved.IsAdHoc);
+
+            var definition = await Client.GetFromJsonAsync<MissionDefinitionResponse>(
+                $"missions/definitions/{created.Id}",
+                SerializerOptions,
+                TestContext.Current.CancellationToken
+            );
+            Assert.NotNull(definition);
+            Assert.Equal(isAdHoc ?? false, definition.IsAdHoc);
+
+            var definitions = await Client.GetFromJsonAsync<List<MissionDefinitionResponse>>(
+                "missions/definitions",
+                SerializerOptions,
+                TestContext.Current.CancellationToken
+            );
+            Assert.Equal(isAdHoc ?? false, Assert.Single(definitions!).IsAdHoc);
+        }
+
         [Fact]
         public async Task CheckThatUpdateMissionSucceedsForValidInspectionArea()
         {
