@@ -51,6 +51,15 @@ namespace Api.Test.Mocks
             await Task.Run(() => Thread.Sleep(1));
         }
 
+        public Task SetReturnHomeTimeout(
+            Robot robot,
+            int seconds,
+            CancellationToken cancellationToken = default
+        )
+        {
+            return Task.CompletedTask;
+        }
+
         public async Task StopMission(Robot robot)
         {
             await Task.Run(() => Thread.Sleep(1));
