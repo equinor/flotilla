@@ -88,9 +88,9 @@ export const InspectionImageWithPlaceholder = ({
     isLargeImage: boolean
 }) =>
     isLargeImage ? (
-        <StyledInspection $otherContentHeight={'174px'} src={inspection.anonymizedSAS} />
+        <StyledInspection $otherContentHeight={'174px'} src={inspection.mediaSAS} />
     ) : (
-        <StyledInspectionImage src={inspection.anonymizedSAS} />
+        <StyledInspectionImage src={inspection.mediaSAS} />
     )
 
 const InspectionValueWithPlaceholder = ({
@@ -123,7 +123,7 @@ const InspectionVideoWithPlaceholder = ({
 }) => (isLargeImage ? <LargeVideoWithPlaceholder inspection={inspection} /> : <VideoPlaceholder />)
 
 const LargeVideoWithPlaceholder = ({ inspection }: { inspection: InspectionData }) =>
-    inspection.anonymizedSAS ? <VideoPlayer src={inspection.anonymizedSAS} /> : <VideoPlaceholder />
+    inspection.mediaSAS ? <VideoPlayer src={inspection.mediaSAS} /> : <VideoPlaceholder />
 
 const InspectionResultWithPlaceholder = ({
     inspection,
@@ -168,6 +168,8 @@ const AnalysisImageWithPlaceholder = ({
         return <PendingResultPlaceholder isLargeImage={isLargeImage} />
     } else if (isError || !data) {
         return <TextAsImage isLargeImage={isLargeImage} text={'No analysis could be found'} />
+    } else if (data.fileType === FileType.VIDEO) {
+        return <VideoPlaceholder />
     } else
         return isLargeImage ? (
             <StyledInspection $otherContentHeight={'174px'} src={data.visualizedSAS} />
