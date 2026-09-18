@@ -98,7 +98,7 @@ const TaskTableRow = ({
             <Table.Cell>
                 <IconWithLabel>
                     <Typography>{TranslateText(task.sensorType as string)}</Typography>
-                    {inspectionData && inspectionData.anonymizedSAS && (
+                    {inspectionData && inspectionData.mediaSAS && (
                         <Button variant="ghost_icon" onClick={() => switchSelectedInspectionId(task.id)}>
                             <Icon name={Icons.Image}></Icon>
                         </Button>
