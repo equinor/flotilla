@@ -49,6 +49,8 @@ Database__PostgreSqlConnectionString=...
 
 The connection string is found in the key vault in the development resource group in Azure. Remember to add your IP address to the accepted IPs for connecting to the database.
 
+Outside the test and local PostgreSQL-container paths, Staging and Production require token authentication for runtime PostgreSQL access. Synchronous token-setup failures stop startup without falling back to `Database:PostgreSqlConnectionString`; `Database:SeedExampleDataPostgres=true` is rejected before database setup because it uses that connection string. Token refresh behavior is unchanged. Development/local connection strings and password access (including pgAdmin), local example-data seeding, and the separate EF design-time/CI migration connection-string path remain supported.
+
 ## Database migrations (EF Core)
 
 The database model lives in [`api/Database/Models`](./api/Database/Models) and we use [Entity Framework Core](https://docs.microsoft.com/en-us/ef/core/) as an O/RM. When changing the model, add a [migration](https://docs.microsoft.com/en-us/ef/core/managing-schemas/migrations/).

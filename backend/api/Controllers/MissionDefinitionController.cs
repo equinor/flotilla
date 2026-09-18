@@ -203,6 +203,7 @@ namespace Api.Controllers
                     Id = Guid.NewGuid().ToString(),
                     Tasks = missionTasks,
                     Name = customMissionQuery.Name,
+                    IsAdHoc = customMissionQuery.IsAdHoc,
                     InstallationCode = customMissionQuery.InstallationCode,
                     InspectionArea = inspectionAreaForMission,
                 };

@@ -80,6 +80,8 @@ namespace Api.Controllers.Models
 
         public string Name { get; set; }
 
+        public bool IsAdHoc { get; set; }
+
         public List<TaskQuery> Tasks { get; set; }
     }
 }

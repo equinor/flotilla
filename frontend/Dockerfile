@@ -1,6 +1,6 @@
-FROM node:24-alpine@sha256:d32cdf619f63fe0471182d08996dd516c6275bb5fd31ae06e55a570bd9e1ad43 AS build
+FROM node:26-alpine@sha256:dbaa92e5758cbbcf85d65d5403fdb530fe3442cbe8c6dbfb7ef23365450d5070 AS build
 
-RUN corepack enable
+RUN npm install --global corepack@0.36.0 && corepack enable
 
 WORKDIR /app
 
@@ -9,7 +9,7 @@ COPY . .
 RUN pnpm install --frozen-lockfile
 RUN pnpm build
 
-FROM nginxinc/nginx-unprivileged:1.31-alpine@sha256:2ddec616f1cb58bcac057aa388f28cb81e35137641ef4226d321714499329bd1
+FROM nginxinc/nginx-unprivileged:1.31-alpine@sha256:b54ac358b83fc6c965793fd271839b4ea4cdb6e99895bb19618cbc2ca152d972
 
 WORKDIR /app
 

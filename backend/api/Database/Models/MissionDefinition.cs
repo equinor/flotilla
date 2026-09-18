@@ -36,6 +36,8 @@ namespace Api.Database.Models
 
         public virtual MissionRun? LastSuccessfulRun { get; set; }
 
+        public bool IsAdHoc { get; set; }
+
         public bool IsDeprecated { get; set; }
     }
 }

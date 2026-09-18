@@ -25,7 +25,8 @@ export const MissionSchedulingPage = () => {
     const { TranslateText } = useLanguageContext()
     const { ongoingMissions, missionQueue } = useMissionsContext()
     const { installationInspectionAreas } = useAssetContext()
-    const { missionDefinitions } = useMissionDefinitionsContext()
+    const { missionDefinitions: allMissionDefinitions } = useMissionDefinitionsContext()
+    const missionDefinitions = allMissionDefinitions.filter((mission) => !mission.isAdHoc)
     const [selectedMissions, setSelectedMissions] = useState<MissionDefinition[]>([])
     const [userSelectedInspectionArea, setSelectedInspectionArea] = useState<InspectionArea | undefined>(undefined)
     const selectedInspectionArea =
