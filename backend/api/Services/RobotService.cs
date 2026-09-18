@@ -16,6 +16,7 @@ namespace Api.Services
         public Task<Robot> GetRobotWithSchedulingPreCheck(string robotId, bool readOnly = true);
         public Task<IEnumerable<Robot>> ReadAll(bool readOnly = true);
         public Task<Robot?> ReadById(string id, bool readOnly = true);
+        public Task<Robot?> ReadByIdForWrite(string id, bool readOnly = true);
         public Task<Robot?> ReadByIsarId(string isarId, bool readOnly = true);
         public Task<IList<Robot>> ReadRobotsForInstallation(
             string installationCode,
@@ -94,7 +95,7 @@ namespace Api.Services
             bool readOnly = true
         )
         {
-            var robot = await ReadById(robotId, readOnly: readOnly);
+            var robot = await ReadByIdForWrite(robotId, readOnly: readOnly);
 
             if (robot is null)
             {
@@ -295,6 +296,12 @@ namespace Api.Services
             return await query.FirstOrDefaultAsync(robot => robot.Id.Equals(id));
         }
 
+        public async Task<Robot?> ReadByIdForWrite(string id, bool readOnly = true)
+        {
+            var query = await GetRobotsWithSubModels(readOnly, AccessMode.Write);
+            return await query.FirstOrDefaultAsync(robot => robot.Id.Equals(id));
+        }
+
         public async Task<Robot?> ReadByIsarId(string isarId, bool readOnly = true)
         {
             var query = await GetRobotsWithSubModels(readOnly: readOnly);
@@ -348,10 +355,13 @@ namespace Api.Services
                 .ToListAsync();
         }
 
-        private async Task<IQueryable<Robot>> GetRobotsWithSubModels(bool readOnly = true)
+        private async Task<IQueryable<Robot>> GetRobotsWithSubModels(
+            bool readOnly = true,
+            AccessMode accessMode = AccessMode.Read
+        )
         {
             var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes(
-                AccessMode.Read
+                accessMode
             );
 
             var query = context
@@ -361,10 +371,19 @@ namespace Api.Services
                 .Where(r =>
                     !r.Deprecated
                     && (
-                        r.CurrentInstallation == null
-                        || r.CurrentInstallation.InstallationCode == null
-                        || accessibleInstallationCodes.Contains(
-                            r.CurrentInstallation.InstallationCode.ToUpper()
+                        (
+                            accessMode == AccessMode.Read
+                            && (
+                                r.CurrentInstallation == null
+                                || r.CurrentInstallation.InstallationCode == null
+                            )
+                        )
+                        || (
+                            r.CurrentInstallation != null
+                            && r.CurrentInstallation.InstallationCode != null
+                            && accessibleInstallationCodes.Contains(
+                                r.CurrentInstallation.InstallationCode.ToUpper()
+                            )
                         )
                     )
                 );

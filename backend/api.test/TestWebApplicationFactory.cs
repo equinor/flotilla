@@ -4,6 +4,7 @@ using Api.Database.Context;
 using Api.Services;
 using Api.Test.Database;
 using Api.Test.Mocks;
+using Hangfire;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -12,6 +13,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Moq;
 
 namespace Api.Test
 {
@@ -23,6 +25,7 @@ namespace Api.Test
         public MockIsarService MockIsarService = new();
         public MockSignalRService MockSignalRService = new();
         public MockTeamsNotificationService MockTeamsNotificationService = new();
+        public Mock<IBackgroundJobClient> BackgroundJobs { get; } = new(MockBehavior.Strict);
         private readonly string? postgresConnectionString = postgresConnectionString;
 
         protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -60,6 +63,7 @@ namespace Api.Test
                 }
 
                 services.AddScoped<IAccessRoleService, AccessRoleService>();
+                services.AddSingleton(BackgroundJobs.Object);
                 services.AddScoped<IIsarService, MockIsarService>(_ => MockIsarService);
                 services.AddSingleton<ISignalRService, MockSignalRService>(_ => MockSignalRService);
                 services.AddSingleton<ITeamsNotificationService, MockTeamsNotificationService>(_ =>

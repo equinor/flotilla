@@ -80,6 +80,15 @@ The backend validates access tokens against Microsoft Entra ID by default. `Auth
 
 This is not a way to turn authentication off — issuer, audience, signature, lifetime and roles are validated under either value. An `http://` authority is accepted only in the `Local` and `IntegrationTest` environments and fails at startup anywhere else. Note that the frontend still signs in against Entra ID; only the backend is covered here.
 
+### Robot registration and installation permissions
+
+Register robots through the administrator-only `POST /robots` API and update
+their endpoints through `PUT /robots/{id}`. MQTT cannot register robots or change
+host/port. Verify existing endpoints before rollout.
+
+Robot commands and scheduling require installation write access in addition to
+the global operator role.
+
 ### Running against a local Keycloak
 
 ```bash

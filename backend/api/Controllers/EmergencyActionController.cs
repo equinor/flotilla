@@ -10,7 +10,8 @@ namespace Api.Controllers
     [Route("emergency-action")]
     public class EmergencyActionController(
         IRobotService robotService,
-        EventAggregatorSingletonService eventAggregatorSingletonService
+        EventAggregatorSingletonService eventAggregatorSingletonService,
+        IAccessRoleService accessRoleService
     ) : ControllerBase
     {
         /// <summary>
@@ -34,6 +35,12 @@ namespace Api.Controllers
             [FromRoute] string installationCode
         )
         {
+            var allowedInstallations = await accessRoleService.GetAllowedInstallationCodes(
+                AccessMode.Write
+            );
+            if (!allowedInstallations.Contains(installationCode, StringComparer.OrdinalIgnoreCase))
+                return Forbid();
+
             var robots = await robotService.ReadRobotsForInstallation(
                 installationCode,
                 readOnly: true
@@ -69,6 +76,12 @@ namespace Api.Controllers
             [FromRoute] string installationCode
         )
         {
+            var allowedInstallations = await accessRoleService.GetAllowedInstallationCodes(
+                AccessMode.Write
+            );
+            if (!allowedInstallations.Contains(installationCode, StringComparer.OrdinalIgnoreCase))
+                return Forbid();
+
             var robots = await robotService.ReadRobotsForInstallation(
                 installationCode,
                 readOnly: true

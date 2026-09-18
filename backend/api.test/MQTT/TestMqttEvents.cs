@@ -103,9 +103,11 @@ namespace Api.Test.MQTT
                 installation.InstallationCode,
                 plant.PlantCode
             );
-            var robot = new Robot { Name = "TestRobot", IsarId = Guid.NewGuid().ToString() };
-            var latestRobot = await RobotService.ReadById(robot.Id);
-            Assert.Null(latestRobot);
+            var robot = await DatabaseUtilities.NewRobot(
+                RobotStatus.Available,
+                installation,
+                inspectionArea.Id
+            );
 
             IsarRobotInfoMessage message = new()
             {
@@ -115,8 +117,9 @@ namespace Api.Test.MQTT
                 CurrentInstallation = installation.InstallationCode,
                 DocumentationQueries = [],
                 SerialNumber = robot.SerialNumber,
-                Host = robot.Host,
-                Port = robot.Port,
+                Host = "unapproved.example",
+                Port = 8080,
+                Capabilities = [],
             };
             var messageString = JsonSerializer.Serialize(message);
             await MqttService.PublishMessageBasedOnTopic(
@@ -124,11 +127,16 @@ namespace Api.Test.MQTT
                 messageString
             );
 
-            await TestSetupHelpers.WaitFor(async () =>
-            {
-                latestRobot = await RobotService.ReadByIsarId(robot.IsarId);
-                return latestRobot != null;
-            });
+            Robot? latestRobot = null;
+            Assert.True(
+                await TestSetupHelpers.WaitFor(async () =>
+                {
+                    latestRobot = await RobotService.ReadByIsarId(robot.IsarId);
+                    return latestRobot?.RobotCapabilities?.Count == 0;
+                })
+            );
+            Assert.Equal(robot.Host, latestRobot!.Host);
+            Assert.Equal(robot.Port, latestRobot.Port);
         }
 
         [Fact]
