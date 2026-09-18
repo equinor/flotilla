@@ -78,6 +78,12 @@ export interface InspectionData {
     visualizedSAS?: string
     fileType: FileType
     anonymizedSAS?: string
+    // The SAS URL the media should actually be rendered from. SARA populates
+    // exactly one of visualizedSAS/anonymizedSAS depending on the analysis
+    // chain: the anonymize chain sets only anonymizedSAS, while the
+    // copy-raw-to-visualized passthrough used for videos sets only
+    // visualizedSAS. Resolving once here keeps display in step with fileType.
+    mediaSAS?: string
     analysisType?: string
     tag: string
     createdAt: Date
@@ -125,6 +131,7 @@ export const inspectionRecordToInspectionData = (record: InspectionRecord): Insp
         feedback: latestRun?.feedback ?? undefined,
         visualizedSAS: analysis.visualizedSAS,
         anonymizedSAS: analysis.anonymizedSAS,
+        mediaSAS: sas,
         analysisType: analysis.analysisType,
         tag: record.tag,
         createdAt: record.createdAt,

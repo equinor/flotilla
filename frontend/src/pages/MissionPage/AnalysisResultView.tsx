@@ -14,10 +14,11 @@ import {
     StyledInfoContent,
 } from 'pages/InspectionReportPage/InspectionStyles'
 import { TextAsImage, PendingResultPlaceholder } from 'pages/InspectionReportPage/InspectionReportImage'
+import { VideoPlayer } from 'pages/InspectionReportPage/InspectionVideoPlayer'
 import styled from 'styled-components'
 import { useInspectionId } from 'pages/InspectionReportPage/SetInspectionIdHook'
 import { AnalysisOverviewDialogView } from 'pages/InspectionReportPage/ImageOverview'
-import { InspectionData } from 'models/InspectionRecord'
+import { InspectionData, FileType } from 'models/InspectionRecord'
 import { AnalysisFeedback } from './AnalysisFeedback'
 import { AnalysisValueDisplay } from 'components/Displays/TaskDisplay'
 
@@ -33,9 +34,18 @@ const StyledImage = styled.img<{ $otherContentHeight?: string }>`
     border: none;
 `
 
-const AnalysisImage = ({ sasURI, isPending }: { sasURI: string | undefined; isPending: boolean }) => {
+const AnalysisMedia = ({
+    sasURI,
+    fileType,
+    isPending,
+}: {
+    sasURI: string | undefined
+    fileType: FileType
+    isPending: boolean
+}) => {
     if (isPending) return <PendingResultPlaceholder isLargeImage={true} />
     if (!sasURI) return <TextAsImage isLargeImage={true} text="No inspection could be found" />
+    if (fileType === FileType.VIDEO) return <VideoPlayer src={sasURI} />
 
     return <StyledImage $otherContentHeight="0px" src={sasURI} />
 }
@@ -46,7 +56,7 @@ export const AnalysisResultDialogContent = ({ inspection }: { inspection: Inspec
     return (
         <div>
             {inspection.visualizedSAS ? (
-                <AnalysisImage sasURI={inspection.visualizedSAS} isPending={false} />
+                <AnalysisMedia sasURI={inspection.visualizedSAS} fileType={inspection.fileType} isPending={false} />
             ) : (
                 <>{/* No image to display*/}</>
             )}
