@@ -16,6 +16,9 @@ const IconWithLabel = styled.div`
     display: flex;
     align-items: center;
 `
+const RightAlignedImageButton = styled(Button)`
+    margin-left: auto;
+`
 
 export interface TaskAndData {
     task: Task
@@ -99,9 +102,12 @@ const TaskTableRow = ({
                 <IconWithLabel>
                     <Typography>{TranslateText(task.sensorType as string)}</Typography>
                     {inspectionData && inspectionData.anonymizedSAS && (
-                        <Button variant="ghost_icon" onClick={() => switchSelectedInspectionId(task.id)}>
+                        <RightAlignedImageButton
+                            variant="ghost_icon"
+                            onClick={() => switchSelectedInspectionId(task.id)}
+                        >
                             <Icon name={Icons.Image}></Icon>
-                        </Button>
+                        </RightAlignedImageButton>
                     )}
                 </IconWithLabel>
             </Table.Cell>
