@@ -37,6 +37,7 @@ export const StyledDialogContent = styled(Dialog.Content)`
     display: flex;
     flex-direction: column;
     gap: 10px;
+    overflow-y: auto;
 `
 export const StyledDialogHeader = styled.div`
     display: flex;
