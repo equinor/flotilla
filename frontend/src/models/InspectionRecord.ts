@@ -78,11 +78,7 @@ export interface InspectionData {
     visualizedSAS?: string
     fileType: FileType
     anonymizedSAS?: string
-    // The SAS URL the media should actually be rendered from. SARA populates
-    // exactly one of visualizedSAS/anonymizedSAS depending on the analysis
-    // chain: the anonymize chain sets only anonymizedSAS, while the
-    // copy-raw-to-visualized passthrough used for videos sets only
-    // visualizedSAS. Resolving once here keeps display in step with fileType.
+    // SARA sets only one of visualizedSAS/anonymizedSAS, depending on the analysis chain
     mediaSAS?: string
     analysisType?: string
     tag: string
