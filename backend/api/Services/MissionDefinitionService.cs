@@ -14,6 +14,7 @@ namespace Api.Services
         public Task<MissionDefinition> Create(MissionDefinition missionDefinition);
 
         public Task<MissionDefinition?> ReadById(string id, bool readOnly = true);
+        public Task<MissionDefinition?> ReadByIdForWrite(string id, bool readOnly = true);
 
         public Task<PagedList<MissionDefinition>> ReadAll(
             MissionDefinitionQueryStringParameters parameters,
@@ -89,6 +90,14 @@ namespace Api.Services
         public async Task<MissionDefinition?> ReadById(string id, bool readOnly = true)
         {
             var query = await GetMissionDefinitionsWithSubModels(readOnly: readOnly);
+            return await query
+                .Where(m => m.IsDeprecated == false)
+                .FirstOrDefaultAsync(missionDefinition => missionDefinition.Id.Equals(id));
+        }
+
+        public async Task<MissionDefinition?> ReadByIdForWrite(string id, bool readOnly = true)
+        {
+            var query = await GetMissionDefinitionsWithSubModels(readOnly, AccessMode.Write);
             return await query
                 .Where(m => m.IsDeprecated == false)
                 .FirstOrDefaultAsync(missionDefinition => missionDefinition.Id.Equals(id));
@@ -245,11 +254,12 @@ namespace Api.Services
         }
 
         private async Task<IQueryable<MissionDefinition>> GetMissionDefinitionsWithSubModels(
-            bool readOnly = true
+            bool readOnly = true,
+            AccessMode accessMode = AccessMode.Read
         )
         {
             var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes(
-                AccessMode.Read
+                accessMode
             );
             var query = context
                 .MissionDefinitions.Include(missionDefinition => missionDefinition.InspectionArea)

@@ -189,62 +189,6 @@ namespace Api.EventHandlers
             }
         }
 
-        private async void CreateRobot(IsarRobotInfoMessage isarRobotInfo)
-        {
-            var installation = await InstallationService.ReadByInstallationCode(
-                isarRobotInfo.CurrentInstallation,
-                readOnly: true
-            );
-
-            if (installation is null)
-            {
-                _logger.LogError(
-                    new InstallationNotFoundException(
-                        $"No installation with code {isarRobotInfo.CurrentInstallation} found"
-                    ),
-                    "Could not create new robot due to missing installation"
-                );
-                return;
-            }
-
-            _logger.LogInformation(
-                "Received message from new ISAR instance '{Id}' with robot name '{Name}'. Adding new robot to database",
-                isarRobotInfo.IsarId,
-                isarRobotInfo.RobotName
-            );
-
-            var robotQuery = new CreateRobotQuery
-            {
-                IsarId = isarRobotInfo.IsarId,
-                Name = isarRobotInfo.RobotName,
-                RobotType = isarRobotInfo.RobotType,
-                SerialNumber = isarRobotInfo.SerialNumber,
-                CurrentInstallationCode = installation.InstallationCode,
-                Documentation = isarRobotInfo.DocumentationQueries,
-                Host = isarRobotInfo.Host,
-                Port = isarRobotInfo.Port,
-                RobotCapabilities = isarRobotInfo.Capabilities,
-                Status = RobotStatus.Available,
-            };
-
-            try
-            {
-                var newRobot = await RobotService.CreateFromQuery(robotQuery);
-                _logger.LogInformation(
-                    "Added robot '{RobotName}' with ISAR id '{IsarId}' to database",
-                    newRobot.Name,
-                    newRobot.IsarId
-                );
-            }
-            catch (DbUpdateException)
-            {
-                _logger.LogError(
-                    "Failed to add robot {robotQueryName} with to the database",
-                    robotQuery.Name
-                );
-            }
-        }
-
         private async Task<Robot?> GetCachedRobotByIsarId(string isarId)
         {
             if (!_cache.TryGetValue(isarId, out Robot? cachedRobot) || cachedRobot == null)
@@ -276,19 +220,35 @@ namespace Api.EventHandlers
         {
             try
             {
-                var robot = await GetCachedRobotByIsarId(isarRobotInfo.IsarId);
+                var robot = await RobotService.ReadByIsarId(isarRobotInfo.IsarId);
 
                 if (robot == null)
                 {
-                    CreateRobot(isarRobotInfo);
+                    _logger.LogWarning(
+                        "Ignoring robot information for unregistered ISAR instance {IsarId}; an administrator must register the robot",
+                        isarRobotInfo.IsarId
+                    );
                     return;
                 }
                 List<string> updatedFields = [];
 
-                if (isarRobotInfo.Host is not null)
-                    UpdateHostIfChanged(isarRobotInfo.Host, ref robot, ref updatedFields);
-
-                UpdatePortIfChanged(isarRobotInfo.Port, ref robot, ref updatedFields);
+                if (
+                    (
+                        isarRobotInfo.Host is not null
+                        && !string.Equals(
+                            isarRobotInfo.Host,
+                            robot.Host,
+                            StringComparison.OrdinalIgnoreCase
+                        )
+                    )
+                    || isarRobotInfo.Port != robot.Port
+                )
+                {
+                    _logger.LogWarning(
+                        "Ignoring MQTT endpoint change for robot {RobotId}; endpoint changes require administrator approval",
+                        robot.Id
+                    );
+                }
 
                 if (
                     isarRobotInfo.CurrentInstallation is not null
@@ -335,38 +295,12 @@ namespace Api.EventHandlers
             }
             catch (DbUpdateException e)
             {
-                _logger.LogError(e, "Could not add robot to db");
+                _logger.LogError(e, "Could not update robot in db");
             }
             catch (Exception e)
             {
                 _logger.LogError(e, "Could not update robot in db");
             }
-        }
-
-        private static void UpdateHostIfChanged(
-            string host,
-            ref Robot robot,
-            ref List<string> updatedFields
-        )
-        {
-            if (host.Equals(robot.Host, StringComparison.Ordinal))
-                return;
-
-            updatedFields.Add($"\nHost ({robot.Host} -> {host})\n");
-            robot.Host = host;
-        }
-
-        private static void UpdatePortIfChanged(
-            int port,
-            ref Robot robot,
-            ref List<string> updatedFields
-        )
-        {
-            if (port.Equals(robot.Port))
-                return;
-
-            updatedFields.Add($"\nPort ({robot.Port} -> {port})\n");
-            robot.Port = port;
         }
 
         private static void UpdateCurrentInstallationIfChanged(
