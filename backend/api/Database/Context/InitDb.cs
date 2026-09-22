@@ -1,651 +1,307 @@
-﻿using Api.Database.Models;
-using TaskStatus = Api.Database.Models.TaskStatus;
+using Api.Database.Models;
 
 namespace Api.Database.Context
 {
     public static class InitDb
     {
-        private static readonly List<Installation> installations = GetInstallations();
-        private static readonly List<Plant> plants = GetPlants();
-        private static readonly List<InspectionArea> inspectionAreas = GetInspectionAreas();
-        private static readonly List<Robot> robots = GetRobots();
-        private static readonly List<MissionTask> tasks = GetMissionTasks();
-        private static readonly List<MissionDefinition> missionDefinitions =
-            GetMissionDefinitions();
-        private static readonly List<MissionRun> missionRuns = GetMissionRuns();
-        private static readonly List<AccessRole> accessRoles = GetAccessRoles();
+        private const string KaarstoInspectionArea = "K-Lab";
+        private const string KaarstoInspectionAreaWithoutRobot = "Area Without Robot";
+        private const string NorthernLightsInspectionArea = "Northern Lights Inspection Area";
 
-        private static List<AccessRole> GetAccessRoles()
+        // One inspection per mission avoids grouped SARA analyses; distinct tags keep alarms separate.
+        private sealed record MissionScenario(
+            string MissionName,
+            string TagId,
+            string Description,
+            SensorType SensorType,
+            AnalysisType[] AnalysisTypes,
+            string Comment,
+            float? VideoDuration = null,
+            Func<AcousticInspectionMetadata>? AcousticInspectionMetadata = null
+        );
+
+        private static readonly MissionScenario[] scenarios =
+        [
+            new MissionScenario(
+                "CLOE - Empty glass",
+                "cloe-empty",
+                "Constant level oiler with an empty sight glass",
+                SensorType.Image,
+                [AnalysisType.CLOE],
+                "Oil level should read at or near 0 %, which is below the alert bound and should raise an alert in SARA."
+            ),
+            new MissionScenario(
+                "CLOE - Low level",
+                "cloe-low",
+                "Constant level oiler with a low oil level",
+                SensorType.Image,
+                [AnalysisType.CLOE],
+                "Oil level should land between the warning and alert bounds and should raise a warning in SARA."
+            ),
+            new MissionScenario(
+                "CLOE - Normal level",
+                "cloe-normal",
+                "Constant level oiler with a normal oil level",
+                SensorType.Image,
+                [AnalysisType.CLOE],
+                "Oil level should read above the warning bound and should not raise anything in SARA."
+            ),
+            new MissionScenario(
+                "CLOE - Rain drops on lens",
+                "cloe-rain-drops",
+                "Constant level oiler seen through a lens covered in rain drops",
+                SensorType.Image,
+                [AnalysisType.CLOE],
+                "Verifies that CLOE behaves sensibly when the image is degraded rather than simply absent."
+            ),
+            new MissionScenario(
+                "Fencilla - Intact fence",
+                "fence-intact",
+                "Fence in good condition",
+                SensorType.Image,
+                [AnalysisType.Fencilla],
+                "Fencilla should report no break, so nothing should be raised in SARA."
+            ),
+            new MissionScenario(
+                "Fencilla - Fence with hole",
+                "fence-hole",
+                "Fence with a hole in it",
+                SensorType.Image,
+                [AnalysisType.Fencilla],
+                "Fencilla should report a break, which should raise an alert in SARA."
+            ),
+            new MissionScenario(
+                "Fencilla - Rain drops on lens",
+                "fence-rain-drops",
+                "Fence seen through a lens covered in rain drops",
+                SensorType.Image,
+                [AnalysisType.Fencilla],
+                "Verifies that Fencilla behaves sensibly when the image is degraded rather than simply absent."
+            ),
+            new MissionScenario(
+                "Thermal reading - Normal temperature",
+                "thermal-normal",
+                "Thermal reading of equipment at a normal temperature",
+                SensorType.ThermalImage,
+                [AnalysisType.ThermalReading],
+                "Verifies that a thermal reading is produced and stored. Requires a reference polygon seeded in SARA for this tag."
+            ),
+            new MissionScenario(
+                "Thermal reading - Hot spot",
+                "thermal-hot-spot",
+                "Thermal reading of equipment with a hot spot",
+                SensorType.ThermalImage,
+                [AnalysisType.ThermalReading],
+                "Verifies that an elevated thermal reading is produced. Note that SARA has no thermal bounds configured, so this cannot raise an alarm yet."
+            ),
+            new MissionScenario(
+                "CO2 measurement",
+                "co2-measurement",
+                "CO2 measurement",
+                SensorType.CO2Measurement,
+                [AnalysisType.CO2],
+                "Verifies that a CO2 measurement arrives and is stored as a time series. CO2 has no analyzer and cannot raise an alarm."
+            ),
+            new MissionScenario(
+                "Image without analysis",
+                "image-no-analysis",
+                "Image taken without any analysis requested",
+                SensorType.Image,
+                [],
+                "Verifies that an image is stored and displayed when no analysis is requested."
+            ),
+            new MissionScenario(
+                "Video inspection",
+                "video",
+                "Video recording",
+                SensorType.Video,
+                [],
+                "Verifies that a video arrives and can be played back.",
+                VideoDuration: 10f
+            ),
+            new MissionScenario(
+                "Thermal video inspection",
+                "thermal-video",
+                "Thermal video recording",
+                SensorType.ThermalVideo,
+                [],
+                "Verifies that a thermal video arrives and can be played back.",
+                VideoDuration: 10f
+            ),
+            new MissionScenario(
+                "Acoustic measurement",
+                "acoustic",
+                "Acoustic leak measurement",
+                SensorType.AcousticMeasurement,
+                [],
+                "Verifies that an acoustic measurement and its metadata arrive.",
+                AcousticInspectionMetadata: () =>
+                    new AcousticInspectionMetadata(
+                        frequencyFrom: 20_000f,
+                        frequencyTo: 60_000f,
+                        snrValueThreshold: 3f,
+                        detectionType: AcousticDetectionType.Leak
+                    )
+            ),
+            new MissionScenario(
+                "Audio recording",
+                "audio",
+                "Audio recording",
+                SensorType.Audio,
+                [],
+                "Verifies that an audio recording arrives and can be played back.",
+                VideoDuration: 10f
+            ),
+        ];
+
+        private static readonly MissionScenario inspectionAreaGuardScenario = new(
+            "Blocked - Mission in area without robot",
+            "blocked-area",
+            "Image in an inspection area that holds no robot",
+            SensorType.Image,
+            [],
+            "Expected to be rejected. Verifies that a mission cannot be started in an inspection area the robot is not in."
+        );
+
+        private static Plant CreatePlant(string installationCode, string name)
         {
-            var userAccessRole = new AccessRole
+            return new Plant
             {
-                Installation = installations[0],
-                AccessLevel = RoleAccessLevel.ADMIN,
-                RoleName = "Role.User.HUA",
+                Id = Guid.NewGuid().ToString(),
+                Installation = new Installation
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Name = name,
+                    InstallationCode = installationCode,
+                },
+                Name = name,
+                PlantCode = installationCode,
             };
-
-            var readOnlyAccessRole = new AccessRole
-            {
-                Installation = installations[0],
-                AccessLevel = RoleAccessLevel.READ_ONLY,
-                RoleName = "Role.ReadOnly.HUA",
-            };
-
-            return new List<AccessRole>([userAccessRole, readOnlyAccessRole]);
         }
 
-        private static List<Installation> GetInstallations()
+        private static InspectionArea CreateInspectionArea(Plant plant, string name)
         {
-            var installation1 = new Installation
+            return new InspectionArea
             {
                 Id = Guid.NewGuid().ToString(),
-                Name = "Huldra",
-                InstallationCode = "HUA",
+                Plant = plant,
+                Installation = plant.Installation,
+                Name = name,
             };
-
-            var installation2 = new Installation
-            {
-                Id = Guid.NewGuid().ToString(),
-                Name = "Kårstø",
-                InstallationCode = "KAA",
-            };
-
-            return new List<Installation>([installation1, installation2]);
         }
 
-        private static List<Plant> GetPlants()
+        private static List<AccessRole> GetAccessRoles(List<Installation> installations)
         {
-            var plant1 = new Plant
-            {
-                Id = Guid.NewGuid().ToString(),
-                Installation = installations[0],
-                Name = "HULDRA",
-                PlantCode = "HUA",
-            };
-
-            var plant2 = new Plant
-            {
-                Id = Guid.NewGuid().ToString(),
-                Installation = installations[1],
-                Name = "Kårstø",
-                PlantCode = "kaa",
-            };
-
-            return new List<Plant>([plant1, plant2]);
+            return
+            [
+                .. installations.SelectMany(installation =>
+                    new[]
+                    {
+                        new AccessRole
+                        {
+                            Installation = installation,
+                            AccessLevel = RoleAccessLevel.USER,
+                            RoleName = $"Role.User.{installation.InstallationCode}",
+                        },
+                        new AccessRole
+                        {
+                            Installation = installation,
+                            AccessLevel = RoleAccessLevel.READ_ONLY,
+                            RoleName = $"Role.ReadOnly.{installation.InstallationCode}",
+                        },
+                    }
+                ),
+            ];
         }
 
-        private static List<InspectionArea> GetInspectionAreas()
+        private static List<MissionDefinition> GetMissionDefinitions(
+            List<InspectionArea> inspectionAreas
+        )
         {
-            var inspectionArea1 = new InspectionArea
-            {
-                Id = Guid.NewGuid().ToString(),
-                Plant = plants[0],
-                Installation = plants[0].Installation,
-                Name = "TestInspectionArea",
-            };
+            var areasWithRobot = inspectionAreas.Where(area =>
+                area.Name != KaarstoInspectionAreaWithoutRobot
+            );
 
-            var inspectionArea2 = new InspectionArea
-            {
-                Id = Guid.NewGuid().ToString(),
-                Plant = plants[0],
-                Installation = plants[0].Installation,
-                Name = "TestInspectionArea2",
-            };
+            var definitions = areasWithRobot
+                .SelectMany(area => scenarios.Select(scenario => CreateMission(scenario, area)))
+                .ToList();
 
-            var inspectionArea3 = new InspectionArea
-            {
-                Id = Guid.NewGuid().ToString(),
-                Plant = plants[0],
-                Installation = plants[0].Installation,
-                Name = "TestInspectionArea3",
-            };
+            definitions.Add(
+                CreateMission(
+                    inspectionAreaGuardScenario,
+                    inspectionAreas.Single(area => area.Name == KaarstoInspectionAreaWithoutRobot)
+                )
+            );
 
-            var inspectionArea4 = new InspectionArea
-            {
-                Id = Guid.NewGuid().ToString(),
-                Plant = plants[0],
-                Installation = plants[0].Installation,
-                Name = "TestInspectionArea4",
-            };
-
-            var inspectionAreaHuldraMezzanine = new InspectionArea
-            {
-                Id = Guid.NewGuid().ToString(),
-                Plant = plants[0],
-                Installation = plants[0].Installation,
-                Name = "Huldra Mezzanine InspectionArea",
-            };
-
-            var inspectionAreaKLab = new InspectionArea
-            {
-                Id = Guid.NewGuid().ToString(),
-                Plant = plants[1],
-                Installation = plants[1].Installation,
-                Name = "K-Lab",
-            };
-
-            return new List<InspectionArea>([
-                inspectionArea1,
-                inspectionArea2,
-                inspectionArea3,
-                inspectionArea4,
-                inspectionAreaHuldraMezzanine,
-                inspectionAreaKLab,
-            ]);
+            return definitions;
         }
 
-        private static List<Robot> GetRobots()
+        private static MissionDefinition CreateMission(
+            MissionScenario scenario,
+            InspectionArea inspectionArea
+        )
         {
-            var robot1 = new Robot
-            {
-                IsarId = "c68b679d-308b-460f-9fe0-87eaadbd8a6e",
-                Name = "R2-D2",
-                SerialNumber = "D2",
-                Status = RobotStatus.Available,
-                Host = "localhost",
-                Port = 3000,
-                Type = RobotType.Turtlebot,
-                CurrentInstallation = installations[0],
-                Documentation = [],
-            };
-
-            var robot2 = new Robot
-            {
-                Name = "Ultron",
-                IsarId = "c68b679d-308b-460f-9fe0-87eaadbd5678",
-                SerialNumber = "Earth616",
-                Status = RobotStatus.Available,
-                Type = RobotType.TaurobInspector,
-                Host = "localhost",
-                Port = 3000,
-                CurrentInstallation = installations[0],
-                Documentation = [],
-            };
-
-            var robot3 = new Robot
-            {
-                Name = "Placebot",
-                IsarId = "00000000-0000-0000-0000-000000000000",
-                SerialNumber = "Placebot1",
-                Status = RobotStatus.Available,
-                Type = RobotType.Robot,
-                Host = "localhost",
-                Port = 3000,
-                CurrentInstallation = installations[0],
-                CurrentInspectionAreaId = inspectionAreas[0].Id,
-                Documentation = [],
-            };
-
-            var robot4 = new Robot
-            {
-                Name = "Placebot Klab",
-                IsarId = "00000000-0000-0000-0000-000000000001",
-                SerialNumber = "Placebot Kårstø",
-                Status = RobotStatus.Available,
-                Type = RobotType.AnymalX,
-                Host = "localhost",
-                Port = 3000,
-                CurrentInstallation = installations[1],
-                CurrentInspectionAreaId = inspectionAreas[5].Id,
-                Documentation = [],
-            };
-
-            return new List<Robot>([robot1, robot2, robot3, robot4]);
-        }
-
-        private static List<TaskDefinition> GetMissionTaskDefinitions()
-        {
-            var task1 = new TaskDefinition
-            {
-                Index = 1,
-                TagId = "dummy-tag-id-1",
-                Description = "dummy task 1",
-                RobotPose = new Pose(),
-                AnalysisTypes = [AnalysisType.Fencilla],
-                SensorType = SensorType.Image,
-                TargetPosition = new Position(),
-            };
-
-            var task2 = new TaskDefinition
-            {
-                Index = 2,
-                TagId = "dummy-tag-id-2",
-                Description = "dummy task 2",
-                RobotPose = new Pose(),
-                SensorType = SensorType.Image,
-                AnalysisTypes = [AnalysisType.CLOE],
-                TargetPosition = new Position(),
-            };
-
-            var task3 = new TaskDefinition
-            {
-                Index = 3,
-                TagId = "dummy-tag-id-3",
-                Description = "dummy task 3",
-                RobotPose = new Pose(),
-                AnalysisTypes = [AnalysisType.CO2],
-                SensorType = SensorType.CO2Measurement,
-                TargetPosition = new Position(),
-            };
-
-            var task4 = new TaskDefinition
-            {
-                Index = 4,
-                TagId = "thermal-tag-1",
-                Description = "Thermal reading inspection",
-                RobotPose = new Pose(),
-                SensorType = SensorType.ThermalImage,
-                AnalysisTypes = [AnalysisType.ThermalReading],
-                TargetPosition = new Position(),
-            };
-
-            return new List<TaskDefinition>([task1, task2, task3, task4]);
-        }
-
-        private static List<MissionDefinition> GetMissionDefinitions()
-        {
-            var missionDefinition1 = new MissionDefinition
+            return new MissionDefinition
             {
                 Id = Guid.NewGuid().ToString(),
-                Name = "Placeholder Mission 1",
-                InstallationCode = inspectionAreas[0].Installation!.InstallationCode,
-                InspectionArea = inspectionAreas[0],
-                Tasks =
-                [
-                    GetMissionTaskDefinitions()[0],
-                    GetMissionTaskDefinitions()[1],
-                    GetMissionTaskDefinitions()[2],
-                ],
-                Comment = "Interesting comment",
+                Name = scenario.MissionName,
+                InstallationCode = inspectionArea.Installation.InstallationCode,
+                InspectionArea = inspectionArea,
+                Comment = scenario.Comment,
                 LastSuccessfulRun = null,
-            };
-
-            var missionDefinition2 = new MissionDefinition
-            {
-                Id = Guid.NewGuid().ToString(),
-                Name = "Placeholder Mission 2",
-                InstallationCode = inspectionAreas[1].Installation!.InstallationCode,
-                InspectionArea = inspectionAreas[1],
-                Tasks = [GetMissionTaskDefinitions()[0], GetMissionTaskDefinitions()[2]],
-                LastSuccessfulRun = null,
-            };
-
-            var missionDefinition3 = new MissionDefinition
-            {
-                Id = Guid.NewGuid().ToString(),
-                Name = "Placeholder Mission 3",
-                InstallationCode = inspectionAreas[1].Installation!.InstallationCode,
-                InspectionArea = inspectionAreas[1],
-                Tasks = [GetMissionTaskDefinitions()[1], GetMissionTaskDefinitions()[2]],
-                LastSuccessfulRun = null,
-            };
-
-            var missionDefinition4 = new MissionDefinition
-            {
-                Id = Guid.NewGuid().ToString(),
-                Name = "Placeholder Mission 4",
-                InstallationCode = inspectionAreas[2].Installation.InstallationCode,
-                InspectionArea = inspectionAreas[2],
-                Tasks = [GetMissionTaskDefinitions()[0]],
-                LastSuccessfulRun = null,
-            };
-
-            var missionDefinition5 = new MissionDefinition
-            {
-                Id = Guid.NewGuid().ToString(),
-                Name = "Placeholder Mission 5",
-                InstallationCode = inspectionAreas[2].Installation.InstallationCode,
-                InspectionArea = inspectionAreas[2],
-                Tasks = [GetMissionTaskDefinitions()[1]],
-                LastSuccessfulRun = null,
-            };
-
-            var missionDefinition6 = new MissionDefinition
-            {
-                Id = Guid.NewGuid().ToString(),
-                Name = "Placeholder Mission 6",
-                InstallationCode = inspectionAreas[3].Installation.InstallationCode,
-                InspectionArea = inspectionAreas[3],
-                Tasks = [GetMissionTaskDefinitions()[2]],
-                LastSuccessfulRun = null,
-            };
-
-            var thermalReadingMission = new MissionDefinition
-            {
-                Id = Guid.NewGuid().ToString(),
-                Name = "Thermal Reading Mission",
-                InstallationCode = inspectionAreas[5].Installation.InstallationCode,
-                InspectionArea = inspectionAreas[5],
-                Tasks = [GetMissionTaskDefinitions()[3]],
-                LastSuccessfulRun = null,
-            };
-
-            var cloeMission = new MissionDefinition
-            {
-                Id = Guid.NewGuid().ToString(),
-                Name = "Constant Level Oiler Mission",
-                InstallationCode = inspectionAreas[5].Installation.InstallationCode,
-                InspectionArea = inspectionAreas[5],
                 Tasks =
                 [
                     new TaskDefinition
                     {
-                        TagId = "cloe-tag-1",
-                        Description = "CLOE tag 1",
+                        Index = 1,
+                        TagId = scenario.TagId,
+                        Description = scenario.Description,
                         RobotPose = new Pose(),
-                        AnalysisTypes = [AnalysisType.CLOE],
-                        SensorType = SensorType.Image,
                         TargetPosition = new Position(),
-                    },
-                    new TaskDefinition
-                    {
-                        TagId = "cloe-tag-2",
-                        Description = "CLOE tag 2",
-                        RobotPose = new Pose(),
-                        AnalysisTypes = [AnalysisType.CLOE],
-                        SensorType = SensorType.Image,
-                        TargetPosition = new Position(),
+                        SensorType = scenario.SensorType,
+                        AnalysisTypes = [.. scenario.AnalysisTypes],
+                        VideoDuration = scenario.VideoDuration,
+                        AcousticInspectionMetadata = scenario.AcousticInspectionMetadata?.Invoke(),
                     },
                 ],
-                LastSuccessfulRun = null,
             };
-
-            var onlyImagesWithoutAnalysisMissionDefinition = new MissionDefinition
-            {
-                Id = Guid.NewGuid().ToString(),
-                Name = "Only Images Without Analysis Mission",
-                InstallationCode = inspectionAreas[5].Installation.InstallationCode,
-                InspectionArea = inspectionAreas[5],
-                Tasks =
-                [
-                    new TaskDefinition
-                    {
-                        TagId = "image-tag-1",
-                        Description = "Tag to take image of",
-                        RobotPose = new Pose(),
-                        AnalysisTypes = [],
-                        SensorType = SensorType.Image,
-                        TargetPosition = new Position(),
-                    },
-                    new TaskDefinition
-                    {
-                        TagId = "image-tag-2",
-                        Description = "Tag to take image of",
-                        RobotPose = new Pose(),
-                        AnalysisTypes = [],
-                        SensorType = SensorType.Image,
-                        TargetPosition = new Position(),
-                    },
-                ],
-                LastSuccessfulRun = null,
-            };
-
-            var fencillaMission = new MissionDefinition
-            {
-                Id = Guid.NewGuid().ToString(),
-                Name = "Fencilla Mission",
-                InstallationCode = inspectionAreas[5].Installation.InstallationCode,
-                InspectionArea = inspectionAreas[5],
-                Tasks =
-                [
-                    new TaskDefinition
-                    {
-                        TagId = "fence-tag-1",
-                        Description = "Fence tag 1",
-                        RobotPose = new Pose(),
-                        AnalysisTypes = [AnalysisType.Fencilla],
-                        SensorType = SensorType.Image,
-                        TargetPosition = new Position(),
-                    },
-                    new TaskDefinition
-                    {
-                        TagId = "fence-tag-2",
-                        Description = "Fence tag 2",
-                        RobotPose = new Pose(),
-                        AnalysisTypes = [AnalysisType.Fencilla],
-                        SensorType = SensorType.Image,
-                        TargetPosition = new Position(),
-                    },
-                    new TaskDefinition
-                    {
-                        TagId = "fence-tag-3",
-                        Description = "Fence tag 3 - rain drops",
-                        RobotPose = new Pose(),
-                        AnalysisTypes = [AnalysisType.Fencilla],
-                        SensorType = SensorType.Image,
-                        TargetPosition = new Position(),
-                    },
-                ],
-                LastSuccessfulRun = null,
-            };
-
-            var co2Mission = new MissionDefinition
-            {
-                Id = Guid.NewGuid().ToString(),
-                Name = "CO2 Mission",
-                InstallationCode = inspectionAreas[5].Installation.InstallationCode,
-                InspectionArea = inspectionAreas[5],
-                Tasks =
-                [
-                    new TaskDefinition
-                    {
-                        TagId = "co2-tag-1",
-                        Description = "CO2 tag 1",
-                        RobotPose = new Pose(),
-                        AnalysisTypes = [AnalysisType.CO2],
-                        SensorType = SensorType.CO2Measurement,
-                        TargetPosition = new Position(),
-                    },
-                    new TaskDefinition
-                    {
-                        TagId = "co2-tag-2",
-                        Description = "CO2 tag 2",
-                        RobotPose = new Pose(),
-                        AnalysisTypes = [AnalysisType.CO2],
-                        SensorType = SensorType.CO2Measurement,
-                        TargetPosition = new Position(),
-                    },
-                ],
-                LastSuccessfulRun = null,
-            };
-
-            return new List<MissionDefinition>([
-                missionDefinition1,
-                missionDefinition2,
-                missionDefinition3,
-                missionDefinition4,
-                missionDefinition5,
-                missionDefinition6,
-                thermalReadingMission,
-                cloeMission,
-                onlyImagesWithoutAnalysisMissionDefinition,
-                fencillaMission,
-                co2Mission,
-            ]);
-        }
-
-        private static List<MissionTask> GetMissionTasks()
-        {
-            var task1 = new MissionTask
-            {
-                RobotPose = new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
-                TagId = "ABCD",
-                Description = "Task description",
-                Status = TaskStatus.Successful,
-            };
-
-            var task2 = new MissionTask
-            {
-                RobotPose = new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
-                TagId = "ABCDE",
-                Description = "Task description",
-                Status = TaskStatus.Failed,
-            };
-
-            var task3 = new MissionTask
-            {
-                RobotPose = new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
-                TagId = "ABCDEF",
-                Description = "Task description",
-                Status = TaskStatus.PartiallySuccessful,
-            };
-
-            var task4 = new MissionTask
-            {
-                RobotPose = new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
-                TagId = "ABCDEFG",
-                Description = "Task description",
-                Status = TaskStatus.Cancelled,
-            };
-
-            var task5 = new MissionTask
-            {
-                RobotPose = new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
-                TagId = "ABCDEFGH",
-                Description = "Task description",
-                Status = TaskStatus.Failed,
-            };
-
-            var task6 = new MissionTask
-            {
-                RobotPose = new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
-                TagId = "ABCDEFGHI",
-                Description = "Task description",
-                Status = TaskStatus.Failed,
-            };
-
-            var task7 = new MissionTask
-            {
-                RobotPose = new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
-                TagId = "ABCDEFGHIJ",
-                Description = "Task description",
-                Status = TaskStatus.Failed,
-            };
-
-            return [task1, task2, task3, task4, task5, task6, task7];
-        }
-
-        private static List<MissionRun> GetMissionRuns()
-        {
-            var missionRun1 = new MissionRun
-            {
-                Name = "Placeholder Mission 1",
-                Robot = robots[0],
-                InstallationCode = inspectionAreas[0].Installation!.InstallationCode,
-                InspectionArea = inspectionAreas[0],
-                MissionId = missionDefinitions[0].Id,
-                Status = MissionStatus.Successful,
-                CreationTime = DateTime.UtcNow,
-                Tasks = [],
-            };
-
-            var missionRun2 = new MissionRun
-            {
-                Name = "Placeholder Mission 2",
-                Robot = robots[1],
-                InstallationCode = inspectionAreas[1].Installation!.InstallationCode,
-                InspectionArea = inspectionAreas[1],
-                MissionId = missionDefinitions[0].Id,
-                Status = MissionStatus.Successful,
-                CreationTime = DateTime.UtcNow,
-                Tasks = [],
-            };
-            missionDefinitions[0].LastSuccessfulRun = missionRun2;
-
-            var missionRun3 = new MissionRun
-            {
-                Name = "Placeholder Mission 3",
-                Robot = robots[2],
-                InstallationCode = inspectionAreas[1].Installation!.InstallationCode,
-                InspectionArea = inspectionAreas[1],
-                MissionId = missionDefinitions[1].Id,
-                Status = MissionStatus.Successful,
-                CreationTime = DateTime.UtcNow,
-                Tasks = [],
-            };
-
-            var missionRun4 = new MissionRun
-            {
-                Name = "Placeholder Mission 4",
-                Robot = robots[2],
-                InstallationCode = inspectionAreas[1].Installation.InstallationCode,
-                InspectionArea = inspectionAreas[1],
-                MissionId = missionDefinitions[1].Id,
-                Status = MissionStatus.Failed,
-                CreationTime = DateTime.UtcNow,
-                Tasks = [tasks[0], tasks[1]],
-            };
-
-            var missionRun5 = new MissionRun
-            {
-                Name = "Placeholder Mission 5",
-                Robot = robots[2],
-                InstallationCode = inspectionAreas[1].Installation.InstallationCode,
-                InspectionArea = inspectionAreas[1],
-                MissionId = missionDefinitions[1].Id,
-                Status = MissionStatus.PartiallySuccessful,
-                CreationTime = DateTime.UtcNow,
-                Tasks = [tasks[0], tasks[2]],
-            };
-
-            var missionRun6 = new MissionRun
-            {
-                Name = "Placeholder Mission 6",
-                Robot = robots[2],
-                InstallationCode = inspectionAreas[1].Installation.InstallationCode,
-                InspectionArea = inspectionAreas[1],
-                MissionId = missionDefinitions[1].Id,
-                Status = MissionStatus.Cancelled,
-                CreationTime = DateTime.UtcNow,
-                Tasks = [tasks[0], tasks[3]],
-            };
-
-            var missionRun7 = new MissionRun
-            {
-                Name = "Some failed tasks",
-                Robot = robots[2],
-                InstallationCode = inspectionAreas[1].Installation.InstallationCode,
-                InspectionArea = inspectionAreas[1],
-                MissionId = missionDefinitions[1].Id,
-                Status = MissionStatus.Failed,
-                CreationTime = DateTime.UtcNow,
-                Tasks = [tasks[0], tasks[1], tasks[2], tasks[3], tasks[4], tasks[5], tasks[6]],
-            };
-
-            missionDefinitions[1].LastSuccessfulRun = missionRun3;
-
-            return new List<MissionRun>([
-                missionRun1,
-                missionRun2,
-                missionRun3,
-                missionRun4,
-                missionRun5,
-                missionRun6,
-                missionRun7,
-            ]);
         }
 
         public static void PopulateDb(FlotillaDbContext context)
         {
-            // To make sure we are not trying to initialize database more than once during tests
-            if (context.Robots.Any() || context.Installations.Any())
+            if (context.Installations.Any())
             {
                 return;
             }
 
-            context.AddRange(installations);
-            context.SaveChanges();
+            var kaarsto = CreatePlant("KAA", "Kårstø");
+            var northernLights = CreatePlant("NLS", "Northern Lights");
+            var klab = CreateInspectionArea(kaarsto, KaarstoInspectionArea);
+            List<InspectionArea> inspectionAreas =
+            [
+                klab,
+                CreateInspectionArea(kaarsto, KaarstoInspectionAreaWithoutRobot),
+                CreateInspectionArea(northernLights, NorthernLightsInspectionArea),
+            ];
 
-            context.AddRange(robots);
-            context.AddRange(plants);
             context.AddRange(inspectionAreas);
-
-            var tasks = GetMissionTasks();
-            missionRuns[0].Tasks = tasks;
-            context.AddRange(tasks);
-            context.AddRange(missionDefinitions);
-            context.AddRange(missionRuns);
-            context.AddRange(accessRoles);
+            context.AddRange(GetAccessRoles([kaarsto.Installation, northernLights.Installation]));
+            context.AddRange(GetMissionDefinitions(inspectionAreas));
+            context.Robots.Add(
+                new Robot
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    IsarId = "00000000-0000-0000-0000-000000000000",
+                    Name = "Placebot",
+                    SerialNumber = "0001",
+                    CurrentInstallation = kaarsto.Installation,
+                    CurrentInspectionAreaId = klab.Id,
+                    Status = RobotStatus.Offline,
+                    Host = "localhost",
+                    Port = 3000,
+                    RobotCapabilities = [],
+                }
+            );
 
             context.SaveChanges();
             context.ChangeTracker.Clear();
