@@ -41,6 +41,12 @@ export const StyledPage = styled.div`
     min-height: calc(100vh - 65px);
     background-color: ${tokens.colors.ui.background__light.hex};
 `
+export const StyledDashboard = styled.div`
+    display: flex;
+    justify-content: center;
+    padding: 2.5rem 3rem;
+    background-color: ${tokens.colors.ui.background__light.hex};
+`
 export const StyledLoading = styled.div`
     display: flex;
     flex-direction: column;

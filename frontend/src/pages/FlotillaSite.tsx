@@ -24,6 +24,7 @@ import { useLanguageContext } from 'contexts/LanguageContext'
 import { CloeDataViewPage } from './DataViewPage/CloeDataViewPage'
 import { DataOverviewPage } from './DataOverviewPage'
 import { ThermalReadingViewPage } from './DataViewPage/ThermalReadingViewPage'
+import { DashboardPage } from './DashboardPage/DashboardPage'
 
 const StyledLoading = styled.div`
     display: flex;
@@ -40,6 +41,7 @@ export const FlotillaSite = () => {
                 <Routes>
                     <Route path="/" element={<AssetSelectionPage />} />
                     <Route path=":installationCode" element={<InstallationLayout />}>
+                        <Route path="dashboard" element={<DashboardPage />} />
                         <Route index element={<Navigate to="mission-control" replace />} />
                         <Route path="mission-control" element={<MissionControlPage />} />
                         <Route path="mission-scheduling" element={<MissionSchedulingPage />} />
