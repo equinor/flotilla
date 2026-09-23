@@ -104,6 +104,13 @@ def flotilla_stack(
     """
     backend_env = {
         "ASPNETCORE_ENVIRONMENT": "Local",
+        "Local__DevUserId": str(local([
+            "python3", "-c",
+            "import getpass, hashlib, os, socket, sys; " +
+            "identity = repr((socket.gethostname(), getpass.getuser(), os.path.realpath(sys.argv[1]))); " +
+            "print('tilt-' + hashlib.sha256(identity.encode()).hexdigest()[:32])",
+            _FLOTILLA_ROOT,
+        ], quiet=True)).strip(),
         "ASPNETCORE_URLS": "http://localhost:%d" % backend_port,
         "Database__UseInMemoryDatabase": "false",
         "Database__PostgreSqlConnectionString": pg_conn,
