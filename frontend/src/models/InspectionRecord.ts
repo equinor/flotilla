@@ -78,7 +78,6 @@ export interface InspectionData {
     visualizedSAS?: string
     fileType: FileType
     anonymizedSAS?: string
-    // SARA sets only one of visualizedSAS/anonymizedSAS, depending on the analysis chain
     mediaSAS?: string
     analysisType?: string
     tag: string
@@ -113,7 +112,7 @@ export const inspectionRecordToInspectionData = (record: InspectionRecord): Insp
 
     if (!analysis) return null
 
-    const sas = analysis.visualizedSAS ?? analysis.anonymizedSAS
+    const sas = analysis.anonymizedSAS ?? analysis.visualizedSAS
     const fileType = sas ? sasURLToFileType(sas) : FileType.VALUE
 
     // Feedback is given per analysis run, so mirror the choice of analysis above
