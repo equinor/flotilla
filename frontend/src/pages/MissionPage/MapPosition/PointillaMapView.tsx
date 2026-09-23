@@ -269,10 +269,9 @@ export function InspectionsPlantMap({
         <div className="map-root">
             <StyledElements>
                 <LeafletTooltipStyles />
-                <StyledMapContainer ref={setMap} attributionControl={false}>
+                <StyledMapContainer style={{ width: '100%' }} ref={setMap} attributionControl={false}>
                     {mapInfo && <AuthTileLayer mapInfo={mapInfo} />}
                 </StyledMapContainer>
-                <MapCompass />
             </StyledElements>
         </div>
     )

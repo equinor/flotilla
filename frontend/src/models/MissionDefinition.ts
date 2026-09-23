@@ -6,10 +6,10 @@ import { Position } from './Position'
 import { AcousticInspectionMetadata, SensorType } from './Task'
 
 export enum AnalysisType {
-    Fencilla = 'Fencilla',
-    CLOE = 'CLOE',
-    ThermalReading = 'ThermalReading',
-    CO2 = 'CO2',
+    Fencilla = 'fencilla',
+    CLOE = 'cloe',
+    ThermalReading = 'thermal-reading',
+    CO2 = 'co2',
 }
 
 interface ZoomDescription {
