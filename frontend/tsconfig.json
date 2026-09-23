@@ -16,7 +16,19 @@
     "noFallthroughCasesInSwitch": true,
     "jsx": "react-jsx",
     "types": ["vite/client"],
-    "baseUrl": "src",
+    "paths": {
+      "api/*": ["./src/api/*"],
+      "components/*": ["./src/components/*"],
+      "language": ["./src/language"],
+      "language/*": ["./src/language/*"],
+      "mediaAssets/*": ["./src/mediaAssets/*"],
+      "models/*": ["./src/models/*"],
+      "utils/*": ["./src/utils/*"],
+      "config": ["./src/config"],
+      "pages/*": ["./src/pages/*"],
+      "hooks/*": ["./src/hooks/*"],
+      "contexts/*": ["./src/contexts/*"]
+    },
     "outDir": "out",
     "sourceMap": true
   },
