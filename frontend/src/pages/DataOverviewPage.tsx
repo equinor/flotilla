@@ -2,7 +2,7 @@ import { InstallationContext } from 'contexts/InstallationContext'
 import { Header } from 'components/Header/Header'
 import { NavBar } from 'components/Header/NavBar'
 import { useContext } from 'react'
-import { cardShadow, StyledPage } from 'components/Styles/StyledComponents'
+import { PageContent, PageBackground, cardShadow } from 'components/Styles/StyledComponents'
 import { useLanguageContext } from 'contexts/LanguageContext'
 import { Card, Typography, Icon } from '@equinor/eds-core-react'
 import { styled } from 'styled-components'
@@ -15,14 +15,11 @@ import fenceBreach from 'mediaAssets/fenceBreach.png'
 import thermalReading from 'mediaAssets/thermalReading.png'
 
 const StyledCard = styled(Card)`
-    width: clamp(600px, 50%, 700px);
+    width: 100%;
+    max-width: 700px;
     padding: 1.25rem;
     box-shadow: ${cardShadow};
     border-left: 4px solid ${tokens.colors.interactive.warning__hover.hex};
-
-    @media (max-width: 960px) {
-        width: 90%;
-    }
 `
 const DataCardImage = styled.img`
     width: 100px;
@@ -89,27 +86,29 @@ export const DataOverviewPage = () => {
         <>
             <Header installation={installation} />
             <NavBar />
-            <StyledPage>
-                {analysisPages.map((page) => (
-                    <StyledCard key={page.to}>
-                        <DataCardRow>
-                            <DataCardImage src={page.source} alt={page.label} />
-                            <DataCardContent>
-                                <Typography variant="h4">{page.label}</Typography>
-                                <Typography variant="body_short">{page.description}</Typography>
-                                <StyledGhostButton
-                                    variant="ghost"
-                                    style={{ color: tokens.colors.interactive.warning__hover.hex }}
-                                    onClick={() => navigate(page.to)}
-                                >
-                                    {TranslateText('Go to Data View')}
-                                    <Icon name={Icons.RightCheveron} size={16} />
-                                </StyledGhostButton>
-                            </DataCardContent>
-                        </DataCardRow>
-                    </StyledCard>
-                ))}
-            </StyledPage>
+            <PageBackground>
+                <PageContent>
+                    {analysisPages.map((page) => (
+                        <StyledCard key={page.to}>
+                            <DataCardRow>
+                                <DataCardImage src={page.source} alt={page.label} />
+                                <DataCardContent>
+                                    <Typography variant="h4">{page.label}</Typography>
+                                    <Typography variant="body_short">{page.description}</Typography>
+                                    <StyledGhostButton
+                                        variant="ghost"
+                                        style={{ color: tokens.colors.interactive.warning__hover.hex }}
+                                        onClick={() => navigate(page.to)}
+                                    >
+                                        {TranslateText('Go to Data View')}
+                                        <Icon name={Icons.RightCheveron} size={16} />
+                                    </StyledGhostButton>
+                                </DataCardContent>
+                            </DataCardRow>
+                        </StyledCard>
+                    ))}
+                </PageContent>
+            </PageBackground>
         </>
     )
 }

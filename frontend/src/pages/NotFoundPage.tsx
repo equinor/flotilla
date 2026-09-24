@@ -2,36 +2,29 @@ import { useNavigate } from 'react-router'
 import { Button, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import notfound from 'mediaAssets/404notfound.png'
-import { StyledPage } from 'components/Styles/StyledComponents'
+import { PageContent, PageBackground } from 'components/Styles/StyledComponents'
 import { Header } from 'components/Header/Header'
 import { phone_width } from 'utils/constants'
 
-const StyledPageContent = styled.div`
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    display: flex;
+const NotFoundContent = styled(PageContent)`
+    flex: 1;
     flex-direction: row;
     align-items: center;
+    justify-content: center;
 
     @media (max-width: ${phone_width}) {
         flex-direction: column;
-        top: 60%;
-        left: 50%;
-        transform: translate(-50%, -50%);
     }
 `
 const StyledTypography = styled(Typography)`
     text-align: center;
-    gap: 10px;
 `
 const StyledImage = styled.img`
     height: 500px;
     padding: 0px 10px;
 
     @media (max-width: ${phone_width}) {
-        max-width: 50vw;
+        max-width: 100%;
         height: auto;
         padding: 5px;
     }
@@ -54,8 +47,8 @@ export const PageNotFound = () => {
     return (
         <>
             <Header />
-            <StyledPage>
-                <StyledPageContent>
+            <PageBackground>
+                <NotFoundContent>
                     <StyledImage src={notfound} />
                     <StyledActions>
                         <StyledTypography variant="h3">
@@ -65,8 +58,8 @@ export const PageNotFound = () => {
                             {"Let's go back"}
                         </StyledButton>
                     </StyledActions>
-                </StyledPageContent>
-            </StyledPage>
+                </NotFoundContent>
+            </PageBackground>
         </>
     )
 }

@@ -8,7 +8,6 @@ import { Alert } from 'models/Alert'
 const StyledCard = styled.div`
     display: flex;
     width: 100%;
-    box-sizing: border-box;
     height: auto;
     padding: 0.5rem 1.5rem;
     justify-content: space-between;

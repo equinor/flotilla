@@ -29,13 +29,9 @@ const SectionTitle = styled.p`
 `
 
 const StyledTable = styled(Table)`
-    width: 960px;
+    width: 100%;
     margin-top: 10px;
     border-top: 1px solid ${tokens.colors.ui.background__medium.hex};
-
-    @media (max-width: 960px) {
-        width: 100%;
-    }
 `
 
 const ShowLessOrMoreButton = ({

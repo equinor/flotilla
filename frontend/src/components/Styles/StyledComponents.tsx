@@ -1,7 +1,17 @@
-import { Button, Dialog, Pagination, Table, Typography } from '@equinor/eds-core-react'
+import { Button, Dialog, Pagination, Table } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
-import styled from 'styled-components'
-import { phone_width } from 'utils/constants'
+import styled, { css } from 'styled-components'
+import { content_widths } from 'utils/constants'
+
+// For elements that cannot use PageContent because they bring their own layout, such
+// as the EDS TopBar.
+export const pageContentWidth = css`
+    width: 100%;
+    min-width: 0;
+    margin-inline: auto;
+    padding-inline: var(--eds-page-space-horizontal);
+    ${content_widths.map((width) => `@media (min-width: ${width}) { max-width: ${width}; }`).join('\n')}
+`
 
 export const StyledDialog = styled(Dialog)`
     width: calc(100vw * 0.8);
@@ -28,24 +38,20 @@ export const StyledButton = styled(Button)`
     height: auto;
     min-height: ${tokens.shape.button.minHeight};
 `
-export const StyledPage = styled.div`
+export const PageBackground = styled.div`
     display: flex;
-    flex-wrap: wrap;
-    justify-content: start;
     flex-direction: column;
     gap: 2rem;
-    padding: 2.5rem 3rem;
-    @media (max-width: ${phone_width}) {
-        padding: 1rem;
-    }
-    min-height: calc(100vh - 65px);
+    padding-block: var(--eds-page-space-vertical);
+    flex: 1;
     background-color: ${tokens.colors.ui.background__light.hex};
 `
-export const StyledDashboard = styled.div`
+// Siblings of this, inside PageBackground, run the full width of the window.
+export const PageContent = styled.div`
+    ${pageContentWidth}
     display: flex;
-    justify-content: center;
-    padding: 2.5rem 3rem;
-    background-color: ${tokens.colors.ui.background__light.hex};
+    flex-direction: column;
+    gap: 2rem;
 `
 export const StyledLoading = styled.div`
     display: flex;
@@ -61,17 +67,10 @@ export const StyledPagination = styled(Pagination)`
     padding: 0px 8px 0px 16px;
     background-color: ${tokens.colors.ui.background__default.hex};
 `
-export const AttributeTitleTypography = styled(Typography)`
-    font-size: 0.62rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: ${tokens.colors.text.static_icons__tertiary.hex};
-`
 export const StyledTable = styled(Table)`
     display: block;
     overflow: auto;
-    max-width: calc(80vw);
+    max-width: 100%;
 `
 
 export const StyledTableAndMap = styled.div`
@@ -105,16 +104,18 @@ export const StyledTableBody = styled(Table.Body)`
 export const StyledTableCaption = styled(Table.Caption)`
     background-color: ${tokens.colors.ui.background__default.hex};
 `
-export const StyledCardsWidth = styled.div`
+// Padding matches the page gutter so card text lines up with the bars above.
+export const ContentCard = styled.div`
     display: flex;
     flex-direction: column;
-    max-width: fit-content;
-    gap: 20px;
+    gap: 8px;
+    padding: var(--eds-page-space-vertical) var(--eds-page-space-horizontal);
+    border-radius: 2px;
+    background: ${tokens.colors.ui.background__default.hex};
 `
 
-export const VideoStreamSection = styled.div`
+export const VideoStreamSection = styled(ContentCard)`
     display: grid;
-    gap: 1rem;
 `
 
 export const cardShadow = '0 4px 12px rgba(0, 0, 0, 0.1), 0 12px 32px rgba(0, 0, 0, 0.08)'

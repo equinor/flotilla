@@ -18,20 +18,9 @@ import {
 } from './FrontPage/MissionOverview/OngoingMissionCard'
 import { RobotCard, RobotCardPlaceholder } from './FrontPage/MissionOverview/RobotCard'
 import { RobotMissionQueueView } from './FrontPage/MissionOverview/MissionQueueView'
-import { StyledPage, cardShadow } from 'components/Styles/StyledComponents'
+import { PageContent, PageBackground, cardShadow } from 'components/Styles/StyledComponents'
 import { MissionStatus } from 'models/Mission'
 
-const MissionControlStyle = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-`
-const MissionControlBody = styled.div`
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    gap: 24px;
-`
 const MissionControlCardStyle = styled.div`
     display: flex;
     gap: 0px;
@@ -39,14 +28,6 @@ const MissionControlCardStyle = styled.div`
     background: ${tokens.colors.ui.background__default.hex};
     border-left: 4px solid ${tokens.colors.interactive.primary__resting.hex};
     box-shadow: ${cardShadow};
-
-    @media (min-width: 960px) {
-        width: 960px;
-    }
-
-    @media (max-width: 960px) {
-        width: 100%;
-    }
 `
 const OngoingMissionControlCardStyle = styled.div`
     display: flex;
@@ -69,15 +50,13 @@ export const MissionControlPage = () => {
         <>
             <Header installation={installation} />
             <NavBar />
-            <StyledPage>
-                <MissionControlStyle>
-                    <MissionControlBody>
-                        {enabledRobots.length > 0 && missionControlCards}
-                        {enabledRobots.length === 0 && <MissionControlPlaceholderCard />}
-                    </MissionControlBody>
+            <PageBackground>
+                <PageContent>
+                    {enabledRobots.length > 0 && missionControlCards}
+                    {enabledRobots.length === 0 && <MissionControlPlaceholderCard />}
                     <NextAutoScheduleMissionView />
-                </MissionControlStyle>
-            </StyledPage>
+                </PageContent>
+            </PageBackground>
         </>
     )
 }

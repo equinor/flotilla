@@ -43,7 +43,7 @@ const CalendarColors = {
 
 const CalendarWrapper = styled.div`
     height: 70vh;
-    width: 90vw;
+    width: 100%;
     margin: 2px;
 
     .rbc-calendar {
@@ -153,7 +153,6 @@ const StyledEvent = styled.div`
     width: 100%;
     height: 100%;
     padding: 4px;
-    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;

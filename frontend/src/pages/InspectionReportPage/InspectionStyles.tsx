@@ -2,6 +2,7 @@ import { Button, Card, Dialog } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import { styled } from 'styled-components'
 import { phone_width, tablet_width } from 'utils/constants'
+import { ContentCard } from 'components/Styles/StyledComponents'
 
 export const HiddenOnSmallScreen = styled.div`
     @media (max-width: ${phone_width}) {
@@ -65,14 +66,8 @@ export const StyledInfoContent = styled.div`
     align-items: flex-start;
 `
 
-export const StyledInspectionOverviewSection = styled.div`
-    display: flex;
-    padding: 24px 0;
-    min-width: 240px;
-    flex-direction: column;
+export const StyledInspectionOverviewSection = styled(ContentCard)`
     align-items: flex-start;
-    gap: 8px;
-    background: ${tokens.colors.ui.background__default.hex};
 `
 
 export const StyledInspectionOverviewDialogView = styled.div`

@@ -4,11 +4,13 @@ import { LanguageProvider } from 'contexts/LanguageContext'
 import { AuthProvider } from 'contexts/AuthProvider'
 import { MediaStreamProvider } from 'contexts/MediaStreamContext'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { GlobalStyle } from 'components/Styles/GlobalStyle'
 
 export const queryClient = new QueryClient()
 
 const App = () => (
     <AuthProvider>
+        <GlobalStyle />
         <UnauthenticatedTemplate />
         <AuthenticatedTemplate>
             <LanguageProvider>

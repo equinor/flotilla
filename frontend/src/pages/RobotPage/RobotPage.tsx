@@ -7,7 +7,13 @@ import { BatteryStatusDisplay } from 'components/Displays/RobotDisplays/BatteryS
 import { RobotStatusChip } from 'components/Displays/RobotDisplays/RobotStatusIcon'
 import { RobotStatus, RobotWithoutTelemetry } from 'models/Robot'
 import { useLanguageContext } from 'contexts/LanguageContext'
-import { VideoStreamSection, FieldLabel } from 'components/Styles/StyledComponents'
+import {
+    PageContent,
+    ContentCard,
+    FieldLabel,
+    PageBackground,
+    VideoStreamSection,
+} from 'components/Styles/StyledComponents'
 import { DocumentationSection } from './Documentation'
 import { useContext, useState } from 'react'
 import { VideoStreamWindow } from '../MissionPage/VideoStream/VideoStreamWindow'
@@ -23,24 +29,12 @@ import { useRobotTelemetry } from 'hooks/useRobotTelemetry'
 import { useBackendApi } from 'api/UseBackendApi'
 import { InstallationContext } from 'contexts/InstallationContext'
 
-const StyledRobotPage = styled.div`
-    display: flex;
-    flex-direction: column;
-    background-color: ${tokens.colors.ui.background__default.hex};
-    min-height: 100vh;
-`
-
-const HeroSection = styled.div`
-    display: flex;
+const HeroSection = styled(ContentCard)`
+    flex-direction: row;
     align-items: center;
     gap: 3rem;
-    padding: 2rem 4rem;
-    background-color: ${tokens.colors.ui.background__light.hex};
-    box-sizing: border-box;
     @media (max-width: ${phone_width}) {
         flex-direction: column;
-        padding: 1.5rem;
-        gap: 16px;
         align-items: flex-start;
     }
 `
@@ -51,14 +45,11 @@ const HeroLeft = styled.div`
     gap: 16px;
 `
 
-const MetricsRow = styled.div`
-    display: flex;
+const MetricsRow = styled(ContentCard)`
+    flex-direction: row;
     flex-wrap: wrap;
-    padding: 2rem 4rem;
     @media (max-width: ${phone_width}) {
         flex-direction: column;
-        gap: 1rem;
-        padding: 1rem 1.5rem;
     }
 `
 
@@ -83,9 +74,7 @@ const ActionsRow = styled.div`
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
-    padding: 0 4rem 2rem 4rem;
     @media (max-width: ${phone_width}) {
-        padding: 0 1.5rem 1.5rem 1.5rem;
         flex-direction: column;
     }
 `
@@ -153,87 +142,91 @@ export const RobotPage = ({ robot }: RobotPageProps) => {
     return (
         <>
             <Header installation={installation} />
-            <StyledRobotPage>
-                {robot && (
-                    <>
-                        <HeroSection>
-                            <RobotImage height="280px" robotType={robot.type} />
-                            <HeroLeft>
-                                <Typography variant="h1">{robot.name}</Typography>
-                                <RobotStatusChip status={robot.status} itemSize={24} />
-                            </HeroLeft>
-                        </HeroSection>
+            <PageBackground>
+                <PageContent>
+                    {robot && (
+                        <>
+                            <HeroSection>
+                                <RobotImage height="280px" robotType={robot.type} />
+                                <HeroLeft>
+                                    <Typography variant="h1">{robot.name}</Typography>
+                                    <RobotStatusChip status={robot.status} itemSize={24} />
+                                </HeroLeft>
+                            </HeroSection>
 
-                        {robot.status !== RobotStatus.Offline && (
-                            <MetricsRow>
-                                <MetricCard>
-                                    <FieldLabel>{TranslateText('Battery')}</FieldLabel>
-                                    <BatteryStatusDisplay
-                                        itemSize={24}
-                                        batteryLevel={robotBatteryLevel}
-                                        batteryState={robotBatteryStatus}
-                                    />
-                                </MetricCard>
-                                {robotPressureLevel !== undefined && (
+                            {robot.status !== RobotStatus.Offline && (
+                                <MetricsRow>
                                     <MetricCard>
-                                        <FieldLabel>{TranslateText('Pressure')}</FieldLabel>
-                                        <PressureStatusDisplay itemSize={24} pressure={robotPressureLevel} />
+                                        <FieldLabel>{TranslateText('Battery')}</FieldLabel>
+                                        <BatteryStatusDisplay
+                                            itemSize={24}
+                                            batteryLevel={robotBatteryLevel}
+                                            batteryState={robotBatteryStatus}
+                                        />
                                     </MetricCard>
-                                )}
-                                {robot.type && (
-                                    <MetricCard>
-                                        <FieldLabel>{TranslateText('Robot Model')}</FieldLabel>
-                                        <Typography style={{ fontSize: '24px' }}>{robot.type}</Typography>
-                                    </MetricCard>
-                                )}
-                                {currentInspectionArea && (
-                                    <MetricCard>
-                                        <FieldLabel>{TranslateText('Current Inspection Area')}</FieldLabel>
-                                        <Typography style={{ fontSize: '24px' }}>
-                                            {currentInspectionArea.inspectionAreaName}
-                                        </Typography>
-                                    </MetricCard>
-                                )}
-                                {isLoadingCurrentInspectionArea && (
-                                    <MetricCard>
-                                        <FieldLabel>{TranslateText('Current Inspection Area')}</FieldLabel>
-                                        <Typography style={{ fontSize: '24px' }}>
-                                            {TranslateText('Loading...')}
-                                        </Typography>
-                                    </MetricCard>
-                                )}
-                                {((!isLoadingCurrentInspectionArea && !currentInspectionArea) ||
-                                    currentInspectionAreaError ||
-                                    robot.currentInspectionAreaId === null) && (
-                                    <MetricCard>
-                                        <FieldLabel>{TranslateText('Current Inspection Area')}</FieldLabel>
-                                        <Typography style={{ fontSize: '24px' }}>
-                                            {TranslateText('No inspection area found')}
-                                        </Typography>
-                                    </MetricCard>
-                                )}
-                            </MetricsRow>
-                        )}
-
-                        <ActionsRow>
-                            {stopButton}
-                            {robot.status != RobotStatus.InterventionNeeded && <ReturnHomeButton robot={robot} />}
-                            {robot.status == RobotStatus.InterventionNeeded && (
-                                <InterventionNeededButton robot={robot} />
+                                    {robotPressureLevel !== undefined && (
+                                        <MetricCard>
+                                            <FieldLabel>{TranslateText('Pressure')}</FieldLabel>
+                                            <PressureStatusDisplay itemSize={24} pressure={robotPressureLevel} />
+                                        </MetricCard>
+                                    )}
+                                    {robot.type && (
+                                        <MetricCard>
+                                            <FieldLabel>{TranslateText('Robot Model')}</FieldLabel>
+                                            <Typography style={{ fontSize: '24px' }}>{robot.type}</Typography>
+                                        </MetricCard>
+                                    )}
+                                    {currentInspectionArea && (
+                                        <MetricCard>
+                                            <FieldLabel>{TranslateText('Current Inspection Area')}</FieldLabel>
+                                            <Typography style={{ fontSize: '24px' }}>
+                                                {currentInspectionArea.inspectionAreaName}
+                                            </Typography>
+                                        </MetricCard>
+                                    )}
+                                    {isLoadingCurrentInspectionArea && (
+                                        <MetricCard>
+                                            <FieldLabel>{TranslateText('Current Inspection Area')}</FieldLabel>
+                                            <Typography style={{ fontSize: '24px' }}>
+                                                {TranslateText('Loading...')}
+                                            </Typography>
+                                        </MetricCard>
+                                    )}
+                                    {((!isLoadingCurrentInspectionArea && !currentInspectionArea) ||
+                                        currentInspectionAreaError ||
+                                        robot.currentInspectionAreaId === null) && (
+                                        <MetricCard>
+                                            <FieldLabel>{TranslateText('Current Inspection Area')}</FieldLabel>
+                                            <Typography style={{ fontSize: '24px' }}>
+                                                {TranslateText('No inspection area found')}
+                                            </Typography>
+                                        </MetricCard>
+                                    )}
+                                </MetricsRow>
                             )}
-                            <MaintenanceButton robotId={robot.id} robotStatus={robot.status} />
-                        </ActionsRow>
 
-                        {skipMissionDialog}
-                        {robot.documentation && robot.documentation.length > 0 && (
-                            <DocumentationSection documentation={robot.documentation} />
-                        )}
-                        <VideoStreamSection>
-                            <VideoStreamWindow robotId={robot.id} />
-                        </VideoStreamSection>
-                    </>
-                )}
-            </StyledRobotPage>
+                            <ActionsRow>
+                                {stopButton}
+                                {robot.status != RobotStatus.InterventionNeeded && <ReturnHomeButton robot={robot} />}
+                                {robot.status == RobotStatus.InterventionNeeded && (
+                                    <InterventionNeededButton robot={robot} />
+                                )}
+                                <MaintenanceButton robotId={robot.id} robotStatus={robot.status} />
+                            </ActionsRow>
+
+                            {skipMissionDialog}
+                            {robot.documentation && robot.documentation.length > 0 && (
+                                <ContentCard>
+                                    <DocumentationSection documentation={robot.documentation} />
+                                </ContentCard>
+                            )}
+                            <VideoStreamSection>
+                                <VideoStreamWindow robotId={robot.id} />
+                            </VideoStreamSection>
+                        </>
+                    )}
+                </PageContent>
+            </PageBackground>
         </>
     )
 }

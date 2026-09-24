@@ -13,8 +13,9 @@ import { tokens } from '@equinor/eds-tokens'
 import { SmallScreenInfoText } from 'utils/InfoText'
 import { useAlertContext } from 'contexts/AlertContext'
 import {
+    PageContent,
     StyledLoading,
-    StyledPage,
+    PageBackground,
     StyledPagination,
     StyledTableBody,
     StyledTableCaption,
@@ -42,29 +43,21 @@ const HideColumnsOnSmallScreen = styled.div`
     #SmallScreenInfoText {
         display: none;
     }
+    #${InspectionTableColumns.StatusShort} {
+        display: none;
+    }
     @media (max-width: ${phone_width}) {
         #SmallScreenInfoText {
             display: grid;
             grid-template-columns: auto auto;
             gap: 0.3em;
-            align-items: left;
             padding-bottom: 1rem;
             max-width: 400px;
         }
-    }
-    @media (max-width: ${phone_width}) {
-        #${InspectionTableColumns.Status} {
-            display: none;
-        }
-        #${InspectionTableColumns.Robot} {
-            display: none;
-        }
-        #${InspectionTableColumns.CompletionTime} {
-            display: none;
-        }
-    }
-    @media (min-width: ${phone_width}) {
         #${InspectionTableColumns.StatusShort} {
+            display: table-cell;
+        }
+        #${InspectionTableColumns.Status}, #${InspectionTableColumns.Robot}, #${InspectionTableColumns.CompletionTime} {
             display: none;
         }
     }
@@ -78,8 +71,6 @@ const ActiveFilterList = styled.div`
     display: flex;
     gap: 0.7rem;
     align-items: center;
-    padding-left: var(--page-margin);
-    padding-right: var(--page-margin);
     flex-wrap: wrap;
     min-height: 24px;
 `
@@ -110,11 +101,13 @@ export const MissionHistoryPage = () => {
         <>
             <Header installation={installation} />
             <NavBar />
-            <StyledPage>
-                <MissionFilterProvider>
-                    <MissionHistoryViewComponent />
-                </MissionFilterProvider>
-            </StyledPage>
+            <PageBackground>
+                <PageContent>
+                    <MissionFilterProvider>
+                        <MissionHistoryViewComponent />
+                    </MissionFilterProvider>
+                </PageContent>
+            </PageBackground>
         </>
     )
 }

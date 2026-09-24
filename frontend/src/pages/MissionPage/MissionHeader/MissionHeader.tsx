@@ -13,42 +13,30 @@ import { TaskStatus } from 'models/Task'
 import { convertUTCDateToLocalDate, formatDateTime } from 'utils/StringFormatting'
 import { calculateRemaindingTimeInMinutes } from 'utils/CalculateRemaingingTime'
 import { useNavigate } from 'react-router'
-import { phone_width } from 'utils/constants'
-import { FieldLabel } from 'components/Styles/StyledComponents'
+import { phone_width, tablet_width } from 'utils/constants'
+import { ContentCard, FieldLabel } from 'components/Styles/StyledComponents'
 import { useContext } from 'react'
 import { InstallationContext } from 'contexts/InstallationContext'
 import { RobotStatus } from 'models/Robot'
 import { AnalysisType } from 'models/MissionDefinition'
 
-const HeaderSection = styled.div`
-    width: 100%;
-    padding: 1.5rem 4rem;
-    top: 56px;
-    position: sticky;
-    z-index: 1;
-    background-color: ${tokens.colors.ui.background__light.hex};
-    box-sizing: border-box;
+const TitleRow = styled.div`
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
     gap: 2rem;
-    @media (max-width: ${phone_width}) {
+    @media (max-width: ${tablet_width}) {
         flex-direction: column;
-        padding: 1rem 1.5rem;
     }
 `
-const StaticHeaderSection = styled.div`
-    width: 100%;
-    padding: 1.5rem 4rem;
-    background-color: ${tokens.colors.ui.background__light.hex};
-    box-sizing: border-box;
+const MetricsRow = styled.div`
     display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 2rem;
+    flex-wrap: wrap;
+    gap: 48px;
     @media (max-width: ${phone_width}) {
-        flex-direction: column;
-        padding: 1rem 1.5rem;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
     }
 `
 const TitleArea = styled.div`
@@ -56,14 +44,14 @@ const TitleArea = styled.div`
     flex-direction: column;
     gap: 8px;
     flex: 1;
+    min-width: 0;
 `
 const ButtonGroup = styled.div`
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
     align-items: center;
-    flex-shrink: 0;
-    @media (max-width: ${phone_width}) {
+    @media (max-width: ${tablet_width}) {
         width: 100%;
     }
 `
@@ -74,21 +62,6 @@ const StyledTypography = styled(Typography)`
     line-height: 40px;
     @media (max-width: ${phone_width}) {
         font-size: 24px;
-    }
-`
-const MetricsSection = styled.div`
-    width: 100%;
-    padding: 1.25rem 4rem;
-    background-color: ${tokens.colors.ui.background__light.hex};
-    box-sizing: border-box;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 48px;
-    @media (max-width: ${phone_width}) {
-        padding: 1rem 1.5rem;
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1rem;
     }
 `
 const MetricItem = styled.div`
@@ -189,8 +162,8 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
     const dataOverviewUrl = analysisType ? getDataOverviewUrl(analysisType) : undefined
 
     return (
-        <>
-            <HeaderSection>
+        <ContentCard>
+            <TitleRow>
                 <TitleArea>
                     <StyledTypography>{mission.name}</StyledTypography>
                     {mission.description && (
@@ -235,8 +208,8 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
                         </Button>
                     )}
                 </ButtonGroup>
-            </HeaderSection>
-            <MetricsSection>
+            </TitleRow>
+            <MetricsRow>
                 <Metric label={translatedStatus}>
                     <MissionStatusDisplay status={mission.status} />
                 </Metric>
@@ -259,8 +232,8 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
                 <Metric label={translatedRobot}>
                     <Typography>{mission.robot.name}</Typography>
                 </Metric>
-            </MetricsSection>
-        </>
+            </MetricsRow>
+        </ContentCard>
     )
 }
 
@@ -281,8 +254,8 @@ export const SimpleMissionHeader = ({ mission }: { mission: Mission }) => {
     const numberOfCompletedTasks = mission.tasks.filter((task) => task.isCompleted).length
 
     return (
-        <>
-            <StaticHeaderSection>
+        <ContentCard>
+            <TitleRow>
                 <TitleArea>
                     <StyledTypography>{mission.name}</StyledTypography>
                     {mission.description && (
@@ -296,8 +269,8 @@ export const SimpleMissionHeader = ({ mission }: { mission: Mission }) => {
                     )}
                     <StatusReason statusReason={mission.statusReason} status={mission.status} />
                 </TitleArea>
-            </StaticHeaderSection>
-            <MetricsSection>
+            </TitleRow>
+            <MetricsRow>
                 <Metric label={translatedStatus}>
                     <MissionStatusDisplay status={mission.status} />
                 </Metric>
@@ -320,7 +293,7 @@ export const SimpleMissionHeader = ({ mission }: { mission: Mission }) => {
                 <Metric label={translatedRobot}>
                     <Typography>{mission.robot.name}</Typography>
                 </Metric>
-            </MetricsSection>
-        </>
+            </MetricsRow>
+        </ContentCard>
     )
 }

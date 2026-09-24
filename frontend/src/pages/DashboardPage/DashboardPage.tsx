@@ -1,7 +1,7 @@
 import { Typography } from '@equinor/eds-core-react'
 import { useContext, useMemo } from 'react'
 import { useLanguageContext } from 'contexts/LanguageContext'
-import { StyledDashboard } from 'components/Styles/StyledComponents'
+import { PageContent, ContentCard, PageBackground } from 'components/Styles/StyledComponents'
 import { InstallationContext } from 'contexts/InstallationContext'
 import { PendingResultPlaceholder } from 'pages/InspectionReportPage/InspectionReportImage'
 import { DataViewMapWrapper } from 'pages/DataViewPage/DataViewComponents'
@@ -15,15 +15,21 @@ import { InspectionsPlantMap } from 'pages/MissionPage/MapPosition/PointillaMapV
 import styled from 'styled-components'
 import { MissionControlCard } from 'pages/MissionControlPage'
 import { NextAutoScheduleMissionView } from 'pages/FrontPage/AutoScheduleSection/NextAutoScheduleMissionView'
-import { tokens } from '@equinor/eds-tokens'
 
 interface DataViewContentProps {
     inspectionData: InspectionData[]
 }
 
-const DashboardContentWrapper = styled.div`
+const DashboardColumns = styled.div`
     display: flex;
     flex-wrap: wrap;
+    gap: 16px;
+`
+const DashboardColumn = styled.div`
+    display: flex;
+    flex-direction: column;
+    flex: auto;
+    min-width: 0;
     gap: 16px;
 `
 
@@ -49,34 +55,27 @@ const DashboardContent = ({ inspectionData }: DataViewContentProps) => {
     }, [inspectionData])
 
     return (
-        <StyledDashboard>
-            <div style={{ maxWidth: '100%' }}>
-                <Typography variant="h2">{`${installation.name} - ${TranslateText('Dashboard')}`}</Typography>
-                <DashboardContentWrapper>
-                    <div
-                        style={{
-                            flex: 'auto',
-                            gap: tokens.spacings.comfortable.small,
-                            display: 'flex',
-                            flexDirection: 'column',
-                        }}
-                    >
-                        {uniqueTagInspectionData
-                            .filter((i) => i.warning)
-                            .map((i) => (
-                                <SaraAlertCard
-                                    key={i.analysisId}
-                                    analysisType={i.analysisType!}
-                                    tag={i.tag!}
-                                    createdAt={i.createdAt!}
-                                    value={i.value!}
-                                    unit={i.unit!}
-                                    warning={i.warning!}
-                                />
-                            ))}
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                        {plantCode ? (
+        <>
+            <Typography variant="h2">{`${installation.name} - ${TranslateText('Dashboard')}`}</Typography>
+            <DashboardColumns>
+                <DashboardColumn>
+                    {uniqueTagInspectionData
+                        .filter((i) => i.warning)
+                        .map((i) => (
+                            <SaraAlertCard
+                                key={i.analysisId}
+                                analysisType={i.analysisType!}
+                                tag={i.tag!}
+                                createdAt={i.createdAt!}
+                                value={i.value!}
+                                unit={i.unit!}
+                                warning={i.warning!}
+                            />
+                        ))}
+                </DashboardColumn>
+                <DashboardColumn>
+                    {plantCode && (
+                        <ContentCard>
                             <DataViewMapWrapper>
                                 <InspectionsPlantMap
                                     key={'all'}
@@ -85,17 +84,15 @@ const DashboardContent = ({ inspectionData }: DataViewContentProps) => {
                                     inspections={uniqueTagInspectionData}
                                 />
                             </DataViewMapWrapper>
-                        ) : (
-                            <></>
-                        )}
-                        {enabledRobots.map((robot) => (
-                            <MissionControlCard key={robot.id} robot={robot} />
-                        ))}
-                        <NextAutoScheduleMissionView />
-                    </div>
-                </DashboardContentWrapper>
-            </div>
-        </StyledDashboard>
+                        </ContentCard>
+                    )}
+                    {enabledRobots.map((robot) => (
+                        <MissionControlCard key={robot.id} robot={robot} />
+                    ))}
+                    <NextAutoScheduleMissionView />
+                </DashboardColumn>
+            </DashboardColumns>
+        </>
     )
 }
 
@@ -116,14 +113,16 @@ export const DashboardPage = () => {
         timeRangeSelection.range.maxDate
     )
 
-    if (isPending) {
-        return <PendingResultPlaceholder isLargeImage={true} />
-    }
-
     // Keep the page mounted on error, or the time range selector goes with it.
     return (
-        <div style={{}}>
-            <DashboardContent inspectionData={data ?? []} />
-        </div>
+        <PageBackground>
+            <PageContent>
+                {isPending ? (
+                    <PendingResultPlaceholder isLargeImage={true} />
+                ) : (
+                    <DashboardContent inspectionData={data ?? []} />
+                )}
+            </PageContent>
+        </PageBackground>
     )
 }

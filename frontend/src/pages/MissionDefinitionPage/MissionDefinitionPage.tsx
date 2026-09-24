@@ -9,7 +9,7 @@ import { MissionDefinitionUpdateForm } from 'models/MissionDefinitionUpdateForm'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
 import { useMissionDefinitionsContext } from 'contexts/MissionDefinitionsContext'
-import { StyledPage, subtleCardShadow } from 'components/Styles/StyledComponents'
+import { PageContent, PageBackground, subtleCardShadow } from 'components/Styles/StyledComponents'
 import styled from 'styled-components'
 import { useAlertContext } from 'contexts/AlertContext'
 import { MissionDefinitionTaskTableAndMap } from '../MissionPage/TaskTableAndMap'
@@ -199,26 +199,28 @@ export const MissionDefinitionPage = ({ missionId }: { missionId: string }) => {
         <>
             <Header installation={installation} />
             {selectedMissionDefinition !== undefined && (
-                <StyledPage>
-                    <StyledTopComponents>
-                        <MissionDefinitionHeader missionDefinition={selectedMissionDefinition} />
-                        <StyledButton
-                            variant="outlined"
-                            disabled={!selectedMissionDefinition.lastSuccessfulRun}
-                            onClick={() =>
-                                navigate(
-                                    `/${installation.installationCode}/mission/${selectedMissionDefinition.lastSuccessfulRun!.id}`
-                                )
-                            }
-                        >
-                            {TranslateText('View last run') +
-                                (selectedMissionDefinition.lastSuccessfulRun
-                                    ? ''
-                                    : ': ' + TranslateText('Not yet performed'))}
-                        </StyledButton>
-                    </StyledTopComponents>
-                    <MissionDefinitionPageBody missionDefinition={selectedMissionDefinition} />
-                </StyledPage>
+                <PageBackground>
+                    <PageContent>
+                        <StyledTopComponents>
+                            <MissionDefinitionHeader missionDefinition={selectedMissionDefinition} />
+                            <StyledButton
+                                variant="outlined"
+                                disabled={!selectedMissionDefinition.lastSuccessfulRun}
+                                onClick={() =>
+                                    navigate(
+                                        `/${installation.installationCode}/mission/${selectedMissionDefinition.lastSuccessfulRun!.id}`
+                                    )
+                                }
+                            >
+                                {TranslateText('View last run') +
+                                    (selectedMissionDefinition.lastSuccessfulRun
+                                        ? ''
+                                        : ': ' + TranslateText('Not yet performed'))}
+                            </StyledButton>
+                        </StyledTopComponents>
+                        <MissionDefinitionPageBody missionDefinition={selectedMissionDefinition} />
+                    </PageContent>
+                </PageBackground>
             )}
         </>
     )
