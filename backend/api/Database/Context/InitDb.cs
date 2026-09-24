@@ -111,6 +111,14 @@ namespace Api.Database.Context
                 "Verifies that an image is stored and displayed when no analysis is requested."
             ),
             new MissionScenario(
+                "Failed task",
+                "task-failure",
+                "Image inspection that deliberately fails in isar-robot",
+                SensorType.Image,
+                [],
+                "Expected to fail. The task-failure tag makes isar-robot fail the task rather than an analysis or upload."
+            ),
+            new MissionScenario(
                 "Video inspection",
                 "video",
                 "Video recording",
@@ -226,6 +234,8 @@ namespace Api.Database.Context
                 .SelectMany(area => scenarios.Select(scenario => CreateMission(scenario, area)))
                 .ToList();
 
+            definitions.AddRange(areasWithRobot.Select(CreatePartiallySuccessfulMission));
+            definitions.AddRange(areasWithRobot.Select(CreateAllTasksFailedMission));
             definitions.Add(
                 CreateMission(
                     inspectionAreaGuardScenario,
@@ -239,6 +249,57 @@ namespace Api.Database.Context
             );
 
             return definitions;
+        }
+
+        private static MissionDefinition CreateAllTasksFailedMission(InspectionArea inspectionArea)
+        {
+            var scenario = scenarios.Single(scenario => scenario.TagId == "task-failure");
+
+            return new MissionDefinition
+            {
+                Id = Guid.NewGuid().ToString(),
+                Name = "All tasks failed",
+                InstallationCode = inspectionArea.Installation.InstallationCode,
+                InspectionArea = inspectionArea,
+                Comment =
+                    "Expected to fail with isar-robot: both image inspection tasks fail. "
+                    + "Verifies that a mission fails when none of its tasks succeed.",
+                LastSuccessfulRun = null,
+                Tasks = [CreateTask(scenario, 1), CreateTask(scenario, 2)],
+            };
+        }
+
+        private static MissionDefinition CreatePartiallySuccessfulMission(
+            InspectionArea inspectionArea
+        )
+        {
+            string[] tags =
+            [
+                "image-no-analysis",
+                "task-failure",
+                "image-no-analysis",
+                "task-failure",
+            ];
+
+            return new MissionDefinition
+            {
+                Id = Guid.NewGuid().ToString(),
+                Name = "Partially successful mission",
+                InstallationCode = inspectionArea.Installation.InstallationCode,
+                InspectionArea = inspectionArea,
+                Comment =
+                    "Expected to be partially successful with isar-robot: tasks 1 and 3 succeed, "
+                    + "and tasks 2 and 4 fail. Verifies that execution continues after a failed task.",
+                LastSuccessfulRun = null,
+                Tasks = tags.Select(
+                        (tag, index) =>
+                            CreateTask(
+                                scenarios.Single(scenario => scenario.TagId == tag),
+                                index + 1
+                            )
+                    )
+                    .ToList(),
+            };
         }
 
         private static MissionDefinition CreateMixedInspectionMission(InspectionArea inspectionArea)
