@@ -1,4 +1,8 @@
 {
+    "Inspection results": "Inspeksjonsresultater",
+    "Result task {0}": "Oppgave {0}",
+    "Enlarge inspection for {0}": "Forstørr inspeksjon for {0}",
+    "Enlarge analysis for {0}": "Forstørr analyse for {0}",
     "Failed to load result media": "Kunne ikke laste resultatmediet",
     "Mission History": "Oppdragshistorie",
     "failed on robot": "feilet på robot",
