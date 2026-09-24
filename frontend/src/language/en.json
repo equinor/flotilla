@@ -1,4 +1,5 @@
 {
+    "Failed to load result media": "Failed to load result media",
     "Mission History": "Mission History",
     "failed on robot": "failed on robot",
     "missions failed recently. See 'Mission History' for more information.": "missions failed recently. See 'Mission History' for more information.",
@@ -292,6 +293,11 @@
     "Warning": "Warning",
     "Confidence": "Confidence",
     "Value": "Value",
+    "Level": "Level",
+    "Temperature": "Temperature",
+    "Breach": "Breach",
+    "True": "True",
+    "False": "False",
     "Analysis": "Analysis",
     "Feedback": "Feedback",
     "Feedback description": "We rely on feedback to improve our analyses. Please give a thumbs up if the analysis is correct and a thumbs down if something is wrong. If someone already gave feedback, it is visible as a colored icon.",

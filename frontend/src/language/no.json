@@ -1,4 +1,5 @@
 {
+    "Failed to load result media": "Kunne ikke laste resultatmediet",
     "Mission History": "Oppdragshistorie",
     "failed on robot": "feilet på robot",
     "missions failed recently. See 'Mission History' for more information.": "oppdrag feilet nylig. Se 'Oppdragshistorie' for mer informasjon.",
@@ -292,6 +293,11 @@
     "Warning": "Advarsel",
     "Confidence": "Treffsikkerhet",
     "Value": "Verdi",
+    "Level": "Nivå",
+    "Temperature": "Temperatur",
+    "Breach": "Brudd",
+    "True": "Sann",
+    "False": "Usann",
     "Analysis": "Analyse",
     "Feedback": "Tilbakemelding",
     "Feedback description": "Vi er avhengige av tilbakemeldinger for å forbedre analysene våre. Gi tommel opp hvis analysen er riktig, og tommel ned hvis noe er feil. Hvis noen allerede har gitt tilbakemelding, vises det som et farget ikon.",
