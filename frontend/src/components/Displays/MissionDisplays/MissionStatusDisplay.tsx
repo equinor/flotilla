@@ -4,7 +4,7 @@ import { MissionStatus } from 'models/Mission'
 import styled from 'styled-components'
 import { useLanguageContext } from 'contexts/LanguageContext'
 import { Icons } from 'utils/icons'
-import { AttributeTitleTypography } from 'components/Styles/StyledComponents'
+import { FieldLabel } from 'components/Styles/StyledComponents'
 
 interface StatusProps {
     status: MissionStatus
@@ -78,7 +78,7 @@ export const MissionStatusDisplayWithHeader = ({ status }: StatusProps) => {
     const { TranslateText } = useLanguageContext()
     return (
         <StyledStatusDisplay>
-            <AttributeTitleTypography>{TranslateText('Status')}</AttributeTitleTypography>
+            <FieldLabel>{TranslateText('Status')}</FieldLabel>
             <MissionStatusDisplay status={status} />
         </StyledStatusDisplay>
     )

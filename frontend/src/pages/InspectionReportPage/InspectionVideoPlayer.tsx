@@ -13,7 +13,6 @@ const StyledVideoPlaceholder = styled.div`
     align-items: center;
     gap: 8px;
     padding: 16px;
-    box-sizing: border-box;
     height: 100%;
     width: 100%;
 `

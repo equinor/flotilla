@@ -1,6 +1,6 @@
 import { Button } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
-import { StyledImagesSection } from 'pages/InspectionReportPage/InspectionStyles'
+import { ContentCard } from 'components/Styles/StyledComponents'
 import styled from 'styled-components'
 
 export const DataViewMapWrapper = styled.div`
@@ -9,16 +9,6 @@ export const DataViewMapWrapper = styled.div`
         padding: 0 4px !important;
         border-radius: 2px !important;
     }
-`
-export const WhiteBackgroundBand = styled.div`
-    display: flex;
-    flex-direction: column;
-    align-self: flex-start;
-    margin: 0 -3rem;
-    padding: 24px 3rem;
-    gap: 24px;
-    width: 100%;
-    background: ${tokens.colors.ui.background__default.hex};
 `
 export const TimeRangeToggle = styled.div`
     display: inline-flex;
@@ -46,13 +36,8 @@ export const CustomTimeRangeError = styled.div`
     color: ${tokens.colors.interactive.danger__text.hex};
     min-height: 20px;
 `
-export const DataViewChartArea = styled.div`
-    display: flex;
-    flex-direction: column;
-    max-width: 1250px;
-    gap: 15px;
-`
-export const StyledTopAlignedImagesSection = styled(StyledImagesSection)`
+export const StyledTopAlignedImagesSection = styled(ContentCard)`
+    flex-direction: row;
     align-items: flex-start;
     gap: 40px;
 `

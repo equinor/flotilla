@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Autocomplete, Button, CircularProgress, Typography } from '@equinor/eds-core-react'
+import { Autocomplete, Button, Card, CircularProgress, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { useLanguageContext } from 'contexts/LanguageContext'
 import { Header } from 'components/Header/Header'
@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router'
 import { phone_width } from '../utils/constants'
 import { Installation } from 'models/Installation'
 import { useBackendApi } from 'api/UseBackendApi'
+import { cardShadow, PageContent, PageBackground } from 'components/Styles/StyledComponents'
 
 const StyledAssetSelection = styled.div`
     display: flex;
@@ -18,7 +19,7 @@ const StyledButton = styled(Button)`
     justify-content: center;
 `
 const StyledImage = styled.img`
-    width: 100vw;
+    width: 100%;
     object-fit: cover;
     height: 500px;
 
@@ -26,21 +27,30 @@ const StyledImage = styled.img`
         height: 400px;
     }
 `
-const StyledContent = styled.div`
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+const AssetPageBackground = styled(PageBackground)`
     padding-top: 80px;
     gap: 80px;
+`
+// EDS Card is width: 100%; width: auto makes it size to its content.
+const StyledPickerCard = styled(Card)`
+    width: auto;
+    align-self: center;
+    padding: 2rem;
+    gap: 1rem;
+    box-shadow: ${cardShadow};
 `
 
 export const AssetSelectionPage = () => (
     <>
         <Header />
-        <StyledContent>
-            <InstallationPicker />
+        <AssetPageBackground>
+            <PageContent>
+                <StyledPickerCard>
+                    <InstallationPicker />
+                </StyledPickerCard>
+            </PageContent>
             <StyledImage src={assetImage} />
-        </StyledContent>
+        </AssetPageBackground>
     </>
 )
 

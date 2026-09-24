@@ -9,15 +9,11 @@ import { useMissionDefinitionsContext } from 'contexts/MissionDefinitionsContext
 import { useAssetContext } from 'contexts/AssetContext'
 import { PlantPolygonMap } from 'pages/MissionPage/MapPosition/PointillaMapView'
 import { Typography } from '@equinor/eds-core-react'
-import {
-    compareMissionDefinitions,
-    InspectionAreaOverview,
-    StyledInspectionAreaCards,
-} from './MissionSchedulingComponents/InspectionUtilities'
+import { compareMissionDefinitions, StyledInspectionAreaCards } from './MissionSchedulingComponents/InspectionUtilities'
 import { InspectionAreaCard } from './MissionSchedulingComponents/InspectionAreaCards'
 import { MissionSchedulingTable } from './MissionSchedulingComponents/MissionSchedulingTable'
 import { ScheduleMissionDialog } from './MissionSchedulingComponents/ScheduleMissionDialogs'
-import { StyledPage } from 'components/Styles/StyledComponents'
+import { PageContent, PageBackground } from 'components/Styles/StyledComponents'
 import { useLanguageContext } from 'contexts/LanguageContext'
 
 export const MissionSchedulingPage = () => {
@@ -66,8 +62,8 @@ export const MissionSchedulingPage = () => {
         <>
             <Header installation={installation} />
             <NavBar />
-            <StyledPage>
-                <InspectionAreaOverview>
+            <PageBackground>
+                <PageContent>
                     {installationInspectionAreas.length > 1 && (
                         <StyledInspectionAreaCards>
                             {installationInspectionAreas.map((inspectionArea) => (
@@ -111,7 +107,7 @@ export const MissionSchedulingPage = () => {
                             <PlantPolygonMap inspectionArea={selectedInspectionArea} floorId={'0'} />{' '}
                         </>
                     )}
-                </InspectionAreaOverview>
+                </PageContent>
                 {selectedMissions.length > 0 && (
                     <ScheduleMissionDialog
                         selectedMissions={selectedMissions}
@@ -120,7 +116,7 @@ export const MissionSchedulingPage = () => {
                         isAlreadyScheduled={isAlreadyScheduled}
                     />
                 )}
-            </StyledPage>
+            </PageBackground>
         </>
     )
 }

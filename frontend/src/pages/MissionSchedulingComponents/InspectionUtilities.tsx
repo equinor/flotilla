@@ -22,7 +22,7 @@ export const CardComponent = styled.div`
 `
 export const StyledInspectionAreaCards = styled.div`
     display: grid;
-    grid-template-columns: repeat(auto-fill, 450px);
+    grid-template-columns: repeat(auto-fill, minmax(0, 450px));
     grid-auto-rows: 1fr;
     gap: 24px;
 `
@@ -38,18 +38,10 @@ export const TopInspectionAreaText = styled.div`
 `
 export const StyledInspectionAreaCard = styled.div`
     display: flex;
-    @media (max-width: 800px) {
-        max-width: calc(100vw - 30px);
-    }
-    max-width: 450px;
+    width: 100%;
     border-radius: 2px;
     overflow: hidden;
     box-shadow: ${cardShadow};
-`
-export const InspectionAreaOverview = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 48px;
 `
 export const Content = styled.div`
     display: flex;

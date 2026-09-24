@@ -8,7 +8,7 @@ import { RobotImage } from 'components/Displays/RobotDisplays/RobotImage'
 import { useNavigate } from 'react-router'
 import { useLanguageContext } from 'contexts/LanguageContext'
 import { PressureStatusDisplay } from 'components/Displays/RobotDisplays/PressureStatusDisplay'
-import { AttributeTitleTypography } from 'components/Styles/StyledComponents'
+import { FieldLabel } from 'components/Styles/StyledComponents'
 import { Icons } from 'utils/icons'
 import { useRobotTelemetry } from 'hooks/useRobotTelemetry'
 import { useContext } from 'react'
@@ -17,22 +17,22 @@ import { InstallationContext } from 'contexts/InstallationContext'
 const StyledRobotCard = styled.div`
     display: flex;
     align-self: stretch;
+    padding: 8px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 8px;
+    border-bottom: 1px solid ${tokens.colors.ui.background__medium.hex};
 
     @media (min-width: 960px) {
         width: 446px;
         padding: 16px;
+        flex-direction: row;
+        justify-content: flex-start;
         align-items: center;
         gap: 16px;
+        border-bottom: none;
         border-right: 1px solid ${tokens.colors.ui.background__medium.hex};
-    }
-
-    @media (max-width: 960px) {
-        padding: 8px;
-        flex-direction: column;
-        justify-content: center;
-        align-items: flex-start;
-        gap: 8px;
-        border-bottom: 1px solid ${tokens.colors.ui.background__medium.hex};
     }
 `
 const HorizontalContent = styled.div`
@@ -96,11 +96,13 @@ export const StyledGhostButton = styled(Button)`
     }
 `
 const HiddenOnSmallScreen = styled.div`
-    @media (max-width: 960px) {
-        display: none;
+    display: none;
+    @media (min-width: 960px) {
+        display: block;
     }
 `
 const HiddenOnLargeScreen = styled.div`
+    display: block;
     @media (min-width: 960px) {
         display: none;
     }
@@ -141,14 +143,14 @@ export const RobotCard = ({ robot }: RobotCardProps) => {
                     </StyledHeader>
                     <HorizontalContent>
                         <VerticalContent>
-                            <AttributeTitleTypography>{TranslateText('Status')}</AttributeTitleTypography>
+                            <FieldLabel>{TranslateText('Status')}</FieldLabel>
                             <RobotStatusChip status={robot.status} />
                         </VerticalContent>
 
                         {robot.status !== RobotStatus.Offline ? (
                             <>
                                 <VerticalContent>
-                                    <AttributeTitleTypography>{TranslateText('Battery')}</AttributeTitleTypography>
+                                    <FieldLabel>{TranslateText('Battery')}</FieldLabel>
                                     <BatteryStatusDisplay
                                         batteryLevel={robotBatteryLevel}
                                         batteryState={robotBatteryStatus}
@@ -157,7 +159,7 @@ export const RobotCard = ({ robot }: RobotCardProps) => {
 
                                 {robotPressureLevel !== undefined && (
                                     <VerticalContent>
-                                        <AttributeTitleTypography>{TranslateText('Pressure')}</AttributeTitleTypography>
+                                        <FieldLabel>{TranslateText('Pressure')}</FieldLabel>
                                         <PressureStatusDisplay pressure={robotPressureLevel} />
                                     </VerticalContent>
                                 )}

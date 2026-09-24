@@ -13,12 +13,10 @@ interface TypeProps {
 }
 
 const StyledImage = styled.img<{ $height?: string }>`
-    object-fit: contain;
-    max-height: ${(props) => props.$height};
+    height: ${(props) => props.$height};
+    width: auto;
     max-width: 100%;
-    display: flex;
-    justify-content: center;
-    padding: 12px 5px 12px 5px;
+    object-fit: contain;
 `
 const StyledIcon = styled(Icon)`
     display: flex;
@@ -69,5 +67,5 @@ export const RobotImage = ({ robotType, height = '200px' }: TypeProps) => {
             )
         }
     }
-    return <StyledImage height={height} alt={robotType} src={robotImage} />
+    return <StyledImage $height={height} alt={robotType} src={robotImage} />
 }

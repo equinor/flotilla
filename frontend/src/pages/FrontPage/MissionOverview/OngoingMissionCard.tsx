@@ -49,7 +49,7 @@ interface OngoingEmergencyMissionCardProps {
 }
 
 const StyledLargeScreenMissionCard = styled.div`
-    display: flex;
+    display: none;
     flex-direction: column;
     align-items: flex-start;
     align-self: stretch;
@@ -59,8 +59,8 @@ const StyledLargeScreenMissionCard = styled.div`
     flex: 1 0 0;
     position: relative;
 
-    @media (max-width: 960px) {
-        display: none;
+    @media (min-width: 960px) {
+        display: flex;
     }
 `
 const StyledSmallScreenMissionCard = styled.div`

@@ -5,10 +5,11 @@ import { useContext, useState } from 'react'
 import { NavLink, useNavigate } from 'react-router'
 import { styled } from 'styled-components'
 import { Icons } from 'utils/icons'
-import { phone_width } from 'utils/constants'
+import { nav_tabs_min_width, phone_width } from 'utils/constants'
 import { InstallationContext } from 'contexts/InstallationContext'
 import { useMissionsContext } from 'contexts/MissionRunsContext'
 import { StopRobotDialog } from 'pages/FrontPage/MissionOverview/StopDialogs'
+import { pageContentWidth } from 'components/Styles/StyledComponents'
 
 const StyledButton = styled(Button)`
     width: 100px;
@@ -17,18 +18,33 @@ const StyledButton = styled(Button)`
 const NavWrapper = styled.div`
     background: ${tokens.colors.ui.background__default.hex};
     border-bottom: 1px solid ${tokens.colors.ui.background__medium.hex};
-    padding: 0 1rem;
+`
+const NavContent = styled.div`
+    ${pageContentWidth}
     display: flex;
     justify-content: space-between;
     align-items: stretch;
+    gap: 1rem;
 `
 const NavLinks = styled.nav`
-    display: flex;
+    display: none;
     align-items: stretch;
+    min-width: 0;
+    @media (min-width: ${nav_tabs_min_width}) {
+        display: flex;
+    }
+`
+const NavMenu = styled.div`
+    display: flex;
+    align-items: center;
+    @media (min-width: ${nav_tabs_min_width}) {
+        display: none;
+    }
 `
 const NavItem = styled(NavLink)`
     display: flex;
     align-items: center;
+    flex-shrink: 0;
     padding: 0 14px;
     height: 48px;
     font-family: Equinor, sans-serif;
@@ -56,6 +72,7 @@ const NavItem = styled(NavLink)`
 const RightContent = styled.div`
     display: flex;
     align-items: center;
+    flex-shrink: 0;
     gap: 24px;
 `
 
@@ -110,7 +127,7 @@ const NavBarAsButton = () => {
 }
 
 const StyledOngoingMissionsInfo = styled.div`
-    display: flex;
+    display: none;
     align-items: center;
     gap: 6px;
     padding: 4px 12px;
@@ -121,6 +138,9 @@ const StyledOngoingMissionsInfo = styled.div`
     transition: background 0.15s ease;
     &:hover {
         background: ${tokens.colors.interactive.primary__hover_alt.hex};
+    }
+    @media (min-width: ${phone_width}) {
+        display: flex;
     }
 `
 const OngoingDot = styled.span<{ $active: boolean }>`
@@ -145,7 +165,7 @@ const OngoingMissionsInfo = ({ goToOngoingTab }: { goToOngoingTab: () => void })
     )
 }
 
-const NavBarAsTabs = () => {
+export const NavBar = () => {
     const { TranslateText } = useLanguageContext()
     const { installation } = useContext(InstallationContext)
     const navigate = useNavigate()
@@ -160,47 +180,26 @@ const NavBarAsTabs = () => {
 
     return (
         <NavWrapper>
-            <NavLinks>
-                {navItems.map(({ to, label }) => (
-                    <NavItem key={to} to={to} end>
-                        {label}
-                    </NavItem>
-                ))}
-            </NavLinks>
-            <RightContent>
-                <OngoingMissionsInfo
-                    goToOngoingTab={() => {
-                        navigate(`/${installation.installationCode}`)
-                    }}
-                />
-                <StopRobotDialog />
-            </RightContent>
+            <NavContent>
+                <NavLinks>
+                    {navItems.map(({ to, label }) => (
+                        <NavItem key={to} to={to} end>
+                            {label}
+                        </NavItem>
+                    ))}
+                </NavLinks>
+                <NavMenu>
+                    <NavBarAsButton />
+                </NavMenu>
+                <RightContent>
+                    <OngoingMissionsInfo
+                        goToOngoingTab={() => {
+                            navigate(`/${installation.installationCode}`)
+                        }}
+                    />
+                    <StopRobotDialog />
+                </RightContent>
+            </NavContent>
         </NavWrapper>
-    )
-}
-
-const StyledShowOnMobile = styled.div`
-    display: none;
-    @media (max-width: ${phone_width}) {
-        display: block;
-    }
-`
-
-const StyledShowOffMobile = styled.div`
-    @media (max-width: ${phone_width}) {
-        display: none;
-    }
-`
-
-export const NavBar = () => {
-    return (
-        <>
-            <StyledShowOnMobile>
-                <NavBarAsButton />
-            </StyledShowOnMobile>
-            <StyledShowOffMobile>
-                <NavBarAsTabs />
-            </StyledShowOffMobile>
-        </>
     )
 }

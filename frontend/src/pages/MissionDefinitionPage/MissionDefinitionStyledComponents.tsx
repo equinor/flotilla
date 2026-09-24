@@ -16,15 +16,9 @@ export const ButtonSection = styled.div`
 `
 
 export const FormContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-
-    @media (min-width: 800px) {
-        display: grid;
-        grid-template-columns: repeat(2, 480px);
-        gap: 24px 32px;
-    }
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(0, 480px));
+    gap: 24px 32px;
 `
 
 export const FormItem = styled.div`

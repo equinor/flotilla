@@ -1,7 +1,7 @@
 import { Typography } from '@equinor/eds-core-react'
 import { useContext, useMemo, useState } from 'react'
 import { useLanguageContext } from 'contexts/LanguageContext'
-import { StyledPage, StyledTableAndMap } from 'components/Styles/StyledComponents'
+import { PageContent, ContentCard, PageBackground, StyledTableAndMap } from 'components/Styles/StyledComponents'
 import { InstallationContext } from 'contexts/InstallationContext'
 import {
     TimeseriesLinePlot,
@@ -18,13 +18,7 @@ import { InspectionDialogView } from 'pages/InspectionReportPage/InspectionView'
 import { AnalysisResultDialogView } from 'pages/MissionPage/AnalysisResultView'
 import { useSearchParams } from 'react-router'
 import { DataViewTable } from './DataViewTable'
-import {
-    DataViewChartArea,
-    DataViewMapWrapper,
-    StyledDataViewImageCard,
-    StyledTopAlignedImagesSection,
-    WhiteBackgroundBand,
-} from './DataViewComponents'
+import { DataViewMapWrapper, StyledDataViewImageCard, StyledTopAlignedImagesSection } from './DataViewComponents'
 import { useInspectionsContext } from 'contexts/InspectionsContext'
 import { AnalysisType } from 'models/MissionDefinition'
 import { InspectionData } from 'models/InspectionRecord'
@@ -135,85 +129,87 @@ const DataViewContent = ({
     }, [inspectionData])
 
     return (
-        <StyledPage>
-            <Typography variant="h2">{TranslateText(pageTitle)}</Typography>
-            {showLoadError && (
-                <AlertBanner
-                    bannerAlert={{
-                        message: TranslateText('Could not load data for the selected time range'),
-                        severity: 'error',
-                    }}
-                    dismissAlert={() => setDismissedErrorRange(activeTimeRange)}
-                />
-            )}
-            <WhiteBackgroundBand>
-                <StyledTableAndMap>
-                    <DataViewTable
-                        uniqueTagInspectionData={uniqueTagInspectionData}
-                        selectedInspectionId={selectedInspectionId}
-                        onSelectInspection={(inspectionId) => setSelectedInspectionId(inspectionId)}
+        <PageBackground>
+            <PageContent>
+                <Typography variant="h2">{TranslateText(pageTitle)}</Typography>
+                {showLoadError && (
+                    <AlertBanner
+                        bannerAlert={{
+                            message: TranslateText('Could not load data for the selected time range'),
+                            severity: 'error',
+                        }}
+                        dismissAlert={() => setDismissedErrorRange(activeTimeRange)}
                     />
-                    {plantCode ? (
-                        <DataViewMapWrapper>
-                            <InspectionsPlantMap
-                                key={selectedInspectionId ?? 'all'}
-                                plantCode={plantCode}
-                                floorId="0"
-                                inspections={uniqueTagInspectionData}
-                            />
-                        </DataViewMapWrapper>
-                    ) : (
-                        <></>
-                    )}
-                </StyledTableAndMap>
-            </WhiteBackgroundBand>
-            {selectedInspection && (
-                <StyledTopAlignedImagesSection>
-                    <StyledDataViewImageCard>
-                        <Typography variant="h4">{inspectionImageTitle}</Typography>
-                        <InspectionImageWithPlaceholder inspection={selectedInspection} isLargeImage={true} />
-                    </StyledDataViewImageCard>
-                    <StyledDataViewImageCard>
-                        <Typography variant="h4">{analysisImageTitle}</Typography>
-                        <AnalysisResultDialogContent inspection={selectedInspection} />
-                    </StyledDataViewImageCard>
-                </StyledTopAlignedImagesSection>
-            )}
-            <DataViewChartArea>
-                <Typography variant="h3">{TranslateText(plotTitle)}</Typography>
-                <DataViewTimeRangeSelector
-                    ariaLabel={TranslateText(plotAriaLabel)}
-                    activeMode={activeTimeRangeMode}
-                    activeRange={activeTimeRange}
-                    onApplyRange={(mode, range) => {
-                        onApplyTimeRange(mode, range)
-                        setSelectedInspectionId(undefined)
-                    }}
-                />
-                {Object.keys(linePlotData).length > 0 ? (
-                    <TimeseriesLinePlot
-                        data={linePlotData}
-                        yLabel={TranslateText(plotYLabel)}
-                        ymin={plotYMin}
-                        ymax={plotYMax}
-                        selectedInspectionId={selectedInspectionId}
-                        onPointClick={(point: TimeseriesLinePlotDataPoint) => {
-                            setSelectedInspectionId((current) =>
-                                current && current === point.inspectionId ? undefined : point.inspectionId
-                            )
+                )}
+                <ContentCard>
+                    <StyledTableAndMap>
+                        <DataViewTable
+                            uniqueTagInspectionData={uniqueTagInspectionData}
+                            selectedInspectionId={selectedInspectionId}
+                            onSelectInspection={(inspectionId) => setSelectedInspectionId(inspectionId)}
+                        />
+                        {plantCode ? (
+                            <DataViewMapWrapper>
+                                <InspectionsPlantMap
+                                    key={selectedInspectionId ?? 'all'}
+                                    plantCode={plantCode}
+                                    floorId="0"
+                                    inspections={uniqueTagInspectionData}
+                                />
+                            </DataViewMapWrapper>
+                        ) : (
+                            <></>
+                        )}
+                    </StyledTableAndMap>
+                </ContentCard>
+                {selectedInspection && (
+                    <StyledTopAlignedImagesSection>
+                        <StyledDataViewImageCard>
+                            <Typography variant="h4">{inspectionImageTitle}</Typography>
+                            <InspectionImageWithPlaceholder inspection={selectedInspection} isLargeImage={true} />
+                        </StyledDataViewImageCard>
+                        <StyledDataViewImageCard>
+                            <Typography variant="h4">{analysisImageTitle}</Typography>
+                            <AnalysisResultDialogContent inspection={selectedInspection} />
+                        </StyledDataViewImageCard>
+                    </StyledTopAlignedImagesSection>
+                )}
+                <ContentCard>
+                    <Typography variant="h3">{TranslateText(plotTitle)}</Typography>
+                    <DataViewTimeRangeSelector
+                        ariaLabel={TranslateText(plotAriaLabel)}
+                        activeMode={activeTimeRangeMode}
+                        activeRange={activeTimeRange}
+                        onApplyRange={(mode, range) => {
+                            onApplyTimeRange(mode, range)
+                            setSelectedInspectionId(undefined)
                         }}
                     />
-                ) : (
-                    <Typography>{TranslateText('No data available in the selected time range')}</Typography>
+                    {Object.keys(linePlotData).length > 0 ? (
+                        <TimeseriesLinePlot
+                            data={linePlotData}
+                            yLabel={TranslateText(plotYLabel)}
+                            ymin={plotYMin}
+                            ymax={plotYMax}
+                            selectedInspectionId={selectedInspectionId}
+                            onPointClick={(point: TimeseriesLinePlotDataPoint) => {
+                                setSelectedInspectionId((current) =>
+                                    current && current === point.inspectionId ? undefined : point.inspectionId
+                                )
+                            }}
+                        />
+                    ) : (
+                        <Typography>{TranslateText('No data available in the selected time range')}</Typography>
+                    )}
+                </ContentCard>
+                {inspectionId && !selectedInspectionId && (
+                    <InspectionDialogView selectedInspectionId={inspectionId} inspectionData={inspectionData} />
                 )}
-            </DataViewChartArea>
-            {inspectionId && !selectedInspectionId && (
-                <InspectionDialogView selectedInspectionId={inspectionId} inspectionData={inspectionData} />
-            )}
-            {analysisId && !selectedInspectionId && (
-                <AnalysisResultDialogView selectedInspectionId={analysisId} inspectionData={inspectionData} />
-            )}
-        </StyledPage>
+                {analysisId && !selectedInspectionId && (
+                    <AnalysisResultDialogView selectedInspectionId={analysisId} inspectionData={inspectionData} />
+                )}
+            </PageContent>
+        </PageBackground>
     )
 }
 

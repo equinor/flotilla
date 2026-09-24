@@ -36,7 +36,7 @@ const StyledTable = styled.div`
     display: grid;
     overflow-x: auto;
     @media (max-width: ${phone_width}) {
-        width: calc(100vw - 30px);
+        width: 100%;
     }
     max-width: fit-content;
 `

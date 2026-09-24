@@ -4,7 +4,13 @@ import { NavBar } from 'components/Header/NavBar'
 import { Autocomplete, Button, Icon, Table, Typography } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'contexts/LanguageContext'
 import { useMissionDefinitionsContext } from 'contexts/MissionDefinitionsContext'
-import { StyledDialog, StyledPage, StyledTableBody, StyledTableCell } from 'components/Styles/StyledComponents'
+import {
+    PageContent,
+    StyledDialog,
+    PageBackground,
+    StyledTableBody,
+    StyledTableCell,
+} from 'components/Styles/StyledComponents'
 import { allDays, DaysOfWeek, getAllDaysIndexOfToday, getTimeMissionPairsForDay } from 'models/AutoScheduleFrequency'
 import styled from 'styled-components'
 import { capitalizeFirstLetter } from 'utils/StringFormatting'
@@ -20,39 +26,22 @@ import { AutoScheduleMissionTableRow } from './FrontPage/AutoScheduleSection/Aut
 const StyledSection = styled.div`
     display: flex;
     flex-direction: column;
-    max-width: 960px;
     gap: 1rem;
-
-    @media (min-width: ${phone_width}) ) {
-        min-width: 90vw;
-    }
 `
 const StyledDayOverview = styled.div`
     display: grid;
     gap: 0px;
 `
-const StyledView = styled.div`
-    display: flex;
-    align-items: flex-start;
-`
-const StyledContent = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    align-items: end;
-    @media (max-width: ${phone_width}) {
-        align-items: start;
-    }
-    max-width: 95%;
-`
 
 const StyledDesktopView = styled.div`
-    @media (max-width: ${phone_width}) {
-        display: none;
+    display: none;
+    @media (min-width: ${phone_width}) {
+        display: block;
     }
 `
 
 const StyledPhoneView = styled.div`
+    display: block;
     @media (min-width: ${phone_width}) {
         display: none;
     }
@@ -62,6 +51,10 @@ const StyledButtons = styled.div`
     display: flex;
     gap: 0.5rem;
     align-items: center;
+    align-self: flex-end;
+    @media (max-width: ${phone_width}) {
+        align-self: flex-start;
+    }
 `
 
 export const AutoSchedulePage = () => {
@@ -74,25 +67,23 @@ export const AutoSchedulePage = () => {
         <>
             <Header installation={installation} />
             <NavBar />
-            <StyledPage>
-                <StyledView>
-                    <StyledContent>
-                        <StyledButtons>
-                            <Button variant="ghost" onClick={() => setShowListView(!showListView)}>
-                                <Icon name={showListView ? Icons.ViewWeek : Icons.List} size={18} />
-                                {showListView
-                                    ? TranslateText('Switch to calendar view')
-                                    : TranslateText('Switch to list view')}
-                            </Button>
-                            <EditAutoSchedulingButton />
-                        </StyledButtons>
-                        <StyledDesktopView>{showListView ? <DayOverview /> : <CalendarPro />}</StyledDesktopView>
-                        <StyledPhoneView>
-                            <DayOverview />
-                        </StyledPhoneView>
-                    </StyledContent>
-                </StyledView>
-            </StyledPage>
+            <PageBackground>
+                <PageContent>
+                    <StyledButtons>
+                        <Button variant="ghost" onClick={() => setShowListView(!showListView)}>
+                            <Icon name={showListView ? Icons.ViewWeek : Icons.List} size={18} />
+                            {showListView
+                                ? TranslateText('Switch to calendar view')
+                                : TranslateText('Switch to list view')}
+                        </Button>
+                        <EditAutoSchedulingButton />
+                    </StyledButtons>
+                    <StyledDesktopView>{showListView ? <DayOverview /> : <CalendarPro />}</StyledDesktopView>
+                    <StyledPhoneView>
+                        <DayOverview />
+                    </StyledPhoneView>
+                </PageContent>
+            </PageBackground>
         </>
     )
 }

@@ -3,7 +3,7 @@ import { Mission } from 'models/Mission'
 import styled from 'styled-components'
 import { useLanguageContext } from 'contexts/LanguageContext'
 import { Task, TaskStatus } from 'models/Task'
-import { AttributeTitleTypography } from 'components/Styles/StyledComponents'
+import { FieldLabel } from 'components/Styles/StyledComponents'
 
 const StyledTagCount = styled.div`
     display: flex;
@@ -27,7 +27,7 @@ export const MissionProgressDisplay = ({ mission }: MissionProps) => {
 
     return (
         <StyledTagCount>
-            <AttributeTitleTypography>{TranslateText('Completed Tasks')}</AttributeTitleTypography>
+            <FieldLabel>{TranslateText('Completed Tasks')}</FieldLabel>
             <Typography>
                 {completedTasks}/{tasks.length}
             </Typography>

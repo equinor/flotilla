@@ -1,45 +1,21 @@
 import { VideoStreamWindow } from 'pages/MissionPage/VideoStream/VideoStreamWindow'
 import { Mission } from 'models/Mission'
 import { useContext, useEffect, useState } from 'react'
-import styled from 'styled-components'
 import { MissionHeader, SimpleMissionHeader } from './MissionHeader/MissionHeader'
 import { Header } from 'components/Header/Header'
 import { SignalREventLabels, useSignalRContext } from 'contexts/SignalRContext'
 import { useAlertContext } from 'contexts/AlertContext'
 import { useLanguageContext } from 'contexts/LanguageContext'
-import { StyledCardsWidth, VideoStreamSection } from 'components/Styles/StyledComponents'
+import { PageContent, PageBackground, VideoStreamSection } from 'components/Styles/StyledComponents'
 import { InspectionTaskDialogView } from '../InspectionReportPage/InspectionView'
 import { AnalysisOverviewSection, InspectionOverviewSection } from '../InspectionReportPage/ImageOverview'
 import { TaskTableAndMap } from './TaskTableAndMap'
 import { AnalysisResultDialogView } from './AnalysisResultView'
-import { tokens } from '@equinor/eds-tokens'
 import { useNavigate, useSearchParams } from 'react-router'
 import { useBackendApi } from 'api/UseBackendApi'
 import { InstallationContext } from 'contexts/InstallationContext'
 import { useInspectionsContext } from 'contexts/InspectionsContext'
 import { PendingResultPlaceholder, TextAsImage } from 'pages/InspectionReportPage/InspectionReportImage'
-
-const StyledMissionPageContent = styled.div`
-    display: flex;
-    flex-direction: column;
-`
-
-const StyledMissionPage = styled.div`
-    display: flex;
-    flex-direction: column;
-    background: ${tokens.colors.ui.background__default.hex};
-    min-height: 100vh;
-`
-
-const StyledMissionPageBody = styled.div`
-    padding: 1.5rem 4rem 2rem 4rem;
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    @media (max-width: 960px) {
-        padding: 1rem 1.5rem 1.5rem 1.5rem;
-    }
-`
 
 // lookupInspectionId is only set on the mission-simple route, where the mission is
 // identified by an inspection and this hook writes the resolved id back into the URL.
@@ -142,41 +118,37 @@ const MissionPageWithMission = ({
     return (
         <>
             {includeHeader ? <Header installation={installation} /> : <></>}
-            <StyledMissionPage>
-                <StyledMissionPageContent>
+            <PageBackground>
+                <PageContent>
                     {includeHeader ? <MissionHeader mission={mission} /> : <SimpleMissionHeader mission={mission} />}
-                    <StyledMissionPageBody>
-                        <StyledCardsWidth>
-                            <TaskTableAndMap
-                                tasksAndData={taskDataInSelectedMission}
-                                plantCode={mission.inspectionArea.plantCode}
-                                robot={mission.robot}
-                            />
-                            <VideoStreamSection>
-                                <VideoStreamWindow robotId={mission.robot.id} />
-                            </VideoStreamSection>
-                            {inspectionId && data && (
-                                <InspectionTaskDialogView
-                                    selectedInspectionId={inspectionId}
-                                    inspectionData={data}
-                                    tasks={mission.tasks}
-                                />
-                            )}
-                            {analysisId && data && (
-                                <AnalysisResultDialogView
-                                    selectedInspectionId={analysisId}
-                                    inspectionData={data}
-                                    tasks={mission.tasks}
-                                />
-                            )}
-                            {!isPending && data && <InspectionOverviewSection inspectionData={data} />}
-                            {!isPending && hasAnalysisType && data && <AnalysisOverviewSection inspectionData={data} />}
-                            {isPending && <PendingResultPlaceholder isLargeImage={true} />}
-                            {isError && <TextAsImage isLargeImage={true} text={'No inspection could be found'} />}
-                        </StyledCardsWidth>
-                    </StyledMissionPageBody>
-                </StyledMissionPageContent>
-            </StyledMissionPage>
+                    <TaskTableAndMap
+                        tasksAndData={taskDataInSelectedMission}
+                        plantCode={mission.inspectionArea.plantCode}
+                        robot={mission.robot}
+                    />
+                    <VideoStreamSection>
+                        <VideoStreamWindow robotId={mission.robot.id} />
+                    </VideoStreamSection>
+                    {inspectionId && data && (
+                        <InspectionTaskDialogView
+                            selectedInspectionId={inspectionId}
+                            inspectionData={data}
+                            tasks={mission.tasks}
+                        />
+                    )}
+                    {analysisId && data && (
+                        <AnalysisResultDialogView
+                            selectedInspectionId={analysisId}
+                            inspectionData={data}
+                            tasks={mission.tasks}
+                        />
+                    )}
+                    {!isPending && data && <InspectionOverviewSection inspectionData={data} />}
+                    {!isPending && hasAnalysisType && data && <AnalysisOverviewSection inspectionData={data} />}
+                    {isPending && <PendingResultPlaceholder isLargeImage={true} />}
+                    {isError && <TextAsImage isLargeImage={true} text={'No inspection could be found'} />}
+                </PageContent>
+            </PageBackground>
         </>
     )
 }
@@ -208,7 +180,7 @@ export const MissionPage = ({
     ) : (
         <>
             {includeHeader ? <Header installation={installation} /> : <></>}
-            <StyledMissionPage />
+            <PageBackground />
         </>
     )
 }
