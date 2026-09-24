@@ -1,8 +1,8 @@
-import { Button, Dialog, Typography } from '@equinor/eds-core-react'
+import { Button, Card, Dialog, Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import styled, { css } from 'styled-components'
 import { phone_width } from 'utils/constants'
-import { getAnalysisResultStyle } from '../AnalysisResultStyles'
+import { getAnalysisResultStyle } from 'pages/MissionPage/AnalysisResultStyles'
 
 const spacing = tokens.spacings.comfortable
 const divider = `1px solid ${tokens.colors.ui.background__medium.hex}`
@@ -35,18 +35,82 @@ export const PreviewButton = styled(Button)`
     }
 `
 
+export const ResultCard = styled(Card)<{ $hasAnalysis: boolean }>`
+    && {
+        display: grid;
+        grid-row: 1 / span ${({ $hasAnalysis }) => ($hasAnalysis ? 3 : 2)};
+        grid-template-rows: subgrid;
+        min-width: 0;
+        padding: 0;
+        gap: 0;
+        border-radius: 2px;
+        border: ${divider};
+    }
+    > ${PreviewButton} {
+        grid-row: 2;
+    }
+`
+
+export const CardDetails = styled.div`
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    gap: ${spacing.small};
+    padding: ${spacing.medium};
+    overflow-wrap: anywhere;
+    background: ${tokens.colors.ui.background__light.hex};
+    border-bottom: ${divider};
+    > p {
+        font-weight: 400;
+        color: ${tokens.colors.text.static_icons__secondary.hex};
+    }
+`
+
+export const CardHeading = styled.div`
+    display: flex;
+    align-items: baseline;
+    gap: ${spacing.small};
+`
+
 export const ResultTitle = styled(Typography)`
     min-width: 0;
     font-weight: 500;
 `
 
-const TaskNumber = styled(Typography)`
+export const TaskNumber = styled(Typography)`
     font-weight: 400;
     color: ${tokens.colors.text.static_icons__secondary.hex};
     white-space: nowrap;
     flex-shrink: 0;
     padding-left: ${spacing.small};
     border-left: ${divider};
+`
+
+export const AnalysisPreview = styled.div<{ $hasFinding: boolean }>`
+    ${analysisHighlight}
+    grid-row: 3;
+    padding: ${spacing.medium};
+    border-top: ${divider};
+    display: flex;
+    flex-direction: column;
+    gap: ${spacing.medium_small};
+`
+
+export const ResultsSection = styled.section`
+    min-width: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: ${spacing.medium};
+`
+
+export const Deck = styled.div`
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 280px;
+    column-gap: ${spacing.medium};
+    overflow-x: auto;
+    align-items: stretch;
 `
 
 export const Gallery = styled(Dialog)`
