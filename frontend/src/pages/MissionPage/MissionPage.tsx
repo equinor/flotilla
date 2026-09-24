@@ -7,15 +7,13 @@ import { SignalREventLabels, useSignalRContext } from 'contexts/SignalRContext'
 import { useAlertContext } from 'contexts/AlertContext'
 import { useLanguageContext } from 'contexts/LanguageContext'
 import { PageContent, PageBackground, VideoStreamSection } from 'components/Styles/StyledComponents'
-import { InspectionTaskDialogView } from '../InspectionReportPage/InspectionView'
 import { AnalysisOverviewSection, InspectionOverviewSection } from '../InspectionReportPage/ImageOverview'
 import { TaskTableAndMap } from './TaskTableAndMap'
-import { AnalysisResultDialogView } from './AnalysisResultView'
 import { useNavigate, useSearchParams } from 'react-router'
 import { useBackendApi } from 'api/UseBackendApi'
 import { InstallationContext } from 'contexts/InstallationContext'
 import { useInspectionsContext } from 'contexts/InspectionsContext'
-import { PendingResultPlaceholder, TextAsImage } from 'pages/InspectionReportPage/InspectionReportImage'
+import { MissionResultGalleryController } from './MissionResults/MissionResultGalleryController'
 
 // lookupInspectionId is only set on the mission-simple route, where the mission is
 // identified by an inspection and this hook writes the resolved id back into the URL.
@@ -69,6 +67,7 @@ const useMissionSelector = (missionId: string | undefined, lookupInspectionId: s
             navigate(`/not-found`)
             return
         }
+        if (selectedMission?.id === missionId) return
 
         backendApi
             .getMissionRunById(missionId)
@@ -85,17 +84,7 @@ const useMissionSelector = (missionId: string | undefined, lookupInspectionId: s
     return { selectedMission }
 }
 
-const MissionPageWithMission = ({
-    mission,
-    inspectionId,
-    analysisId,
-    includeHeader = true,
-}: {
-    mission: Mission
-    inspectionId: string | undefined
-    analysisId: string | undefined
-    includeHeader: boolean
-}) => {
+const MissionPageWithMission = ({ mission, includeHeader = true }: { mission: Mission; includeHeader: boolean }) => {
     const { installation } = useContext(InstallationContext)
     const { useSaraListData } = useInspectionsContext()
 
@@ -121,32 +110,25 @@ const MissionPageWithMission = ({
             <PageBackground>
                 <PageContent>
                     {includeHeader ? <MissionHeader mission={mission} /> : <SimpleMissionHeader mission={mission} />}
-                    <TaskTableAndMap
-                        tasksAndData={taskDataInSelectedMission}
-                        plantCode={mission.inspectionArea.plantCode}
-                        robot={mission.robot}
-                    />
-                    <VideoStreamSection>
-                        <VideoStreamWindow robotId={mission.robot.id} />
-                    </VideoStreamSection>
-                    {inspectionId && data && (
-                        <InspectionTaskDialogView
-                            selectedInspectionId={inspectionId}
-                            inspectionData={data}
-                            tasks={mission.tasks}
+                    <MissionResultGalleryController
+                        tasks={mission.tasks}
+                        data={data}
+                        isPending={isPending}
+                        isError={isError}
+                        installationName={installation.name}
+                        robotName={mission.robot.name}
+                    >
+                        <TaskTableAndMap
+                            tasksAndData={taskDataInSelectedMission}
+                            plantCode={mission.inspectionArea.plantCode}
+                            robot={mission.robot}
                         />
-                    )}
-                    {analysisId && data && (
-                        <AnalysisResultDialogView
-                            selectedInspectionId={analysisId}
-                            inspectionData={data}
-                            tasks={mission.tasks}
-                        />
-                    )}
-                    {!isPending && data && <InspectionOverviewSection inspectionData={data} />}
-                    {!isPending && hasAnalysisType && data && <AnalysisOverviewSection inspectionData={data} />}
-                    {isPending && <PendingResultPlaceholder isLargeImage={true} />}
-                    {isError && <TextAsImage isLargeImage={true} text={'No inspection could be found'} />}
+                        <VideoStreamSection>
+                            <VideoStreamWindow robotId={mission.robot.id} />
+                        </VideoStreamSection>
+                        {!isPending && data && <InspectionOverviewSection inspectionData={data} />}
+                        {!isPending && hasAnalysisType && data && <AnalysisOverviewSection inspectionData={data} />}
+                    </MissionResultGalleryController>
                 </PageContent>
             </PageBackground>
         </>
@@ -155,14 +137,10 @@ const MissionPageWithMission = ({
 
 export const MissionPage = ({
     missionId,
-    inspectionId,
-    analysisId,
     lookupInspectionId,
     includeHeader = true,
 }: {
     missionId: string | undefined
-    inspectionId: string | undefined
-    analysisId: string | undefined
     /** Set by the mission-simple route only; see useMissionSelector. */
     lookupInspectionId: string | undefined
     includeHeader: boolean
@@ -171,12 +149,7 @@ export const MissionPage = ({
     const { installation } = useContext(InstallationContext)
 
     return selectedMission ? (
-        <MissionPageWithMission
-            mission={selectedMission}
-            inspectionId={inspectionId}
-            analysisId={analysisId}
-            includeHeader={includeHeader}
-        />
+        <MissionPageWithMission mission={selectedMission} includeHeader={includeHeader} />
     ) : (
         <>
             {includeHeader ? <Header installation={installation} /> : <></>}
