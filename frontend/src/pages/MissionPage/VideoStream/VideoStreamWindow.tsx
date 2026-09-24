@@ -6,6 +6,10 @@ import { useEffect } from 'react'
 import { useLanguageContext } from 'contexts/LanguageContext'
 import { OmeVideoCard } from './OmeVideoCard'
 
+const RetryButton = styled(Button)`
+    width: fit-content;
+`
+
 const VideoStreamContent = styled.div`
     display: flex;
     flex-wrap: wrap;
@@ -67,7 +71,7 @@ export const VideoStreamWindow = ({ robotId }: VideoStreamWindowProps) => {
             <Typography variant="h2">{TranslateText('Camera')}</Typography>
             {!omeStreams && statusText && <Typography role="status">{TranslateText(statusText)}</Typography>}
             {!omeStreams && status === 'unavailable' && (
-                <Button onClick={() => retryMediaStream(robotId)}>{TranslateText('Retry')}</Button>
+                <RetryButton onClick={() => retryMediaStream(robotId)}>{TranslateText('Retry')}</RetryButton>
             )}
             <VideoStreamContent>
                 {videoCards}
