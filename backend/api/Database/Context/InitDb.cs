@@ -8,7 +8,7 @@ namespace Api.Database.Context
         private const string KaarstoInspectionAreaWithoutRobot = "Area Without Robot";
         private const string NorthernLightsInspectionArea = "Northern Lights Inspection Area";
 
-        // One inspection per mission avoids grouped SARA analyses; distinct tags keep alarms separate.
+        // Single-inspection missions avoid grouped SARA analyses.
         private sealed record MissionScenario(
             string MissionName,
             string TagId,
@@ -232,8 +232,72 @@ namespace Api.Database.Context
                     inspectionAreas.Single(area => area.Name == KaarstoInspectionAreaWithoutRobot)
                 )
             );
+            definitions.Add(
+                CreateMixedInspectionMission(
+                    inspectionAreas.Single(area => area.Name == KaarstoInspectionArea)
+                )
+            );
 
             return definitions;
+        }
+
+        private static MissionDefinition CreateMixedInspectionMission(InspectionArea inspectionArea)
+        {
+            string[] tags =
+            [
+                "image-no-analysis",
+                "cloe-normal",
+                "thermal-normal",
+                "fence-intact",
+                "cloe-low",
+                "image-no-analysis",
+                "fence-hole",
+                "thermal-hot-spot",
+                "cloe-empty",
+                "video",
+                "cloe-rain-drops",
+                "fence-rain-drops",
+                "co2-measurement",
+                "thermal-normal",
+                "fence-hole",
+                "image-no-analysis",
+            ];
+
+            return new MissionDefinition
+            {
+                Id = "97c0c59d-64ab-4f7b-b89e-51ae2b61b070",
+                Name = "Mixed inspections",
+                InstallationCode = inspectionArea.Installation.InstallationCode,
+                InspectionArea = inspectionArea,
+                Comment =
+                    "A varied inspection round combining oil level, fence, thermal, image, video and CO2 inspections, "
+                    + "including repeated observations.",
+                LastSuccessfulRun = null,
+                Tasks = tags.Select(
+                        (tag, index) =>
+                            CreateTask(
+                                scenarios.Single(scenario => scenario.TagId == tag),
+                                index + 1
+                            )
+                    )
+                    .ToList(),
+            };
+        }
+
+        private static TaskDefinition CreateTask(MissionScenario scenario, int index)
+        {
+            return new TaskDefinition
+            {
+                Index = index,
+                TagId = scenario.TagId,
+                Description = scenario.Description,
+                RobotPose = new Pose(),
+                TargetPosition = new Position(),
+                SensorType = scenario.SensorType,
+                AnalysisTypes = [.. scenario.AnalysisTypes],
+                VideoDuration = scenario.VideoDuration,
+                AcousticInspectionMetadata = scenario.AcousticInspectionMetadata?.Invoke(),
+            };
         }
 
         private static MissionDefinition CreateMission(
@@ -249,21 +313,7 @@ namespace Api.Database.Context
                 InspectionArea = inspectionArea,
                 Comment = scenario.Comment,
                 LastSuccessfulRun = null,
-                Tasks =
-                [
-                    new TaskDefinition
-                    {
-                        Index = 1,
-                        TagId = scenario.TagId,
-                        Description = scenario.Description,
-                        RobotPose = new Pose(),
-                        TargetPosition = new Position(),
-                        SensorType = scenario.SensorType,
-                        AnalysisTypes = [.. scenario.AnalysisTypes],
-                        VideoDuration = scenario.VideoDuration,
-                        AcousticInspectionMetadata = scenario.AcousticInspectionMetadata?.Invoke(),
-                    },
-                ],
+                Tasks = [CreateTask(scenario, 1)],
             };
         }
 
