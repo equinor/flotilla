@@ -69,9 +69,10 @@ interface AnalysisFeedbackProps {
     inspectionId: string
     analysisRunId: string
     feedback?: Feedback
+    compact?: boolean
 }
 
-export const AnalysisFeedback = ({ inspectionId, analysisRunId, feedback }: AnalysisFeedbackProps) => {
+export const AnalysisFeedback = ({ inspectionId, analysisRunId, feedback, compact = false }: AnalysisFeedbackProps) => {
     const { TranslateText } = useLanguageContext()
     const { setFeedback, removeFeedback } = useInspectionsContext()
     const { setBanner } = useAlertContext()
@@ -107,11 +108,14 @@ export const AnalysisFeedback = ({ inspectionId, analysisRunId, feedback }: Anal
             <FeedbackSection>
                 <FeedbackPrompt>
                     <Typography variant="h6">{TranslateText('Feedback')}</Typography>
-                    <Typography variant="body_short">{TranslateText('Feedback description')}</Typography>
+                    <Typography variant="body_short">
+                        {TranslateText(compact ? 'Is this result correct?' : 'Feedback description')}
+                    </Typography>
                 </FeedbackPrompt>
                 <FeedbackButtons>
                     <ThumbsUpButton
                         variant="ghost_icon"
+                        aria-label={TranslateText('Mark analysis correct')}
                         aria-pressed={feedback?.isCorrect === true}
                         disabled={isSubmitting}
                         onClick={() => requestFeedback(true)}
@@ -120,6 +124,7 @@ export const AnalysisFeedback = ({ inspectionId, analysisRunId, feedback }: Anal
                     </ThumbsUpButton>
                     <ThumbsDownButton
                         variant="ghost_icon"
+                        aria-label={TranslateText('Mark analysis incorrect')}
                         aria-pressed={feedback?.isCorrect === false}
                         disabled={isSubmitting}
                         onClick={() => requestFeedback(false)}
