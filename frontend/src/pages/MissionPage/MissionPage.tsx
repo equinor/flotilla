@@ -1,6 +1,6 @@
 import { VideoStreamWindow } from 'pages/MissionPage/VideoStream/VideoStreamWindow'
 import { Mission } from 'models/Mission'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 import { MissionHeader, SimpleMissionHeader } from './MissionHeader/MissionHeader'
 import { Header } from 'components/Header/Header'
@@ -8,16 +8,13 @@ import { SignalREventLabels, useSignalRContext } from 'contexts/SignalRContext'
 import { useAlertContext } from 'contexts/AlertContext'
 import { useLanguageContext } from 'contexts/LanguageContext'
 import { StyledCardsWidth, VideoStreamSection } from 'components/Styles/StyledComponents'
-import { InspectionTaskDialogView } from '../InspectionReportPage/InspectionView'
-import { AnalysisOverviewSection, InspectionOverviewSection } from '../InspectionReportPage/ImageOverview'
 import { TaskTableAndMap } from './TaskTableAndMap'
-import { AnalysisResultDialogView } from './AnalysisResultView'
 import { tokens } from '@equinor/eds-tokens'
 import { useNavigate, useSearchParams } from 'react-router'
 import { useBackendApi } from 'api/UseBackendApi'
 import { InstallationContext } from 'contexts/InstallationContext'
 import { useInspectionsContext } from 'contexts/InspectionsContext'
-import { PendingResultPlaceholder, TextAsImage } from 'pages/InspectionReportPage/InspectionReportImage'
+import { MissionResults } from './MissionResults/MissionResults'
 
 const StyledMissionPageContent = styled.div`
     display: flex;
@@ -93,6 +90,7 @@ const useMissionSelector = (missionId: string | undefined, lookupInspectionId: s
             navigate(`/not-found`)
             return
         }
+        if (selectedMission?.id === missionId) return
 
         backendApi
             .getMissionRunById(missionId)
@@ -109,21 +107,38 @@ const useMissionSelector = (missionId: string | undefined, lookupInspectionId: s
     return { selectedMission }
 }
 
-const MissionPageWithMission = ({
-    mission,
-    inspectionId,
-    analysisId,
-    includeHeader = true,
-}: {
-    mission: Mission
-    inspectionId: string | undefined
-    analysisId: string | undefined
-    includeHeader: boolean
-}) => {
+const MissionPageWithMission = ({ mission, includeHeader = true }: { mission: Mission; includeHeader: boolean }) => {
     const { installation } = useContext(InstallationContext)
     const { useSaraListData } = useInspectionsContext()
+    const body = useRef<HTMLDivElement>(null)
+    const results = useRef<HTMLDivElement>(null)
+    const [resultsWidth, setResultsWidth] = useState<number>()
 
-    const hasAnalysisType = mission.tasks.some((task) => task.analysisTypes.length > 0)
+    useLayoutEffect(() => {
+        const content = body.current
+        const resultSection = results.current
+        const map = content?.querySelector('.map-root')
+        const table = content?.querySelector('table')
+        const boundary = map ?? table
+        if (!content || !resultSection || !boundary) {
+            setResultsWidth(undefined)
+            return
+        }
+        const updateWidth = () => {
+            const isStacked = map && table && map.getBoundingClientRect().top >= table.getBoundingClientRect().bottom
+            setResultsWidth(
+                isStacked
+                    ? undefined
+                    : boundary.getBoundingClientRect().right - resultSection.getBoundingClientRect().left
+            )
+        }
+        const observer = new ResizeObserver(updateWidth)
+        observer.observe(content)
+        observer.observe(boundary)
+        if (table && table !== boundary) observer.observe(table)
+        updateWidth()
+        return () => observer.disconnect()
+    }, [mission.inspectionArea.plantCode])
 
     const { data, isPending, isError } = useSaraListData(
         mission.tasks.map((t) => t.id),
@@ -145,7 +160,7 @@ const MissionPageWithMission = ({
             <StyledMissionPage>
                 <StyledMissionPageContent>
                     {includeHeader ? <MissionHeader mission={mission} /> : <SimpleMissionHeader mission={mission} />}
-                    <StyledMissionPageBody>
+                    <StyledMissionPageBody ref={body}>
                         <StyledCardsWidth>
                             <TaskTableAndMap
                                 tasksAndData={taskDataInSelectedMission}
@@ -155,25 +170,17 @@ const MissionPageWithMission = ({
                             <VideoStreamSection>
                                 <VideoStreamWindow robotId={mission.robot.id} />
                             </VideoStreamSection>
-                            {inspectionId && data && (
-                                <InspectionTaskDialogView
-                                    selectedInspectionId={inspectionId}
-                                    inspectionData={data}
-                                    tasks={mission.tasks}
-                                />
-                            )}
-                            {analysisId && data && (
-                                <AnalysisResultDialogView
-                                    selectedInspectionId={analysisId}
-                                    inspectionData={data}
-                                    tasks={mission.tasks}
-                                />
-                            )}
-                            {!isPending && data && <InspectionOverviewSection inspectionData={data} />}
-                            {!isPending && hasAnalysisType && data && <AnalysisOverviewSection inspectionData={data} />}
-                            {isPending && <PendingResultPlaceholder isLargeImage={true} />}
-                            {isError && <TextAsImage isLargeImage={true} text={'No inspection could be found'} />}
                         </StyledCardsWidth>
+                        <div ref={results} style={{ maxWidth: resultsWidth, minWidth: 0 }}>
+                            <MissionResults
+                                tasks={mission.tasks}
+                                data={data}
+                                isPending={isPending}
+                                isError={isError}
+                                installationName={installation.name}
+                                robotName={mission.robot.name}
+                            />
+                        </div>
                     </StyledMissionPageBody>
                 </StyledMissionPageContent>
             </StyledMissionPage>
@@ -183,14 +190,10 @@ const MissionPageWithMission = ({
 
 export const MissionPage = ({
     missionId,
-    inspectionId,
-    analysisId,
     lookupInspectionId,
     includeHeader = true,
 }: {
     missionId: string | undefined
-    inspectionId: string | undefined
-    analysisId: string | undefined
     /** Set by the mission-simple route only; see useMissionSelector. */
     lookupInspectionId: string | undefined
     includeHeader: boolean
@@ -199,12 +202,7 @@ export const MissionPage = ({
     const { installation } = useContext(InstallationContext)
 
     return selectedMission ? (
-        <MissionPageWithMission
-            mission={selectedMission}
-            inspectionId={inspectionId}
-            analysisId={analysisId}
-            includeHeader={includeHeader}
-        />
+        <MissionPageWithMission mission={selectedMission} includeHeader={includeHeader} />
     ) : (
         <>
             {includeHeader ? <Header installation={installation} /> : <></>}
