@@ -1,7 +1,6 @@
 import { Icon, Typography } from '@equinor/eds-core-react'
 import { Icons } from 'utils/icons'
 import { useLanguageContext } from 'contexts/LanguageContext'
-import { Task } from 'models/Task'
 import { formatDateTime } from 'utils/StringFormatting'
 import {
     HiddenOnSmallScreen,
@@ -19,118 +18,6 @@ import { LargeDialogInspectionResult, TextAsImage } from './InspectionReportImag
 import { useInspectionId } from './SetInspectionIdHook'
 import { InstallationContext } from 'contexts/InstallationContext'
 import { InspectionData } from 'models/InspectionRecord'
-
-interface InspectionTaskDialogViewProps {
-    selectedInspectionId: string
-    inspectionData: InspectionData[]
-    tasks?: Task[]
-}
-
-export const InspectionTaskDialogView = ({
-    selectedInspectionId,
-    inspectionData,
-    tasks,
-}: InspectionTaskDialogViewProps) => {
-    const { TranslateText } = useLanguageContext()
-    const { installation } = useContext(InstallationContext)
-    const [switchImageDirection, setSwitchImageDirection] = useState<number>(0)
-    const { switchSelectedInspectionId } = useInspectionId()
-
-    const inspectionIndex = inspectionData.findIndex((i) => i.inspectionId == selectedInspectionId)
-    const currentInspection = inspectionData[inspectionIndex]
-    const taskNumber = tasks?.findIndex((t) => t.id === selectedInspectionId) ?? -1
-
-    const closeDialog = () => {
-        switchSelectedInspectionId(undefined)
-    }
-
-    if (!currentInspection) {
-        return (
-            <StyledDialog open={true} isDismissable onClose={closeDialog}>
-                <StyledDialogContent>
-                    <StyledDialogInspectionView>
-                        <TextAsImage isLargeImage={true} text="No inspection could be found" />
-                    </StyledDialogInspectionView>
-                </StyledDialogContent>
-            </StyledDialog>
-        )
-    }
-
-    document.addEventListener('keydown', (event) => {
-        // Let a focused video handle arrow keys for seeking instead of switching inspection.
-        if (event.target instanceof HTMLMediaElement) return
-        if (event.code === 'ArrowLeft' && switchImageDirection !== -1) {
-            setSwitchImageDirection(-1)
-        } else if (event.code === 'ArrowRight' && switchImageDirection !== 1) {
-            setSwitchImageDirection(1)
-        }
-    })
-
-    document.addEventListener('keyup', (event) => {
-        if (event.target instanceof HTMLMediaElement) return
-        if (
-            (event.code === 'ArrowLeft' && switchImageDirection === -1) ||
-            (event.code === 'ArrowRight' && switchImageDirection === 1)
-        ) {
-            const nextTask = inspectionData.indexOf(currentInspection) + switchImageDirection
-            if (nextTask >= 0 && nextTask < inspectionData.length) {
-                switchSelectedInspectionId(inspectionData[nextTask].inspectionId)
-            }
-            setSwitchImageDirection(0)
-        }
-    })
-
-    return (
-        <StyledDialog open={true} isDismissable onClose={closeDialog}>
-            <StyledDialogContent>
-                <StyledDialogHeader>
-                    <Typography variant="accordion_header" group="ui">
-                        {TranslateText('Inspection report for task') +
-                            ' ' +
-                            (taskNumber !== -1 ? ' ' + (taskNumber + 1) : '')}
-                    </Typography>
-                    <StyledCloseButton variant="ghost" onClick={closeDialog}>
-                        <Icon name={Icons.Clear} size={24} />
-                    </StyledCloseButton>
-                </StyledDialogHeader>
-                <StyledDialogInspectionView>
-                    <div>
-                        <LargeDialogInspectionResult inspection={currentInspection} />
-                        <StyledBottomContent>
-                            <StyledInfoContent>
-                                <Typography variant="caption">{TranslateText('Installation') + ':'}</Typography>
-                                <Typography variant="body_short">{installation.name}</Typography>
-                            </StyledInfoContent>
-                            <StyledInfoContent>
-                                <Typography variant="caption">{TranslateText('Tag') + ':'}</Typography>
-                                <Typography variant="body_short">{currentInspection.tag}</Typography>
-                            </StyledInfoContent>
-                            {currentInspection.inspectionDescription && (
-                                <StyledInfoContent>
-                                    <Typography variant="caption">{TranslateText('Description') + ':'}</Typography>
-                                    <Typography variant="body_short">
-                                        {currentInspection.inspectionDescription}
-                                    </Typography>
-                                </StyledInfoContent>
-                            )}
-                            {currentInspection.createdAt && (
-                                <StyledInfoContent>
-                                    <Typography variant="caption">{TranslateText('Timestamp') + ':'}</Typography>
-                                    <Typography variant="body_short">
-                                        {formatDateTime(currentInspection.createdAt)}
-                                    </Typography>
-                                </StyledInfoContent>
-                            )}
-                        </StyledBottomContent>
-                    </div>
-                    <HiddenOnSmallScreen>
-                        <InspectionOverviewDialogView inspectionData={inspectionData} />
-                    </HiddenOnSmallScreen>
-                </StyledDialogInspectionView>
-            </StyledDialogContent>
-        </StyledDialog>
-    )
-}
 
 export const InspectionDialogView = ({
     selectedInspectionId,

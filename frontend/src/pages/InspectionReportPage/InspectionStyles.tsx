@@ -65,16 +65,6 @@ export const StyledInfoContent = styled.div`
     align-items: flex-start;
 `
 
-export const StyledInspectionOverviewSection = styled.div`
-    display: flex;
-    padding: 24px 0;
-    min-width: 240px;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-    background: ${tokens.colors.ui.background__default.hex};
-`
-
 export const StyledInspectionOverviewDialogView = styled.div`
     display: flex;
     max-height: 60vh;
