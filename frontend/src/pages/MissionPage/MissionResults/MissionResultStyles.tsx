@@ -5,6 +5,7 @@ import { getAnalysisResultStyle } from '../AnalysisResultStyles'
 
 const spacing = tokens.spacings.comfortable
 const divider = `1px solid ${tokens.colors.ui.background__medium.hex}`
+const galleryStackBreakpoint = '900px'
 
 const analysisHighlight = css<{ $hasFinding?: boolean }>`
     ${({ $hasFinding }) => $hasFinding !== undefined && getAnalysisResultStyle($hasFinding)}
@@ -111,4 +112,47 @@ export const Deck = styled.div`
     overflow-x: auto;
     align-items: stretch;
     padding: ${spacing.xx_small} ${spacing.xx_small} ${spacing.medium};
+`
+
+export const GalleryBody = styled.div<{ $paired: boolean }>`
+    display: grid;
+    grid-template-columns: ${({ $paired }) => ($paired ? 'minmax(0, 1fr) 300px' : 'minmax(0, 1fr)')};
+    gap: ${spacing.large};
+    padding: ${spacing.large};
+    @media (max-width: ${galleryStackBreakpoint}) {
+        grid-template-columns: minmax(0, 1fr);
+        padding: ${spacing.medium};
+    }
+`
+
+export const AnalysisContent = styled.div<{ $hasFinding?: boolean }>`
+    display: flex;
+    flex-direction: column;
+    gap: ${spacing.medium_small};
+    min-width: 0;
+    ${analysisHighlight}
+    padding: ${({ $hasFinding }) => ($hasFinding === undefined ? '0' : spacing.medium)};
+    border-radius: 2px;
+`
+
+export const Companion = styled.aside`
+    display: flex;
+    flex-direction: column;
+    gap: ${spacing.medium};
+    min-width: 0;
+    padding-left: ${spacing.large};
+    border-left: ${divider};
+    @media (max-width: ${galleryStackBreakpoint}) {
+        padding: ${spacing.medium} 0 0;
+        border-left: none;
+        border-top: ${divider};
+    }
+`
+
+export const Metadata = styled.div`
+    display: flex;
+    flex-wrap: wrap;
+    gap: ${spacing.medium} ${spacing.x_large};
+    padding: ${spacing.medium} ${spacing.large};
+    border-top: ${divider};
 `
