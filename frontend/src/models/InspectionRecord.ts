@@ -91,6 +91,19 @@ export interface InspectionData {
     warning?: string
 }
 
+export const hasInspectionFinding = (inspection: Pick<InspectionData, 'warning'> | undefined): boolean =>
+    Boolean(inspection?.warning)
+
+export const hasResultValue = (value: string | undefined) => value !== undefined && value.trim() !== ''
+
+export const hasInspectionAnalysis = (inspection: InspectionData | undefined): boolean =>
+    Boolean(
+        inspection &&
+        ((inspection.visualizedSAS && inspection.visualizedSAS !== inspection.anonymizedSAS) ||
+            hasResultValue(inspection.value) ||
+            hasInspectionFinding(inspection))
+    )
+
 const imageFileEndings = ['jpg', 'jpeg', 'png', 'gif']
 
 const videoFileEndings = ['mp4', 'mpg', 'mpeg', 'm4v']
@@ -114,17 +127,19 @@ export const inspectionRecordToInspectionData = (record: InspectionRecord): Insp
 
     const sas = analysis.anonymizedSAS ?? analysis.visualizedSAS
     const fileType = sas ? sasURLToFileType(sas) : FileType.VALUE
+    const isInspectionOnly = analysis.analysisType === 'passthrough' || analysis.analysisType === 'anonymize'
+    const result = isInspectionOnly ? undefined : analysis.result
 
     // Feedback is given per analysis run, so mirror the choice of analysis above
     // and use the latest run.
-    const latestRun = analysis.runs?.[analysis.runs.length - 1]
+    const latestRun = isInspectionOnly ? undefined : analysis.runs?.[analysis.runs.length - 1]
 
     return {
         inspectionId: record.inspectionId,
         analysisId: analysis.id,
         analysisRunId: latestRun?.id,
         feedback: latestRun?.feedback ?? undefined,
-        visualizedSAS: analysis.visualizedSAS,
+        visualizedSAS: isInspectionOnly ? undefined : analysis.visualizedSAS,
         anonymizedSAS: analysis.anonymizedSAS,
         mediaSAS: sas,
         analysisType: analysis.analysisType,
@@ -134,9 +149,9 @@ export const inspectionRecordToInspectionData = (record: InspectionRecord): Insp
         robotPose: record.robotPose,
         fileType: fileType,
         inspectionDescription: record.inspectionDescription,
-        value: analysis.result?.value,
-        unit: analysis.result?.unit,
-        confidence: analysis.result?.confidence,
-        warning: analysis.result?.warning,
+        value: result?.value,
+        unit: result?.unit,
+        confidence: result?.confidence,
+        warning: result?.warning,
     }
 }
