@@ -3,17 +3,16 @@ import { useLanguageContext } from 'contexts/LanguageContext'
 import { InspectionData } from 'models/InspectionRecord'
 import { Task } from 'models/Task'
 import { PendingResultPlaceholder } from 'pages/InspectionReportPage/InspectionReportImage'
-import { ReactNode, useMemo, useRef } from 'react'
+import { ContentCard } from 'components/Styles/StyledComponents'
 import styled from 'styled-components'
-import { getMissionResults } from './missionResultPresentation'
-import { MissionResultGallery } from './MissionResultGallery'
-import { useMissionResultSelection } from './useMissionResultSelection'
+import { useMemo, useRef } from 'react'
+import { getMissionResults, ResultFocus } from 'pages/MissionPage/MissionResults/missionResultPresentation'
+import { MissionResultGallery } from 'pages/MissionPage/MissionResults/MissionResultGallery'
+import { MissionResultsSection } from 'pages/MissionPage/MissionResults/MissionResultsSection'
+import { useMissionResultSelection } from 'pages/MissionPage/MissionResults/useMissionResultSelection'
 
 const MissionContent = styled.div`
-    display: flex;
-    flex-direction: column;
     min-width: 0;
-    gap: 2rem;
 `
 
 interface Props {
@@ -23,40 +22,35 @@ interface Props {
     isError: boolean
     installationName: string
     robotName: string | undefined
-    children: ReactNode
 }
 
-export const MissionResultGalleryController = ({
-    tasks,
-    data,
-    isPending,
-    isError,
-    installationName,
-    robotName,
-    children,
-}: Props) => {
+export const MissionResults = ({ tasks, data, isPending, isError, installationName, robotName }: Props) => {
     const { TranslateText } = useLanguageContext()
     const { selectedId, preferredFocus, select } = useMissionResultSelection()
     const results = useMemo(() => getMissionResults(tasks, data ?? []), [tasks, data])
     const container = useRef<HTMLDivElement>(null)
     const opener = useRef<HTMLElement | null>(null)
 
+    const onSelect = (id: string, focus: ResultFocus) => {
+        if (!selectedId && document.activeElement instanceof HTMLElement) opener.current = document.activeElement
+        select(id, focus)
+    }
     const returnFocus = () => {
         const target = opener.current?.isConnected ? opener.current : container.current
         target?.focus({ preventScroll: true })
     }
 
     return (
-        <MissionContent
-            ref={container}
-            tabIndex={-1}
-            onFocusCapture={(event) => {
-                if (!selectedId) opener.current = event.target
-            }}
-        >
-            {children}
-            {isPending && <PendingResultPlaceholder isLargeImage />}
-            {isError && <Typography role="alert">{TranslateText('Failed to load inspection results')}</Typography>}
+        <MissionContent ref={container} tabIndex={-1}>
+            {(isPending || isError || results.length > 0) && (
+                <ContentCard>
+                    {isPending && <PendingResultPlaceholder isLargeImage />}
+                    {isError && (
+                        <Typography role="alert">{TranslateText('Failed to load inspection results')}</Typography>
+                    )}
+                    {!isPending && <MissionResultsSection results={results} onSelect={onSelect} />}
+                </ContentCard>
+            )}
             {selectedId && !isPending && (
                 <MissionResultGallery
                     results={results}

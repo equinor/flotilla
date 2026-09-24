@@ -7,13 +7,12 @@ import { SignalREventLabels, useSignalRContext } from 'contexts/SignalRContext'
 import { useAlertContext } from 'contexts/AlertContext'
 import { useLanguageContext } from 'contexts/LanguageContext'
 import { PageContent, PageBackground, VideoStreamSection } from 'components/Styles/StyledComponents'
-import { AnalysisOverviewSection, InspectionOverviewSection } from '../InspectionReportPage/ImageOverview'
 import { TaskTableAndMap } from './TaskTableAndMap'
 import { useNavigate, useSearchParams } from 'react-router'
 import { useBackendApi } from 'api/UseBackendApi'
 import { InstallationContext } from 'contexts/InstallationContext'
 import { useInspectionsContext } from 'contexts/InspectionsContext'
-import { MissionResultGalleryController } from './MissionResults/MissionResultGalleryController'
+import { MissionResults } from './MissionResults/MissionResults'
 
 // lookupInspectionId is only set on the mission-simple route, where the mission is
 // identified by an inspection and this hook writes the resolved id back into the URL.
@@ -87,9 +86,6 @@ const useMissionSelector = (missionId: string | undefined, lookupInspectionId: s
 const MissionPageWithMission = ({ mission, includeHeader = true }: { mission: Mission; includeHeader: boolean }) => {
     const { installation } = useContext(InstallationContext)
     const { useSaraListData } = useInspectionsContext()
-
-    const hasAnalysisType = mission.tasks.some((task) => task.analysisTypes.length > 0)
-
     const { data, isPending, isError } = useSaraListData(
         mission.tasks.map((t) => t.id),
         null,
@@ -110,25 +106,22 @@ const MissionPageWithMission = ({ mission, includeHeader = true }: { mission: Mi
             <PageBackground>
                 <PageContent>
                     {includeHeader ? <MissionHeader mission={mission} /> : <SimpleMissionHeader mission={mission} />}
-                    <MissionResultGalleryController
+                    <TaskTableAndMap
+                        tasksAndData={taskDataInSelectedMission}
+                        plantCode={mission.inspectionArea.plantCode}
+                        robot={mission.robot}
+                    />
+                    <VideoStreamSection>
+                        <VideoStreamWindow robotId={mission.robot.id} />
+                    </VideoStreamSection>
+                    <MissionResults
                         tasks={mission.tasks}
                         data={data}
                         isPending={isPending}
                         isError={isError}
                         installationName={installation.name}
                         robotName={mission.robot.name}
-                    >
-                        <TaskTableAndMap
-                            tasksAndData={taskDataInSelectedMission}
-                            plantCode={mission.inspectionArea.plantCode}
-                            robot={mission.robot}
-                        />
-                        <VideoStreamSection>
-                            <VideoStreamWindow robotId={mission.robot.id} />
-                        </VideoStreamSection>
-                        {!isPending && data && <InspectionOverviewSection inspectionData={data} />}
-                        {!isPending && hasAnalysisType && data && <AnalysisOverviewSection inspectionData={data} />}
-                    </MissionResultGalleryController>
+                    />
                 </PageContent>
             </PageBackground>
         </>
