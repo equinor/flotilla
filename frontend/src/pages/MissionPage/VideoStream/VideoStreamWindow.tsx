@@ -43,7 +43,9 @@ export const VideoStreamWindow = ({ robotId }: VideoStreamWindowProps) => {
             <Typography variant="h2">{TranslateText('Camera')}</Typography>
             {statusText && <Typography role="status">{TranslateText(statusText)}</Typography>}
             {status === 'unavailable' && (
-                <Button onClick={() => retryMediaStream(robotId)}>{TranslateText('Retry')}</Button>
+                <Button style={{ width: 'fit-content' }} onClick={() => retryMediaStream(robotId)}>
+                    {TranslateText('Retry')}
+                </Button>
             )}
             <VideoStreamContent>{videoCards}</VideoStreamContent>
         </>
