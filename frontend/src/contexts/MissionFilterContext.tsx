@@ -127,12 +127,21 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
     const [page, setPage] = useState<number>(mapURLtoPage(searchParams))
     const [filterError, setFilterError] = useState<string>(defaultMissionFilterInterface.filterError)
     const [filterState, setFilterState] = useState<IMissionFilterContext['filterState']>(mapURLtoFilter(searchParams))
-
     useEffect(() => {
+        defaultMissionFilterInterface.filterState = { ...filterState }
         setSearchParams(
             (oldParams) => {
                 Object.entries(filterState).forEach((entry) => {
-                    if (entry[1]) oldParams.set(entry[0], JSON.stringify(entry[1]))
+                    const [filterName, filterValue] = entry
+                    const isEmptyFilter =
+                        filterValue === undefined ||
+                        filterValue === '' ||
+                        (Array.isArray(filterValue) && filterValue.length === 0)
+                    if (isEmptyFilter) {
+                        oldParams.delete(filterName)
+                    } else {
+                        oldParams.set(filterName, JSON.stringify(filterValue))
+                    }
                 })
                 return oldParams
             },
