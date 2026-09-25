@@ -94,7 +94,7 @@ export interface InspectionData {
 export const hasInspectionFinding = (inspection: Pick<InspectionData, 'warning'> | undefined): boolean =>
     Boolean(inspection?.warning)
 
-const hasResultValue = (value: string | undefined) => value !== undefined && value.trim() !== ''
+export const hasResultValue = (value: string | undefined) => value !== undefined && value.trim() !== ''
 
 export const hasInspectionAnalysis = (inspection: InspectionData | undefined): boolean =>
     Boolean(

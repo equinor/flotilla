@@ -15,9 +15,7 @@ export const SimpleMissionPageRouter = () => {
     return (
         <MissionPage
             missionId={id}
-            inspectionId={inspectionId}
-            analysisId={analysisId}
-            lookupInspectionId={analysisId ?? inspectionId}
+            lookupInspectionId={id ? undefined : (analysisId ?? inspectionId)}
             includeHeader={false}
         />
     )
@@ -26,21 +24,7 @@ export const SimpleMissionPageRouter = () => {
 export const MissionPageRouter = () => {
     const { missionId } = useParams()
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [searchParams, setSearchParams] = useSearchParams()
-
-    const inspectionId = searchParams.get('inspectionId') ?? undefined
-    const analysisId = searchParams.get('analysisId') ?? undefined
-
-    return (
-        <MissionPage
-            missionId={missionId}
-            inspectionId={inspectionId}
-            analysisId={analysisId}
-            lookupInspectionId={undefined}
-            includeHeader
-        />
-    )
+    return <MissionPage missionId={missionId} lookupInspectionId={undefined} includeHeader />
 }
 
 export const MissionDefinitionPageRouter = () => {
