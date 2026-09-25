@@ -9,12 +9,15 @@ import { AnalysisValueDisplay, DescriptionDisplay, TagIdDisplay } from 'componen
 import { StyledTable, StyledTableBody, StyledTableCell, StyledTableRow } from 'components/Styles/StyledComponents'
 import styled from 'styled-components'
 import { MissionTaskDefinition } from 'models/MissionDefinition'
-import { InspectionData } from 'models/InspectionRecord'
+import { hasInspectionAnalysis, hasInspectionFinding, InspectionData } from 'models/InspectionRecord'
 import { Icons } from 'utils/icons'
+import { getAnalysisResultStyle } from '../AnalysisResultStyles'
 
 const IconWithLabel = styled.div`
     display: flex;
     align-items: center;
+    justify-content: flex-end;
+    text-align: right;
 `
 
 export interface TaskAndData {
@@ -40,9 +43,9 @@ export const TaskTable = ({ tasksAndData }: TaskTableProps) => {
                     <StyledTableCell>#</StyledTableCell>
                     <StyledTableCell>{TranslateText('Tag-ID')}</StyledTableCell>
                     <StyledTableCell>{TranslateText('Description')}</StyledTableCell>
-                    <StyledTableCell>{TranslateText('Sensor Types')}</StyledTableCell>
+                    <StyledTableCell style={{ textAlign: 'right' }}>{TranslateText('Sensor Types')}</StyledTableCell>
                     <StyledTableCell>{TranslateText('Status')}</StyledTableCell>
-                    <StyledTableCell>{TranslateText('Analysis')}</StyledTableCell>
+                    <StyledTableCell style={{ textAlign: 'right' }}>{TranslateText('Analysis')}</StyledTableCell>
                 </Table.Row>
             </Table.Head>
             <StyledTableBody>
@@ -72,17 +75,20 @@ const TaskTableRow = ({
     const { TranslateText } = useLanguageContext()
     const { switchSelectedInspectionId, switchSelectedAnalysisId } = useInspectionId()
 
-    const rowStyle =
-        task.status === TaskStatus.InProgress || task.status === TaskStatus.Paused
-            ? { background: tokens.colors.infographic.primary__mist_blue.hex }
-            : inspectionData?.warning
-              ? { background: tokens.colors.interactive.danger__highlight.hex }
-              : {}
+    const isActive = task.status === TaskStatus.InProgress || task.status === TaskStatus.Paused
+    const analysisStyle =
+        !isActive && hasInspectionAnalysis(inspectionData)
+            ? getAnalysisResultStyle(hasInspectionFinding(inspectionData))
+            : undefined
+    const rowStyle = {
+        background: isActive ? tokens.colors.infographic.primary__mist_blue.hex : analysisStyle?.background,
+    }
+    const rowEdge = analysisStyle?.boxShadow ?? getAnalysisResultStyle().boxShadow
     const markerColors = getColorsFromTaskStatus(task.status)
 
     return (
         <StyledTableRow style={rowStyle}>
-            <Table.Cell>
+            <Table.Cell style={{ boxShadow: isActive ? undefined : rowEdge }}>
                 <Chip style={{ background: markerColors.fillColor }}>
                     <Typography variant="body_short_bold" style={{ color: markerColors.textColor }}>
                         {index + 1}
