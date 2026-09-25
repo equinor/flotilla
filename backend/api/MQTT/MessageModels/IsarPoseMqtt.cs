@@ -1,5 +1,5 @@
 ﻿using System.Text.Json.Serialization;
-using Api.Database.Models;
+using Api.Services.Models;
 
 namespace Api.Mqtt.MessageModels
 {
@@ -8,7 +8,7 @@ namespace Api.Mqtt.MessageModels
     public class IsarPoseMessage : MqttMessage
     {
         [JsonPropertyName("pose")]
-        public IsarPoseMqtt Pose { get; set; }
+        public IsarPose Pose { get; set; }
 
         [JsonPropertyName("robot_name")]
         public string RobotName { get; set; }
@@ -18,56 +18,5 @@ namespace Api.Mqtt.MessageModels
 
         [JsonPropertyName("timestamp")]
         public DateTime Timestamp { get; set; }
-    }
-
-    public class IsarPoseMqtt
-    {
-        [JsonPropertyName("position")]
-        public IsarPosition Position { get; set; }
-
-        [JsonPropertyName("orientation")]
-        public IsarOrientation Orientation { get; set; }
-
-        [JsonPropertyName("frame")]
-        public IsarFrame Frame { get; set; }
-    }
-
-    public class IsarPosition
-    {
-        [JsonPropertyName("x")]
-        public float X { get; set; }
-
-        [JsonPropertyName("y")]
-        public float Y { get; set; }
-
-        [JsonPropertyName("z")]
-        public float Z { get; set; }
-
-        [JsonPropertyName("frame")]
-        public IsarFrame Frame { get; set; }
-    }
-
-    public class IsarOrientation
-    {
-        [JsonPropertyName("x")]
-        public float X { get; set; }
-
-        [JsonPropertyName("y")]
-        public float Y { get; set; }
-
-        [JsonPropertyName("z")]
-        public float Z { get; set; }
-
-        [JsonPropertyName("w")]
-        public float W { get; set; }
-
-        [JsonPropertyName("frame")]
-        public IsarFrame Frame { get; set; }
-    }
-
-    public class IsarFrame
-    {
-        [JsonPropertyName("name")]
-        public string Name { get; set; }
     }
 }

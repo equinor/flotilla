@@ -440,24 +440,24 @@ namespace Api.Test.MQTT
             );
 
             var frame = new IsarFrame { Name = "map" };
-            var pose = new IsarPoseMqtt
+            var pose = new IsarPose
             {
-                Position = new Api.Mqtt.MessageModels.IsarPosition
+                Position = new IsarPosition
                 {
                     X = 1,
                     Y = 2,
                     Z = 3,
-                    Frame = frame,
+                    Frame = new IsarFrame { Name = "asset" },
                 },
-                Orientation = new Api.Mqtt.MessageModels.IsarOrientation
+                Orientation = new IsarOrientation
                 {
                     X = 0,
                     Y = 0,
                     Z = 0,
                     W = 1,
-                    Frame = frame,
+                    Frame = new IsarFrame { Name = "asset" },
                 },
-                Frame = frame,
+                Frame = new IsarFrame { Name = "asset" },
             };
             var message = new IsarPoseMessage
             {
@@ -467,6 +467,7 @@ namespace Api.Test.MQTT
                 Pose = pose,
             };
             var messageString = JsonSerializer.Serialize(message);
+            // TODO: why is this not being deserialized to the same model? Only default values. Maybe remove defaults
             await MqttService.PublishMessageBasedOnTopic($"isar/{robot.Id}/pose", messageString);
 
             await TestSetupHelpers.WaitFor(async () =>

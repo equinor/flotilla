@@ -56,7 +56,6 @@
 
     public enum IsarTaskType
     {
-        ReturnToHome,
         TakeImage,
         TakeVideo,
         TakeThermalImage,
