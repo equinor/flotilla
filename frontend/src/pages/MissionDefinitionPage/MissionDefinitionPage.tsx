@@ -66,6 +66,7 @@ const StyledMissionDefinitionPageBody = styled.div`
     display: flex;
     flex-direction: column;
     gap: 30px;
+    min-width: 0;
 `
 
 const MetadataItem = ({
