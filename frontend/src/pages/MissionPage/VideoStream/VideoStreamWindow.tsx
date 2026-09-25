@@ -5,6 +5,10 @@ import { useMediaStreamContext } from 'contexts/MediaStreamContext'
 import { useEffect } from 'react'
 import { useLanguageContext } from 'contexts/LanguageContext'
 
+const RetryButton = styled(Button)`
+    width: fit-content;
+`
+
 const VideoStreamContent = styled.div`
     display: flex;
     flex-wrap: wrap;
@@ -43,7 +47,7 @@ export const VideoStreamWindow = ({ robotId }: VideoStreamWindowProps) => {
             <Typography variant="h2">{TranslateText('Camera')}</Typography>
             {statusText && <Typography role="status">{TranslateText(statusText)}</Typography>}
             {status === 'unavailable' && (
-                <Button onClick={() => retryMediaStream(robotId)}>{TranslateText('Retry')}</Button>
+                <RetryButton onClick={() => retryMediaStream(robotId)}>{TranslateText('Retry')}</RetryButton>
             )}
             <VideoStreamContent>{videoCards}</VideoStreamContent>
         </>
