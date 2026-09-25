@@ -1,6 +1,7 @@
 import { VideoStreamWindow } from 'pages/MissionPage/VideoStream/VideoStreamWindow'
 import { Mission } from 'models/Mission'
 import { useContext, useEffect, useState } from 'react'
+import styled from 'styled-components'
 import { MissionHeader, SimpleMissionHeader } from './MissionHeader/MissionHeader'
 import { Header } from 'components/Header/Header'
 import { SignalREventLabels, useSignalRContext } from 'contexts/SignalRContext'
@@ -13,6 +14,11 @@ import { useBackendApi } from 'api/UseBackendApi'
 import { InstallationContext } from 'contexts/InstallationContext'
 import { useInspectionsContext } from 'contexts/InspectionsContext'
 import { MissionResults } from './MissionResults/MissionResults'
+
+const MissionVideoStreamSection = styled(VideoStreamSection)`
+    grid-template-columns: minmax(0, 1fr);
+    overflow-x: auto;
+`
 
 // lookupInspectionId is only set on the mission-simple route, where the mission is
 // identified by an inspection and this hook writes the resolved id back into the URL.
@@ -110,18 +116,19 @@ const MissionPageWithMission = ({ mission, includeHeader = true }: { mission: Mi
                         tasksAndData={taskDataInSelectedMission}
                         plantCode={mission.inspectionArea.plantCode}
                         robot={mission.robot}
-                    />
-                    <VideoStreamSection>
-                        <VideoStreamWindow robotId={mission.robot.id} />
-                    </VideoStreamSection>
-                    <MissionResults
-                        tasks={mission.tasks}
-                        data={data}
-                        isPending={isPending}
-                        isError={isError}
-                        installationName={installation.name}
-                        robotName={mission.robot.name}
-                    />
+                    >
+                        <MissionVideoStreamSection>
+                            <VideoStreamWindow robotId={mission.robot.id} />
+                        </MissionVideoStreamSection>
+                        <MissionResults
+                            tasks={mission.tasks}
+                            data={data}
+                            isPending={isPending}
+                            isError={isError}
+                            installationName={installation.name}
+                            robotName={mission.robot.name}
+                        />
+                    </TaskTableAndMap>
                 </PageContent>
             </PageBackground>
         </>
