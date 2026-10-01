@@ -19,6 +19,7 @@
         "date-fns": "^4.4.0",
         "leaflet": "^1.9.4",
         "livekit-client": "^2.22.3",
+        "ovenplayer": "^0.10.39",
         "luxon": "^3.7.2",
         "prettier": "^3.9.6",
         "react": "^19.3.0",

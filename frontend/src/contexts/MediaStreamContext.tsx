@@ -2,7 +2,10 @@ import { createContext, FC, useContext, useEffect, useMemo, useState } from 'rea
 import { useBackendApi } from 'api/UseBackendApi'
 import { createMediaStreamManager, MediaStreamState } from './MediaStreamManager'
 
-interface IMediaStreamContext {
+interface IMediaStreamContext extends Pick<
+    ReturnType<typeof createMediaStreamManager>,
+    'markOmeStreamPlaying' | 'markOmeStreamStalled' | 'reconnectOmeStream' | 'retryOmeStream'
+> {
     mediaStreams: Record<string, MediaStreamState>
     acquireMediaStream: (robotId: string) => () => void
     retryMediaStream: (robotId: string) => void
@@ -12,6 +15,10 @@ const MediaStreamContext = createContext<IMediaStreamContext>({
     mediaStreams: {},
     acquireMediaStream: () => () => {},
     retryMediaStream: () => {},
+    markOmeStreamPlaying: () => {},
+    markOmeStreamStalled: () => {},
+    reconnectOmeStream: () => {},
+    retryOmeStream: () => {},
 })
 
 export const MediaStreamProvider: FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -40,6 +47,10 @@ export const MediaStreamProvider: FC<{ children: React.ReactNode }> = ({ childre
                 mediaStreams,
                 acquireMediaStream: manager.acquire,
                 retryMediaStream: manager.retry,
+                markOmeStreamPlaying: manager.markOmeStreamPlaying,
+                markOmeStreamStalled: manager.markOmeStreamStalled,
+                reconnectOmeStream: manager.reconnectOmeStream,
+                retryOmeStream: manager.retryOmeStream,
             }}
         >
             {children}

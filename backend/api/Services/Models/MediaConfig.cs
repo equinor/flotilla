@@ -6,10 +6,14 @@
         public string? Token { get; set; }
         public string? RobotId { get; set; }
         public MediaConnectionType MediaConnectionType { get; set; }
+        public List<MediaStream>? Streams { get; set; }
     }
+
+    public record MediaStream(string Role, string Url);
 
     public enum MediaConnectionType
     {
         LiveKit,
+        OvenMediaEngine,
     }
 }

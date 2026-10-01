@@ -47,6 +47,13 @@ vi.mock('api/UseBackendApi', () => ({ useBackendApi: () => backendApi }))
 vi.mock('pages/MissionPage/VideoStream/VideoStreamCards', () => ({
     VideoStreamCard: () => <div data-testid="camera" />,
 }))
+vi.mock('pages/MissionPage/VideoStream/OmeVideoCard', () => ({
+    OmeVideoCard: ({ stream, onDisconnect }: { stream: { role: string }; onDisconnect: () => void }) => (
+        <button data-testid="ome-camera" onClick={onDisconnect}>
+            {stream.role}
+        </button>
+    ),
+}))
 
 const config: MediaStreamConfig = {
     robotId: 'robot-1',
@@ -110,6 +117,31 @@ afterEach(() => {
 })
 
 describe('livestream viewing and recovery', () => {
+    test('selects OME by connection type and fetches a fresh URL after disconnect', async () => {
+        backendApi.getRobotMediaConfig
+            .mockResolvedValueOnce({
+                robotId: 'robot-1',
+                mediaConnectionType: MediaConnectionType.OvenMediaEngine,
+                url: '',
+                token: '',
+                streams: [{ role: 'front', url: 'ws://localhost:3335/local/front?signature=first' }],
+            })
+            .mockResolvedValueOnce({
+                robotId: 'robot-1',
+                mediaConnectionType: MediaConnectionType.OvenMediaEngine,
+                url: '',
+                token: '',
+                streams: [{ role: 'front', url: 'ws://localhost:3335/local/front?signature=second' }],
+            })
+        await mount()
+        expect(rooms).toHaveLength(0)
+        expect(container.querySelector('[data-testid="ome-camera"]')?.textContent).toBe('front')
+        await act(async () => container.querySelector<HTMLButtonElement>('[data-testid="ome-camera"]')!.click())
+        await advance(2_000)
+        expect(backendApi.getRobotMediaConfig).toHaveBeenCalledTimes(2)
+        expect(status()).toBe('Reconnecting')
+    })
+
     test('activates the backend even with a valid cached token and does not persist new credentials', async () => {
         const cached = JSON.stringify({ 'robot-1': { ...config, token: 'valid-cached-token' } })
         window.localStorage.setItem('mediaConfigs', cached)
