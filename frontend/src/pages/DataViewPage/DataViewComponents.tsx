@@ -5,7 +5,6 @@ import styled from 'styled-components'
 
 export const DataViewMapWrapper = styled.div`
     .leaflet-tooltip.circleLabel {
-        background-color: ${tokens.colors.ui.background__medium.hex} !important;
         padding: 0 4px !important;
         border-radius: 2px !important;
     }

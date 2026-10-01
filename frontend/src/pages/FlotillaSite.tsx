@@ -25,6 +25,7 @@ import { CloeDataViewPage } from './DataViewPage/CloeDataViewPage'
 import { DataOverviewPage } from './DataOverviewPage'
 import { ThermalReadingViewPage } from './DataViewPage/ThermalReadingViewPage'
 import { DashboardPage } from './DashboardPage/DashboardPage'
+import { OldFencillaViewPage } from './DataViewPage/OldFencillaViewPage'
 
 const StyledLoading = styled.div`
     display: flex;
@@ -49,7 +50,7 @@ export const FlotillaSite = () => {
                         <Route path="auto-schedule" element={<AutoSchedulePage />} />
                         <Route path="data-overview" element={<DataOverviewPage />} />
                         {/* data-view needs to redirect to fencilla-view for backwards compatibility */}
-                        <Route path="data-view" element={<FencillaViewPage />} />
+                        <Route path="data-view" element={<OldFencillaViewPage />} />
                         <Route path="fencilla-view" element={<FencillaViewPage />} />
                         <Route path="cloe-view" element={<CloeDataViewPage />} />
                         <Route path="thermal-reading-view" element={<ThermalReadingViewPage />} />

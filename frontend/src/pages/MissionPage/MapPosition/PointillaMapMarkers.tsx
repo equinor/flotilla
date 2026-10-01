@@ -26,10 +26,10 @@ const orderTasksByDrawOrder = (tasks: Task[]) => {
     })
 }
 
-const getPositionMarker = (map: L.Map, pos: Position, index: number) => {
+const getPositionMarker = (map: L.Map, pos: Position, index: number, warning?: boolean) => {
     const positionMarker = L.circleMarker([pos.y, pos.x], {
         radius: 15,
-        fillColor: tokens.colors.ui.background__medium.hex,
+        fillColor: warning ? tokens.colors.ui.background__danger.hex : tokens.colors.ui.background__medium.hex,
         color: 'black',
         weight: 1,
         fillOpacity: 0.8,
@@ -52,7 +52,14 @@ export const getTaskDefinitionMarkers = (map: L.Map, tasks: MissionTaskDefinitio
 }
 
 export const getInspectionMarkers = (map: L.Map, inspections: InspectionData[]) =>
-    inspections.map((inspection, index) => getPositionMarker(map, inspection.targetPosition, index + 1))
+    inspections.map((inspection, index) =>
+        getPositionMarker(
+            map,
+            inspection.targetPosition,
+            index + 1,
+            inspection.warning !== undefined && inspection.warning !== null
+        )
+    )
 
 const getRobotAuraMarker = (map: L.Map, robotPose: Pose) => {
     const msFromMinToMax = 2000
