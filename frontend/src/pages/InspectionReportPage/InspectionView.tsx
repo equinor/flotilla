@@ -132,7 +132,7 @@ export const InspectionTaskDialogView = ({
     )
 }
 
-export const InspectionDialogView = ({
+export const InspectionsDialogView = ({
     selectedInspectionId,
     inspectionData,
 }: {
@@ -231,6 +231,63 @@ export const InspectionDialogView = ({
                     <HiddenOnSmallScreen>
                         <InspectionOverviewDialogView inspectionData={inspectionData} />
                     </HiddenOnSmallScreen>
+                </StyledDialogInspectionView>
+            </StyledDialogContent>
+        </StyledDialog>
+    )
+}
+
+export const InspectionDialogView = ({
+    inspectionData,
+    title,
+    onClose,
+}: {
+    inspectionData: InspectionData
+    title: string
+    onClose: () => void
+}) => {
+    const { TranslateText } = useLanguageContext()
+    const { installation } = useContext(InstallationContext)
+
+    return (
+        <StyledDialog open={true} isDismissable onClose={onClose}>
+            <StyledDialogContent>
+                <StyledDialogHeader>
+                    <Typography variant="accordion_header" group="ui">
+                        {title}
+                    </Typography>
+                    <StyledCloseButton variant="ghost" onClick={onClose}>
+                        <Icon name={Icons.Clear} size={24} />
+                    </StyledCloseButton>
+                </StyledDialogHeader>
+                <StyledDialogInspectionView>
+                    <div>
+                        <LargeDialogInspectionResult inspection={inspectionData} />
+                        <StyledBottomContent>
+                            <StyledInfoContent>
+                                <Typography variant="caption">{TranslateText('Installation') + ':'}</Typography>
+                                <Typography variant="body_short">{installation.name}</Typography>
+                            </StyledInfoContent>
+                            <StyledInfoContent>
+                                <Typography variant="caption">{TranslateText('Tag') + ':'}</Typography>
+                                <Typography variant="body_short">{inspectionData.tag}</Typography>
+                            </StyledInfoContent>
+                            {inspectionData.inspectionDescription && (
+                                <StyledInfoContent>
+                                    <Typography variant="caption">{TranslateText('Description') + ':'}</Typography>
+                                    <Typography variant="body_short">{inspectionData.inspectionDescription}</Typography>
+                                </StyledInfoContent>
+                            )}
+                            {inspectionData.createdAt && (
+                                <StyledInfoContent>
+                                    <Typography variant="caption">{TranslateText('Timestamp') + ':'}</Typography>
+                                    <Typography variant="body_short">
+                                        {formatDateTime(inspectionData.createdAt)}
+                                    </Typography>
+                                </StyledInfoContent>
+                            )}
+                        </StyledBottomContent>
+                    </div>
                 </StyledDialogInspectionView>
             </StyledDialogContent>
         </StyledDialog>

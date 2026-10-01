@@ -14,7 +14,7 @@ import {
     PendingResultPlaceholder,
 } from 'pages/InspectionReportPage/InspectionReportImage'
 import { AnalysisResultDialogContent } from 'pages/MissionPage/AnalysisResultView'
-import { InspectionDialogView } from 'pages/InspectionReportPage/InspectionView'
+import { InspectionsDialogView } from 'pages/InspectionReportPage/InspectionView'
 import { AnalysisResultDialogView } from 'pages/MissionPage/AnalysisResultView'
 import { useSearchParams } from 'react-router'
 import { DataViewTable } from './DataViewTable'
@@ -155,6 +155,7 @@ const DataViewContent = ({
                                     plantCode={plantCode}
                                     floorId="0"
                                     inspections={uniqueTagInspectionData}
+                                    onMarkerClick={() => {}}
                                 />
                             </DataViewMapWrapper>
                         ) : (
@@ -203,7 +204,7 @@ const DataViewContent = ({
                     )}
                 </ContentCard>
                 {inspectionId && !selectedInspectionId && (
-                    <InspectionDialogView selectedInspectionId={inspectionId} inspectionData={inspectionData} />
+                    <InspectionsDialogView selectedInspectionId={inspectionId} inspectionData={inspectionData} />
                 )}
                 {analysisId && !selectedInspectionId && (
                     <AnalysisResultDialogView selectedInspectionId={analysisId} inspectionData={inspectionData} />

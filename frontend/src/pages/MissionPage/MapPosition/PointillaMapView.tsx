@@ -222,12 +222,14 @@ export function InspectionsPlantMap({
     plantCode,
     floorId,
     inspections,
+    onMarkerClick = () => {},
 }: {
     plantCode: string
     floorId: string
     inspections: InspectionData[]
+    onMarkerClick: (markerIndex: number) => void
 }) {
-    const { mapInfo, setMap } = useInspectionsPlantMapData(plantCode, floorId, inspections)
+    const { mapInfo, setMap } = useInspectionsPlantMapData(plantCode, floorId, inspections, onMarkerClick)
 
     return (
         <div className="map-root">
@@ -241,7 +243,12 @@ export function InspectionsPlantMap({
     )
 }
 
-export function useInspectionsPlantMapData(plantCode: string, floorId: string, inspections: InspectionData[]) {
+export function useInspectionsPlantMapData(
+    plantCode: string,
+    floorId: string,
+    inspections: InspectionData[],
+    onMarkerClick: (markerIndex: number) => void
+) {
     const [mapInfo, setMapInfo] = useState<PointillaMapInfo | undefined>(undefined)
     const [map, setMap] = useState<L.Map | null>(null)
     const backendApi = useBackendApi()
@@ -271,6 +278,7 @@ export function useInspectionsPlantMapData(plantCode: string, floorId: string, i
         if (inspectionWithPositions.length <= 0 || !map) return
 
         const taskMarkers = getInspectionMarkers(map, inspectionWithPositions)
+        taskMarkers.forEach((t, i) => t.on('click', () => onMarkerClick(i)))
 
         const group = L.featureGroup(taskMarkers)
         map.fitBounds(group.getBounds())

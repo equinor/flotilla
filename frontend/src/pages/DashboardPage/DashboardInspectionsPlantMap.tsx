@@ -25,7 +25,7 @@ export const DashboardInspectionsPlantMap = ({
     floorId,
     inspections,
 }: DashboardInspectionsPlantMapProps) => {
-    const { mapInfo, setMap } = useInspectionsPlantMapData(plantCode, floorId, inspections)
+    const { mapInfo, setMap } = useInspectionsPlantMapData(plantCode, floorId, inspections, () => {})
 
     return (
         <>
