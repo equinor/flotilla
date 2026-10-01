@@ -171,7 +171,7 @@ namespace Api.Database.Context
             "Expected to be rejected. Verifies that a mission cannot be started in an inspection area the robot is not in."
         );
 
-        private static Plant CreatePlant(string installationCode, string name)
+        private static Plant CreatePlant(string installationCode, string name, string plantCode)
         {
             return new Plant
             {
@@ -183,7 +183,7 @@ namespace Api.Database.Context
                     InstallationCode = installationCode,
                 },
                 Name = name,
-                PlantCode = installationCode,
+                PlantCode = plantCode,
             };
         }
 
@@ -385,8 +385,8 @@ namespace Api.Database.Context
                 return;
             }
 
-            var kaarsto = CreatePlant("KAA", "Kårstø");
-            var northernLights = CreatePlant("NLS", "Northern Lights");
+            var kaarsto = CreatePlant("KAA", "Kårstø", "KAA");
+            var northernLights = CreatePlant("NLS", "Northern Lights", "NLT");
             var klab = CreateInspectionArea(kaarsto, KaarstoInspectionArea);
             List<InspectionArea> inspectionAreas =
             [
