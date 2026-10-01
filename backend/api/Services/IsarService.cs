@@ -532,8 +532,7 @@ namespace Api.Services
             }
             catch (JsonException)
             {
-                string errorMessage =
-                    $"Could not parse content from new robot media stream config. {await response.Content.ReadAsStringAsync()}";
+                string errorMessage = "Could not parse content from new robot media stream config.";
                 logger.LogError("{ErrorMessage}", errorMessage);
                 throw new ConfigException(errorMessage);
             }
@@ -541,7 +540,7 @@ namespace Api.Services
             if (isarMediaConfigResponse == null)
             {
                 string errorMessage =
-                    $"Parsing of robot media stream config resulted in empty config. {await response.Content.ReadAsStringAsync()}";
+                    "Parsing of robot media stream config resulted in empty config.";
                 logger.LogError("{ErrorMessage}", errorMessage);
                 throw new ConfigException(errorMessage);
             }
@@ -559,12 +558,36 @@ namespace Api.Services
                 throw new ConfigException(errorMessage);
             }
 
+            if (
+                connectionType == MediaConnectionType.LiveKit
+                && (
+                    string.IsNullOrEmpty(isarMediaConfigResponse.Url)
+                    || string.IsNullOrEmpty(isarMediaConfigResponse.Token)
+                )
+            )
+            {
+                const string errorMessage = "LiveKit media stream config requires a URL and token.";
+                logger.LogError("{ErrorMessage}", errorMessage);
+                throw new ConfigException(errorMessage);
+            }
+
+            if (
+                connectionType == MediaConnectionType.OvenMediaEngine
+                && isarMediaConfigResponse.Streams is not { Count: > 0 }
+            )
+            {
+                const string errorMessage = "OvenMediaEngine media stream config requires streams.";
+                logger.LogError("{ErrorMessage}", errorMessage);
+                throw new ConfigException(errorMessage);
+            }
+
             return new MediaConfig
             {
                 Url = isarMediaConfigResponse.Url,
                 Token = isarMediaConfigResponse.Token,
                 RobotId = robot.Id,
                 MediaConnectionType = connectionType,
+                Streams = isarMediaConfigResponse.Streams,
             };
         }
     }

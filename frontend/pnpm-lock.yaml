@@ -59,6 +59,9 @@ importers:
       luxon:
         specifier: ^3.7.2
         version: 3.7.2
+      ovenplayer:
+        specifier: ^0.10.39
+        version: 0.10.54
       prettier:
         specifier: ^3.9.6
         version: 3.9.6
@@ -2055,6 +2058,9 @@ packages:
   optionator@0.9.4:
     resolution: {integrity: sha512-6IpQ7mKUxRcZNLIObR0hz7lxsapSSIYNZJwXPGeF0mTVqGKFIXj1DQcMoT22S3ROcLyY/rz0PWaWZ9ayWmad9g==}
     engines: {node: '>= 0.8.0'}
+
+  ovenplayer@0.10.54:
+    resolution: {integrity: sha512-PTEb4RMpgUz4i776c7buMkesZdslx/B+3MJgaClkQHvGvO8InkIu2EHDQ7nqF1OXsbWATf3d9iGOs2fglVfoCQ==}
 
   own-keys@1.0.2:
     resolution: {integrity: sha512-19YVAg7T+WTrxggPukVq7DjTv6+PJ867TmhCvBsYwmbFCsZd344rq2Ld1p0wo8f8Qrrhgp82c6FJRqdXWtSEhg==}
@@ -4734,6 +4740,8 @@ snapshots:
       prelude-ls: 1.2.1
       type-check: 0.4.0
       word-wrap: 1.2.5
+
+  ovenplayer@0.10.54: {}
 
   own-keys@1.0.2:
     dependencies:

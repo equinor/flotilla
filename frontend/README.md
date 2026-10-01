@@ -50,23 +50,43 @@ With `.env` configured as described above, run the suite from the frontend folde
 
 ## Livestream recovery
 
-Mission and robot camera views share a LiveKit connection per robot while mounted. Starting a new
-viewing session or retry always fetches fresh media configuration from the backend: this also activates
-the robot's publisher, which connecting with a cached LiveKit token alone does not do. The frontend
-no longer reads or writes the legacy `mediaConfigs` credential cache.
+Mission and robot camera views acquire media through
+[MediaStreamManager.ts](./src/contexts/MediaStreamManager.ts). Starting a new viewing session or
+manager-level retry fetches fresh media configuration from the backend: this also activates the robot's
+publisher, which connecting with a cached LiveKit token alone does not do. The frontend no longer
+reads or writes the legacy `mediaConfigs` credential cache.
 
-Activation, room connection, and waiting for video have a bounded deadline. Failed attempts retry
-with exponential backoff up to an attempt limit, then display **Stream unavailable** with a manual
-**Retry** action. Losing the last camera or a stalled native reconnect also has a recovery deadline;
+Both transports use the code defaults and backoff helper in
+[MediaStreamRecoveryPolicy.ts](./src/contexts/MediaStreamRecoveryPolicy.ts):
+
+- `recoveryTimeoutMs` (**30 seconds**) bounds each connection/recovery wait. Repeated interruption
+  events preserve the existing deadline rather than extending it.
+- `stabilityResetMs` (**30 seconds**) is the uninterrupted healthy-state window required to reset the
+  attempt counter to zero. An interruption cancels the window, so short-lived recoveries do not
+  replenish the budget. Health is inferred from transport events, not measured frame progression.
+- `maxAttempts` (**3**) includes the initial connection attempt, allowing two startup retries. After
+  stability resets the counter, a later outage gets three fresh attempts. Manual **Retry** also resets
+  the counter.
+- `retryBaseDelayMs` (**2 seconds**) feeds exponential backoff through
+  `calculateMediaStreamRetryDelayMs`. Startup retries wait **2, then 4 seconds**; after a stability
+  reset, the waits before three fresh attempts are **2, 2, then 4 seconds**.
+
+LiveKit views share one room per robot. Activation, room connection, and waiting for video share an
+attempt deadline. Losing the last camera or a stalled native reconnect starts a recovery deadline;
 a disconnected room starts recovery after backoff. Partial camera loss does not interrupt remaining
-cameras. Sustained video replenishes the retry budget for a later independent outage; short-lived
-tracks do not reset it.
+cameras. Video-track subscription and room connection events determine the healthy state.
 
-The recovery policy is defined by `ATTEMPT_TIMEOUT_MS`, `MAX_ATTEMPTS`, `RETRY_DELAY_MS`, and
-`STABLE_VIDEO_MS` in [MediaStreamManager.ts](./src/components/Contexts/MediaStreamManager.ts).
+For OvenMediaEngine (OME), [OmeStreamManager.ts](./src/contexts/OmeStreamManager.ts) maintains a
+separate deadline and retry budget per camera. Once the initial configuration arrives, each camera
+starts its own deadline; the timeout is therefore not an overall end-to-end limit for opening an OME
+view. Each camera retry fetches fresh configuration and selects that camera's URL. Player `playing`
+events establish health, while stall/loading/pause/idle events interrupt the stability window.
+An exhausted camera displays **Stream unavailable** with its own **Retry** action while other cameras
+continue playing. LiveKit exhaustion displays the same status and action for the robot connection.
 
-The last camera viewer leaving disconnects its room and cancels recovery. Re-rendering a page or
-receiving mission updates does not restart activation or reset the retry budget.
+The last camera viewer leaving disposes the robot's manager state and cancels recovery. LiveKit rooms
+are disconnected, and OME views remove their players and cancel pending probes on unmount.
+Re-rendering a page or receiving mission updates does not restart activation or reset the retry budget.
 
 Livestream regression tests live in `tests/components/Contexts/MediaStreamContext.test.tsx`.
 Run them with `pnpm test --run tests/components/Contexts/MediaStreamContext.test.tsx`.

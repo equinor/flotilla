@@ -1,23 +1,24 @@
 import { Room, RoomEvent } from 'livekit-client'
 import { MediaConnectionType, MediaStreamConfig } from 'models/VideoStream'
+import { createOmeStreamManager, OmeStreamState } from './OmeStreamManager'
+import { calculateMediaStreamRetryDelayMs, MEDIA_STREAM_RECOVERY_POLICY } from './MediaStreamRecoveryPolicy'
 
 export interface MediaStreamState {
     status: 'connecting' | 'reconnecting' | 'connected' | 'unavailable'
     streams: MediaStreamTrack[]
+    omeStreams?: OmeStreamState[]
+    omeAttemptId?: number
 }
-
-const ATTEMPT_TIMEOUT_MS = 30_000
-const MAX_ATTEMPTS = 3
-const RETRY_DELAY_MS = 2_000
-const STABLE_VIDEO_MS = 30_000
 
 type TimerHandle = ReturnType<typeof setTimeout>
 
 interface Attempt {
+    id: number
     room?: Room
     timeout?: TimerHandle
     stableTimer?: TimerHandle
     tracks: Map<string, MediaStreamTrack>
+    omeManager?: ReturnType<typeof createOmeStreamManager>
 }
 
 interface Connection {
@@ -33,6 +34,7 @@ export const createMediaStreamManager = (
     onChange: (robotId: string, state: MediaStreamState | undefined) => void
 ) => {
     const connections = new Map<string, Connection>()
+    let nextAttemptId = 0
 
     const disconnect = (room: Room) => {
         room.removeAllListeners()
@@ -45,27 +47,31 @@ export const createMediaStreamManager = (
         if (!attempt) return
         clearTimeout(attempt.timeout)
         clearTimeout(attempt.stableTimer)
+        attempt.omeManager?.dispose()
         if (attempt.room) disconnect(attempt.room)
     }
 
     const publish = (robotId: string, connection: Connection, status: MediaStreamState['status']) => {
-        connection.state = { status, streams: [...(connection.attempt?.tracks.values() ?? [])] }
+        const attempt = connection.attempt
+        connection.state = {
+            status,
+            streams: [...(attempt?.tracks.values() ?? [])],
+            omeStreams: attempt?.omeManager?.getStreams(),
+            omeAttemptId: attempt?.omeManager ? attempt.id : undefined,
+        }
         onChange(robotId, connection.state)
     }
 
     const scheduleRetry = (robotId: string, connection: Connection) => {
-        if (connection.attempts >= MAX_ATTEMPTS) {
+        if (connection.attempts >= MEDIA_STREAM_RECOVERY_POLICY.maxAttempts) {
             publish(robotId, connection, 'unavailable')
             return
         }
         publish(robotId, connection, 'reconnecting')
-        connection.retryTimer = setTimeout(
-            () => {
-                connection.retryTimer = undefined
-                void startAttempt(robotId, connection)
-            },
-            RETRY_DELAY_MS * 2 ** Math.max(0, connection.attempts - 1)
-        )
+        connection.retryTimer = setTimeout(() => {
+            connection.retryTimer = undefined
+            void startAttempt(robotId, connection)
+        }, calculateMediaStreamRetryDelayMs(connection.attempts))
     }
 
     const createAttemptHandlers = (robotId: string, connection: Connection, attempt: Attempt) => {
@@ -81,7 +87,10 @@ export const createMediaStreamManager = (
         // Preserve an existing deadline so repeated events cannot postpone recovery indefinitely.
         const startRecoveryDeadlineIfNeeded = () => {
             if (attempt.timeout !== undefined) return
-            attempt.timeout = setTimeout(() => fail('Timed out waiting for camera stream'), ATTEMPT_TIMEOUT_MS)
+            attempt.timeout = setTimeout(
+                () => fail('Timed out waiting for camera stream'),
+                MEDIA_STREAM_RECOVERY_POLICY.recoveryTimeoutMs
+            )
         }
         const clearRecoveryDeadline = () => {
             clearTimeout(attempt.timeout)
@@ -99,7 +108,7 @@ export const createMediaStreamManager = (
             attempt.stableTimer = setTimeout(() => {
                 if (isCurrent()) connection.attempts = 0
                 attempt.stableTimer = undefined
-            }, STABLE_VIDEO_MS)
+            }, MEDIA_STREAM_RECOVERY_POLICY.stabilityResetMs)
         }
         const registerRoomEvents = (room: Room) => {
             const removeTrack = (trackSid: string) => {
@@ -141,7 +150,7 @@ export const createMediaStreamManager = (
 
     const startAttempt = async (robotId: string, connection: Connection) => {
         if (connections.get(robotId) !== connection) return
-        const attempt: Attempt = { tracks: new Map() }
+        const attempt: Attempt = { id: ++nextAttemptId, tracks: new Map() }
         connection.attempt = attempt
         connection.attempts++
         const { isCurrent, fail, startRecoveryDeadlineIfNeeded, registerRoomEvents } = createAttemptHandlers(
@@ -156,7 +165,41 @@ export const createMediaStreamManager = (
             // This endpoint activates the robot's publisher; a valid cached token cannot replace it.
             const config = await getConfig(robotId)
             if (!isCurrent()) return
-            if (!config || config.robotId !== robotId || config.mediaConnectionType !== MediaConnectionType.LiveKit) {
+            if (!config || config.robotId !== robotId) {
+                fail('No supported media configuration')
+                return
+            }
+            if (config.mediaConnectionType === MediaConnectionType.OvenMediaEngine && config.streams?.length) {
+                clearTimeout(attempt.timeout)
+                attempt.timeout = undefined
+                const refreshOmeStreamForRole = async (role: string) => {
+                    const refreshed = await getConfig(robotId)
+                    if (
+                        refreshed?.robotId !== robotId ||
+                        refreshed.mediaConnectionType !== MediaConnectionType.OvenMediaEngine
+                    )
+                        return undefined
+                    return refreshed.streams?.find((stream) => stream.role === role)
+                }
+                const publishOmeCameraStatus = () => {
+                    if (!isCurrent()) return
+                    const cameras = attempt.omeManager?.getStreams() ?? []
+                    for (const status of ['reconnecting', 'connecting', 'connected', 'unavailable'] as const) {
+                        if (cameras.some((camera) => camera.status === status)) {
+                            publish(robotId, connection, status)
+                            return
+                        }
+                    }
+                }
+                attempt.omeManager = createOmeStreamManager(
+                    config.streams,
+                    refreshOmeStreamForRole,
+                    publishOmeCameraStatus
+                )
+                publish(robotId, connection, connection.state.status)
+                return
+            }
+            if (config.mediaConnectionType !== MediaConnectionType.LiveKit) {
                 fail('No supported media configuration')
                 return
             }
@@ -201,14 +244,36 @@ export const createMediaStreamManager = (
     const retry = (robotId: string) => {
         const connection = connections.get(robotId)
         if (!connection || connection.state.status !== 'unavailable') return
+        clearAttempt(connection)
         connection.attempts = 0
         connection.state = { status: 'connecting', streams: [] }
         void startAttempt(robotId, connection)
+    }
+
+    const currentOmeManager = (robotId: string, attemptId: number) => {
+        const attempt = connections.get(robotId)?.attempt
+        if (attempt?.id === attemptId) return attempt.omeManager
+    }
+
+    const markOmeStreamPlaying = (robotId: string, attemptId: number, role: string, cameraAttemptId: number) => {
+        currentOmeManager(robotId, attemptId)?.markPlaying(role, cameraAttemptId)
+    }
+
+    const markOmeStreamStalled = (robotId: string, attemptId: number, role: string, cameraAttemptId: number) => {
+        currentOmeManager(robotId, attemptId)?.markStalled(role, cameraAttemptId)
+    }
+
+    const reconnectOmeStream = (robotId: string, attemptId: number, role: string, cameraAttemptId: number) => {
+        currentOmeManager(robotId, attemptId)?.reconnect(role, cameraAttemptId)
+    }
+
+    const retryOmeStream = (robotId: string, attemptId: number, role: string) => {
+        currentOmeManager(robotId, attemptId)?.retry(role)
     }
 
     const dispose = () => {
         connections.forEach((connection, robotId) => removeConnection(robotId, connection))
     }
 
-    return { acquire, retry, dispose }
+    return { acquire, retry, markOmeStreamPlaying, markOmeStreamStalled, reconnectOmeStream, retryOmeStream, dispose }
 }
