@@ -1,7 +1,5 @@
-import { Typography } from '@equinor/eds-core-react'
-import { tokens } from '@equinor/eds-tokens'
 import { useContext, useMemo } from 'react'
-import { useLanguageContext } from 'contexts/LanguageContext'
+import { tokens } from '@equinor/eds-tokens'
 import { ContentCard, PageBackground } from 'components/Styles/StyledComponents'
 import { InstallationContext } from 'contexts/InstallationContext'
 import { PendingResultPlaceholder } from 'pages/InspectionReportPage/InspectionReportImage'
@@ -14,11 +12,21 @@ import { DashboardRobotStatusCard } from './DashboardRobotStatusCard'
 import { DashboardScheduledMissionsView } from './DashboardScheduledMissionsView'
 import { useAssetContext } from 'contexts/AssetContext'
 import { DashboardInspectionsPlantMap } from './DashboardInspectionsPlantMap'
+import { Header } from 'components/Header/Header'
 import styled from 'styled-components'
 
 interface DataViewContentProps {
     inspectionData: InspectionData[]
 }
+
+const DashboardZoomWrapper = styled.div`
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    --dashboard-zoom: clamp(1, calc(100vw / 2195px), 3);
+    zoom: var(--dashboard-zoom);
+`
 
 const DashboardPageContent = styled.div`
     width: 100%;
@@ -27,8 +35,6 @@ const DashboardPageContent = styled.div`
     display: flex;
     flex-direction: column;
     gap: 2rem;
-    --dashboard-zoom: clamp(1, calc(100vw / 2195px), 3);
-    zoom: var(--dashboard-zoom);
 `
 
 const DashboardColumns = styled.div`
@@ -59,12 +65,7 @@ const RobotList = styled(ContentCard)`
     overflow-y: auto;
 `
 
-const PageTitle = styled(Typography)`
-    padding-left: 8px;
-`
-
 const DashboardContent = ({ inspectionData }: DataViewContentProps) => {
-    const { TranslateText } = useLanguageContext()
     const { installation } = useContext(InstallationContext)
     const { installationInspectionAreas } = useAssetContext()
     const { enabledRobots } = useAssetContext()
@@ -85,32 +86,29 @@ const DashboardContent = ({ inspectionData }: DataViewContentProps) => {
     }, [inspectionData])
 
     return (
-        <>
-            <PageTitle variant="h2">{`${installation.name} ${TranslateText('Dashboard')}`}</PageTitle>
-            <DashboardColumns>
-                <DashboardColumn>
-                    <DashboardAlertPanel alerts={alerts} />
-                </DashboardColumn>
-                <DashboardColumn>
-                    {plantCode && (
-                        <MapCard>
-                            <DashboardInspectionsPlantMap
-                                key={'all'}
-                                plantCode={plantCode}
-                                floorId="0"
-                                inspections={alerts}
-                            />
-                        </MapCard>
-                    )}
-                    <RobotList>
-                        {enabledRobots.map((robot) => (
-                            <DashboardRobotStatusCard key={robot.id} robot={robot} />
-                        ))}
-                    </RobotList>
-                    <DashboardScheduledMissionsView />
-                </DashboardColumn>
-            </DashboardColumns>
-        </>
+        <DashboardColumns>
+            <DashboardColumn>
+                <DashboardAlertPanel alerts={alerts} />
+            </DashboardColumn>
+            <DashboardColumn>
+                {plantCode && (
+                    <MapCard>
+                        <DashboardInspectionsPlantMap
+                            key={'all'}
+                            plantCode={plantCode}
+                            floorId="0"
+                            inspections={alerts}
+                        />
+                    </MapCard>
+                )}
+                <RobotList>
+                    {enabledRobots.map((robot) => (
+                        <DashboardRobotStatusCard key={robot.id} robot={robot} />
+                    ))}
+                </RobotList>
+                <DashboardScheduledMissionsView />
+            </DashboardColumn>
+        </DashboardColumns>
     )
 }
 
@@ -132,14 +130,17 @@ export const DashboardPage = () => {
     )
 
     return (
-        <PageBackground>
-            <DashboardPageContent>
-                {isPending ? (
-                    <PendingResultPlaceholder isLargeImage={true} />
-                ) : (
-                    <DashboardContent inspectionData={data ?? []} />
-                )}
-            </DashboardPageContent>
-        </PageBackground>
+        <DashboardZoomWrapper>
+            <Header installation={installation} minimal fullWidth />
+            <PageBackground>
+                <DashboardPageContent>
+                    {isPending ? (
+                        <PendingResultPlaceholder isLargeImage={true} />
+                    ) : (
+                        <DashboardContent inspectionData={data ?? []} />
+                    )}
+                </DashboardPageContent>
+            </PageBackground>
+        </DashboardZoomWrapper>
     )
 }
