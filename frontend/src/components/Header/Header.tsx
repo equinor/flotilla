@@ -1,6 +1,6 @@
 import { Button, EdsProvider, Icon, TopBar } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import { SelectLanguage } from 'components/Header/LanguageSelector'
 import { Icons } from 'utils/icons'
 import { AlertBanner } from 'components/Alerts/AlertsBanner'
@@ -19,8 +19,15 @@ const TopBarBackground = styled.div`
     background: ${tokens.colors.ui.background__default.hex};
     border-bottom: 1px solid ${tokens.colors.ui.background__medium.hex};
 `
-const StyledTopBar = styled(TopBar)`
-    ${pageContentWidth}
+const StyledTopBar = styled(TopBar)<{ $fullWidth?: boolean }>`
+    ${(props) =>
+        props.$fullWidth
+            ? css`
+                  width: 100%;
+                  min-width: 0;
+                  padding-inline: var(--eds-page-space-horizontal);
+              `
+            : pageContentWidth}
     align-items: center;
     box-shadow: none;
     border-bottom: none;
@@ -79,9 +86,11 @@ const AppWrapper = styled.div`
 
 interface Props {
     installation?: Installation
+    minimal?: boolean
+    fullWidth?: boolean
 }
 
-export const Header = ({ installation }: Props) => {
+export const Header = ({ installation, minimal, fullWidth }: Props) => {
     const navigate = useNavigate()
     const { TranslateText } = useLanguageContext()
     const { banner, clearBanner } = useAlertContext()
@@ -90,7 +99,7 @@ export const Header = ({ installation }: Props) => {
     return (
         <>
             <TopBarBackground>
-                <StyledTopBar id={FrontPageSectionId.TopBar}>
+                <StyledTopBar id={FrontPageSectionId.TopBar} $fullWidth={fullWidth}>
                     <TopBar.Header onClick={() => navigate(`/${installation?.installationCode || ''}`)}>
                         <AppWrapper>
                             <AppName>Flotilla</AppName>
@@ -99,22 +108,24 @@ export const Header = ({ installation }: Props) => {
                     </TopBar.Header>
                     <TopBar.Actions>
                         <EdsProvider density="compact">
-                            <IconStyle>
-                                <Button
-                                    variant="ghost_icon"
-                                    aria-label={TranslateText('Send feedback')}
-                                    onClick={() => setIsFeedbackOpen(true)}
-                                >
-                                    <Icon name={Icons.Feedback} size={24} title={TranslateText('Send feedback')} />
-                                </Button>
-                                <Button variant="ghost_icon" onClick={() => navigate(`/info`)}>
-                                    <Icon name={Icons.Info} size={24} title="Info Page" />
-                                </Button>
-                                <Button variant="ghost_icon" onClick={() => navigate(`/`)}>
-                                    <Icon name={Icons.Platform} size={24} title="Change Asset" />
-                                </Button>
-                                {installation && <AlertIcon installation={installation} />}
-                            </IconStyle>
+                            {!minimal && (
+                                <IconStyle>
+                                    <Button
+                                        variant="ghost_icon"
+                                        aria-label={TranslateText('Send feedback')}
+                                        onClick={() => setIsFeedbackOpen(true)}
+                                    >
+                                        <Icon name={Icons.Feedback} size={24} title={TranslateText('Send feedback')} />
+                                    </Button>
+                                    <Button variant="ghost_icon" onClick={() => navigate(`/info`)}>
+                                        <Icon name={Icons.Info} size={24} title="Info Page" />
+                                    </Button>
+                                    <Button variant="ghost_icon" onClick={() => navigate(`/`)}>
+                                        <Icon name={Icons.Platform} size={24} title="Change Asset" />
+                                    </Button>
+                                    {installation && <AlertIcon installation={installation} />}
+                                </IconStyle>
+                            )}
                             <SelectLanguageWrapper>
                                 <SelectLanguage />
                             </SelectLanguageWrapper>
