@@ -14,6 +14,18 @@ namespace Api.Services.Models
         public required string MediaConnectionType { get; set; }
 
         [JsonPropertyName("streams")]
-        public List<MediaStream>? Streams { get; set; }
+        public List<IsarMediaStream>? Streams { get; set; }
+    }
+
+    public class IsarMediaStream
+    {
+        [JsonPropertyName("camera_id")]
+        public required string CameraId { get; set; }
+
+        [JsonPropertyName("url")]
+        public required string Url { get; set; }
+
+        [JsonPropertyName("rotation_degrees")]
+        public int RotationDegrees { get; set; }
     }
 }

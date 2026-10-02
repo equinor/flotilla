@@ -48,9 +48,15 @@ vi.mock('pages/MissionPage/VideoStream/VideoStreamCards', () => ({
     VideoStreamCard: () => <div data-testid="camera" />,
 }))
 vi.mock('pages/MissionPage/VideoStream/OmeVideoCard', () => ({
-    OmeVideoCard: ({ stream, onDisconnect }: { stream: { role: string }; onDisconnect: () => void }) => (
-        <button data-testid="ome-camera" onClick={onDisconnect}>
-            {stream.role}
+    OmeVideoCard: ({
+        stream,
+        onDisconnect,
+    }: {
+        stream: { cameraId: string; rotationDegrees?: number }
+        onDisconnect: () => void
+    }) => (
+        <button data-testid="ome-camera" data-rotation={stream.rotationDegrees ?? 0} onClick={onDisconnect}>
+            {stream.cameraId}
         </button>
     ),
 }))
@@ -124,21 +130,31 @@ describe('livestream viewing and recovery', () => {
                 mediaConnectionType: MediaConnectionType.OvenMediaEngine,
                 url: '',
                 token: '',
-                streams: [{ role: 'front', url: 'ws://localhost:3335/local/front?signature=first' }],
+                streams: [
+                    { cameraId: 'front', url: 'ws://localhost:3335/local/front?signature=first', rotationDegrees: -90 },
+                ],
             })
             .mockResolvedValueOnce({
                 robotId: 'robot-1',
                 mediaConnectionType: MediaConnectionType.OvenMediaEngine,
                 url: '',
                 token: '',
-                streams: [{ role: 'front', url: 'ws://localhost:3335/local/front?signature=second' }],
+                streams: [
+                    {
+                        cameraId: 'front',
+                        url: 'ws://localhost:3335/local/front?signature=second',
+                        rotationDegrees: -90,
+                    },
+                ],
             })
         await mount()
         expect(rooms).toHaveLength(0)
         expect(container.querySelector('[data-testid="ome-camera"]')?.textContent).toBe('front')
+        expect(container.querySelector('[data-testid="ome-camera"]')?.getAttribute('data-rotation')).toBe('-90')
         await act(async () => container.querySelector<HTMLButtonElement>('[data-testid="ome-camera"]')!.click())
         await advance(2_000)
         expect(backendApi.getRobotMediaConfig).toHaveBeenCalledTimes(2)
+        expect(container.querySelector('[data-testid="ome-camera"]')?.getAttribute('data-rotation')).toBe('-90')
         expect(status()).toBe('Reconnecting')
     })
 

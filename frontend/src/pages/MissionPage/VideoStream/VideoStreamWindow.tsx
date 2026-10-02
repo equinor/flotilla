@@ -73,20 +73,20 @@ export const VideoStreamWindow = ({ robotId }: VideoStreamWindowProps) => {
                 {videoCards}
                 {omeAttemptId !== undefined &&
                     omeStreams?.map((camera) => (
-                        <OmeCamera key={`${omeAttemptId}-${camera.role}`}>
-                            <Typography variant="h5">{camera.role}</Typography>
+                        <OmeCamera key={`${omeAttemptId}-${camera.cameraId}`}>
+                            <Typography variant="h5">{camera.cameraId}</Typography>
                             {camera.stream && (
                                 <OmeVideoCard
                                     key={camera.attemptId}
                                     stream={camera.stream}
                                     onPlaying={() =>
-                                        markOmeStreamPlaying(robotId, omeAttemptId, camera.role, camera.attemptId)
+                                        markOmeStreamPlaying(robotId, omeAttemptId, camera.cameraId, camera.attemptId)
                                     }
                                     onStalled={() =>
-                                        markOmeStreamStalled(robotId, omeAttemptId, camera.role, camera.attemptId)
+                                        markOmeStreamStalled(robotId, omeAttemptId, camera.cameraId, camera.attemptId)
                                     }
                                     onDisconnect={() =>
-                                        reconnectOmeStream(robotId, omeAttemptId, camera.role, camera.attemptId)
+                                        reconnectOmeStream(robotId, omeAttemptId, camera.cameraId, camera.attemptId)
                                     }
                                 />
                             )}
@@ -94,7 +94,7 @@ export const VideoStreamWindow = ({ robotId }: VideoStreamWindowProps) => {
                                 <Typography role="status">{TranslateText(statusLabels[camera.status])}</Typography>
                             )}
                             {camera.status === 'unavailable' && (
-                                <Button onClick={() => retryOmeStream(robotId, omeAttemptId, camera.role)}>
+                                <Button onClick={() => retryOmeStream(robotId, omeAttemptId, camera.cameraId)}>
                                     {TranslateText('Retry')}
                                 </Button>
                             )}
