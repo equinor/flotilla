@@ -8,6 +8,39 @@ namespace Api.Database.Context
         private const string KaarstoInspectionAreaWithoutRobot = "Area Without Robot";
         private const string NorthernLightsInspectionArea = "Northern Lights Inspection Area";
 
+        private static readonly (
+            Position RobotPosition,
+            Position TargetPosition
+        )[] kaarstoTaskLocations =
+        [
+            (new(20184.373f, 5251.362f, 14.392f), new(20185.643f, 5251.3f, 14.716f)),
+            (new(20183.297f, 5252.729f, 14.497f), new(20185.643f, 5253.9f, 16.08f)),
+            (new(20182.22f, 5254.095f, 14.602f), new(20182.11f, 5255.75f, 15.7f)),
+        ];
+
+        private static readonly (
+            Position RobotPosition,
+            Position TargetPosition
+        )[] northernLightsTaskLocations =
+        [
+            (new(251.55f, 260.352f, 105.101f), new(251.58f, 257.187f, 106.2f)),
+            (new(266.328f, 256.488f, 105.051f), new(264.541f, 256.555f, 105.789f)),
+            (new(270.308f, 256.559f, 105.051f), new(268.542f, 256.56f, 105.77f)),
+            (new(274.466f, 256.39f, 105.051f), new(272.542f, 256.56f, 105.796f)),
+            (new(286.617f, 264.12f, 105.052f), new(287.925f, 262.502f, 106.228f)),
+            (new(288.092f, 264.081f, 105.052f), new(289.421f, 262.538f, 106.188f)),
+            (new(288.804f, 263.906f, 105.052f), new(291.123f, 263.494f, 105.551f)),
+            (new(292.974f, 263.985f, 105.051f), new(294.735f, 263.513f, 105.539f)),
+            (new(258.603f, 278.044f, 105.053f), new(258.603f, 278.044f, 105.053f)),
+            (new(264.225f, 280.057f, 105.053f), new(264.225f, 280.057f, 105.053f)),
+            (new(263.849f, 275.218f, 105.053f), new(263.849f, 275.218f, 105.053f)),
+            (new(262.579f, 288.105f, 105.051f), new(262.579f, 288.105f, 105.051f)),
+            (new(264.229f, 284.292f, 105.055f), new(264.229f, 284.292f, 105.055f)),
+            (new(280.556f, 287.122f, 105.051f), new(280.556f, 287.122f, 105.051f)),
+            (new(270.526f, 289.155f, 105.059f), new(270.526f, 289.155f, 105.059f)),
+            (new(270.176f, 284.116f, 105.057f), new(270.176f, 284.116f, 105.057f)),
+        ];
+
         // Single-inspection missions avoid grouped SARA analyses.
         private sealed record MissionScenario(
             string MissionName,
@@ -242,11 +275,23 @@ namespace Api.Database.Context
                     inspectionAreas.Single(area => area.Name == KaarstoInspectionAreaWithoutRobot)
                 )
             );
-            definitions.Add(
-                CreateMixedInspectionMission(
-                    inspectionAreas.Single(area => area.Name == KaarstoInspectionArea)
-                )
-            );
+            definitions.AddRange(areasWithRobot.Select(CreateMixedInspectionMission));
+
+            for (int missionIndex = 0; missionIndex < definitions.Count; missionIndex++)
+            {
+                var mission = definitions[missionIndex];
+                var locations =
+                    mission.InspectionArea.Name == NorthernLightsInspectionArea
+                        ? northernLightsTaskLocations
+                        : kaarstoTaskLocations;
+
+                foreach (var task in mission.Tasks)
+                {
+                    var location = locations[(missionIndex + task.Index - 1) % locations.Length];
+                    task.RobotPose = new Pose { Position = new Position(location.RobotPosition) };
+                    task.TargetPosition = new Position(location.TargetPosition);
+                }
+            }
 
             return definitions;
         }
@@ -326,7 +371,10 @@ namespace Api.Database.Context
 
             return new MissionDefinition
             {
-                Id = "97c0c59d-64ab-4f7b-b89e-51ae2b61b070",
+                Id =
+                    inspectionArea.Name == KaarstoInspectionArea
+                        ? "97c0c59d-64ab-4f7b-b89e-51ae2b61b070"
+                        : Guid.NewGuid().ToString(),
                 Name = "Mixed inspections",
                 InstallationCode = inspectionArea.Installation.InstallationCode,
                 InspectionArea = inspectionArea,
