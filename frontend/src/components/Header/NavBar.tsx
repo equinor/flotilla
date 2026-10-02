@@ -106,6 +106,9 @@ const NavBarAsButton = () => {
                 {TranslateText('Menu')}
             </StyledButton>
             <Menu open={isOpen} id="menu" aria-labelledby="menu" onClose={closeMenu} anchorEl={anchorEl}>
+                <Menu.Item onClick={() => navigate(`/${installation.installationCode}/dashboard`)}>
+                    {TranslateText('Dashboard')}
+                </Menu.Item>
                 <Menu.Item onClick={() => navigate(`/${installation.installationCode}/mission-control`)}>
                     {TranslateText('Mission Control')}
                 </Menu.Item>
@@ -171,6 +174,7 @@ export const NavBar = () => {
     const navigate = useNavigate()
 
     const navItems = [
+        { to: `/${installation.installationCode}/dashboard`, label: TranslateText('Dashboard') },
         { to: `/${installation.installationCode}/mission-control`, label: TranslateText('Mission Control') },
         { to: `/${installation.installationCode}/mission-scheduling`, label: TranslateText('Mission Scheduling') },
         { to: `/${installation.installationCode}/history`, label: TranslateText('Mission History') },

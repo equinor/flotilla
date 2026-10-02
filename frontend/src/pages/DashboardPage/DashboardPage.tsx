@@ -5,10 +5,11 @@ import { useLanguageContext } from 'contexts/LanguageContext'
 import { ContentCard, PageBackground } from 'components/Styles/StyledComponents'
 import { InstallationContext } from 'contexts/InstallationContext'
 import { PendingResultPlaceholder } from 'pages/InspectionReportPage/InspectionReportImage'
-import { useInspectionsContext } from 'contexts/InspectionsContext'
 import { AnalysisType } from 'models/MissionDefinition'
 import { InspectionData } from 'models/InspectionRecord'
-import { createPresetTimeRange } from 'pages/DataViewPage/DataViewTimeRange'
+import { AnalysisEvaluation } from 'models/analysis/AnalysisEvaluation'
+import { AnalysisSeverity } from 'models/analysis/AnalysisSeverity'
+import { useAnalysisEvaluations } from 'hooks/useAnalysisEvaluations'
 import { DashboardAlertPanel } from './DashboardAlertPanel'
 import { DashboardRobotStatusCard } from './DashboardRobotStatusCard'
 import { DashboardScheduledMissionsView } from './DashboardScheduledMissionsView'
@@ -17,7 +18,10 @@ import { DashboardInspectionsPlantMap } from './DashboardInspectionsPlantMap'
 import styled from 'styled-components'
 
 interface DataViewContentProps {
-    inspectionData: InspectionData[]
+    alerts: AnalysisEvaluation[]
+    severityCounts: Record<AnalysisSeverity, number>
+    alertInspections: InspectionData[]
+    hasLoadingError: boolean
 }
 
 const DashboardPageContent = styled.div`
@@ -63,7 +67,7 @@ const PageTitle = styled(Typography)`
     padding-left: 8px;
 `
 
-const DashboardContent = ({ inspectionData }: DataViewContentProps) => {
+const DashboardContent = ({ alerts, severityCounts, alertInspections, hasLoadingError }: DataViewContentProps) => {
     const { TranslateText } = useLanguageContext()
     const { installation } = useContext(InstallationContext)
     const { installationInspectionAreas } = useAssetContext()
@@ -72,24 +76,16 @@ const DashboardContent = ({ inspectionData }: DataViewContentProps) => {
     const plantCode =
         installationInspectionAreas.find((i) => i.installationCode === installation.installationCode)?.plantCode ?? null
 
-    const alerts = useMemo(() => {
-        const tagToInspectionMap = new Map<string, InspectionData>()
-        inspectionData.forEach((inspection) => {
-            if (!tagToInspectionMap.has(inspection.tag)) {
-                tagToInspectionMap.set(inspection.tag, inspection)
-            } else if (tagToInspectionMap.get(inspection.tag)!.value == null && inspection.value != null) {
-                tagToInspectionMap.set(inspection.tag, inspection)
-            }
-        })
-        return Array.from(tagToInspectionMap.values()).filter((i) => i.warning)
-    }, [inspectionData])
-
     return (
         <>
             <PageTitle variant="h2">{`${installation.name} ${TranslateText('Dashboard')}`}</PageTitle>
             <DashboardColumns>
                 <DashboardColumn>
-                    <DashboardAlertPanel alerts={alerts} />
+                    <DashboardAlertPanel
+                        alerts={alerts}
+                        severityCounts={severityCounts}
+                        hasLoadingError={hasLoadingError}
+                    />
                 </DashboardColumn>
                 <DashboardColumn>
                     {plantCode && (
@@ -98,7 +94,7 @@ const DashboardContent = ({ inspectionData }: DataViewContentProps) => {
                                 key={'all'}
                                 plantCode={plantCode}
                                 floorId="0"
-                                inspections={alerts}
+                                inspections={alertInspections}
                             />
                         </MapCard>
                     )}
@@ -114,22 +110,19 @@ const DashboardContent = ({ inspectionData }: DataViewContentProps) => {
     )
 }
 
+/** Analyses surfaced on the dashboard. Adding a type here is the whole onboarding step. */
+const dashboardAnalysisTypes = [AnalysisType.CLOE]
+
 export const DashboardPage = () => {
-    const { installation } = useContext(InstallationContext)
-    const { useSaraListData } = useInspectionsContext()
+    const { alerts, severityCounts, rawData, isPending, isError } = useAnalysisEvaluations({
+        analysisTypes: dashboardAnalysisTypes,
+    })
 
-    const timeRangeSelection = useMemo(() => {
-        return { mode: 30, range: createPresetTimeRange(30) }
-    }, [])
-
-    const { data, isPending } = useSaraListData(
-        null,
-        installation.installationCode,
-        null,
-        AnalysisType.CLOE,
-        timeRangeSelection.range.minDate,
-        timeRangeSelection.range.maxDate
-    )
+    // The map plots raw records, so map the alerts back to the rows they came from.
+    const alertInspections = useMemo(() => {
+        const alertIds = new Set(alerts.map((alert) => alert.analysisId))
+        return rawData.filter((inspection) => alertIds.has(inspection.analysisId))
+    }, [alerts, rawData])
 
     return (
         <PageBackground>
@@ -137,7 +130,12 @@ export const DashboardPage = () => {
                 {isPending ? (
                     <PendingResultPlaceholder isLargeImage={true} />
                 ) : (
-                    <DashboardContent inspectionData={data ?? []} />
+                    <DashboardContent
+                        alerts={alerts}
+                        severityCounts={severityCounts}
+                        alertInspections={alertInspections}
+                        hasLoadingError={isError}
+                    />
                 )}
             </DashboardPageContent>
         </PageBackground>

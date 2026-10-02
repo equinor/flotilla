@@ -321,6 +321,7 @@
     "Fill [%]": "Fyll [%]",
     "No data available in the selected time range": "Ingen data tilgjengelig i det valgte tidsrommet",
     "Could not load data for the selected time range": "Kunne ikke laste data for det valgte tidsrommet",
+    "Could not load analysis results": "Kunne ikke laste analyseresultater",
     "Not available": "Ikke tilgjengelig",
     "Selected inspection": "Utvalgt inspeksjon",
     "Selected analysis result": "Utvalgt analyseresultat",
@@ -372,5 +373,15 @@
     "Finding": "Funn",
     "No finding": "Ingen funn",
     "Index": "Indeks",
-    "Show data until selected date": "Vis data fram til valgte dato"
+    "Show data until selected date": "Vis data fram til valgte dato",
+    "Dashboard": "Dashbord",
+    "Active alarms": "Aktive alarmer",
+    "No active alarms": "Ingen aktive alarmer",
+    "Alarm": "Alarm",
+    "Normal": "Normal",
+    "Unknown": "Ukjent",
+    "Fill level": "Fyllnivå",
+    "Constant level oiler": "Nivåglass",
+    "Perimeter breach detection": "Deteksjon av gjerdebrudd",
+    "Thermal reading": "Termisk avlesning"
 }

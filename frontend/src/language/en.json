@@ -321,6 +321,7 @@
     "Fill [%]": "Fill [%]",
     "No data available in the selected time range": "No data available in the selected time range",
     "Could not load data for the selected time range": "Could not load data for the selected time range",
+    "Could not load analysis results": "Could not load analysis results",
     "Data View for Constant Level Oilers": "Data View for Constant Level Oilers",
     "Not available": "Not available",
     "Go to data overview": "Go to data overview",
@@ -372,5 +373,15 @@
     "Finding": "Finding",
     "No finding": "No finding",
     "Index": "Index",
-    "Show data until selected date": "Show data until selected date"
+    "Show data until selected date": "Show data until selected date",
+    "Dashboard": "Dashboard",
+    "Active alarms": "Active alarms",
+    "No active alarms": "No active alarms",
+    "Alarm": "Alarm",
+    "Normal": "Normal",
+    "Unknown": "Unknown",
+    "Fill level": "Fill level",
+    "Constant level oiler": "Constant level oiler",
+    "Perimeter breach detection": "Perimeter breach detection",
+    "Thermal reading": "Thermal reading"
 }
