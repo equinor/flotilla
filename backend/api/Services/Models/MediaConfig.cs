@@ -9,7 +9,7 @@
         public List<MediaStream>? Streams { get; set; }
     }
 
-    public record MediaStream(string Role, string Url);
+    public record MediaStream(string CameraId, string Url, int RotationDegrees = 0);
 
     public enum MediaConnectionType
     {

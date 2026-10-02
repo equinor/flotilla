@@ -2,7 +2,7 @@ import { NamedMediaStream } from 'models/VideoStream'
 import { calculateMediaStreamRetryDelayMs, MEDIA_STREAM_RECOVERY_POLICY } from './MediaStreamRecoveryPolicy'
 
 export interface OmeStreamState {
-    role: string
+    cameraId: string
     attemptId: number
     status: 'connecting' | 'reconnecting' | 'connected' | 'unavailable'
     stream?: NamedMediaStream
@@ -20,7 +20,7 @@ interface Camera {
 
 export const createOmeStreamManager = (
     streams: NamedMediaStream[],
-    refreshStream: (role: string) => Promise<NamedMediaStream | undefined>,
+    refreshStream: (cameraId: string) => Promise<NamedMediaStream | undefined>,
     onChange: () => void
 ) => {
     let disposed = false
@@ -39,7 +39,7 @@ export const createOmeStreamManager = (
         clearTimers(camera)
         // Invalidate player callbacks and pending config responses before scheduling recovery.
         camera.state = {
-            role: camera.state.role,
+            cameraId: camera.state.cameraId,
             attemptId: attemptId + 1,
             status: camera.attempts >= MEDIA_STREAM_RECOVERY_POLICY.maxAttempts ? 'unavailable' : 'reconnecting',
         }
@@ -66,11 +66,11 @@ export const createOmeStreamManager = (
         clearTimers(camera)
         camera.attempts++
         camera.state = { ...camera.state, attemptId: camera.state.attemptId + 1, status: 'reconnecting' }
-        const { attemptId, role } = camera.state
+        const { attemptId, cameraId } = camera.state
         startRecoveryDeadline(camera)
         onChange()
         try {
-            const stream = await refreshStream(role)
+            const stream = await refreshStream(cameraId)
             if (!isCurrent(camera, attemptId)) return
             if (!stream) {
                 failCamera(camera, attemptId)
@@ -83,8 +83,8 @@ export const createOmeStreamManager = (
         }
     }
 
-    const markPlaying = (role: string, attemptId: number) => {
-        const camera = cameras.get(role)
+    const markPlaying = (cameraId: string, attemptId: number) => {
+        const camera = cameras.get(cameraId)
         if (!camera || !isCurrent(camera, attemptId) || !camera.state.stream) return
         if (camera.state.status === 'connected') return
         clearTimers(camera)
@@ -96,8 +96,8 @@ export const createOmeStreamManager = (
         onChange()
     }
 
-    const markStalled = (role: string, attemptId: number) => {
-        const camera = cameras.get(role)
+    const markStalled = (cameraId: string, attemptId: number) => {
+        const camera = cameras.get(cameraId)
         if (!camera || !isCurrent(camera, attemptId) || !camera.state.stream) return
         clearTimeout(camera.stableTimer)
         camera.stableTimer = undefined
@@ -106,13 +106,13 @@ export const createOmeStreamManager = (
         onChange()
     }
 
-    const reconnect = (role: string, attemptId: number) => {
-        const camera = cameras.get(role)
+    const reconnect = (cameraId: string, attemptId: number) => {
+        const camera = cameras.get(cameraId)
         if (camera) failCamera(camera, attemptId)
     }
 
-    const retry = (role: string) => {
-        const camera = cameras.get(role)
+    const retry = (cameraId: string) => {
+        const camera = cameras.get(cameraId)
         if (!camera || camera.state.status !== 'unavailable' || disposed) return
         camera.attempts = 0
         void startCameraAttempt(camera)
@@ -120,10 +120,10 @@ export const createOmeStreamManager = (
 
     streams.forEach((stream) => {
         const camera: Camera = {
-            state: { role: stream.role, stream, attemptId: 1, status: 'connecting' },
+            state: { cameraId: stream.cameraId, stream, attemptId: 1, status: 'connecting' },
             attempts: 1,
         }
-        cameras.set(stream.role, camera)
+        cameras.set(stream.cameraId, camera)
         startRecoveryDeadline(camera)
     })
 
