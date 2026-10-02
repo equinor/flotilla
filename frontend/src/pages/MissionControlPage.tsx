@@ -61,7 +61,7 @@ export const MissionControlPage = () => {
     )
 }
 
-export const MissionControlCard = ({ robot }: { robot: RobotWithoutTelemetry }) => {
+const MissionControlCard = ({ robot }: { robot: RobotWithoutTelemetry }) => {
     const { ongoingMissions } = useMissionsContext()
     const ongoingMission = ongoingMissions.find((mission) => mission.robot.id === robot.id)
     const [isOpen, setIsOpen] = useState<boolean>(true)

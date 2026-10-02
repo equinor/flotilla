@@ -1,24 +1,35 @@
 import { Typography } from '@equinor/eds-core-react'
+import { tokens } from '@equinor/eds-tokens'
 import { useContext, useMemo } from 'react'
 import { useLanguageContext } from 'contexts/LanguageContext'
-import { PageContent, ContentCard, PageBackground } from 'components/Styles/StyledComponents'
+import { ContentCard, PageBackground } from 'components/Styles/StyledComponents'
 import { InstallationContext } from 'contexts/InstallationContext'
 import { PendingResultPlaceholder } from 'pages/InspectionReportPage/InspectionReportImage'
-import { DataViewMapWrapper } from 'pages/DataViewPage/DataViewComponents'
 import { useInspectionsContext } from 'contexts/InspectionsContext'
 import { AnalysisType } from 'models/MissionDefinition'
 import { InspectionData } from 'models/InspectionRecord'
 import { createPresetTimeRange } from 'pages/DataViewPage/DataViewTimeRange'
-import { SaraAlertCard } from './AlertComponent'
+import { DashboardAlertPanel } from './DashboardAlertPanel'
+import { DashboardRobotStatusCard } from './DashboardRobotStatusCard'
+import { DashboardScheduledMissionsView } from './DashboardScheduledMissionsView'
 import { useAssetContext } from 'contexts/AssetContext'
-import { InspectionsPlantMap } from 'pages/MissionPage/MapPosition/PointillaMapView'
+import { DashboardInspectionsPlantMap } from './DashboardInspectionsPlantMap'
 import styled from 'styled-components'
-import { MissionControlCard } from 'pages/MissionControlPage'
-import { NextAutoScheduleMissionView } from 'pages/FrontPage/AutoScheduleSection/NextAutoScheduleMissionView'
 
 interface DataViewContentProps {
     inspectionData: InspectionData[]
 }
+
+const DashboardPageContent = styled.div`
+    width: 100%;
+    min-width: 0;
+    padding-inline: var(--eds-page-space-horizontal);
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    --dashboard-zoom: clamp(1, calc(100vw / 2195px), 3);
+    zoom: var(--dashboard-zoom);
+`
 
 const DashboardColumns = styled.div`
     display: flex;
@@ -28,9 +39,28 @@ const DashboardColumns = styled.div`
 const DashboardColumn = styled.div`
     display: flex;
     flex-direction: column;
-    flex: auto;
+    flex: 1;
     min-width: 0;
+    min-height: 0;
+    height: calc(90vh / var(--dashboard-zoom));
+    overflow-y: auto;
     gap: 16px;
+`
+
+const MapCard = styled(ContentCard)`
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+`
+
+const RobotList = styled(ContentCard)`
+    padding-block: ${tokens.spacings.comfortable.xx_small};
+    max-height: calc(40vh / var(--dashboard-zoom));
+    overflow-y: auto;
+`
+
+const PageTitle = styled(Typography)`
+    padding-left: 8px;
 `
 
 const DashboardContent = ({ inspectionData }: DataViewContentProps) => {
@@ -42,7 +72,7 @@ const DashboardContent = ({ inspectionData }: DataViewContentProps) => {
     const plantCode =
         installationInspectionAreas.find((i) => i.installationCode === installation.installationCode)?.plantCode ?? null
 
-    const uniqueTagInspectionData = useMemo(() => {
+    const alerts = useMemo(() => {
         const tagToInspectionMap = new Map<string, InspectionData>()
         inspectionData.forEach((inspection) => {
             if (!tagToInspectionMap.has(inspection.tag)) {
@@ -51,45 +81,33 @@ const DashboardContent = ({ inspectionData }: DataViewContentProps) => {
                 tagToInspectionMap.set(inspection.tag, inspection)
             }
         })
-        return Array.from(tagToInspectionMap.values())
+        return Array.from(tagToInspectionMap.values()).filter((i) => i.warning)
     }, [inspectionData])
 
     return (
         <>
-            <Typography variant="h2">{`${installation.name} - ${TranslateText('Dashboard')}`}</Typography>
+            <PageTitle variant="h2">{`${installation.name} ${TranslateText('Dashboard')}`}</PageTitle>
             <DashboardColumns>
                 <DashboardColumn>
-                    {uniqueTagInspectionData
-                        .filter((i) => i.warning)
-                        .map((i) => (
-                            <SaraAlertCard
-                                key={i.analysisId}
-                                analysisType={i.analysisType!}
-                                tag={i.tag!}
-                                createdAt={i.createdAt!}
-                                value={i.value!}
-                                unit={i.unit!}
-                                warning={i.warning!}
-                            />
-                        ))}
+                    <DashboardAlertPanel alerts={alerts} />
                 </DashboardColumn>
                 <DashboardColumn>
                     {plantCode && (
-                        <ContentCard>
-                            <DataViewMapWrapper>
-                                <InspectionsPlantMap
-                                    key={'all'}
-                                    plantCode={plantCode}
-                                    floorId="0"
-                                    inspections={uniqueTagInspectionData}
-                                />
-                            </DataViewMapWrapper>
-                        </ContentCard>
+                        <MapCard>
+                            <DashboardInspectionsPlantMap
+                                key={'all'}
+                                plantCode={plantCode}
+                                floorId="0"
+                                inspections={alerts}
+                            />
+                        </MapCard>
                     )}
-                    {enabledRobots.map((robot) => (
-                        <MissionControlCard key={robot.id} robot={robot} />
-                    ))}
-                    <NextAutoScheduleMissionView />
+                    <RobotList>
+                        {enabledRobots.map((robot) => (
+                            <DashboardRobotStatusCard key={robot.id} robot={robot} />
+                        ))}
+                    </RobotList>
+                    <DashboardScheduledMissionsView />
                 </DashboardColumn>
             </DashboardColumns>
         </>
@@ -113,16 +131,15 @@ export const DashboardPage = () => {
         timeRangeSelection.range.maxDate
     )
 
-    // Keep the page mounted on error, or the time range selector goes with it.
     return (
         <PageBackground>
-            <PageContent>
+            <DashboardPageContent>
                 {isPending ? (
                     <PendingResultPlaceholder isLargeImage={true} />
                 ) : (
                     <DashboardContent inspectionData={data ?? []} />
                 )}
-            </PageContent>
+            </DashboardPageContent>
         </PageBackground>
     )
 }

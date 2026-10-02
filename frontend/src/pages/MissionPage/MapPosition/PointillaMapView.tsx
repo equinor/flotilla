@@ -18,7 +18,7 @@ import { RobotWithoutTelemetry } from 'models/Robot'
 import { Task } from 'models/Task'
 import { InspectionData } from 'models/InspectionRecord'
 
-const LeafletTooltipStyles = createGlobalStyle`
+export const LeafletTooltipStyles = createGlobalStyle`
     .leaflet-tooltip.circleLabel {
     background: transparent !important;
     border: none !important;
@@ -227,6 +227,21 @@ export function InspectionsPlantMap({
     floorId: string
     inspections: InspectionData[]
 }) {
+    const { mapInfo, setMap } = useInspectionsPlantMapData(plantCode, floorId, inspections)
+
+    return (
+        <div className="map-root">
+            <StyledElements>
+                <LeafletTooltipStyles />
+                <StyledMapContainer style={{ width: '100%' }} ref={setMap} attributionControl={false}>
+                    {mapInfo && <AuthTileLayer mapInfo={mapInfo} />}
+                </StyledMapContainer>
+            </StyledElements>
+        </div>
+    )
+}
+
+export function useInspectionsPlantMapData(plantCode: string, floorId: string, inspections: InspectionData[]) {
     const [mapInfo, setMapInfo] = useState<PointillaMapInfo | undefined>(undefined)
     const [map, setMap] = useState<L.Map | null>(null)
     const backendApi = useBackendApi()
@@ -265,16 +280,7 @@ export function InspectionsPlantMap({
         }
     }, [mapInfo])
 
-    return (
-        <div className="map-root">
-            <StyledElements>
-                <LeafletTooltipStyles />
-                <StyledMapContainer style={{ width: '100%' }} ref={setMap} attributionControl={false}>
-                    {mapInfo && <AuthTileLayer mapInfo={mapInfo} />}
-                </StyledMapContainer>
-            </StyledElements>
-        </div>
-    )
+    return { mapInfo, map, setMap }
 }
 
 export function PlantPolygonMap({ inspectionArea, floorId }: PlantPolygonMapProps) {
