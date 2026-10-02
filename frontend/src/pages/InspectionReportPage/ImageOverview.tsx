@@ -6,7 +6,6 @@ import {
     StyledInspectionContent,
     StyledInspectionData,
     StyledInspectionOverviewDialogView,
-    StyledInspectionOverviewSection,
 } from './InspectionStyles'
 import { Typography } from '@equinor/eds-core-react'
 import { formatDateTime } from 'utils/StringFormatting'
@@ -55,21 +54,6 @@ const ImageOverview = ({ inspectionData, variant }: { inspectionData: Inspection
     )
 }
 
-const OverviewSection = ({
-    inspectionData,
-    variant,
-    title,
-}: {
-    inspectionData: InspectionData[]
-    variant: OverviewVariant
-    title: string
-}) => (
-    <StyledInspectionOverviewSection>
-        <Typography variant="h4">{title}</Typography>
-        <ImageOverview inspectionData={inspectionData} variant={variant} />
-    </StyledInspectionOverviewSection>
-)
-
 const OverviewDialogView = ({
     inspectionData,
     variant,
@@ -81,24 +65,6 @@ const OverviewDialogView = ({
         <ImageOverview inspectionData={inspectionData} variant={variant} />
     </StyledInspectionOverviewDialogView>
 )
-
-export const InspectionOverviewSection = ({ inspectionData }: { inspectionData: InspectionData[] }) => {
-    const { TranslateText } = useLanguageContext()
-    return (
-        <OverviewSection
-            inspectionData={inspectionData}
-            variant="inspection"
-            title={TranslateText('Inspection result')}
-        />
-    )
-}
-
-export const AnalysisOverviewSection = ({ inspectionData }: { inspectionData: InspectionData[] }) => {
-    const { TranslateText } = useLanguageContext()
-    return (
-        <OverviewSection inspectionData={inspectionData} variant="analysis" title={TranslateText('Analysis result')} />
-    )
-}
 
 export const InspectionOverviewDialogView = ({ inspectionData }: { inspectionData: InspectionData[] }) => (
     <OverviewDialogView inspectionData={inspectionData} variant="inspection" />
