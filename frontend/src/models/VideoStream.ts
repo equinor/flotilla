@@ -4,8 +4,9 @@ export enum MediaConnectionType {
 }
 
 export interface NamedMediaStream {
-    role: string
+    cameraId: string
     url: string
+    rotationDegrees?: number
 }
 
 export interface MediaStreamConfig {

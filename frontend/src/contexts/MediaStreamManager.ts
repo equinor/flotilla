@@ -172,14 +172,14 @@ export const createMediaStreamManager = (
             if (config.mediaConnectionType === MediaConnectionType.OvenMediaEngine && config.streams?.length) {
                 clearTimeout(attempt.timeout)
                 attempt.timeout = undefined
-                const refreshOmeStreamForRole = async (role: string) => {
+                const refreshOmeStreamForCamera = async (cameraId: string) => {
                     const refreshed = await getConfig(robotId)
                     if (
                         refreshed?.robotId !== robotId ||
                         refreshed.mediaConnectionType !== MediaConnectionType.OvenMediaEngine
                     )
                         return undefined
-                    return refreshed.streams?.find((stream) => stream.role === role)
+                    return refreshed.streams?.find((stream) => stream.cameraId === cameraId)
                 }
                 const publishOmeCameraStatus = () => {
                     if (!isCurrent()) return
@@ -193,7 +193,7 @@ export const createMediaStreamManager = (
                 }
                 attempt.omeManager = createOmeStreamManager(
                     config.streams,
-                    refreshOmeStreamForRole,
+                    refreshOmeStreamForCamera,
                     publishOmeCameraStatus
                 )
                 publish(robotId, connection, connection.state.status)
@@ -255,20 +255,20 @@ export const createMediaStreamManager = (
         if (attempt?.id === attemptId) return attempt.omeManager
     }
 
-    const markOmeStreamPlaying = (robotId: string, attemptId: number, role: string, cameraAttemptId: number) => {
-        currentOmeManager(robotId, attemptId)?.markPlaying(role, cameraAttemptId)
+    const markOmeStreamPlaying = (robotId: string, attemptId: number, cameraId: string, cameraAttemptId: number) => {
+        currentOmeManager(robotId, attemptId)?.markPlaying(cameraId, cameraAttemptId)
     }
 
-    const markOmeStreamStalled = (robotId: string, attemptId: number, role: string, cameraAttemptId: number) => {
-        currentOmeManager(robotId, attemptId)?.markStalled(role, cameraAttemptId)
+    const markOmeStreamStalled = (robotId: string, attemptId: number, cameraId: string, cameraAttemptId: number) => {
+        currentOmeManager(robotId, attemptId)?.markStalled(cameraId, cameraAttemptId)
     }
 
-    const reconnectOmeStream = (robotId: string, attemptId: number, role: string, cameraAttemptId: number) => {
-        currentOmeManager(robotId, attemptId)?.reconnect(role, cameraAttemptId)
+    const reconnectOmeStream = (robotId: string, attemptId: number, cameraId: string, cameraAttemptId: number) => {
+        currentOmeManager(robotId, attemptId)?.reconnect(cameraId, cameraAttemptId)
     }
 
-    const retryOmeStream = (robotId: string, attemptId: number, role: string) => {
-        currentOmeManager(robotId, attemptId)?.retry(role)
+    const retryOmeStream = (robotId: string, attemptId: number, cameraId: string) => {
+        currentOmeManager(robotId, attemptId)?.retry(cameraId)
     }
 
     const dispose = () => {
