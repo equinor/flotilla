@@ -1,123 +1,100 @@
-import { Card, Chip, Icon, Typography } from '@equinor/eds-core-react'
+import { Chip, Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import { useId } from 'react'
 import styled from 'styled-components'
-import { AnalysisValueDisplay } from 'components/Displays/TaskDisplay'
 import { useLanguageContext } from 'contexts/LanguageContext'
 import { AnalysisType } from 'models/MissionDefinition'
-import cloe from 'mediaAssets/cloe.png'
-import fenceBreach from 'mediaAssets/fenceBreach.png'
-import thermalReading from 'mediaAssets/thermalReading.png'
 import { formatDateTime } from 'utils/StringFormatting'
-import { Icons } from 'utils/icons'
-const analysisDetails: Record<string, { label: string; valueLabel: string; image?: string }> = {
-    [AnalysisType.CLOE]: { label: 'Constant level oiler', valueLabel: 'Fill level', image: cloe },
-    [AnalysisType.Fencilla]: { label: 'Perimeter breach detection', valueLabel: 'Value', image: fenceBreach },
-    [AnalysisType.ThermalReading]: { label: 'Thermal reading', valueLabel: 'Temperature', image: thermalReading },
-    [AnalysisType.CO2]: { label: 'CO2Measurement', valueLabel: 'CO2Measurement' },
+
+const analysisDetails: Record<string, { label: string }> = {
+    [AnalysisType.CLOE]: { label: 'Constant level oiler' },
+    [AnalysisType.Fencilla]: { label: 'Perimeter breach detection' },
+    [AnalysisType.ThermalReading]: { label: 'Thermal reading' },
+    [AnalysisType.CO2]: { label: 'CO2Measurement' },
 }
-const StyledCard = styled(Card)`
-    min-width: 0;
-    border-left: ${tokens.spacings.comfortable.x_small} solid ${tokens.colors.interactive.warning__resting.hex};
-    overflow-wrap: anywhere;
-`
-const CardContent = styled(Card.Content)`
+const StyledRow = styled.div`
     display: flex;
     align-items: center;
-    padding-top: ${tokens.spacings.comfortable.medium};
+    justify-content: space-between;
     gap: ${tokens.spacings.comfortable.xxx_large};
+    min-width: 0;
+    padding: ${tokens.spacings.comfortable.large} 0;
+    padding-left: ${tokens.spacings.comfortable.large};
+    border-left: 5px solid ${tokens.colors.interactive.danger__resting.hex};
+    border-bottom: 1px dashed ${tokens.colors.ui.background__medium.hex};
+    overflow-wrap: anywhere;
+
+    &:last-child {
+        border-bottom: none;
+    }
 `
 const Identity = styled.div`
     display: flex;
-    flex: 2 1 230px;
-    min-width: 0;
-    align-items: flex-start;
-    gap: ${tokens.spacings.comfortable.medium};
-    svg {
-        flex-shrink: 0;
-        margin-top: ${tokens.spacings.comfortable.x_small};
-    }
-`
-const TagDetails = styled(Card.HeaderTitle)`
+    flex-direction: column;
     min-width: 0;
     gap: ${tokens.spacings.comfortable.x_small};
 `
-const WarningBadge = styled(Chip)`
-    background-color: ${tokens.colors.interactive.warning__highlight.hex};
-    color: ${tokens.colors.interactive.warning__hover.hex};
+const TitleRow = styled.div`
+    display: flex;
+    align-items: center;
+    gap: ${tokens.spacings.comfortable.medium};
 `
-const Reading = styled.div`
-    flex: 1 1 160px;
-    min-width: 0;
+const OrderBadge = styled.span`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid black;
+    font-family: Equinor, sans-serif;
+    font-weight: 400;
 `
-const WarningText = styled(Typography)`
-    white-space: pre-wrap;
+const AnalysisLabel = styled(Typography)`
+    font-size: 1.1rem;
 `
-const Media = styled.div`
+const WarningSection = styled.div`
     display: flex;
     flex-direction: column;
-    align-items: center;
-    flex: 0 1 128px;
-    min-width: 0;
-    gap: ${tokens.spacings.comfortable.x_small};
+    align-items: flex-end;
+    flex-shrink: 0;
+    gap: ${tokens.spacings.comfortable.medium};
 `
-const AnalysisImage = styled.img`
-    width: 100px;
-    height: 80px;
-    object-fit: contain;
+const WarningBadge = styled(Chip)`
+    background-color: ${tokens.colors.interactive.danger__highlight.hex};
+    color: ${tokens.colors.interactive.danger__text.hex};
+    height: 32px;
+    font-size: 1rem;
+    padding-inline: 16px;
 `
 interface SaraAlertCardProps {
     analysisType: string
     tag: string
-    area?: string
     createdAt: Date
-    value: string
-    unit: string
     warning: string
+    order: number
 }
-export const SaraAlertCard = ({ analysisType, tag, area, createdAt, value, unit, warning }: SaraAlertCardProps) => {
+export const SaraAlertCard = ({ analysisType, tag, createdAt, warning, order }: SaraAlertCardProps) => {
     const { TranslateText } = useLanguageContext()
     const titleId = useId()
-    const valueLabelId = useId()
     if (!warning.trim()) return null
     const details = analysisDetails[analysisType]
     const analysisLabel = TranslateText(details.label)
     return (
-        <StyledCard role="article" aria-labelledby={titleId} elevation="raised">
-            <CardContent>
-                <Identity>
-                    <Icon
-                        name={Icons.Warning}
-                        color={tokens.colors.interactive.warning__hover.hex}
-                        aria-hidden="true"
-                    />
-                    <TagDetails>
-                        <Typography id={titleId} as="h3" variant="h3">
-                            {tag}
-                        </Typography>
-                        <Typography variant="body_short">{analysisLabel}</Typography>
-                        {area?.trim() && (
-                            <Typography variant="body_short">
-                                {TranslateText('Area')} {area}
-                            </Typography>
-                        )}
-                        <WarningBadge>{`${TranslateText('Warning')} - ${warning}`}</WarningBadge>
-                    </TagDetails>
-                </Identity>
-                <Reading>
-                    <Typography id={valueLabelId} variant="overline">
-                        {TranslateText(details.valueLabel)}
+        <StyledRow role="article" aria-labelledby={titleId}>
+            <Identity>
+                <TitleRow>
+                    <Typography id={titleId} as="h3" variant="h4">
+                        {tag}
                     </Typography>
-                    <div role="group" aria-labelledby={valueLabelId}>
-                        <AnalysisValueDisplay value={value} unit={unit} analysisType={analysisType} />
-                    </div>
-                    <WarningText variant="body_short">{warning}</WarningText>
-                </Reading>
-                <Media>
-                    {details.image && <AnalysisImage src={details.image} alt={analysisLabel} />}
-                    <Typography variant="caption">{formatDateTime(createdAt)}</Typography>
-                </Media>
-            </CardContent>
-        </StyledCard>
+                    <OrderBadge>{order}</OrderBadge>
+                </TitleRow>
+                <AnalysisLabel variant="body_short">{analysisLabel}</AnalysisLabel>
+            </Identity>
+            <WarningSection>
+                <WarningBadge>{`${TranslateText('Warning')} - ${warning}`}</WarningBadge>
+                <Typography variant="caption">{formatDateTime(createdAt)}</Typography>
+            </WarningSection>
+        </StyledRow>
     )
 }
