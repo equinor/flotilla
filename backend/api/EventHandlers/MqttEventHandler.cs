@@ -826,6 +826,18 @@ namespace Api.EventHandlers
                 $"Intervention needed for robot {interventionNeededMessage.RobotName}. "
                 + $"Reason: {interventionNeededMessage.Reason}";
 
+            _ = SignalRService.SendMessageAsync(
+                "Alert",
+                robot.CurrentInstallation,
+                new AlertResponse(
+                    "InterventionNeeded",
+                    $"Intervention needed for robot {robot.Name}",
+                    interventionNeededMessage.Reason,
+                    robot.CurrentInstallation.InstallationCode,
+                    robot.Id
+                )
+            );
+
             _eventAggregatorSingletonService.Publish(new TeamsMessageEventArgs(message));
         }
 

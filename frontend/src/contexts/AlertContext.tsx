@@ -205,6 +205,10 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                     // This comes from MQTT (mission failures handled separately), but show as banner
                     setBanner(backendAlert.alertMessage, 'warning', backendAlert.alertTitle)
                     break
+                case 'InterventionNeeded':
+                    setBanner(backendAlert.alertMessage, 'error', backendAlert.alertTitle)
+                    addNotification(backendAlert.alertMessage, 'error', backendAlert.alertTitle)
+                    break
                 case 'DockFailure':
                     // DockFailure -> Both banner and notification
                     setBanner(backendAlert.alertMessage, 'error', backendAlert.alertTitle)

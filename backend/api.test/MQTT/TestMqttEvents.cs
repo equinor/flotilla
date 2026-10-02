@@ -60,6 +60,71 @@ namespace Api.Test.MQTT
             await Task.CompletedTask;
         }
 
+        [Theory]
+        [InlineData("Return home failed after 3 attempts")]
+        [InlineData("Return home to recharge failed")]
+        [InlineData("Lockdown mission failed")]
+        public async Task TestMQTTInterventionNeeded(string reason)
+        {
+            var installation = await DatabaseUtilities.NewInstallation();
+            var robot = await DatabaseUtilities.NewRobot(
+                RobotStatus.InterventionNeeded,
+                installation
+            );
+            var message = new IsarInterventionNeededMessage
+            {
+                RobotName = robot.Name,
+                IsarId = robot.IsarId,
+                Reason = reason,
+                Timestamp = DateTime.UtcNow,
+            };
+            var messageString = JsonSerializer.Serialize(message);
+
+            await MqttService.PublishMessageBasedOnTopic(
+                $"isar/{robot.Id}/intervention_needed",
+                messageString
+            );
+
+            AlertResponse? alert = null;
+            await TestSetupHelpers.WaitFor(() =>
+            {
+                foreach (var raw in Factory.MockSignalRService.LatestMessages)
+                {
+                    var receivedMessage = (dynamic)raw;
+                    if (receivedMessage.Label != "Alert")
+                        continue;
+                    object payload = receivedMessage.Message;
+                    if (payload is AlertResponse receivedAlert && receivedAlert.RobotId == robot.Id)
+                    {
+                        alert = receivedAlert;
+                        return Task.FromResult(true);
+                    }
+                }
+                return Task.FromResult(false);
+            });
+
+            Assert.NotNull(alert);
+            Assert.Equal("InterventionNeeded", alert.AlertCode);
+            Assert.Equal($"Intervention needed for robot {robot.Name}", alert.AlertTitle);
+            Assert.Equal(reason, alert.AlertMessage);
+            Assert.Equal(robot.Id, alert.RobotId);
+            Assert.Equal(installation.InstallationCode, alert.InstallationCode);
+
+            await TestSetupHelpers.WaitFor(() =>
+            {
+                foreach (var notification in Factory.MockTeamsNotificationService.Notifications)
+                {
+                    if (
+                        notification.Destination == TeamsDestination.SystemAlerts
+                        && notification.CardJson
+                            == $"Intervention needed for robot {robot.Name}. Reason: {reason}"
+                    )
+                        return Task.FromResult(true);
+                }
+                return Task.FromResult(false);
+            });
+        }
+
         [Fact]
         public async Task TestMQTTUpdatesIsarStatus()
         {
