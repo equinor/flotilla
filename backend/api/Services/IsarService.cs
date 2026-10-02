@@ -587,7 +587,13 @@ namespace Api.Services
                 Token = isarMediaConfigResponse.Token,
                 RobotId = robot.Id,
                 MediaConnectionType = connectionType,
-                Streams = isarMediaConfigResponse.Streams,
+                Streams = isarMediaConfigResponse
+                    .Streams?.Select(stream => new MediaStream(
+                        stream.CameraId,
+                        stream.Url,
+                        stream.RotationDegrees
+                    ))
+                    .ToList(),
             };
         }
     }

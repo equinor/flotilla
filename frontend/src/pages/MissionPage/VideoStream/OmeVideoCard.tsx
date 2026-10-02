@@ -1,14 +1,15 @@
-import { useEffect, useRef, useState } from 'react'
+import { CSSProperties, useEffect, useRef, useState } from 'react'
 import { Button, Icon } from '@equinor/eds-core-react'
 import { NamedMediaStream } from 'models/VideoStream'
 import styled from 'styled-components'
 import { Icons } from 'utils/icons'
 
-const VideoFrame = styled.div`
+const VideoFrame = styled.div<{ $rotationDegrees: number; $quarterTurn: boolean }>`
     position: relative;
     width: 100%;
     aspect-ratio: 16 / 9;
     background: black;
+    overflow: hidden;
 
     .ovenplayer {
         height: 100%;
@@ -19,8 +20,18 @@ const VideoFrame = styled.div`
         display: none;
     }
 
-    .ovenplayer video {
+    && .ovenplayer .op-media-element-container video {
         object-fit: contain;
+        ${({ $quarterTurn }) =>
+            $quarterTurn &&
+            `
+                width: var(--frame-height);
+                height: var(--frame-width);
+                top: 50%;
+                left: 50%;
+            `}
+        transform: ${({ $rotationDegrees, $quarterTurn }) =>
+            $quarterTurn ? `translate(-50%, -50%) rotate(${$rotationDegrees}deg)` : `rotate(${$rotationDegrees}deg)`};
     }
 
     &:fullscreen {
@@ -90,6 +101,18 @@ export const OmeVideoCard = ({ stream, onPlaying, onStalled, onDisconnect }: Pro
     const stalledHandler = useRef(onStalled)
     const disconnectHandler = useRef(onDisconnect)
     const [isFullscreen, setIsFullscreen] = useState(false)
+    const [frameSize, setFrameSize] = useState({ width: 0, height: 0 })
+    const rotationDegrees = stream.rotationDegrees ?? 0
+    const quarterTurn = Math.abs(rotationDegrees % 180) === 90
+
+    useEffect(() => {
+        if (!quarterTurn || !frame.current) return
+        const observer = new ResizeObserver(([entry]) => {
+            setFrameSize({ width: entry.contentRect.width, height: entry.contentRect.height })
+        })
+        observer.observe(frame.current)
+        return () => observer.disconnect()
+    }, [quarterTurn])
 
     useEffect(() => {
         const updateFullscreen = () => setIsFullscreen(document.fullscreenElement === frame.current)
@@ -138,7 +161,7 @@ export const OmeVideoCard = ({ stream, onPlaying, onStalled, onDisconnect }: Pro
                 mute: true,
                 controls: false,
                 expandFullScreenUI: false,
-                sources: [{ type: 'webrtc', file: stream.url, label: stream.role }],
+                sources: [{ type: 'webrtc', file: stream.url, label: stream.cameraId }],
             })
             player.on('stateChanged', handleOmePlayerStateChange)
             player.on('error', () => {
@@ -173,10 +196,23 @@ export const OmeVideoCard = ({ stream, onPlaying, onStalled, onDisconnect }: Pro
             waitForRetry?.()
             player?.remove()
         }
-    }, [stream.url, stream.role])
+    }, [stream.url, stream.cameraId])
 
     return (
-        <VideoFrame ref={frame} onDoubleClick={toggleFullscreen}>
+        <VideoFrame
+            ref={frame}
+            $rotationDegrees={rotationDegrees}
+            $quarterTurn={quarterTurn}
+            style={
+                quarterTurn
+                    ? ({
+                          '--frame-width': `${frameSize.width}px`,
+                          '--frame-height': `${frameSize.height}px`,
+                      } as CSSProperties)
+                    : undefined
+            }
+            onDoubleClick={toggleFullscreen}
+        >
             <div ref={element} />
             <FullscreenButton
                 color="secondary"
