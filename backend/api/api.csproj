@@ -32,8 +32,8 @@
     <PackageReference Include="Testcontainers.PostgreSql" Version="4.15.0" />
     <!-- Override transitive SSH.NET pulled in by Testcontainers to patch GHSA-q939-rpr3-3284 -->
     <PackageReference Include="SSH.NET" Version="2026.0.0" />
-    <PackageReference Include="Microsoft.Identity.Web" Version="4.15.0" />
-    <PackageReference Include="Microsoft.Identity.Web.DownstreamApi" Version="4.15.0" />
+    <PackageReference Include="Microsoft.Identity.Web" Version="4.16.0" />
+    <PackageReference Include="Microsoft.Identity.Web.DownstreamApi" Version="4.16.0" />
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.12" />
     <PackageReference Include="Microsoft.Azure.StackExchangeRedis" Version="3.3.1" />
     <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.19.1" />
