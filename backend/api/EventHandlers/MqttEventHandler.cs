@@ -129,6 +129,9 @@ namespace Api.EventHandlers
             _eventAggregatorSingletonService.Subscribe<SaraInspectionResultMessage>(
                 OnSaraInspectionResultUpdate
             );
+            _eventAggregatorSingletonService.Subscribe<SaraInspectionRecordMessage>(
+                OnSaraInspectionRecordAvailable
+            );
             _eventAggregatorSingletonService.Subscribe<SaraAnalysisResultMessage>(
                 OnSaraAnalysisResultMessage
             );
@@ -914,15 +917,24 @@ namespace Api.EventHandlers
             SaraInspectionResultMessage inspectionResult
         )
         {
+            await NotifyInspectionReady(inspectionResult.InspectionId);
+        }
+
+        private async void OnSaraInspectionRecordAvailable(
+            SaraInspectionRecordMessage inspectionRecord
+        )
+        {
+            await NotifyInspectionReady(inspectionRecord.InspectionId);
+        }
+
+        private async Task NotifyInspectionReady(string inspectionId)
+        {
             var inspectionResultMessage = new InspectionResultMessage
             {
-                InspectionId = inspectionResult.InspectionId,
+                InspectionId = inspectionId,
             };
 
-            var missionRun = await MissionRunService.ReadByTaskId(
-                inspectionResult.InspectionId,
-                readOnly: true
-            );
+            var missionRun = await MissionRunService.ReadByTaskId(inspectionId, readOnly: true);
 
             var installation = missionRun?.InspectionArea?.Installation;
 
@@ -930,7 +942,7 @@ namespace Api.EventHandlers
             {
                 _logger.LogError(
                     "Installation could not be found when processing SARA inspection result update with inspection ID {InspectionId}",
-                    inspectionResult.InspectionId
+                    inspectionId
                 );
                 return;
             }
