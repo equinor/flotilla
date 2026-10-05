@@ -4,7 +4,7 @@ import { AssetSelectionPage } from './AssetSelectionPage'
 import { InfoPage } from './InfoPage'
 import { MissionDefinitionPageRouter, MissionPageRouter, RobotPageRouter, SimpleMissionPageRouter } from './PageRouter'
 import { PageNotFound } from './NotFoundPage'
-import { FencillaViewPage } from './DataViewPage/FencillaViewPage'
+import { FencillaViewPageRouter } from './DataViewPage/FencillaViewPage'
 import { MissionControlPage } from './MissionControlPage'
 import { MissionSchedulingPage } from './MissionSchedulingPage'
 import { MissionHistoryPage } from './MissionHistoryPage'
@@ -51,7 +51,7 @@ export const FlotillaSite = () => {
                         <Route path="data-overview" element={<DataOverviewPage />} />
                         {/* data-view needs to redirect to fencilla-view for backwards compatibility */}
                         <Route path="data-view" element={<OldFencillaViewPage />} />
-                        <Route path="fencilla-view" element={<FencillaViewPage />} />
+                        <Route path="fencilla-view" element={<FencillaViewPageRouter />} />
                         <Route path="cloe-view" element={<CloeDataViewPage />} />
                         <Route path="thermal-reading-view" element={<ThermalReadingViewPage />} />
                         <Route path="mission/:missionId" element={<MissionPageRouter />} />
