@@ -618,8 +618,10 @@ namespace Api.Test.MQTT
             });
         }
 
-        [Fact]
-        public async Task TestMQTTSaraInspectionResult()
+        [Theory]
+        [InlineData("sara/visualization_available")]
+        [InlineData("sara/inspection_record_available")]
+        public async Task TestMQTTSaraInspectionResult(string topic)
         {
             var installation = await DatabaseUtilities.NewInstallation();
             var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
@@ -666,11 +668,11 @@ namespace Api.Test.MQTT
                 AnalysisRunId = Guid.NewGuid(),
                 AnalysisId = Guid.NewGuid(),
             };
-            var messageString = JsonSerializer.Serialize(message);
-            await MqttService.PublishMessageBasedOnTopic(
-                $"sara/visualization_available",
-                messageString
-            );
+            var messageString =
+                topic == "sara/inspection_record_available"
+                    ? JsonSerializer.Serialize(new { inspection_id = isarInspectionId })
+                    : JsonSerializer.Serialize(message);
+            await MqttService.PublishMessageBasedOnTopic(topic, messageString);
 
             await TestSetupHelpers.WaitFor(async () =>
             {

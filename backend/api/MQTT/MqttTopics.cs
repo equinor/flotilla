@@ -25,6 +25,7 @@ namespace Api.Mqtt
             { "isar/+/intervention_needed", typeof(IsarInterventionNeededMessage) },
             { "isar/+/startup", typeof(IsarStartupMessage) },
             { "sara/visualization_available", typeof(SaraInspectionResultMessage) },
+            { "sara/inspection_record_available", typeof(SaraInspectionRecordMessage) },
             { "sara/analysis_result_available", typeof(SaraAnalysisResultMessage) },
         };
 
