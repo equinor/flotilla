@@ -71,6 +71,7 @@ Authentication uses Microsoft Entra ID, so `az login` is required; there is no
 offline auth option yet. To drive a mission, run an [ISAR](https://github.com/equinor/isar)
 robot on the host pointed at this stack's broker (`localhost:1883`) and backend
 (`localhost:8000`).
+First [register the robot](backend/README.md#robot-registration-and-installation-permissions) through the administrator API.
 
 The example database includes one offline `Placebot` at KAA / K-Lab with ISAR ID
 `00000000-0000-0000-0000-000000000000`. A standalone ISAR instance using that ID
