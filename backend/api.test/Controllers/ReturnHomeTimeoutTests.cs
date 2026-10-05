@@ -84,7 +84,7 @@ namespace Api.Test.Controllers
             );
             _client = _app.CreateClient();
             var database = _app.Services.GetRequiredService<DatabaseUtilities>();
-            var installation = await database.NewInstallation();
+            var installation = await database.NewInstallation("BBB");
             _robot = await database.NewRobot(RobotStatus.Available, installation);
         }
 
@@ -164,6 +164,28 @@ namespace Api.Test.Controllers
 
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
             Assert.Equal(0, _calls);
+        }
+
+        [Theory]
+        [InlineData(RoleAccessLevel.READ_ONLY, "Role.ReadOnly.BBB", HttpStatusCode.NotFound, 0)]
+        [InlineData(RoleAccessLevel.USER, "Role.User.BBB", HttpStatusCode.NoContent, 1)]
+        public async Task RequiresInstallationWriteAccess(
+            RoleAccessLevel accessLevel,
+            string installationRole,
+            HttpStatusCode expectedStatus,
+            int expectedCalls
+        )
+        {
+            var accessRoles = _app.Services.GetRequiredService<IAccessRoleService>();
+            await accessRoles.Create(_robot.CurrentInstallation, installationRole, accessLevel);
+            var accessor = (MockHttpContextAccessor)
+                _app.Services.GetRequiredService<IHttpContextAccessor>();
+            accessor.SetHttpContextRoles(["Role.User", installationRole]);
+
+            using var response = await Post("{\"seconds\":60}");
+
+            Assert.Equal(expectedStatus, response.StatusCode);
+            Assert.Equal(expectedCalls, _calls);
         }
 
         [Theory]

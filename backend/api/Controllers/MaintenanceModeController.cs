@@ -29,7 +29,7 @@ namespace Api.Controllers
         {
             robotId = Sanitize.SanitizeUserInput(robotId);
 
-            var robot = await robotService.ReadById(robotId, readOnly: true);
+            var robot = await robotService.ReadByIdForWrite(robotId, readOnly: true);
             if (robot is null)
             {
                 logger.LogWarning("Could not find robot with id {Id}", robotId);
@@ -64,7 +64,7 @@ namespace Api.Controllers
         {
             robotId = Sanitize.SanitizeUserInput(robotId);
 
-            var robot = await robotService.ReadById(robotId, readOnly: true);
+            var robot = await robotService.ReadByIdForWrite(robotId, readOnly: true);
             if (robot is null)
             {
                 logger.LogWarning("Could not find robot with id {Id}", robotId);
