@@ -8,7 +8,7 @@ import { FlotillaAnalysisResultMessage, FlotillaInspectionResultMessage, Inspect
 import { AnalysisType } from 'models/MissionDefinition'
 
 interface IInspectionData {
-    data: InspectionData | undefined
+    data: InspectionData | null | undefined
     isPending: boolean
     isError: boolean
 }
@@ -112,6 +112,7 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
         const result = useQuery({
             queryKey: ['fetchInspectionData', inspectionId],
             queryFn: async () => {
+                if (inspectionId === '') return null
                 return await saraApiRef.current.getSaraDataByInspectionId(inspectionId)
             },
             retry: 1,

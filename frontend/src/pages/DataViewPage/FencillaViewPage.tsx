@@ -25,6 +25,8 @@ import { tokens } from '@equinor/eds-tokens'
 import { DataViewTimeRange } from './DataViewTimeRange'
 import { AlertBanner } from 'components/Alerts/AlertsBanner'
 import styled from 'styled-components'
+import { useInspectionId } from 'pages/InspectionReportPage/SetInspectionIdHook'
+import { useSearchParams } from 'react-router'
 
 const StyledDiv = styled.div`
     display: flex;
@@ -50,14 +52,24 @@ const get7DayWindow = (endDate: Date | null): DataViewTimeRange => {
     return { minDate, maxDate: endDate }
 }
 
-export const FencillaViewPage = () => {
+export const FencillaViewPageRouter = () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [searchParams, setSearchParams] = useSearchParams()
+    const inspectionId = searchParams.get('inspectionId') ?? undefined
+
+    return <FencillaViewPage lookupInspectionId={inspectionId} />
+}
+
+const FencillaViewPage = ({ lookupInspectionId }: { lookupInspectionId: string | undefined }) => {
     const { TranslateText } = useLanguageContext()
     const { installation } = useContext(InstallationContext)
     const { installationInspectionAreas } = useAssetContext()
 
-    const { useSaraListData } = useInspectionsContext()
+    const { useSaraListData, useSaraData } = useInspectionsContext()
     const [filterDates, setFilterDates] = useState<DataViewTimeRange>(() => get7DayWindow(new Date()))
-    const [selectedInspectionIndex, setSelectedInspectionIndex] = useState<number | undefined>()
+    const { switchSelectedInspectionId } = useInspectionId()
+
+    const singleInspectionData = useSaraData(lookupInspectionId ?? '')
 
     const { data, isPending, isError } = useSaraListData(
         null,
@@ -69,9 +81,10 @@ export const FencillaViewPage = () => {
     )
 
     const mostRecentInspections = useMemo(() => {
-        if (!data) return []
         const descriptionToInspectionMap = new Map<string, InspectionData>()
-        data.forEach((inspection) => {
+        const listData = data ?? []
+        const lookupInspectionList = singleInspectionData.data ? [singleInspectionData.data] : []
+        listData.concat(lookupInspectionList).forEach((inspection) => {
             if (!descriptionToInspectionMap.has(inspection.inspectionDescription)) {
                 descriptionToInspectionMap.set(inspection.inspectionDescription, inspection)
             } else if (
@@ -82,29 +95,30 @@ export const FencillaViewPage = () => {
             }
         })
         return Array.from(descriptionToInspectionMap.values())
-    }, [data])
-
-    if (isPending) {
-        return <PendingResultPlaceholder isLargeImage={true} />
-    }
+    }, [data, singleInspectionData.data])
 
     const plantCode =
         installationInspectionAreas.find((i) => i.installationCode === installation.installationCode)?.plantCode ?? null
 
+    const selectedInspectionIndex = mostRecentInspections.findIndex((i) => i.inspectionId === lookupInspectionId)
     const selectedInspection =
-        selectedInspectionIndex !== undefined ? mostRecentInspections[selectedInspectionIndex] : undefined
+        selectedInspectionIndex !== null && selectedInspectionIndex !== undefined
+            ? mostRecentInspections[selectedInspectionIndex]
+            : undefined
 
     document.addEventListener('keyup', (event) => {
         if (selectedInspectionIndex === undefined) return
         if (event.target instanceof HTMLMediaElement) return
         if (event.code === 'ArrowLeft') {
             if (selectedInspectionIndex - 1 < 0) return
-            setSelectedInspectionIndex(selectedInspectionIndex - 1)
+            switchSelectedInspectionId(mostRecentInspections[selectedInspectionIndex - 1].inspectionId)
         } else if (event.code === 'ArrowRight') {
             if (selectedInspectionIndex + 1 >= mostRecentInspections.length) return
-            setSelectedInspectionIndex(selectedInspectionIndex + 1)
+            switchSelectedInspectionId(mostRecentInspections[selectedInspectionIndex + 1].inspectionId)
         }
     })
+
+    if (isPending) return <PendingResultPlaceholder isLargeImage={true} />
 
     const mapDisplay = plantCode ? (
         <ContentCard>
@@ -113,7 +127,9 @@ export const FencillaViewPage = () => {
                     plantCode={plantCode}
                     floorId="0"
                     inspections={mostRecentInspections}
-                    onMarkerClick={(markerIndex: number) => setSelectedInspectionIndex(markerIndex)}
+                    onMarkerClick={(markerIndex: number) =>
+                        switchSelectedInspectionId(mostRecentInspections[markerIndex].inspectionId)
+                    }
                 />
             </DataViewMapWrapper>
         </ContentCard>
@@ -125,7 +141,7 @@ export const FencillaViewPage = () => {
         <InspectionDialogView
             inspectionData={selectedInspection}
             title={TranslateText('Inspection report for task') + ' ' + (selectedInspectionIndex + 1)}
-            onClose={() => setSelectedInspectionIndex(undefined)}
+            onClose={() => switchSelectedInspectionId(undefined)}
         />
     )
 
@@ -156,7 +172,9 @@ export const FencillaViewPage = () => {
                             {mostRecentInspections.map((inspection, index) => (
                                 <StyledImageCard
                                     key={inspection.inspectionId}
-                                    onClick={() => setSelectedInspectionIndex(index)}
+                                    onClick={() =>
+                                        switchSelectedInspectionId(mostRecentInspections[index].inspectionId)
+                                    }
                                     style={{
                                         backgroundColor: inspection.warning
                                             ? tokens.colors.ui.background__danger.hex
