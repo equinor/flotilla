@@ -10,6 +10,8 @@
     "View result for {0}, task {1}": "Vis resultat for {0}, oppgave {1}",
     "Selected result is unavailable": "Valgt resultat er utilgjengelig",
     "Failed to load result media": "Kunne ikke laste resultatmediet",
+    "Measurement is unavailable": "Målingen er utilgjengelig",
+    "Failed to load measurement": "Kunne ikke laste målingen",
     "Failed to load inspection results": "Kunne ikke laste inspeksjonsresultater",
     "Mission History": "Oppdragshistorie",
     "failed on robot": "feilet på robot",

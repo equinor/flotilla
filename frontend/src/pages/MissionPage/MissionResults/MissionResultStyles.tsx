@@ -35,6 +35,24 @@ export const PreviewButton = styled(Button)`
     }
 `
 
+export const MeasurementPreviewButton = styled(PreviewButton)`
+    && {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    > span {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+    p {
+        text-align: inherit;
+    }
+`
+
 export const ResultCard = styled(Card)<{ $hasAnalysis: boolean }>`
     && {
         display: grid;

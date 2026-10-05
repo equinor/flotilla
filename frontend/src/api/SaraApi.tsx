@@ -15,6 +15,11 @@ interface PaginatedInspectionRecords {
 
 const inspectionRecordPageSize = 200
 
+interface InspectionMeasurement {
+    value: number
+    unit: string
+}
+
 export class SaraApi {
     constructor(private readonly api: BackendAPICaller) {}
 
@@ -24,13 +29,29 @@ export class SaraApi {
         const content = this.api
             .GET<InspectionRecord>(path)
             .then((response) => {
-                if (!response.content.analyses || response.content.analyses.length < 1) throw Error('No analysis found')
                 const data = inspectionRecordToInspectionData(response.content)
                 if (!data) throw Error('No analysis found')
                 return data
             })
             .catch(handleError('GET', path))
         return content
+    }
+
+    async getMeasurement(recordId: string): Promise<InspectionMeasurement> {
+        const path = `api/inspection-record/id/${encodeURIComponent(recordId)}/measurement`
+        return this.api
+            .GET<InspectionMeasurement>(path)
+            .then(({ content }) => {
+                if (
+                    typeof content?.value !== 'number' ||
+                    !Number.isFinite(content.value) ||
+                    typeof content.unit !== 'string'
+                ) {
+                    throw new Error('Invalid inspection measurement')
+                }
+                return content
+            })
+            .catch(handleError('GET', path))
     }
 
     async getSaraData(
