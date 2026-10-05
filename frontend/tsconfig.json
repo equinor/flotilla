@@ -16,7 +16,9 @@
     "noFallthroughCasesInSwitch": true,
     "jsx": "react-jsx",
     "types": ["vite/client"],
-    "baseUrl": "src",
+    "paths": {
+      "*": ["./src/*"],
+    },
     "outDir": "out",
     "sourceMap": true
   },
