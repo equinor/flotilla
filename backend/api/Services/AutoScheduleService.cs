@@ -47,9 +47,33 @@ namespace Api.Services
         IRobotService robotService,
         IMissionRunService missionRunService,
         IMissionSchedulingService missionSchedulingService,
-        ISignalRService signalRService
+        ISignalRService signalRService,
+        IAccessRoleService accessRoleService,
+        IBackgroundJobClient backgroundJobs
     ) : IAutoScheduleService
     {
+        private async Task EnsureWriteAccess(MissionDefinition missionDefinition)
+        {
+            var allowedInstallations = await accessRoleService.GetAllowedInstallationCodes(
+                AccessMode.Write
+            );
+            if (
+                !allowedInstallations.Contains(
+                    missionDefinition.InstallationCode,
+                    StringComparer.OrdinalIgnoreCase
+                )
+            )
+            {
+                logger.LogWarning(
+                    "Denied auto scheduling change for mission definition {MissionDefinitionId}",
+                    missionDefinition.Id
+                );
+                throw new UnauthorizedAccessException(
+                    "Installation write access is required to change auto scheduling."
+                );
+            }
+        }
+
         public Dictionary<TimeOnly, string> DeserializeAutoScheduleJobs(
             MissionDefinition missionDefinition
         )
@@ -106,6 +130,8 @@ namespace Api.Services
             bool? scheduleJobs = true
         )
         {
+            await EnsureWriteAccess(missionDefinition);
+
             if (missionDefinition.AutoScheduleFrequency is null)
                 return null;
 
@@ -140,7 +166,7 @@ namespace Api.Services
                     jobDelay.Item1
                 );
 
-                var jobId = BackgroundJob.Schedule(
+                var jobId = backgroundJobs.Schedule(
                     () => AutoScheduleMissionRun(missionDefinition.Id, jobDelay.Item2),
                     jobDelay.Item1
                 );
@@ -149,7 +175,21 @@ namespace Api.Services
 
                 missionDefinition.AutoScheduleFrequency!.AutoScheduledJobs =
                     JsonSerializer.Serialize(existingJobs);
-                await missionDefinitionService.Update(missionDefinition);
+                try
+                {
+                    await missionDefinitionService.Update(missionDefinition);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(
+                        ex,
+                        "Failed to persist auto scheduling job {JobId}; removing it",
+                        jobId
+                    );
+                    if (!backgroundJobs.Delete(jobId))
+                        logger.LogError("Could not remove auto scheduling job {JobId}", jobId);
+                    throw;
+                }
             }
             return jobDelays;
         }
@@ -178,6 +218,7 @@ namespace Api.Services
             catch (FailedToRemoveAutoSchedulingException e)
             {
                 logger.LogError(e.Message);
+                return;
             }
             catch (Exception e)
             {
@@ -187,6 +228,7 @@ namespace Api.Services
                     missionDefinition.Id,
                     timeOfDay
                 );
+                return;
             }
 
             IList<Robot> robots;
@@ -278,6 +320,8 @@ namespace Api.Services
             IList<TimeAndDay>? newSchedulingTimesCETperWeek
         )
         {
+            await EnsureWriteAccess(missionDefinition);
+
             if (newSchedulingTimesCETperWeek != null && newSchedulingTimesCETperWeek.Count == 0)
             {
                 newSchedulingTimesCETperWeek = null;
@@ -322,6 +366,7 @@ namespace Api.Services
             missionDefinition.AutoScheduleFrequency.SchedulingTimesCETperWeek =
                 newSchedulingTimesCETperWeek;
 
+            await missionDefinitionService.Update(missionDefinition);
             await StartJobsForMissionDefinition(missionDefinition);
             updatedMissionDefinition = await missionDefinitionService.Update(missionDefinition);
             return updatedMissionDefinition.AutoScheduleFrequency;
@@ -332,6 +377,8 @@ namespace Api.Services
             TimeOnly scheduledTimeInLocalTime
         )
         {
+            await EnsureWriteAccess(missionDefinition);
+
             string message;
 
             var jobs = DeserializeAutoScheduleJobs(missionDefinition);
@@ -364,7 +411,10 @@ namespace Api.Services
 
             try
             {
-                BackgroundJob.Delete(job);
+                if (!backgroundJobs.Delete(job))
+                    throw new FailedToRemoveAutoSchedulingException(
+                        $"Failed to delete background job: {job}"
+                    );
             }
             catch (Exception)
             {
@@ -386,6 +436,8 @@ namespace Api.Services
             TimeOnly scheduledTimeInLocalTime
         )
         {
+            await EnsureWriteAccess(missionDefinition);
+
             try
             {
                 await RemoveFromAutoMissionScheduledJobs(
@@ -416,13 +468,17 @@ namespace Api.Services
 
         public async Task SkipAllAutoMissions(MissionDefinition missionDefinition)
         {
+            await EnsureWriteAccess(missionDefinition);
+
             var jobs = DeserializeAutoScheduleJobs(missionDefinition);
             foreach (var job in jobs)
             {
                 try
                 {
-                    BackgroundJob.Delete(job.Value);
-                    jobs.Remove(job.Key);
+                    if (backgroundJobs.Delete(job.Value))
+                        jobs.Remove(job.Key);
+                    else
+                        logger.LogWarning("Failed to delete background job: {JobId}", job.Value);
                 }
                 catch (Exception ex)
                 {
