@@ -137,6 +137,7 @@ namespace Api.Test.HostedServices
 
             // Assert
             Assert.True(jobDelays?.Count > 0);
+            Factory.BackgroundJobs.VerifyNoOtherCalls();
         }
     }
 }
