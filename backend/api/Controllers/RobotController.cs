@@ -501,7 +501,7 @@ namespace Api.Controllers
         {
             robotId = Sanitize.SanitizeUserInput(robotId);
 
-            var robot = await robotService.ReadById(robotId, readOnly: true);
+            var robot = await robotService.ReadByIdForWrite(robotId, readOnly: true);
             if (robot == null)
             {
                 logger.LogWarning("Could not find robot with id={Id}", robotId);
@@ -565,7 +565,7 @@ namespace Api.Controllers
         {
             robotId = Sanitize.SanitizeUserInput(robotId);
 
-            var robot = await robotService.ReadById(robotId, readOnly: true);
+            var robot = await robotService.ReadByIdForWrite(robotId, readOnly: true);
             if (robot == null)
             {
                 logger.LogWarning("Could not find robot with id={Id}", robotId);
@@ -617,7 +617,7 @@ namespace Api.Controllers
         {
             robotId = Sanitize.SanitizeUserInput(robotId);
 
-            var robot = await robotService.ReadById(robotId, readOnly: true);
+            var robot = await robotService.ReadByIdForWrite(robotId, readOnly: true);
             if (robot == null)
             {
                 logger.LogWarning("Could not find robot with id={Id}", robotId);
@@ -668,7 +668,7 @@ namespace Api.Controllers
         public async Task<ActionResult> ReleaseInterventionNeeded([FromRoute] string robotId)
         {
             robotId = Sanitize.SanitizeUserInput(robotId);
-            var robot = await robotService.ReadById(robotId, readOnly: true);
+            var robot = await robotService.ReadByIdForWrite(robotId, readOnly: true);
             if (robot == null)
             {
                 logger.LogWarning("Could not find robot with id={Id}", robotId);
