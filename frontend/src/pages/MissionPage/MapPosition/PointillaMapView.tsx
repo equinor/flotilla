@@ -275,7 +275,7 @@ export function useInspectionsPlantMapData(
     }, [plantCode, floorId, map])
 
     useEffect(() => {
-        if (inspectionWithPositions.length <= 0 || !map) return
+        if (inspectionWithPositions.length <= 0 || !map || !mapInfo) return
 
         const taskMarkers = getInspectionMarkers(map, inspectionWithPositions)
         taskMarkers.forEach((t, i) => t.on('click', () => onMarkerClick(i)))
@@ -286,7 +286,7 @@ export function useInspectionsPlantMapData(
         return () => {
             taskMarkers.forEach((marker) => marker.remove())
         }
-    }, [mapInfo])
+    }, [mapInfo, map, inspections])
 
     return { mapInfo, map, setMap }
 }
