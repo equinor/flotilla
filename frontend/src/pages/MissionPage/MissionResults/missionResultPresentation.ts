@@ -3,10 +3,8 @@ import { Task } from 'models/Task'
 
 export type ResultFocus = 'inspection' | 'analysis'
 
-export interface ResultMedia {
-    src: string
-    type: 'image' | 'video' | 'unsupported'
-}
+export type ResultMedia =
+    { src: string; type: 'image' | 'video' | 'unsupported' } | { recordId: string; type: 'measurement' }
 
 export interface MissionResult {
     inspection: InspectionData
@@ -42,11 +40,14 @@ export const getMissionResults = (
     const results = tasks.flatMap((task, index) => {
         const inspection = byId.get(task.id)
         if (!inspection) return []
-        const source = mediaFromUrl(
-            inspection.anonymizedSAS ??
-                (inspection.mediaSAS !== inspection.visualizedSAS ? inspection.mediaSAS : undefined)
-        )
-        const analysis = mediaFromUrl(inspection.visualizedSAS !== source?.src ? inspection.visualizedSAS : undefined)
+        const source: ResultMedia | undefined = inspection.measurementRecordId
+            ? { type: 'measurement', recordId: inspection.measurementRecordId }
+            : mediaFromUrl(
+                  inspection.anonymizedSAS ??
+                      (inspection.mediaSAS !== inspection.visualizedSAS ? inspection.mediaSAS : undefined)
+              )
+        const sourceUrl = source && source.type !== 'measurement' ? source.src : undefined
+        const analysis = mediaFromUrl(inspection.visualizedSAS !== sourceUrl ? inspection.visualizedSAS : undefined)
         const hasFinding = hasInspectionFinding(inspection)
         const hasAnalysis = hasInspectionAnalysis(inspection)
         if (!source && !hasAnalysis) return []

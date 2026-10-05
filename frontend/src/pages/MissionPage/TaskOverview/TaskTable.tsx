@@ -12,6 +12,7 @@ import { MissionTaskDefinition } from 'models/MissionDefinition'
 import { hasInspectionAnalysis, hasInspectionFinding, InspectionData } from 'models/InspectionRecord'
 import { Icons } from 'utils/icons'
 import { getAnalysisResultStyle } from '../AnalysisResultStyles'
+import { MeasurementDisplay } from 'components/Displays/MeasurementDisplay'
 
 const IconWithLabel = styled.div`
     display: grid;
@@ -111,9 +112,10 @@ const TaskTableRow = ({
             <Table.Cell>
                 <IconWithLabel>
                     <Typography>{TranslateText(task.sensorType as string)}</Typography>
-                    {inspectionData && inspectionData.mediaSAS && (
+                    {inspectionData && inspectionData.mediaSAS && !inspectionData.measurementRecordId && (
                         <RightAlignedImageButton
                             variant="ghost_icon"
+                            aria-label={TranslateText('Enlarge inspection for {0}', [inspectionData.tag])}
                             onClick={() => switchSelectedInspectionId(task.id)}
                         >
                             <Icon name={Icons.Image}></Icon>
@@ -125,6 +127,9 @@ const TaskTableRow = ({
                 <TaskStatusDisplay status={task.status} errorMessage={task.errorDescription} />
             </Table.Cell>
             <Table.Cell>
+                {inspectionData?.measurementRecordId && (
+                    <MeasurementDisplay recordId={inspectionData.measurementRecordId} />
+                )}
                 <IconWithLabel>
                     {inspectionData && inspectionData.value && (
                         <AnalysisValueDisplay

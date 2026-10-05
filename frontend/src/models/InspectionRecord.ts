@@ -48,6 +48,7 @@ export interface InspectionRecord {
     installationCode: string
     createdAt: Date
     inspectionType: string
+    blobStorageLocation?: { blobName: string } | null
     tag: string
     targetPosition: Position
     robotPose: Pose
@@ -72,7 +73,8 @@ export interface FlotillaAnalysisResultMessage {
 
 export interface InspectionData {
     inspectionId: string
-    analysisId: string
+    analysisId?: string
+    measurementRecordId?: string
     analysisRunId?: string
     feedback?: Feedback
     visualizedSAS?: string
@@ -119,30 +121,31 @@ const sasURLToFileType = (sasURL: string): FileType => {
 }
 
 export const inspectionRecordToInspectionData = (record: InspectionRecord): InspectionData | null => {
-    if (!record.analyses || record.analyses.length === 0) return null
+    const measurementRecordId = record.blobStorageLocation?.blobName.toLowerCase().endsWith('.json')
+        ? record.id
+        : undefined
+    const analysis = record.analyses?.[record.analyses.length - 1]
+    if (!analysis && !measurementRecordId) return null
 
-    const analysis = record.analyses[record.analyses.length - 1]
-
-    if (!analysis) return null
-
-    const sas = analysis.anonymizedSAS ?? analysis.visualizedSAS
+    const sas = analysis?.anonymizedSAS ?? analysis?.visualizedSAS
     const fileType = sas ? sasURLToFileType(sas) : FileType.VALUE
-    const isInspectionOnly = analysis.analysisType === 'passthrough' || analysis.analysisType === 'anonymize'
-    const result = isInspectionOnly ? undefined : analysis.result
+    const isInspectionOnly = analysis?.analysisType === 'passthrough' || analysis?.analysisType === 'anonymize'
+    const result = isInspectionOnly ? undefined : analysis?.result
 
     // Feedback is given per analysis run, so mirror the choice of analysis above
     // and use the latest run.
-    const latestRun = isInspectionOnly ? undefined : analysis.runs?.[analysis.runs.length - 1]
+    const latestRun = isInspectionOnly ? undefined : analysis?.runs?.[analysis.runs.length - 1]
 
     return {
         inspectionId: record.inspectionId,
-        analysisId: analysis.id,
+        analysisId: analysis?.id,
+        measurementRecordId: measurementRecordId,
         analysisRunId: latestRun?.id,
         feedback: latestRun?.feedback ?? undefined,
-        visualizedSAS: isInspectionOnly ? undefined : analysis.visualizedSAS,
-        anonymizedSAS: analysis.anonymizedSAS,
+        visualizedSAS: isInspectionOnly ? undefined : analysis?.visualizedSAS,
+        anonymizedSAS: analysis?.anonymizedSAS,
         mediaSAS: sas,
-        analysisType: analysis.analysisType,
+        analysisType: analysis?.analysisType,
         tag: record.tag,
         createdAt: record.createdAt,
         targetPosition: record.targetPosition,

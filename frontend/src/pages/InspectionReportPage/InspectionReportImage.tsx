@@ -6,6 +6,7 @@ import styled from 'styled-components'
 import { useLanguageContext } from 'contexts/LanguageContext'
 import { VideoPlaceholder, VideoPlayer } from './InspectionVideoPlayer'
 import { FileType, InspectionData } from 'models/InspectionRecord'
+import { MeasurementDisplay } from 'components/Displays/MeasurementDisplay'
 
 const StyledSmallImagePlaceholder = styled.div`
     display: flex;
@@ -132,6 +133,9 @@ const InspectionResultWithPlaceholder = ({
     inspection: InspectionData
     isLargeImage: boolean
 }) => {
+    if (inspection.measurementRecordId) {
+        return <MeasurementDisplay recordId={inspection.measurementRecordId} isCompact={!isLargeImage} />
+    }
     if (inspection.fileType === FileType.SOUND) {
         const errorMsg = 'Viewing of the inspection type is not supported'
         return <TextAsImage isLargeImage={isLargeImage} text={errorMsg} />
