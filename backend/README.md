@@ -82,9 +82,12 @@ This is not a way to turn authentication off — issuer, audience, signature, li
 
 ### Robot registration and installation permissions
 
-Register robots through the administrator-only `POST /robots` API and update
-their endpoints through `PUT /robots/{id}`. MQTT cannot register robots or change
-host/port. Verify existing endpoints before rollout.
+In `Local` (used by Tilt), MQTT automatically registers robots and updates their
+host/port. The installation must already exist. Keep this mode on trusted local networks.
+
+In all other environments, register robots through the administrator-only
+`POST /robots` API and update endpoints through `PUT /robots/{id}`. This includes
+`Development`, used by the Compose backend. Verify existing endpoints before rollout.
 
 Robot commands and scheduling require installation write access in addition to
 the global operator role.

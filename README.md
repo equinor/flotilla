@@ -71,13 +71,14 @@ Authentication uses Microsoft Entra ID, so `az login` is required; there is no
 offline auth option yet. To drive a mission, run an [ISAR](https://github.com/equinor/isar)
 robot on the host pointed at this stack's broker (`localhost:1883`) and backend
 (`localhost:8000`).
-First [register the robot](backend/README.md#robot-registration-and-installation-permissions) through the administrator API.
+Tilt's `Local` backend accepts MQTT robot registration and endpoint updates automatically.
+Other environments require [administrator registration](backend/README.md#robot-registration-and-installation-permissions).
 
 The example database includes one offline `Placebot` at KAA / K-Lab with ISAR ID
 `00000000-0000-0000-0000-000000000000`. A standalone ISAR instance using that ID
 and installation `KAA` connects to this robot without manual inspection-area
 assignment. For older ISAR versions defaulting to HUA, set
-`ISAR_PLANT_SHORT_NAME=KAA`. Other IDs still self-register and need an inspection
+`ISAR_PLANT_SHORT_NAME=KAA`. Other IDs self-register in `Local` and need an inspection
 area assigned. Robotics' Tilt instances use distinct IDs and automate that assignment.
 This seed applies to an empty database; it does not add the robot to an existing one.
 
