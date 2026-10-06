@@ -72,9 +72,9 @@ export const StyledTable = styled(Table)`
     overflow: auto;
     max-width: 100%;
 `
-
 export const StyledTableAndMap = styled.div`
     display: flex;
+    flex-direction: row;
     flex-wrap: wrap;
     align-items: top;
     gap: 30px;
