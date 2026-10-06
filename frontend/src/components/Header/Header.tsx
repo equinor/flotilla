@@ -88,9 +88,10 @@ interface Props {
     installation?: Installation
     minimal?: boolean
     fullWidth?: boolean
+    showBanner?: boolean
 }
 
-export const Header = ({ installation, minimal, fullWidth }: Props) => {
+export const Header = ({ installation, minimal, fullWidth, showBanner = true }: Props) => {
     const navigate = useNavigate()
     const { TranslateText } = useLanguageContext()
     const { banner, clearBanner } = useAlertContext()
@@ -133,7 +134,7 @@ export const Header = ({ installation, minimal, fullWidth }: Props) => {
                     </TopBar.Actions>
                 </StyledTopBar>
             </TopBarBackground>
-            {banner && <AlertBanner dismissAlert={clearBanner} bannerAlert={banner} />}
+            {showBanner && banner && <AlertBanner dismissAlert={clearBanner} bannerAlert={banner} />}
             {isFeedbackOpen && <FeedbackDialog isOpen onClose={() => setIsFeedbackOpen(false)} />}
         </>
     )
