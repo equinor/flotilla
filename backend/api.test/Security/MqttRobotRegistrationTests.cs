@@ -1,5 +1,6 @@
 using System.Diagnostics.Metrics;
 using System.Threading.Tasks;
+using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.EventHandlers;
 using Api.Mqtt.MessageModels;
@@ -7,6 +8,7 @@ using Api.Services;
 using Api.Services.Events;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit;
@@ -16,10 +18,23 @@ namespace Api.Test.Security
     public class MqttRobotRegistrationTests
     {
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public void RobotInformationCannotRegisterOrRedirectRobots(bool registered)
+        [InlineData("Local", false)]
+        [InlineData("Local", true)]
+        [InlineData("Development", false)]
+        [InlineData("Development", true)]
+        [InlineData("Staging", false)]
+        [InlineData("Staging", true)]
+        [InlineData("Production", false)]
+        [InlineData("Production", true)]
+        [InlineData("IntegrationTest", false)]
+        [InlineData("IntegrationTest", true)]
+        [InlineData("Test", false)]
+        [InlineData("Test", true)]
+        public void OnlyLocalCanRegisterOrRedirectRobots(string environmentName, bool registered)
         {
+            bool local = environmentName == "Local";
+            var environment = new Mock<IHostEnvironment>();
+            environment.SetupGet(e => e.EnvironmentName).Returns(environmentName);
             var robot = new Robot
             {
                 Id = "robot",
@@ -35,6 +50,19 @@ namespace Api.Test.Security
                 .ReturnsAsync(registered ? robot : null);
             if (registered)
                 robots.Setup(s => s.Update(robot)).Returns(Task.CompletedTask);
+            else if (local)
+                robots
+                    .Setup(s =>
+                        s.CreateFromQuery(
+                            It.Is<CreateRobotQuery>(q =>
+                                q.IsarId == robot.IsarId
+                                && q.Host == "unapproved.example"
+                                && q.Port == 8080
+                                && q.CurrentInstallationCode == "BBB"
+                            )
+                        )
+                    )
+                    .ReturnsAsync(robot);
 
             using var services = new ServiceCollection()
                 .AddScoped<IRobotService>(_ => robots.Object)
@@ -47,7 +75,8 @@ namespace Api.Test.Security
                 services.GetRequiredService<IServiceScopeFactory>(),
                 cache,
                 meter,
-                events
+                events,
+                environment.Object
             );
 
             // All mocked tasks are already completed, so the event callback finishes inline.
@@ -57,14 +86,19 @@ namespace Api.Test.Security
                     IsarId = robot.IsarId,
                     RobotName = robot.Name,
                     CurrentInstallation = "BBB",
+                    DocumentationQueries = [],
+                    SerialNumber = robot.SerialNumber,
                     Host = "unapproved.example",
                     Port = 8080,
                     Capabilities = [RobotCapabilitiesEnum.take_image],
                 }
             );
 
-            Assert.Equal("approved.example", robot.Host);
-            Assert.Equal(3000, robot.Port);
+            Assert.Equal(
+                local && registered ? "unapproved.example" : "approved.example",
+                robot.Host
+            );
+            Assert.Equal(local && registered ? 8080 : 3000, robot.Port);
             robots.Verify(s => s.ReadByIsarId(robot.IsarId, true), Times.Once);
             if (registered)
             {
@@ -74,6 +108,9 @@ namespace Api.Test.Security
                 );
                 robots.Verify(s => s.Update(robot), Times.Once);
             }
+            else if (local)
+                robots.Verify(s => s.CreateFromQuery(It.IsAny<CreateRobotQuery>()), Times.Once);
+            robots.VerifyAll();
             robots.VerifyNoOtherCalls();
         }
     }

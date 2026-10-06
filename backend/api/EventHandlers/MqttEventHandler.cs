@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics.Metrics;
+using Api.Configurations;
 using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Mqtt.MessageModels;
@@ -23,6 +24,7 @@ namespace Api.EventHandlers
         private readonly IServiceScopeFactory _scopeFactory;
 
         private readonly IMemoryCache _cache;
+        private readonly bool _allowMqttRegistration;
         private EventAggregatorSingletonService _eventAggregatorSingletonService;
 
         private readonly ConcurrentDictionary<string, RobotMetricData> _batteryMetrics = new();
@@ -40,13 +42,17 @@ namespace Api.EventHandlers
             IServiceScopeFactory scopeFactory,
             IMemoryCache cache,
             Meter meter,
-            EventAggregatorSingletonService eventAggregatorSingletonService
+            EventAggregatorSingletonService eventAggregatorSingletonService,
+            IHostEnvironment environment
         )
         {
             _logger = logger;
             // Reason for using factory: https://www.thecodebuzz.com/using-dbcontext-instance-in-ihostedservice/
             _scopeFactory = scopeFactory;
             _cache = cache;
+            _allowMqttRegistration = environment.IsEnvironment(
+                AuthenticationConfigurations.LocalEnvironment
+            );
             _eventAggregatorSingletonService = eventAggregatorSingletonService;
 
             meter.CreateObservableGauge(
@@ -224,6 +230,26 @@ namespace Api.EventHandlers
 
                 if (robot == null)
                 {
+                    if (_allowMqttRegistration)
+                    {
+                        await RobotService.CreateFromQuery(
+                            new CreateRobotQuery
+                            {
+                                IsarId = isarRobotInfo.IsarId,
+                                Name = isarRobotInfo.RobotName,
+                                RobotType = isarRobotInfo.RobotType,
+                                SerialNumber = isarRobotInfo.SerialNumber,
+                                CurrentInstallationCode = isarRobotInfo.CurrentInstallation,
+                                Documentation = isarRobotInfo.DocumentationQueries,
+                                Host = isarRobotInfo.Host,
+                                Port = isarRobotInfo.Port,
+                                RobotCapabilities = isarRobotInfo.Capabilities,
+                                Status = RobotStatus.Available,
+                            }
+                        );
+                        return;
+                    }
+
                     _logger.LogWarning(
                         "Ignoring robot information for unregistered ISAR instance {IsarId}; an administrator must register the robot",
                         isarRobotInfo.IsarId
@@ -244,10 +270,19 @@ namespace Api.EventHandlers
                     || isarRobotInfo.Port != robot.Port
                 )
                 {
-                    _logger.LogWarning(
-                        "Ignoring MQTT endpoint change for robot {RobotId}; endpoint changes require administrator approval",
-                        robot.Id
-                    );
+                    if (_allowMqttRegistration)
+                    {
+                        robot.Host = isarRobotInfo.Host ?? robot.Host;
+                        robot.Port = isarRobotInfo.Port;
+                        updatedFields.Add("Endpoint");
+                    }
+                    else
+                    {
+                        _logger.LogWarning(
+                            "Ignoring MQTT endpoint change for robot {RobotId}; endpoint changes require administrator approval",
+                            robot.Id
+                        );
+                    }
                 }
 
                 if (
