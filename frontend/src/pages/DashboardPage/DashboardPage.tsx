@@ -131,7 +131,7 @@ export const DashboardPage = () => {
 
     return (
         <DashboardZoomWrapper>
-            <Header installation={installation} minimal fullWidth />
+            <Header installation={installation} minimal fullWidth showBanner={false} />
             <PageBackground>
                 <DashboardPageContent>
                     {isPending ? (
