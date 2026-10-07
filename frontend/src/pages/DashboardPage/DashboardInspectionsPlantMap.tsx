@@ -3,7 +3,12 @@ import styled from 'styled-components'
 import 'leaflet/dist/leaflet.css'
 import 'utils/leaflet-overrides.css'
 import AuthTileLayer from 'pages/MissionPage/MapPosition/PointillaMap'
-import { LeafletTooltipStyles, useInspectionsPlantMapData } from 'pages/MissionPage/MapPosition/PointillaMapView'
+import {
+    LeafletTooltipStyles,
+    useInspectionsPlantMapData,
+    useRobotMarkers,
+} from 'pages/MissionPage/MapPosition/PointillaMapView'
+import { useAllRobotPosesTelemetry } from 'hooks/useRobotTelemetry'
 import { InspectionData } from 'models/InspectionRecord'
 
 const FillMapContainer = styled(MapContainer)`
@@ -25,7 +30,12 @@ export const DashboardInspectionsPlantMap = ({
     floorId,
     inspections,
 }: DashboardInspectionsPlantMapProps) => {
-    const { mapInfo, setMap } = useInspectionsPlantMapData(plantCode, floorId, inspections, () => {})
+    const { mapInfo, map, setMap } = useInspectionsPlantMapData(plantCode, floorId, inspections, () => {})
+    const { robotIdAndPoses } = useAllRobotPosesTelemetry()
+    useRobotMarkers(
+        map,
+        robotIdAndPoses.map((r) => r.pose)
+    )
 
     return (
         <>
