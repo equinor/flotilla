@@ -15,6 +15,7 @@ import { useBackendApi } from 'api/UseBackendApi'
 import { useAssetContext } from 'contexts/AssetContext'
 import { MissionTaskDefinition } from 'models/MissionDefinition'
 import { RobotWithoutTelemetry } from 'models/Robot'
+import { Pose } from 'models/Pose'
 import { Task } from 'models/Task'
 import { InspectionData } from 'models/InspectionRecord'
 
@@ -100,6 +101,22 @@ const setMapOptions = (map: L.Map, info: PointillaMapInfo) => {
 
 const updateIntervalRobotAuraInMS = 50
 
+export const useRobotMarkers = (map: L.Map | null, robotPoses: Pose[]) => {
+    useEffect(() => {
+        if (!map || robotPoses.length < 1) return
+        const drawMarkers = () => robotPoses.flatMap((pose) => getRobotMarker(map, pose))
+        let robotMarkers = drawMarkers()
+        const timer = setInterval(() => {
+            robotMarkers.forEach((marker) => marker.remove())
+            robotMarkers = drawMarkers()
+        }, updateIntervalRobotAuraInMS)
+        return () => {
+            clearInterval(timer)
+            robotMarkers.forEach((marker) => marker.remove())
+        }
+    }, [map, robotPoses])
+}
+
 export function PlantMap({ plantCode, floorId, tasks, robot }: PlantMapProps) {
     const [mapInfo, setMapInfo] = useState<PointillaMapInfo | undefined>(undefined)
     const [map, setMap] = useState<L.Map | null>(null)
@@ -144,19 +161,7 @@ export function PlantMap({ plantCode, floorId, tasks, robot }: PlantMapProps) {
         }
     }, [tasks])
 
-    useEffect(() => {
-        if (!robotPose || !map) return
-        let robotMarkers = getRobotMarker(map, robotPose)
-        const timer = setInterval(() => {
-            robotMarkers.forEach((marker) => marker?.remove())
-            if (!robotPose || !map) return
-            robotMarkers = getRobotMarker(map, robotPose)
-        }, updateIntervalRobotAuraInMS)
-        return () => {
-            clearInterval(timer)
-            robotMarkers.forEach((marker) => marker?.remove())
-        }
-    }, [robotPose])
+    useRobotMarkers(map, robotPose ? [robotPose] : [])
 
     return (
         <div className="map-root">
@@ -320,28 +325,10 @@ export function PlantPolygonMap({ inspectionArea, floorId }: PlantPolygonMapProp
 
     const positions = polygon ? toLeafletPositions(polygon) : undefined
 
-    useEffect(() => {
-        const robotPoses = robotIdAndPoses
-            .filter((IdAndPose) => robotIdsInArea.includes(IdAndPose.robotId))
-            .map((IdAndPose) => IdAndPose.pose)
-        if (robotPoses.length < 1 || !map) return
-        let robotMarkers = robotPoses
-            .filter((robotPose) => robotPose != undefined)
-            .map((robotPose) => getRobotMarker(map, robotPose))
-            .flat()
-        const timer = setInterval(() => {
-            robotMarkers.forEach((marker) => marker?.remove())
-            if (robotPoses.length < 1 || !map) return
-            robotMarkers = robotPoses
-                .filter((robotPose) => robotPose != undefined)
-                .map((robotPose) => getRobotMarker(map, robotPose))
-                .flat()
-        }, updateIntervalRobotAuraInMS)
-        return () => {
-            clearInterval(timer)
-            robotMarkers.forEach((marker) => marker?.remove())
-        }
-    }, [robotIdAndPoses, map])
+    const robotPoses = robotIdAndPoses
+        .filter((idAndPose) => robotIdsInArea.includes(idAndPose.robotId))
+        .map((idAndPose) => idAndPose.pose)
+    useRobotMarkers(map, robotPoses)
 
     useEffect(() => {
         loadMap()
