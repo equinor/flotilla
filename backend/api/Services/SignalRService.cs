@@ -111,9 +111,11 @@ namespace Api.Services
             string installationCode
         )
         {
+            ArgumentException.ThrowIfNullOrWhiteSpace(installationCode);
+
             _ = SendMessageAsync(
                 "Alert",
-                (string?)null,
+                installationCode,
                 new AlertResponse(type, missionDefinitionId, message, installationCode, null)
             );
         }
