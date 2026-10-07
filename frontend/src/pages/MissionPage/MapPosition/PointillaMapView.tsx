@@ -279,19 +279,25 @@ export function useInspectionsPlantMapData(
         loadMap()
     }, [plantCode, floorId, map])
 
+    const positionsKey = JSON.stringify(inspectionWithPositions.map((i) => [i.targetPosition.x, i.targetPosition.y]))
+
     useEffect(() => {
         if (inspectionWithPositions.length <= 0 || !map || !mapInfo) return
 
         const taskMarkers = getInspectionMarkers(map, inspectionWithPositions)
         taskMarkers.forEach((t, i) => t.on('click', () => onMarkerClick(i)))
 
-        const group = L.featureGroup(taskMarkers)
-        map.fitBounds(group.getBounds())
-
         return () => {
             taskMarkers.forEach((marker) => marker.remove())
         }
     }, [mapInfo, map, inspections])
+
+    // Keyed on positions so refetched data with the same findings does not reset the user's pan and zoom
+    useEffect(() => {
+        if (inspectionWithPositions.length <= 0 || !map || !mapInfo) return
+        const bounds = L.latLngBounds(inspectionWithPositions.map((i) => [i.targetPosition.y, i.targetPosition.x]))
+        map.fitBounds(bounds)
+    }, [mapInfo, map, positionsKey])
 
     return { mapInfo, map, setMap }
 }
