@@ -15,8 +15,11 @@ namespace Api.Services
         public Task<Robot> CreateFromQuery(CreateRobotQuery robotQuery);
         public Task<Robot> GetRobotWithSchedulingPreCheck(string robotId, bool readOnly = true);
         public Task<IEnumerable<Robot>> ReadAll(bool readOnly = true);
-        public Task<Robot?> ReadById(string id, bool readOnly = true);
-        public Task<Robot?> ReadByIdForWrite(string id, bool readOnly = true);
+        public Task<Robot?> ReadById(
+            string id,
+            bool readOnly = true,
+            AccessMode accessMode = AccessMode.Read
+        );
         public Task<Robot?> ReadByIsarId(string isarId, bool readOnly = true);
         public Task<IList<Robot>> ReadRobotsForInstallation(
             string installationCode,
@@ -95,7 +98,7 @@ namespace Api.Services
             bool readOnly = true
         )
         {
-            var robot = await ReadByIdForWrite(robotId, readOnly: readOnly);
+            var robot = await ReadById(robotId, readOnly: readOnly, accessMode: AccessMode.Write);
 
             if (robot is null)
             {
@@ -290,15 +293,13 @@ namespace Api.Services
             return await query.ToListAsync();
         }
 
-        public async Task<Robot?> ReadById(string id, bool readOnly = true)
+        public async Task<Robot?> ReadById(
+            string id,
+            bool readOnly = true,
+            AccessMode accessMode = AccessMode.Read
+        )
         {
-            var query = await GetRobotsWithSubModels(readOnly: readOnly);
-            return await query.FirstOrDefaultAsync(robot => robot.Id.Equals(id));
-        }
-
-        public async Task<Robot?> ReadByIdForWrite(string id, bool readOnly = true)
-        {
-            var query = await GetRobotsWithSubModels(readOnly, AccessMode.Write);
+            var query = await GetRobotsWithSubModels(readOnly, accessMode);
             return await query.FirstOrDefaultAsync(robot => robot.Id.Equals(id));
         }
 

@@ -13,8 +13,11 @@ namespace Api.Services
     {
         public Task<MissionDefinition> Create(MissionDefinition missionDefinition);
 
-        public Task<MissionDefinition?> ReadById(string id, bool readOnly = true);
-        public Task<MissionDefinition?> ReadByIdForWrite(string id, bool readOnly = true);
+        public Task<MissionDefinition?> ReadById(
+            string id,
+            bool readOnly = true,
+            AccessMode accessMode = AccessMode.Read
+        );
 
         public Task<PagedList<MissionDefinition>> ReadAll(
             MissionDefinitionQueryStringParameters parameters,
@@ -87,17 +90,13 @@ namespace Api.Services
             return missionDefinition;
         }
 
-        public async Task<MissionDefinition?> ReadById(string id, bool readOnly = true)
+        public async Task<MissionDefinition?> ReadById(
+            string id,
+            bool readOnly = true,
+            AccessMode accessMode = AccessMode.Read
+        )
         {
-            var query = await GetMissionDefinitionsWithSubModels(readOnly: readOnly);
-            return await query
-                .Where(m => m.IsDeprecated == false)
-                .FirstOrDefaultAsync(missionDefinition => missionDefinition.Id.Equals(id));
-        }
-
-        public async Task<MissionDefinition?> ReadByIdForWrite(string id, bool readOnly = true)
-        {
-            var query = await GetMissionDefinitionsWithSubModels(readOnly, AccessMode.Write);
+            var query = await GetMissionDefinitionsWithSubModels(readOnly, accessMode);
             return await query
                 .Where(m => m.IsDeprecated == false)
                 .FirstOrDefaultAsync(missionDefinition => missionDefinition.Id.Equals(id));

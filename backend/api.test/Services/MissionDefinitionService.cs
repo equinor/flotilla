@@ -1,10 +1,13 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Api.Controllers.Models;
+using Api.Database.Context;
 using Api.Database.Models;
 using Api.Services;
 using Api.Test.Database;
 using Microsoft.Extensions.DependencyInjection;
+using Moq;
 using Testcontainers.PostgreSql;
 using Xunit;
 
@@ -15,6 +18,7 @@ namespace Api.Test.Services
         public required DatabaseUtilities DatabaseUtilities { get; set; }
         public required IMissionDefinitionService MissionDefinitionService { get; set; }
         public required IInstallationService InstallationService { get; set; }
+        private IServiceProvider _services = null!;
 
         public async ValueTask InitializeAsync()
         {
@@ -24,6 +28,7 @@ namespace Api.Test.Services
                 postgreSqlConnectionString: connectionString
             );
             var serviceProvider = TestSetupHelpers.ConfigureServiceProvider(factory);
+            _services = serviceProvider;
 
             DatabaseUtilities = serviceProvider.GetRequiredService<DatabaseUtilities>();
             MissionDefinitionService =
@@ -59,6 +64,60 @@ namespace Api.Test.Services
                     }
                 )
             );
+        }
+
+        [Theory]
+        [InlineData(true, false)]
+        [InlineData(false, false)]
+        [InlineData(true, true)]
+        [InlineData(false, true)]
+        public async Task ReadByIdSeparatesAccessFromTracking(bool readOnly, bool canWrite)
+        {
+            var installation = await DatabaseUtilities.NewInstallation("BBB");
+            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
+            var area = await DatabaseUtilities.NewInspectionArea(
+                installation.InstallationCode,
+                plant.PlantCode
+            );
+            var definition = await DatabaseUtilities.NewMissionDefinition(
+                null,
+                installation.InstallationCode,
+                area,
+                [
+                    new TaskDefinition
+                    {
+                        Index = 1,
+                        RobotPose = new Pose(),
+                        TargetPosition = new Position(),
+                    },
+                ],
+                writeToDatabase: true
+            );
+            var roles = new Mock<IAccessRoleService>(MockBehavior.Strict);
+            roles.Setup(s => s.GetAllowedInstallationCodes(AccessMode.Read)).ReturnsAsync(["BBB"]);
+            roles
+                .Setup(s => s.GetAllowedInstallationCodes(AccessMode.Write))
+                .ReturnsAsync(canWrite ? ["BBB"] : ["AAA"]);
+            var context = _services.GetRequiredService<FlotillaDbContext>();
+            var service = ActivatorUtilities.CreateInstance<Api.Services.MissionDefinitionService>(
+                _services,
+                context,
+                roles.Object
+            );
+            context.ChangeTracker.Clear();
+
+            var readable = await service.ReadById(definition.Id, readOnly);
+            Assert.NotNull(readable);
+            Assert.Equal(!readOnly, context.ChangeTracker.Entries<MissionDefinition>().Any());
+            context.ChangeTracker.Clear();
+
+            var writable = await service.ReadById(definition.Id, readOnly, AccessMode.Write);
+            Assert.Equal(canWrite, writable != null);
+            Assert.Equal(
+                canWrite && !readOnly,
+                context.ChangeTracker.Entries<MissionDefinition>().Any()
+            );
+            roles.VerifyAll();
         }
     }
 }

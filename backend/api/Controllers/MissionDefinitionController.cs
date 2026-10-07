@@ -243,9 +243,10 @@ namespace Api.Controllers
             if (!ModelState.IsValid)
                 return BadRequest("Invalid data.");
 
-            var missionDefinition = await missionDefinitionService.ReadByIdForWrite(
+            var missionDefinition = await missionDefinitionService.ReadById(
                 id,
-                readOnly: false
+                readOnly: false,
+                accessMode: AccessMode.Write
             );
             if (missionDefinition == null)
                 return NotFound($"Could not find mission definition with id '{id}'");
@@ -402,9 +403,9 @@ namespace Api.Controllers
             missionDefinitionId = Sanitize.SanitizeUserInput(missionDefinitionId);
             skipAutoMissionQuery = Sanitize.SanitizeUserInput(skipAutoMissionQuery);
 
-            var missionDefinition = await missionDefinitionService.ReadByIdForWrite(
+            var missionDefinition = await missionDefinitionService.ReadById(
                 missionDefinitionId,
-                readOnly: true
+                accessMode: AccessMode.Write
             );
             if (missionDefinition == null)
             {
