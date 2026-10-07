@@ -1,4 +1,4 @@
-import { useContext, useMemo, useState } from 'react'
+import { useContext, useMemo } from 'react'
 import { useLanguageContext } from 'contexts/LanguageContext'
 import { ContentCard, PageBackground, PageContent } from 'components/Styles/StyledComponents'
 import { InstallationContext } from 'contexts/InstallationContext'
@@ -52,24 +52,53 @@ const get7DayWindow = (endDate: Date | null): DataViewTimeRange => {
     return { minDate, maxDate: endDate }
 }
 
+const useFilterDate = () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [searchParams, setSearchParams] = useSearchParams()
+
+    const switchSelectedMaxDate = (maxDate: Date | null | undefined) => {
+        setSearchParams(
+            (prev) => {
+                if (maxDate) prev.set('maxDate', maxDate.toDateString())
+                else prev.delete('maxDate')
+                return prev
+            },
+            { replace: true }
+        )
+    }
+
+    return { switchSelectedMaxDate }
+}
+
 export const FencillaViewPageRouter = () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [searchParams, setSearchParams] = useSearchParams()
     const inspectionId = searchParams.get('inspectionId') ?? undefined
+    const maxDateString = searchParams.get('maxDate') ?? undefined
 
-    return <FencillaViewPage lookupInspectionId={inspectionId} />
+    const maxDate = maxDateString ? new Date(maxDateString) : undefined
+
+    return <FencillaViewPage lookupInspectionId={inspectionId} maxDate={maxDate} />
 }
 
-const FencillaViewPage = ({ lookupInspectionId }: { lookupInspectionId: string | undefined }) => {
+const FencillaViewPage = ({
+    lookupInspectionId,
+    maxDate = new Date(),
+}: {
+    lookupInspectionId: string | undefined
+    maxDate: Date | undefined
+}) => {
     const { TranslateText } = useLanguageContext()
     const { installation } = useContext(InstallationContext)
     const { installationInspectionAreas } = useAssetContext()
-
     const { useSaraListData, useSaraData } = useInspectionsContext()
-    const [filterDates, setFilterDates] = useState<DataViewTimeRange>(() => get7DayWindow(new Date()))
+    const { switchSelectedMaxDate } = useFilterDate()
     const { switchSelectedInspectionId } = useInspectionId()
 
-    const singleInspectionData = useSaraData(lookupInspectionId ?? '')
+    const filterDates = get7DayWindow(maxDate)
+
+    const plantCode =
+        installationInspectionAreas.find((i) => i.installationCode === installation.installationCode)?.plantCode ?? null
 
     const { data, isPending, isError } = useSaraListData(
         null,
@@ -79,6 +108,8 @@ const FencillaViewPage = ({ lookupInspectionId }: { lookupInspectionId: string |
         filterDates.minDate,
         filterDates.maxDate
     )
+
+    const singleInspectionData = useSaraData(lookupInspectionId ?? '')
 
     const mostRecentInspections = useMemo(() => {
         const descriptionToInspectionMap = new Map<string, InspectionData>()
@@ -96,9 +127,6 @@ const FencillaViewPage = ({ lookupInspectionId }: { lookupInspectionId: string |
         })
         return Array.from(descriptionToInspectionMap.values())
     }, [data, singleInspectionData.data])
-
-    const plantCode =
-        installationInspectionAreas.find((i) => i.installationCode === installation.installationCode)?.plantCode ?? null
 
     const selectedInspectionIndex = mostRecentInspections.findIndex((i) => i.inspectionId === lookupInspectionId)
     const selectedInspection =
@@ -161,7 +189,7 @@ const FencillaViewPage = ({ lookupInspectionId }: { lookupInspectionId: string |
                 <StyledDiv>
                     <Typography variant="h6">{TranslateText('Show data until selected date') + ':'}</Typography>
                     <DatePicker
-                        onChange={(newDate: Date | null) => setFilterDates(get7DayWindow(newDate))}
+                        onChange={(newDate: Date | null) => switchSelectedMaxDate(newDate)}
                         value={filterDates.maxDate}
                         maxValue={new Date()}
                     />
