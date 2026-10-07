@@ -27,8 +27,10 @@ namespace Api.Test.Security
         {
             var robot = new Robot { Id = "robot" };
             var robots = new Mock<IRobotService>(MockBehavior.Strict);
-            robots.Setup(s => s.ReadById(robot.Id, true)).ReturnsAsync(robot);
-            robots.Setup(s => s.ReadByIdForWrite(robot.Id, true)).ReturnsAsync((Robot?)null);
+            robots.Setup(s => s.ReadById(robot.Id, true, AccessMode.Read)).ReturnsAsync(robot);
+            robots
+                .Setup(s => s.ReadById(robot.Id, true, AccessMode.Write))
+                .ReturnsAsync((Robot?)null);
             var isar = new Mock<IIsarService>(MockBehavior.Strict);
             var robotController = new RobotController(
                 NullLogger<RobotController>.Instance,
@@ -66,8 +68,11 @@ namespace Api.Test.Security
             };
 
             Assert.True(result is NotFoundResult or NotFoundObjectResult);
-            robots.Verify(s => s.ReadByIdForWrite(robot.Id, true), Times.Once);
-            robots.Verify(s => s.ReadById(It.IsAny<string>(), It.IsAny<bool>()), Times.Never);
+            robots.Verify(s => s.ReadById(robot.Id, true, AccessMode.Write), Times.Once);
+            robots.Verify(
+                s => s.ReadById(It.IsAny<string>(), It.IsAny<bool>(), AccessMode.Read),
+                Times.Never
+            );
             isar.VerifyNoOtherCalls();
         }
 

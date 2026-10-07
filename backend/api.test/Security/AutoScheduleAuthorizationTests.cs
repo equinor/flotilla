@@ -170,7 +170,9 @@ namespace Api.Test.Security
             definition.AutoScheduleFrequency = jobs is null
                 ? null
                 : new AutoScheduleFrequency { AutoScheduledJobs = jobs };
-            _definitions.Setup(s => s.ReadById(definition.Id, true)).ReturnsAsync(definition);
+            _definitions
+                .Setup(s => s.ReadById(definition.Id, true, AccessMode.Read))
+                .ReturnsAsync(definition);
 
             await CreateService().AutoScheduleMissionRun(definition.Id, ScheduledTime);
 
@@ -189,7 +191,9 @@ namespace Api.Test.Security
                 .Setup(s => s.GetAllowedInstallationCodes(AccessMode.Write))
                 .ReturnsAsync(["BBB"]);
             var definition = CreateDefinition();
-            _definitions.Setup(s => s.ReadById(definition.Id, true)).ReturnsAsync(definition);
+            _definitions
+                .Setup(s => s.ReadById(definition.Id, true, AccessMode.Read))
+                .ReturnsAsync(definition);
             if (jobDeleted)
                 _definitions
                     .Setup(s => s.Update(definition))
@@ -217,7 +221,9 @@ namespace Api.Test.Security
                 .ReturnsAsync(["BBB"]);
             var definition = CreateDefinition();
             var robot = new Robot { Id = "robot", CurrentInspectionAreaId = "area" };
-            _definitions.Setup(s => s.ReadById(definition.Id, true)).ReturnsAsync(definition);
+            _definitions
+                .Setup(s => s.ReadById(definition.Id, true, AccessMode.Read))
+                .ReturnsAsync(definition);
             _definitions.Setup(s => s.Update(definition)).ReturnsAsync(definition);
             _jobs.Setup(j => j.ChangeState("job", It.IsAny<DeletedState>(), null)).Returns(true);
             _robots.Setup(s => s.ReadRobotsForInstallation("BBB", true)).ReturnsAsync([robot]);
