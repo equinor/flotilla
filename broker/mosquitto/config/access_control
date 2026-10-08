@@ -16,4 +16,5 @@ user sara
 topic read isar/+/inspection_result
 topic read isar/+/inspection_value
 topic write sara/visualization_available
+topic write sara/inspection_record_available
 topic write sara/analysis_result_available
