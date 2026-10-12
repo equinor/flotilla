@@ -49,6 +49,6 @@ export const VideoPlaceholder = () => {
 
 export const VideoPlayer = ({ src, onError }: { src: string; onError?: () => void }) => (
     <StyledVideoWrapper>
-        <StyledVideoPlayer src={src} controls playsInline onError={onError} />
+        <StyledVideoPlayer src={src} controls muted playsInline onError={onError} />
     </StyledVideoWrapper>
 )
