@@ -55,9 +55,18 @@ const StyledContent = styled.div`
 enum Columns {
     Name = 'Name',
     Description = 'Description',
+    AnalysisType = 'Analysis type',
     Status = 'Status',
     LastCompleted = 'LastCompleted',
     AddToQueue = 'AddToQueue',
+}
+
+// Flotilla serializes enum names, not the SARA analysis keys used by the frontend enum.
+const analysisTypeLabels: Record<string, string> = {
+    CLOE: 'Constant level oiler',
+    Fencilla: 'Perimeter breach detection',
+    ThermalReading: 'Thermal reading',
+    CO2: 'CO2Measurement',
 }
 
 const HideColumnsOnSmallScreen = styled.div`
@@ -120,6 +129,10 @@ const MissionRow = ({ mission, setMissions }: IMissionRowProps) => {
     const lastCompleted = mission.lastSuccessfulRun?.endTime
         ? formatDateTime(mission.lastSuccessfulRun.endTime)
         : TranslateText('Never')
+    const analysisTypes = [...new Set(mission.tasks.flatMap((task) => task.analysisTypes))]
+    const analyses = analysisTypes.length
+        ? analysisTypes.map((type) => TranslateText(analysisTypeLabels[type] ?? type)).join(', ')
+        : TranslateText('None')
 
     return (
         <StyledTableRow key={mission.id}>
@@ -134,6 +147,7 @@ const MissionRow = ({ mission, setMissions }: IMissionRowProps) => {
             <Table.Cell id={Columns.Description} style={{ wordBreak: 'break-word' }}>
                 {mission.comment}
             </Table.Cell>
+            <Table.Cell id={Columns.AnalysisType}>{analyses}</Table.Cell>
             <Table.Cell id={Columns.Status}>{status}</Table.Cell>
             <Table.Cell id={Columns.LastCompleted}>{lastCompleted}</Table.Cell>
             <Table.Cell id={Columns.AddToQueue}>
