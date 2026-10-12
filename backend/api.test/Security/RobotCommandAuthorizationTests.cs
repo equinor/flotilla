@@ -86,7 +86,8 @@ namespace Api.Test.Security
             var robots = new Mock<IRobotService>(MockBehavior.Strict);
             var events = new EventAggregatorSingletonService();
             int published = 0;
-            events.Subscribe<RobotEmergencyEventArgs>(_ => published++);
+            events.Subscribe<RobotLockdownEventArgs>(_ => published++);
+            events.Subscribe<RobotReleaseFromLockdownEventArgs>(_ => published++);
             var controller = new EmergencyActionController(robots.Object, events, roles.Object);
 
             var response = clearEmergency

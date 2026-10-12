@@ -48,12 +48,7 @@ namespace Api.Controllers
 
             foreach (var robot in robots)
             {
-                eventAggregatorSingletonService.Publish(
-                    new RobotEmergencyEventArgs(
-                        robot,
-                        "Robot couldn't complete mission as 'Send robots to dock'-button was clicked"
-                    )
-                );
+                eventAggregatorSingletonService.Publish(new RobotLockdownEventArgs(robot));
             }
 
             return NoContent();
@@ -89,7 +84,9 @@ namespace Api.Controllers
 
             foreach (var robot in robots)
             {
-                eventAggregatorSingletonService.Publish(new RobotEmergencyEventArgs(robot));
+                eventAggregatorSingletonService.Publish(
+                    new RobotReleaseFromLockdownEventArgs(robot)
+                );
             }
 
             return NoContent();
