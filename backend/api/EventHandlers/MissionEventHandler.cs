@@ -38,10 +38,10 @@ namespace Api.EventHandlers
             _eventAggregatorSingletonService.Subscribe<RobotReadyForMissionsEventArgs>(
                 OnRobotReadyForMissions
             );
-            _eventAggregatorSingletonService.Subscribe<RobotEmergencyEventArgs>(
+            _eventAggregatorSingletonService.Subscribe<RobotLockdownEventArgs>(
                 OnLockdownRobotTriggered
             );
-            _eventAggregatorSingletonService.Subscribe<RobotEmergencyEventArgs>(
+            _eventAggregatorSingletonService.Subscribe<RobotReleaseFromLockdownEventArgs>(
                 OnReleaseRobotFromLockdownTriggered
             );
         }
@@ -69,12 +69,12 @@ namespace Api.EventHandlers
             }
         }
 
-        private async void OnLockdownRobotTriggered(RobotEmergencyEventArgs e)
+        private async void OnLockdownRobotTriggered(RobotLockdownEventArgs e)
         {
             Robot robot = e.Robot;
 
             _logger.LogInformation(
-                "Triggered RobotEmergencyEvent for robot ID: {RobotId}",
+                "Triggered RobotLockdownEvent for robot ID: {RobotId}",
                 robot.Id
             );
 
@@ -89,7 +89,7 @@ namespace Api.EventHandlers
             }
         }
 
-        private async void OnReleaseRobotFromLockdownTriggered(RobotEmergencyEventArgs e)
+        private async void OnReleaseRobotFromLockdownTriggered(RobotReleaseFromLockdownEventArgs e)
         {
             Robot robot = e.Robot;
 

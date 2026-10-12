@@ -7,10 +7,14 @@ namespace Api.Services.Events
         public Robot Robot { get; } = robot;
     }
 
-    public class RobotEmergencyEventArgs(Robot robot, string? message = null) : EventArgs
+    public class RobotLockdownEventArgs(Robot robot) : EventArgs
     {
         public Robot Robot { get; } = robot;
-        public string? Message { get; } = message;
+    }
+
+    public class RobotReleaseFromLockdownEventArgs(Robot robot) : EventArgs
+    {
+        public Robot Robot { get; } = robot;
     }
 
     public class TeamsMessageEventArgs(string teamsMessage) : EventArgs
