@@ -10,9 +10,9 @@ export interface NamedMediaStream {
 }
 
 export interface MediaStreamConfig {
-    url: string
-    token: string
-    robotId: string
+    url: string | null
+    token: string | null
+    robotId: string | null
     mediaConnectionType: MediaConnectionType
     streams?: NamedMediaStream[]
 }
