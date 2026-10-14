@@ -38,9 +38,9 @@ export class BackendApi {
         return result.content
     }
 
-    async getRobotMediaConfig(robotId: string): Promise<MediaStreamConfig | null | undefined> {
+    async getRobotMediaConfig(robotId: string): Promise<MediaStreamConfig | null> {
         const path: string = 'media-stream/' + robotId
-        const result = await this.api.GET<MediaStreamConfig>(path).catch(handleError('GET', path))
+        const result = await this.api.GET<MediaStreamConfig | null>(path)
         return result.content
     }
 

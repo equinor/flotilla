@@ -5,10 +5,10 @@ import { Position } from './Position'
 interface AnalysisResult {
     analysisId: string
     analysisType: string
-    value?: string
-    unit?: string
-    confidence?: number
-    warning?: string
+    value?: string | null
+    unit?: string | null
+    confidence?: number | null
+    warning?: string | null
 }
 
 export interface Feedback {
@@ -96,7 +96,8 @@ export interface InspectionData {
 export const hasInspectionFinding = (inspection: Pick<InspectionData, 'warning'> | undefined): boolean =>
     Boolean(inspection?.warning)
 
-export const hasResultValue = (value: string | undefined) => value !== undefined && value.trim() !== ''
+export const hasResultValue = (value: string | null | undefined): value is string =>
+    typeof value === 'string' && value.trim() !== ''
 
 export const hasInspectionAnalysis = (inspection: InspectionData | undefined): boolean =>
     Boolean(
@@ -152,9 +153,9 @@ export const inspectionRecordToInspectionData = (record: InspectionRecord): Insp
         robotPose: record.robotPose,
         fileType: fileType,
         inspectionDescription: record.inspectionDescription,
-        value: result?.value,
-        unit: result?.unit,
-        confidence: result?.confidence,
-        warning: result?.warning,
+        value: result?.value ?? undefined,
+        unit: result?.unit ?? undefined,
+        confidence: result?.confidence ?? undefined,
+        warning: result?.warning ?? undefined,
     }
 }

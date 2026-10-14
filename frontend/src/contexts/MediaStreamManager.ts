@@ -1,4 +1,5 @@
 import { Room, RoomEvent } from 'livekit-client'
+import { ApiError } from 'api/ApiError'
 import { MediaConnectionType, MediaStreamConfig } from 'models/VideoStream'
 import { createOmeStreamManager, OmeStreamState } from './OmeStreamManager'
 import { calculateMediaStreamRetryDelayMs, MEDIA_STREAM_RECOVERY_POLICY } from './MediaStreamRecoveryPolicy'
@@ -36,9 +37,18 @@ export const createMediaStreamManager = (
     const connections = new Map<string, Connection>()
     let nextAttemptId = 0
 
+    const reportFailure = (robotId: string, reason: string, error?: unknown) => {
+        const status = error instanceof ApiError ? ` (HTTP ${error.statusCode})` : ''
+        console.error(
+            `Livestream unavailable for robot ${robotId}: ${reason}${status}. ` +
+                `Check /media-stream/${robotId}, the backend media/token service configuration, and camera availability. ` +
+                'Camera recovery is bounded; use Retry after the service is restored. Other frontend features remain available.'
+        )
+    }
+
     const disconnect = (room: Room) => {
         room.removeAllListeners()
-        void room.disconnect().catch((error: unknown) => console.error('Failed to disconnect LiveKit room', error))
+        void room.disconnect().catch(() => console.error('Failed to disconnect LiveKit room during camera cleanup'))
     }
 
     const clearAttempt = (connection: Connection) => {
@@ -77,9 +87,9 @@ export const createMediaStreamManager = (
     const createAttemptHandlers = (robotId: string, connection: Connection, attempt: Attempt) => {
         const isCurrent = () => connections.get(robotId) === connection && connection.attempt === attempt
 
-        const fail = (reason: unknown) => {
+        const fail = (reason: string, error?: unknown) => {
             if (!isCurrent()) return
-            console.warn(`Livestream failed for robot ${robotId}`, reason)
+            reportFailure(robotId, reason, error)
             clearAttempt(connection)
             scheduleRetry(robotId, connection)
         }
@@ -161,25 +171,37 @@ export const createMediaStreamManager = (
         publish(robotId, connection, connection.state.status === 'connecting' ? 'connecting' : 'reconnecting')
         startRecoveryDeadlineIfNeeded()
 
+        let failureReason = 'Media configuration/token request failed'
         try {
             // This endpoint activates the robot's publisher; a valid cached token cannot replace it.
             const config = await getConfig(robotId)
             if (!isCurrent()) return
-            if (!config || config.robotId !== robotId) {
-                fail('No supported media configuration')
+            if (!config) {
+                fail('No media configuration returned')
+                return
+            }
+            if (config.robotId !== robotId) {
+                fail('Media configuration does not match the requested robot')
                 return
             }
             if (config.mediaConnectionType === MediaConnectionType.OvenMediaEngine && config.streams?.length) {
                 clearTimeout(attempt.timeout)
                 attempt.timeout = undefined
                 const refreshOmeStreamForCamera = async (cameraId: string) => {
-                    const refreshed = await getConfig(robotId)
-                    if (
-                        refreshed?.robotId !== robotId ||
-                        refreshed.mediaConnectionType !== MediaConnectionType.OvenMediaEngine
-                    )
+                    try {
+                        const refreshed = await getConfig(robotId)
+                        const stream =
+                            refreshed?.robotId === robotId &&
+                            refreshed.mediaConnectionType === MediaConnectionType.OvenMediaEngine
+                                ? refreshed.streams?.find((stream) => stream.cameraId === cameraId)
+                                : undefined
+                        if (!stream && isCurrent())
+                            reportFailure(robotId, 'No media configuration returned for the requested OME camera')
+                        return stream
+                    } catch (error) {
+                        if (isCurrent()) reportFailure(robotId, 'OME media configuration request failed', error)
                         return undefined
-                    return refreshed.streams?.find((stream) => stream.cameraId === cameraId)
+                    }
                 }
                 const publishOmeCameraStatus = () => {
                     if (!isCurrent()) return
@@ -203,6 +225,16 @@ export const createMediaStreamManager = (
                 fail('No supported media configuration')
                 return
             }
+            if (
+                typeof config.url !== 'string' ||
+                !config.url.trim() ||
+                typeof config.token !== 'string' ||
+                !config.token.trim()
+            ) {
+                fail('LiveKit URL or token is missing')
+                return
+            }
+            failureReason = 'LiveKit connection failed'
             const room = new Room()
             attempt.room = room
             registerRoomEvents(room)
@@ -210,7 +242,7 @@ export const createMediaStreamManager = (
             // connect() may settle after timeout, release, or provider cleanup.
             if (!isCurrent()) disconnect(room)
         } catch (error) {
-            fail(error)
+            fail(failureReason, error)
         }
     }
 

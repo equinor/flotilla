@@ -29,7 +29,7 @@ const { rooms, MockRoom, backendApi, connectRoom } = vi.hoisted(() => {
         connectRoom,
         rooms: [] as MockRoom[],
         backendApi: {
-            getRobotMediaConfig: vi.fn<(robotId: string) => Promise<MediaStreamConfig | null | undefined>>(),
+            getRobotMediaConfig: vi.fn<(robotId: string) => Promise<MediaStreamConfig | null>>(),
         },
     }
 })
@@ -104,6 +104,7 @@ beforeEach(() => {
     vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
     vi.stubGlobal('MediaStream', class {})
     vi.spyOn(console, 'warn').mockImplementation(() => {})
+    vi.spyOn(console, 'error').mockImplementation(() => {})
     window.localStorage.clear()
     window.localStorage.setItem('flotilla-language', 'en')
     rooms.length = 0
@@ -446,18 +447,26 @@ describe('livestream viewing and recovery', () => {
         expect(vi.getTimerCount()).toBe(0)
     })
 
-    test.each(['missing', 'rejected', 'wrong-robot'])('surfaces %s config after finite retries', async (failure) => {
-        if (failure === 'rejected') backendApi.getRobotMediaConfig.mockRejectedValue(new Error('Unavailable'))
-        else
-            backendApi.getRobotMediaConfig.mockResolvedValue(
-                failure === 'missing' ? null : { ...config, robotId: 'other' }
-            )
+    test('keeps the page usable and recovers after a media-config request fails', async () => {
+        backendApi.getRobotMediaConfig.mockRejectedValue(new Error('secret-token'))
         await mount()
         await advance(6_000)
+
         expect(status()).toBe('Stream unavailable')
         expect(rooms).toHaveLength(0)
-        expect(backendApi.getRobotMediaConfig).toHaveBeenCalledTimes(3)
-        expect(vi.getTimerCount()).toBe(0)
+        const logs = JSON.stringify(vi.mocked(console.error).mock.calls)
+        expect(logs).toContain('robot-1')
+        expect(logs).not.toContain('secret-token')
+
+        backendApi.getRobotMediaConfig.mockResolvedValue(config)
+        await act(async () =>
+            Array.from(container.querySelectorAll('button'))
+                .find((button) => button.textContent === 'Retry')!
+                .click()
+        )
+        subscribe(rooms[0])
+        expect(cameras()).toBe(1)
+        expect(status()).toBeUndefined()
     })
 
     test('shows localized camera status and retry action', async () => {
