@@ -8,7 +8,7 @@ import {
 } from 'models/AutoScheduleOccurrence'
 import { DaysOfWeek } from 'models/AutoScheduleFrequency'
 
-export const makeOccurrence = (
+const makeOccurrence = (
     id: string,
     scheduledAt: string,
     status: 'Scheduled' | 'Skipped' = 'Scheduled'
