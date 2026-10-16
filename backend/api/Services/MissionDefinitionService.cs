@@ -210,11 +210,15 @@ namespace Api.Services
 
             var entry = context.Update(missionDefinition);
             await ApplyDatabaseUpdate(missionDefinition.InspectionArea.Installation);
-            _ = signalRService.SendMessageAsync(
-                "Mission definition updated",
-                missionDefinition?.InspectionArea.Installation,
-                missionDefinition != null ? new MissionDefinitionResponse(missionDefinition) : null
-            );
+            // A transaction owner publishes only after its commit succeeds.
+            if (context.Database.CurrentTransaction == null)
+                _ = signalRService.SendMessageAsync(
+                    "Mission definition updated",
+                    missionDefinition?.InspectionArea.Installation,
+                    missionDefinition != null
+                        ? new MissionDefinitionResponse(missionDefinition)
+                        : null
+                );
             DetachTracking(context, missionDefinition!);
             return entry.Entity;
         }

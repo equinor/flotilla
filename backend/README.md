@@ -38,6 +38,56 @@ Swagger is served at <http://localhost:8000/swagger>.
 
 To run the backend in Docker together with the rest of the stack, see the [root README](../README.md#quick-start).
 
+## Automatic mission scheduling
+
+Weekly schedules use Central European local time (CET/CEST). The scheduler materializes
+dated occurrences in PostgreSQL for the next 48 elapsed hours at startup, hourly, and
+when a weekly schedule is edited. It no longer clears scheduling state at midnight.
+Each mission definition and UTC timestamp identifies one occurrence.
+
+`GET /missions/definitions/auto-scheduled?installationCode=...` returns scheduled and
+skipped occurrences in `(now, now + 24 hours]`, subject to installation read access.
+The dashboard and mission-control list display scheduled occurrences; the weekly
+calendar/list also indicates skipped occurrences. Displayed dates and times use
+Europe/Oslo, regardless of the browser's timezone.
+
+`PUT /missions/definitions/{id}/skip-auto-mission` takes
+`{"occurrenceId":"..."}`. Only scheduled occurrences in the next 24 hours can be
+skipped, and installation write access is required. Requests without an occurrence
+ID receive 400; stale or ineligible occurrences receive 409. A time of day is not
+sufficient to identify a run.
+
+Skipping persists its state before attempting to delete the Hangfire job. Dispatch
+atomically claims the occurrence and creates its queued mission in one database
+transaction. A cancelled job that still fires cannot execute a skipped occurrence;
+duplicate jobs cannot create duplicate mission runs. Changing a weekly pattern
+cancels obsolete future occurrences. Re-adding a slot restores a cancelled occurrence
+but does not undo an explicit skip.
+
+Hangfire storage is still in memory. Use a single active scheduling backend.
+Restarting rebuilds future jobs from the persisted occurrences without resetting
+skips. Occurrences that became overdue while their scheduling process was down
+are marked missed rather than executed as a catch-up batch, preserving the previous
+no-catch-up behavior. A late job in the running process can still dispatch.
+Nonexistent spring-forward times have no occurrence; repeated autumn times run
+once at standard time, matching the existing .NET conversion policy.
+
+### Rolling-window rollout
+
+Apply `AddAutoScheduleOccurrences` before deploying the updated backend. Stop the
+old backend before starting the new scheduler; do not run the old daily scheduler
+alongside the occurrence scheduler. Deploy the frontend with the new occurrence-ID
+skip contract and have operators refresh any open pages.
+
+The scheduler/API and UI cutover must be coordinated: the backend layer changes
+the skip request contract and is not independently deployable with the old UI.
+The matching frontend layer is required to deploy the complete feature.
+
+The legacy time-only job map is retained in the schema but is no longer scheduling
+authority. It has neither dated skip records nor enough information to reliably
+migrate old skips. Record and reapply any pre-upgrade skips during the cutover,
+before allowing scheduled missions to run. Subsequent skips survive restarts.
+
 ## Connecting to the development database
 
 By default the backend runs against an in-memory database. To use the development database instead, add the following to `backend/api/.env`:

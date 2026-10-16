@@ -103,6 +103,7 @@ builder.Services.AddScoped<RobotController>();
 builder.Services.AddScoped<EmergencyActionController>();
 builder.Services.AddScoped<IUserInfoService, UserInfoService>();
 builder.Services.AddScoped<IAutoScheduleService, AutoScheduleService>();
+builder.Services.AddSingleton(TimeProvider.System);
 
 builder.Services.AddTransient<ISignalRService, SignalRService>();
 

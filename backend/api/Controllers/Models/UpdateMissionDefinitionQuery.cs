@@ -39,8 +39,8 @@ namespace Api.Controllers.Models
     public struct SkipAutoMissionQuery
     {
         /// <summary>
-        /// The time of day to skip the mission
+        /// The exact dated occurrence to skip
         /// </summary>
-        public TimeOnly TimeOfDay { get; set; }
+        public string? OccurrenceId { get; set; }
     }
 }
