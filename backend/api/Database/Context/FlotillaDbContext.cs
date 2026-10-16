@@ -23,6 +23,8 @@ namespace Api.Database.Context
         public DbSet<ExclusionArea> ExclusionAreas => Set<ExclusionArea>();
         public DbSet<AccessRole> AccessRoles => Set<AccessRole>();
         public DbSet<UserInfo> UserInfos => Set<UserInfo>();
+        public DbSet<AutoScheduleOccurrence> AutoScheduleOccurrences =>
+            Set<AutoScheduleOccurrence>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
