@@ -17,7 +17,7 @@ namespace Api.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.10")
+                .HasAnnotation("ProductVersion", "10.0.12")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -44,6 +44,36 @@ namespace Api.Migrations
                     b.HasIndex("InstallationId");
 
                     b.ToTable("AccessRoles");
+                });
+
+            modelBuilder.Entity("Api.Database.Models.AutoScheduleOccurrence", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<string>("JobId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("MissionDefinitionId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("ScheduledAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("SchedulerInstance")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MissionDefinitionId", "ScheduledAt")
+                        .IsUnique();
+
+                    b.ToTable("AutoScheduleOccurrences");
                 });
 
             modelBuilder.Entity("Api.Database.Models.ExclusionArea", b =>
@@ -403,6 +433,15 @@ namespace Api.Migrations
                         .HasForeignKey("InstallationId");
 
                     b.Navigation("Installation");
+                });
+
+            modelBuilder.Entity("Api.Database.Models.AutoScheduleOccurrence", b =>
+                {
+                    b.HasOne("Api.Database.Models.MissionDefinition", null)
+                        .WithMany()
+                        .HasForeignKey("MissionDefinitionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Api.Database.Models.ExclusionArea", b =>

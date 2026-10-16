@@ -23,9 +23,22 @@ namespace Api.Database.Context
         public DbSet<ExclusionArea> ExclusionAreas => Set<ExclusionArea>();
         public DbSet<AccessRole> AccessRoles => Set<AccessRole>();
         public DbSet<UserInfo> UserInfos => Set<UserInfo>();
+        public DbSet<AutoScheduleOccurrence> AutoScheduleOccurrences =>
+            Set<AutoScheduleOccurrence>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder
+                .Entity<AutoScheduleOccurrence>()
+                .HasIndex(o => new { o.MissionDefinitionId, o.ScheduledAt })
+                .IsUnique();
+            modelBuilder
+                .Entity<AutoScheduleOccurrence>()
+                .HasOne<MissionDefinition>()
+                .WithMany()
+                .HasForeignKey(o => o.MissionDefinitionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             // https://docs.microsoft.com/en-us/ef/core/modeling/owned-entities
             // https://docs.microsoft.com/en-us/ef/core/modeling/owned-entities#collections-of-owned-types
             modelBuilder.Entity<MissionTask>(missionTaskEntity =>
