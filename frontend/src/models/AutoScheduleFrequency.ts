@@ -10,14 +10,6 @@ export interface TimeAndDay {
     timeOfDay: string // Format HH:mm:ss
 }
 
-function parseAutoScheduledJobIds(autoScheduledJobs: string): { [key: string]: string } {
-    return JSON.parse(autoScheduledJobs)
-}
-
-export const isJobScheduledAt = (mission: MissionDefinition, time: string): boolean =>
-    !!mission.autoScheduleFrequency?.autoScheduledJobs &&
-    !!parseAutoScheduledJobIds(mission.autoScheduleFrequency.autoScheduledJobs)[time]
-
 export enum DaysOfWeek {
     Monday = 'Monday',
     Tuesday = 'Tuesday',
@@ -49,7 +41,7 @@ export const allDaysStartingSunday = [
 ]
 
 // SchedulingTimesCETperWeek is always CET/CEST, regardless of server or browser timezone
-const getCetNow = (now: Date): Date => {
+export const getCetNow = (now: Date): Date => {
     const parts = new Intl.DateTimeFormat('en-US', {
         timeZone: 'Europe/Oslo',
         year: 'numeric',
