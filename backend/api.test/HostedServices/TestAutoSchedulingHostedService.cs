@@ -250,7 +250,12 @@ namespace Api.Test.HostedServices
             var upcoming = await _service.ReadUpcoming(_definition.InstallationCode);
             Assert.Equal(2, upcoming.Count);
             Assert.Equal(DateTimeOffset.Parse("2026-10-16T23:00:00Z"), upcoming[1].ScheduledAt);
-            Assert.Equal(4, await _context.AutoScheduleOccurrences.CountAsync());
+            Assert.Equal(
+                4,
+                await _context.AutoScheduleOccurrences.CountAsync(
+                    TestContext.Current.CancellationToken
+                )
+            );
             var createdJobs = _jobNumber;
             await _service.Reconcile(_definition);
             Assert.Equal(createdJobs, _jobNumber);
@@ -258,21 +263,27 @@ namespace Api.Test.HostedServices
             var tomorrow = upcoming[1];
             Assert.True(await _service.SkipOccurrence(_definition, tomorrow.Id));
             Assert.False(await _service.SkipOccurrence(_definition, tomorrow.Id));
-            await _context.AutoScheduleOccurrences.ExecuteUpdateAsync(s =>
-                s.SetProperty(o => o.SchedulerInstance, "previous-process")
+            await _context.AutoScheduleOccurrences.ExecuteUpdateAsync(
+                s => s.SetProperty(o => o.SchedulerInstance, "previous-process"),
+                TestContext.Current.CancellationToken
             );
             await _service.Reconcile(_definition);
             Assert.Equal(
                 AutoScheduleOccurrenceStatus.Skipped,
                 (
-                    await _context.AutoScheduleOccurrences.SingleAsync(o => o.Id == tomorrow.Id)
+                    await _context.AutoScheduleOccurrences.SingleAsync(
+                        o => o.Id == tomorrow.Id,
+                        TestContext.Current.CancellationToken
+                    )
                 ).Status
             );
             Assert.Equal(createdJobs + 3, _jobNumber);
 
             _clock.Now = tomorrow.ScheduledAt;
             await _service.DispatchOccurrence(tomorrow.Id);
-            Assert.Empty(await _context.MissionRuns.ToListAsync());
+            Assert.Empty(
+                await _context.MissionRuns.ToListAsync(TestContext.Current.CancellationToken)
+            );
         }
 
         [Fact]
@@ -285,7 +296,9 @@ namespace Api.Test.HostedServices
             Assert.True(await _service.SkipOccurrence(_definition, occurrence.Id));
             _clock.Now = occurrence.ScheduledAt;
             await _service.DispatchOccurrence(occurrence.Id);
-            Assert.Empty(await _context.MissionRuns.ToListAsync());
+            Assert.Empty(
+                await _context.MissionRuns.ToListAsync(TestContext.Current.CancellationToken)
+            );
         }
 
         [Fact]
@@ -293,16 +306,23 @@ namespace Api.Test.HostedServices
         {
             var occurrence = (await _service.ReadUpcoming(_definition.InstallationCode))[0];
             await _service.DispatchOccurrence(occurrence.Id);
-            Assert.Empty(await _context.MissionRuns.ToListAsync());
+            Assert.Empty(
+                await _context.MissionRuns.ToListAsync(TestContext.Current.CancellationToken)
+            );
             _clock.Now = occurrence.ScheduledAt;
             await _service.DispatchOccurrence(occurrence.Id);
             await _service.DispatchOccurrence(occurrence.Id);
-            Assert.Single(await _context.MissionRuns.ToListAsync());
+            Assert.Single(
+                await _context.MissionRuns.ToListAsync(TestContext.Current.CancellationToken)
+            );
             Assert.False(await _service.SkipOccurrence(_definition, occurrence.Id));
             Assert.Equal(
                 AutoScheduleOccurrenceStatus.Dispatched,
                 (
-                    await _context.AutoScheduleOccurrences.SingleAsync(o => o.Id == occurrence.Id)
+                    await _context.AutoScheduleOccurrences.SingleAsync(
+                        o => o.Id == occurrence.Id,
+                        TestContext.Current.CancellationToken
+                    )
                 ).Status
             );
         }
@@ -317,23 +337,37 @@ namespace Api.Test.HostedServices
             Assert.Equal(
                 AutoScheduleOccurrenceStatus.Cancelled,
                 (
-                    await _context.AutoScheduleOccurrences.SingleAsync(o => o.Id == upcoming[0].Id)
+                    await _context.AutoScheduleOccurrences.SingleAsync(
+                        o => o.Id == upcoming[0].Id,
+                        TestContext.Current.CancellationToken
+                    )
                 ).Status
             );
             await _service.UpdateAutoScheduleFrequency(_definition, original);
             Assert.Equal(
                 AutoScheduleOccurrenceStatus.Scheduled,
                 (
-                    await _context.AutoScheduleOccurrences.SingleAsync(o => o.Id == upcoming[0].Id)
+                    await _context.AutoScheduleOccurrences.SingleAsync(
+                        o => o.Id == upcoming[0].Id,
+                        TestContext.Current.CancellationToken
+                    )
                 ).Status
             );
             Assert.Equal(
                 AutoScheduleOccurrenceStatus.Skipped,
                 (
-                    await _context.AutoScheduleOccurrences.SingleAsync(o => o.Id == upcoming[1].Id)
+                    await _context.AutoScheduleOccurrences.SingleAsync(
+                        o => o.Id == upcoming[1].Id,
+                        TestContext.Current.CancellationToken
+                    )
                 ).Status
             );
-            Assert.Equal(4, await _context.AutoScheduleOccurrences.CountAsync());
+            Assert.Equal(
+                4,
+                await _context.AutoScheduleOccurrences.CountAsync(
+                    TestContext.Current.CancellationToken
+                )
+            );
         }
 
         [Fact]
@@ -341,7 +375,7 @@ namespace Api.Test.HostedServices
         {
             var outside = await _context
                 .AutoScheduleOccurrences.OrderBy(o => o.ScheduledAt)
-                .LastAsync();
+                .LastAsync(TestContext.Current.CancellationToken);
             Assert.False(await _service.SkipOccurrence(_definition, outside.Id));
             var upcoming = (await _service.ReadUpcoming(_definition.InstallationCode))[0];
             Assert.False(
@@ -408,7 +442,9 @@ namespace Api.Test.HostedServices
             _clock.Now = tomorrow.ScheduledAt.AddSeconds(20);
             await _service.Reconcile(_definition);
             await _service.DispatchOccurrence(tomorrow.Id);
-            Assert.Single(await _context.MissionRuns.ToListAsync());
+            Assert.Single(
+                await _context.MissionRuns.ToListAsync(TestContext.Current.CancellationToken)
+            );
         }
     }
 }
