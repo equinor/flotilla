@@ -8,7 +8,7 @@ export interface AutoScheduleOccurrence {
     mission: MissionDefinition
 }
 
-export const isInUpcomingWindow = (occurrence: AutoScheduleOccurrence, now: Date): boolean => {
+const isInUpcomingWindow = (occurrence: AutoScheduleOccurrence, now: Date): boolean => {
     const scheduledAt = new Date(occurrence.scheduledAt).getTime()
     return scheduledAt > now.getTime() && scheduledAt <= now.getTime() + 24 * 60 * 60 * 1000
 }
