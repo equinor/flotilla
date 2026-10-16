@@ -64,7 +64,7 @@ namespace Api.Utilities
 
         public static SkipAutoMissionQuery SanitizeUserInput(SkipAutoMissionQuery inputQuery)
         {
-            inputQuery.TimeOfDay = SanitizeUserInput(inputQuery.TimeOfDay);
+            inputQuery.OccurrenceId = SanitizeUserInput(inputQuery.OccurrenceId);
             return inputQuery;
         }
 

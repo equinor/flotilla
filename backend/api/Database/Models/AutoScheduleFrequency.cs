@@ -8,7 +8,7 @@ namespace Api.Database.Models
     {
         public IList<TimeAndDay> SchedulingTimesCETperWeek { get; set; } = [];
 
-        // Used by the legacy scheduler until occurrence-based scheduling is enabled.
+        // Retained for rollback compatibility; occurrences are the scheduling authority.
         public string? AutoScheduledJobs { get; set; }
 
         public bool HasValidValue()
@@ -73,29 +73,6 @@ namespace Api.Database.Models
                         yield return instant;
                 }
             }
-        }
-
-        public IList<(DateTimeOffset, TimeOnly)>? GetSchedulingTimesUntilMidnight()
-        {
-            DateTime nowLocal = TimeZoneUtilities.NowCet();
-            TimeOnly nowLocalTimeOnly = TimeOnly.FromDateTime(nowLocal);
-            DateOnly todayLocal = DateOnly.FromDateTime(nowLocal);
-
-            var autoScheduleNext = SchedulingTimesCETperWeek
-                .Where(schedulingTime => schedulingTime.DayOfWeek == nowLocal.DayOfWeek)
-                .Where(schedulingTime => schedulingTime.TimeOfDay > nowLocalTimeOnly)
-                .Select(schedulingTime =>
-                    (
-                        TimeZoneUtilities.CetWallClockToUtcInstant(
-                            todayLocal,
-                            schedulingTime.TimeOfDay
-                        ),
-                        schedulingTime.TimeOfDay
-                    )
-                )
-                .ToList();
-
-            return autoScheduleNext.Count > 0 ? autoScheduleNext : null;
         }
     }
 
