@@ -21,7 +21,7 @@ jobs:
 
       - name: TruffleHog OSS
         id: trufflehog
-        uses: trufflesecurity/trufflehog@363923b901c911a9164f50b6c423f47c15372b1c #v3
+        uses: trufflesecurity/trufflehog@e76dff8a7e57d6df0c60ad8cbf5d5cba505a8fc9 #v3
         with:
           path: ./
           base: "${{ github.event.repository.default_branch }}"
