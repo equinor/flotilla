@@ -22,6 +22,7 @@ public class TaskDefinitionResponse
         AnalysisTypes = taskDefinition.AnalysisTypes;
         SensorType = taskDefinition.SensorType;
         VideoDuration = taskDefinition.VideoDuration;
+        AcousticInspectionMetadata = taskDefinition.AcousticInspectionMetadata;
     }
 
     public string? TagId { get; set; }
@@ -39,4 +40,6 @@ public class TaskDefinitionResponse
     public SensorType SensorType { get; set; }
 
     public float? VideoDuration { get; set; }
+
+    public AcousticInspectionMetadata? AcousticInspectionMetadata { get; set; }
 }
