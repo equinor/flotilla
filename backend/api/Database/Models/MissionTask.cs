@@ -1,8 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using Api.Options;
 using Api.Services.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 #pragma warning disable CS8618
 namespace Api.Database.Models
 {
@@ -210,7 +212,7 @@ namespace Api.Database.Models
     }
 
     [Owned]
-    public class Roi
+    public class Roi : IValidatableObject
     {
         [JsonConstructor]
         public Roi(int x, int y, int width, int height)
@@ -239,5 +241,37 @@ namespace Api.Database.Models
 
         public Roi(Roi copy)
             : this(copy.X, copy.Y, copy.Width, copy.Height) { }
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            var bounds = (
+                validationContext.GetService(typeof(IOptions<AcousticCameraRoiBoundsOptions>))
+                as IOptions<AcousticCameraRoiBoundsOptions>
+            )?.Value;
+
+            if (bounds is null)
+                yield break;
+
+            // X/Y mark the rectangle's center, so the bounds must contain all four edges.
+            double left = X - Width / 2.0;
+            double right = X + Width / 2.0;
+            double bottom = Y - Height / 2.0;
+            double top = Y + Height / 2.0;
+
+            if (left < bounds.MinX || right > bounds.MaxX)
+            {
+                yield return new ValidationResult(
+                    $"Roi's X range [{left}, {right}] falls outside the supported range [{bounds.MinX}, {bounds.MaxX}].",
+                    [nameof(X), nameof(Width)]
+                );
+            }
+            if (bottom < bounds.MinY || top > bounds.MaxY)
+            {
+                yield return new ValidationResult(
+                    $"Roi's Y range [{bottom}, {top}] falls outside the supported range [{bounds.MinY}, {bounds.MaxY}].",
+                    [nameof(Y), nameof(Height)]
+                );
+            }
+        }
     }
 }
