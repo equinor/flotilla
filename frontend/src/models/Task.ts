@@ -9,6 +9,7 @@ export enum SensorType {
     ThermalVideo = 'ThermalVideo',
     Audio = 'Audio',
     CO2Measurement = 'CO2Measurement',
+    Xam8000GasMeasurement = 'Xam8000GasMeasurement',
     AcousticMeasurement = 'AcousticMeasurement',
 }
 

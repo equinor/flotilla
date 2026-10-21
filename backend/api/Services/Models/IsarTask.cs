@@ -35,6 +35,7 @@
                 "take_thermal_image" => IsarTaskType.TakeThermalImage,
                 "take_thermal_video" => IsarTaskType.TakeThermalVideo,
                 "take_co2_measurement" => IsarTaskType.TakeCO2Measurement,
+                "take_xam8000_gas_measurement" => IsarTaskType.TakeXam8000GasMeasurement,
                 "take_acoustic_measurement" => IsarTaskType.TakeAcousticMeasurement,
                 _ => throw new ArgumentException(
                     $"Failed to parse step type '{isarClassName}' - not supported"
@@ -61,6 +62,7 @@
         TakeThermalImage,
         TakeThermalVideo,
         TakeCO2Measurement,
+        TakeXam8000GasMeasurement,
         TakeAcousticMeasurement,
         RecordAudio,
     }

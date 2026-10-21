@@ -104,6 +104,9 @@ namespace Api.Database.Models
                 SensorType.CO2Measurement => capabilities.Contains(
                     RobotCapabilitiesEnum.take_co2_measurement
                 ),
+                SensorType.Xam8000GasMeasurement => capabilities.Contains(
+                    RobotCapabilitiesEnum.take_xam8000_gas_measurement
+                ),
                 SensorType.Audio => capabilities.Contains(RobotCapabilitiesEnum.record_audio),
                 SensorType.AcousticMeasurement => capabilities.Contains(
                     RobotCapabilitiesEnum.take_acoustic_measurement
@@ -147,6 +150,7 @@ namespace Api.Database.Models
         ThermalVideo,
         Audio,
         CO2Measurement,
+        Xam8000GasMeasurement,
         AcousticMeasurement,
     }
 
