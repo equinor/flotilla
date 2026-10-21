@@ -2,7 +2,6 @@ import { Button, Icon, Typography } from '@equinor/eds-core-react'
 import { chevron_left, chevron_right, close } from '@equinor/eds-icons'
 import { useLanguageContext } from 'contexts/LanguageContext'
 import { KeyboardEvent } from 'react'
-import { MissionResult, ResultFocus } from './missionResultPresentation'
 import { ResultMediaView } from './ResultMediaView'
 import { GalleryResultContent } from './GalleryResultContent'
 import {
@@ -17,6 +16,8 @@ import {
     Strip,
     StripButton,
 } from './MissionResultStyles'
+import { MeasurementDisplay } from 'components/Displays/MeasurementDisplay'
+import { MissionResult, ResultFocus } from './MissionResults'
 
 interface Props {
     results: MissionResult[]
@@ -127,7 +128,7 @@ export const MissionResultGallery = ({
                 <div>
                     {results.map((item) => {
                         const id = item.inspection.inspectionId
-                        const thumbnail = item.source ?? item.analysis
+                        const thumbnail = item.rawMedia ?? item.analysisMedia
                         return (
                             <StripButton
                                 key={id}
@@ -140,8 +141,11 @@ export const MissionResultGallery = ({
                                 ])}
                                 onClick={() => onSelect(id)}
                             >
-                                {thumbnail && (
+                                {!item.measurementId && thumbnail && (
                                     <ResultMediaView media={thumbnail} label={item.inspection.tag} size="thumbnail" />
+                                )}
+                                {item.measurementId && (
+                                    <MeasurementDisplay recordId={result.measurementId!} isCompact={true} />
                                 )}
                                 <Typography variant="body_short">{item.inspection.tag}</Typography>
                                 <Typography variant="caption">

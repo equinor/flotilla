@@ -5,9 +5,8 @@ import { useLanguageContext } from 'contexts/LanguageContext'
 import { ReactNode, useState } from 'react'
 import styled from 'styled-components'
 import { VideoPlaceholder, VideoPlayer } from 'pages/InspectionReportPage/InspectionVideoPlayer'
-import { ResultMedia } from './missionResultPresentation'
 import { SensorType } from 'models/Task'
-import { MeasurementDisplay } from 'components/Displays/MeasurementDisplay'
+import { ResultMedia } from './MissionResults'
 
 type MediaSize = 'preview' | 'analysis' | 'thumbnail' | 'large'
 
@@ -101,9 +100,6 @@ export const ResultMediaView = ({
     sensorType?: SensorType
 }) => {
     const { TranslateText } = useLanguageContext()
-    if (media.type === 'measurement') {
-        return <MeasurementDisplay recordId={media.recordId} isCompact={size === 'thumbnail'} />
-    }
     const typeLabel = sensorType && size !== 'thumbnail' && (
         <InspectionTypeLabel as="span" variant="caption" $aboveControls={size === 'large' && media.type === 'video'}>
             {TranslateText(sensorType)}

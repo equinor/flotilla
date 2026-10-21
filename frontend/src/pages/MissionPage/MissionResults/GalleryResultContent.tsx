@@ -2,10 +2,11 @@ import { Typography } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'contexts/LanguageContext'
 import { formatDateTime } from 'utils/StringFormatting'
 import { AnalysisFeedback } from '../AnalysisFeedback'
-import { MissionResult, ResultFocus } from './missionResultPresentation'
 import { ResultAnalysis } from './ResultAnalysis'
 import { ResultMediaView } from './ResultMediaView'
 import { AnalysisContent, Companion, GalleryBody, Metadata, PreviewButton } from './MissionResultStyles'
+import { MeasurementDisplay } from 'components/Displays/MeasurementDisplay'
+import { MissionResult, ResultFocus } from './MissionResults'
 
 interface Props {
     result: MissionResult
@@ -19,16 +20,7 @@ export const GalleryResultContent = ({ result, focus, installationName, robotNam
     const { TranslateText } = useLanguageContext()
     const { inspection } = result
     const showingAnalysis = focus === 'analysis'
-    const primary = showingAnalysis ? result.analysis : result.source
-    const inspectionCompanion = showingAnalysis ? result.source : undefined
-    const analysisCompanion = showingAnalysis ? undefined : result.analysis
-    const hasSummary =
-        (inspection.value && inspection.value !== '') ||
-        result.hasFinding ||
-        (inspection.confidence !== undefined && inspection.confidence !== null)
-    const summary = result.hasAnalysis && primary && hasSummary ? <ResultAnalysis inspection={inspection} /> : null
-    const showAnalysisCompanion = Boolean(analysisCompanion || summary)
-    const hasSidebar = Boolean(inspectionCompanion || showAnalysisCompanion)
+
     const feedback =
         result.hasAnalysis && inspection.analysisRunId ? (
             <AnalysisFeedback
@@ -39,6 +31,49 @@ export const GalleryResultContent = ({ result, focus, installationName, robotNam
                 compact
             />
         ) : null
+
+    if (result.measurementId) {
+        return (
+            <>
+                <GalleryBody $paired={false}>
+                    <AnalysisContent $hasFinding={showingAnalysis ? result.hasFinding : undefined}>
+                        <Typography variant="h6">
+                            {TranslateText(showingAnalysis ? 'Analysis result' : 'Inspection result')}
+                        </Typography>
+                        <MeasurementDisplay recordId={result.measurementId!} isCompact={false} />
+                        {feedback}
+                    </AnalysisContent>
+                </GalleryBody>
+                <Metadata>
+                    {(
+                        [
+                            ['Installation', installationName],
+                            ['Robot', robotName],
+                            ['Timestamp', inspection.createdAt ? formatDateTime(inspection.createdAt) : ''],
+                        ] as const
+                    )
+                        .filter(([, value]) => value)
+                        .map(([label, value]) => (
+                            <div key={label}>
+                                <Typography variant="caption">{TranslateText(label)}</Typography>
+                                <Typography variant="body_short">{value}</Typography>
+                            </div>
+                        ))}
+                </Metadata>
+            </>
+        )
+    }
+
+    const primary = showingAnalysis ? result.analysisMedia : result.rawMedia
+    const inspectionCompanion = showingAnalysis ? result.rawMedia : undefined
+    const analysisCompanion = showingAnalysis ? undefined : result.analysisMedia
+    const hasSummary =
+        (inspection.value && inspection.value !== '') ||
+        result.hasFinding ||
+        (inspection.confidence !== undefined && inspection.confidence !== null)
+    const summary = result.hasAnalysis && primary && hasSummary ? <ResultAnalysis inspection={inspection} /> : null
+    const showAnalysisCompanion = Boolean(analysisCompanion || summary)
+    const hasSidebar = Boolean(inspectionCompanion || showAnalysisCompanion)
 
     return (
         <>
