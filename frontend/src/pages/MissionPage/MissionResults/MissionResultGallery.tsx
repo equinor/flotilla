@@ -103,14 +103,6 @@ export const MissionResultGallery = ({
             aria-labelledby={titleId}
             aria-describedby={undefined}
             onKeyDown={onKeyDown}
-            onMouseDown={(event) => {
-                if (
-                    event.target instanceof HTMLElement &&
-                    event.target.closest('dialog') !== event.currentTarget.closest('dialog')
-                ) {
-                    event.stopPropagation()
-                }
-            }}
         >
             <GalleryHeader>
                 <GalleryDetails>
