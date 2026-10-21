@@ -2,7 +2,7 @@ import { Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import { AnalysisValueDisplay } from 'components/Displays/TaskDisplay'
 import { useLanguageContext } from 'contexts/LanguageContext'
-import { hasResultValue, InspectionData } from 'models/InspectionRecord'
+import { InspectionData } from 'models/InspectionRecord'
 import styled from 'styled-components'
 
 const Content = styled.div`
@@ -16,7 +16,7 @@ export const ResultAnalysis = ({ inspection }: { inspection: InspectionData }) =
     const { TranslateText } = useLanguageContext()
     return (
         <Content>
-            {hasResultValue(inspection.value) && inspection.value !== undefined && (
+            {inspection?.value && (
                 <AnalysisValueDisplay
                     value={inspection.value}
                     unit={inspection.unit}

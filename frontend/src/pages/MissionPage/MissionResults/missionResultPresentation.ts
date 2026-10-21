@@ -1,4 +1,4 @@
-import { hasInspectionAnalysis, hasInspectionFinding, InspectionData } from 'models/InspectionRecord'
+import { hasInspectionAnalysis, InspectionData } from 'models/InspectionRecord'
 import { Task } from 'models/Task'
 
 export type ResultFocus = 'inspection' | 'analysis'
@@ -48,7 +48,7 @@ export const getMissionResults = (
               )
         const sourceUrl = source && source.type !== 'measurement' ? source.src : undefined
         const analysis = mediaFromUrl(inspection.visualizedSAS !== sourceUrl ? inspection.visualizedSAS : undefined)
-        const hasFinding = hasInspectionFinding(inspection)
+        const hasFinding = Boolean(inspection?.warning)
         const hasAnalysis = hasInspectionAnalysis(inspection)
         if (!source && !hasAnalysis) return []
         return [
@@ -65,6 +65,3 @@ export const getMissionResults = (
     })
     return results.sort((left, right) => Number(right.hasFinding) - Number(left.hasFinding))
 }
-
-export const getResultFocus = (result: MissionResult, preferred: ResultFocus): ResultFocus =>
-    preferred === 'analysis' && result.hasAnalysis ? 'analysis' : result.source ? 'inspection' : 'analysis'

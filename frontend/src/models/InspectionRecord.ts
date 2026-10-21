@@ -93,18 +93,12 @@ export interface InspectionData {
     warning?: string
 }
 
-export const hasInspectionFinding = (inspection: Pick<InspectionData, 'warning'> | undefined): boolean =>
-    Boolean(inspection?.warning)
-
-export const hasResultValue = (value: string | null | undefined): value is string =>
-    typeof value === 'string' && value.trim() !== ''
-
 export const hasInspectionAnalysis = (inspection: InspectionData | undefined): boolean =>
     Boolean(
         inspection &&
         ((inspection.visualizedSAS && inspection.visualizedSAS !== inspection.anonymizedSAS) ||
-            hasResultValue(inspection.value) ||
-            hasInspectionFinding(inspection))
+            inspection?.value ||
+            Boolean(inspection?.warning))
     )
 
 const imageFileEndings = ['jpg', 'jpeg', 'png', 'gif']

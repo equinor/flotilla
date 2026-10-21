@@ -2,7 +2,7 @@ import { Button, Icon, Typography } from '@equinor/eds-core-react'
 import { chevron_left, chevron_right, close } from '@equinor/eds-icons'
 import { useLanguageContext } from 'contexts/LanguageContext'
 import { KeyboardEvent, useEffect, useId, useRef } from 'react'
-import { getResultFocus, MissionResult, ResultFocus } from './missionResultPresentation'
+import { MissionResult, ResultFocus } from './missionResultPresentation'
 import { ResultMediaView } from './ResultMediaView'
 import { GalleryResultContent } from './GalleryResultContent'
 import {
@@ -46,7 +46,7 @@ export const MissionResultGallery = ({
     const activeThumbnail = useRef<HTMLButtonElement>(null)
     const index = results.findIndex((result) => result.inspection.inspectionId === selectedId)
     const result = results[index]
-    const focus = result ? getResultFocus(result, preferredFocus) : preferredFocus
+    const focus = result && preferredFocus === 'analysis' && result.hasAnalysis ? 'analysis' : 'inspection'
     const inspection = result?.inspection
 
     useEffect(() => {
@@ -74,7 +74,7 @@ export const MissionResultGallery = ({
 
     const navigate = (offset: number) => {
         const next = results[index + offset]
-        if (index !== -1 && next) onSelect(next.inspection.inspectionId, preferredFocus)
+        if (index !== -1 && next) onSelect(next.inspection.inspectionId)
     }
 
     const onKeyDown = (event: KeyboardEvent<HTMLElement>) => {
@@ -148,9 +148,9 @@ export const MissionResultGallery = ({
                     focus={focus}
                     installationName={installationName}
                     robotName={robotName}
-                    onFocus={(next) => {
+                    onFocus={(newFocus) => {
                         heading.current?.focus({ preventScroll: true })
-                        onSelect(selectedId, next)
+                        onSelect(selectedId, newFocus)
                     }}
                 />
             ) : !loadFailed ? (
@@ -175,7 +175,7 @@ export const MissionResultGallery = ({
                                     item.inspection.tag,
                                     String(item.taskNumber),
                                 ])}
-                                onClick={() => onSelect(id, preferredFocus)}
+                                onClick={() => onSelect(id)}
                             >
                                 {thumbnail && (
                                     <ResultMediaView media={thumbnail} label={item.inspection.tag} size="thumbnail" />
