@@ -1,7 +1,7 @@
 import { Button, Icon, Typography } from '@equinor/eds-core-react'
 import { chevron_left, chevron_right, close } from '@equinor/eds-icons'
 import { useLanguageContext } from 'contexts/LanguageContext'
-import { KeyboardEvent, useEffect, useId, useRef } from 'react'
+import { KeyboardEvent } from 'react'
 import { MissionResult, ResultFocus } from './missionResultPresentation'
 import { ResultMediaView } from './ResultMediaView'
 import { GalleryResultContent } from './GalleryResultContent'
@@ -40,37 +40,10 @@ export const MissionResultGallery = ({
     onClose,
 }: Props) => {
     const { TranslateText } = useLanguageContext()
-    const titleId = useId()
-    const dialog = useRef<HTMLDialogElement>(null)
-    const heading = useRef<HTMLHeadingElement>(null)
-    const activeThumbnail = useRef<HTMLButtonElement>(null)
     const index = results.findIndex((result) => result.inspection.inspectionId === selectedId)
     const result = results[index]
     const focus = result && preferredFocus === 'analysis' && result.hasAnalysis ? 'analysis' : 'inspection'
     const inspection = result?.inspection
-
-    useEffect(() => {
-        const element = dialog.current
-        if (!element) return
-        element.setAttribute('aria-labelledby', titleId)
-        const onCancel = (event: Event) => {
-            if (event.target !== element) return
-            event.preventDefault()
-            onClose()
-        }
-        element.addEventListener('cancel', onCancel)
-        return () => element.removeEventListener('cancel', onCancel)
-    }, [titleId, onClose])
-
-    useEffect(() => {
-        const thumbnail = activeThumbnail.current
-        const strip = thumbnail?.parentElement
-        if (!thumbnail || !strip) return
-        const itemBounds = thumbnail.getBoundingClientRect()
-        const stripBounds = strip.getBoundingClientRect()
-        if (itemBounds.left < stripBounds.left) strip.scrollLeft += itemBounds.left - stripBounds.left
-        else if (itemBounds.right > stripBounds.right) strip.scrollLeft += itemBounds.right - stripBounds.right
-    }, [selectedId, index])
 
     const navigate = (offset: number) => {
         const next = results[index + offset]
@@ -85,19 +58,11 @@ export const MissionResultGallery = ({
     }
 
     return (
-        <Gallery
-            open
-            isDismissable
-            dialogRef={dialog}
-            onClose={onClose}
-            aria-labelledby={titleId}
-            aria-describedby={undefined}
-            onKeyDown={onKeyDown}
-        >
+        <Gallery open isDismissable onClose={onClose} onKeyDown={onKeyDown}>
             <GalleryHeader>
                 <GalleryDetails>
                     <GalleryHeading>
-                        <Typography variant="h3" id={titleId} ref={heading} tabIndex={-1}>
+                        <Typography variant="h3" tabIndex={-1}>
                             {inspection?.tag || TranslateText('Inspection results')}
                         </Typography>
                         {result && (
@@ -149,7 +114,6 @@ export const MissionResultGallery = ({
                     installationName={installationName}
                     robotName={robotName}
                     onFocus={(newFocus) => {
-                        heading.current?.focus({ preventScroll: true })
                         onSelect(selectedId, newFocus)
                     }}
                 />
@@ -168,7 +132,6 @@ export const MissionResultGallery = ({
                             <StripButton
                                 key={id}
                                 $hasFinding={item.hasAnalysis ? item.hasFinding : undefined}
-                                ref={id === selectedId ? activeThumbnail : undefined}
                                 variant="ghost"
                                 aria-current={id === selectedId ? 'true' : undefined}
                                 aria-label={TranslateText('View result for {0}, task {1}', [
