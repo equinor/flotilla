@@ -13,10 +13,15 @@ namespace Api.Services
     {
         public Task<MissionDefinition> Create(MissionDefinition missionDefinition);
 
+        /// <summary>
+        /// With forUpdate, acquire a row lock until the caller's active transaction commits
+        /// or rolls back, independently of change tracking and installation access mode.
+        /// </summary>
         public Task<MissionDefinition?> ReadById(
             string id,
             bool readOnly = true,
-            AccessMode accessMode = AccessMode.Read
+            AccessMode accessMode = AccessMode.Read,
+            bool forUpdate = false
         );
 
         public Task<PagedList<MissionDefinition>> ReadAll(
@@ -93,13 +98,31 @@ namespace Api.Services
         public async Task<MissionDefinition?> ReadById(
             string id,
             bool readOnly = true,
-            AccessMode accessMode = AccessMode.Read
+            AccessMode accessMode = AccessMode.Read,
+            bool forUpdate = false
         )
         {
-            var query = await GetMissionDefinitionsWithSubModels(readOnly, accessMode);
-            return await query
-                .Where(m => m.IsDeprecated == false)
-                .FirstOrDefaultAsync(missionDefinition => missionDefinition.Id.Equals(id));
+            if (forUpdate && context.Database.CurrentTransaction == null)
+                throw new InvalidOperationException(
+                    "Reading a mission definition for update requires an active transaction."
+                );
+
+            var query = (await GetMissionDefinitionsWithSubModels(readOnly, accessMode)).Where(m =>
+                !m.IsDeprecated && m.Id == id
+            );
+            if (forUpdate)
+            {
+                // Do not lock definitions excluded by the caller's access or deprecation filters.
+                if (!await query.AnyAsync())
+                    return null;
+
+                await context.Database.ExecuteSqlInterpolatedAsync(
+                    $"""SELECT 1 FROM "MissionDefinitions" WHERE "Id" = {id} FOR UPDATE"""
+                );
+            }
+
+            // Re-read after acquiring the lock: the row may have changed while waiting.
+            return await query.FirstOrDefaultAsync();
         }
 
         public async Task<PagedList<MissionDefinition>> ReadAll(
@@ -210,11 +233,15 @@ namespace Api.Services
 
             var entry = context.Update(missionDefinition);
             await ApplyDatabaseUpdate(missionDefinition.InspectionArea.Installation);
-            _ = signalRService.SendMessageAsync(
-                "Mission definition updated",
-                missionDefinition?.InspectionArea.Installation,
-                missionDefinition != null ? new MissionDefinitionResponse(missionDefinition) : null
-            );
+            // A transaction owner publishes only after its commit succeeds.
+            if (context.Database.CurrentTransaction == null)
+                _ = signalRService.SendMessageAsync(
+                    "Mission definition updated",
+                    missionDefinition?.InspectionArea.Installation,
+                    missionDefinition != null
+                        ? new MissionDefinitionResponse(missionDefinition)
+                        : null
+                );
             DetachTracking(context, missionDefinition!);
             return entry.Entity;
         }
