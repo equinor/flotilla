@@ -9,7 +9,7 @@ import { AnalysisValueDisplay, DescriptionDisplay, TagIdDisplay } from 'componen
 import { StyledTable, StyledTableBody, StyledTableCell, StyledTableRow } from 'components/Styles/StyledComponents'
 import styled from 'styled-components'
 import { MissionTaskDefinition } from 'models/MissionDefinition'
-import { hasInspectionAnalysis, hasInspectionFinding, InspectionData } from 'models/InspectionRecord'
+import { hasInspectionAnalysis, InspectionData } from 'models/InspectionRecord'
 import { Icons } from 'utils/icons'
 import { getAnalysisResultStyle } from '../AnalysisResultStyles'
 import { MeasurementDisplay } from 'components/Displays/MeasurementDisplay'
@@ -86,7 +86,7 @@ const TaskTableRow = ({
     const isActive = task.status === TaskStatus.InProgress || task.status === TaskStatus.Paused
     const analysisStyle =
         !isActive && hasInspectionAnalysis(inspectionData)
-            ? getAnalysisResultStyle(hasInspectionFinding(inspectionData))
+            ? getAnalysisResultStyle(Boolean(inspectionData?.warning))
             : undefined
     const rowStyle = {
         background: isActive ? tokens.colors.infographic.primary__mist_blue.hex : analysisStyle?.background,

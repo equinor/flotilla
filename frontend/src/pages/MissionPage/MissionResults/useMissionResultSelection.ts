@@ -3,17 +3,21 @@ import { ResultFocus } from './missionResultPresentation'
 
 export const useMissionResultSelection = () => {
     const [params, setParams] = useSearchParams()
-    const analysisId = params.get('analysisId')
-    const selectedId = analysisId ?? params.get('inspectionId')
-    const preferredFocus: ResultFocus = analysisId ? 'analysis' : 'inspection'
+    const selectedId = params.get('inspectionId')
+    const focusString = params.get('focus')
+    const preferredFocus: ResultFocus =
+        focusString && (focusString === 'analysis' || focusString === 'inspection') ? focusString : 'analysis'
 
     const select = (id: string | undefined, focus: ResultFocus = preferredFocus) => {
         setParams(
             (previous) => {
                 const next = new URLSearchParams(previous)
                 next.delete('inspectionId')
-                next.delete('analysisId')
-                if (id) next.set(focus === 'analysis' ? 'analysisId' : 'inspectionId', id)
+                next.delete('focus')
+                if (id) {
+                    next.set('inspectionId', id)
+                    next.set('focus', focus)
+                }
                 return next
             },
             { replace: true }

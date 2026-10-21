@@ -1,6 +1,5 @@
 import { Typography } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'contexts/LanguageContext'
-import { hasResultValue } from 'models/InspectionRecord'
 import { formatDateTime } from 'utils/StringFormatting'
 import { AnalysisFeedback } from '../AnalysisFeedback'
 import { MissionResult, ResultFocus } from './missionResultPresentation'
@@ -24,7 +23,7 @@ export const GalleryResultContent = ({ result, focus, installationName, robotNam
     const inspectionCompanion = showingAnalysis ? result.source : undefined
     const analysisCompanion = showingAnalysis ? undefined : result.analysis
     const hasSummary =
-        hasResultValue(inspection.value) ||
+        (inspection.value && inspection.value !== '') ||
         result.hasFinding ||
         (inspection.confidence !== undefined && inspection.confidence !== null)
     const summary = result.hasAnalysis && primary && hasSummary ? <ResultAnalysis inspection={inspection} /> : null
