@@ -14,10 +14,14 @@ import { useBackendApi } from 'api/UseBackendApi'
 import { InstallationContext } from 'contexts/InstallationContext'
 import { useInspectionsContext } from 'contexts/InspectionsContext'
 import { MissionResults } from './MissionResults/MissionResults'
+import { MissionRecordings } from './VideoStream/MissionRecordings'
 
 const MissionVideoStreamSection = styled(VideoStreamSection)`
     grid-template-columns: minmax(0, 1fr);
     overflow-x: auto;
+    &:empty {
+        display: none;
+    }
 `
 
 // lookupInspectionId is only set on the mission-simple route, where the mission is
@@ -118,7 +122,11 @@ const MissionPageWithMission = ({ mission, includeHeader = true }: { mission: Mi
                         robot={mission.robot}
                     >
                         <MissionVideoStreamSection>
-                            <VideoStreamWindow robotId={mission.robot.id} />
+                            {mission.isCompleted || mission.endTime ? (
+                                <MissionRecordings key={mission.id} missionId={mission.id} />
+                            ) : (
+                                <VideoStreamWindow robotId={mission.robot.id} />
+                            )}
                         </MissionVideoStreamSection>
                         <MissionResults
                             tasks={mission.tasks}
