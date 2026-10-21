@@ -106,14 +106,12 @@ namespace Api.Controllers
 
             try
             {
-                await missionSchedulingService.StartNextMissionRunIfSystemIsAvailable(
-                    newMissionRun.Robot
-                );
+                await missionSchedulingService.StartNextMissionRunIfSystemIsAvailable(robot);
             }
             catch (MissionRunNotFoundException e)
             {
                 logger.LogError(
-                    $"Mission run created but then not found for robot ID: {newMissionRun.Robot.Id}. Exception: {e.Message}"
+                    $"Mission run created but then not found for robot ID: {robot.Id}. Exception: {e.Message}"
                 );
                 return StatusCode(
                     StatusCodes.Status500InternalServerError,
@@ -229,14 +227,12 @@ namespace Api.Controllers
 
             try
             {
-                await missionSchedulingService.StartNextMissionRunIfSystemIsAvailable(
-                    newMissionRun.Robot
-                );
+                await missionSchedulingService.StartNextMissionRunIfSystemIsAvailable(robot);
             }
             catch (MissionRunNotFoundException e)
             {
                 logger.LogError(
-                    $"Mission run created but then not found for robot ID: {newMissionRun.Robot.Id}. Exception: {e.Message}"
+                    $"Mission run created but then not found for robot ID: {robot.Id}. Exception: {e.Message}"
                 );
                 return StatusCode(
                     StatusCodes.Status500InternalServerError,

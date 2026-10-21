@@ -18,6 +18,17 @@ namespace Api.Controllers
         IInspectionAreaService inspectionAreaService
     ) : ControllerBase
     {
+        [HttpGet("auto-scheduled")]
+        [Authorize(Roles = Role.Any)]
+        public async Task<ActionResult<IList<ScheduledMissionRunResponse>>> GetUpcomingAutoMissions(
+            [FromQuery] string installationCode
+        )
+        {
+            return Ok(
+                await autoScheduleService.ReadUpcoming(Sanitize.SanitizeUserInput(installationCode))
+            );
+        }
+
         /// <summary>
         ///     List all mission definitions in the Flotilla database
         /// </summary>
@@ -306,6 +317,7 @@ namespace Api.Controllers
                         missionDefinition,
                         schedulingTimesCETperWeek
                     );
+                return new MissionDefinitionResponse(missionDefinition);
             }
 
             var newMissionDefinition = await missionDefinitionService.Update(missionDefinition);
@@ -385,12 +397,14 @@ namespace Api.Controllers
         }
 
         /// <summary>
-        ///     Skip auto mission run for the given mission definition at the given time of day
+        ///     Skip a specific dated mission run within the next 24 hours.
         /// </summary>
         [HttpPut]
         [Authorize(Roles = Role.User)]
         [Route("{missionDefinitionId}/skip-auto-mission")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -402,6 +416,10 @@ namespace Api.Controllers
         {
             missionDefinitionId = Sanitize.SanitizeUserInput(missionDefinitionId);
             skipAutoMissionQuery = Sanitize.SanitizeUserInput(skipAutoMissionQuery);
+            if (string.IsNullOrWhiteSpace(skipAutoMissionQuery.MissionRunId))
+                return BadRequest(
+                    "A mission run ID is required. Refresh the schedule before skipping."
+                );
 
             var missionDefinition = await missionDefinitionService.ReadById(
                 missionDefinitionId,
@@ -416,10 +434,15 @@ namespace Api.Controllers
 
             try
             {
-                await autoScheduleService.SkipAutoMissionScheduledJob(
-                    missionDefinition,
-                    skipAutoMissionQuery.TimeOfDay
-                );
+                if (
+                    !await autoScheduleService.SkipMissionRun(
+                        missionDefinition,
+                        skipAutoMissionQuery.MissionRunId
+                    )
+                )
+                    return Conflict(
+                        "This scheduled run can no longer be skipped. Refresh the schedule."
+                    );
             }
             catch (ArgumentException e)
             {

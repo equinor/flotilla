@@ -37,6 +37,8 @@ export interface Mission {
     status: MissionStatus
     isCompleted: boolean
     creationTime: Date
+    scheduledAt?: string | null
+    activatedAt?: string | null
     startTime?: Date
     endTime?: Date
     estimatedTaskDuration?: number

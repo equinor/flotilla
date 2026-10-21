@@ -26,6 +26,14 @@ namespace Api.Database.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder
+                .Entity<MissionRun>()
+                .ToTable(t =>
+                    t.HasCheckConstraint(
+                        "CK_MissionRuns_RobotAssignment",
+                        "\"RobotId\" IS NOT NULL OR (\"ScheduledAt\" IS NOT NULL AND \"ActivatedAt\" IS NULL)"
+                    )
+                );
             // https://docs.microsoft.com/en-us/ef/core/modeling/owned-entities
             // https://docs.microsoft.com/en-us/ef/core/modeling/owned-entities#collections-of-owned-types
             modelBuilder.Entity<MissionTask>(missionTaskEntity =>

@@ -17,7 +17,7 @@ namespace Api.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.10")
+                .HasAnnotation("ProductVersion", "10.0.12")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -175,6 +175,9 @@ namespace Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("text");
 
+                    b.Property<DateTimeOffset?>("ActivatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Comment")
                         .HasMaxLength(1000)
                         .HasColumnType("character varying(1000)");
@@ -214,7 +217,15 @@ namespace Api.Migrations
                         .HasColumnType("character varying(200)");
 
                     b.Property<string>("RobotId")
-                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ScheduleJobId")
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset?>("ScheduledAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("SchedulerInstance")
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("StartTime")
@@ -234,7 +245,15 @@ namespace Api.Migrations
 
                     b.HasIndex("RobotId");
 
-                    b.ToTable("MissionRuns");
+                    b.HasIndex("MissionId", "ScheduledAt")
+                        .IsUnique();
+
+                    b.HasIndex("Status", "ScheduledAt");
+
+                    b.ToTable("MissionRuns", t =>
+                        {
+                            t.HasCheckConstraint("CK_MissionRuns_RobotAssignment", "\"RobotId\" IS NOT NULL OR (\"ScheduledAt\" IS NOT NULL AND \"ActivatedAt\" IS NULL)");
+                        });
                 });
 
             modelBuilder.Entity("Api.Database.Models.MissionTask", b =>
@@ -783,8 +802,7 @@ namespace Api.Migrations
                     b.HasOne("Api.Database.Models.Robot", "Robot")
                         .WithMany()
                         .HasForeignKey("RobotId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("InspectionArea");
 

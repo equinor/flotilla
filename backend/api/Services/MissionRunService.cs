@@ -86,6 +86,10 @@ namespace Api.Services
     {
         public async Task<MissionRun> Create(MissionRun missionRun)
         {
+            if (missionRun.Robot is null || missionRun.ScheduledAt is not null)
+                throw new ArgumentException(
+                    "Immediate missions require a robot and no scheduled time."
+                );
             missionRun.Id ??= Guid.NewGuid().ToString(); // Useful for signalR messages
 
             if (IncludesUnsupportedInspectionType(missionRun))
@@ -179,9 +183,15 @@ namespace Api.Services
             var query = await GetMissionRunsWithSubModels(readOnly: readOnly);
             return await query
                 .Where(missionRun =>
-                    missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Queued
+                    missionRun.Robot != null
+                    && missionRun.Robot.Id == robotId
+                    && missionRun.Status == MissionStatus.Queued
                 )
-                .OrderBy(missionRun => missionRun.CreationTime)
+                .OrderBy(missionRun =>
+                    missionRun.ActivatedAt.HasValue
+                        ? missionRun.ActivatedAt.Value.UtcDateTime
+                        : missionRun.CreationTime
+                )
                 .ToListAsync();
         }
 
@@ -192,15 +202,21 @@ namespace Api.Services
         {
             var query = await GetMissionRunsWithSubModels(readOnly: readOnly);
             return await query
-                .OrderBy(missionRun => missionRun.CreationTime)
+                .OrderBy(missionRun =>
+                    missionRun.ActivatedAt.HasValue
+                        ? missionRun.ActivatedAt.Value.UtcDateTime
+                        : missionRun.CreationTime
+                )
                 .FirstOrDefaultAsync(missionRun =>
-                    missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Queued
+                    missionRun.Robot != null
+                    && missionRun.Robot.Id == robotId
+                    && missionRun.Status == MissionStatus.Queued
                 );
         }
 
         public bool IncludesUnsupportedInspectionType(MissionRun missionRun)
         {
-            if (missionRun.Robot.RobotCapabilities == null)
+            if (missionRun.Robot?.RobotCapabilities == null)
                 return false;
 
             return missionRun.Tasks.Any(task =>
@@ -268,7 +284,8 @@ namespace Api.Services
                 .Include(missionRun => missionRun.Robot)
                 .Include(missionRun => missionRun.Tasks)
                 .Include(missionRun => missionRun.Robot)
-                    .ThenInclude(robot => robot.CurrentInstallation)
+                    .ThenInclude(robot => robot != null ? robot.CurrentInstallation : null)
+                .Where(m => m.ScheduledAt == null || m.ActivatedAt != null)
                 .Where(m =>
                     accessibleInstallationCodes.Contains(
                         m.InspectionArea.Installation.InstallationCode.ToUpper()
@@ -325,7 +342,8 @@ namespace Api.Services
 
 #pragma warning disable CA1862
             missionRuns = missionRuns.Where(missionRun =>
-                missionRun.Robot.Name.ToLower().Contains(robotName.ToLower().Trim())
+                missionRun.Robot != null
+                && missionRun.Robot.Name.ToLower().Contains(robotName.ToLower().Trim())
             );
 #pragma warning restore CA1862
         }
@@ -395,11 +413,13 @@ namespace Api.Services
 
             Expression<Func<MissionRun, bool>> robotTypeFilter = parameters.RobotType is null
                 ? missionRun => true
-                : missionRun => missionRun.Robot.Type.Equals(parameters.RobotType);
+                : missionRun =>
+                    missionRun.Robot != null && missionRun.Robot.Type.Equals(parameters.RobotType);
 
             Expression<Func<MissionRun, bool>> robotIdFilter = parameters.RobotId is null
                 ? missionRun => true
-                : missionRun => missionRun.Robot.Id.Equals(parameters.RobotId);
+                : missionRun =>
+                    missionRun.Robot != null && missionRun.Robot.Id.Equals(parameters.RobotId);
 
             Expression<Func<MissionRun, bool>> missionIdFilter = parameters.MissionId is null
                 ? missionRun => true

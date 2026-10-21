@@ -5,16 +5,7 @@ import { useLanguageContext } from 'contexts/LanguageContext'
 import { useMissionDefinitionsContext } from 'contexts/MissionDefinitionsContext'
 import { useNow } from 'hooks/useNow'
 import { ContentCard } from 'components/Styles/StyledComponents'
-import {
-    allDays,
-    getAllDaysIndexOfToday,
-    getTimeMissionPairsForDay,
-    isJobScheduledAt,
-} from 'models/AutoScheduleFrequency'
-import {
-    MissionStatusType,
-    selectMissionStatusType,
-} from 'pages/FrontPage/AutoScheduleSection/AutoScheduleMissionTableRow'
+import { formatScheduledAt, upcomingScheduledRuns } from 'models/ScheduledMissionRun'
 
 const SectionTitle = styled.p`
     margin: 0 0 10px 0;
@@ -35,44 +26,38 @@ const ScheduleList = styled.div`
 `
 const ScheduleRow = styled.div`
     display: grid;
-    grid-template-columns: 48px 1fr;
+    grid-template-columns: 110px 1fr;
     align-items: center;
     gap: 12px;
     padding: 4px 0;
 `
 
-const maxMissionsShown = 3
-
 export const DashboardScheduledMissionsView = () => {
-    const { TranslateText } = useLanguageContext()
-    const { missionDefinitions } = useMissionDefinitionsContext()
+    const { TranslateText, language } = useLanguageContext()
+    const { scheduledMissionRuns, autoScheduleLoading, autoScheduleError } = useMissionDefinitionsContext()
     const now = useNow()
-    const currentDayOfTheWeek = allDays[getAllDaysIndexOfToday(now)]
-
-    const timeMissionPairs = getTimeMissionPairsForDay(missionDefinitions, currentDayOfTheWeek)
-        .filter(({ time, mission }) => isJobScheduledAt(mission, time))
-        .slice(0, maxMissionsShown)
+    const occurrences = upcomingScheduledRuns(scheduledMissionRuns, now)
 
     return (
         <ContentCard>
-            <SectionTitle>{TranslateText('Next auto scheduled mission for today')}</SectionTitle>
-            {timeMissionPairs.length === 0 ? (
+            <SectionTitle>{TranslateText('Next planned missions - next 24 hours')}</SectionTitle>
+            {autoScheduleError || autoScheduleLoading || occurrences.length === 0 ? (
                 <Typography variant="body_short" color={tokens.colors.text.static_icons__tertiary.hex}>
-                    {TranslateText('There are no scheduled missions remaining today')}
+                    {TranslateText(
+                        autoScheduleError
+                            ? 'Failed to retrieve scheduled missions'
+                            : autoScheduleLoading
+                              ? 'Loading scheduled missions'
+                              : 'There are no scheduled missions in the next 24 hours'
+                    )}
                 </Typography>
             ) : (
                 <ScheduleList>
-                    {timeMissionPairs.map(({ time, mission }) => {
-                        const statusType = selectMissionStatusType(currentDayOfTheWeek, time, mission, now)
-                        const color =
-                            statusType === MissionStatusType.SkippedJob || statusType === MissionStatusType.PastJob
-                                ? tokens.colors.interactive.disabled__text.hex
-                                : tokens.colors.interactive.primary__resting.hex
-
+                    {occurrences.map((occurrence) => {
                         return (
-                            <ScheduleRow key={mission.id + time}>
-                                <Typography color={color}>{time.substring(0, 5)}</Typography>
-                                <Typography color={color}>{mission.name}</Typography>
+                            <ScheduleRow key={occurrence.id}>
+                                <Typography>{formatScheduledAt(occurrence.scheduledAt, language)}</Typography>
+                                <Typography>{occurrence.mission.name}</Typography>
                             </ScheduleRow>
                         )
                     })}

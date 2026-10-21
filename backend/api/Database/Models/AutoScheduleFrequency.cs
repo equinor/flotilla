@@ -8,6 +8,7 @@ namespace Api.Database.Models
     {
         public IList<TimeAndDay> SchedulingTimesCETperWeek { get; set; } = [];
 
+        // Retained for rollback compatibility; Mission runs are the scheduling authority.
         public string? AutoScheduledJobs { get; set; }
 
         public bool HasValidValue()
@@ -43,27 +44,35 @@ namespace Api.Database.Models
             return true;
         }
 
-        public IList<(DateTimeOffset, TimeOnly)>? GetSchedulingTimesUntilMidnight()
+        public IEnumerable<DateTimeOffset> GetSchedulingInstants(
+            DateTimeOffset from,
+            DateTimeOffset until
+        )
         {
-            DateTime nowLocal = TimeZoneUtilities.NowCet();
-            TimeOnly nowLocalTimeOnly = TimeOnly.FromDateTime(nowLocal);
-            DateOnly todayLocal = DateOnly.FromDateTime(nowLocal);
-
-            var autoScheduleNext = SchedulingTimesCETperWeek
-                .Where(schedulingTime => schedulingTime.DayOfWeek == nowLocal.DayOfWeek)
-                .Where(schedulingTime => schedulingTime.TimeOfDay > nowLocalTimeOnly)
-                .Select(schedulingTime =>
-                    (
-                        TimeZoneUtilities.CetWallClockToUtcInstant(
-                            todayLocal,
-                            schedulingTime.TimeOfDay
-                        ),
-                        schedulingTime.TimeOfDay
-                    )
+            var firstDate = DateOnly.FromDateTime(
+                TimeZoneInfo.ConvertTime(from, TimeZoneUtilities.CetZone).DateTime
+            );
+            var lastDate = DateOnly.FromDateTime(
+                TimeZoneInfo.ConvertTime(until, TimeZoneUtilities.CetZone).DateTime
+            );
+            for (var date = firstDate; date <= lastDate; date = date.AddDays(1))
+            {
+                foreach (
+                    var time in SchedulingTimesCETperWeek
+                        .Where(t => t.DayOfWeek == date.DayOfWeek)
+                        .Select(t => t.TimeOfDay)
+                        .Distinct()
                 )
-                .ToList();
-
-            return autoScheduleNext.Count > 0 ? autoScheduleNext : null;
+                {
+                    // A nonexistent spring-forward time has no occurrence. In autumn, use
+                    // standard time once, matching TimeZoneInfo's existing conversion policy.
+                    if (TimeZoneUtilities.CetZone.IsInvalidTime(date.ToDateTime(time)))
+                        continue;
+                    var instant = TimeZoneUtilities.CetWallClockToUtcInstant(date, time);
+                    if (instant > from && instant <= until)
+                        yield return instant;
+                }
+            }
         }
     }
 

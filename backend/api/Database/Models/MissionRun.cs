@@ -1,8 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 #pragma warning disable CS8618
 namespace Api.Database.Models
 {
+    [Index(nameof(MissionId), nameof(ScheduledAt), IsUnique = true)]
+    [Index(nameof(Status), nameof(ScheduledAt))]
     public class MissionRun : SortableRecord
     {
         private MissionStatus _status = MissionStatus.Queued;
@@ -47,8 +50,18 @@ namespace Api.Database.Models
         [Required]
         public DateTime CreationTime { get; set; }
 
-        [Required]
-        public virtual Robot Robot { get; set; }
+        [DeleteBehavior(DeleteBehavior.Restrict)]
+        public virtual Robot? Robot { get; set; }
+
+        // Scheduling means eligibility, not a guaranteed robot start time.
+        public DateTimeOffset? ScheduledAt { get; set; }
+
+        // Robot assignment and task snapshots happen at activation, not generation.
+        public DateTimeOffset? ActivatedAt { get; set; }
+
+        public string? ScheduleJobId { get; set; }
+
+        public string? SchedulerInstance { get; set; }
 
         // The tasks are always returned ordered by their order field
         [Required]
@@ -76,7 +89,9 @@ namespace Api.Database.Models
                     or MissionStatus.Cancelled
                     or MissionStatus.Successful
                     or MissionStatus.PartiallySuccessful
-                    or MissionStatus.Failed;
+                    or MissionStatus.Failed
+                    or MissionStatus.Skipped
+                    or MissionStatus.Missed;
 
         public DateTime? StartTime { get; private set; }
 
@@ -117,7 +132,7 @@ namespace Api.Database.Models
 
         public void SetEstimatedTaskDuration()
         {
-            if (Robot.AverageDurationPerTag is not null)
+            if (Robot?.AverageDurationPerTag is not null)
             {
                 EstimatedTaskDuration = (uint)Robot.AverageDurationPerTag;
             }
@@ -135,5 +150,8 @@ namespace Api.Database.Models
         Successful,
         PartiallySuccessful,
         Queued,
+        Scheduled,
+        Skipped,
+        Missed,
     }
 }

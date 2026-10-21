@@ -1,39 +1,30 @@
 import { Button, Icon, Popover, Table, Typography } from '@equinor/eds-core-react'
-import {
-    allDays,
-    DaysOfWeek,
-    getAllDaysIndexOfToday,
-    getCetTimeOnly,
-    isJobScheduledAt,
-} from 'models/AutoScheduleFrequency'
 import { useLanguageContext } from 'contexts/LanguageContext'
 import styled from 'styled-components'
-import { MissionDefinition } from 'models/MissionDefinition'
 import { Link } from 'react-router'
-import { StyledDialog } from 'components/Styles/StyledComponents'
 import { useContext, useState } from 'react'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
-import { useBackendApi } from 'api/UseBackendApi'
 import { InstallationContext } from 'contexts/InstallationContext'
 import { MissionSchedulingEditDialog } from 'components/Dialogs/MissionEditDialog'
 import { phone_width } from 'utils/constants'
 import { useNow } from 'hooks/useNow'
+import { ScheduledMissionRun, canSkipScheduledRun, formatScheduledAt } from 'models/ScheduledMissionRun'
+import { SkipAutoMissionDialog } from './SkipAutoMissionDialog'
+import { findRunForSlot } from 'models/ScheduledMissionRun'
+import { allDays, DaysOfWeek, getAllDaysIndexOfToday, getCetTimeOnly } from 'models/AutoScheduleFrequency'
+import { MissionDefinition } from 'models/MissionDefinition'
+import { useMissionDefinitionsContext } from 'contexts/MissionDefinitionsContext'
 
 const StyledTableRow = styled.div`
     display: grid;
     align-items: center;
     gap: 1rem;
-    grid-template-columns: 100px auto 16px 100px;
+    grid-template-columns: 130px auto 16px 100px;
     @media (max-width: ${phone_width}) {
-        grid-template-columns: 70px 1fr 16px 80px;
+        grid-template-columns: 100px 1fr 16px 80px;
         gap: 0.5rem;
     }
-`
-
-const StyledDialogActions = styled(StyledDialog.Actions)`
-    display: flex;
-    gap: 5px;
 `
 
 const StyledMissionInfo = styled.div`
@@ -52,39 +43,16 @@ const CalendarButton = styled(Button)`
     max-width: 100px;
 `
 
-export enum MissionStatusType {
-    ScheduledJob = 'ScheduledJob',
-    SkippedJob = 'SkippedJob',
-    PastJob = 'PastJob',
-    FutureUnstartedJob = 'FutureUnstartedJob',
-}
+type RowProps = { occurrence: ScheduledMissionRun } | { day: DaysOfWeek; time: string; mission: MissionDefinition }
 
-export const selectMissionStatusType = (day: DaysOfWeek, time: string, mission: MissionDefinition, now: Date) => {
-    const currentDayOfTheWeek = allDays[getAllDaysIndexOfToday(now)]
-    if (day !== currentDayOfTheWeek) {
-        return MissionStatusType.FutureUnstartedJob
-    }
-    const nowAsTimeOnly = getCetTimeOnly(now)
-    if (time <= nowAsTimeOnly) {
-        return MissionStatusType.PastJob
-    }
-    if (isJobScheduledAt(mission, time)) {
-        return MissionStatusType.ScheduledJob
-    }
-    return MissionStatusType.SkippedJob
-}
-
-export const AutoScheduleMissionTableRow = ({
-    day,
-    time,
-    mission,
-}: {
-    day: DaysOfWeek
-    time: string
-    mission: MissionDefinition
-}) => {
-    const { TranslateText } = useLanguageContext()
-    const backendApi = useBackendApi()
+export const AutoScheduleMissionTableRow = (props: RowProps) => {
+    const { TranslateText, language } = useLanguageContext()
+    const { scheduledMissionRuns, autoScheduleError } = useMissionDefinitionsContext()
+    const occurrence =
+        'occurrence' in props
+            ? props.occurrence
+            : findRunForSlot(scheduledMissionRuns, props.mission.id, props.day, props.time)
+    const mission = 'occurrence' in props ? props.occurrence.mission : props.mission
     const { installation } = useContext(InstallationContext)
     const [isSkipDialogOpen, setIsSkipDialogOpen] = useState<boolean>(false)
     const [isEditDialogOpen, setIsEditDialogOpen] = useState<boolean>(false)
@@ -92,10 +60,10 @@ export const AutoScheduleMissionTableRow = ({
     const [isOpen, setIsOpen] = useState(false)
     const now = useNow()
 
-    const missionStatusType = selectMissionStatusType(day, time, mission, now)
-
+    const isPast =
+        'day' in props && props.day === allDays[getAllDaysIndexOfToday(now)] && props.time <= getCetTimeOnly(now)
     const typographyColor =
-        missionStatusType === MissionStatusType.SkippedJob || missionStatusType === MissionStatusType.PastJob
+        isPast || occurrence?.status === 'Skipped'
             ? tokens.colors.interactive.disabled__text.hex
             : tokens.colors.interactive.primary__resting.hex
 
@@ -106,16 +74,15 @@ export const AutoScheduleMissionTableRow = ({
         setIsOpen(false)
     }
 
-    const handleAutoScheduleSkip = () => {
-        backendApi.skipAutoScheduledMission(mission.id, time)
-        setIsSkipDialogOpen(false)
-    }
-
     return (
-        <Table.Row key={mission.id + time}>
+        <Table.Row>
             <Table.Cell>
                 <StyledTableRow>
-                    <Typography color={typographyColor}>{`${time.substring(0, 5)}`}</Typography>
+                    <Typography color={typographyColor}>
+                        {'occurrence' in props
+                            ? formatScheduledAt(props.occurrence.scheduledAt, language)
+                            : props.time.slice(0, 5)}
+                    </Typography>
 
                     <StyledMissionInfo>
                         <Typography
@@ -155,41 +122,18 @@ export const AutoScheduleMissionTableRow = ({
                     <CalendarButton variant="ghost_icon" onClick={() => setIsEditDialogOpen(true)}>
                         <Icon name={Icons.Edit} size={16} color={typographyColor} />
                     </CalendarButton>
-                    {(missionStatusType === MissionStatusType.ScheduledJob ||
-                        missionStatusType === MissionStatusType.SkippedJob) && (
+                    {occurrence && (
                         <CalendarButton
                             variant="ghost"
-                            disabled={missionStatusType === MissionStatusType.SkippedJob}
+                            disabled={autoScheduleError || !canSkipScheduledRun(occurrence, now)}
                             onClick={() => setIsSkipDialogOpen(true)}
                         >
-                            {missionStatusType === MissionStatusType.ScheduledJob
-                                ? TranslateText('SkipAutoMission')
-                                : TranslateText('Skipped')}
+                            {TranslateText(occurrence.status === 'Skipped' ? 'Skipped' : 'SkipAutoMission')}
                         </CalendarButton>
                     )}
-                    <StyledDialog open={isSkipDialogOpen}>
-                        <StyledDialog.Header>
-                            <StyledDialog.Title>
-                                {TranslateText('SkipAutoMission') + ' ' + TranslateText('Mission')}
-                            </StyledDialog.Title>
-                        </StyledDialog.Header>
-                        <StyledDialog.CustomContent>
-                            <Typography>
-                                {TranslateText('Are you sure you want to skip {0} scheduled for today at {1}?', [
-                                    mission.name,
-                                    time.slice(0, 5),
-                                ])}
-                            </Typography>
-                        </StyledDialog.CustomContent>
-                        <StyledDialogActions>
-                            <Button onClick={() => setIsSkipDialogOpen(false)} variant="outlined" color="primary">
-                                {TranslateText('Close')}
-                            </Button>
-                            <Button onClick={handleAutoScheduleSkip} variant="outlined" color="danger">
-                                {TranslateText('SkipAutoMission')}
-                            </Button>
-                        </StyledDialogActions>
-                    </StyledDialog>
+                    {isSkipDialogOpen && occurrence && (
+                        <SkipAutoMissionDialog occurrence={occurrence} onClose={() => setIsSkipDialogOpen(false)} />
+                    )}
                     <MissionSchedulingEditDialog
                         mission={mission}
                         isOpen={isEditDialogOpen}

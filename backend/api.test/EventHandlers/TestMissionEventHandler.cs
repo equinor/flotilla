@@ -273,9 +273,7 @@ namespace Api.Test.EventHandlers
 
             // Act (Ensure first mission is started)
             await MissionRunService.Create(missionRunOne);
-            await MissionSchedulingService.StartNextMissionRunIfSystemIsAvailable(
-                missionRunOne.Robot
-            );
+            await MissionSchedulingService.StartNextMissionRunIfSystemIsAvailable(robotOne);
             Thread.Sleep(1000);
 
             // Assert
@@ -289,9 +287,7 @@ namespace Api.Test.EventHandlers
 
             // Act (Ensure second mission is started for second robot)
             await MissionRunService.Create(missionRunTwo);
-            await MissionSchedulingService.StartNextMissionRunIfSystemIsAvailable(
-                missionRunTwo.Robot
-            );
+            await MissionSchedulingService.StartNextMissionRunIfSystemIsAvailable(robotTwo);
             Thread.Sleep(1000);
 
             // Assert

@@ -90,7 +90,7 @@ export const AutoSchedulePage = () => {
 
 const DayOverview = () => {
     const { TranslateText } = useLanguageContext()
-    const { missionDefinitions } = useMissionDefinitionsContext()
+    const { missionDefinitions, autoScheduleLoading, autoScheduleError } = useMissionDefinitionsContext()
 
     const now = useNow()
     const allDaysIndexOfToday = getAllDaysIndexOfToday(now)
@@ -100,6 +100,13 @@ const DayOverview = () => {
 
     return (
         <StyledSection>
+            {(autoScheduleError || autoScheduleLoading) && (
+                <Typography>
+                    {TranslateText(
+                        autoScheduleError ? 'Failed to retrieve scheduled missions' : 'Loading scheduled missions'
+                    )}
+                </Typography>
+            )}
             {autoScheduleMissionDefinitions.length > 0 ? (
                 <>
                     <Typography>

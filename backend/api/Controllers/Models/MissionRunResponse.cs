@@ -29,6 +29,10 @@ namespace Api.Controllers.Models
 
         public DateTime CreationTime { get; set; }
 
+        public DateTimeOffset? ScheduledAt { get; set; }
+
+        public DateTimeOffset? ActivatedAt { get; set; }
+
         public DateTime? StartTime { get; private set; }
 
         public DateTime? EndTime { get; private set; }
@@ -60,6 +64,8 @@ namespace Api.Controllers.Models
             Status = mission.Status;
             IsCompleted = mission.IsCompleted;
             CreationTime = mission.CreationTime;
+            ScheduledAt = mission.ScheduledAt;
+            ActivatedAt = mission.ActivatedAt;
             StartTime = mission.StartTime;
             EndTime = mission.EndTime;
             EstimatedTaskDuration = mission.EstimatedTaskDuration;
