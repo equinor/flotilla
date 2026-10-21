@@ -27,7 +27,6 @@ interface Props {
     loadFailed: boolean
     onSelect: (id: string, focus?: ResultFocus) => void
     onClose: () => void
-    returnFocus: () => void
 }
 
 export const MissionResultGallery = ({
@@ -39,14 +38,12 @@ export const MissionResultGallery = ({
     loadFailed,
     onSelect,
     onClose,
-    returnFocus,
 }: Props) => {
     const { TranslateText } = useLanguageContext()
     const titleId = useId()
     const dialog = useRef<HTMLDialogElement>(null)
     const heading = useRef<HTMLHeadingElement>(null)
     const activeThumbnail = useRef<HTMLButtonElement>(null)
-    const restoreFocus = useRef(returnFocus)
     const index = results.findIndex((result) => result.inspection.inspectionId === selectedId)
     const result = results[index]
     const focus = result ? getResultFocus(result, preferredFocus) : preferredFocus
@@ -74,13 +71,6 @@ export const MissionResultGallery = ({
         if (itemBounds.left < stripBounds.left) strip.scrollLeft += itemBounds.left - stripBounds.left
         else if (itemBounds.right > stripBounds.right) strip.scrollLeft += itemBounds.right - stripBounds.right
     }, [selectedId, index])
-
-    useEffect(
-        () => () => {
-            requestAnimationFrame(() => restoreFocus.current())
-        },
-        []
-    )
 
     const navigate = (offset: number) => {
         const next = results[index + offset]

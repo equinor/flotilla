@@ -35,10 +35,6 @@ export const MissionResults = ({ tasks, data, isPending, isError, installationNa
         if (!selectedId && document.activeElement instanceof HTMLElement) opener.current = document.activeElement
         select(id, focus)
     }
-    const returnFocus = () => {
-        const target = opener.current?.isConnected ? opener.current : container.current
-        target?.focus({ preventScroll: true })
-    }
 
     return (
         <MissionContent ref={container} tabIndex={-1}>
@@ -61,7 +57,6 @@ export const MissionResults = ({ tasks, data, isPending, isError, installationNa
                     loadFailed={isError}
                     onSelect={select}
                     onClose={() => select(undefined)}
-                    returnFocus={returnFocus}
                 />
             )}
         </MissionContent>
