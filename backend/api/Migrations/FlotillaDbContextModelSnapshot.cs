@@ -536,9 +536,6 @@ namespace Api.Migrations
                             b1.Property<string>("MissionDefinitionId")
                                 .HasColumnType("text");
 
-                            b1.Property<string>("AutoScheduledJobs")
-                                .HasColumnType("text");
-
                             b1.Property<string>("SchedulingTimesCETperWeek")
                                 .IsRequired()
                                 .HasColumnType("text");

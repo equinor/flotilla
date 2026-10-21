@@ -200,7 +200,10 @@ namespace Api.Test.HostedServices
             var next = await Next();
             _clock.Now = next.ScheduledAt;
             await _service.ActivateMissionRun(next.Id);
-            var previous = _context.Database.GetMigrations().Reverse().Skip(1).First();
+            var previous = _context
+                .Database.GetMigrations()
+                .TakeWhile(m => !m.EndsWith("_AddScheduledMissionRuns", StringComparison.Ordinal))
+                .Last();
             await _context.GetService<IMigrator>().MigrateAsync(previous, Token);
             Assert.Equal(1, await _context.MissionRuns.CountAsync(Token));
             await _context.Database.MigrateAsync(Token);
@@ -209,6 +212,50 @@ namespace Api.Test.HostedServices
             Assert.Single(retained.Tasks);
             Assert.Null(retained.ScheduledAt);
             Assert.False(_context.Database.HasPendingModelChanges());
+        }
+
+        [Fact]
+        public async Task RemovingLegacyJobsPreservesWeeklyScheduleAndScheduledRuns()
+        {
+            var next = await Next();
+            Assert.True(await _service.SkipMissionRun(_definition, next.Id));
+            var scheduledRunsMigration = _context
+                .Database.GetMigrations()
+                .Single(m => m.EndsWith("_AddScheduledMissionRuns", StringComparison.Ordinal));
+            await _context.GetService<IMigrator>().MigrateAsync(scheduledRunsMigration, Token);
+            await _context.Database.ExecuteSqlInterpolatedAsync(
+                $$"""
+                UPDATE "MissionDefinitions"
+                SET "AutoScheduleFrequency_AutoScheduledJobs" = '{"23:00:00":"legacy-job"}'
+                WHERE "Id" = {{_definition.Id}}
+                """,
+                Token
+            );
+
+            await _context.Database.MigrateAsync(Token);
+
+            var legacyColumns = await _context
+                .Database.SqlQueryRaw<int>(
+                    """
+                    SELECT COUNT(*)::integer AS "Value"
+                    FROM information_schema.columns
+                    WHERE table_schema = 'public'
+                      AND table_name = 'MissionDefinitions'
+                      AND column_name = 'AutoScheduleFrequency_AutoScheduledJobs'
+                    """
+                )
+                .SingleAsync(Token);
+            Assert.Equal(0, legacyColumns);
+            var definition = await _definitions.ReadById(_definition.Id);
+            Assert.True(
+                definition!.AutoScheduleFrequency!.IsUnchanged(
+                    _definition.AutoScheduleFrequency!.SchedulingTimesCETperWeek
+                )
+            );
+            Assert.Equal(4, await _context.MissionRuns.CountAsync(Token));
+            Assert.Equal(MissionStatus.Skipped, (await Persisted(next.Id)).Status);
+            await _service.Reconcile(definition);
+            Assert.Equal(MissionStatus.Skipped, (await Persisted(next.Id)).Status);
         }
 
         [Fact]

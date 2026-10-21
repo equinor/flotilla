@@ -8,9 +8,6 @@ namespace Api.Database.Models
     {
         public IList<TimeAndDay> SchedulingTimesCETperWeek { get; set; } = [];
 
-        // Retained for rollback compatibility; Mission runs are the scheduling authority.
-        public string? AutoScheduledJobs { get; set; }
-
         public bool HasValidValue()
         {
             return SchedulingTimesCETperWeek.Count != 0;

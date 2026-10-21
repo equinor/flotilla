@@ -2,7 +2,6 @@ import type { MissionDefinition } from './MissionDefinition'
 
 export interface AutoScheduleFrequency {
     schedulingTimesCETperWeek: TimeAndDay[]
-    autoScheduledJobs?: string
 }
 
 export interface TimeAndDay {
