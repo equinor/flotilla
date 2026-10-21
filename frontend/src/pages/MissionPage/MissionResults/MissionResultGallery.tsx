@@ -88,14 +88,6 @@ export const MissionResultGallery = ({
     }
 
     const onKeyDown = (event: KeyboardEvent<HTMLElement>) => {
-        const target = event.target
-        if (!(target instanceof HTMLElement)) return
-        if (target.closest('dialog') !== event.currentTarget.closest('dialog')) {
-            event.stopPropagation()
-            return
-        }
-        if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return
-        if (target.closest('video, audio, input, textarea, select, [contenteditable="true"]')) return
         if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
             event.preventDefault()
             navigate(event.key === 'ArrowLeft' ? -1 : 1)
