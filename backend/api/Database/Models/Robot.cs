@@ -174,6 +174,7 @@ namespace Api.Database.Models
         take_video,
         take_thermal_video,
         take_co2_measurement,
+        take_xam8000_gas_measurement,
         record_audio,
         take_acoustic_measurement,
     }

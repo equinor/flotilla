@@ -1,4 +1,4 @@
-using Api.Database.Models;
+﻿using Api.Database.Models;
 
 namespace Api.Database.Context
 {
@@ -192,6 +192,14 @@ namespace Api.Database.Context
                 [],
                 "Verifies that an audio recording arrives and can be played back.",
                 VideoDuration: 10f
+            ),
+            new MissionScenario(
+                "Xam-8000 gas recording",
+                "xam-gas",
+                "Xam-8000 gas recording",
+                SensorType.Xam8000GasMeasurement,
+                [],
+                "Verifies that a Xam-8000 gas measurement arrives and can be processed."
             ),
         ];
 
