@@ -53,21 +53,6 @@ export const MeasurementPreviewButton = styled(PreviewButton)`
     }
 `
 
-export const ResultCard = styled(Card)<{ $hasAnalysis: boolean }>`
-    && {
-        display: grid;
-        grid-row: 1 / span ${({ $hasAnalysis }) => ($hasAnalysis ? 3 : 2)};
-        grid-template-rows: subgrid;
-        padding: 0;
-        gap: 0;
-        border-radius: 2px;
-        border: ${divider};
-    }
-    > ${PreviewButton} {
-        grid-row: 2;
-    }
-`
-
 export const CardDetails = styled.div`
     grid-row: 1;
     display: flex;
@@ -117,11 +102,19 @@ export const ResultsSection = styled.section`
 
 export const Deck = styled.div`
     display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: 280px;
-    column-gap: ${spacing.medium};
-    overflow-x: auto;
-    align-items: stretch;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 24px;
+`
+
+export const ResultCard = styled(Card)<{ $hasAnalysis: boolean }>`
+    && {
+        display: grid;
+        border-radius: 1px;
+        border: ${divider};
+    }
+    > ${PreviewButton} {
+        grid-row: 2;
+    }
 `
 
 export const Gallery = styled(Dialog)`
