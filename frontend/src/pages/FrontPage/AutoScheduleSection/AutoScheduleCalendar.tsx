@@ -4,15 +4,20 @@ import { nb } from 'date-fns/locale'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 import styled from 'styled-components'
 import { useContext, useMemo, useState } from 'react'
-import { allDaysStartingSunday, DaysOfWeek, getAutoScheduledOccurrences } from 'models/AutoScheduleFrequency'
-import { MissionStatusType, selectMissionStatusType } from './AutoScheduleMissionTableRow'
+import { allDaysStartingSunday, DaysOfWeek, getAutoScheduledOccurrences, getCetNow } from 'models/AutoScheduleFrequency'
+import {
+    AutoScheduleOccurrence,
+    canSkipOccurrence,
+    canUnskipOccurrence,
+    findOccurrenceForSlot,
+} from 'models/AutoScheduleOccurrence'
+import { SkipAutoMissionDialog } from './SkipAutoMissionDialog'
 import { useNavigate } from 'react-router'
 import { Button, Chip, Icon, Typography } from '@equinor/eds-core-react'
-import { StyledDialog, subtleCardShadow } from 'components/Styles/StyledComponents'
+import { subtleCardShadow } from 'components/Styles/StyledComponents'
 import { useMissionDefinitionsContext } from 'contexts/MissionDefinitionsContext'
 import { tokens } from '@equinor/eds-tokens'
 import { useLanguageContext } from 'contexts/LanguageContext'
-import { useBackendApi } from 'api/UseBackendApi'
 import { InstallationContext } from 'contexts/InstallationContext'
 import { Icons } from 'utils/icons'
 import { MissionSchedulingEditDialog } from 'components/Dialogs/MissionEditDialog'
@@ -183,12 +188,6 @@ const StyledSkipButton = styled(Button)`
     }
 `
 
-const StyledDialogActions = styled(StyledDialog.Actions)`
-    display: flex;
-    flex-direction: row;
-    gap: 6px;
-`
-
 const StyledEditButton = styled(Button)`
     position: absolute;
     bottom: 4px;
@@ -202,124 +201,88 @@ const StyledEditButton = styled(Button)`
 `
 
 const legendItems = [
-    { color: CalendarColors.Planned, label: 'Planned today' },
+    { color: CalendarColors.Planned, label: 'Planned in the next 24 hours' },
     { color: CalendarColors.Future, label: 'Future missions' },
     { color: CalendarColors.Skipped, label: 'Skipped' },
     { color: CalendarColors.Passed, label: 'Passed' },
 ]
 
-const statusToColor: Record<MissionStatusType, (typeof CalendarColors)[keyof typeof CalendarColors]> = {
-    [MissionStatusType.ScheduledJob]: CalendarColors.Planned,
-    [MissionStatusType.FutureUnstartedJob]: CalendarColors.Future,
-    [MissionStatusType.SkippedJob]: CalendarColors.Skipped,
-    [MissionStatusType.PastJob]: CalendarColors.Passed,
+interface ScheduleEvent {
+    id: string
+    title: string
+    start: Date
+    end: Date
+    occurrence?: AutoScheduleOccurrence
+    color: (typeof CalendarColors)[keyof typeof CalendarColors]
+    mission: MissionDefinition
 }
 
 export const CalendarPro = () => {
-    const { missionDefinitions } = useMissionDefinitionsContext()
+    const { missionDefinitions, autoScheduleOccurrences, autoScheduleError } = useMissionDefinitionsContext()
     const { TranslateText } = useLanguageContext()
     const { installation } = useContext(InstallationContext)
-    const backendApi = useBackendApi()
     const navigate = useNavigate()
-    const [skipDialogOpen, setSkipDialogOpen] = useState<boolean>(false)
     const [selectedMissionToEdit, setSelectedMissionToEdit] = useState<MissionDefinition>()
-    const [selectedEvent, setSelectedEvent] = useState<any>(null)
+    const [selectedOccurrence, setSelectedOccurrence] = useState<AutoScheduleOccurrence>()
     const now = useNow()
 
     const getTargetDate = (day: DaysOfWeek, time: string, now: Date) => {
-        const offset = (allDaysStartingSunday.indexOf(day) - now.getDay() + 7) % 7
-        const targetDate = new Date(now)
-        targetDate.setDate(now.getDate() + offset)
+        const cetNow = getCetNow(now)
+        const offset = (allDaysStartingSunday.indexOf(day) - cetNow.getDay() + 7) % 7
+        const targetDate = new Date(cetNow)
+        targetDate.setDate(cetNow.getDate() + offset)
         const hours = time.split(':').map(Number)[0]
-        let minutes = time.split(':').map(Number)[1]
-        if (hours === 23) minutes = 0 // To prevent wrapping over to next day
+        const minutes = time.split(':').map(Number)[1]
         targetDate.setHours(hours, minutes, 0, 0)
         return targetDate
     }
 
-    const events = useMemo(() => {
+    const events = useMemo<ScheduleEvent[]>(() => {
         return getAutoScheduledOccurrences(missionDefinitions).map(({ mission, dayOfWeek, timeOfDay }) => {
             const targetDate = getTargetDate(dayOfWeek, timeOfDay, now)
-            const status = selectMissionStatusType(dayOfWeek, timeOfDay, mission, now)
-            const color = statusToColor[status]
+            const occurrence = findOccurrenceForSlot(autoScheduleOccurrences, mission.id, dayOfWeek, timeOfDay)
+            const color =
+                occurrence?.status === 'Skipped'
+                    ? CalendarColors.Skipped
+                    : occurrence?.status === 'Scheduled'
+                      ? CalendarColors.Planned
+                      : targetDate <= getCetNow(now)
+                        ? CalendarColors.Passed
+                        : CalendarColors.Future
 
             return {
                 id: `${mission.id}-${dayOfWeek}-${timeOfDay}`,
-                title: `${mission.name}${status === MissionStatusType.SkippedJob ? ' (' + TranslateText('Skipped') + ')' : ''}`,
+                title: `${mission.name}${occurrence?.status === 'Skipped' ? ' (' + TranslateText('Skipped') + ')' : ''}`,
                 start: targetDate,
-                end: new Date(targetDate.getTime() + 59 * 60 * 1000),
-                skip: status === MissionStatusType.ScheduledJob,
-                resource: mission.id,
+                end: new Date(
+                    Math.min(
+                        targetDate.getTime() + 59 * 60 * 1000,
+                        new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate() + 1).getTime()
+                    )
+                ),
+                occurrence,
                 color,
-                status,
-                metadata: {
-                    missionName: mission.name,
-                    missionId: mission.id,
-                    time: timeOfDay,
-                },
+                mission,
             }
         })
-    }, [missionDefinitions, now])
+    }, [missionDefinitions, autoScheduleOccurrences, now, TranslateText])
 
-    const handleCloseSkipDialog = () => {
-        setSkipDialogOpen(false)
-    }
-
-    const handleSelectSkipEvent = (event: any) => {
-        setSelectedEvent(event)
-        setSkipDialogOpen(true)
-    }
-
-    const handleSelectEditEvent = (event: any) => {
-        setSelectedMissionToEdit(missionDefinitions.find((m) => m.id === event.metadata.missionId))
-    }
-
-    const handleAutoScheduleSkip = () => {
-        if (selectedEvent) {
-            backendApi.skipAutoScheduledMission(selectedEvent.metadata.missionId, selectedEvent.metadata.time)
-        }
-        setSkipDialogOpen(false)
-        setSelectedEvent(null)
-    }
-
-    const renderSkipDialog = () => (
-        <StyledDialog open={skipDialogOpen} onClose={handleCloseSkipDialog}>
-            <StyledDialog.Header>
-                <Typography variant="h3">
-                    {TranslateText('SkipAutoMission') + ' ' + TranslateText('Mission')}
-                </Typography>
-            </StyledDialog.Header>
-            <StyledDialog.Content>
-                {TranslateText('Are you sure you want to skip {0} scheduled for today at {1}?', [
-                    selectedEvent.metadata.missionName,
-                    selectedEvent.metadata.time.slice(0, 5),
-                ])}
-            </StyledDialog.Content>
-            <StyledDialogActions>
-                <Button onClick={handleCloseSkipDialog} variant="outlined" color="primary">
-                    {TranslateText('Cancel')}
-                </Button>
-                <Button onClick={handleAutoScheduleSkip} variant="outlined" color="danger">
-                    {TranslateText('SkipAutoMission')}
-                </Button>
-            </StyledDialogActions>
-        </StyledDialog>
-    )
-
-    const CustomEvent = ({ event }: { event: any }) => {
+    const CustomEvent = ({ event }: { event: ScheduleEvent }) => {
         return (
             <StyledEvent>
                 <Typography variant="caption" as="span" color={tokens.colors.text.static_icons__default.hex}>
                     {event.title}
                 </Typography>
-                <StyledEditButton variant="ghost_icon" onClick={() => handleSelectEditEvent(event)}>
+                <StyledEditButton variant="ghost_icon" onClick={() => setSelectedMissionToEdit(event.mission)}>
                     <Icon name={Icons.Edit} size={16} color={event.color.border} />
                 </StyledEditButton>
-                {event.skip && (
-                    <StyledSkipButton onClick={() => handleSelectSkipEvent(event)}>
-                        {TranslateText('SkipAutoMission')}
-                    </StyledSkipButton>
-                )}
+                {!autoScheduleError &&
+                    event.occurrence &&
+                    (canSkipOccurrence(event.occurrence, now) || canUnskipOccurrence(event.occurrence, now)) && (
+                        <StyledSkipButton onClick={() => setSelectedOccurrence(event.occurrence)}>
+                            {TranslateText(event.occurrence.status === 'Skipped' ? 'Undo skip' : 'SkipAutoMission')}
+                        </StyledSkipButton>
+                    )}
             </StyledEvent>
         )
     }
@@ -339,6 +302,7 @@ export const CalendarPro = () => {
 
     return (
         <>
+            {autoScheduleError && <Typography>{TranslateText('Failed to retrieve scheduled missions')}</Typography>}
             <LegendWrapper>
                 {legendItems.map(({ color, label }) => (
                     <Chip key={label} style={{ background: color.background, borderColor: color.border }}>
@@ -352,6 +316,8 @@ export const CalendarPro = () => {
                     events={events}
                     components={{ event: CustomEvent }}
                     defaultView={Views.WEEK}
+                    defaultDate={getCetNow(now)}
+                    getNow={() => getCetNow(now)}
                     views={[Views.WEEK]}
                     startAccessor="start"
                     endAccessor="end"
@@ -378,11 +344,16 @@ export const CalendarPro = () => {
                         },
                     })}
                     onDoubleClickEvent={(event) =>
-                        navigate(`/${installation.installationCode}/missiondefinition/${event.metadata.missionId}`)
+                        navigate(`/${installation.installationCode}/missiondefinition/${event.mission.id}`)
                     }
                 />
             </CalendarWrapper>
-            {skipDialogOpen && renderSkipDialog()}
+            {selectedOccurrence && (
+                <SkipAutoMissionDialog
+                    occurrence={selectedOccurrence}
+                    onClose={() => setSelectedOccurrence(undefined)}
+                />
+            )}
             {selectedMissionToEdit && (
                 <MissionSchedulingEditDialog
                     mission={selectedMissionToEdit}

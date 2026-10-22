@@ -17,7 +17,7 @@ namespace Api.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.10")
+                .HasAnnotation("ProductVersion", "10.0.12")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -44,6 +44,29 @@ namespace Api.Migrations
                     b.HasIndex("InstallationId");
 
                     b.ToTable("AccessRoles");
+                });
+
+            modelBuilder.Entity("Api.Database.Models.AutoScheduleSkip", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("MissionDefinitionId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("ScheduledAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MissionDefinitionId", "ScheduledAt")
+                        .IsUnique();
+
+                    b.ToTable("AutoScheduleSkips");
                 });
 
             modelBuilder.Entity("Api.Database.Models.ExclusionArea", b =>
@@ -405,6 +428,17 @@ namespace Api.Migrations
                     b.Navigation("Installation");
                 });
 
+            modelBuilder.Entity("Api.Database.Models.AutoScheduleSkip", b =>
+                {
+                    b.HasOne("Api.Database.Models.MissionDefinition", "MissionDefinition")
+                        .WithMany()
+                        .HasForeignKey("MissionDefinitionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MissionDefinition");
+                });
+
             modelBuilder.Entity("Api.Database.Models.ExclusionArea", b =>
                 {
                     b.HasOne("Api.Database.Models.Installation", "Installation")
@@ -515,9 +549,6 @@ namespace Api.Migrations
                     b.OwnsOne("Api.Database.Models.AutoScheduleFrequency", "AutoScheduleFrequency", b1 =>
                         {
                             b1.Property<string>("MissionDefinitionId")
-                                .HasColumnType("text");
-
-                            b1.Property<string>("AutoScheduledJobs")
                                 .HasColumnType("text");
 
                             b1.Property<string>("SchedulingTimesCETperWeek")
