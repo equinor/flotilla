@@ -249,8 +249,6 @@ namespace Api.Controllers
         {
             id = Sanitize.SanitizeUserInput(id);
 
-            logger.LogInformation("Updating mission definition");
-
             if (!ModelState.IsValid)
                 return BadRequest("Invalid data.");
 
@@ -261,6 +259,11 @@ namespace Api.Controllers
             );
             if (missionDefinition == null)
                 return NotFound($"Could not find mission definition with id '{id}'");
+
+            logger.LogInformation(
+                "Updating mission definition with id '{Id}'",
+                missionDefinition.Id
+            );
 
             if (missionDefinitionQuery.Name != null)
                 missionDefinition.Name = missionDefinitionQuery.Name;
@@ -342,8 +345,6 @@ namespace Api.Controllers
         {
             id = Sanitize.SanitizeUserInput(id);
 
-            logger.LogInformation("Updating mission definition deprecation");
-
             if (!ModelState.IsValid)
             {
                 return BadRequest("Invalid data.");
@@ -358,6 +359,10 @@ namespace Api.Controllers
             {
                 return NotFound($"Could not find mission definition with id '{id}'");
             }
+            logger.LogInformation(
+                "Updating mission definition deprecation for id '{Id}'",
+                missionDefinition.Id
+            );
             missionDefinition.IsDeprecated = missionDefinitionIsDeprecatedQuery.IsDeprecated;
             var updatedDefinition = await missionDefinitionService.Update(missionDefinition);
             return new MissionDefinitionResponse(updatedDefinition);
@@ -380,12 +385,15 @@ namespace Api.Controllers
         {
             id = Sanitize.SanitizeUserInput(id);
 
-            logger.LogInformation("Deprecating mission definition");
             var missionDefinition = await missionDefinitionService.Delete(id);
             if (missionDefinition is null)
             {
                 return NotFound($"Mission definition with id {id} not found");
             }
+            logger.LogInformation(
+                "Deprecated mission definition with id '{Id}'",
+                missionDefinition.Id
+            );
             var missionDefinitionResponse = new MissionDefinitionResponse(missionDefinition);
             return Ok(missionDefinitionResponse);
         }
@@ -403,15 +411,40 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public Task<ActionResult> SkipAutoScheduledMissionRun(
+        public async Task<ActionResult> SkipAutoScheduledMissionRun(
             [FromRoute] string missionDefinitionId,
             [FromBody] SkipAutoMissionQuery skipAutoMissionQuery
-        ) =>
-            SetAutoScheduledMissionSkip(
+        )
+        {
+            missionDefinitionId = Sanitize.SanitizeUserInput(missionDefinitionId);
+            var occurrenceId = Sanitize.SanitizeUserInput(skipAutoMissionQuery.OccurrenceId);
+            if (!ModelState.IsValid || string.IsNullOrWhiteSpace(occurrenceId))
+                return BadRequest(
+                    "An occurrence ID is required. Refresh the schedule before skipping."
+                );
+
+            var missionDefinition = await missionDefinitionService.ReadById(
                 missionDefinitionId,
-                skipAutoMissionQuery.OccurrenceId,
-                true
+                accessMode: AccessMode.Write
             );
+            if (missionDefinition == null)
+                return NotFound(
+                    $"Could not find mission definition with id '{missionDefinitionId}'"
+                );
+
+            try
+            {
+                if (!await autoScheduleService.SkipOccurrence(missionDefinition, occurrenceId))
+                    return Conflict(
+                        "This occurrence can no longer be skipped. Refresh the schedule."
+                    );
+            }
+            catch (ArgumentException e)
+            {
+                return BadRequest(e.Message);
+            }
+            return NoContent();
+        }
 
         /// <summary>
         ///     Restore a skipped dated occurrence within the next 24 hours.
@@ -425,22 +458,16 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public Task<ActionResult> UnskipAutoScheduledMissionRun(
+        public async Task<ActionResult> UnskipAutoScheduledMissionRun(
             [FromRoute] string missionDefinitionId,
             [FromRoute] string occurrenceId
-        ) => SetAutoScheduledMissionSkip(missionDefinitionId, occurrenceId, false);
-
-        private async Task<ActionResult> SetAutoScheduledMissionSkip(
-            string missionDefinitionId,
-            string occurrenceId,
-            bool skip
         )
         {
             missionDefinitionId = Sanitize.SanitizeUserInput(missionDefinitionId);
             occurrenceId = Sanitize.SanitizeUserInput(occurrenceId);
-            if (string.IsNullOrWhiteSpace(occurrenceId))
+            if (!ModelState.IsValid || string.IsNullOrWhiteSpace(occurrenceId))
                 return BadRequest(
-                    "An occurrence ID is required. Refresh the schedule before changing its skip."
+                    "An occurrence ID is required. Refresh the schedule before undoing a skip."
                 );
 
             var missionDefinition = await missionDefinitionService.ReadById(
@@ -456,13 +483,8 @@ namespace Api.Controllers
 
             try
             {
-                var changed = skip
-                    ? await autoScheduleService.SkipOccurrence(missionDefinition, occurrenceId)
-                    : await autoScheduleService.UnskipOccurrence(missionDefinition, occurrenceId);
-                if (!changed)
-                    return Conflict(
-                        "This occurrence's skip can no longer be changed. Refresh the schedule."
-                    );
+                if (!await autoScheduleService.UnskipOccurrence(missionDefinition, occurrenceId))
+                    return Conflict("This skip can no longer be undone. Refresh the schedule.");
             }
             catch (ArgumentException e)
             {

@@ -14,15 +14,15 @@ namespace Api.Database.Models
         }
 
         public IEnumerable<DateTimeOffset> GetSchedulingInstants(
-            DateTimeOffset from,
-            DateTimeOffset until
+            DateTimeOffset fromExclusive,
+            DateTimeOffset untilInclusive
         )
         {
             var firstDate = DateOnly.FromDateTime(
-                TimeZoneInfo.ConvertTime(from, TimeZoneUtilities.CetZone).DateTime
+                TimeZoneInfo.ConvertTime(fromExclusive, TimeZoneUtilities.CetZone).DateTime
             );
             var lastDate = DateOnly.FromDateTime(
-                TimeZoneInfo.ConvertTime(until, TimeZoneUtilities.CetZone).DateTime
+                TimeZoneInfo.ConvertTime(untilInclusive, TimeZoneUtilities.CetZone).DateTime
             );
             for (var date = firstDate; date <= lastDate; date = date.AddDays(1))
             {
@@ -41,7 +41,7 @@ namespace Api.Database.Models
                     if (TimeZoneUtilities.CetZone.IsInvalidTime(date.ToDateTime(time)))
                         continue;
                     var instant = TimeZoneUtilities.CetWallClockToUtcInstant(date, time);
-                    if (instant > from && instant <= until)
+                    if (instant > fromExclusive && instant <= untilInclusive)
                         yield return instant;
                 }
             }

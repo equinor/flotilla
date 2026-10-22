@@ -1,3 +1,4 @@
+using System;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Api.Controllers;
@@ -47,6 +48,7 @@ public class AutoScheduleOccurrenceControllerTests
             await Controller().SkipAutoScheduledMissionRun("mission", default)
         );
         Assert.IsType<BadRequestObjectResult>(await ChangeSkip(false, " \t"));
+        Assert.IsType<BadRequestObjectResult>(await ChangeSkip(true, " \t"));
         _definitions.VerifyNoOtherCalls();
         _schedule.VerifyNoOtherCalls();
     }
@@ -88,5 +90,43 @@ public class AutoScheduleOccurrenceControllerTests
             .ReturnsAsync((MissionDefinition?)null);
         Assert.IsType<NotFoundObjectResult>(await ChangeSkip(skip));
         _schedule.VerifyNoOtherCalls();
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task InvalidModelHasNoSideEffects(bool skip)
+    {
+        var controller = Controller();
+        controller.ModelState.AddModelError("OccurrenceId", "Invalid");
+        var result = skip
+            ? await controller.SkipAutoScheduledMissionRun(
+                "mission",
+                new SkipAutoMissionQuery { OccurrenceId = "occurrence" }
+            )
+            : await controller.UnskipAutoScheduledMissionRun("mission", "occurrence");
+        Assert.IsType<BadRequestObjectResult>(result);
+        _definitions.VerifyNoOtherCalls();
+        _schedule.VerifyNoOtherCalls();
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task InvalidServiceInputReturnsBadRequest(bool skip)
+    {
+        var definition = new MissionDefinition { Id = "mission" };
+        _definitions
+            .Setup(s => s.ReadById("mission", true, AccessMode.Write))
+            .ReturnsAsync(definition);
+        if (skip)
+            _schedule
+                .Setup(s => s.SkipOccurrence(definition, "tomorrow-occurrence"))
+                .ThrowsAsync(new ArgumentException("Invalid occurrence"));
+        else
+            _schedule
+                .Setup(s => s.UnskipOccurrence(definition, "tomorrow-occurrence"))
+                .ThrowsAsync(new ArgumentException("Invalid occurrence"));
+        Assert.IsType<BadRequestObjectResult>(await ChangeSkip(skip));
     }
 }
