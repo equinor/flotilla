@@ -1,9 +1,10 @@
+import { useContext } from 'react'
 import { Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import styled from 'styled-components'
 import { useLanguageContext } from 'contexts/LanguageContext'
 import { ContentCard } from 'components/Styles/StyledComponents'
-import { InspectionData } from 'models/InspectionRecord'
+import { FileType, InspectionData } from 'models/InspectionRecord'
 import { SaraAlertCard } from './AlertComponent'
 
 const AlertPanelCard = styled(ContentCard)`
@@ -16,7 +17,7 @@ const AlertList = styled.div`
     display: flex;
     flex-direction: column;
     flex: 1;
-    min-height: 100%;
+    min-height: 0;
     gap: 16px;
 `
 
@@ -55,6 +56,11 @@ export const DashboardAlertPanel = ({ alerts }: DashboardAlertPanelProps) => {
                             tag={alert.tag!}
                             createdAt={alert.createdAt!}
                             warning={alert.warning!}
+                            imageSAS={
+                                alert.fileType === FileType.IMAGE
+                                    ? (alert.anonymizedSAS ?? alert.visualizedSAS)
+                                    : undefined
+                            }
                         />
                     ))}
                     <PlaceholderMessage>
