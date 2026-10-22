@@ -120,11 +120,6 @@ namespace Api.Controllers
                 logger.LogError(e, "Error retrieving missions from Mission Loader");
                 return StatusCode(StatusCodes.Status502BadGateway);
             }
-            catch (JsonException e)
-            {
-                logger.LogError(e, "Error retrieving missions from database");
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
 
             return Ok(missionDefinitions.Select((m) => new MissionDefinitionResponse(m)));
         }
@@ -172,34 +167,27 @@ namespace Api.Controllers
                 .Tasks.Select((task, index) => new TaskDefinition(task, index + 1))
                 .ToList();
 
-            try
+            var inspectionAreaForMission =
+                await inspectionAreaService.TryFindInspectionAreaForMissionTasks(
+                    missionTasks,
+                    customMissionQuery.InstallationCode
+                );
+            if (inspectionAreaForMission == null)
             {
-                var inspectionAreaForMission =
-                    await inspectionAreaService.TryFindInspectionAreaForMissionTasks(
-                        missionTasks,
-                        customMissionQuery.InstallationCode
-                    );
-                if (inspectionAreaForMission == null)
-                {
-                    return BadRequest("No inspection area found for the mission tasks");
-                }
+                return BadRequest("No inspection area found for the mission tasks");
+            }
 
-                var newMissionDefinition = new MissionDefinition
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    Tasks = missionTasks,
-                    Name = customMissionQuery.Name,
-                    IsAdHoc = customMissionQuery.IsAdHoc,
-                    InstallationCode = customMissionQuery.InstallationCode,
-                    InspectionArea = inspectionAreaForMission,
-                };
-                await missionDefinitionService.Create(newMissionDefinition);
-                return Ok(newMissionDefinition);
-            }
-            catch (MultipleInspectionAreasFoundException e)
+            var newMissionDefinition = new MissionDefinition
             {
-                return BadRequest(e.Message);
-            }
+                Id = Guid.NewGuid().ToString(),
+                Tasks = missionTasks,
+                Name = customMissionQuery.Name,
+                IsAdHoc = customMissionQuery.IsAdHoc,
+                InstallationCode = customMissionQuery.InstallationCode,
+                InspectionArea = inspectionAreaForMission,
+            };
+            await missionDefinitionService.Create(newMissionDefinition);
+            return Ok(newMissionDefinition);
         }
 
         /// <summary>
@@ -256,29 +244,18 @@ namespace Api.Controllers
                         (taskQuery, index) => new TaskDefinition(taskQuery, index + 1)
                     ),
                 ];
-                try
-                {
-                    var inspectionAreaForMission =
-                        await inspectionAreaService.TryFindInspectionAreaForMissionTasks(
-                            missionDefinition.Tasks,
-                            missionDefinition.InstallationCode
-                        );
-                    if (inspectionAreaForMission == null)
-                    {
-                        return BadRequest("No inspection area found for the mission tasks");
-                    }
-                    if (missionDefinition.InspectionArea.Id != inspectionAreaForMission.Id)
-                    {
-                        missionDefinition.InspectionArea = inspectionAreaForMission;
-                    }
-                }
-                catch (MultipleInspectionAreasFoundException ex)
-                {
-                    logger.LogError(ex, "Error while finding inspection area for mission tasks");
-                    return StatusCode(
-                        StatusCodes.Status500InternalServerError,
-                        "Internal server error"
+                var inspectionAreaForMission =
+                    await inspectionAreaService.TryFindInspectionAreaForMissionTasks(
+                        missionDefinition.Tasks,
+                        missionDefinition.InstallationCode
                     );
+                if (inspectionAreaForMission == null)
+                {
+                    return BadRequest("No inspection area found for the mission tasks");
+                }
+                if (missionDefinition.InspectionArea.Id != inspectionAreaForMission.Id)
+                {
+                    missionDefinition.InspectionArea = inspectionAreaForMission;
                 }
             }
 

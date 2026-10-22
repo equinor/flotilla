@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Api.Controllers.Models;
 using Api.Services;
 using Api.Services.Models;
@@ -9,10 +8,7 @@ namespace Api.Controllers
 {
     [ApiController]
     [Route("pointilla")]
-    public class PointillaController(
-        ILogger<PointillaController> logger,
-        IPointillaService pointillaService
-    ) : ControllerBase
+    public class PointillaController(IPointillaService pointillaService) : ControllerBase
     {
         /// <summary>
         ///     Get all available pointilla map floors for mission with specified id.
@@ -56,27 +52,12 @@ namespace Api.Controllers
             [FromRoute] string floorId
         )
         {
-            try
-            {
-                var pointillaResponse = await pointillaService.GetFloorMap(plantCode, floorId);
-                if (pointillaResponse == null)
-                    return NotFound(
-                        $"Could not retrieve map for plant {plantCode} floor {floorId} from Pointilla"
-                    );
-                return Ok(pointillaResponse);
-            }
-            catch (JsonException e)
-            {
-                logger.LogError(e, "Invalid JSON response from Pointilla");
-                return BadRequest($"Invalid JSON response from Pointilla");
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Error during GET of map from Pointilla");
-                return BadRequest(
+            var pointillaResponse = await pointillaService.GetFloorMap(plantCode, floorId);
+            if (pointillaResponse == null)
+                return NotFound(
                     $"Could not retrieve map for plant {plantCode} floor {floorId} from Pointilla"
                 );
-            }
+            return Ok(pointillaResponse);
         }
 
         /// <summary>
@@ -101,32 +82,18 @@ namespace Api.Controllers
             [FromRoute] int y
         )
         {
-            try
-            {
-                var pointillaResponse = await pointillaService.GetMapTiles(
-                    plantCode,
-                    floorId,
-                    zoomLevel,
-                    x,
-                    y
-                );
-                if (pointillaResponse == null)
-                    return NotFound(
-                        $"Could not retrieve map for plant {plantCode} floor {floorId} from Pointilla"
-                    );
-                return File(pointillaResponse, "image/png");
-            }
-            catch (JsonException)
-            {
-                return BadRequest($"Invalid JSON response from Pointilla");
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Error during GET of map from Pointilla");
-                return BadRequest(
+            var pointillaResponse = await pointillaService.GetMapTiles(
+                plantCode,
+                floorId,
+                zoomLevel,
+                x,
+                y
+            );
+            if (pointillaResponse == null)
+                return NotFound(
                     $"Could not retrieve map for plant {plantCode} floor {floorId} from Pointilla"
                 );
-            }
+            return File(pointillaResponse, "image/png");
         }
     }
 }
