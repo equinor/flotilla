@@ -8,62 +8,43 @@ namespace Api.Database.Models
     {
         public IList<TimeAndDay> SchedulingTimesCETperWeek { get; set; } = [];
 
-        public string? AutoScheduledJobs { get; set; }
-
         public bool HasValidValue()
         {
             return SchedulingTimesCETperWeek.Count != 0;
         }
 
-        public bool IsUnchanged(IList<TimeAndDay>? newSchedulingTimesCETperWeek)
+        public IEnumerable<DateTimeOffset> GetSchedulingInstants(
+            DateTimeOffset from,
+            DateTimeOffset until
+        )
         {
-            if (newSchedulingTimesCETperWeek == null || SchedulingTimesCETperWeek == null)
+            var firstDate = DateOnly.FromDateTime(
+                TimeZoneInfo.ConvertTime(from, TimeZoneUtilities.CetZone).DateTime
+            );
+            var lastDate = DateOnly.FromDateTime(
+                TimeZoneInfo.ConvertTime(until, TimeZoneUtilities.CetZone).DateTime
+            );
+            for (var date = firstDate; date <= lastDate; date = date.AddDays(1))
             {
-                return newSchedulingTimesCETperWeek == SchedulingTimesCETperWeek;
-            }
-
-            if (newSchedulingTimesCETperWeek.Count != SchedulingTimesCETperWeek.Count)
-            {
-                return false;
-            }
-
-            foreach (var schedulingTime in newSchedulingTimesCETperWeek)
-            {
-                if (
-                    !SchedulingTimesCETperWeek.Any(existingTime =>
-                        existingTime.DayOfWeek == schedulingTime.DayOfWeek
-                        && existingTime.TimeOfDay == schedulingTime.TimeOfDay
-                    )
+                foreach (
+                    var time in SchedulingTimesCETperWeek
+                        .Where(t => t.DayOfWeek == date.DayOfWeek)
+                        // Match Npgsql's timestamp precision, including duplicate fractional slots.
+                        .Select(t => new TimeOnly(
+                            t.TimeOfDay.Ticks - t.TimeOfDay.Ticks % TimeSpan.TicksPerMicrosecond
+                        ))
+                        .Distinct()
                 )
                 {
-                    return false;
+                    // A nonexistent spring-forward time has no occurrence. In autumn, use
+                    // standard time once, matching TimeZoneInfo's existing conversion policy.
+                    if (TimeZoneUtilities.CetZone.IsInvalidTime(date.ToDateTime(time)))
+                        continue;
+                    var instant = TimeZoneUtilities.CetWallClockToUtcInstant(date, time);
+                    if (instant > from && instant <= until)
+                        yield return instant;
                 }
             }
-
-            return true;
-        }
-
-        public IList<(DateTimeOffset, TimeOnly)>? GetSchedulingTimesUntilMidnight()
-        {
-            DateTime nowLocal = TimeZoneUtilities.NowCet();
-            TimeOnly nowLocalTimeOnly = TimeOnly.FromDateTime(nowLocal);
-            DateOnly todayLocal = DateOnly.FromDateTime(nowLocal);
-
-            var autoScheduleNext = SchedulingTimesCETperWeek
-                .Where(schedulingTime => schedulingTime.DayOfWeek == nowLocal.DayOfWeek)
-                .Where(schedulingTime => schedulingTime.TimeOfDay > nowLocalTimeOnly)
-                .Select(schedulingTime =>
-                    (
-                        TimeZoneUtilities.CetWallClockToUtcInstant(
-                            todayLocal,
-                            schedulingTime.TimeOfDay
-                        ),
-                        schedulingTime.TimeOfDay
-                    )
-                )
-                .ToList();
-
-            return autoScheduleNext.Count > 0 ? autoScheduleNext : null;
         }
     }
 

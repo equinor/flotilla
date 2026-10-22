@@ -18,6 +18,17 @@ namespace Api.Controllers
         IInspectionAreaService inspectionAreaService
     ) : ControllerBase
     {
+        [HttpGet("auto-scheduled")]
+        [Authorize(Roles = Role.Any)]
+        public async Task<
+            ActionResult<IList<AutoScheduleOccurrenceResponse>>
+        > GetUpcomingAutoMissions([FromQuery] string installationCode)
+        {
+            return Ok(
+                await autoScheduleService.ReadUpcoming(Sanitize.SanitizeUserInput(installationCode))
+            );
+        }
+
         /// <summary>
         ///     List all mission definitions in the Flotilla database
         /// </summary>
@@ -238,7 +249,7 @@ namespace Api.Controllers
         {
             id = Sanitize.SanitizeUserInput(id);
 
-            logger.LogInformation("Updating mission definition with id '{Id}'", id);
+            logger.LogInformation("Updating mission definition");
 
             if (!ModelState.IsValid)
                 return BadRequest("Invalid data.");
@@ -296,20 +307,15 @@ namespace Api.Controllers
                 }
             }
 
-            if (missionDefinitionQuery.SchedulingTimesCETperWeek != null)
-            {
-                var schedulingTimesCETperWeek = missionDefinitionQuery
-                    .SchedulingTimesCETperWeek.Select(s => new TimeAndDay(s.DayOfWeek, s.TimeOfDay))
-                    .ToList();
-                missionDefinition.AutoScheduleFrequency =
-                    await autoScheduleService.UpdateAutoScheduleFrequency(
-                        missionDefinition,
-                        schedulingTimesCETperWeek
-                    );
-            }
-
-            var newMissionDefinition = await missionDefinitionService.Update(missionDefinition);
-            return new MissionDefinitionResponse(newMissionDefinition);
+            var schedulingTimes = missionDefinitionQuery
+                .SchedulingTimesCETperWeek?.Select(s => new TimeAndDay(s.DayOfWeek, s.TimeOfDay))
+                .ToList();
+            var updatedDefinition = await autoScheduleService.UpdateAutoScheduleFrequency(
+                missionDefinition,
+                schedulingTimes,
+                missionDefinitionQuery
+            );
+            return new MissionDefinitionResponse(updatedDefinition);
         }
 
         /// <summary>
@@ -336,25 +342,25 @@ namespace Api.Controllers
         {
             id = Sanitize.SanitizeUserInput(id);
 
-            logger.LogInformation(
-                "Updating mission definition IsDeprected value for id '{Id}'",
-                id
-            );
+            logger.LogInformation("Updating mission definition deprecation");
 
             if (!ModelState.IsValid)
             {
                 return BadRequest("Invalid data.");
             }
 
-            var missionDefinition = await missionDefinitionService.ReadById(id, readOnly: true);
+            var missionDefinition = await missionDefinitionService.ReadById(
+                id,
+                readOnly: false,
+                accessMode: AccessMode.Write
+            );
             if (missionDefinition == null)
             {
                 return NotFound($"Could not find mission definition with id '{id}'");
             }
             missionDefinition.IsDeprecated = missionDefinitionIsDeprecatedQuery.IsDeprecated;
-
-            var newMissionDefinition = await missionDefinitionService.Update(missionDefinition);
-            return new MissionDefinitionResponse(newMissionDefinition);
+            var updatedDefinition = await missionDefinitionService.Update(missionDefinition);
+            return new MissionDefinitionResponse(updatedDefinition);
         }
 
         /// <summary>
@@ -374,7 +380,7 @@ namespace Api.Controllers
         {
             id = Sanitize.SanitizeUserInput(id);
 
-            logger.LogInformation("Deprecating mission definition with id '{Id}'", id);
+            logger.LogInformation("Deprecating mission definition");
             var missionDefinition = await missionDefinitionService.Delete(id);
             if (missionDefinition is null)
             {
@@ -385,23 +391,57 @@ namespace Api.Controllers
         }
 
         /// <summary>
-        ///     Skip auto mission run for the given mission definition at the given time of day
+        ///     Skip a specific dated occurrence within the next 24 hours.
         /// </summary>
         [HttpPut]
         [Authorize(Roles = Role.User)]
         [Route("{missionDefinitionId}/skip-auto-mission")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult> SkipAutoScheduledMissionRun(
+        public Task<ActionResult> SkipAutoScheduledMissionRun(
             [FromRoute] string missionDefinitionId,
             [FromBody] SkipAutoMissionQuery skipAutoMissionQuery
+        ) =>
+            SetAutoScheduledMissionSkip(
+                missionDefinitionId,
+                skipAutoMissionQuery.OccurrenceId,
+                true
+            );
+
+        /// <summary>
+        ///     Restore a skipped dated occurrence within the next 24 hours.
+        /// </summary>
+        [HttpDelete("{missionDefinitionId}/skip-auto-mission/{occurrenceId}")]
+        [Authorize(Roles = Role.User)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public Task<ActionResult> UnskipAutoScheduledMissionRun(
+            [FromRoute] string missionDefinitionId,
+            [FromRoute] string occurrenceId
+        ) => SetAutoScheduledMissionSkip(missionDefinitionId, occurrenceId, false);
+
+        private async Task<ActionResult> SetAutoScheduledMissionSkip(
+            string missionDefinitionId,
+            string occurrenceId,
+            bool skip
         )
         {
             missionDefinitionId = Sanitize.SanitizeUserInput(missionDefinitionId);
-            skipAutoMissionQuery = Sanitize.SanitizeUserInput(skipAutoMissionQuery);
+            occurrenceId = Sanitize.SanitizeUserInput(occurrenceId);
+            if (string.IsNullOrWhiteSpace(occurrenceId))
+                return BadRequest(
+                    "An occurrence ID is required. Refresh the schedule before changing its skip."
+                );
 
             var missionDefinition = await missionDefinitionService.ReadById(
                 missionDefinitionId,
@@ -416,10 +456,13 @@ namespace Api.Controllers
 
             try
             {
-                await autoScheduleService.SkipAutoMissionScheduledJob(
-                    missionDefinition,
-                    skipAutoMissionQuery.TimeOfDay
-                );
+                var changed = skip
+                    ? await autoScheduleService.SkipOccurrence(missionDefinition, occurrenceId)
+                    : await autoScheduleService.UnskipOccurrence(missionDefinition, occurrenceId);
+                if (!changed)
+                    return Conflict(
+                        "This occurrence's skip can no longer be changed. Refresh the schedule."
+                    );
             }
             catch (ArgumentException e)
             {

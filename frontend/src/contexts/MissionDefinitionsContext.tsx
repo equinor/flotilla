@@ -7,8 +7,9 @@ import { useAlertContext } from './AlertContext'
 import { useBackendApi } from 'api/UseBackendApi'
 import { InstallationContext } from './InstallationContext'
 import { useOnPageVisible } from 'hooks/usePageVisibility'
+import { useAutoScheduleOccurrences } from 'hooks/useAutoScheduleOccurrences'
 
-interface IMissionDefinitionsContext {
+interface IMissionDefinitionsContext extends ReturnType<typeof useAutoScheduleOccurrences> {
     missionDefinitions: MissionDefinition[]
 }
 
@@ -18,6 +19,10 @@ interface Props {
 
 const defaultMissionDefinitionsContext: IMissionDefinitionsContext = {
     missionDefinitions: [],
+    autoScheduleOccurrences: [],
+    autoScheduleLoading: true,
+    autoScheduleError: false,
+    refreshOccurrences: () => {},
 }
 
 const MissionDefinitionsContext = createContext<IMissionDefinitionsContext>(defaultMissionDefinitionsContext)
@@ -37,6 +42,7 @@ const useMissionDefinitions = (): IMissionDefinitionsContext => {
     const [missionDefinitions, setMissionDefinitions] = useState<MissionDefinition[]>([])
     const { registerEvent, connectionReady } = useSignalRContext()
     const { installation } = useContext(InstallationContext)
+    const occurrences = useAutoScheduleOccurrences(installation.installationCode)
     const { TranslateText } = useLanguageContext()
     const { setBanner } = useAlertContext()
     const backendApi = useBackendApi()
@@ -101,16 +107,12 @@ const useMissionDefinitions = (): IMissionDefinitionsContext => {
         [missionDefinitions, installation.installationCode]
     )
 
-    return { missionDefinitions: filteredMissionDefinitions }
+    return { missionDefinitions: filteredMissionDefinitions, ...occurrences }
 }
 
 export const MissionDefinitionsProvider: FC<Props> = ({ children }) => {
-    const { missionDefinitions } = useMissionDefinitions()
-    return (
-        <MissionDefinitionsContext.Provider value={{ missionDefinitions }}>
-            {children}
-        </MissionDefinitionsContext.Provider>
-    )
+    const value = useMissionDefinitions()
+    return <MissionDefinitionsContext.Provider value={value}>{children}</MissionDefinitionsContext.Provider>
 }
 
 export const useMissionDefinitionsContext = () => useContext(MissionDefinitionsContext)
