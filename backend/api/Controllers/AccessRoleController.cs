@@ -38,11 +38,6 @@ namespace Api.Controllers
             {
                 return StatusCode(StatusCodes.Status403Forbidden, e.Message);
             }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Error during GET of access roles from database");
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
         }
 
         /// <summary>
@@ -101,11 +96,6 @@ namespace Api.Controllers
             catch (HttpRequestException e)
             {
                 return StatusCode(StatusCodes.Status403Forbidden, e.Message);
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Error while creating new access role");
-                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
     }

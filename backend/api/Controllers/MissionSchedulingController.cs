@@ -39,22 +39,10 @@ namespace Api.Controllers
         {
             scheduledMissionQuery = Sanitize.SanitizeUserInput(scheduledMissionQuery);
 
-            Robot robot;
-            try
-            {
-                robot = await robotService.GetRobotWithSchedulingPreCheck(
-                    scheduledMissionQuery.RobotId,
-                    readOnly: true
-                );
-            }
-            catch (RobotNotFoundException e)
-            {
-                return NotFound(e.Message);
-            }
-            catch (RobotPreCheckFailedException e)
-            {
-                return BadRequest(e.Message);
-            }
+            var robot = await robotService.GetRobotWithSchedulingPreCheck(
+                scheduledMissionQuery.RobotId,
+                readOnly: true
+            );
 
             var missionRun = await missionRunService.ReadById(missionRunId, readOnly: true);
             if (missionRun == null)
@@ -145,22 +133,10 @@ namespace Api.Controllers
         {
             scheduledMissionQuery = Sanitize.SanitizeUserInput(scheduledMissionQuery);
 
-            Robot robot;
-            try
-            {
-                robot = await robotService.GetRobotWithSchedulingPreCheck(
-                    scheduledMissionQuery.RobotId,
-                    readOnly: true
-                );
-            }
-            catch (RobotNotFoundException e)
-            {
-                return NotFound(e.Message);
-            }
-            catch (RobotPreCheckFailedException e)
-            {
-                return BadRequest(e.Message);
-            }
+            var robot = await robotService.GetRobotWithSchedulingPreCheck(
+                scheduledMissionQuery.RobotId,
+                readOnly: true
+            );
 
             var missionDefinition = await missionDefinitionService.ReadById(
                 missionDefinitionId,
@@ -179,21 +155,10 @@ namespace Api.Controllers
             if (missionDefinition.InspectionArea.Id != robot.CurrentInspectionAreaId)
                 return BadRequest("Robot is not in the same inspection area as the mission.");
 
-            try
-            {
-                await installationService.AssertRobotIsOnSameInstallationAsMission(
-                    robot,
-                    missionDefinition
-                );
-            }
-            catch (InstallationNotFoundException e)
-            {
-                return NotFound(e.Message);
-            }
-            catch (RobotNotInSameInstallationAsMissionException e)
-            {
-                return Conflict(e.Message);
-            }
+            await installationService.AssertRobotIsOnSameInstallationAsMission(
+                robot,
+                missionDefinition
+            );
 
             if (missionDefinition.Tasks == null)
                 return NotFound("No mission tasks were found for the requested mission");

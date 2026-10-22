@@ -38,20 +38,10 @@ namespace Api.Controllers
                 );
                 return NoContent();
             }
-            catch (TeamsNotificationException e)
-            {
-                logger.LogError(e, "Error during POST of feedback");
-                return StatusCode(StatusCodes.Status502BadGateway);
-            }
             catch (HttpRequestException e)
             {
                 logger.LogError(e, "Error during POST of feedback");
                 return StatusCode(StatusCodes.Status502BadGateway);
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Error during POST of feedback");
-                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
     }

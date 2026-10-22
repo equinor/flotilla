@@ -12,6 +12,7 @@ using Api.Services;
 using Api.Services.ActionServices;
 using Api.Services.Events;
 using Api.SignalRHubs;
+using Api.Utilities;
 using Azure.Core;
 using Azure.Identity;
 using DotEnv.Core;
@@ -139,7 +140,10 @@ builder
 
 builder.Services.AddSignalR();
 
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
 var app = builder.Build();
+app.UseExceptionHandler(_ => { });
 string basePath = builder.Configuration["BackendBaseRoute"] ?? "";
 app.UseSwagger(c =>
 {

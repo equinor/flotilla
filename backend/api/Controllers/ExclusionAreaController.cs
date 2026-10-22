@@ -1,7 +1,6 @@
 using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
-using Api.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -31,19 +30,11 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<IList<ExclusionAreaResponse>>> GetExclusionAreas()
         {
-            try
-            {
-                var exclusionAreas = await exclusionAreaService.ReadAll(readOnly: true);
-                var exclusionAreaResponses = exclusionAreas
-                    .Select(d => new ExclusionAreaResponse(d))
-                    .ToList();
-                return Ok(exclusionAreaResponses);
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Error during GET of exclusion areas from database");
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
+            var exclusionAreas = await exclusionAreaService.ReadAll(readOnly: true);
+            var exclusionAreaResponses = exclusionAreas
+                .Select(d => new ExclusionAreaResponse(d))
+                .ToList();
+            return Ok(exclusionAreaResponses);
         }
 
         /// <summary>
@@ -63,22 +54,14 @@ namespace Api.Controllers
             ActionResult<IList<ExclusionAreaResponse>>
         > GetExclusionAreasByInstallationCode([FromRoute] string installationCode)
         {
-            try
-            {
-                var exclusionAreas = await exclusionAreaService.ReadByInstallationCode(
-                    installationCode,
-                    readOnly: true
-                );
-                var exclusionAreaResponses = exclusionAreas
-                    .Select(d => new ExclusionAreaResponse(d))
-                    .ToList();
-                return Ok(exclusionAreaResponses);
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Error during GET of exclusion areas from database");
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
+            var exclusionAreas = await exclusionAreaService.ReadByInstallationCode(
+                installationCode,
+                readOnly: true
+            );
+            var exclusionAreaResponses = exclusionAreas
+                .Select(d => new ExclusionAreaResponse(d))
+                .ToList();
+            return Ok(exclusionAreaResponses);
         }
 
         /// <summary>
@@ -96,18 +79,10 @@ namespace Api.Controllers
             [FromRoute] string id
         )
         {
-            try
-            {
-                var exclusionArea = await exclusionAreaService.ReadById(id, readOnly: true);
-                if (exclusionArea == null)
-                    return NotFound($"Could not find exclusion area with id {id}");
-                return Ok(new ExclusionAreaResponse(exclusionArea));
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Error during GET of exclusion area from database");
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
+            var exclusionArea = await exclusionAreaService.ReadById(id, readOnly: true);
+            if (exclusionArea == null)
+                return NotFound($"Could not find exclusion area with id {id}");
+            return Ok(new ExclusionAreaResponse(exclusionArea));
         }
 
         /// <summary>
@@ -126,24 +101,16 @@ namespace Api.Controllers
             [FromBody] AreaPolygon areaPolygon
         )
         {
-            try
-            {
-                var exclusionArea = await exclusionAreaService.ReadById(
-                    exclusionAreaId,
-                    readOnly: true
-                );
-                if (exclusionArea == null)
-                    return NotFound($"Could not find exclusion area with id {exclusionAreaId}");
+            var exclusionArea = await exclusionAreaService.ReadById(
+                exclusionAreaId,
+                readOnly: true
+            );
+            if (exclusionArea == null)
+                return NotFound($"Could not find exclusion area with id {exclusionAreaId}");
 
-                exclusionArea.AreaPolygon = areaPolygon;
-                var updatedExclusionArea = await exclusionAreaService.Update(exclusionArea);
-                return Ok(exclusionArea);
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Error during updating exclusion area polygon");
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
+            exclusionArea.AreaPolygon = areaPolygon;
+            var updatedExclusionArea = await exclusionAreaService.Update(exclusionArea);
+            return Ok(exclusionArea);
         }
 
         /// <summary>
@@ -164,69 +131,56 @@ namespace Api.Controllers
         )
         {
             logger.LogInformation("Creating new exclusion area");
-            try
+            var existingInstallation = await installationService.ReadByInstallationCode(
+                exclusionArea.InstallationCode,
+                readOnly: true
+            );
+            if (existingInstallation == null)
             {
-                var existingInstallation = await installationService.ReadByInstallationCode(
-                    exclusionArea.InstallationCode,
-                    readOnly: true
+                return NotFound(
+                    $"Could not find installation with name {exclusionArea.InstallationCode}"
                 );
-                if (existingInstallation == null)
+            }
+            var existingPlant = await plantService.ReadByInstallationAndPlantCode(
+                existingInstallation,
+                exclusionArea.PlantCode,
+                readOnly: true
+            );
+            if (existingPlant == null)
+            {
+                return NotFound($"Could not find plant with name {exclusionArea.PlantCode}");
+            }
+
+            if (exclusionArea.Name != null)
+            {
+                var existingExclusionArea =
+                    await exclusionAreaService.ReadByInstallationAndPlantAndName(
+                        existingInstallation,
+                        existingPlant,
+                        exclusionArea.Name,
+                        readOnly: true
+                    );
+                if (existingExclusionArea != null)
                 {
-                    return NotFound(
-                        $"Could not find installation with name {exclusionArea.InstallationCode}"
+                    logger.LogInformation(
+                        "An exclusion area for given name and exclusion area already exists"
+                    );
+                    return BadRequest(
+                        $"ExclusionArea with name {exclusionArea.Name} already exists"
                     );
                 }
-                var existingPlant = await plantService.ReadByInstallationAndPlantCode(
-                    existingInstallation,
-                    exclusionArea.PlantCode,
-                    readOnly: true
-                );
-                if (existingPlant == null)
-                {
-                    return NotFound($"Could not find plant with name {exclusionArea.PlantCode}");
-                }
+            }
 
-                if (exclusionArea.Name != null)
-                {
-                    var existingExclusionArea =
-                        await exclusionAreaService.ReadByInstallationAndPlantAndName(
-                            existingInstallation,
-                            existingPlant,
-                            exclusionArea.Name,
-                            readOnly: true
-                        );
-                    if (existingExclusionArea != null)
-                    {
-                        logger.LogInformation(
-                            "An exclusion area for given name and exclusion area already exists"
-                        );
-                        return BadRequest(
-                            $"ExclusionArea with name {exclusionArea.Name} already exists"
-                        );
-                    }
-                }
-
-                var newExclusionArea = await exclusionAreaService.Create(exclusionArea);
-                logger.LogInformation(
-                    "Succesfully created new exclusion area with id '{exclusionAreaId}'",
-                    newExclusionArea.Id
-                );
-                return CreatedAtAction(
-                    nameof(GetExclusionAreaById),
-                    new { id = newExclusionArea.Id },
-                    new ExclusionAreaResponse(newExclusionArea)
-                );
-            }
-            catch (InvalidPolygonException e)
-            {
-                logger.LogError(e, "Invalid polygon");
-                return BadRequest("Invalid polygon");
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Error while creating new exclusion area");
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
+            var newExclusionArea = await exclusionAreaService.Create(exclusionArea);
+            logger.LogInformation(
+                "Succesfully created new exclusion area with id '{exclusionAreaId}'",
+                newExclusionArea.Id
+            );
+            return CreatedAtAction(
+                nameof(GetExclusionAreaById),
+                new { id = newExclusionArea.Id },
+                new ExclusionAreaResponse(newExclusionArea)
+            );
         }
 
         /// <summary>
