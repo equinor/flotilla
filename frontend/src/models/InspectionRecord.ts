@@ -57,6 +57,7 @@ export interface InspectionRecord {
     robotName: string
     timestamp: number
     analysisGroupId: string
+    flotillaMissionId?: string | null
 }
 
 // Mirrors the backend InspectionResultMessage sent with the
@@ -73,6 +74,7 @@ export interface FlotillaAnalysisResultMessage {
 
 export interface InspectionData {
     inspectionId: string
+    missionId?: string
     analysisId?: string
     measurementRecordId?: string
     analysisRunId?: string
@@ -133,6 +135,7 @@ export const inspectionRecordToInspectionData = (record: InspectionRecord): Insp
 
     return {
         inspectionId: record.inspectionId,
+        missionId: record.flotillaMissionId ?? undefined,
         analysisId: analysis?.id,
         measurementRecordId: measurementRecordId,
         analysisRunId: latestRun?.id,
