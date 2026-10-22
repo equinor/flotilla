@@ -12,13 +12,20 @@ const analysisDetails: Record<string, { label: string }> = {
     [AnalysisType.ThermalReading]: { label: 'Thermal reading' },
     [AnalysisType.CO2]: { label: 'CO2Measurement' },
 }
+
+const maximumRowHeight = '200px'
+const minimumRowHeight = '80px'
+const minimumIdentityWidth = '160px'
+const minimumWarningWidth = '260px'
+
 const StyledRow = styled.div`
     display: flex;
+    flex: 0 1 ${maximumRowHeight};
+    min-height: ${minimumRowHeight};
     align-items: center;
-    justify-content: space-between;
     gap: ${tokens.spacings.comfortable.xxx_large};
     min-width: 0;
-    padding: ${tokens.spacings.comfortable.large} 0;
+    padding: ${tokens.spacings.comfortable.small} 0;
     padding-left: ${tokens.spacings.comfortable.large};
     border-left: 5px solid ${tokens.colors.interactive.danger__resting.hex};
     border-bottom: 1px dashed ${tokens.colors.ui.background__medium.hex};
@@ -31,7 +38,8 @@ const StyledRow = styled.div`
 const Identity = styled.div`
     display: flex;
     flex-direction: column;
-    min-width: 0;
+    margin-right: auto;
+    min-width: ${minimumIdentityWidth};
     gap: ${tokens.spacings.comfortable.x_small};
 `
 const TitleRow = styled.div`
@@ -53,11 +61,19 @@ const OrderBadge = styled.span`
 const AnalysisLabel = styled(Typography)`
     font-size: 1.1rem;
 `
+
+const AlertImage = styled.img`
+    min-width: 0;
+    height: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: contain;
+`
 const WarningSection = styled.div`
     display: flex;
     flex-direction: column;
     align-items: flex-end;
     flex-shrink: 0;
+    min-width: ${minimumWarningWidth};
     gap: ${tokens.spacings.comfortable.medium};
 `
 const WarningBadge = styled(Chip)`
@@ -73,8 +89,16 @@ interface SaraAlertCardProps {
     createdAt: Date
     warning: string
     order: number
+    imageSAS?: string
 }
-export const SaraAlertCard = ({ analysisType, tag, createdAt, warning, order }: SaraAlertCardProps) => {
+export const SaraAlertCard = ({
+    analysisType,
+    tag,
+    createdAt,
+    warning,
+    order,
+    imageSAS,
+}: SaraAlertCardProps) => {
     const { TranslateText } = useLanguageContext()
     const titleId = useId()
     if (!warning.trim()) return null
@@ -91,6 +115,7 @@ export const SaraAlertCard = ({ analysisType, tag, createdAt, warning, order }: 
                 </TitleRow>
                 <AnalysisLabel variant="body_short">{analysisLabel}</AnalysisLabel>
             </Identity>
+            {imageSAS && <AlertImage src={imageSAS} alt={analysisLabel} />}
             <WarningSection>
                 <WarningBadge>{`${TranslateText('Warning')} - ${warning}`}</WarningBadge>
                 <Typography variant="caption">{formatDateTime(createdAt)}</Typography>
