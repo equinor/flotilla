@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Diagnostics;
 
 namespace Api.Utilities
@@ -24,6 +25,10 @@ namespace Api.Utilities
                 RobotPreCheckFailedException e => (StatusCodes.Status400BadRequest, e.Message),
                 MissionPauseException e => (StatusCodes.Status400BadRequest, e.Message),
                 MissionResumeException e => (StatusCodes.Status400BadRequest, e.Message),
+                MultipleInspectionAreasFoundException e => (
+                    StatusCodes.Status400BadRequest,
+                    e.Message
+                ),
                 RobotNotFoundException e => (StatusCodes.Status404NotFound, e.Message),
                 InstallationNotFoundException e => (StatusCodes.Status404NotFound, e.Message),
                 RobotBusyException => (StatusCodes.Status409Conflict, null),
@@ -36,6 +41,7 @@ namespace Api.Utilities
                     StatusCodes.Status500InternalServerError,
                     e.Message
                 ),
+                JsonException e => (StatusCodes.Status500InternalServerError, e.Message),
                 _ => (StatusCodes.Status500InternalServerError, (string?)null),
             };
 

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Api.Utilities;
@@ -21,7 +22,6 @@ namespace Api.Test.Utilities
             typeof(MissionNotFoundException),
             typeof(MissionRunNotFoundException),
             typeof(UnsupportedRobotCapabilityException),
-            typeof(MultipleInspectionAreasFoundException),
             typeof(PlantNotFoundException),
             typeof(InspectionNotFoundException),
             typeof(MissionTaskNotFoundException),
@@ -88,6 +88,8 @@ namespace Api.Test.Utilities
         )]
         [InlineData(typeof(TeamsNotificationException), StatusCodes.Status502BadGateway)]
         [InlineData(typeof(IsarCommunicationException), StatusCodes.Status500InternalServerError)]
+        [InlineData(typeof(JsonException), StatusCodes.Status500InternalServerError)]
+        [InlineData(typeof(MultipleInspectionAreasFoundException), StatusCodes.Status400BadRequest)]
         public async Task KnownExceptionTypeMapsToExpectedStatusCode(
             Type exceptionType,
             int expectedStatusCode

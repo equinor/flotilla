@@ -1,5 +1,4 @@
-﻿using System.Text.Json;
-using Api.Controllers.Models;
+﻿using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
 using Api.Services.Events;
@@ -444,12 +443,6 @@ namespace Api.Controllers
                 logger.LogWarning("Error while stopping ISAR mission: {e}", e.Message);
                 return StatusCode(StatusCodes.Status200OK, $"Mission was already stopped");
             }
-            catch (JsonException e)
-            {
-                const string Message = "Error while processing the response from ISAR";
-                logger.LogError(e, "{Message}", Message);
-                return StatusCode(StatusCodes.Status500InternalServerError, Message);
-            }
             catch (MissionNotFoundException)
             {
                 logger.LogWarning($"No mission was runnning for robot {robot.Id}");
@@ -496,12 +489,6 @@ namespace Api.Controllers
                 await errorHandlingService.HandleLosingConnectionToIsar(robot.Id);
                 return StatusCode(StatusCodes.Status502BadGateway, Message);
             }
-            catch (JsonException e)
-            {
-                const string Message = "Error while processing of the response from ISAR";
-                logger.LogError(e, "{Message}", Message);
-                return StatusCode(StatusCodes.Status500InternalServerError, Message);
-            }
 
             return NoContent();
         }
@@ -543,12 +530,6 @@ namespace Api.Controllers
                 await errorHandlingService.HandleLosingConnectionToIsar(robot.Id);
                 return StatusCode(StatusCodes.Status502BadGateway, Message);
             }
-            catch (JsonException e)
-            {
-                const string Message = "Error while processing of the response from ISAR";
-                logger.LogError(e, "{Message}", Message);
-                return StatusCode(StatusCodes.Status500InternalServerError, Message);
-            }
 
             return NoContent();
         }
@@ -588,12 +569,6 @@ namespace Api.Controllers
                     "Error connecting to ISAR while releasing intervention needed";
                 logger.LogError(e, "{Message}", Message);
                 await errorHandlingService.HandleLosingConnectionToIsar(robot.Id);
-                return StatusCode(StatusCodes.Status500InternalServerError, Message);
-            }
-            catch (JsonException e)
-            {
-                const string Message = "Error while processing of the response from ISAR";
-                logger.LogError(e, "{Message}", Message);
                 return StatusCode(StatusCodes.Status500InternalServerError, Message);
             }
 
