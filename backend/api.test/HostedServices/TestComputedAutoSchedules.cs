@@ -64,13 +64,17 @@ public class TestComputedAutoSchedules : IAsyncLifetime
             CancellationToken cancellationToken = default
         )
         {
-            if (FailOnce && eventData.Context!.ChangeTracker.Entries<MissionRun>().Any())
+            if (eventData.Context!.ChangeTracker.Entries<MissionRun>().Any())
             {
-                FailOnce = false;
-                throw new NpgsqlException(
-                    "Simulated transient write failure",
-                    new TimeoutException()
-                );
+                Assert.Null(eventData.Context.Database.CurrentTransaction);
+                if (FailOnce)
+                {
+                    FailOnce = false;
+                    throw new NpgsqlException(
+                        "Simulated transient write failure",
+                        new TimeoutException()
+                    );
+                }
             }
             return ValueTask.FromResult(result);
         }
@@ -80,25 +84,35 @@ public class TestComputedAutoSchedules : IAsyncLifetime
     {
         private readonly string _connectionString;
         private readonly RetryInterceptor _retry;
+        private readonly ISignalRService _signals;
 
-        public SchedulingFactory(string connectionString, RetryInterceptor retry)
+        public SchedulingFactory(
+            string connectionString,
+            RetryInterceptor retry,
+            ISignalRService signals
+        )
             : base(connectionString)
         {
             _connectionString = connectionString;
             _retry = retry;
+            _signals = signals;
         }
 
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             base.ConfigureWebHost(builder);
             builder.ConfigureTestServices(services =>
+            {
                 services.AddScoped<FlotillaDbContext>(_ => new FlotillaDbContext(
                     new DbContextOptionsBuilder<FlotillaDbContext>()
                         .UseNpgsql(_connectionString, o => o.EnableRetryOnFailure())
                         .AddInterceptors(_retry)
                         .Options
-                ))
-            );
+                ));
+                services.AddScoped<IMissionRunService>(provider =>
+                    ActivatorUtilities.CreateInstance<MissionRunService>(provider, _signals)
+                );
+            });
         }
     }
 
@@ -107,7 +121,7 @@ public class TestComputedAutoSchedules : IAsyncLifetime
         var setup = await TestSetupHelpers.ConfigurePostgreSqlDatabase();
         _container = setup.Item1;
         await setup.Item3.DisposeAsync();
-        _factory = new SchedulingFactory(setup.Item2, _retry);
+        _factory = new SchedulingFactory(setup.Item2, _retry, _signals.Object);
         _scope = _factory.Services.CreateScope();
         var services = _scope.ServiceProvider;
         _context = services.GetRequiredService<FlotillaDbContext>();
@@ -195,6 +209,9 @@ public class TestComputedAutoSchedules : IAsyncLifetime
     [Fact]
     public async Task UpcomingIsDerivedAndReconciliationDoesNotDuplicateJobs()
     {
+        Assert.Same(TimeProvider.System, _scope.ServiceProvider.GetRequiredService<TimeProvider>());
+        Assert.NotNull(_scope.ServiceProvider.GetRequiredService<AutoScheduleJobs>());
+        Assert.NotNull(_scope.ServiceProvider.GetRequiredService<IAutoScheduleService>());
         var upcoming = await _service.ReadUpcoming(_definition.InstallationCode);
         Assert.Equal(3, upcoming.Count);
         Assert.Equal(_clock.Now.AddHours(24), upcoming[^1].ScheduledAt);
@@ -230,6 +247,10 @@ public class TestComputedAutoSchedules : IAsyncLifetime
             Worker(concurrent.ServiceProvider).SkipOccurrence(_definition, next.Id)
         );
         Assert.All(skips, Assert.True);
+        var savedSkip = await _context.AutoScheduleSkips.SingleAsync(Token);
+        Assert.True(savedSkip.Id > 0);
+        Assert.True(await _service.SkipOccurrence(_definition, next.Id));
+        Assert.Equal(savedSkip.Id, (await _context.AutoScheduleSkips.SingleAsync(Token)).Id);
         await _service.UpdateAutoScheduleFrequency(_definition, []);
         Assert.Empty(await _service.ReadUpcoming(_definition.InstallationCode));
         await _service.UpdateAutoScheduleFrequency(_definition, frequency);
@@ -349,8 +370,8 @@ public class TestComputedAutoSchedules : IAsyncLifetime
             {
                 "unknown",
                 "untrusted\r\nlog-injection",
-                AutoScheduleSkip.OccurrenceId("other-definition", next.ScheduledAt),
-                AutoScheduleSkip.OccurrenceId(_definition.Id, outside),
+                AutoScheduleOccurrenceIdentity.Create("other-definition", next.ScheduledAt),
+                AutoScheduleOccurrenceIdentity.Create(_definition.Id, outside),
             }
         )
             Assert.False(await Change(id));
@@ -752,9 +773,40 @@ public class TestComputedAutoSchedules : IAsyncLifetime
         var next = await Next();
         _clock.Now = next.ScheduledAt;
         await Dispatch(next);
+        var originalSkipMigration = _context
+            .Database.GetMigrations()
+            .Single(m => m.EndsWith("_AddDatedAutoScheduleSkips", StringComparison.Ordinal));
+        await _context.GetService<IMigrator>().MigrateAsync(originalSkipMigration, Token);
+        await _context.Database.ExecuteSqlInterpolatedAsync(
+            $"""INSERT INTO "AutoScheduleSkips" ("MissionDefinitionId", "ScheduledAt") VALUES ({_definition.Id}, {next.ScheduledAt})""",
+            Token
+        );
+        await _context.Database.MigrateAsync(Token);
+        var migratedSkip = await _context.AutoScheduleSkips.SingleAsync(Token);
+        Assert.True(migratedSkip.Id > 0);
+        Assert.Equal(next.ScheduledAt, migratedSkip.ScheduledAt);
+        var duplicate = new AutoScheduleSkip
+        {
+            MissionDefinitionId = _definition.Id,
+            ScheduledAt = next.ScheduledAt,
+        };
+        _context.AutoScheduleSkips.Add(duplicate);
+        await Assert.ThrowsAsync<DbUpdateException>(() => _context.SaveChangesAsync(Token));
+        _context.ChangeTracker.Clear();
+        var another = new AutoScheduleSkip
+        {
+            MissionDefinitionId = _definition.Id,
+            ScheduledAt = next.ScheduledAt.AddHours(1),
+        };
+        _context.AutoScheduleSkips.Add(another);
+        await _context.SaveChangesAsync(Token);
+        Assert.True(another.Id > 0);
+        Assert.NotEqual(migratedSkip.Id, another.Id);
+        _context.ChangeTracker.Clear();
+
         var previous = _context
             .Database.GetMigrations()
-            .TakeWhile(m => !m.EndsWith("_AddDatedAutoScheduleSkips", StringComparison.Ordinal))
+            .TakeWhile(m => m != originalSkipMigration)
             .Last();
         await _context.GetService<IMigrator>().MigrateAsync(previous, Token);
         await _context.Database.MigrateAsync(Token);
@@ -772,7 +824,7 @@ public class TestComputedAutoSchedules : IAsyncLifetime
                 """SELECT column_name AS "Value" FROM information_schema.columns WHERE table_name = 'AutoScheduleSkips'"""
             )
             .ToListAsync(Token);
-        Assert.Equal(new[] { "MissionDefinitionId", "ScheduledAt" }, columns.Order());
+        Assert.Equal(new[] { "Id", "MissionDefinitionId", "ScheduledAt" }, columns.Order());
         Assert.Equal(
             "timestamp with time zone",
             await _context

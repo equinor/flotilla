@@ -48,13 +48,23 @@ namespace Api.Migrations
 
             modelBuilder.Entity("Api.Database.Models.AutoScheduleSkip", b =>
                 {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
                     b.Property<string>("MissionDefinitionId")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTimeOffset>("ScheduledAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.HasKey("MissionDefinitionId", "ScheduledAt");
+                    b.HasKey("Id");
+
+                    b.HasIndex("MissionDefinitionId", "ScheduledAt")
+                        .IsUnique();
 
                     b.ToTable("AutoScheduleSkips");
                 });

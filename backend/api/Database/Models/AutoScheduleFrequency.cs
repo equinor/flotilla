@@ -6,6 +6,8 @@ namespace Api.Database.Models
 {
     public class AutoScheduleFrequency
     {
+        private const int CalendarDayStep = 1;
+
         public IList<TimeAndDay> SchedulingTimesCETperWeek { get; set; } = [];
 
         public bool HasValidValue()
@@ -24,7 +26,7 @@ namespace Api.Database.Models
             var lastDate = DateOnly.FromDateTime(
                 TimeZoneInfo.ConvertTime(untilInclusive, TimeZoneUtilities.CetZone).DateTime
             );
-            for (var date = firstDate; date <= lastDate; date = date.AddDays(1))
+            for (var date = firstDate; date <= lastDate; date = date.AddDays(CalendarDayStep))
             {
                 foreach (
                     var time in SchedulingTimesCETperWeek

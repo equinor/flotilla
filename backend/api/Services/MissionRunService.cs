@@ -103,13 +103,11 @@ namespace Api.Services
             await context.MissionRuns.AddAsync(missionRun);
             await ApplyDatabaseUpdate(missionRun.InspectionArea.Installation);
 
-            // A transaction owner publishes only after its commit succeeds.
-            if (context.Database.CurrentTransaction == null)
-                _ = signalRService.SendMessageAsync(
-                    "Mission run created",
-                    missionRun.InspectionArea.Installation,
-                    new MissionRunResponse(missionRun)
-                );
+            _ = signalRService.SendMessageAsync(
+                "Mission run created",
+                missionRun.InspectionArea.Installation,
+                new MissionRunResponse(missionRun)
+            );
 
             DetachTracking(context, missionRun);
 

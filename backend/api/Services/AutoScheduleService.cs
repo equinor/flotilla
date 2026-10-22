@@ -85,7 +85,7 @@ namespace Api.Services
         {
             // Concurrent registration can enqueue duplicates; the run primary key prevents
             // duplicate runs. This cache only avoids redundant registrations in normal use.
-            var id = AutoScheduleSkip.OccurrenceId(definitionId, instant);
+            var id = AutoScheduleOccurrenceIdentity.Create(definitionId, instant);
             if (jobs.Contains(id))
                 return;
             backgroundJobs.Schedule(() => DispatchOccurrence(definitionId, instant), instant);
@@ -165,7 +165,7 @@ namespace Api.Services
                 .SelectMany(d =>
                     (d.AutoScheduleFrequency?.GetSchedulingInstants(now, until) ?? []).Select(
                         instant => new AutoScheduleOccurrenceResponse(
-                            AutoScheduleSkip.OccurrenceId(d.Id, instant),
+                            AutoScheduleOccurrenceIdentity.Create(d.Id, instant),
                             instant,
                             skippedInstants.Contains((d.Id, instant))
                                 ? AutoScheduleOccurrenceStatus.Skipped
@@ -210,7 +210,8 @@ namespace Api.Services
                     var instant = current
                         ?.AutoScheduleFrequency?.GetSchedulingInstants(now, now.AddHours(24))
                         .Where(i =>
-                            AutoScheduleSkip.OccurrenceId(missionDefinition.Id, i) == occurrenceId
+                            AutoScheduleOccurrenceIdentity.Create(missionDefinition.Id, i)
+                            == occurrenceId
                         )
                         .Select(i => (DateTimeOffset?)i)
                         .SingleOrDefault();
@@ -271,81 +272,12 @@ namespace Api.Services
                 .ExecuteAsync(async () =>
                 {
                     context.ChangeTracker.Clear();
-                    await using var transaction = await context.Database.BeginTransactionAsync();
-                    var definition = await missionDefinitionService.ReadById(
-                        missionDefinitionId,
-                        accessMode: AccessMode.Write
-                    );
-                    var now = timeProvider.GetUtcNow();
-                    // Jobs lost on restart are not caught up. Delayed jobs from this process may run,
-                    // but no job may create a mission before its exact scheduled instant.
-                    if (
-                        definition == null
-                        || scheduledAt <= jobs.StartedAt
-                        || scheduledAt > now
-                        || definition
-                            .AutoScheduleFrequency?.GetSchedulingInstants(
-                                scheduledAt.AddTicks(-1),
-                                scheduledAt
-                            )
-                            .Contains(scheduledAt) != true
-                    )
-                    {
-                        logger.LogInformation(
-                            "Ignoring unavailable, stale or not-yet-due auto schedule job"
-                        );
+                    var candidate = await PrepareDueMissionRun(missionDefinitionId, scheduledAt);
+                    if (candidate == null)
                         return null;
-                    }
-                    var id = AutoScheduleSkip.OccurrenceId(missionDefinitionId, scheduledAt);
-                    if (
-                        await context.MissionRuns.AnyAsync(r => r.Id == id)
-                        || await context.AutoScheduleSkips.AnyAsync(s =>
-                            s.MissionDefinitionId == missionDefinitionId
-                            && s.ScheduledAt == scheduledAt
-                        )
-                    )
-                        return null;
-                    var robots = await robotService.ReadRobotsForInstallation(
-                        definition.InstallationCode
-                    );
-                    var robot = robots.FirstOrDefault(r =>
-                        r.CurrentInspectionAreaId == definition.InspectionArea.Id
-                    );
-                    if (robot == null)
-                    {
-                        logger.LogWarning("No robot available for due auto scheduled mission");
-                        await transaction.CommitAsync();
-                        signalRService.ReportAutoScheduleToSignalR(
-                            "AutoScheduleFail",
-                            definition.Name,
-                            "No robot available for the auto scheduled mission.",
-                            definition.InstallationCode
-                        );
-                        return null;
-                    }
-                    var queued = await missionRunService.ReadMissionRunQueue(robot.Id);
-                    if (queued.Any(r => r.MissionId == definition.Id))
-                    {
-                        logger.LogInformation("Auto scheduled mission is already queued");
-                        return null;
-                    }
-                    var created = new MissionRun
-                    {
-                        Id = id,
-                        MissionId = definition.Id,
-                        Name = definition.Name,
-                        Robot = robot,
-                        Status = MissionStatus.Queued,
-                        CreationTime = now.UtcDateTime,
-                        Tasks = [.. definition.Tasks.Select(t => t.ToMissionRunTask())],
-                        InstallationCode = definition.InstallationCode,
-                        InspectionArea = definition.InspectionArea,
-                    };
-                    if (created.Tasks.Any())
-                        created.SetEstimatedTaskDuration();
                     try
                     {
-                        await missionRunService.Create(created);
+                        return await missionRunService.Create(candidate);
                     }
                     catch (DbUpdateException e)
                         when (e.InnerException
@@ -356,23 +288,98 @@ namespace Api.Services
                                 }
                         )
                     {
-                        await transaction.RollbackAsync();
                         context.ChangeTracker.Clear();
                         logger.LogInformation("Ignoring duplicate auto schedule dispatch");
                         return null;
                     }
-                    await transaction.CommitAsync();
-                    return created;
                 });
             if (run != null)
-            {
-                _ = signalRService.SendMessageAsync(
-                    "Mission run created",
-                    run.InspectionArea.Installation,
-                    new MissionRunResponse(run)
-                );
                 await missionSchedulingService.StartNextMissionRunIfSystemIsAvailable(run.Robot);
+        }
+
+        private async Task<MissionRun?> PrepareDueMissionRun(
+            string missionDefinitionId,
+            DateTimeOffset scheduledAt
+        )
+        {
+            var definition = await missionDefinitionService.ReadById(
+                missionDefinitionId,
+                accessMode: AccessMode.Write
+            );
+            var now = timeProvider.GetUtcNow();
+            // No startup catch-up or early execution; delayed jobs from this process remain eligible.
+            if (
+                definition == null
+                || scheduledAt <= jobs.StartedAt
+                || scheduledAt > now
+                || definition
+                    .AutoScheduleFrequency?.GetSchedulingInstants(
+                        scheduledAt.AddTicks(-1),
+                        scheduledAt
+                    )
+                    .Contains(scheduledAt) != true
+            )
+            {
+                logger.LogInformation(
+                    "Ignoring unavailable, stale or not-yet-due auto schedule job"
+                );
+                return null;
             }
+            var id = AutoScheduleOccurrenceIdentity.Create(missionDefinitionId, scheduledAt);
+            if (
+                await context.MissionRuns.AnyAsync(r => r.Id == id)
+                || await context.AutoScheduleSkips.AnyAsync(s =>
+                    s.MissionDefinitionId == missionDefinitionId && s.ScheduledAt == scheduledAt
+                )
+            )
+                return null;
+
+            var robots = await robotService.ReadRobotsForInstallation(definition.InstallationCode);
+            var robot = robots.FirstOrDefault(r =>
+                r.CurrentInspectionAreaId == definition.InspectionArea.Id
+            );
+            if (robot == null)
+            {
+                logger.LogWarning("No robot available for due auto scheduled mission");
+                signalRService.ReportAutoScheduleToSignalR(
+                    "AutoScheduleFail",
+                    definition.Name,
+                    "No robot available for the auto scheduled mission.",
+                    definition.InstallationCode
+                );
+                return null;
+            }
+            var queued = await missionRunService.ReadMissionRunQueue(robot.Id);
+            if (queued.Any(r => r.MissionId == definition.Id))
+            {
+                logger.LogInformation("Auto scheduled mission is already queued");
+                return null;
+            }
+            return CreateScheduledMissionRun(definition, robot, id, now);
+        }
+
+        private static MissionRun CreateScheduledMissionRun(
+            MissionDefinition definition,
+            Robot robot,
+            string id,
+            DateTimeOffset now
+        )
+        {
+            var run = new MissionRun
+            {
+                Id = id,
+                MissionId = definition.Id,
+                Name = definition.Name,
+                Robot = robot,
+                Status = MissionStatus.Queued,
+                CreationTime = now.UtcDateTime,
+                Tasks = [.. definition.Tasks.Select(t => t.ToMissionRunTask())],
+                InstallationCode = definition.InstallationCode,
+                InspectionArea = definition.InspectionArea,
+            };
+            if (run.Tasks.Any())
+                run.SetEstimatedTaskDuration();
+            return run;
         }
 
         private void Notify(MissionDefinition definition) =>

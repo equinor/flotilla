@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Api.Database.Models;
+using Api.Utilities;
 using Xunit;
 
 namespace Api.Test.Utilities
@@ -98,20 +99,23 @@ namespace Api.Test.Utilities
         public void IdentityIsStableAcrossOffsetsAndSubMicrosecondDifferences()
         {
             var instant = DateTimeOffset.Parse("2026-10-16T20:00:00Z");
-            var id = AutoScheduleSkip.OccurrenceId("mission", instant);
+            var id = AutoScheduleOccurrenceIdentity.Create("mission", instant);
             Assert.True(Guid.TryParse(id, out var parsed));
             Assert.Equal(8, parsed.Version);
             Assert.Equal(
                 id,
-                AutoScheduleSkip.OccurrenceId("mission", instant.ToOffset(TimeSpan.FromHours(2)))
+                AutoScheduleOccurrenceIdentity.Create(
+                    "mission",
+                    instant.ToOffset(TimeSpan.FromHours(2))
+                )
             );
-            Assert.Equal(id, AutoScheduleSkip.OccurrenceId("mission", instant.AddTicks(1)));
-            Assert.Equal(id, AutoScheduleSkip.OccurrenceId("mission", instant.AddTicks(9)));
+            Assert.Equal(id, AutoScheduleOccurrenceIdentity.Create("mission", instant.AddTicks(1)));
+            Assert.Equal(id, AutoScheduleOccurrenceIdentity.Create("mission", instant.AddTicks(9)));
             Assert.NotEqual(
                 id,
-                AutoScheduleSkip.OccurrenceId("mission", instant.AddMicroseconds(1))
+                AutoScheduleOccurrenceIdentity.Create("mission", instant.AddMicroseconds(1))
             );
-            Assert.NotEqual(id, AutoScheduleSkip.OccurrenceId("other-mission", instant));
+            Assert.NotEqual(id, AutoScheduleOccurrenceIdentity.Create("other-mission", instant));
         }
 
         [Fact]
