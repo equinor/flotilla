@@ -115,6 +115,9 @@ builder.Services.AddHostedService<TeamsMessageEventHandler>();
 builder.Services.AddHostedService<AutoSchedulingHostedService>();
 
 builder.Services.Configure<AzureAdOptions>(builder.Configuration.GetSection("AzureAd"));
+builder.Services.Configure<AcousticCameraRoiBoundsOptions>(
+    builder.Configuration.GetSection("AcousticCameraRoiBounds")
+);
 
 builder.Services.AddHangfire(Configuration => Configuration.UseInMemoryStorage());
 builder.Services.AddHangfireServer();

@@ -407,5 +407,263 @@ namespace Api.Test.Controllers
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
+
+        [Fact]
+        public async Task CheckThatCreateMissionFailsForRoiOutsideAcousticCameraRoiBounds()
+        {
+            // Arrange
+            var installation = await DatabaseUtilities.NewInstallation();
+            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
+            _ = await DatabaseUtilities.NewInspectionArea(
+                installation.InstallationCode,
+                plant.PlantCode,
+                areaPolygon: new AreaPolygon
+                {
+                    ZMin = 0,
+                    ZMax = 10,
+                    Positions =
+                    [
+                        new PolygonPoint { X = 0, Y = 0 },
+                        new PolygonPoint { X = 0, Y = 10 },
+                        new PolygonPoint { X = 10, Y = 10 },
+                        new PolygonPoint { X = 10, Y = 0 },
+                    ],
+                }
+            );
+            var query = new Dictionary<string, object>
+            {
+                ["installationCode"] = installation.InstallationCode,
+                ["name"] = "Test mission",
+                ["tasks"] = new List<TaskQuery>
+                {
+                    new()
+                    {
+                        TagId = "test",
+                        TargetPosition = new Position(1, 1, 1),
+                        SensorType = SensorType.AcousticMeasurement,
+                        AnalysisTypes = [AnalysisType.Fencilla],
+                        RobotPose = new Pose(1, 1, 1, 0, 0, 0, 1),
+                        AcousticInspectionMetadata = new AcousticInspectionMetadata(
+                            100f,
+                            200f,
+                            3.0f,
+                            AcousticDetectionType.Leak
+                        )
+                        {
+                            // Well outside the configured bounds
+                            Roi = new Roi(10, 10, 10, 10),
+                        },
+                    },
+                },
+            };
+
+            // Act
+            var response = await Client.PostAsJsonAsync(
+                "missions/definitions",
+                query,
+                TestContext.Current.CancellationToken
+            );
+
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task CheckThatCreateMissionFailsWhenOnlyOneRoiAxisIsOutsideAcousticCameraRoiBounds()
+        {
+            // Arrange
+            var installation = await DatabaseUtilities.NewInstallation();
+            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
+            _ = await DatabaseUtilities.NewInspectionArea(
+                installation.InstallationCode,
+                plant.PlantCode,
+                areaPolygon: new AreaPolygon
+                {
+                    ZMin = 0,
+                    ZMax = 10,
+                    Positions =
+                    [
+                        new PolygonPoint { X = 0, Y = 0 },
+                        new PolygonPoint { X = 0, Y = 10 },
+                        new PolygonPoint { X = 10, Y = 10 },
+                        new PolygonPoint { X = 10, Y = 0 },
+                    ],
+                }
+            );
+            var query = new Dictionary<string, object>
+            {
+                ["installationCode"] = installation.InstallationCode,
+                ["name"] = "Test mission",
+                ["tasks"] = new List<TaskQuery>
+                {
+                    new()
+                    {
+                        TagId = "test",
+                        TargetPosition = new Position(1, 1, 1),
+                        SensorType = SensorType.AcousticMeasurement,
+                        AnalysisTypes = [AnalysisType.Fencilla],
+                        RobotPose = new Pose(1, 1, 1, 0, 0, 0, 1),
+                        AcousticInspectionMetadata = new AcousticInspectionMetadata(
+                            100f,
+                            200f,
+                            3.0f,
+                            AcousticDetectionType.Leak
+                        )
+                        {
+                            // X is within the bounds, but Y is well outside it
+                            Roi = new Roi(2000, 100, 100, 10),
+                        },
+                    },
+                },
+            };
+
+            // Act
+            var response = await Client.PostAsJsonAsync(
+                "missions/definitions",
+                query,
+                TestContext.Current.CancellationToken
+            );
+
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task CheckThatCreateMissionSucceedsForRoiInsideAcousticCameraRoiBounds()
+        {
+            // Arrange
+            var installation = await DatabaseUtilities.NewInstallation();
+            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
+            _ = await DatabaseUtilities.NewInspectionArea(
+                installation.InstallationCode,
+                plant.PlantCode,
+                areaPolygon: new AreaPolygon
+                {
+                    ZMin = 0,
+                    ZMax = 10,
+                    Positions =
+                    [
+                        new PolygonPoint { X = 0, Y = 0 },
+                        new PolygonPoint { X = 0, Y = 10 },
+                        new PolygonPoint { X = 10, Y = 10 },
+                        new PolygonPoint { X = 10, Y = 0 },
+                    ],
+                }
+            );
+            var query = new Dictionary<string, object>
+            {
+                ["installationCode"] = installation.InstallationCode,
+                ["name"] = "Test mission",
+                ["tasks"] = new List<TaskQuery>
+                {
+                    new()
+                    {
+                        TagId = "test",
+                        TargetPosition = new Position(1, 1, 1),
+                        SensorType = SensorType.AcousticMeasurement,
+                        AnalysisTypes = [AnalysisType.Fencilla],
+                        RobotPose = new Pose(1, 1, 1, 0, 0, 0, 1),
+                        AcousticInspectionMetadata = new AcousticInspectionMetadata(
+                            100f,
+                            200f,
+                            3.0f,
+                            AcousticDetectionType.Leak
+                        )
+                        {
+                            // Comfortably inside the configured bounds
+                            Roi = new Roi(2000, 3000, 100, 100),
+                        },
+                    },
+                },
+            };
+
+            // Act
+            var response = await Client.PostAsJsonAsync(
+                "missions/definitions",
+                query,
+                TestContext.Current.CancellationToken
+            );
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task CheckThatUpdateMissionFailsForRoiOutsideAcousticCameraRoiBounds()
+        {
+            // Arrange
+            var installation = await DatabaseUtilities.NewInstallation();
+            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
+            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
+                installation.InstallationCode,
+                plant.PlantCode,
+                areaPolygon: new AreaPolygon
+                {
+                    ZMin = 0,
+                    ZMax = 10,
+                    Positions =
+                    [
+                        new PolygonPoint { X = 0, Y = 0 },
+                        new PolygonPoint { X = 0, Y = 10 },
+                        new PolygonPoint { X = 10, Y = 10 },
+                        new PolygonPoint { X = 10, Y = 0 },
+                    ],
+                }
+            );
+            var missionDefinition = await DatabaseUtilities.NewMissionDefinition(
+                id: null,
+                installationCode: installation.InstallationCode,
+                inspectionArea,
+                tasks:
+                [
+                    new TaskDefinition(
+                        new TaskQuery
+                        {
+                            TagId = "existing-task",
+                            TargetPosition = new Position(),
+                            SensorType = SensorType.Image,
+                            AnalysisTypes = [AnalysisType.Fencilla],
+                            RobotPose = new Pose(),
+                        },
+                        1
+                    ),
+                ],
+                writeToDatabase: true
+            );
+            var query = new UpdateMissionDefinitionQuery
+            {
+                Tasks =
+                [
+                    new TaskQuery
+                    {
+                        TagId = "task-with-invalid-roi",
+                        TargetPosition = new Position(1, 1, 1),
+                        SensorType = SensorType.AcousticMeasurement,
+                        AnalysisTypes = [AnalysisType.Fencilla],
+                        RobotPose = new Pose(1, 1, 1, 0, 0, 0, 1),
+                        AcousticInspectionMetadata = new AcousticInspectionMetadata(
+                            100f,
+                            200f,
+                            3.0f,
+                            AcousticDetectionType.Leak
+                        )
+                        {
+                            // Well outside the configured bounds
+                            Roi = new Roi(10, 10, 10, 10),
+                        },
+                    },
+                ],
+            };
+
+            // Act
+            var response = await Client.PatchAsJsonAsync(
+                $"missions/definitions/{missionDefinition.Id}",
+                query,
+                TestContext.Current.CancellationToken
+            );
+
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
     }
 }
