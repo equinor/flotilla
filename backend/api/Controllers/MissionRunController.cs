@@ -45,16 +45,7 @@ namespace Api.Controllers
                 return BadRequest("Max EndTime cannot be less than min EndTime");
             }
 
-            PagedList<MissionRun> missionRuns;
-            try
-            {
-                missionRuns = await missionRunService.ReadAll(parameters, readOnly: true);
-            }
-            catch (InvalidDataException e)
-            {
-                logger.LogError(e, "Message: {errorMessage}", e.Message);
-                return BadRequest(e.Message);
-            }
+            var missionRuns = await missionRunService.ReadAll(parameters, readOnly: true);
 
             var metadata = new
             {

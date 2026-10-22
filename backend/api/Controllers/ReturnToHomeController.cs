@@ -98,22 +98,7 @@ namespace Api.Controllers
                 return NotFound();
             }
 
-            try
-            {
-                await isarService.ReturnHome(robot);
-            }
-            catch (RobotBusyException e)
-            {
-                string errorMessage =
-                    $"Failed to create return to home mission for robot {robotId}";
-                logger.LogError(e, "{Message}", errorMessage);
-                return StatusCode(StatusCodes.Status409Conflict);
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Failed to send robot {RobotId} home", robot.Id);
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
+            await isarService.ReturnHome(robot);
 
             return NoContent();
         }

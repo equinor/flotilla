@@ -29,16 +29,8 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<IList<Plant>>> GetPlants()
         {
-            try
-            {
-                var plants = await plantService.ReadAll(readOnly: true);
-                return Ok(plants);
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Error during GET of plants from database");
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
+            var plants = await plantService.ReadAll(readOnly: true);
+            return Ok(plants);
         }
 
         /// <summary>
@@ -54,18 +46,10 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<Plant>> GetPlantById([FromRoute] string id)
         {
-            try
-            {
-                var plant = await plantService.ReadById(id, readOnly: true);
-                if (plant == null)
-                    return NotFound($"Could not find plant with id {id}");
-                return Ok(plant);
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Error during GET of plant from database");
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
+            var plant = await plantService.ReadById(id, readOnly: true);
+            if (plant == null)
+                return NotFound($"Could not find plant with id {id}");
+            return Ok(plant);
         }
 
         /// <summary>
@@ -84,41 +68,30 @@ namespace Api.Controllers
         public async Task<ActionResult<Plant>> Create([FromBody] CreatePlantQuery plant)
         {
             logger.LogInformation("Creating new plant");
-            try
+            var existingInstallation = await installationService.ReadByInstallationCode(
+                plant.InstallationCode,
+                readOnly: true
+            );
+            if (existingInstallation == null)
             {
-                var existingInstallation = await installationService.ReadByInstallationCode(
-                    plant.InstallationCode,
-                    readOnly: true
+                return NotFound(
+                    $"Installation with installation code {plant.InstallationCode} not found"
                 );
-                if (existingInstallation == null)
-                {
-                    return NotFound(
-                        $"Installation with installation code {plant.InstallationCode} not found"
-                    );
-                }
-                var existingPlant = await plantService.ReadByInstallationAndPlantCode(
-                    existingInstallation,
-                    plant.PlantCode,
-                    readOnly: true
-                );
-                if (existingPlant != null)
-                {
-                    logger.LogInformation("A plant for given name and plant already exists");
-                    return BadRequest("Plant already exists");
-                }
+            }
+            var existingPlant = await plantService.ReadByInstallationAndPlantCode(
+                existingInstallation,
+                plant.PlantCode,
+                readOnly: true
+            );
+            if (existingPlant != null)
+            {
+                logger.LogInformation("A plant for given name and plant already exists");
+                return BadRequest("Plant already exists");
+            }
 
-                var newPlant = await plantService.Create(plant);
-                logger.LogInformation(
-                    "Succesfully created new plant with id '{plantId}'",
-                    newPlant.Id
-                );
-                return CreatedAtAction(nameof(GetPlantById), new { id = newPlant.Id }, newPlant);
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Error while creating new plant");
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
+            var newPlant = await plantService.Create(plant);
+            logger.LogInformation("Succesfully created new plant with id '{plantId}'", newPlant.Id);
+            return CreatedAtAction(nameof(GetPlantById), new { id = newPlant.Id }, newPlant);
         }
 
         /// <summary>

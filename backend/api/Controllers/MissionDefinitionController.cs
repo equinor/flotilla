@@ -38,19 +38,10 @@ namespace Api.Controllers
             ActionResult<IEnumerable<MissionDefinitionResponse>>
         > GetMissionDefinitions([FromQuery] MissionDefinitionQueryStringParameters parameters)
         {
-            PagedList<MissionDefinition> missionDefinitions;
-            try
-            {
-                missionDefinitions = await missionDefinitionService.ReadAll(
-                    parameters,
-                    readOnly: true
-                );
-            }
-            catch (InvalidDataException e)
-            {
-                logger.LogError(e, "{ErrorMessage}", e.Message);
-                return BadRequest(e.Message);
-            }
+            var missionDefinitions = await missionDefinitionService.ReadAll(
+                parameters,
+                readOnly: true
+            );
 
             var metadata = new
             {
@@ -123,11 +114,6 @@ namespace Api.Controllers
                 missionDefinitions = await missionDefinitionService.ReadByInstallationCode(
                     installationCode
                 );
-            }
-            catch (InvalidDataException e)
-            {
-                logger.LogError(e, "{ErrorMessage}", e.Message);
-                return BadRequest(e.Message);
             }
             catch (HttpRequestException e)
             {

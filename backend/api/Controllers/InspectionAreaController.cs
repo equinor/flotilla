@@ -3,7 +3,6 @@ using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
 using Api.Services.Models;
-using Api.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -34,19 +33,11 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<IList<InspectionAreaResponse>>> GetInspectionAreas()
         {
-            try
-            {
-                var inspectionAreas = await inspectionAreaService.ReadAll(readOnly: true);
-                var inspectionAreaResponses = inspectionAreas
-                    .Select(d => new InspectionAreaResponse(d))
-                    .ToList();
-                return Ok(inspectionAreaResponses);
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Error during GET of inspection areas from database");
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
+            var inspectionAreas = await inspectionAreaService.ReadAll(readOnly: true);
+            var inspectionAreaResponses = inspectionAreas
+                .Select(d => new InspectionAreaResponse(d))
+                .ToList();
+            return Ok(inspectionAreaResponses);
         }
 
         /// <summary>
@@ -66,22 +57,14 @@ namespace Api.Controllers
             ActionResult<IList<InspectionAreaResponse>>
         > GetInspectionAreasByInstallationCode([FromRoute] string installationCode)
         {
-            try
-            {
-                var inspectionAreas = await inspectionAreaService.ReadByInstallation(
-                    installationCode,
-                    readOnly: true
-                );
-                var inspectionAreaResponses = inspectionAreas
-                    .Select(d => new InspectionAreaResponse(d))
-                    .ToList();
-                return Ok(inspectionAreaResponses);
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Error during GET of inspection areas from database");
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
+            var inspectionAreas = await inspectionAreaService.ReadByInstallation(
+                installationCode,
+                readOnly: true
+            );
+            var inspectionAreaResponses = inspectionAreas
+                .Select(d => new InspectionAreaResponse(d))
+                .ToList();
+            return Ok(inspectionAreaResponses);
         }
 
         /// <summary>
@@ -99,18 +82,10 @@ namespace Api.Controllers
             [FromRoute] string id
         )
         {
-            try
-            {
-                var inspectionArea = await inspectionAreaService.ReadById(id, readOnly: true);
-                if (inspectionArea == null)
-                    return NotFound($"Could not find inspection area with id {id}");
-                return Ok(new InspectionAreaResponse(inspectionArea));
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Error during GET of inspection area from database");
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
+            var inspectionArea = await inspectionAreaService.ReadById(id, readOnly: true);
+            if (inspectionArea == null)
+                return NotFound($"Could not find inspection area with id {id}");
+            return Ok(new InspectionAreaResponse(inspectionArea));
         }
 
         /// <summary>
@@ -128,29 +103,21 @@ namespace Api.Controllers
             ActionResult<IList<MissionDefinitionResponse>>
         > GetMissionDefinitionsInInspectionArea([FromRoute] string inspectionAreaId)
         {
-            try
-            {
-                var inspectionArea = await inspectionAreaService.ReadById(
-                    inspectionAreaId,
-                    readOnly: true
-                );
-                if (inspectionArea == null)
-                    return NotFound($"Could not find inspection area with id {inspectionAreaId}");
+            var inspectionArea = await inspectionAreaService.ReadById(
+                inspectionAreaId,
+                readOnly: true
+            );
+            if (inspectionArea == null)
+                return NotFound($"Could not find inspection area with id {inspectionAreaId}");
 
-                var missionDefinitions = await missionDefinitionService.ReadByInspectionAreaId(
-                    inspectionArea.Id,
-                    readOnly: true
-                );
-                var missionDefinitionResponses = missionDefinitions
-                    .FindAll(m => !m.IsDeprecated)
-                    .Select(m => new MissionDefinitionResponse(m));
-                return Ok(missionDefinitionResponses);
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Error during GET of inspection area missions from database");
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
+            var missionDefinitions = await missionDefinitionService.ReadByInspectionAreaId(
+                inspectionArea.Id,
+                readOnly: true
+            );
+            var missionDefinitionResponses = missionDefinitions
+                .FindAll(m => !m.IsDeprecated)
+                .Select(m => new MissionDefinitionResponse(m));
+            return Ok(missionDefinitionResponses);
         }
 
         /// <summary>
@@ -169,24 +136,16 @@ namespace Api.Controllers
             [FromBody] AreaPolygon areaPolygonJson
         )
         {
-            try
-            {
-                var inspectionArea = await inspectionAreaService.ReadById(
-                    inspectionAreaId,
-                    readOnly: true
-                );
-                if (inspectionArea == null)
-                    return NotFound($"Could not find inspection area with id {inspectionAreaId}");
+            var inspectionArea = await inspectionAreaService.ReadById(
+                inspectionAreaId,
+                readOnly: true
+            );
+            if (inspectionArea == null)
+                return NotFound($"Could not find inspection area with id {inspectionAreaId}");
 
-                inspectionArea.AreaPolygon = areaPolygonJson;
-                var updatedInspectionArea = await inspectionAreaService.Update(inspectionArea);
-                return Ok(inspectionArea);
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Error during updating inspection area polygon");
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
+            inspectionArea.AreaPolygon = areaPolygonJson;
+            var updatedInspectionArea = await inspectionAreaService.Update(inspectionArea);
+            return Ok(inspectionArea);
         }
 
         /// <summary>
@@ -207,63 +166,50 @@ namespace Api.Controllers
         )
         {
             logger.LogInformation("Creating new inspection area");
-            try
+            var existingInstallation = await installationService.ReadByInstallationCode(
+                inspectionArea.InstallationCode,
+                readOnly: true
+            );
+            if (existingInstallation == null)
             {
-                var existingInstallation = await installationService.ReadByInstallationCode(
-                    inspectionArea.InstallationCode,
-                    readOnly: true
+                return NotFound(
+                    $"Could not find installation with name {inspectionArea.InstallationCode}"
                 );
-                if (existingInstallation == null)
-                {
-                    return NotFound(
-                        $"Could not find installation with name {inspectionArea.InstallationCode}"
-                    );
-                }
-                var existingPlant = await plantService.ReadByInstallationAndPlantCode(
+            }
+            var existingPlant = await plantService.ReadByInstallationAndPlantCode(
+                existingInstallation,
+                inspectionArea.PlantCode,
+                readOnly: true
+            );
+            if (existingPlant == null)
+            {
+                return NotFound($"Could not find plant with name {inspectionArea.PlantCode}");
+            }
+            var existingInspectionArea =
+                await inspectionAreaService.ReadByInstallationAndPlantAndName(
                     existingInstallation,
-                    inspectionArea.PlantCode,
+                    existingPlant,
+                    inspectionArea.Name,
                     readOnly: true
                 );
-                if (existingPlant == null)
-                {
-                    return NotFound($"Could not find plant with name {inspectionArea.PlantCode}");
-                }
-                var existingInspectionArea =
-                    await inspectionAreaService.ReadByInstallationAndPlantAndName(
-                        existingInstallation,
-                        existingPlant,
-                        inspectionArea.Name,
-                        readOnly: true
-                    );
-                if (existingInspectionArea != null)
-                {
-                    logger.LogInformation(
-                        "An inspection area for given name and inspection area already exists"
-                    );
-                    return BadRequest("InspectionArea already exists");
-                }
-
-                var newInspectionArea = await inspectionAreaService.Create(inspectionArea);
+            if (existingInspectionArea != null)
+            {
                 logger.LogInformation(
-                    "Succesfully created new inspection area with id '{inspectionAreaId}'",
-                    newInspectionArea.Id
+                    "An inspection area for given name and inspection area already exists"
                 );
-                return CreatedAtAction(
-                    nameof(GetInspectionAreaById),
-                    new { id = newInspectionArea.Id },
-                    new InspectionAreaResponse(newInspectionArea)
-                );
+                return BadRequest("InspectionArea already exists");
             }
-            catch (InvalidPolygonException e)
-            {
-                logger.LogError(e, "Invalid polygon");
-                return BadRequest("Invalid polygon");
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Error while creating new inspection area");
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
+
+            var newInspectionArea = await inspectionAreaService.Create(inspectionArea);
+            logger.LogInformation(
+                "Succesfully created new inspection area with id '{inspectionAreaId}'",
+                newInspectionArea.Id
+            );
+            return CreatedAtAction(
+                nameof(GetInspectionAreaById),
+                new { id = newInspectionArea.Id },
+                new InspectionAreaResponse(newInspectionArea)
+            );
         }
 
         /// <summary>
