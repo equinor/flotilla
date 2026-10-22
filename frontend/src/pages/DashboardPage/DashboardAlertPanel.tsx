@@ -1,8 +1,10 @@
 import { useContext } from 'react'
+import { useNavigate } from 'react-router'
 import { Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import styled from 'styled-components'
 import { useLanguageContext } from 'contexts/LanguageContext'
+import { InstallationContext } from 'contexts/InstallationContext'
 import { ContentCard } from 'components/Styles/StyledComponents'
 import { FileType, InspectionData } from 'models/InspectionRecord'
 import { SaraAlertCard } from './AlertComponent'
@@ -39,6 +41,8 @@ interface DashboardAlertPanelProps {
 
 export const DashboardAlertPanel = ({ alerts }: DashboardAlertPanelProps) => {
     const { TranslateText } = useLanguageContext()
+    const { installation } = useContext(InstallationContext)
+    const navigate = useNavigate()
 
     return (
         <AlertPanelCard>
@@ -56,6 +60,11 @@ export const DashboardAlertPanel = ({ alerts }: DashboardAlertPanelProps) => {
                             tag={alert.tag!}
                             createdAt={alert.createdAt!}
                             warning={alert.warning!}
+                            onClick={() =>
+                                navigate(
+                                    `/${installation.installationCode}/mission/${alert.missionId!}?inspectionId=${alert.inspectionId}`
+                                )
+                            }
                             imageSAS={
                                 alert.fileType === FileType.IMAGE
                                     ? (alert.anonymizedSAS ?? alert.visualizedSAS)

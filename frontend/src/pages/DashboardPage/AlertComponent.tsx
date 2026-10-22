@@ -30,6 +30,7 @@ const StyledRow = styled.div`
     border-left: 5px solid ${tokens.colors.interactive.danger__resting.hex};
     border-bottom: 1px dashed ${tokens.colors.ui.background__medium.hex};
     overflow-wrap: anywhere;
+    cursor: pointer;
 
     &:last-child {
         border-bottom: none;
@@ -90,6 +91,7 @@ interface SaraAlertCardProps {
     warning: string
     order: number
     imageSAS?: string
+    onClick: () => void
 }
 export const SaraAlertCard = ({
     analysisType,
@@ -98,6 +100,7 @@ export const SaraAlertCard = ({
     warning,
     order,
     imageSAS,
+    onClick,
 }: SaraAlertCardProps) => {
     const { TranslateText } = useLanguageContext()
     const titleId = useId()
@@ -105,7 +108,7 @@ export const SaraAlertCard = ({
     const details = analysisDetails[analysisType]
     const analysisLabel = TranslateText(details.label)
     return (
-        <StyledRow role="article" aria-labelledby={titleId}>
+        <StyledRow onClick={onClick} aria-labelledby={titleId}>
             <Identity>
                 <TitleRow>
                     <Typography id={titleId} as="h3" variant="h4">
