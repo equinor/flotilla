@@ -75,6 +75,13 @@ builder.Services.AddScoped<IAccessRoleService, AccessRoleService>();
 builder.Services.AddScoped<IRobotService, RobotService>();
 
 builder.Services.AddScoped<IMissionRunService, MissionRunService>();
+
+builder.Services.AddSingleton(services => new Lazy<Azure.Storage.Blobs.BlobContainerClient>(() =>
+    new Azure.Storage.Blobs.BlobServiceClient(
+        services.GetRequiredService<IConfiguration>()["MissionRecording:StorageConnectionString"]
+    ).GetBlobContainerClient(MissionRecordingService.ContainerName)
+));
+builder.Services.AddScoped<IMissionRecordingService, MissionRecordingService>();
 builder.Services.AddScoped<IMissionDefinitionService, MissionDefinitionService>();
 builder.Services.AddScoped<IMissionTaskService, MissionTaskService>();
 builder.Services.AddScoped<IExclusionAreaService, ExclusionAreaService>();
