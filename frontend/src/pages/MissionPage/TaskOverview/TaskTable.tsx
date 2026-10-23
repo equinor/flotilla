@@ -4,7 +4,6 @@ import { useLanguageContext } from 'contexts/LanguageContext'
 import { Task, TaskStatus } from 'models/Task'
 import { tokens } from '@equinor/eds-tokens'
 import { getColorsFromTaskStatus } from 'utils/MarkerStyles'
-import { useInspectionId } from 'pages/InspectionReportPage/SetInspectionIdHook'
 import { AnalysisValueDisplay, DescriptionDisplay, TagIdDisplay } from 'components/Displays/TaskDisplay'
 import { StyledTable, StyledTableBody, StyledTableCell, StyledTableRow } from 'components/Styles/StyledComponents'
 import styled from 'styled-components'
@@ -13,6 +12,7 @@ import { hasInspectionAnalysis, InspectionData } from 'models/InspectionRecord'
 import { Icons } from 'utils/icons'
 import { getAnalysisResultStyle } from '../AnalysisResultStyles'
 import { MeasurementDisplay } from 'components/Displays/MeasurementDisplay'
+import { useMissionResultSelection } from '../MissionResults/MissionResults'
 
 const IconWithLabel = styled.div`
     display: grid;
@@ -81,7 +81,7 @@ const TaskTableRow = ({
     index: number
 }) => {
     const { TranslateText } = useLanguageContext()
-    const { switchSelectedInspectionId, switchSelectedAnalysisId } = useInspectionId()
+    const { select } = useMissionResultSelection()
 
     const isActive = task.status === TaskStatus.InProgress || task.status === TaskStatus.Paused
     const analysisStyle =
@@ -116,7 +116,7 @@ const TaskTableRow = ({
                         <RightAlignedImageButton
                             variant="ghost_icon"
                             aria-label={TranslateText('Enlarge inspection for {0}', [inspectionData.tag])}
-                            onClick={() => switchSelectedInspectionId(task.id)}
+                            onClick={() => select(task.id, 'inspection')}
                         >
                             <Icon name={Icons.Image}></Icon>
                         </RightAlignedImageButton>
@@ -139,7 +139,7 @@ const TaskTableRow = ({
                         />
                     )}
                     {inspectionData && inspectionData.visualizedSAS && (
-                        <Button variant="ghost_icon" onClick={() => switchSelectedAnalysisId(task.id)}>
+                        <Button variant="ghost_icon" onClick={() => select(task.id, 'analysis')}>
                             <Icon name={Icons.Image}></Icon>
                         </Button>
                     )}

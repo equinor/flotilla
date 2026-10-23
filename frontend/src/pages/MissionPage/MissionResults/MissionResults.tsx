@@ -87,7 +87,7 @@ const getMissionResults = (
     return results.sort((left, right) => Number(right.hasFinding) - Number(left.hasFinding))
 }
 
-const useMissionResultSelection = () => {
+export const useMissionResultSelection = () => {
     const [params, setParams] = useSearchParams()
     const selectedId = params.get('inspectionId')
     const focusString = params.get('focus')
