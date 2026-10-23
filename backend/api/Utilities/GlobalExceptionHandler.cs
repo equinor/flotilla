@@ -49,8 +49,8 @@ namespace Api.Utilities
                 exception,
                 "Unhandled {ExceptionType} for {Method} {Path}",
                 exception.GetType().Name,
-                httpContext.Request.Method,
-                httpContext.Request.Path
+                Sanitize.SanitizeUserInput(httpContext.Request.Method),
+                Sanitize.SanitizeUserInput(httpContext.Request.Path.Value)
             );
 
             httpContext.Response.StatusCode = statusCode;
