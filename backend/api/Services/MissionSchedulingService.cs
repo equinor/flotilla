@@ -112,10 +112,15 @@ namespace Api.Services
                 return;
             }
 
-            missionRun.Tasks = await exclusionAreaService.FilterOutExcludedMissionTasks(
+            var filteredTasks = await exclusionAreaService.FilterOutExcludedMissionTasks(
                 missionRun.Tasks,
                 missionRun.InstallationCode
             );
+            var excludedTaskIds = missionRun
+                .Tasks.Select(task => task.Id)
+                .Except(filteredTasks.Select(task => task.Id))
+                .ToList();
+            missionRun.Tasks = filteredTasks;
 
             if (missionRun.Tasks.Count == 0)
             {
@@ -144,11 +149,10 @@ namespace Api.Services
                 return;
             }
 
-            await missionRunService.UpdateMissionRunProperty(
-                missionRun.Id,
-                "Tasks",
-                missionRun.Tasks
-            );
+            if (excludedTaskIds.Count > 0)
+            {
+                missionRun = await missionRunService.RemoveTasks(missionRun.Id, excludedTaskIds);
+            }
 
             if (
                 !missionRun.InspectionArea.Id.Equals(
