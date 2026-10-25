@@ -26,6 +26,11 @@ services:
     ports:
       - "1883:1883"
     env_file: "broker/.env"
+    environment:
+      # Fail loudly rather than fall back to the credentials committed to this
+      # repository. Overridable, because it contradicts
+      # MQTT_ALLOW_INSECURE_LOCAL_CONNECTIONS; see broker/entrypoint.sh.
+      - MQTT_REQUIRE_ENV_CREDENTIALS=${MQTT_REQUIRE_ENV_CREDENTIALS:-true}
 
   backend:
     build: backend
