@@ -438,8 +438,17 @@ namespace Api.Test.EventHandlers
             Assert.True(IsarService.isStarted);
         }
 
-        [Fact]
-        public async Task MissionStatusUpdate()
+        [Theory]
+        [InlineData(false, "successful", MissionStatus.Successful)]
+        [InlineData(true, "successful", MissionStatus.Successful)]
+        [InlineData(true, "failed", MissionStatus.Failed)]
+        [InlineData(true, "cancelled", MissionStatus.Cancelled)]
+        [InlineData(true, "aborted", MissionStatus.Aborted)]
+        public async Task MissionStatusUpdate(
+            bool storedMission,
+            string status,
+            MissionStatus expected
+        )
         {
             // Arrange
             var installation = await DatabaseUtilities.NewInstallation();
@@ -461,6 +470,13 @@ namespace Api.Test.EventHandlers
                 lastSuccessfulRun: null,
                 writeToDatabase: false
             );
+            if (storedMission)
+            {
+                missionDefinition.RobotMissionId = "DiagnosticRoutine";
+                missionDefinition.Tasks = [];
+                robot.RobotCapabilities = [RobotCapabilitiesEnum.stored_mission];
+                await RobotService.Update(robot);
+            }
             var missionRun = await DatabaseUtilities.NewMissionRun(
                 missionDefinition: missionDefinition,
                 robot: robot,
@@ -474,10 +490,26 @@ namespace Api.Test.EventHandlers
                 RobotName = robot.Name,
                 IsarId = robot.IsarId,
                 MissionId = missionRun.Id,
-                Status = "successful",
+                Status = status,
                 Timestamp = DateTime.UtcNow,
             };
-            EventAggregatorSingletonService.Publish(isarMissionMessage);
+            if (status == "aborted")
+            {
+                EventAggregatorSingletonService.Publish(
+                    new IsarMissionAbortedMessage
+                    {
+                        RobotName = robot.Name,
+                        IsarId = robot.IsarId,
+                        MissionId = missionRun.Id,
+                        Reason = "Stored mission stopped",
+                        Timestamp = DateTime.UtcNow,
+                    }
+                );
+            }
+            else
+            {
+                EventAggregatorSingletonService.Publish(isarMissionMessage);
+            }
 
             // Assert
             await TestSetupHelpers.WaitFor(async () =>
@@ -486,7 +518,7 @@ namespace Api.Test.EventHandlers
                     missionRun.Id,
                     readOnly: true
                 );
-                return postTestMissionRun!.Status == MissionStatus.Successful;
+                return postTestMissionRun!.Status == expected;
             });
         }
     }

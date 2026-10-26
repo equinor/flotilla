@@ -181,7 +181,7 @@ export const OngoingMissionCard = ({
                 <MissionControlButtons
                     missionName={mission.name}
                     canBePaused={canBePaused}
-                    canBeSkipped={canBeSkipped}
+                    canBeSkipped={canBeSkipped && !mission.robotMissionId}
                     robotId={mission.robot.id}
                     missionStatus={missionStatus}
                 />
@@ -205,7 +205,7 @@ export const OngoingMissionCard = ({
                 <MissionControlButtons
                     missionName={mission.name}
                     canBePaused={canBePaused}
-                    canBeSkipped={canBeSkipped}
+                    canBeSkipped={canBeSkipped && !mission.robotMissionId}
                     robotId={mission.robot.id}
                     missionStatus={missionStatus}
                 />

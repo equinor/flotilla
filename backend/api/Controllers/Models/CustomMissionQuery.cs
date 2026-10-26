@@ -74,7 +74,7 @@ namespace Api.Controllers.Models
         }
     }
 
-    public struct CreateMissionQuery
+    public struct CreateMissionQuery : IValidatableObject
     {
         public string InstallationCode { get; set; }
 
@@ -82,6 +82,46 @@ namespace Api.Controllers.Models
 
         public bool IsAdHoc { get; set; }
 
+        [MaxLength(200)]
+        public string? RobotMissionId { get; set; }
+
+        public string? InspectionAreaId { get; set; }
+
         public List<TaskQuery> Tasks { get; set; }
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (RobotMissionId is not null)
+            {
+                if (string.IsNullOrWhiteSpace(RobotMissionId))
+                    yield return new ValidationResult(
+                        "RobotMissionId must not be blank.",
+                        [nameof(RobotMissionId)]
+                    );
+                if (Tasks is null || Tasks.Count != 0)
+                    yield return new ValidationResult(
+                        "Robot-stored missions require an empty tasks list.",
+                        [nameof(Tasks)]
+                    );
+                if (string.IsNullOrWhiteSpace(InspectionAreaId))
+                    yield return new ValidationResult(
+                        "Robot-stored missions require an inspection area.",
+                        [nameof(InspectionAreaId)]
+                    );
+            }
+            else
+            {
+                if (Tasks is null || Tasks.Count == 0)
+                    yield return new ValidationResult(
+                        "A mission definition must contain at least one task.",
+                        [nameof(Tasks)]
+                    );
+                if (InspectionAreaId is not null)
+                    yield return new ValidationResult(
+                        "Inspection missions determine their area from their tasks.",
+                        [nameof(InspectionAreaId)]
+                    );
+            }
+        }
     }
 }

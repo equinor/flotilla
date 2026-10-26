@@ -27,6 +27,7 @@ export type MissionStatusFilterOptions = (typeof missionStatusFilterOptionsItera
 export interface Mission {
     id: string
     missionId: string
+    robotMissionId?: string | null
     name: string
     description?: string
     statusReason?: string

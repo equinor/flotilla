@@ -85,7 +85,7 @@ namespace Api.Services
                 return;
             }
 
-            if (missionRun.Tasks.Count == 0)
+            if (missionRun.Tasks.Count == 0 && missionRun.RobotMissionId is null)
             {
                 logger.LogError(
                     "MissionRun {RobotName} was not started on robot {RobotId} as the mission has no tasks",
@@ -117,7 +117,7 @@ namespace Api.Services
                 missionRun.InstallationCode
             );
 
-            if (missionRun.Tasks.Count == 0)
+            if (missionRun.Tasks.Count == 0 && missionRun.RobotMissionId is null)
             {
                 logger.LogWarning(
                     "MissionRun {RobotName} was not started on robot {RobotId} as all its tasks are in exclusion areas",
@@ -187,6 +187,13 @@ namespace Api.Services
 
             try
             {
+                if (
+                    missionRun.RobotMissionId is not null
+                    && robot.RobotCapabilities?.Contains(RobotCapabilitiesEnum.stored_mission)
+                        != true
+                )
+                    throw new MissionException("Robot no longer supports robot-stored missions.");
+
                 await StartMissionRun(missionRun, robot);
             }
             catch (Exception ex)

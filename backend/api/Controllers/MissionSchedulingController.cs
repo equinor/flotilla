@@ -56,7 +56,7 @@ namespace Api.Controllers
                 .Select(t => new MissionTask(t))
                 .ToList();
 
-            if (missionTasks == null || missionTasks.Count == 0)
+            if (missionTasks.Count == 0 && missionRun.RobotMissionId is null)
                 return NotFound("No unfinished mission tasks were found for the requested mission");
 
             foreach (var task in missionTasks)
@@ -69,6 +69,7 @@ namespace Api.Controllers
                 Name = missionRun.Name,
                 Robot = robot,
                 MissionId = missionRun.MissionId,
+                RobotMissionId = missionRun.RobotMissionId,
                 Status = MissionStatus.Queued,
                 Tasks = missionTasks,
                 CreationTime = DateTime.UtcNow,
@@ -88,7 +89,7 @@ namespace Api.Controllers
             catch (UnsupportedRobotCapabilityException)
             {
                 return BadRequest(
-                    $"The robot {robot.Name} does not have the necessary sensors to run the mission."
+                    $"The robot {robot.Name} does not have the necessary capabilities to run the mission."
                 );
             }
 
@@ -147,7 +148,7 @@ namespace Api.Controllers
                 return NotFound("Mission definition not found");
             }
 
-            if (missionDefinition.Tasks.Count == 0)
+            if (missionDefinition.Tasks.Count == 0 && missionDefinition.RobotMissionId is null)
             {
                 return BadRequest("Mission definition has no tasks");
             }
@@ -168,6 +169,7 @@ namespace Api.Controllers
                 Name = missionDefinition.Name,
                 Robot = robot,
                 MissionId = missionDefinition.Id,
+                RobotMissionId = missionDefinition.RobotMissionId,
                 Status = MissionStatus.Queued,
                 CreationTime = DateTime.UtcNow,
                 Tasks = [.. missionDefinition.Tasks.Select((t) => t.ToMissionRunTask())],
@@ -188,7 +190,7 @@ namespace Api.Controllers
             catch (UnsupportedRobotCapabilityException)
             {
                 return BadRequest(
-                    $"The robot {robot.Name} does not have the necessary sensors to run the mission."
+                    $"The robot {robot.Name} does not have the necessary capabilities to run the mission."
                 );
             }
 

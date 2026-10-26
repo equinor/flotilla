@@ -158,30 +158,36 @@ namespace Api.Controllers
                 );
             }
 
-            if (customMissionQuery.Tasks == null || customMissionQuery.Tasks.Count == 0)
-            {
-                return BadRequest("A mission definition must contain at least one task");
-            }
-
             var missionTasks = customMissionQuery
                 .Tasks.Select((task, index) => new TaskDefinition(task, index + 1))
                 .ToList();
 
-            var inspectionAreaForMission =
-                await inspectionAreaService.TryFindInspectionAreaForMissionTasks(
+            var inspectionAreaForMission = customMissionQuery.RobotMissionId is not null
+                ? await inspectionAreaService.ReadById(customMissionQuery.InspectionAreaId!)
+                : await inspectionAreaService.TryFindInspectionAreaForMissionTasks(
                     missionTasks,
                     customMissionQuery.InstallationCode
                 );
             if (inspectionAreaForMission == null)
             {
-                return BadRequest("No inspection area found for the mission tasks");
+                return BadRequest("No inspection area found for the mission");
             }
+
+            if (
+                !string.Equals(
+                    inspectionAreaForMission.Installation.InstallationCode,
+                    customMissionQuery.InstallationCode,
+                    StringComparison.OrdinalIgnoreCase
+                )
+            )
+                return BadRequest("The inspection area must belong to the mission installation");
 
             var newMissionDefinition = new MissionDefinition
             {
                 Id = Guid.NewGuid().ToString(),
                 Tasks = missionTasks,
                 Name = customMissionQuery.Name,
+                RobotMissionId = customMissionQuery.RobotMissionId,
                 IsAdHoc = customMissionQuery.IsAdHoc,
                 InstallationCode = customMissionQuery.InstallationCode,
                 InspectionArea = inspectionAreaForMission,
@@ -233,6 +239,11 @@ namespace Api.Controllers
 
             if (missionDefinitionQuery.Tasks != null)
             {
+                if (missionDefinition.RobotMissionId is not null)
+                    return BadRequest(
+                        "Inspection tasks cannot be edited on a robot-stored mission"
+                    );
+
                 if (missionDefinitionQuery.Tasks.Count == 0)
                 {
                     return BadRequest("A mission definition must contain at least one task");

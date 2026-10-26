@@ -180,9 +180,16 @@ const MissionDefinitionPageBody = ({ missionDefinition }: { missionDefinition: M
                 />
             )}
 
-            <StyledTableAndMap>
-                <MissionDefinitionTaskTableAndMap missionDefinition={missionDefinition} />
-            </StyledTableAndMap>
+            {missionDefinition.robotMissionId ? (
+                <MetadataItem
+                    title={TranslateText('Robot-stored mission')}
+                    content={missionDefinition.robotMissionId}
+                />
+            ) : (
+                <StyledTableAndMap>
+                    <MissionDefinitionTaskTableAndMap missionDefinition={missionDefinition} />
+                </StyledTableAndMap>
+            )}
         </StyledMissionDefinitionPageBody>
     )
 }
