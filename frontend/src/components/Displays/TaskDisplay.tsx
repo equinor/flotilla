@@ -1,7 +1,6 @@
 import { Typography } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'contexts/LanguageContext'
 import { AnalysisType } from 'models/MissionDefinition'
-import { saraAnalysisTypeToEnum } from 'models/SaraAnalysisTypeMapping'
 
 export const AnalysisValueDisplay = ({
     value,
@@ -15,7 +14,7 @@ export const AnalysisValueDisplay = ({
     isCompact?: boolean
 }) => {
     const { TranslateText } = useLanguageContext()
-    const type = saraAnalysisTypeToEnum(analysisType)
+    const type = analysisType as AnalysisType | undefined
 
     if (isCompact) {
         if (type === AnalysisType.CLOE) {
