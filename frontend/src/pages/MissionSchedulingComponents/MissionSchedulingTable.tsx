@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { useLanguageContext } from 'contexts/LanguageContext'
 import { InspectionArea } from 'models/InspectionArea'
 import { tokens } from '@equinor/eds-tokens'
-import { MissionDefinition } from 'models/MissionDefinition'
+import { AnalysisType, MissionDefinition } from 'models/MissionDefinition'
 import { useNavigate } from 'react-router'
 import { Icons } from 'utils/icons'
 import { compareMissionDefinitions } from './InspectionUtilities'
@@ -61,12 +61,11 @@ enum Columns {
     AddToQueue = 'AddToQueue',
 }
 
-// Flotilla serializes enum names, not the SARA analysis keys used by the frontend enum.
-const analysisTypeLabels: Record<string, string> = {
-    CLOE: 'Constant level oiler',
-    Fencilla: 'Perimeter breach detection',
-    ThermalReading: 'Thermal reading',
-    CO2: 'CO2Measurement',
+const analysisTypeLabels: Record<AnalysisType, string> = {
+    [AnalysisType.CLOE]: 'Constant level oiler',
+    [AnalysisType.Fencilla]: 'Perimeter breach detection',
+    [AnalysisType.ThermalReading]: 'Thermal reading',
+    [AnalysisType.CO2]: 'CO2Measurement',
 }
 
 const HideColumnsOnSmallScreen = styled.div`

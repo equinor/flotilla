@@ -23,7 +23,6 @@ import { useInspectionsContext } from 'contexts/InspectionsContext'
 import { AnalysisType } from 'models/MissionDefinition'
 import { InspectionData } from 'models/InspectionRecord'
 import { useAssetContext } from 'contexts/AssetContext'
-import { saraAnalysisTypeToEnum } from 'models/SaraAnalysisTypeMapping'
 import { DataViewTimeRangeSelector } from './DataViewTimeRangeSelector'
 import { createPresetTimeRange, DataViewTimeRange, TimeRangeMode } from './DataViewTimeRange'
 import { AlertBanner } from 'components/Alerts/AlertsBanner'
@@ -95,7 +94,7 @@ const DataViewContent = ({
             if (!Object.hasOwn(plotData, tagId)) plotData[tagId] = []
 
             const value: number =
-                saraAnalysisTypeToEnum(inspection.analysisType) === AnalysisType.CLOE
+                inspection.analysisType === AnalysisType.CLOE
                     ? parseFloat(inspection.value) * 100
                     : parseFloat(inspection.value)
             plotData[tagId].push({

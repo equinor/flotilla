@@ -8,7 +8,7 @@ namespace Api.Test.Services.Models
     public class IsarMissionDefinitionTests
     {
         [Fact]
-        public void AnalysisTypesSerialiseAsSnakeCaseSaraKeys()
+        public void AnalysisTypesSerialiseAsEnumNames()
         {
             var task = new MissionTask
             {
@@ -30,9 +30,28 @@ namespace Api.Test.Services.Models
             var json = JsonSerializer.Serialize(new IsarTaskDefinition(task));
 
             Assert.Contains(
-                "\"analysis_types\":[\"fencilla\",\"cloe\",\"thermal-reading\",\"co2\"]",
+                "\"analysis_types\":[\"Fencilla\",\"CLOE\",\"ThermalReading\",\"CO2\"]",
                 json
             );
+        }
+
+        [Fact]
+        public void EmptyAnalysisTypesSerialiseAsNull()
+        {
+            var task = new MissionTask
+            {
+                TaskOrder = 0,
+                RobotPose = new Pose(),
+                Status = TaskStatus.NotStarted,
+                SensorType = SensorType.Image,
+                TargetPosition = new Position(0, 0, 0),
+                AnalysisTypes = [],
+                VideoDuration = null,
+            };
+
+            var json = JsonSerializer.Serialize(new IsarTaskDefinition(task));
+
+            Assert.Contains("\"analysis_types\":null", json);
         }
 
         [Fact]

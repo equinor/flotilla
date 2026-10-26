@@ -126,7 +126,7 @@ export const inspectionRecordToInspectionData = (record: InspectionRecord): Insp
 
     const sas = analysis?.anonymizedSAS ?? analysis?.visualizedSAS
     const fileType = sas ? sasURLToFileType(sas) : FileType.VALUE
-    const isInspectionOnly = analysis?.analysisType === 'passthrough' || analysis?.analysisType === 'anonymize'
+    const isInspectionOnly = analysis?.analysisType === 'Passthrough' || analysis?.analysisType === 'Anonymize'
     const result = isInspectionOnly ? undefined : analysis?.result
 
     // Feedback is given per analysis run, so mirror the choice of analysis above

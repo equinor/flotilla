@@ -66,33 +66,11 @@ namespace Api.Services.Models
         public float? Duration { get; set; }
 
         [JsonPropertyName("analysis_types")]
-        public List<string>? AnalysisTypes { get; set; }
+        public List<AnalysisType>? AnalysisTypes { get; set; }
 
         [JsonPropertyName("acoustic")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public IsarAcousticInspection? Acoustic { get; set; }
-
-        private static List<string>? ToSaraAnalysisKeys(IList<AnalysisType> types)
-        {
-            if (types is null || types.Count == 0)
-                return null;
-            var mapped = types
-                .Select(t =>
-                    t switch
-                    {
-                        AnalysisType.Fencilla => "fencilla",
-                        AnalysisType.CLOE => "cloe",
-                        AnalysisType.ThermalReading => "thermal-reading",
-                        AnalysisType.CO2 => "co2",
-                        _ => null,
-                    }
-                )
-                .Where(s => s is not null)
-                .Cast<string>()
-                .Distinct()
-                .ToList();
-            return mapped.Count == 0 ? null : mapped;
-        }
 
         [JsonPropertyName("zoom")]
         public IsarZoomDescription? Zoom { get; set; }
@@ -134,7 +112,9 @@ namespace Api.Services.Models
                     : null;
             InspectionDescription = missionTask.Description;
             Duration = missionTask.VideoDuration;
-            AnalysisTypes = ToSaraAnalysisKeys(missionTask.AnalysisTypes);
+            AnalysisTypes = missionTask.AnalysisTypes is { Count: > 0 }
+                ? missionTask.AnalysisTypes.Distinct().ToList()
+                : null;
             Acoustic =
                 missionTask.AcousticInspectionMetadata != null
                     ? new IsarAcousticInspection(missionTask.AcousticInspectionMetadata)

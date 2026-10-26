@@ -28,12 +28,12 @@ const record: InspectionRecord = {
         {
             id: 'analysis-1',
             name: 'Oil level',
-            analysisType: 'cloe',
+            analysisType: 'CLOE',
             createdAt: '2026-10-14T06:00:00Z',
             anonymizedSAS: 'https://example.test/inspection.jpg',
             result: {
                 analysisId: 'analysis-1',
-                analysisType: 'cloe',
+                analysisType: 'CLOE',
                 value: null,
                 unit: null,
                 confidence: null,

@@ -1,10 +1,12 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using Api.Controllers.Models;
 using Api.Services.Models;
 using Microsoft.EntityFrameworkCore;
 #pragma warning disable CS8618
 namespace Api.Database.Models
 {
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum AnalysisType
     {
         Fencilla,
