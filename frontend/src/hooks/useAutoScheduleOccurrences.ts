@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useBackendApi } from 'api/UseBackendApi'
-import { SignalREventLabels, useSignalRContext } from 'contexts/SignalRContext'
+import { useSignalRContext } from 'contexts/SignalRContext'
 import { AutoScheduleOccurrence } from 'models/AutoScheduleOccurrence'
-import { unsubscribeAll } from 'utils/signalR'
+import { MissionDefinition } from 'models/MissionDefinition'
 import { useOnPageVisible } from './usePageVisibility'
 
-export const useAutoScheduleOccurrences = (installationCode: string) => {
+export const useAutoScheduleOccurrences = (installationCode: string, missionDefinitions: MissionDefinition[]) => {
     const api = useBackendApi()
-    const { registerEvent, connectionReady } = useSignalRContext()
+    const { connectionReady } = useSignalRContext()
     const [revision, setRevision] = useState(0)
     const [result, setResult] = useState<{
         installationCode: string
@@ -31,17 +31,11 @@ export const useAutoScheduleOccurrences = (installationCode: string) => {
         }
         void refresh()
         const timer = window.setInterval(() => void refresh(), 30_000)
-        const unsubscribe = unsubscribeAll([
-            registerEvent(SignalREventLabels.missionDefinitionUpdated, () => void refresh()),
-            registerEvent(SignalREventLabels.missionDefinitionCreated, () => void refresh()),
-            registerEvent(SignalREventLabels.missionDefinitionDeleted, () => void refresh()),
-        ])
         return () => {
             active = false
             window.clearInterval(timer)
-            unsubscribe()
         }
-    }, [api, installationCode, registerEvent, connectionReady, revision])
+    }, [api, installationCode, missionDefinitions, connectionReady, revision])
 
     const current = result?.installationCode === installationCode ? result : undefined
     return {

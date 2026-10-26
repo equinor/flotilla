@@ -9,12 +9,7 @@ import { InstallationContext } from 'contexts/InstallationContext'
 import { MissionSchedulingEditDialog } from 'components/Dialogs/MissionEditDialog'
 import { phone_width } from 'utils/constants'
 import { useNow } from 'hooks/useNow'
-import {
-    AutoScheduleOccurrence,
-    canSkipOccurrence,
-    canUnskipOccurrence,
-    formatScheduledAt,
-} from 'models/AutoScheduleOccurrence'
+import { AutoScheduleOccurrence, canChangeOccurrenceSkip, formatScheduledAt } from 'models/AutoScheduleOccurrence'
 import { SkipAutoMissionDialog } from './SkipAutoMissionDialog'
 import { findOccurrenceForSlot } from 'models/AutoScheduleOccurrence'
 import { allDays, DaysOfWeek, getAllDaysIndexOfToday, getCetTimeOnly } from 'models/AutoScheduleFrequency'
@@ -133,10 +128,7 @@ export const AutoScheduleMissionTableRow = (props: RowProps) => {
                     {occurrence && (
                         <CalendarButton
                             variant="ghost"
-                            disabled={
-                                autoScheduleError ||
-                                !(canSkipOccurrence(occurrence, now) || canUnskipOccurrence(occurrence, now))
-                            }
+                            disabled={autoScheduleError || !canChangeOccurrenceSkip(occurrence, now)}
                             onClick={() => setIsSkipDialogOpen(true)}
                         >
                             {TranslateText(occurrence.status === 'Skipped' ? 'Undo skip' : 'SkipAutoMission')}

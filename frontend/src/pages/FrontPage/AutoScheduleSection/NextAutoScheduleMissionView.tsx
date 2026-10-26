@@ -89,18 +89,9 @@ export const NextAutoScheduleMissionView = () => {
                 ) : (
                     <StyledTable>
                         <Table.Body style={{ backgroundColor: tokens.colors.ui.background__default.hex }}>
-                            {!showMore ? (
-                                <AutoScheduleMissionTableRow occurrence={occurrences[0]} />
-                            ) : (
-                                <>
-                                    {occurrences.map((occurrence) => (
-                                        <AutoScheduleMissionTableRow
-                                            key={occurrence.scheduleKey}
-                                            occurrence={occurrence}
-                                        />
-                                    ))}
-                                </>
-                            )}
+                            {(showMore ? occurrences : occurrences.slice(0, 1)).map((occurrence) => (
+                                <AutoScheduleMissionTableRow key={occurrence.scheduleKey} occurrence={occurrence} />
+                            ))}
                         </Table.Body>
                     </StyledTable>
                 )}

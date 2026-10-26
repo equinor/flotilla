@@ -8,16 +8,10 @@ export interface AutoScheduleOccurrence {
     mission: MissionDefinition
 }
 
-const isInUpcomingWindow = (occurrence: AutoScheduleOccurrence, now: Date): boolean => {
+export const canChangeOccurrenceSkip = (occurrence: AutoScheduleOccurrence, now: Date): boolean => {
     const scheduledAt = new Date(occurrence.scheduledAt).getTime()
     return scheduledAt > now.getTime() && scheduledAt <= now.getTime() + 24 * 60 * 60 * 1000
 }
-
-export const canSkipOccurrence = (occurrence: AutoScheduleOccurrence, now: Date): boolean =>
-    occurrence.status === 'Scheduled' && isInUpcomingWindow(occurrence, now)
-
-export const canUnskipOccurrence = (occurrence: AutoScheduleOccurrence, now: Date): boolean =>
-    occurrence.status === 'Skipped' && isInUpcomingWindow(occurrence, now)
 
 export const findOccurrenceForSlot = (
     occurrences: AutoScheduleOccurrence[],
@@ -36,7 +30,7 @@ export const findOccurrenceForSlot = (
 
 export const upcomingOccurrences = (occurrences: AutoScheduleOccurrence[], now: Date) =>
     occurrences
-        .filter((occurrence) => isInUpcomingWindow(occurrence, now))
+        .filter((occurrence) => canChangeOccurrenceSkip(occurrence, now))
         .sort(
             (a, b) =>
                 Date.parse(a.scheduledAt) - Date.parse(b.scheduledAt) || a.scheduleKey.localeCompare(b.scheduleKey)

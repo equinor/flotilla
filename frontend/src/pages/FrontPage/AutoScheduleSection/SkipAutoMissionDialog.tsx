@@ -6,12 +6,7 @@ import { useAlertContext } from 'contexts/AlertContext'
 import { useLanguageContext } from 'contexts/LanguageContext'
 import { useMissionDefinitionsContext } from 'contexts/MissionDefinitionsContext'
 import { useNow } from 'hooks/useNow'
-import {
-    AutoScheduleOccurrence,
-    canSkipOccurrence,
-    canUnskipOccurrence,
-    formatScheduledAt,
-} from 'models/AutoScheduleOccurrence'
+import { AutoScheduleOccurrence, canChangeOccurrenceSkip, formatScheduledAt } from 'models/AutoScheduleOccurrence'
 
 export const SkipAutoMissionDialog = ({
     occurrence,
@@ -32,7 +27,8 @@ export const SkipAutoMissionDialog = ({
     const eligible =
         !autoScheduleError &&
         current !== undefined &&
-        (undoSkip ? canUnskipOccurrence(current, now) : canSkipOccurrence(current, now))
+        current.status === occurrence.status &&
+        canChangeOccurrenceSkip(current, now)
 
     const submit = async () => {
         setSubmitting(true)

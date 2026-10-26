@@ -6,28 +6,25 @@ import { AutoScheduleOccurrence } from 'models/AutoScheduleOccurrence'
 
 const mocks = vi.hoisted(() => ({
     get: vi.fn(),
-    handlers: new Map<string, () => void>(),
+    connectionReady: true,
 }))
 const api = { getAutoScheduleOccurrences: mocks.get }
-const registerEvent = (event: string, callback: () => void) => {
-    mocks.handlers.set(event, callback)
-    return () => mocks.handlers.delete(event)
-}
 vi.mock('api/UseBackendApi', () => ({ useBackendApi: () => api }))
 vi.mock('contexts/SignalRContext', () => ({
-    SignalREventLabels: {
-        missionDefinitionUpdated: 'updated',
-        missionDefinitionCreated: 'created',
-        missionDefinitionDeleted: 'deleted',
-    },
-    useSignalRContext: () => ({ registerEvent, connectionReady: true }),
+    useSignalRContext: () => ({ connectionReady: mocks.connectionReady }),
 }))
 
 let root: Root
 let container: HTMLDivElement
 let result: ReturnType<typeof useAutoScheduleOccurrences>
-const Probe = ({ installation = 'AAA' }: { installation?: string }) => {
-    const current = useAutoScheduleOccurrences(installation)
+const Probe = ({
+    installation = 'AAA',
+    definitions = initialDefinitions,
+}: {
+    installation?: string
+    definitions?: typeof initialDefinitions
+}) => {
+    const current = useAutoScheduleOccurrences(installation, definitions)
     useEffect(() => {
         result = current
     }, [current])
@@ -52,12 +49,13 @@ const occurrence: AutoScheduleOccurrence = {
         },
     },
 }
+const initialDefinitions = [occurrence.mission]
 
 beforeEach(() => {
     vi.useFakeTimers()
     vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
     mocks.get.mockReset().mockResolvedValue([occurrence])
-    mocks.handlers.clear()
+    mocks.connectionReady = true
     container = document.createElement('div')
     root = createRoot(container)
 })
@@ -67,16 +65,22 @@ afterEach(() => {
     vi.unstubAllGlobals()
 })
 
-test('refreshes on schedule updates and polling, and unsubscribes on unmount', async () => {
+test('refreshes on definition changes, reconnect and polling, and clears its timer on unmount', async () => {
     await act(async () => root.render(<Probe />))
     expect(result.autoScheduleOccurrences).toEqual([occurrence])
     mocks.get.mockResolvedValue([{ ...occurrence, status: 'Skipped' }])
-    await act(async () => mocks.handlers.get('updated')?.())
+    await act(async () => root.render(<Probe definitions={[...initialDefinitions]} />))
     expect(result.autoScheduleOccurrences[0].status).toBe('Skipped')
+    mocks.connectionReady = false
+    await act(async () => root.render(<Probe />))
+    const beforeReconnect = mocks.get.mock.calls.length
+    mocks.connectionReady = true
+    await act(async () => root.render(<Probe />))
+    expect(mocks.get).toHaveBeenCalledTimes(beforeReconnect + 1)
+    const beforePolling = mocks.get.mock.calls.length
     await act(async () => vi.advanceTimersByTime(30_000))
-    expect(mocks.get).toHaveBeenCalledTimes(3)
+    expect(mocks.get).toHaveBeenCalledTimes(beforePolling + 1)
     act(() => root.render(null))
-    expect(mocks.handlers.size).toBe(0)
     expect(vi.getTimerCount()).toBe(0)
 })
 

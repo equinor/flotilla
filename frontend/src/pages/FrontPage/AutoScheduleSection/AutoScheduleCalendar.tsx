@@ -5,12 +5,7 @@ import 'react-big-calendar/lib/css/react-big-calendar.css'
 import styled from 'styled-components'
 import { useContext, useMemo, useState } from 'react'
 import { allDaysStartingSunday, DaysOfWeek, getWeeklyScheduleSlots, getCetNow } from 'models/AutoScheduleFrequency'
-import {
-    AutoScheduleOccurrence,
-    canSkipOccurrence,
-    canUnskipOccurrence,
-    findOccurrenceForSlot,
-} from 'models/AutoScheduleOccurrence'
+import { AutoScheduleOccurrence, canChangeOccurrenceSkip, findOccurrenceForSlot } from 'models/AutoScheduleOccurrence'
 import { SkipAutoMissionDialog } from './SkipAutoMissionDialog'
 import { useNavigate } from 'react-router'
 import { Button, Chip, Icon, Typography } from '@equinor/eds-core-react'
@@ -276,13 +271,11 @@ export const CalendarPro = () => {
                 <StyledEditButton variant="ghost_icon" onClick={() => setSelectedMissionToEdit(event.mission)}>
                     <Icon name={Icons.Edit} size={16} color={event.color.border} />
                 </StyledEditButton>
-                {!autoScheduleError &&
-                    event.occurrence &&
-                    (canSkipOccurrence(event.occurrence, now) || canUnskipOccurrence(event.occurrence, now)) && (
-                        <StyledSkipButton onClick={() => setSelectedOccurrence(event.occurrence)}>
-                            {TranslateText(event.occurrence.status === 'Skipped' ? 'Undo skip' : 'SkipAutoMission')}
-                        </StyledSkipButton>
-                    )}
+                {!autoScheduleError && event.occurrence && canChangeOccurrenceSkip(event.occurrence, now) && (
+                    <StyledSkipButton onClick={() => setSelectedOccurrence(event.occurrence)}>
+                        {TranslateText(event.occurrence.status === 'Skipped' ? 'Undo skip' : 'SkipAutoMission')}
+                    </StyledSkipButton>
+                )}
             </StyledEvent>
         )
     }

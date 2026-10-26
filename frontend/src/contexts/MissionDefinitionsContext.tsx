@@ -42,7 +42,7 @@ const useMissionDefinitions = (): IMissionDefinitionsContext => {
     const [missionDefinitions, setMissionDefinitions] = useState<MissionDefinition[]>([])
     const { registerEvent, connectionReady } = useSignalRContext()
     const { installation } = useContext(InstallationContext)
-    const occurrences = useAutoScheduleOccurrences(installation.installationCode)
+    const occurrences = useAutoScheduleOccurrences(installation.installationCode, missionDefinitions)
     const { TranslateText } = useLanguageContext()
     const { setBanner } = useAlertContext()
     const backendApi = useBackendApi()

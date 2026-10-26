@@ -99,18 +99,15 @@ afterEach(() => {
     Reflect.deleteProperty(HTMLDialogElement.prototype, 'close')
 })
 
-test('dashboard shows all occurrences, including after midnight, without skip controls', () => {
-    state.occurrences = Array.from({ length: 5 }, (_, i) => ({ ...tomorrow, scheduleKey: `schedule-key-${i}` }))
+test('dashboard shows all planned occurrences, including after midnight, without skip controls', () => {
+    state.occurrences = [
+        ...Array.from({ length: 5 }, (_, i) => ({ ...tomorrow, scheduleKey: `schedule-key-${i}` })),
+        { ...tomorrow, scheduleKey: 'skipped-key', status: 'Skipped' },
+    ]
     render(<DashboardScheduledMissionsView />)
     expect(container.textContent?.match(/Inspection/g)).toHaveLength(5)
     expect(container.textContent).toContain('17/10')
     expect(container.querySelector('button')).toBeNull()
-})
-
-test('mission-control list offers Skip for tomorrow', () => {
-    render(<NextAutoScheduleMissionView />)
-    expect(button('Skip').disabled).toBe(false)
-    expect(container.textContent).toContain('17/10')
 })
 
 test.each(['Scheduled', 'Skipped'] as const)(
@@ -140,12 +137,6 @@ test('retrieval errors are not presented as an empty successful schedule', () =>
     expect(container.textContent).not.toContain('There are no scheduled missions')
 })
 
-test('stale occurrences cannot be confirmed', () => {
-    state.occurrences = []
-    render(<SkipAutoMissionDialog occurrence={tomorrow} onClose={vi.fn()} />)
-    expect(button('Skip').disabled).toBe(true)
-})
-
 test.each(['Scheduled', 'Skipped'] as const)(
     'a rejected change to %s keeps the dialog open and reports an error',
     async (status) => {
@@ -165,20 +156,22 @@ test.each(['Scheduled', 'Skipped'] as const)(
     }
 )
 
-test('upcoming list displays skipped missions and undo submits only the selected dated schedule key', async () => {
-    const skipped = { ...tomorrow, status: 'Skipped' as const }
-    state.occurrences = [skipped]
+test('expanded list includes skipped missions and undo restores only the selected occurrence', async () => {
+    state.occurrences = [{ ...tomorrow, scheduleKey: 'skipped-key', status: 'Skipped' }, tomorrow]
     state.unskip.mockImplementation(async () => {
         state.occurrences = [tomorrow]
     })
     render(<NextAutoScheduleMissionView />)
+    act(() => button('Show more').click())
+    expect(container.textContent?.match(/Inspection/g)).toHaveLength(2)
     expect(container.textContent).toContain('Skipped')
     expect(container.textContent).toContain('17/10')
+    expect(button('Skip').disabled).toBe(false)
     expect(button('Undo skip').disabled).toBe(false)
     act(() => button('Undo skip').click())
     expect(document.body.textContent).toContain('Restore Inspection scheduled for 17/10')
     await act(async () => button('Undo skip', 'dialog button').click())
-    expect(state.unskip).toHaveBeenCalledExactlyOnceWith('mission-id', 'tomorrow-key')
+    expect(state.unskip).toHaveBeenCalledExactlyOnceWith('mission-id', 'skipped-key')
     expect(state.skip).not.toHaveBeenCalled()
     expect(state.refresh).toHaveBeenCalledOnce()
     render(<NextAutoScheduleMissionView />)
@@ -186,31 +179,16 @@ test('upcoming list displays skipped missions and undo submits only the selected
     expect(button('Skip').disabled).toBe(false)
 })
 
-test('expanded upcoming list keeps both skipped and planned missions visible', () => {
-    state.occurrences = [{ ...tomorrow, scheduleKey: 'skipped-key', status: 'Skipped' }, tomorrow]
-    render(<NextAutoScheduleMissionView />)
-    act(() => button('Show more').click())
-    expect(container.textContent?.match(/Inspection/g)).toHaveLength(2)
-    expect(container.textContent).toContain('Skipped')
-    expect(container.textContent).toContain('Undo skip')
-    expect(button('Skip').disabled).toBe(false)
-})
-
-test.each(['restored', 'expired', 'error'])('undo confirmation rejects a %s occurrence', (reason) => {
+test.each(['missing', 'restored', 'expired', 'error'])('undo confirmation rejects a %s occurrence', (reason) => {
     const skipped = { ...tomorrow, status: 'Skipped' as const }
     state.occurrences =
-        reason === 'restored'
-            ? [tomorrow]
-            : [{ ...skipped, scheduledAt: reason === 'expired' ? '2026-10-16T20:00:00Z' : skipped.scheduledAt }]
+        reason === 'missing'
+            ? []
+            : reason === 'restored'
+              ? [tomorrow]
+              : [{ ...skipped, scheduledAt: reason === 'expired' ? '2026-10-16T20:00:00Z' : skipped.scheduledAt }]
     state.error = reason === 'error'
     render(<SkipAutoMissionDialog occurrence={skipped} onClose={vi.fn()} />)
     expect(button('Undo skip').disabled).toBe(true)
     expect(document.body.textContent).toContain('This skip can no longer be undone.')
-})
-
-test('dashboard still excludes skipped entries and has no undo control', () => {
-    state.occurrences = [{ ...tomorrow, status: 'Skipped' }]
-    render(<DashboardScheduledMissionsView />)
-    expect(container.textContent).toContain('There are no scheduled missions')
-    expect(container.querySelector('button')).toBeNull()
 })
