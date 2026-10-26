@@ -71,6 +71,7 @@ export const placeholderRobot: RobotWithoutTelemetry = {
 }
 
 enum RobotCapabilitiesEnum {
+    stored_mission = 'stored_mission',
     take_thermal_image = 'take_thermal_image',
     take_image = 'take_image',
     take_video = 'take_video',

@@ -213,14 +213,30 @@ namespace Api.Test.Security
             _scheduling.VerifyNoOtherCalls();
         }
 
-        [Fact]
-        public async Task WorkerWithPersistedScheduleStillCreatesMission()
+        [Theory]
+        [InlineData(false, true)]
+        [InlineData(true, true)]
+        [InlineData(true, false)]
+        public async Task WorkerWithPersistedScheduleOnlyCreatesCompatibleMissions(
+            bool storedMission,
+            bool supported
+        )
         {
             _roles
                 .Setup(s => s.GetAllowedInstallationCodes(AccessMode.Write))
                 .ReturnsAsync(["BBB"]);
             var definition = CreateDefinition();
-            var robot = new Robot { Id = "robot", CurrentInspectionAreaId = "area" };
+            if (storedMission)
+            {
+                definition.RobotMissionId = "DiagnosticRoutine";
+                definition.Tasks = [];
+            }
+            var robot = new Robot
+            {
+                Id = "robot",
+                CurrentInspectionAreaId = "area",
+                RobotCapabilities = supported ? [RobotCapabilitiesEnum.stored_mission] : [],
+            };
             _definitions
                 .Setup(s => s.ReadById(definition.Id, true, AccessMode.Read))
                 .ReturnsAsync(definition);
@@ -238,10 +254,20 @@ namespace Api.Test.Security
             await CreateService().AutoScheduleMissionRun(definition.Id, ScheduledTime);
 
             _missions.Verify(
-                s => s.Create(It.Is<MissionRun>(m => m.MissionId == definition.Id)),
-                Times.Once
+                s =>
+                    s.Create(
+                        It.Is<MissionRun>(m =>
+                            m.MissionId == definition.Id
+                            && m.RobotMissionId == definition.RobotMissionId
+                            && m.Tasks.Count == definition.Tasks.Count
+                        )
+                    ),
+                supported ? Times.Once() : Times.Never()
             );
-            _scheduling.Verify(s => s.StartNextMissionRunIfSystemIsAvailable(robot), Times.Once);
+            _scheduling.Verify(
+                s => s.StartNextMissionRunIfSystemIsAvailable(robot),
+                supported ? Times.Once() : Times.Never()
+            );
         }
     }
 }

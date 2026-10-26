@@ -9,7 +9,11 @@ using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
 using Api.Test.Database;
+using Api.Test.Mocks;
+using Hangfire.Common;
+using Hangfire.States;
 using Microsoft.Extensions.DependencyInjection;
+using Moq;
 using Testcontainers.PostgreSql;
 using Xunit;
 
@@ -23,6 +27,9 @@ namespace Api.Test.Controllers
         public required JsonSerializerOptions SerializerOptions;
 
         public required IMissionDefinitionService MissionDefinitionService;
+        private IRobotService _robotService = null!;
+        private IMissionRunService _missionRunService = null!;
+        private MockIsarService _isarService = null!;
 
         public async ValueTask InitializeAsync()
         {
@@ -32,6 +39,12 @@ namespace Api.Test.Controllers
                 postgreSqlConnectionString: connectionString
             );
             var serviceProvider = TestSetupHelpers.ConfigureServiceProvider(factory);
+            factory
+                .BackgroundJobs.Setup(j => j.Create(It.IsAny<Job>(), It.IsAny<IState>()))
+                .Returns("job");
+            _robotService = serviceProvider.GetRequiredService<IRobotService>();
+            _missionRunService = serviceProvider.GetRequiredService<IMissionRunService>();
+            _isarService = factory.MockIsarService;
 
             Client = TestSetupHelpers.ConfigureHttpClient(factory);
             SerializerOptions = TestSetupHelpers.ConfigureJsonSerializerOptions();
@@ -46,6 +59,202 @@ namespace Api.Test.Controllers
         {
             GC.SuppressFinalize(this);
             await Task.CompletedTask;
+        }
+
+        [Fact]
+        public async Task StoredMissionCanBeCreatedScheduledAndRerunWithoutInspectionTasks()
+        {
+            var installation = await DatabaseUtilities.NewInstallation();
+            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
+            var area = await DatabaseUtilities.NewInspectionArea(
+                installation.InstallationCode,
+                plant.PlantCode
+            );
+            var robot = await DatabaseUtilities.NewRobot(
+                RobotStatus.Available,
+                installation,
+                area.Id
+            );
+            robot.RobotCapabilities = [RobotCapabilitiesEnum.stored_mission];
+            await _robotService.Update(robot);
+
+            var response = await Client.PostAsJsonAsync(
+                "missions/definitions",
+                new
+                {
+                    installationCode = installation.InstallationCode,
+                    name = "Daily diagnostics",
+                    robotMissionId = "DiagnosticRoutine",
+                    inspectionAreaId = area.Id,
+                    tasks = System.Array.Empty<TaskQuery>(),
+                },
+                TestContext.Current.CancellationToken
+            );
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            var created = await response.Content.ReadFromJsonAsync<MissionDefinition>(
+                SerializerOptions,
+                TestContext.Current.CancellationToken
+            );
+            Assert.NotNull(created);
+            var definition = await MissionDefinitionService.ReadById(created.Id);
+            Assert.Equal("DiagnosticRoutine", definition!.RobotMissionId);
+            Assert.Empty(definition.Tasks);
+            Assert.False(definition.IsAdHoc);
+
+            var patch = await Client.PatchAsJsonAsync(
+                $"missions/definitions/{created.Id}",
+                new UpdateMissionDefinitionQuery
+                {
+                    Name = "Renamed diagnostics",
+                    SchedulingTimesCETperWeek =
+                    [
+                        new() { DayOfWeek = DayOfWeek.Monday, TimeOfDay = new TimeOnly(8, 0) },
+                        new() { DayOfWeek = DayOfWeek.Tuesday, TimeOfDay = new TimeOnly(8, 0) },
+                        new() { DayOfWeek = DayOfWeek.Wednesday, TimeOfDay = new TimeOnly(8, 0) },
+                        new() { DayOfWeek = DayOfWeek.Thursday, TimeOfDay = new TimeOnly(8, 0) },
+                        new() { DayOfWeek = DayOfWeek.Friday, TimeOfDay = new TimeOnly(8, 0) },
+                        new() { DayOfWeek = DayOfWeek.Saturday, TimeOfDay = new TimeOnly(8, 0) },
+                        new() { DayOfWeek = DayOfWeek.Sunday, TimeOfDay = new TimeOnly(8, 0) },
+                    ],
+                },
+                TestContext.Current.CancellationToken
+            );
+            Assert.Equal(HttpStatusCode.OK, patch.StatusCode);
+            var updated = await patch.Content.ReadFromJsonAsync<MissionDefinitionResponse>(
+                SerializerOptions,
+                TestContext.Current.CancellationToken
+            );
+            Assert.Equal("DiagnosticRoutine", updated!.RobotMissionId);
+            Assert.Equal(7, updated.AutoScheduleFrequency!.SchedulingTimesCETperWeek.Count);
+
+            var schedule = await Client.PostAsJsonAsync(
+                $"missions/schedule/{created.Id}",
+                new ScheduleMissionQuery { RobotId = robot.Id },
+                TestContext.Current.CancellationToken
+            );
+            Assert.Equal(HttpStatusCode.Created, schedule.StatusCode);
+            var run = await schedule.Content.ReadFromJsonAsync<MissionRun>(
+                SerializerOptions,
+                TestContext.Current.CancellationToken
+            );
+            Assert.Equal("DiagnosticRoutine", run!.RobotMissionId);
+            Assert.Equal("Renamed diagnostics", run.Name);
+            Assert.Empty(run.Tasks);
+            Assert.True(_isarService.isStarted);
+            Assert.Equal(
+                "DiagnosticRoutine",
+                (await _missionRunService.ReadById(run.Id))!.RobotMissionId
+            );
+
+            var rerun = await Client.PostAsJsonAsync(
+                $"missions/rerun/{run.Id}",
+                new ScheduleMissionQuery { RobotId = robot.Id },
+                TestContext.Current.CancellationToken
+            );
+            Assert.Equal(HttpStatusCode.Created, rerun.StatusCode);
+            var repeated = await rerun.Content.ReadFromJsonAsync<MissionRun>(
+                SerializerOptions,
+                TestContext.Current.CancellationToken
+            );
+            Assert.Equal("DiagnosticRoutine", repeated!.RobotMissionId);
+            Assert.NotEqual(run.Id, repeated.Id);
+
+            var editTasks = await Client.PatchAsJsonAsync(
+                $"missions/definitions/{created.Id}",
+                new UpdateMissionDefinitionQuery { Tasks = [] },
+                TestContext.Current.CancellationToken
+            );
+            Assert.Equal(HttpStatusCode.BadRequest, editTasks.StatusCode);
+
+            robot.Status = RobotStatus.Busy;
+            await _robotService.Update(robot);
+            _isarService.isStarted = false;
+            var busy = await Client.PostAsJsonAsync(
+                $"missions/schedule/{created.Id}",
+                new ScheduleMissionQuery { RobotId = robot.Id },
+                TestContext.Current.CancellationToken
+            );
+            Assert.Equal(HttpStatusCode.Created, busy.StatusCode);
+            Assert.False(_isarService.isStarted);
+            var queued = await busy.Content.ReadFromJsonAsync<MissionRun>(
+                SerializerOptions,
+                TestContext.Current.CancellationToken
+            );
+            Assert.Equal(MissionStatus.Queued, queued!.Status);
+
+            robot.RobotCapabilities = [RobotCapabilitiesEnum.take_image];
+            await _robotService.Update(robot);
+            var incompatible = await Client.PostAsJsonAsync(
+                $"missions/schedule/{created.Id}",
+                new ScheduleMissionQuery { RobotId = robot.Id },
+                TestContext.Current.CancellationToken
+            );
+            Assert.Equal(HttpStatusCode.BadRequest, incompatible.StatusCode);
+        }
+
+        [Fact]
+        public async Task InvalidStoredMissionRequestsAreRejected()
+        {
+            var invalidQueries = new[]
+            {
+                new CreateMissionQuery
+                {
+                    RobotMissionId = "",
+                    InspectionAreaId = "area",
+                    Tasks = [],
+                },
+                new CreateMissionQuery
+                {
+                    RobotMissionId = " ",
+                    InspectionAreaId = "area",
+                    Tasks = [],
+                },
+                new CreateMissionQuery { RobotMissionId = "DiagnosticRoutine", Tasks = [] },
+                new CreateMissionQuery
+                {
+                    RobotMissionId = "DiagnosticRoutine",
+                    InspectionAreaId = "area",
+                    Tasks = [new TaskQuery()],
+                },
+                new CreateMissionQuery { Tasks = [] },
+            };
+            foreach (var invalid in invalidQueries)
+            {
+                var query = invalid;
+                query.Name = "Diagnostics";
+                query.InstallationCode = "TEST";
+                var response = await Client.PostAsJsonAsync(
+                    "missions/definitions",
+                    query,
+                    TestContext.Current.CancellationToken
+                );
+                Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            }
+        }
+
+        [Fact]
+        public async Task StoredMissionCannotUseAnotherInstallationsInspectionArea()
+        {
+            var installation = await DatabaseUtilities.NewInstallation();
+            var otherInstallation = await DatabaseUtilities.NewInstallation("OTHER");
+            var plant = await DatabaseUtilities.NewPlant(otherInstallation.InstallationCode);
+            var area = await DatabaseUtilities.NewInspectionArea(
+                otherInstallation.InstallationCode,
+                plant.PlantCode
+            );
+            var response = await Client.PostAsJsonAsync(
+                "missions/definitions",
+                new
+                {
+                    installationCode = installation.InstallationCode,
+                    name = "Daily diagnostics",
+                    robotMissionId = "DiagnosticRoutine",
+                    inspectionAreaId = area.Id,
+                    tasks = System.Array.Empty<TaskQuery>(),
+                },
+                TestContext.Current.CancellationToken
+            );
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
         [Fact]

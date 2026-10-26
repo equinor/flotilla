@@ -123,6 +123,63 @@ Request one `*-api` scope at a time: two audience mappers make Keycloak emit `au
 
 The armada integration tests run the backend against the same realm, under `ASPNETCORE_ENVIRONMENT=IntegrationTest`. That environment has no appsettings file here on purpose: its configuration is passed in as environment variables from [`armada/robotics_integration_tests/custom_containers/flotilla_backend.py`](https://github.com/equinor/armada/blob/main/robotics_integration_tests/custom_containers/flotilla_backend.py), alongside the realm that defines the clients and scopes. Change it there, not here.
 
+## Scheduling the robot-stored diagnostic mission
+
+Requires the companion ISAR/isar-anymal support for `robot_mission_id` and a robot
+advertising `stored_mission` in its refreshed capabilities. Install those versions
+first. `DiagnosticRoutine` must already exist on the robot; Flotilla does not
+generate an ADS mission or create inspection tasks for it.
+
+Using an operator token with write access to the installation, create a definition
+once with `POST /missions/definitions`:
+
+```json
+{
+  "name": "Daily diagnostics",
+  "installationCode": "YOUR_INSTALLATION",
+  "inspectionAreaId": "EXISTING_INSPECTION_AREA_ID",
+  "robotMissionId": "DiagnosticRoutine",
+  "isAdHoc": false,
+  "tasks": []
+}
+```
+
+Find the inspection area through `GET /inspectionAreas/installation/{installationCode}`.
+It must belong to the same installation. The reference is independent of the
+editable display name; inspection tasks cannot be added to this definition.
+
+Open the definition in Flotilla and edit **Automated scheduling** to select every
+day at the required time. Alternatively, `PATCH /missions/definitions/{id}`:
+
+```json
+{
+  "schedulingTimesCETperWeek": [
+    { "dayOfWeek": "Monday", "timeOfDay": "08:00:00" },
+    { "dayOfWeek": "Tuesday", "timeOfDay": "08:00:00" },
+    { "dayOfWeek": "Wednesday", "timeOfDay": "08:00:00" },
+    { "dayOfWeek": "Thursday", "timeOfDay": "08:00:00" },
+    { "dayOfWeek": "Friday", "timeOfDay": "08:00:00" },
+    { "dayOfWeek": "Saturday", "timeOfDay": "08:00:00" },
+    { "dayOfWeek": "Sunday", "timeOfDay": "08:00:00" }
+  ]
+}
+```
+
+The existing scheduler uses Europe/Oslo local time (CET/CEST). It chooses a capable
+robot currently in the definition's inspection area, creates a normal queued run,
+and retains the usual availability gates. It does not guarantee an exact execution
+time or target every robot. No compatible robot in the area is reported as an
+auto-scheduling failure. An already queued run of this definition is not duplicated.
+Use an empty `schedulingTimesCETperWeek` list to disable future automatic scheduling.
+
+Manual scheduling remains `POST /missions/schedule/{id}` with
+`{"robotId":"ROBOT_ID"}`. Run IDs remain unique for status correlation; the ISAR
+request contains that run ID, the display name, `robot_mission_id: "DiagnosticRoutine"`
+and `tasks: []`. Completion/failure follows ISAR mission status rather than
+inspection counts. A rerun executes the complete robot-stored routine again.
+Flotilla cannot apply inspection-task exclusion polygons inside a robot-stored
+routine; its route must be managed on the robot.
+
 ## Monitoring
 
 The backend is instrumented with [OpenTelemetry](https://opentelemetry.io/). Traces, metrics, and logs are exported via OTLP to a Grafana-compatible backend.

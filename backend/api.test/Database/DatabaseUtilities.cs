@@ -34,6 +34,7 @@ namespace Api.Test.Database
                 Name = "testMission",
                 Robot = robot,
                 MissionId = missionDefinition.Id,
+                RobotMissionId = missionDefinition.RobotMissionId,
                 Status = missionStatus,
                 CreationTime = DateTime.UtcNow,
                 InspectionArea = missionDefinition.InspectionArea,

@@ -177,7 +177,9 @@ const MissionDetails = ({ mission }: { mission: Mission }) => {
         return translateNotAvailable
     }
 
-    const tasks = `${TranslateText('Tasks')}: ${mission.tasks.length}`
+    const tasks = mission.robotMissionId
+        ? `${TranslateText('Robot-stored mission')}: ${mission.robotMissionId}`
+        : `${TranslateText('Tasks')}: ${mission.tasks.length}`
     const missionDetails = `${tasks} | ${getEstimatedDuration()}`
 
     return (

@@ -33,6 +33,7 @@ export interface MissionDefinition {
     id: string
     name: string
     isAdHoc: boolean
+    robotMissionId?: string | null
     installationCode: string
     comment?: string
     autoScheduleFrequency?: AutoScheduleFrequency

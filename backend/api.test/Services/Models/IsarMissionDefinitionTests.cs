@@ -8,6 +8,37 @@ namespace Api.Test.Services.Models
     public class IsarMissionDefinitionTests
     {
         [Fact]
+        public void StoredMissionSerializesReferenceSeparatelyFromRunIdentity()
+        {
+            var mission = new MissionRun
+            {
+                Id = "unique-run-id",
+                Name = "Daily diagnostics",
+                RobotMissionId = "DiagnosticRoutine",
+                Tasks = [],
+            };
+            using var json = JsonDocument.Parse(
+                JsonSerializer.Serialize(new IsarMissionDefinition(mission))
+            );
+            Assert.Equal("unique-run-id", json.RootElement.GetProperty("id").GetString());
+            Assert.Equal("Daily diagnostics", json.RootElement.GetProperty("name").GetString());
+            Assert.Equal(
+                "DiagnosticRoutine",
+                json.RootElement.GetProperty("robot_mission_id").GetString()
+            );
+            Assert.Equal(0, json.RootElement.GetProperty("tasks").GetArrayLength());
+        }
+
+        [Fact]
+        public void OrdinaryMissionOmitsStoredReference()
+        {
+            var json = JsonSerializer.Serialize(
+                new IsarMissionDefinition(new MissionRun { Tasks = [] })
+            );
+            Assert.DoesNotContain("robot_mission_id", json);
+        }
+
+        [Fact]
         public void AnalysisTypesSerialiseAsSnakeCaseSaraKeys()
         {
             var task = new MissionTask

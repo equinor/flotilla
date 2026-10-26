@@ -177,6 +177,7 @@ namespace Api.Database.Models
         take_xam8000_gas_measurement,
         record_audio,
         take_acoustic_measurement,
+        stored_mission,
     }
 
     public enum BatteryState

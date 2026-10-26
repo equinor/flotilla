@@ -89,7 +89,7 @@ const useMissionSelector = (missionId: string | undefined, lookupInspectionId: s
     return { selectedMission }
 }
 
-const MissionPageWithMission = ({ mission, includeHeader = true }: { mission: Mission; includeHeader: boolean }) => {
+const MissionInspectionContent = ({ mission }: { mission: Mission }) => {
     const { installation } = useContext(InstallationContext)
     const { useSaraListData } = useInspectionsContext()
     const { data, isPending, isError } = useSaraListData(
@@ -107,28 +107,42 @@ const MissionPageWithMission = ({ mission, includeHeader = true }: { mission: Mi
     }))
 
     return (
+        <TaskTableAndMap
+            tasksAndData={taskDataInSelectedMission}
+            plantCode={mission.inspectionArea.plantCode}
+            robot={mission.robot}
+        >
+            <MissionVideoStreamSection>
+                <VideoStreamWindow robotId={mission.robot.id} />
+            </MissionVideoStreamSection>
+            <MissionResults
+                tasks={mission.tasks}
+                data={data}
+                isPending={isPending}
+                isError={isError}
+                installationName={installation.name}
+                robotName={mission.robot.name}
+            />
+        </TaskTableAndMap>
+    )
+}
+
+const MissionPageWithMission = ({ mission, includeHeader = true }: { mission: Mission; includeHeader: boolean }) => {
+    const { installation } = useContext(InstallationContext)
+
+    return (
         <>
             {includeHeader ? <Header installation={installation} /> : <></>}
             <PageBackground>
                 <PageContent>
                     {includeHeader ? <MissionHeader mission={mission} /> : <SimpleMissionHeader mission={mission} />}
-                    <TaskTableAndMap
-                        tasksAndData={taskDataInSelectedMission}
-                        plantCode={mission.inspectionArea.plantCode}
-                        robot={mission.robot}
-                    >
+                    {mission.robotMissionId ? (
                         <MissionVideoStreamSection>
                             <VideoStreamWindow robotId={mission.robot.id} />
                         </MissionVideoStreamSection>
-                        <MissionResults
-                            tasks={mission.tasks}
-                            data={data}
-                            isPending={isPending}
-                            isError={isError}
-                            installationName={installation.name}
-                            robotName={mission.robot.name}
-                        />
-                    </TaskTableAndMap>
+                    ) : (
+                        <MissionInspectionContent mission={mission} />
+                    )}
                 </PageContent>
             </PageBackground>
         </>
