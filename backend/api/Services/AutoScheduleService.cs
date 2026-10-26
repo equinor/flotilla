@@ -258,14 +258,32 @@ namespace Api.Services
         private async Task AddDatedSkipIfMissing(
             string missionDefinitionId,
             DateTimeOffset scheduledAt
-        ) =>
-            await context.Database.ExecuteSqlInterpolatedAsync(
-                $"""
-                INSERT INTO "AutoScheduleSkips" ("MissionDefinitionId", "ScheduledAt")
-                VALUES ({missionDefinitionId}, {scheduledAt})
-                ON CONFLICT ("MissionDefinitionId", "ScheduledAt") DO NOTHING
-                """
-            );
+        )
+        {
+            var skip = new AutoScheduleSkip
+            {
+                MissionDefinitionId = missionDefinitionId,
+                ScheduledAt = scheduledAt,
+            };
+            context.AutoScheduleSkips.Add(skip);
+            try
+            {
+                await context.SaveChangesAsync();
+            }
+            catch (DbUpdateException e)
+                when (e.InnerException
+                        is PostgresException
+                        {
+                            SqlState: PostgresErrorCodes.UniqueViolation,
+                            ConstraintName: "IX_AutoScheduleSkips_MissionDefinitionId_ScheduledAt"
+                        }
+                )
+            {
+                // EF rolls back to its savepoint; detach the rejected insert before continuing.
+                context.Entry(skip).State = EntityState.Detached;
+                logger.LogInformation("The selected dated mission is already skipped");
+            }
+        }
 
         private async Task RemoveDatedSkipAndRegisterJob(
             string missionDefinitionId,

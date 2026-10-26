@@ -247,9 +247,20 @@ public class TestComputedAutoSchedules : IAsyncLifetime
             Worker(concurrent.ServiceProvider).SkipOccurrence(_definition, next.ScheduleKey)
         );
         Assert.All(skips, Assert.True);
+        Assert.DoesNotContain(
+            _context.ChangeTracker.Entries<AutoScheduleSkip>(),
+            e => e.State == EntityState.Added
+        );
+        Assert.DoesNotContain(
+            concurrent
+                .ServiceProvider.GetRequiredService<FlotillaDbContext>()
+                .ChangeTracker.Entries<AutoScheduleSkip>(),
+            e => e.State == EntityState.Added
+        );
         var savedSkip = await _context.AutoScheduleSkips.SingleAsync(Token);
         Assert.True(savedSkip.Id > 0);
         Assert.True(await _service.SkipOccurrence(_definition, next.ScheduleKey));
+        Assert.Empty(_context.ChangeTracker.Entries<AutoScheduleSkip>());
         Assert.Equal(savedSkip.Id, (await _context.AutoScheduleSkips.SingleAsync(Token)).Id);
         await _service.UpdateAutoScheduleFrequency(_definition, []);
         Assert.Empty(await _service.ReadUpcoming(_definition.InstallationCode));
