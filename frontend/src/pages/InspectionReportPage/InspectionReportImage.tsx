@@ -89,9 +89,9 @@ export const InspectionImageWithPlaceholder = ({
     isLargeImage: boolean
 }) =>
     isLargeImage ? (
-        <StyledInspection $otherContentHeight={'174px'} src={inspection.mediaSAS} />
+        <StyledInspection $otherContentHeight={'174px'} src={inspection.anonymizedSAS ?? inspection.visualizedSAS} />
     ) : (
-        <StyledInspectionImage src={inspection.mediaSAS} />
+        <StyledInspectionImage src={inspection.anonymizedSAS ?? inspection.visualizedSAS} />
     )
 
 const InspectionValueWithPlaceholder = ({
@@ -121,10 +121,15 @@ const InspectionVideoWithPlaceholder = ({
 }: {
     inspection: InspectionData
     isLargeImage: boolean
-}) => (isLargeImage ? <LargeVideoWithPlaceholder inspection={inspection} /> : <VideoPlaceholder />)
+}) =>
+    isLargeImage ? (
+        <LargeVideoWithPlaceholder source={inspection.anonymizedSAS ?? inspection.visualizedSAS} />
+    ) : (
+        <VideoPlaceholder />
+    )
 
-const LargeVideoWithPlaceholder = ({ inspection }: { inspection: InspectionData }) =>
-    inspection.mediaSAS ? <VideoPlayer src={inspection.mediaSAS} /> : <VideoPlaceholder />
+const LargeVideoWithPlaceholder = ({ source }: { source: string | undefined }) =>
+    source ? <VideoPlayer src={source} /> : <VideoPlaceholder />
 
 const InspectionResultWithPlaceholder = ({
     inspection,

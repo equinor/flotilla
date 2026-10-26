@@ -129,8 +129,7 @@ const MissionPageWithMission = ({ mission, includeHeader = true }: { mission: Mi
                             )}
                         </MissionVideoStreamSection>
                         <MissionResults
-                            tasks={mission.tasks}
-                            data={data}
+                            data={data ?? []}
                             isPending={isPending}
                             isError={isError}
                             installationName={installation.name}

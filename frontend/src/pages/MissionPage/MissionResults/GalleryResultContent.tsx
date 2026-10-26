@@ -6,23 +6,26 @@ import { ResultAnalysis } from './ResultAnalysis'
 import { ResultMediaView } from './ResultMediaView'
 import { AnalysisContent, Companion, GalleryBody, Metadata, PreviewButton } from './MissionResultStyles'
 import { MeasurementDisplay } from 'components/Displays/MeasurementDisplay'
-import { MissionResult, ResultFocus } from './MissionResults'
+import { ResultFocus } from './MissionResults'
+import { hasInspectionAnalysis, InspectionData } from 'models/InspectionRecord'
 
 interface Props {
-    result: MissionResult
+    inspection: InspectionData
     focus: ResultFocus
     installationName: string
     robotName: string | undefined
     onFocus: (focus: ResultFocus) => void
 }
 
-export const GalleryResultContent = ({ result, focus, installationName, robotName, onFocus }: Props) => {
+export const GalleryResultContent = ({ inspection, focus, installationName, robotName, onFocus }: Props) => {
     const { TranslateText } = useLanguageContext()
-    const { inspection } = result
     const showingAnalysis = focus === 'analysis'
 
+    const hasFinding = Boolean(inspection?.warning)
+    const hasAnalysis = hasInspectionAnalysis(inspection)
+
     const feedback =
-        result.hasAnalysis && inspection.analysisRunId ? (
+        hasAnalysis && inspection.analysisRunId ? (
             <AnalysisFeedback
                 key={inspection.analysisRunId}
                 inspectionId={inspection.inspectionId}
@@ -32,15 +35,15 @@ export const GalleryResultContent = ({ result, focus, installationName, robotNam
             />
         ) : null
 
-    if (result.measurementId) {
+    if (inspection.measurementRecordId) {
         return (
             <>
                 <GalleryBody $paired={false}>
-                    <AnalysisContent $hasFinding={showingAnalysis ? result.hasFinding : undefined}>
+                    <AnalysisContent $hasFinding={showingAnalysis ? hasFinding : undefined}>
                         <Typography variant="h6">
                             {TranslateText(showingAnalysis ? 'Analysis result' : 'Inspection result')}
                         </Typography>
-                        <MeasurementDisplay recordId={result.measurementId!} isCompact={false} />
+                        <MeasurementDisplay recordId={inspection.measurementRecordId!} isCompact={false} />
                         {feedback}
                     </AnalysisContent>
                 </GalleryBody>
@@ -64,31 +67,31 @@ export const GalleryResultContent = ({ result, focus, installationName, robotNam
         )
     }
 
-    const primary = showingAnalysis ? result.analysisMedia : result.rawMedia
-    const inspectionCompanion = showingAnalysis ? result.rawMedia : undefined
-    const analysisCompanion = showingAnalysis ? undefined : result.analysisMedia
+    const primarySource = showingAnalysis ? inspection.visualizedSAS : inspection.anonymizedSAS
+    const inspectionCompanion = showingAnalysis ? inspection.anonymizedSAS : undefined
+    const analysisCompanion = showingAnalysis ? undefined : inspection.visualizedSAS
     const hasSummary =
         (inspection.value && inspection.value !== '') ||
-        result.hasFinding ||
+        hasFinding ||
         (inspection.confidence !== undefined && inspection.confidence !== null)
-    const summary = result.hasAnalysis && primary && hasSummary ? <ResultAnalysis inspection={inspection} /> : null
+    const summary = hasAnalysis && primarySource && hasSummary ? <ResultAnalysis inspection={inspection} /> : null
     const showAnalysisCompanion = Boolean(analysisCompanion || summary)
     const hasSidebar = Boolean(inspectionCompanion || showAnalysisCompanion)
 
     return (
         <>
             <GalleryBody $paired={hasSidebar}>
-                <AnalysisContent $hasFinding={showingAnalysis ? result.hasFinding : undefined}>
+                <AnalysisContent $hasFinding={showingAnalysis ? hasFinding : undefined}>
                     <Typography variant="h6">
                         {TranslateText(showingAnalysis ? 'Analysis result' : 'Inspection result')}
                     </Typography>
-                    {primary ? (
+                    {primarySource ? (
                         <ResultMediaView
                             key={`${inspection.inspectionId}-${focus}`}
-                            media={primary}
+                            source={primarySource}
                             label={inspection.tag}
                             size="large"
-                            sensorType={result.sensorType}
+                            fileType={inspection.fileType}
                         />
                     ) : (
                         <ResultAnalysis inspection={inspection} />
@@ -106,15 +109,15 @@ export const GalleryResultContent = ({ result, focus, installationName, robotNam
                                     onClick={() => onFocus('inspection')}
                                 >
                                     <ResultMediaView
-                                        media={inspectionCompanion}
+                                        source={inspectionCompanion}
                                         label={inspection.tag}
-                                        sensorType={result.sensorType}
+                                        fileType={inspection.fileType}
                                     />
                                 </PreviewButton>
                             </>
                         )}
                         {showAnalysisCompanion && (
-                            <AnalysisContent $hasFinding={result.hasFinding}>
+                            <AnalysisContent $hasFinding={hasFinding}>
                                 <Typography variant="h6">{TranslateText('Analysis result')}</Typography>
                                 {analysisCompanion && (
                                     <PreviewButton
@@ -123,9 +126,9 @@ export const GalleryResultContent = ({ result, focus, installationName, robotNam
                                         onClick={() => onFocus('analysis')}
                                     >
                                         <ResultMediaView
-                                            media={analysisCompanion}
+                                            source={analysisCompanion}
                                             label={inspection.tag}
-                                            sensorType={result.sensorType}
+                                            fileType={inspection.fileType}
                                         />
                                     </PreviewButton>
                                 )}

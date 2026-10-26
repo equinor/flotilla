@@ -94,6 +94,8 @@ const TaskTableRow = ({
     const rowEdge = analysisStyle?.boxShadow ?? getAnalysisResultStyle().boxShadow
     const markerColors = getColorsFromTaskStatus(task.status)
 
+    const mediaSAS = inspectionData?.anonymizedSAS ?? inspectionData?.visualizedSAS
+
     return (
         <StyledTableRow style={rowStyle}>
             <Table.Cell style={{ boxShadow: isActive ? undefined : rowEdge }}>
@@ -112,7 +114,7 @@ const TaskTableRow = ({
             <Table.Cell>
                 <IconWithLabel>
                     <Typography>{TranslateText(task.sensorType as string)}</Typography>
-                    {inspectionData && inspectionData.mediaSAS && !inspectionData.measurementRecordId && (
+                    {inspectionData && mediaSAS && !inspectionData.measurementRecordId && (
                         <RightAlignedImageButton
                             variant="ghost_icon"
                             aria-label={TranslateText('Enlarge inspection for {0}', [inspectionData.tag])}
