@@ -194,7 +194,7 @@ namespace Api.Services
         )
         {
             await EnsureWriteAccess(missionDefinition);
-            var updatedDefinition = await context
+            var affectedDefinition = await context
                 .Database.CreateExecutionStrategy()
                 .ExecuteAsync(async () =>
                 {
@@ -204,59 +204,82 @@ namespace Api.Services
                         missionDefinition.Id,
                         accessMode: AccessMode.Write
                     );
-                    var now = timeProvider.GetUtcNow();
-                    var instant = current
-                        ?.AutoScheduleFrequency?.GetSchedulingInstants(now, now.AddHours(24))
-                        .Where(i => AutoScheduleKey.Create(missionDefinition.Id, i) == scheduleKey)
-                        .Select(i => (DateTimeOffset?)i)
-                        .SingleOrDefault();
-                    if (
-                        instant == null
-                        || await context.MissionRuns.AnyAsync(r => r.Id == scheduleKey)
-                    )
+                    var scheduledAt = await FindEligibleSkipTime(current, scheduleKey);
+                    if (scheduledAt == null)
                     {
                         logger.LogWarning(
                             "Cannot change occurrence skip: it is no longer eligible"
                         );
                         return null;
                     }
-                    var skips = context.AutoScheduleSkips.Where(s =>
-                        s.MissionDefinitionId == missionDefinition.Id
-                        && s.ScheduledAt == instant.Value
-                    );
                     if (skip)
-                    {
-                        await context.Database.ExecuteSqlInterpolatedAsync(
-                            $"""
-                            INSERT INTO "AutoScheduleSkips" ("MissionDefinitionId", "ScheduledAt")
-                            VALUES ({missionDefinition.Id}, {instant.Value})
-                            ON CONFLICT ("MissionDefinitionId", "ScheduledAt") DO NOTHING
-                            """
-                        );
-                    }
+                        await AddDatedSkipIfMissing(missionDefinition.Id, scheduledAt.Value);
                     else
-                    {
-                        await skips.ExecuteDeleteAsync();
-                        // A restart may have omitted this job because the skip was persisted.
-                        // Register before commit so a registration failure leaves the skip intact.
-                        RegisterJob(missionDefinition.Id, instant.Value);
-                    }
+                        await RemoveDatedSkipAndRegisterJob(
+                            missionDefinition.Id,
+                            scheduledAt.Value
+                        );
                     await transaction.CommitAsync();
                     return current;
                 });
-            if (updatedDefinition != null)
+            if (affectedDefinition != null)
             {
-                Notify(updatedDefinition);
+                Notify(affectedDefinition);
                 signalRService.ReportAutoScheduleToSignalR(
                     skip ? "skipAutoMission" : "unskipAutoMission",
-                    updatedDefinition.Name,
+                    affectedDefinition.Name,
                     skip
                         ? "Skipped the selected dated mission."
                         : "Restored the selected dated mission.",
-                    updatedDefinition.InstallationCode
+                    affectedDefinition.InstallationCode
                 );
             }
-            return updatedDefinition != null;
+            return affectedDefinition != null;
+        }
+
+        private async Task<DateTimeOffset?> FindEligibleSkipTime(
+            MissionDefinition? definition,
+            string scheduleKey
+        )
+        {
+            if (definition == null)
+                return null;
+            var now = timeProvider.GetUtcNow();
+            var scheduledAt = definition
+                .AutoScheduleFrequency?.GetSchedulingInstants(now, now.AddHours(24))
+                .Where(i => AutoScheduleKey.Create(definition.Id, i) == scheduleKey)
+                .Select(i => (DateTimeOffset?)i)
+                .SingleOrDefault();
+            if (scheduledAt == null || await context.MissionRuns.AnyAsync(r => r.Id == scheduleKey))
+                return null;
+            return scheduledAt;
+        }
+
+        private async Task AddDatedSkipIfMissing(
+            string missionDefinitionId,
+            DateTimeOffset scheduledAt
+        ) =>
+            await context.Database.ExecuteSqlInterpolatedAsync(
+                $"""
+                INSERT INTO "AutoScheduleSkips" ("MissionDefinitionId", "ScheduledAt")
+                VALUES ({missionDefinitionId}, {scheduledAt})
+                ON CONFLICT ("MissionDefinitionId", "ScheduledAt") DO NOTHING
+                """
+            );
+
+        private async Task RemoveDatedSkipAndRegisterJob(
+            string missionDefinitionId,
+            DateTimeOffset scheduledAt
+        )
+        {
+            await context
+                .AutoScheduleSkips.Where(s =>
+                    s.MissionDefinitionId == missionDefinitionId && s.ScheduledAt == scheduledAt
+                )
+                .ExecuteDeleteAsync();
+            // A restart may have omitted this job because the skip was persisted.
+            // Register before commit so a registration failure leaves the skip intact.
+            RegisterJob(missionDefinitionId, scheduledAt);
         }
 
         public async Task DispatchOccurrence(string missionDefinitionId, DateTimeOffset scheduledAt)
