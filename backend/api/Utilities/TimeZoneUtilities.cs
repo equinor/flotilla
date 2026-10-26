@@ -13,6 +13,9 @@ namespace Api.Utilities
             return TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, CetZone);
         }
 
+        public static DateTimeOffset ToPostgresPrecision(DateTimeOffset instant) =>
+            new(instant.UtcTicks - instant.UtcTicks % TimeSpan.TicksPerMicrosecond, TimeSpan.Zero);
+
         public static DateTimeOffset CetWallClockToUtcInstant(DateOnly cetDate, TimeOnly cetTime)
         {
             var unspecified = DateTime.SpecifyKind(

@@ -172,27 +172,27 @@ namespace Api.Services
             string missionDefinitionId
         )
         {
-            var missionRun = await missionRunService.ReadById(missionRunId, readOnly: true);
+            var missionRun = await missionRunService.ReadById(missionRunId, readOnly: false);
             if (missionRun is null)
             {
                 string errorMessage = $"Mission run {missionRunId} was not found";
                 logger.LogWarning("{Message}", errorMessage);
                 throw new MissionNotFoundException(errorMessage);
             }
-            var missionDefinition = await ReadById(missionDefinitionId, readOnly: true);
+            var missionDefinition = await ReadById(
+                missionDefinitionId,
+                readOnly: false,
+                accessMode: AccessMode.Write
+            );
             if (missionDefinition == null)
             {
-                string errorMessage = $"Mission definition {missionDefinitionId} was not found";
-                logger.LogWarning("{Message}", errorMessage);
-                throw new MissionNotFoundException(errorMessage);
+                logger.LogWarning(
+                    "Mission definition was not found when updating its last successful run"
+                );
+                throw new MissionNotFoundException("Mission definition was not found");
             }
             if (missionRun.Status == MissionStatus.Successful)
-            {
                 missionDefinition.LastSuccessfulRun = missionRun;
-                logger.LogInformation(
-                    $"Updated last successful mission run on mission definition {missionDefinitionId} to mission run {missionRunId}"
-                );
-            }
             return await Update(missionDefinition);
         }
 
@@ -208,31 +208,36 @@ namespace Api.Services
             }
             context.Entry(missionDefinition.InspectionArea).State = EntityState.Unchanged;
 
-            var entry = context.Update(missionDefinition);
+            var entry = context.Entry(missionDefinition);
+            if (entry.State == EntityState.Detached)
+                entry = context.Update(missionDefinition);
             await ApplyDatabaseUpdate(missionDefinition.InspectionArea.Installation);
-            _ = signalRService.SendMessageAsync(
-                "Mission definition updated",
-                missionDefinition?.InspectionArea.Installation,
-                missionDefinition != null ? new MissionDefinitionResponse(missionDefinition) : null
-            );
-            DetachTracking(context, missionDefinition!);
+            // When a caller owns the transaction, it publishes after commit.
+            if (context.Database.CurrentTransaction == null)
+                NotifyUpdated(missionDefinition);
+            DetachTracking(context, missionDefinition);
             return entry.Entity;
         }
 
         public async Task<MissionDefinition?> Delete(string id)
         {
-            // We do not delete the source here as more than one mission definition may be using it
-            var missionDefinition = await ReadById(id);
-            if (missionDefinition is null)
-            {
+            var missionDefinition = await ReadById(
+                id,
+                readOnly: false,
+                accessMode: AccessMode.Write
+            );
+            if (missionDefinition == null)
                 return null;
-            }
-
             missionDefinition.IsDeprecated = true;
-            await Update(missionDefinition);
-
-            return missionDefinition;
+            return await Update(missionDefinition);
         }
+
+        private void NotifyUpdated(MissionDefinition definition) =>
+            _ = signalRService.SendMessageAsync(
+                "Mission definition updated",
+                definition.InspectionArea.Installation,
+                new MissionDefinitionResponse(definition)
+            );
 
         private async Task ApplyDatabaseUpdate(Installation? installation)
         {

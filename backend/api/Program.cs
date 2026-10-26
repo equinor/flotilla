@@ -104,6 +104,8 @@ builder.Services.AddScoped<RobotController>();
 builder.Services.AddScoped<EmergencyActionController>();
 builder.Services.AddScoped<IUserInfoService, UserInfoService>();
 builder.Services.AddScoped<IAutoScheduleService, AutoScheduleService>();
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddSingleton<AutoScheduleJobs>();
 
 builder.Services.AddTransient<ISignalRService, SignalRService>();
 
@@ -113,7 +115,7 @@ builder.Services.AddHostedService<MqttEventHandler>();
 builder.Services.AddHostedService<MissionEventHandler>();
 builder.Services.AddHostedService<MqttService>();
 builder.Services.AddHostedService<TeamsMessageEventHandler>();
-builder.Services.AddHostedService<AutoSchedulingHostedService>();
+builder.Services.AddHostedService<AutoSchedulingBackgroundService>();
 
 builder.Services.Configure<AzureAdOptions>(builder.Configuration.GetSection("AzureAd"));
 

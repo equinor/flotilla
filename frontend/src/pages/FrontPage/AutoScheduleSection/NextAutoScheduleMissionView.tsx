@@ -1,11 +1,6 @@
-import { Button, Icon, Table } from '@equinor/eds-core-react'
+import { Button, Icon, Table, Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
-import {
-    allDays,
-    getAllDaysIndexOfToday,
-    getTimeMissionPairsForDay,
-    isJobScheduledAt,
-} from 'models/AutoScheduleFrequency'
+import { upcomingOccurrences } from 'models/AutoScheduleOccurrence'
 import { useLanguageContext } from 'contexts/LanguageContext'
 import { useMissionDefinitionsContext } from 'contexts/MissionDefinitionsContext'
 import styled from 'styled-components'
@@ -71,48 +66,37 @@ const ShowLessOrMoreButton = ({
 
 export const NextAutoScheduleMissionView = () => {
     const { TranslateText } = useLanguageContext()
-    const { missionDefinitions } = useMissionDefinitionsContext()
+    const { autoScheduleOccurrences, autoScheduleLoading, autoScheduleError } = useMissionDefinitionsContext()
     const [showMore, setShowMore] = useState(false)
 
     const now = useNow()
-    const currentDayOfTheWeek = allDays[getAllDaysIndexOfToday(now)]
-
-    const timeMissionPairs = getTimeMissionPairsForDay(missionDefinitions, currentDayOfTheWeek).filter(
-        ({ time, mission }) => isJobScheduledAt(mission, time)
-    )
+    const occurrences = upcomingOccurrences(autoScheduleOccurrences, now)
 
     return (
         <>
-            {timeMissionPairs.length > 0 && (
-                <StyledNextAutoMission>
-                    <SectionTitle>{TranslateText('Next auto scheduled mission for today')}</SectionTitle>
+            <StyledNextAutoMission>
+                <SectionTitle>{TranslateText('Next planned missions - next 24 hours')}</SectionTitle>
+                {autoScheduleError || autoScheduleLoading || occurrences.length === 0 ? (
+                    <Typography>
+                        {TranslateText(
+                            autoScheduleError
+                                ? 'Failed to retrieve scheduled missions'
+                                : autoScheduleLoading
+                                  ? 'Loading scheduled missions'
+                                  : 'There are no scheduled missions in the next 24 hours'
+                        )}
+                    </Typography>
+                ) : (
                     <StyledTable>
                         <Table.Body style={{ backgroundColor: tokens.colors.ui.background__default.hex }}>
-                            {!showMore ? (
-                                <AutoScheduleMissionTableRow
-                                    day={currentDayOfTheWeek}
-                                    time={timeMissionPairs[0].time}
-                                    mission={timeMissionPairs[0].mission}
-                                />
-                            ) : (
-                                <>
-                                    {timeMissionPairs.map(({ time, mission }) => (
-                                        <AutoScheduleMissionTableRow
-                                            key={time + mission.id}
-                                            day={currentDayOfTheWeek}
-                                            time={time}
-                                            mission={mission}
-                                        />
-                                    ))}
-                                </>
-                            )}
+                            {(showMore ? occurrences : occurrences.slice(0, 1)).map((occurrence) => (
+                                <AutoScheduleMissionTableRow key={occurrence.scheduleKey} occurrence={occurrence} />
+                            ))}
                         </Table.Body>
                     </StyledTable>
-                    {timeMissionPairs.length > 1 && (
-                        <ShowLessOrMoreButton showMore={showMore} setShowMore={setShowMore} />
-                    )}
-                </StyledNextAutoMission>
-            )}
+                )}
+                {occurrences.length > 1 && <ShowLessOrMoreButton showMore={showMore} setShowMore={setShowMore} />}
+            </StyledNextAutoMission>
         </>
     )
 }
