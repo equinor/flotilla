@@ -36,10 +36,10 @@ interface Analysis {
 }
 
 export enum FileType {
-    VIDEO,
-    IMAGE,
-    SOUND,
-    VALUE,
+    VIDEO = 'Video',
+    IMAGE = 'Image',
+    SOUND = 'Sound',
+    VALUE = 'Value',
 }
 
 export interface InspectionRecord {
@@ -82,7 +82,6 @@ export interface InspectionData {
     visualizedSAS?: string
     fileType: FileType
     anonymizedSAS?: string
-    mediaSAS?: string
     analysisType?: string
     tag: string
     createdAt: Date
@@ -142,7 +141,6 @@ export const inspectionRecordToInspectionData = (record: InspectionRecord): Insp
         feedback: latestRun?.feedback ?? undefined,
         visualizedSAS: isInspectionOnly ? undefined : analysis?.visualizedSAS,
         anonymizedSAS: analysis?.anonymizedSAS,
-        mediaSAS: sas,
         analysisType: analysis?.analysisType,
         tag: record.tag,
         createdAt: record.createdAt,

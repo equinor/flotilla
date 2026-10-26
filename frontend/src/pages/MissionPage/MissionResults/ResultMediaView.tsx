@@ -5,8 +5,8 @@ import { useLanguageContext } from 'contexts/LanguageContext'
 import { ReactNode, useState } from 'react'
 import styled from 'styled-components'
 import { VideoPlaceholder, VideoPlayer } from 'pages/InspectionReportPage/InspectionVideoPlayer'
-import { SensorType } from 'models/Task'
-import { ResultMedia } from './MissionResults'
+import { StyledInspectionImage } from 'pages/InspectionReportPage/InspectionStyles'
+import { FileType } from 'models/InspectionRecord'
 
 type MediaSize = 'preview' | 'analysis' | 'thumbnail' | 'large'
 
@@ -59,67 +59,67 @@ const InspectionTypeLabel = styled(Typography)<{ $aboveControls: boolean }>`
     pointer-events: none;
 `
 
-const LoadedMedia = ({
-    media,
-    label,
-    overlay,
-}: {
-    media: Exclude<ResultMedia, { type: 'measurement' }>
-    label: string
-    overlay?: ReactNode
-}) => {
+const LoadedImage = ({ source, label, overlay }: { source: string; label: string; overlay?: ReactNode }) => {
     const [failed, setFailed] = useState(false)
     const [aspectRatio, setAspectRatio] = useState<number>()
     const { TranslateText } = useLanguageContext()
     return failed ? (
-        <Typography role="alert">{TranslateText('Failed to load result media')}</Typography>
-    ) : media.type === 'image' ? (
+        <Typography role="alert">{TranslateText('Failed to load image')}</Typography>
+    ) : (
         <ImageSurface $aspectRatio={aspectRatio}>
-            <img
-                src={media.src}
+            <StyledInspectionImage
+                src={source}
                 alt={label}
                 onLoad={({ currentTarget }) => setAspectRatio(currentTarget.naturalWidth / currentTarget.naturalHeight)}
                 onError={() => setFailed(true)}
             />
             {overlay}
         </ImageSurface>
+    )
+}
+
+const LoadedVideo = ({ source }: { source: string }) => {
+    const [failed, setFailed] = useState(false)
+    const { TranslateText } = useLanguageContext()
+    return failed ? (
+        <Typography role="alert">{TranslateText('Failed to load video')}</Typography>
     ) : (
-        <VideoPlayer src={media.src} onError={() => setFailed(true)} />
+        <VideoPlayer src={source} onError={() => setFailed(true)} />
     )
 }
 
 export const ResultMediaView = ({
-    media,
+    source,
     label,
     size = 'preview',
-    sensorType,
+    fileType,
 }: {
-    media: ResultMedia
+    source: string
     label: string
     size?: MediaSize
-    sensorType?: SensorType
+    fileType: FileType
 }) => {
     const { TranslateText } = useLanguageContext()
-    const typeLabel = sensorType && size !== 'thumbnail' && (
-        <InspectionTypeLabel as="span" variant="caption" $aboveControls={size === 'large' && media.type === 'video'}>
-            {TranslateText(sensorType)}
+    const typeLabel = fileType && size !== 'thumbnail' && (
+        <InspectionTypeLabel as="span" variant="caption" $aboveControls={size === 'large'}>
+            {TranslateText(fileType)}
         </InspectionTypeLabel>
     )
     return (
         <Frame $size={size}>
-            {media.type === 'image' && <LoadedMedia key={media.src} media={media} label={label} overlay={typeLabel} />}
-            {media.type === 'video' &&
+            {fileType === FileType.IMAGE && <LoadedImage source={source} label={label} overlay={typeLabel} />}
+            {fileType === FileType.VIDEO &&
                 (size === 'large' ? (
-                    <LoadedMedia key={media.src} media={media} label={label} />
+                    <LoadedVideo source={source} />
                 ) : size === 'thumbnail' ? (
                     <Icon data={play_circle} title={TranslateText('Video')} />
                 ) : (
                     <VideoPlaceholder />
                 ))}
-            {media.type === 'unsupported' && (
+            {fileType === FileType.VALUE && (
                 <Typography role="alert">{TranslateText('Viewing of the inspection type is not supported')}</Typography>
             )}
-            {media.type !== 'image' && typeLabel}
+            {fileType !== FileType.IMAGE && typeLabel}
         </Frame>
     )
 }

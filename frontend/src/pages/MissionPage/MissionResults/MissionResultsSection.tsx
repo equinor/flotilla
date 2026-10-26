@@ -15,95 +15,87 @@ import {
     TaskNumber,
 } from 'pages/MissionPage/MissionResults/MissionResultStyles'
 import { MeasurementDisplay } from 'components/Displays/MeasurementDisplay'
-import { MissionResult, ResultFocus } from './MissionResults'
+import { ResultFocus } from './MissionResults'
+import { hasInspectionAnalysis, InspectionData } from 'models/InspectionRecord'
 
 export const MissionResultsSection = ({
-    results,
+    data,
     onSelect,
 }: {
-    results: MissionResult[]
+    data: InspectionData[]
     onSelect: (id: string, focus: ResultFocus) => void
 }) => {
     const { TranslateText } = useLanguageContext()
-    if (results.length === 0) return null
+    if (data.length === 0) return null
 
     return (
         <ResultsSection aria-label={TranslateText('Inspection results')}>
             <Typography variant="h4">{TranslateText('Inspection results')}</Typography>
             <Deck>
-                {results.map(
-                    ({
-                        inspection,
-                        rawMedia,
-                        analysisMedia,
-                        hasAnalysis,
-                        hasFinding,
-                        taskNumber,
-                        sensorType,
-                        measurementId,
-                    }) => {
-                        const rawPreviewButton = measurementId ? (
-                            <MeasurementPreviewButton
-                                variant="ghost"
-                                aria-label={TranslateText('Enlarge inspection for {0}', [inspection.tag])}
-                                onClick={() => onSelect(inspection.inspectionId, 'inspection')}
-                            >
-                                <MeasurementDisplay recordId={measurementId} isCompact={false} />
-                            </MeasurementPreviewButton>
-                        ) : rawMedia ? (
+                {data.map((inspection, index) => {
+                    const rawPreviewButton = inspection.measurementRecordId ? (
+                        <MeasurementPreviewButton
+                            variant="ghost"
+                            aria-label={TranslateText('Enlarge inspection for {0}', [inspection.tag])}
+                            onClick={() => onSelect(inspection.inspectionId, 'inspection')}
+                        >
+                            <MeasurementDisplay recordId={inspection.measurementRecordId} isCompact={false} />
+                        </MeasurementPreviewButton>
+                    ) : undefined
+
+                    const imageView = inspection.visualizedSAS ? (
+                        <AnalysisPreview $hasFinding={Boolean(inspection?.warning)}>
+                            <Typography variant="caption">{TranslateText('Analysis result')}</Typography>
                             <PreviewButton
                                 variant="ghost"
-                                aria-label={TranslateText('Enlarge inspection for {0}', [inspection.tag])}
-                                onClick={() => onSelect(inspection.inspectionId, 'inspection')}
+                                aria-label={TranslateText('Enlarge analysis for {0}', [inspection.tag])}
+                                onClick={() => onSelect(inspection.inspectionId, 'analysis')}
                             >
-                                <ResultMediaView media={rawMedia} label={inspection.tag} sensorType={sensorType} />
+                                <ResultMediaView
+                                    source={inspection.visualizedSAS}
+                                    label={inspection.tag}
+                                    size="analysis"
+                                    fileType={inspection.fileType}
+                                />
+                                <ResultAnalysis inspection={inspection} />
                             </PreviewButton>
-                        ) : undefined
-                        return (
-                            <ResultCard key={inspection.inspectionId} $hasAnalysis={hasAnalysis}>
-                                <CardDetails>
-                                    <CardHeading>
-                                        <Typography variant="h5">
-                                            {inspection.tag || TranslateText('Result task {0}', [String(taskNumber)])}
-                                        </Typography>
-                                        <TaskNumber variant="caption">
-                                            {TranslateText('Result task {0}', [String(taskNumber)])}
-                                        </TaskNumber>
-                                    </CardHeading>
-                                    {inspection.inspectionDescription && (
-                                        <Typography variant="body_long">{inspection.inspectionDescription}</Typography>
-                                    )}
-                                    {inspection.createdAt && (
-                                        <Typography variant="caption">
-                                            {formatDateTime(inspection.createdAt)}
-                                        </Typography>
-                                    )}
-                                </CardDetails>
-                                {rawPreviewButton}
-                                {hasAnalysis && (
-                                    <AnalysisPreview $hasFinding={hasFinding}>
-                                        <Typography variant="caption">{TranslateText('Analysis result')}</Typography>
-                                        <PreviewButton
-                                            variant="ghost"
-                                            aria-label={TranslateText('Enlarge analysis for {0}', [inspection.tag])}
-                                            onClick={() => onSelect(inspection.inspectionId, 'analysis')}
-                                        >
-                                            {analysisMedia && (
-                                                <ResultMediaView
-                                                    media={analysisMedia}
-                                                    label={inspection.tag}
-                                                    size="analysis"
-                                                    sensorType={sensorType}
-                                                />
-                                            )}
-                                            <ResultAnalysis inspection={inspection} />
-                                        </PreviewButton>
-                                    </AnalysisPreview>
+                        </AnalysisPreview>
+                    ) : inspection.anonymizedSAS ? (
+                        <PreviewButton
+                            variant="ghost"
+                            aria-label={TranslateText('Enlarge inspection for {0}', [inspection.tag])}
+                            onClick={() => onSelect(inspection.inspectionId, 'inspection')}
+                        >
+                            <ResultMediaView
+                                source={inspection.anonymizedSAS}
+                                label={inspection.tag}
+                                fileType={inspection.fileType}
+                            />
+                        </PreviewButton>
+                    ) : undefined
+                    return (
+                        <ResultCard key={inspection.inspectionId} $hasAnalysis={hasInspectionAnalysis(inspection)}>
+                            <CardDetails>
+                                <CardHeading>
+                                    <Typography variant="h5">
+                                        {inspection.tag || TranslateText('Result task {0}', [String(index)])}
+                                    </Typography>
+                                    <TaskNumber variant="caption">
+                                        {TranslateText('Result task {0}', [String(index)])}
+                                    </TaskNumber>
+                                </CardHeading>
+                                {inspection.inspectionDescription && (
+                                    <Typography variant="body_long">{inspection.inspectionDescription}</Typography>
                                 )}
-                            </ResultCard>
-                        )
-                    }
-                )}
+                                {inspection.createdAt && (
+                                    <Typography variant="caption">{formatDateTime(inspection.createdAt)}</Typography>
+                                )}
+                            </CardDetails>
+                            {rawPreviewButton}
+                            {imageView}
+                        </ResultCard>
+                    )
+                })}
             </Deck>
         </ResultsSection>
     )

@@ -17,10 +17,11 @@ import {
     StripButton,
 } from './MissionResultStyles'
 import { MeasurementDisplay } from 'components/Displays/MeasurementDisplay'
-import { MissionResult, ResultFocus } from './MissionResults'
+import { ResultFocus } from './MissionResults'
+import { hasInspectionAnalysis, InspectionData } from 'models/InspectionRecord'
 
 interface Props {
-    results: MissionResult[]
+    data: InspectionData[]
     selectedId: string
     preferredFocus: ResultFocus
     installationName: string
@@ -31,7 +32,7 @@ interface Props {
 }
 
 export const MissionResultGallery = ({
-    results,
+    data,
     selectedId,
     preferredFocus,
     installationName,
@@ -41,14 +42,14 @@ export const MissionResultGallery = ({
     onClose,
 }: Props) => {
     const { TranslateText } = useLanguageContext()
-    const index = results.findIndex((result) => result.inspection.inspectionId === selectedId)
-    const result = results[index]
-    const focus = result && preferredFocus === 'analysis' && result.hasAnalysis ? 'analysis' : 'inspection'
-    const inspection = result?.inspection
+    const index = data.findIndex((inspection) => inspection.inspectionId === selectedId)
+    const inspection = data[index]
+    const focus =
+        inspection && preferredFocus === 'analysis' && hasInspectionAnalysis(inspection) ? 'analysis' : 'inspection'
 
     const navigate = (offset: number) => {
-        const next = results[index + offset]
-        if (index !== -1 && next) onSelect(next.inspection.inspectionId)
+        const next = data[index + offset]
+        if (index !== -1 && next) onSelect(next.inspectionId)
     }
 
     const onKeyDown = (event: KeyboardEvent<HTMLElement>) => {
@@ -66,9 +67,9 @@ export const MissionResultGallery = ({
                         <Typography variant="h3" tabIndex={-1}>
                             {inspection?.tag || TranslateText('Inspection results')}
                         </Typography>
-                        {result && (
+                        {inspection && (
                             <GalleryTaskNumber variant="caption">
-                                {TranslateText('Result task {0}', [String(result.taskNumber)])}
+                                {TranslateText('Result task {0}', [String(index)])}
                             </GalleryTaskNumber>
                         )}
                     </GalleryHeading>
@@ -79,7 +80,7 @@ export const MissionResultGallery = ({
                 <Navigation>
                     {index !== -1 && (
                         <Typography variant="caption">
-                            {index + 1} / {results.length}
+                            {index + 1} / {data.length}
                         </Typography>
                     )}
                     <Button
@@ -93,7 +94,7 @@ export const MissionResultGallery = ({
                     <Button
                         variant="ghost_icon"
                         aria-label={TranslateText('Next inspection')}
-                        disabled={index === -1 || index === results.length - 1}
+                        disabled={index === -1 || index === data.length - 1}
                         onClick={() => navigate(1)}
                     >
                         <Icon data={chevron_right} />
@@ -108,9 +109,9 @@ export const MissionResultGallery = ({
                     <Typography role="alert">{TranslateText('Failed to load inspection results')}</Typography>
                 </GalleryBody>
             )}
-            {result ? (
+            {inspection ? (
                 <GalleryResultContent
-                    result={result}
+                    inspection={inspection}
                     focus={focus}
                     installationName={installationName}
                     robotName={robotName}
@@ -126,30 +127,37 @@ export const MissionResultGallery = ({
             <Strip aria-label={TranslateText('Inspections in this mission')}>
                 <Typography variant="h6">{TranslateText('Inspections in this mission')}</Typography>
                 <div>
-                    {results.map((item) => {
-                        const id = item.inspection.inspectionId
-                        const thumbnail = item.rawMedia ?? item.analysisMedia
+                    {data.map((inspection, inspectionIndex) => {
+                        const id = inspection.inspectionId
+                        const thumbnailSource = inspection.anonymizedSAS ?? inspection.visualizedSAS
                         return (
                             <StripButton
                                 key={id}
-                                $hasFinding={item.hasAnalysis ? item.hasFinding : undefined}
+                                $hasFinding={
+                                    hasInspectionAnalysis(inspection) ? Boolean(inspection?.warning) : undefined
+                                }
                                 variant="ghost"
                                 aria-current={id === selectedId ? 'true' : undefined}
                                 aria-label={TranslateText('View result for {0}, task {1}', [
-                                    item.inspection.tag,
-                                    String(item.taskNumber),
+                                    inspection.tag,
+                                    String(inspectionIndex),
                                 ])}
                                 onClick={() => onSelect(id)}
                             >
-                                {!item.measurementId && thumbnail && (
-                                    <ResultMediaView media={thumbnail} label={item.inspection.tag} size="thumbnail" />
+                                {!inspection.measurementRecordId && thumbnailSource && (
+                                    <ResultMediaView
+                                        source={thumbnailSource}
+                                        label={inspection.tag}
+                                        fileType={inspection.fileType}
+                                        size="thumbnail"
+                                    />
                                 )}
-                                {item.measurementId && (
-                                    <MeasurementDisplay recordId={result.measurementId!} isCompact={true} />
+                                {inspection.measurementRecordId && (
+                                    <MeasurementDisplay recordId={inspection.measurementRecordId!} isCompact={true} />
                                 )}
-                                <Typography variant="body_short">{item.inspection.tag}</Typography>
+                                <Typography variant="body_short">{inspection.tag}</Typography>
                                 <Typography variant="caption">
-                                    {TranslateText('Result task {0}', [String(item.taskNumber)])}
+                                    {TranslateText('Result task {0}', [String(inspectionIndex)])}
                                 </Typography>
                             </StripButton>
                         )
