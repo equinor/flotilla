@@ -2,7 +2,7 @@ namespace Api.Controllers.Models;
 
 // An occurrence is derived from recurrence, not a persisted lifecycle record.
 public record AutoScheduleOccurrenceResponse(
-    string Id,
+    string ScheduleKey,
     DateTimeOffset ScheduledAt,
     AutoScheduleOccurrenceStatus Status,
     MissionDefinitionResponse Mission

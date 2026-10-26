@@ -94,7 +94,10 @@ export const NextAutoScheduleMissionView = () => {
                             ) : (
                                 <>
                                     {occurrences.map((occurrence) => (
-                                        <AutoScheduleMissionTableRow key={occurrence.id} occurrence={occurrence} />
+                                        <AutoScheduleMissionTableRow
+                                            key={occurrence.scheduleKey}
+                                            occurrence={occurrence}
+                                        />
                                     ))}
                                 </>
                             )}

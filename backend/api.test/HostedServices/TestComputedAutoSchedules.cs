@@ -243,13 +243,13 @@ public class TestComputedAutoSchedules : IAsyncLifetime
         var frequency = _definition.AutoScheduleFrequency!.SchedulingTimesCETperWeek;
         using var concurrent = _factory.Services.CreateScope();
         var skips = await Task.WhenAll(
-            _service.SkipOccurrence(_definition, next.Id),
-            Worker(concurrent.ServiceProvider).SkipOccurrence(_definition, next.Id)
+            _service.SkipOccurrence(_definition, next.ScheduleKey),
+            Worker(concurrent.ServiceProvider).SkipOccurrence(_definition, next.ScheduleKey)
         );
         Assert.All(skips, Assert.True);
         var savedSkip = await _context.AutoScheduleSkips.SingleAsync(Token);
         Assert.True(savedSkip.Id > 0);
-        Assert.True(await _service.SkipOccurrence(_definition, next.Id));
+        Assert.True(await _service.SkipOccurrence(_definition, next.ScheduleKey));
         Assert.Equal(savedSkip.Id, (await _context.AutoScheduleSkips.SingleAsync(Token)).Id);
         await _service.UpdateAutoScheduleFrequency(_definition, []);
         Assert.Empty(await _service.ReadUpcoming(_definition.InstallationCode));
@@ -272,8 +272,8 @@ public class TestComputedAutoSchedules : IAsyncLifetime
     {
         var next = await Next();
         var tomorrow = (await _service.ReadUpcoming(_definition.InstallationCode))[1];
-        await _service.SkipOccurrence(_definition, next.Id);
-        await _service.SkipOccurrence(_definition, tomorrow.Id);
+        await _service.SkipOccurrence(_definition, next.ScheduleKey);
+        await _service.SkipOccurrence(_definition, tomorrow.ScheduleKey);
         using var scope = _factory.Services.CreateScope();
         var restarted = Worker(scope.ServiceProvider, new AutoScheduleJobs(_clock));
         await restarted.Reconcile(_definition);
@@ -301,7 +301,7 @@ public class TestComputedAutoSchedules : IAsyncLifetime
                         .ScheduledAt
                 );
             });
-        Assert.True(await restarted.UnskipOccurrence(_definition, next.Id));
+        Assert.True(await restarted.UnskipOccurrence(_definition, next.ScheduleKey));
         Assert.Equal(before + 1, _jobNumber);
         var invocation = _jobs.Invocations.Last();
         Assert.Equal(
@@ -320,18 +320,18 @@ public class TestComputedAutoSchedules : IAsyncLifetime
             Times.Once
         );
         await restarted.Reconcile(_definition);
-        Assert.True(await restarted.UnskipOccurrence(_definition, next.Id));
+        Assert.True(await restarted.UnskipOccurrence(_definition, next.ScheduleKey));
         Assert.Equal(before + 1, _jobNumber);
         _clock.Now = next.ScheduledAt;
         await restarted.DispatchOccurrence(_definition.Id, next.ScheduledAt);
-        Assert.Equal(next.Id, (await _context.MissionRuns.SingleAsync(Token)).Id);
+        Assert.Equal(next.ScheduleKey, (await _context.MissionRuns.SingleAsync(Token)).Id);
     }
 
     [Fact]
     public async Task FailedUnskipRegistrationRollsBackSkipRemovalWithoutSuccessNotification()
     {
         var next = await Next();
-        await _service.SkipOccurrence(_definition, next.Id);
+        await _service.SkipOccurrence(_definition, next.ScheduleKey);
         using var scope = _factory.Services.CreateScope();
         var restarted = Worker(scope.ServiceProvider, new AutoScheduleJobs(_clock));
         _jobs
@@ -339,7 +339,7 @@ public class TestComputedAutoSchedules : IAsyncLifetime
             .Throws(new InvalidOperationException("Registration unavailable"));
         _signals.Invocations.Clear();
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            restarted.UnskipOccurrence(_definition, next.Id)
+            restarted.UnskipOccurrence(_definition, next.ScheduleKey)
         );
         Assert.Single(await _context.AutoScheduleSkips.ToListAsync(Token));
         Assert.Equal(AutoScheduleOccurrenceStatus.Skipped, (await Next()).Status);
@@ -357,7 +357,7 @@ public class TestComputedAutoSchedules : IAsyncLifetime
                 : _service.UnskipOccurrence(_definition, id);
 
         var next = await Next();
-        await _service.SkipOccurrence(_definition, next.Id);
+        await _service.SkipOccurrence(_definition, next.ScheduleKey);
         var outside = _definition
             .AutoScheduleFrequency!.GetSchedulingInstants(
                 _clock.Now.AddHours(24),
@@ -370,18 +370,18 @@ public class TestComputedAutoSchedules : IAsyncLifetime
             {
                 "unknown",
                 "untrusted\r\nlog-injection",
-                AutoScheduleOccurrenceIdentity.Create("other-definition", next.ScheduledAt),
-                AutoScheduleOccurrenceIdentity.Create(_definition.Id, outside),
+                AutoScheduleKey.Create("other-definition", next.ScheduledAt),
+                AutoScheduleKey.Create(_definition.Id, outside),
             }
         )
             Assert.False(await Change(id));
         Assert.Empty(_signals.Invocations);
         var frequency = _definition.AutoScheduleFrequency!.SchedulingTimesCETperWeek;
         await _service.UpdateAutoScheduleFrequency(_definition, []);
-        Assert.False(await Change(next.Id));
+        Assert.False(await Change(next.ScheduleKey));
         await _service.UpdateAutoScheduleFrequency(_definition, frequency);
         _clock.Now = next.ScheduledAt;
-        Assert.False(await Change(next.Id));
+        Assert.False(await Change(next.ScheduleKey));
         Assert.Single(await _context.AutoScheduleSkips.ToListAsync(Token));
         await Dispatch(next);
         Assert.Empty(await _context.MissionRuns.ToListAsync(Token));
@@ -427,7 +427,7 @@ public class TestComputedAutoSchedules : IAsyncLifetime
         Assert.Equal(2, creating);
         await Dispatch(next);
         Assert.Single(await _context.MissionRuns.ToListAsync(Token));
-        Assert.Single((await Persisted(next.Id)).Tasks);
+        Assert.Single((await Persisted(next.ScheduleKey)).Tasks);
         _scheduling.Verify(
             s => s.StartNextMissionRunIfSystemIsAvailable(It.IsAny<Robot>()),
             Times.Once
@@ -441,7 +441,7 @@ public class TestComputedAutoSchedules : IAsyncLifetime
                 ),
             Times.Once
         );
-        await _runs.Delete(next.Id);
+        await _runs.Delete(next.ScheduleKey);
         await Dispatch(next);
         Assert.Single(await _context.MissionRuns.ToListAsync(Token));
     }
@@ -484,12 +484,15 @@ public class TestComputedAutoSchedules : IAsyncLifetime
         _clock.Now = next.ScheduledAt;
         await Dispatch(next);
         await _context
-            .MissionRuns.Where(r => r.Id == next.Id)
+            .MissionRuns.Where(r => r.Id == next.ScheduleKey)
             .ExecuteUpdateAsync(s => s.SetProperty(r => r.Status, MissionStatus.Successful), Token);
         _context.ChangeTracker.Clear();
-        await _definitions.UpdateLastSuccessfulMissionRun(next.Id, _definition.Id);
-        await _definitions.UpdateLastSuccessfulMissionRun(next.Id, _definition.Id);
-        Assert.Equal(next.Id, (await _definitions.ReadById(_definition.Id))!.LastSuccessfulRun!.Id);
+        await _definitions.UpdateLastSuccessfulMissionRun(next.ScheduleKey, _definition.Id);
+        await _definitions.UpdateLastSuccessfulMissionRun(next.ScheduleKey, _definition.Id);
+        Assert.Equal(
+            next.ScheduleKey,
+            (await _definitions.ReadById(_definition.Id))!.LastSuccessfulRun!.Id
+        );
 
         var controller = ActivatorUtilities.CreateInstance<MissionDefinitionController>(
             _scope.ServiceProvider,
@@ -530,7 +533,7 @@ public class TestComputedAutoSchedules : IAsyncLifetime
             );
         _clock.Now = next.ScheduledAt;
         await Dispatch(next);
-        var run = await Persisted(next.Id);
+        var run = await Persisted(next.ScheduleKey);
         Assert.Equal(replacement.Id, run.Robot.Id);
         Assert.Equal("edited-task", Assert.Single(run.Tasks).TagId);
         Assert.Equal(next.ScheduledAt.UtcDateTime, run.CreationTime);
@@ -610,7 +613,7 @@ public class TestComputedAutoSchedules : IAsyncLifetime
         _clock.Now = next.ScheduledAt;
         await Dispatch(next);
         var queue = await _runs.ReadMissionRunQueue(_robot.Id);
-        Assert.Equal(new[] { manual.Id, next.Id }, queue.Select(r => r.Id));
+        Assert.Equal(new[] { manual.Id, next.ScheduleKey }, queue.Select(r => r.Id));
         next = await Next();
         _clock.Now = next.ScheduledAt;
         await Dispatch(next);
@@ -643,7 +646,7 @@ public class TestComputedAutoSchedules : IAsyncLifetime
                 Assert.True(
                     scope
                         .ServiceProvider.GetRequiredService<FlotillaDbContext>()
-                        .MissionRuns.Any(r => r.Id == next.Id)
+                        .MissionRuns.Any(r => r.Id == next.ScheduleKey)
                 );
                 notifications++;
                 return Task.CompletedTask;
@@ -654,7 +657,7 @@ public class TestComputedAutoSchedules : IAsyncLifetime
         Assert.False(_retry.FailOnce);
         Assert.Equal(1, notifications);
         Assert.Single(await _context.MissionRuns.ToListAsync(Token));
-        Assert.Single((await Persisted(next.Id)).Tasks);
+        Assert.Single((await Persisted(next.ScheduleKey)).Tasks);
         _scheduling.Verify(
             s => s.StartNextMissionRunIfSystemIsAvailable(It.IsAny<Robot>()),
             Times.Once
@@ -739,7 +742,7 @@ public class TestComputedAutoSchedules : IAsyncLifetime
         );
         var next = Assert.Single(await _service.ReadUpcoming(_definition.InstallationCode));
         Assert.Equal(expected, next.ScheduledAt);
-        Assert.True(await _service.SkipOccurrence(_definition, next.Id));
+        Assert.True(await _service.SkipOccurrence(_definition, next.ScheduleKey));
         Assert.Equal(expected, (await _context.AutoScheduleSkips.SingleAsync(Token)).ScheduledAt);
         Assert.Equal(
             expected,
@@ -751,16 +754,16 @@ public class TestComputedAutoSchedules : IAsyncLifetime
         var restarted = Worker(scope.ServiceProvider, new AutoScheduleJobs(_clock));
         await restarted.Reconcile(_definition);
         var upcoming = Assert.Single(await restarted.ReadUpcoming(_definition.InstallationCode));
-        Assert.Equal(next.Id, upcoming.Id);
+        Assert.Equal(next.ScheduleKey, upcoming.ScheduleKey);
         Assert.Equal(AutoScheduleOccurrenceStatus.Skipped, upcoming.Status);
-        Assert.True(await restarted.UnskipOccurrence(_definition, next.Id));
+        Assert.True(await restarted.UnskipOccurrence(_definition, next.ScheduleKey));
         _clock.Now = expected.AddTicks(-1);
         await restarted.DispatchOccurrence(_definition.Id, instant);
         Assert.Empty(await _context.MissionRuns.ToListAsync(Token));
         _clock.Now = expected;
         await restarted.DispatchOccurrence(_definition.Id, instant);
         await restarted.DispatchOccurrence(_definition.Id, expected);
-        Assert.Equal(next.Id, (await _context.MissionRuns.SingleAsync(Token)).Id);
+        Assert.Equal(next.ScheduleKey, (await _context.MissionRuns.SingleAsync(Token)).Id);
         _scheduling.Verify(
             s => s.StartNextMissionRunIfSystemIsAvailable(It.IsAny<Robot>()),
             Times.Once
@@ -788,7 +791,7 @@ public class TestComputedAutoSchedules : IAsyncLifetime
         var duplicate = new AutoScheduleSkip
         {
             MissionDefinitionId = _definition.Id,
-            ScheduledAt = next.ScheduledAt,
+            ScheduledAt = next.ScheduledAt.AddTicks(9),
         };
         _context.AutoScheduleSkips.Add(duplicate);
         await Assert.ThrowsAsync<DbUpdateException>(() => _context.SaveChangesAsync(Token));
@@ -796,7 +799,7 @@ public class TestComputedAutoSchedules : IAsyncLifetime
         var another = new AutoScheduleSkip
         {
             MissionDefinitionId = _definition.Id,
-            ScheduledAt = next.ScheduledAt.AddHours(1),
+            ScheduledAt = next.ScheduledAt.AddMicroseconds(1),
         };
         _context.AutoScheduleSkips.Add(another);
         await _context.SaveChangesAsync(Token);

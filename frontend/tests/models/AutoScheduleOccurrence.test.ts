@@ -11,11 +11,11 @@ import {
 import { DaysOfWeek } from 'models/AutoScheduleFrequency'
 
 const makeOccurrence = (
-    id: string,
+    scheduleKey: string,
     scheduledAt: string,
     status: 'Scheduled' | 'Skipped' = 'Scheduled'
 ): AutoScheduleOccurrence => ({
-    id,
+    scheduleKey,
     scheduledAt,
     status,
     mission: {
@@ -85,7 +85,7 @@ describe('24-hour occurrences', () => {
     test('does not confuse equal times on different days', () => {
         const today = makeOccurrence('today', '2026-10-16T08:00:00Z')
         const tomorrow = makeOccurrence('tomorrow', '2026-10-17T08:00:00Z')
-        expect(findOccurrenceForSlot([today, tomorrow], 'mission', DaysOfWeek.Saturday, '10:00:00')?.id).toBe(
+        expect(findOccurrenceForSlot([today, tomorrow], 'mission', DaysOfWeek.Saturday, '10:00:00')?.scheduleKey).toBe(
             'tomorrow'
         )
     })

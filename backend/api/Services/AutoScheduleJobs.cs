@@ -9,9 +9,10 @@ public sealed class AutoScheduleJobs(TimeProvider timeProvider)
     public DateTimeOffset StartedAt { get; } = timeProvider.GetUtcNow();
     private readonly ConcurrentDictionary<string, DateTimeOffset> _registered = new();
 
-    public bool Contains(string id) => _registered.ContainsKey(id);
+    public bool Contains(string scheduleKey) => _registered.ContainsKey(scheduleKey);
 
-    public void Register(string id, DateTimeOffset scheduledAt) => _registered[id] = scheduledAt;
+    public void Register(string scheduleKey, DateTimeOffset scheduledAt) =>
+        _registered[scheduleKey] = scheduledAt;
 
     public void Prune(DateTimeOffset now)
     {

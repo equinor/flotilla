@@ -2,7 +2,7 @@ import { MissionDefinition } from './MissionDefinition'
 import { allDays, DaysOfWeek, getAllDaysIndexOfToday, getCetTimeOnly } from './AutoScheduleFrequency'
 
 export interface AutoScheduleOccurrence {
-    id: string
+    scheduleKey: string
     scheduledAt: string
     status: 'Scheduled' | 'Skipped'
     mission: MissionDefinition
@@ -37,7 +37,10 @@ export const findOccurrenceForSlot = (
 export const upcomingOccurrences = (occurrences: AutoScheduleOccurrence[], now: Date) =>
     occurrences
         .filter((occurrence) => isInUpcomingWindow(occurrence, now))
-        .sort((a, b) => Date.parse(a.scheduledAt) - Date.parse(b.scheduledAt) || a.id.localeCompare(b.id))
+        .sort(
+            (a, b) =>
+                Date.parse(a.scheduledAt) - Date.parse(b.scheduledAt) || a.scheduleKey.localeCompare(b.scheduleKey)
+        )
 
 export const upcomingScheduledOccurrences = (occurrences: AutoScheduleOccurrence[], now: Date) =>
     upcomingOccurrences(occurrences, now).filter((occurrence) => occurrence.status === 'Scheduled')

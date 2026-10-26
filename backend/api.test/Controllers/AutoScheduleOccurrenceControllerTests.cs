@@ -26,20 +26,36 @@ public class AutoScheduleOccurrenceControllerTests
             Mock.Of<IInspectionAreaService>()
         );
 
-    private Task<ActionResult> ChangeSkip(bool skip, string id = "tomorrow-occurrence") =>
+    private Task<ActionResult> ChangeSkip(bool skip, string id = "tomorrow-key") =>
         skip
             ? Controller()
                 .SkipAutoScheduledMissionRun(
                     "mission",
-                    new SkipAutoMissionQuery { OccurrenceId = id }
+                    new SkipAutoMissionQuery { ScheduleKey = id }
                 )
             : Controller().UnskipAutoScheduledMissionRun("mission", id);
 
     [Theory]
     [InlineData("{}")]
     [InlineData("{\"TimeOfDay\":\"10:00:00\"}")]
+    [InlineData("{\"occurrenceId\":\"old-key\"}")]
     public void LegacyOrMissingIdentityIsRejected(string json) =>
         Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<SkipAutoMissionQuery>(json));
+
+    [Fact]
+    public void SkipRequestUsesScheduleKey()
+    {
+        var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        var request = JsonSerializer.Deserialize<SkipAutoMissionQuery>(
+            """{"scheduleKey":"mission-time-key"}""",
+            options
+        );
+        Assert.Equal("mission-time-key", request.ScheduleKey);
+        Assert.Equal(
+            """{"scheduleKey":"mission-time-key"}""",
+            JsonSerializer.Serialize(request, options)
+        );
+    }
 
     [Fact]
     public async Task MissingIdentityHasNoSideEffects()
@@ -66,11 +82,11 @@ public class AutoScheduleOccurrenceControllerTests
             .ReturnsAsync(definition);
         if (skip)
             _schedule
-                .Setup(s => s.SkipOccurrence(definition, "tomorrow-occurrence"))
+                .Setup(s => s.SkipOccurrence(definition, "tomorrow-key"))
                 .ReturnsAsync(eligible);
         else
             _schedule
-                .Setup(s => s.UnskipOccurrence(definition, "tomorrow-occurrence"))
+                .Setup(s => s.UnskipOccurrence(definition, "tomorrow-key"))
                 .ReturnsAsync(eligible);
         var result = await ChangeSkip(skip);
         if (eligible)
@@ -98,13 +114,13 @@ public class AutoScheduleOccurrenceControllerTests
     public async Task InvalidModelHasNoSideEffects(bool skip)
     {
         var controller = Controller();
-        controller.ModelState.AddModelError("OccurrenceId", "Invalid");
+        controller.ModelState.AddModelError("ScheduleKey", "Invalid");
         var result = skip
             ? await controller.SkipAutoScheduledMissionRun(
                 "mission",
-                new SkipAutoMissionQuery { OccurrenceId = "occurrence" }
+                new SkipAutoMissionQuery { ScheduleKey = "mission-time-key" }
             )
-            : await controller.UnskipAutoScheduledMissionRun("mission", "occurrence");
+            : await controller.UnskipAutoScheduledMissionRun("mission", "mission-time-key");
         Assert.IsType<BadRequestObjectResult>(result);
         _definitions.VerifyNoOtherCalls();
         _schedule.VerifyNoOtherCalls();
@@ -121,12 +137,12 @@ public class AutoScheduleOccurrenceControllerTests
             .ReturnsAsync(definition);
         if (skip)
             _schedule
-                .Setup(s => s.SkipOccurrence(definition, "tomorrow-occurrence"))
-                .ThrowsAsync(new ArgumentException("Invalid occurrence"));
+                .Setup(s => s.SkipOccurrence(definition, "tomorrow-key"))
+                .ThrowsAsync(new ArgumentException("Invalid schedule key"));
         else
             _schedule
-                .Setup(s => s.UnskipOccurrence(definition, "tomorrow-occurrence"))
-                .ThrowsAsync(new ArgumentException("Invalid occurrence"));
+                .Setup(s => s.UnskipOccurrence(definition, "tomorrow-key"))
+                .ThrowsAsync(new ArgumentException("Invalid schedule key"));
         Assert.IsType<BadRequestObjectResult>(await ChangeSkip(skip));
     }
 }

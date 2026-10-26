@@ -40,9 +40,9 @@ namespace Api.Controllers.Models
     public struct SkipAutoMissionQuery
     {
         /// <summary>
-        /// The exact dated occurrence to skip
+        /// The mission/date-time key returned with the dated occurrence to skip
         /// </summary>
         [Required]
-        public required string OccurrenceId { get; set; }
+        public required string ScheduleKey { get; set; }
     }
 }

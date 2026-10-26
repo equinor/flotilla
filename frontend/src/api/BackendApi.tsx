@@ -267,15 +267,15 @@ export class BackendApi {
         return result.content
     }
 
-    async skipAutoScheduledMission(missionId: string, occurrenceId: string): Promise<void> {
+    async skipAutoScheduledMission(missionId: string, scheduleKey: string): Promise<void> {
         const path: string = `missions/definitions/${missionId}/skip-auto-mission`
-        const body = { occurrenceId }
+        const body = { scheduleKey }
 
         await this.api.PUT(path, body).catch(handleError('PUT', path))
     }
 
-    async unskipAutoScheduledMission(missionId: string, occurrenceId: string): Promise<void> {
-        const path = `missions/definitions/${missionId}/skip-auto-mission/${occurrenceId}`
+    async unskipAutoScheduledMission(missionId: string, scheduleKey: string): Promise<void> {
+        const path = `missions/definitions/${missionId}/skip-auto-mission/${scheduleKey}`
         await this.api.DELETE(path, '').catch(handleError('DELETE', path))
     }
 

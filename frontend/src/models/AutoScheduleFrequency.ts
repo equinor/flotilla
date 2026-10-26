@@ -63,13 +63,13 @@ export const getCetTimeOnly = (now: Date): string => {
 
 export const getAllDaysIndexOfToday = (now: Date) => (getCetNow(now).getDay() + 6) % 7
 
-interface AutoScheduledOccurrence {
+interface WeeklyScheduleSlot {
     mission: MissionDefinition
     dayOfWeek: DaysOfWeek
     timeOfDay: string
 }
 
-export const getAutoScheduledOccurrences = (missionDefinitions: MissionDefinition[]): AutoScheduledOccurrence[] =>
+export const getWeeklyScheduleSlots = (missionDefinitions: MissionDefinition[]): WeeklyScheduleSlot[] =>
     missionDefinitions
         .filter((m) => m.autoScheduleFrequency)
         .flatMap((mission) =>
@@ -81,7 +81,7 @@ export const getAutoScheduledOccurrences = (missionDefinitions: MissionDefinitio
         )
 
 export const getTimeMissionPairsForDay = (missionDefinitions: MissionDefinition[], day: DaysOfWeek) =>
-    getAutoScheduledOccurrences(missionDefinitions)
-        .filter((occurrence) => occurrence.dayOfWeek === day)
+    getWeeklyScheduleSlots(missionDefinitions)
+        .filter((slot) => slot.dayOfWeek === day)
         .map(({ timeOfDay, mission }) => ({ time: timeOfDay, mission }))
         .sort((a, b) => (a.time === b.time ? 0 : a.time > b.time ? 1 : -1))

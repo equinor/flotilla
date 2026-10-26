@@ -417,10 +417,10 @@ namespace Api.Controllers
         )
         {
             missionDefinitionId = Sanitize.SanitizeUserInput(missionDefinitionId);
-            var occurrenceId = Sanitize.SanitizeUserInput(skipAutoMissionQuery.OccurrenceId);
-            if (!ModelState.IsValid || string.IsNullOrWhiteSpace(occurrenceId))
+            var scheduleKey = Sanitize.SanitizeUserInput(skipAutoMissionQuery.ScheduleKey);
+            if (!ModelState.IsValid || string.IsNullOrWhiteSpace(scheduleKey))
                 return BadRequest(
-                    "An occurrence ID is required. Refresh the schedule before skipping."
+                    "A schedule key is required. Refresh the schedule before skipping."
                 );
 
             var missionDefinition = await missionDefinitionService.ReadById(
@@ -434,7 +434,7 @@ namespace Api.Controllers
 
             try
             {
-                if (!await autoScheduleService.SkipOccurrence(missionDefinition, occurrenceId))
+                if (!await autoScheduleService.SkipOccurrence(missionDefinition, scheduleKey))
                     return Conflict(
                         "This occurrence can no longer be skipped. Refresh the schedule."
                     );
@@ -449,7 +449,7 @@ namespace Api.Controllers
         /// <summary>
         ///     Restore a skipped dated occurrence within the next 24 hours.
         /// </summary>
-        [HttpDelete("{missionDefinitionId}/skip-auto-mission/{occurrenceId}")]
+        [HttpDelete("{missionDefinitionId}/skip-auto-mission/{scheduleKey}")]
         [Authorize(Roles = Role.User)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -460,14 +460,14 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> UnskipAutoScheduledMissionRun(
             [FromRoute] string missionDefinitionId,
-            [FromRoute] string occurrenceId
+            [FromRoute] string scheduleKey
         )
         {
             missionDefinitionId = Sanitize.SanitizeUserInput(missionDefinitionId);
-            occurrenceId = Sanitize.SanitizeUserInput(occurrenceId);
-            if (!ModelState.IsValid || string.IsNullOrWhiteSpace(occurrenceId))
+            scheduleKey = Sanitize.SanitizeUserInput(scheduleKey);
+            if (!ModelState.IsValid || string.IsNullOrWhiteSpace(scheduleKey))
                 return BadRequest(
-                    "An occurrence ID is required. Refresh the schedule before undoing a skip."
+                    "A schedule key is required. Refresh the schedule before undoing a skip."
                 );
 
             var missionDefinition = await missionDefinitionService.ReadById(
@@ -483,7 +483,7 @@ namespace Api.Controllers
 
             try
             {
-                if (!await autoScheduleService.UnskipOccurrence(missionDefinition, occurrenceId))
+                if (!await autoScheduleService.UnskipOccurrence(missionDefinition, scheduleKey))
                     return Conflict("This skip can no longer be undone. Refresh the schedule.");
             }
             catch (ArgumentException e)

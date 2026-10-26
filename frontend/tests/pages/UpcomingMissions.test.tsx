@@ -43,7 +43,7 @@ vi.mock('contexts/InstallationContext', async () => {
 })
 
 const tomorrow: AutoScheduleOccurrence = {
-    id: 'tomorrow-id',
+    scheduleKey: 'tomorrow-key',
     scheduledAt: '2026-10-16T23:00:00Z',
     status: 'Scheduled',
     mission: {
@@ -100,7 +100,7 @@ afterEach(() => {
 })
 
 test('dashboard shows all occurrences, including after midnight, without skip controls', () => {
-    state.occurrences = Array.from({ length: 5 }, (_, i) => ({ ...tomorrow, id: `occurrence-${i}` }))
+    state.occurrences = Array.from({ length: 5 }, (_, i) => ({ ...tomorrow, scheduleKey: `schedule-key-${i}` }))
     render(<DashboardScheduledMissionsView />)
     expect(container.textContent?.match(/Inspection/g)).toHaveLength(5)
     expect(container.textContent).toContain('17/10')
@@ -114,7 +114,7 @@ test('mission-control list offers Skip for tomorrow', () => {
 })
 
 test.each(['Scheduled', 'Skipped'] as const)(
-    'calendar changes tomorrow %s occurrence by its exact ID',
+    'calendar changes tomorrow %s occurrence by its exact schedule key',
     async (status) => {
         const label = status === 'Skipped' ? 'Undo skip' : 'Skip'
         state.occurrences = [{ ...tomorrow, status }]
@@ -127,7 +127,7 @@ test.each(['Scheduled', 'Skipped'] as const)(
         await act(async () => confirm.click())
         expect(status === 'Skipped' ? state.unskip : state.skip).toHaveBeenCalledExactlyOnceWith(
             'mission-id',
-            'tomorrow-id'
+            'tomorrow-key'
         )
         expect(state.refresh).toHaveBeenCalledOnce()
     }
@@ -165,7 +165,7 @@ test.each(['Scheduled', 'Skipped'] as const)(
     }
 )
 
-test('upcoming list displays skipped missions and undo submits only the selected dated ID', async () => {
+test('upcoming list displays skipped missions and undo submits only the selected dated schedule key', async () => {
     const skipped = { ...tomorrow, status: 'Skipped' as const }
     state.occurrences = [skipped]
     state.unskip.mockImplementation(async () => {
@@ -178,7 +178,7 @@ test('upcoming list displays skipped missions and undo submits only the selected
     act(() => button('Undo skip').click())
     expect(document.body.textContent).toContain('Restore Inspection scheduled for 17/10')
     await act(async () => button('Undo skip', 'dialog button').click())
-    expect(state.unskip).toHaveBeenCalledExactlyOnceWith('mission-id', 'tomorrow-id')
+    expect(state.unskip).toHaveBeenCalledExactlyOnceWith('mission-id', 'tomorrow-key')
     expect(state.skip).not.toHaveBeenCalled()
     expect(state.refresh).toHaveBeenCalledOnce()
     render(<NextAutoScheduleMissionView />)
@@ -187,7 +187,7 @@ test('upcoming list displays skipped missions and undo submits only the selected
 })
 
 test('expanded upcoming list keeps both skipped and planned missions visible', () => {
-    state.occurrences = [{ ...tomorrow, id: 'skipped', status: 'Skipped' }, tomorrow]
+    state.occurrences = [{ ...tomorrow, scheduleKey: 'skipped-key', status: 'Skipped' }, tomorrow]
     render(<NextAutoScheduleMissionView />)
     act(() => button('Show more').click())
     expect(container.textContent?.match(/Inspection/g)).toHaveLength(2)

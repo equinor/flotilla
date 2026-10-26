@@ -55,7 +55,7 @@ export const DashboardScheduledMissionsView = () => {
                 <ScheduleList>
                     {occurrences.map((occurrence) => {
                         return (
-                            <ScheduleRow key={occurrence.id}>
+                            <ScheduleRow key={occurrence.scheduleKey}>
                                 <Typography>{formatScheduledAt(occurrence.scheduledAt, language)}</Typography>
                                 <Typography>{occurrence.mission.name}</Typography>
                             </ScheduleRow>

@@ -4,9 +4,9 @@ using System.Text;
 
 namespace Api.Utilities;
 
-public static class AutoScheduleOccurrenceIdentity
+public static class AutoScheduleKey
 {
-    // Identifies derived occurrences and their eventual runs, not persisted skip rows.
+    // Stable mission/date-time key, also used as the eventual run ID, not the skip row ID.
     public static string Create(string definitionId, DateTimeOffset scheduledAt)
     {
         var hash = SHA256.HashData(

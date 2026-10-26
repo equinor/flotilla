@@ -17,8 +17,8 @@ namespace Api.Services
             UpdateMissionDefinitionQuery? requestedChanges = null
         );
         Task<IList<AutoScheduleOccurrenceResponse>> ReadUpcoming(string installationCode);
-        Task<bool> SkipOccurrence(MissionDefinition missionDefinition, string occurrenceId);
-        Task<bool> UnskipOccurrence(MissionDefinition missionDefinition, string occurrenceId);
+        Task<bool> SkipOccurrence(MissionDefinition missionDefinition, string scheduleKey);
+        Task<bool> UnskipOccurrence(MissionDefinition missionDefinition, string scheduleKey);
     }
 
     public class AutoScheduleService(
@@ -85,11 +85,11 @@ namespace Api.Services
         {
             // Concurrent registration can enqueue duplicates; the run primary key prevents
             // duplicate runs. This cache only avoids redundant registrations in normal use.
-            var id = AutoScheduleOccurrenceIdentity.Create(definitionId, instant);
-            if (jobs.Contains(id))
+            var scheduleKey = AutoScheduleKey.Create(definitionId, instant);
+            if (jobs.Contains(scheduleKey))
                 return;
             backgroundJobs.Schedule(() => DispatchOccurrence(definitionId, instant), instant);
-            jobs.Register(id, instant);
+            jobs.Register(scheduleKey, instant);
         }
 
         public async Task<MissionDefinition> UpdateAutoScheduleFrequency(
@@ -165,7 +165,7 @@ namespace Api.Services
                 .SelectMany(d =>
                     (d.AutoScheduleFrequency?.GetSchedulingInstants(now, until) ?? []).Select(
                         instant => new AutoScheduleOccurrenceResponse(
-                            AutoScheduleOccurrenceIdentity.Create(d.Id, instant),
+                            AutoScheduleKey.Create(d.Id, instant),
                             instant,
                             skippedInstants.Contains((d.Id, instant))
                                 ? AutoScheduleOccurrenceStatus.Skipped
@@ -175,23 +175,21 @@ namespace Api.Services
                     )
                 )
                 .OrderBy(o => o.ScheduledAt)
-                .ThenBy(o => o.Id)
+                .ThenBy(o => o.ScheduleKey)
                 .ToList();
         }
 
-        public Task<bool> SkipOccurrence(
-            MissionDefinition missionDefinition,
-            string occurrenceId
-        ) => SetOccurrenceSkipped(missionDefinition, occurrenceId, true);
+        public Task<bool> SkipOccurrence(MissionDefinition missionDefinition, string scheduleKey) =>
+            SetOccurrenceSkipped(missionDefinition, scheduleKey, true);
 
         public Task<bool> UnskipOccurrence(
             MissionDefinition missionDefinition,
-            string occurrenceId
-        ) => SetOccurrenceSkipped(missionDefinition, occurrenceId, false);
+            string scheduleKey
+        ) => SetOccurrenceSkipped(missionDefinition, scheduleKey, false);
 
         private async Task<bool> SetOccurrenceSkipped(
             MissionDefinition missionDefinition,
-            string occurrenceId,
+            string scheduleKey,
             bool skip
         )
         {
@@ -209,15 +207,12 @@ namespace Api.Services
                     var now = timeProvider.GetUtcNow();
                     var instant = current
                         ?.AutoScheduleFrequency?.GetSchedulingInstants(now, now.AddHours(24))
-                        .Where(i =>
-                            AutoScheduleOccurrenceIdentity.Create(missionDefinition.Id, i)
-                            == occurrenceId
-                        )
+                        .Where(i => AutoScheduleKey.Create(missionDefinition.Id, i) == scheduleKey)
                         .Select(i => (DateTimeOffset?)i)
                         .SingleOrDefault();
                     if (
                         instant == null
-                        || await context.MissionRuns.AnyAsync(r => r.Id == occurrenceId)
+                        || await context.MissionRuns.AnyAsync(r => r.Id == scheduleKey)
                     )
                     {
                         logger.LogWarning(
@@ -325,9 +320,9 @@ namespace Api.Services
                 );
                 return null;
             }
-            var id = AutoScheduleOccurrenceIdentity.Create(missionDefinitionId, scheduledAt);
+            var scheduleKey = AutoScheduleKey.Create(missionDefinitionId, scheduledAt);
             if (
-                await context.MissionRuns.AnyAsync(r => r.Id == id)
+                await context.MissionRuns.AnyAsync(r => r.Id == scheduleKey)
                 || await context.AutoScheduleSkips.AnyAsync(s =>
                     s.MissionDefinitionId == missionDefinitionId && s.ScheduledAt == scheduledAt
                 )
@@ -355,19 +350,19 @@ namespace Api.Services
                 logger.LogInformation("Auto scheduled mission is already queued");
                 return null;
             }
-            return CreateScheduledMissionRun(definition, robot, id, now);
+            return CreateScheduledMissionRun(definition, robot, scheduleKey, now);
         }
 
         private static MissionRun CreateScheduledMissionRun(
             MissionDefinition definition,
             Robot robot,
-            string id,
+            string scheduleKey,
             DateTimeOffset now
         )
         {
             var run = new MissionRun
             {
-                Id = id,
+                Id = scheduleKey,
                 MissionId = definition.Id,
                 Name = definition.Name,
                 Robot = robot,

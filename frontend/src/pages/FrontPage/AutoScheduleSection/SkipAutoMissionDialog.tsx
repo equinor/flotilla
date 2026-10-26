@@ -28,7 +28,7 @@ export const SkipAutoMissionDialog = ({
     const now = useNow()
     const undoSkip = occurrence.status === 'Skipped'
     const actionLabel = undoSkip ? 'Undo skip' : 'SkipAutoMission'
-    const current = autoScheduleOccurrences.find((item) => item.id === occurrence.id)
+    const current = autoScheduleOccurrences.find((item) => item.scheduleKey === occurrence.scheduleKey)
     const eligible =
         !autoScheduleError &&
         current !== undefined &&
@@ -37,8 +37,8 @@ export const SkipAutoMissionDialog = ({
     const submit = async () => {
         setSubmitting(true)
         try {
-            if (undoSkip) await api.unskipAutoScheduledMission(occurrence.mission.id, occurrence.id)
-            else await api.skipAutoScheduledMission(occurrence.mission.id, occurrence.id)
+            if (undoSkip) await api.unskipAutoScheduledMission(occurrence.mission.id, occurrence.scheduleKey)
+            else await api.skipAutoScheduledMission(occurrence.mission.id, occurrence.scheduleKey)
             onClose()
         } catch {
             setBanner(

@@ -99,23 +99,44 @@ namespace Api.Test.Utilities
         public void IdentityIsStableAcrossOffsetsAndSubMicrosecondDifferences()
         {
             var instant = DateTimeOffset.Parse("2026-10-16T20:00:00Z");
-            var id = AutoScheduleOccurrenceIdentity.Create("mission", instant);
+            var id = AutoScheduleKey.Create("mission", instant);
             Assert.True(Guid.TryParse(id, out var parsed));
             Assert.Equal(8, parsed.Version);
             Assert.Equal(
                 id,
-                AutoScheduleOccurrenceIdentity.Create(
-                    "mission",
-                    instant.ToOffset(TimeSpan.FromHours(2))
-                )
+                AutoScheduleKey.Create("mission", instant.ToOffset(TimeSpan.FromHours(2)))
             );
-            Assert.Equal(id, AutoScheduleOccurrenceIdentity.Create("mission", instant.AddTicks(1)));
-            Assert.Equal(id, AutoScheduleOccurrenceIdentity.Create("mission", instant.AddTicks(9)));
+            Assert.Equal(id, AutoScheduleKey.Create("mission", instant.AddTicks(1)));
+            Assert.Equal(id, AutoScheduleKey.Create("mission", instant.AddTicks(9)));
+            Assert.NotEqual(id, AutoScheduleKey.Create("mission", instant.AddMicroseconds(1)));
+            Assert.NotEqual(id, AutoScheduleKey.Create("other-mission", instant));
+            Assert.NotEqual(id, AutoScheduleKey.Create("mission", instant.AddSeconds(1)));
             Assert.NotEqual(
-                id,
-                AutoScheduleOccurrenceIdentity.Create("mission", instant.AddMicroseconds(1))
+                AutoScheduleKey.Create("mission", instant.AddTicks(9)),
+                AutoScheduleKey.Create("mission", instant.AddTicks(10))
             );
-            Assert.NotEqual(id, AutoScheduleOccurrenceIdentity.Create("other-mission", instant));
+        }
+
+        [Fact]
+        public void SameMissionCanHaveSlotsOneSecondOrOneMicrosecondApart()
+        {
+            var start = DateTimeOffset.Parse("2026-10-16T20:00:00Z");
+            var time = new TimeOnly(23, 0);
+            var schedule = new AutoScheduleFrequency
+            {
+                SchedulingTimesCETperWeek =
+                [
+                    new TimeAndDay(DayOfWeek.Friday, time),
+                    new TimeAndDay(DayOfWeek.Friday, time.Add(TimeSpan.FromTicks(9))),
+                    new TimeAndDay(DayOfWeek.Friday, time.Add(TimeSpan.FromMicroseconds(1))),
+                    new TimeAndDay(DayOfWeek.Friday, time.Add(TimeSpan.FromSeconds(1))),
+                ],
+            };
+            var first = start.AddHours(1);
+            Assert.Equal(
+                new[] { first, first.AddMicroseconds(1), first.AddSeconds(1) },
+                schedule.GetSchedulingInstants(start, start.AddHours(24))
+            );
         }
 
         [Fact]

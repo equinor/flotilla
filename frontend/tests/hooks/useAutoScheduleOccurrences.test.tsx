@@ -34,7 +34,7 @@ const Probe = ({ installation = 'AAA' }: { installation?: string }) => {
     return null
 }
 const occurrence: AutoScheduleOccurrence = {
-    id: 'occurrence',
+    scheduleKey: 'mission-time-key',
     scheduledAt: '2026-10-16T23:00:00Z',
     status: 'Scheduled',
     mission: {

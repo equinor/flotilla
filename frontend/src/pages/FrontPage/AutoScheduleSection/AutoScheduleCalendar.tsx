@@ -4,7 +4,7 @@ import { nb } from 'date-fns/locale'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 import styled from 'styled-components'
 import { useContext, useMemo, useState } from 'react'
-import { allDaysStartingSunday, DaysOfWeek, getAutoScheduledOccurrences, getCetNow } from 'models/AutoScheduleFrequency'
+import { allDaysStartingSunday, DaysOfWeek, getWeeklyScheduleSlots, getCetNow } from 'models/AutoScheduleFrequency'
 import {
     AutoScheduleOccurrence,
     canSkipOccurrence,
@@ -238,7 +238,7 @@ export const CalendarPro = () => {
     }
 
     const events = useMemo<ScheduleEvent[]>(() => {
-        return getAutoScheduledOccurrences(missionDefinitions).map(({ mission, dayOfWeek, timeOfDay }) => {
+        return getWeeklyScheduleSlots(missionDefinitions).map(({ mission, dayOfWeek, timeOfDay }) => {
             const targetDate = getTargetDate(dayOfWeek, timeOfDay, now)
             const occurrence = findOccurrenceForSlot(autoScheduleOccurrences, mission.id, dayOfWeek, timeOfDay)
             const color =
