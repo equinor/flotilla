@@ -90,6 +90,16 @@ export interface MissionRecording {
     >
 }
 
+const retainValidPlaybackUrl = (currentUrl: string | undefined, nextUrl: string | undefined) => {
+    if (!currentUrl || !nextUrl) return nextUrl
+    const current = new URL(currentUrl)
+    const next = new URL(nextUrl)
+    const expiresAt = Date.parse(current.searchParams.get('se') ?? '')
+    return current.origin === next.origin && current.pathname === next.pathname && expiresAt > Date.now() + 11 * 60_000
+        ? currentUrl
+        : nextUrl
+}
+
 export const MissionRecordings = ({ missionId }: { missionId: string }) => {
     const backendApi = useBackendApi()
     const [recording, setRecording] = useState<MissionRecording>()
@@ -102,7 +112,21 @@ export const MissionRecordings = ({ missionId }: { missionId: string }) => {
                 .getMissionRecordings(missionId)
                 .then((result) => {
                     if (!disposed) {
-                        setRecording(result)
+                        setRecording((previous) => ({
+                            ...result,
+                            cameras: Object.fromEntries(
+                                Object.entries(result.cameras).map(([id, camera]) => [
+                                    id,
+                                    {
+                                        ...camera,
+                                        playbackUrl: retainValidPlaybackUrl(
+                                            previous?.cameras[id]?.playbackUrl,
+                                            camera.playbackUrl
+                                        ),
+                                    },
+                                ])
+                            ),
+                        }))
                         setError(undefined)
                         timer = setTimeout(() => void refresh(), result.status === 'Ready' ? 600000 : 2000)
                     }
