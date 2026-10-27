@@ -1,9 +1,7 @@
 import { Typography } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'contexts/LanguageContext'
 import { ResultMediaView } from 'pages/MissionPage/MissionResults/ResultMediaView'
-import { ResultAnalysis } from 'pages/MissionPage/MissionResults/ResultAnalysis'
 import {
-    AnalysisPreview,
     CardDetails,
     CardHeading,
     Deck,
@@ -15,7 +13,7 @@ import {
 } from 'pages/MissionPage/MissionResults/MissionResultStyles'
 import { MeasurementDisplay } from 'components/Displays/MeasurementDisplay'
 import { ResultFocus } from './MissionResults'
-import { hasInspectionAnalysis, InspectionData } from 'models/InspectionRecord'
+import { InspectionData } from 'models/InspectionRecord'
 
 export const MissionResultsSection = ({
     data,
@@ -42,20 +40,17 @@ export const MissionResultsSection = ({
                     ) : undefined
 
                     const imageView = inspection.visualizedSAS ? (
-                        <AnalysisPreview $hasFinding={Boolean(inspection?.warning)}>
-                            <PreviewButton
-                                variant="ghost"
-                                onClick={() => onSelect(inspection.inspectionId, 'analysis')}
-                            >
-                                <ResultMediaView
-                                    source={inspection.visualizedSAS}
-                                    label={inspection.tag}
-                                    size="analysis"
-                                    fileType={inspection.fileType}
-                                />
-                                <ResultAnalysis inspection={inspection} isCompact />
-                            </PreviewButton>
-                        </AnalysisPreview>
+                        <PreviewButton
+                            $hasFinding={Boolean(inspection?.warning)}
+                            variant="ghost"
+                            onClick={() => onSelect(inspection.inspectionId, 'analysis')}
+                        >
+                            <ResultMediaView
+                                source={inspection.visualizedSAS}
+                                label={inspection.tag}
+                                fileType={inspection.fileType}
+                            />
+                        </PreviewButton>
                     ) : inspection.anonymizedSAS ? (
                         <PreviewButton variant="ghost" onClick={() => onSelect(inspection.inspectionId, 'inspection')}>
                             <ResultMediaView
@@ -68,8 +63,8 @@ export const MissionResultsSection = ({
 
                     if (!rawPreviewButton && !imageView) return <></>
                     return (
-                        <ResultCard key={inspection.inspectionId} $hasAnalysis={hasInspectionAnalysis(inspection)}>
-                            <CardDetails>
+                        <ResultCard key={inspection.inspectionId}>
+                            <CardDetails $hasFinding={Boolean(inspection?.warning)}>
                                 <CardHeading>
                                     <TaskNumber variant="caption">
                                         {TranslateText('Index') + ' ' + String(index + 1)}
