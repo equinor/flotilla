@@ -29,14 +29,13 @@ export const MissionResultsSection = ({
     if (data.length === 0) return null
 
     return (
-        <ResultsSection aria-label={TranslateText('Inspection results')}>
+        <ResultsSection>
             <Typography variant="h4">{TranslateText('Inspection results')}</Typography>
             <Deck>
                 {data.map((inspection, index) => {
                     const rawPreviewButton = inspection.measurementRecordId ? (
                         <MeasurementPreviewButton
                             variant="ghost"
-                            aria-label={TranslateText('Enlarge inspection for {0}', [inspection.tag])}
                             onClick={() => onSelect(inspection.inspectionId, 'inspection')}
                         >
                             <MeasurementDisplay recordId={inspection.measurementRecordId} isCompact={false} />
@@ -48,7 +47,6 @@ export const MissionResultsSection = ({
                             <Typography variant="caption">{TranslateText('Analysis result')}</Typography>
                             <PreviewButton
                                 variant="ghost"
-                                aria-label={TranslateText('Enlarge analysis for {0}', [inspection.tag])}
                                 onClick={() => onSelect(inspection.inspectionId, 'analysis')}
                             >
                                 <ResultMediaView
@@ -61,11 +59,7 @@ export const MissionResultsSection = ({
                             </PreviewButton>
                         </AnalysisPreview>
                     ) : inspection.anonymizedSAS ? (
-                        <PreviewButton
-                            variant="ghost"
-                            aria-label={TranslateText('Enlarge inspection for {0}', [inspection.tag])}
-                            onClick={() => onSelect(inspection.inspectionId, 'inspection')}
-                        >
+                        <PreviewButton variant="ghost" onClick={() => onSelect(inspection.inspectionId, 'inspection')}>
                             <ResultMediaView
                                 source={inspection.anonymizedSAS}
                                 label={inspection.tag}

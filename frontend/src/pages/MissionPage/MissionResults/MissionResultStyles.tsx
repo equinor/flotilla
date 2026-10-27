@@ -239,10 +239,6 @@ export const StripButton = styled(Button)<{ $hasFinding?: boolean }>`
         border: ${divider};
         box-shadow: ${({ $hasFinding }) => getAnalysisResultStyle($hasFinding).boxShadow};
     }
-    &[aria-current='true'] {
-        outline: 2px solid ${tokens.colors.interactive.primary__resting.hex};
-        outline-offset: -2px;
-    }
     > span {
         display: flex;
         flex-direction: column;
