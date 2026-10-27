@@ -16,6 +16,31 @@ interface Props {
     onFocus: (focus: ResultFocus) => void
 }
 
+const MeasurementGalleryResultContent = ({
+    inspection,
+    showAnalysis,
+    children,
+}: {
+    inspection: InspectionData
+    showAnalysis: boolean
+    children: React.ReactNode
+}) => {
+    const { TranslateText } = useLanguageContext()
+    return (
+        <>
+            <GalleryBody $paired={false}>
+                <AnalysisContent $hasFinding={showAnalysis ? Boolean(inspection?.warning) : undefined}>
+                    <Typography variant="h6">
+                        {TranslateText(showAnalysis ? 'Analysis result' : 'Inspection result')}
+                    </Typography>
+                    <MeasurementDisplay recordId={inspection.measurementRecordId!} isCompact={false} />
+                    {children}
+                </AnalysisContent>
+            </GalleryBody>
+        </>
+    )
+}
+
 export const GalleryResultContent = ({ inspection, focus, installationName, onFocus }: Props) => {
     const { TranslateText } = useLanguageContext()
     const showingAnalysis = focus === 'analysis'
@@ -34,33 +59,31 @@ export const GalleryResultContent = ({ inspection, focus, installationName, onFo
             />
         ) : null
 
+    const metadata = (
+        <Metadata>
+            {(
+                [
+                    ['Installation', installationName],
+                    ['Timestamp', inspection.createdAt ? formatDateTime(inspection.createdAt) : ''],
+                ] as const
+            )
+                .filter(([, value]) => value)
+                .map(([label, value]) => (
+                    <div key={label}>
+                        <Typography variant="caption">{TranslateText(label)}</Typography>
+                        <Typography variant="body_short">{value}</Typography>
+                    </div>
+                ))}
+        </Metadata>
+    )
+
     if (inspection.measurementRecordId) {
         return (
             <>
-                <GalleryBody $paired={false}>
-                    <AnalysisContent $hasFinding={showingAnalysis ? hasFinding : undefined}>
-                        <Typography variant="h6">
-                            {TranslateText(showingAnalysis ? 'Analysis result' : 'Inspection result')}
-                        </Typography>
-                        <MeasurementDisplay recordId={inspection.measurementRecordId!} isCompact={false} />
-                        {feedback}
-                    </AnalysisContent>
-                </GalleryBody>
-                <Metadata>
-                    {(
-                        [
-                            ['Installation', installationName],
-                            ['Timestamp', inspection.createdAt ? formatDateTime(inspection.createdAt) : ''],
-                        ] as const
-                    )
-                        .filter(([, value]) => value)
-                        .map(([label, value]) => (
-                            <div key={label}>
-                                <Typography variant="caption">{TranslateText(label)}</Typography>
-                                <Typography variant="body_short">{value}</Typography>
-                            </div>
-                        ))}
-                </Metadata>
+                <MeasurementGalleryResultContent inspection={inspection} showAnalysis={showingAnalysis}>
+                    {feedback}
+                </MeasurementGalleryResultContent>
+                {metadata}
             </>
         )
     }
@@ -148,21 +171,7 @@ export const GalleryResultContent = ({ inspection, focus, installationName, onFo
                     </Companion>
                 )}
             </GalleryBody>
-            <Metadata>
-                {(
-                    [
-                        ['Installation', installationName],
-                        ['Timestamp', inspection.createdAt ? formatDateTime(inspection.createdAt) : ''],
-                    ] as const
-                )
-                    .filter(([, value]) => value)
-                    .map(([label, value]) => (
-                        <div key={label}>
-                            <Typography variant="caption">{TranslateText(label)}</Typography>
-                            <Typography variant="body_short">{value}</Typography>
-                        </div>
-                    ))}
-            </Metadata>
+            {metadata}
         </>
     )
 }
