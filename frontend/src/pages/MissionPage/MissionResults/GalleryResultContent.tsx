@@ -13,11 +13,10 @@ interface Props {
     inspection: InspectionData
     focus: ResultFocus
     installationName: string
-    robotName: string | undefined
     onFocus: (focus: ResultFocus) => void
 }
 
-export const GalleryResultContent = ({ inspection, focus, installationName, robotName, onFocus }: Props) => {
+export const GalleryResultContent = ({ inspection, focus, installationName, onFocus }: Props) => {
     const { TranslateText } = useLanguageContext()
     const showingAnalysis = focus === 'analysis'
 
@@ -51,7 +50,6 @@ export const GalleryResultContent = ({ inspection, focus, installationName, robo
                     {(
                         [
                             ['Installation', installationName],
-                            ['Robot', robotName],
                             ['Timestamp', inspection.createdAt ? formatDateTime(inspection.createdAt) : ''],
                         ] as const
                     )
@@ -154,7 +152,6 @@ export const GalleryResultContent = ({ inspection, focus, installationName, robo
                 {(
                     [
                         ['Installation', installationName],
-                        ['Robot', robotName],
                         ['Timestamp', inspection.createdAt ? formatDateTime(inspection.createdAt) : ''],
                     ] as const
                 )

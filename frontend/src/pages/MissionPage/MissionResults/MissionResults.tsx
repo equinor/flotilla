@@ -18,7 +18,6 @@ interface Props {
     isPending: boolean
     isError: boolean
     installationName: string
-    robotName: string | undefined
 }
 
 export type ResultFocus = 'inspection' | 'analysis'
@@ -49,7 +48,7 @@ export const useMissionResultSelection = () => {
     return { selectedId, preferredFocus, select }
 }
 
-export const MissionResults = ({ data, isPending, isError, installationName, robotName }: Props) => {
+export const MissionResults = ({ data, isPending, isError, installationName }: Props) => {
     const { TranslateText } = useLanguageContext()
     const { selectedId, preferredFocus, select } = useMissionResultSelection()
 
@@ -78,7 +77,6 @@ export const MissionResults = ({ data, isPending, isError, installationName, rob
                     selectedId={selectedId}
                     preferredFocus={preferredFocus}
                     installationName={installationName}
-                    robotName={robotName}
                     loadFailed={isError}
                     onSelect={select}
                     onClose={() => select(undefined)}
