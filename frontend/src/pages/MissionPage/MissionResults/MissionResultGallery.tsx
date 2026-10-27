@@ -81,23 +81,17 @@ export const MissionResultGallery = ({
                             {index + 1} / {data.length}
                         </Typography>
                     )}
-                    <Button
-                        variant="ghost_icon"
-                        aria-label={TranslateText('Previous inspection')}
-                        disabled={index <= 0}
-                        onClick={() => navigate(-1)}
-                    >
+                    <Button variant="ghost_icon" disabled={index <= 0} onClick={() => navigate(-1)}>
                         <Icon data={chevron_left} />
                     </Button>
                     <Button
                         variant="ghost_icon"
-                        aria-label={TranslateText('Next inspection')}
                         disabled={index === -1 || index === data.length - 1}
                         onClick={() => navigate(1)}
                     >
                         <Icon data={chevron_right} />
                     </Button>
-                    <Button variant="ghost_icon" aria-label={TranslateText('Close result gallery')} onClick={onClose}>
+                    <Button variant="ghost_icon" onClick={onClose}>
                         <Icon data={close} />
                     </Button>
                 </Navigation>
@@ -121,7 +115,7 @@ export const MissionResultGallery = ({
                     <Typography role="alert">{TranslateText('Selected result is unavailable')}</Typography>
                 </GalleryBody>
             ) : null}
-            <Strip aria-label={TranslateText('Inspections in this mission')}>
+            <Strip>
                 <Typography variant="h6">{TranslateText('Inspections in this mission')}</Typography>
                 <div>
                     {data.map((inspection, inspectionIndex) => {
@@ -134,11 +128,6 @@ export const MissionResultGallery = ({
                                     hasInspectionAnalysis(inspection) ? Boolean(inspection?.warning) : undefined
                                 }
                                 variant="ghost"
-                                aria-current={id === selectedId ? 'true' : undefined}
-                                aria-label={TranslateText('View result for {0}, task {1}', [
-                                    inspection.tag,
-                                    String(inspectionIndex),
-                                ])}
                                 onClick={() => onSelect(id)}
                             >
                                 {!inspection.measurementRecordId && thumbnailSource && (

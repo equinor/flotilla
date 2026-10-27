@@ -124,11 +124,7 @@ export const GalleryResultContent = ({ inspection, focus, installationName, onFo
                         {inspectionCompanion && (
                             <>
                                 <Typography variant="h6">{TranslateText('Inspection result')}</Typography>
-                                <PreviewButton
-                                    variant="ghost"
-                                    aria-label={TranslateText('Enlarge inspection for {0}', [inspection.tag])}
-                                    onClick={() => onFocus('inspection')}
-                                >
+                                <PreviewButton variant="ghost" onClick={() => onFocus('inspection')}>
                                     <ResultMediaView
                                         source={inspectionCompanion}
                                         label={inspection.tag}
@@ -141,11 +137,7 @@ export const GalleryResultContent = ({ inspection, focus, installationName, onFo
                             <AnalysisContent $hasFinding={hasFinding}>
                                 <Typography variant="h6">{TranslateText('Analysis result')}</Typography>
                                 {analysisCompanion && (
-                                    <PreviewButton
-                                        variant="ghost"
-                                        aria-label={TranslateText('Enlarge analysis for {0}', [inspection.tag])}
-                                        onClick={() => onFocus('analysis')}
-                                    >
+                                    <PreviewButton variant="ghost" onClick={() => onFocus('analysis')}>
                                         <ResultMediaView
                                             source={analysisCompanion}
                                             label={inspection.tag}
@@ -155,11 +147,7 @@ export const GalleryResultContent = ({ inspection, focus, installationName, onFo
                                 )}
                                 {summary &&
                                     (!showingAnalysis && !analysisCompanion ? (
-                                        <PreviewButton
-                                            variant="ghost"
-                                            aria-label={TranslateText('Enlarge analysis for {0}', [inspection.tag])}
-                                            onClick={() => onFocus('analysis')}
-                                        >
+                                        <PreviewButton variant="ghost" onClick={() => onFocus('analysis')}>
                                             {summary}
                                         </PreviewButton>
                                     ) : (
