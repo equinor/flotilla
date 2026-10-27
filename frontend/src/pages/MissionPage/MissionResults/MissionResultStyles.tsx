@@ -53,14 +53,16 @@ export const MeasurementPreviewButton = styled(PreviewButton)`
     }
 `
 
-export const CardDetails = styled.div`
+const findingBackground = `color-mix(in srgb, ${tokens.colors.interactive.warning__resting.hex} 12%, ${tokens.colors.ui.background__default.hex})`
+
+export const CardDetails = styled.div<{ $hasFinding?: boolean }>`
+    background: ${({ $hasFinding }) => ($hasFinding ? findingBackground : tokens.colors.ui.background__light.hex)};
     grid-row: 1;
     display: flex;
     flex-direction: column;
     gap: ${spacing.small};
     padding: ${spacing.medium};
     overflow-wrap: anywhere;
-    background: ${tokens.colors.ui.background__light.hex};
     border-bottom: ${divider};
     > p {
         font-weight: 400;
@@ -68,7 +70,7 @@ export const CardDetails = styled.div`
     }
 `
 
-export const CardHeading = styled.div`
+export const CardHeading = styled.div<{ $hasFinding?: boolean }>`
     display: flex;
     align-items: baseline;
     gap: ${spacing.small};
@@ -83,16 +85,6 @@ export const TaskNumber = styled(Typography)`
     border-right: ${divider};
 `
 
-export const AnalysisPreview = styled.div<{ $hasFinding: boolean }>`
-    ${analysisHighlight}
-    grid-row: 3;
-    padding: ${spacing.medium};
-    border-top: ${divider};
-    display: flex;
-    flex-direction: column;
-    gap: ${spacing.small};
-`
-
 export const ResultsSection = styled.section`
     width: 100%;
     display: flex;
@@ -103,10 +95,10 @@ export const ResultsSection = styled.section`
 export const Deck = styled.div`
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 24px;
+    gap: 8px;
 `
 
-export const ResultCard = styled(Card)<{ $hasAnalysis: boolean }>`
+export const ResultCard = styled(Card)`
     && {
         display: grid;
         border-radius: 1px;
