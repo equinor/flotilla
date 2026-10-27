@@ -43,6 +43,9 @@ public class MissionRecordingServiceTests
         Assert.Equal("NotRecorded", result.Status);
         Assert.Empty(result.Cameras);
         Assert.Empty(result.Gaps);
+        Assert.Null(
+            await CreateService().GetRecordingAccess("run", "front", CancellationToken.None)
+        );
     }
 
     [Fact]
@@ -58,15 +61,15 @@ public class MissionRecordingServiceTests
     }
 
     [Fact]
-    public async Task ReadyCamerasReceiveReadOnlyExpiringPlaybackAndDownloadUrls()
+    public async Task ReadyCamerasReceiveReadOnlyExpiringUrlsOnlyWhenAccessIsRequested()
     {
         using var cancellation = new CancellationTokenSource();
         var content = BlobsModelFactory.BlobDownloadResult(
             content: BinaryData.FromString(
                 """
                 {"runId":"run","status":"Ready","engine":"driver","cameras":{
-                  "front":{"cameraId":"front","status":"Ready","key":"front","blobName":"video.mp4","captureMetadata":{"sourceCodec":"H264"}},
-                  "arm":{"status":"Processing"}
+                  "d104-front/front":{"cameraId":"d104-front/front","status":"Ready","key":"front","blobName":"video.mp4","captureMetadata":{"sourceCodec":"H264"}},
+                  "arm":{"status":"Processing","key":"arm"}
                 }}
                 """
             )
@@ -101,19 +104,26 @@ public class MissionRecordingServiceTests
 
         var result = await CreateService().GetRecordings("run", cancellation.Token);
 
-        var camera = result.Cameras["front"];
+        var camera = result.Cameras["d104-front/front"];
         Assert.Equal("run", result.RunId);
         Assert.Equal("Ready", result.Status);
         Assert.Equal("driver", result.Metadata["engine"].GetString());
-        Assert.Equal("front", camera.CameraId);
+        Assert.Equal("d104-front/front", camera.CameraId);
         Assert.Equal(
             "H264",
             camera.Metadata["captureMetadata"].GetProperty("sourceCodec").GetString()
         );
-        Assert.Contains("inline", camera.PlaybackUrl);
-        Assert.Contains("attachment", camera.DownloadUrl);
-        Assert.Contains("run-front.mp4", Uri.UnescapeDataString(camera.DownloadUrl!));
-        Assert.Null(result.Cameras["arm"].PlaybackUrl);
+        video.Verify(client => client.GenerateSasUri(It.IsAny<BlobSasBuilder>()), Times.Never);
+        Assert.Null(await CreateService().GetRecordingAccess("run", "arm", cancellation.Token));
+        Assert.Null(await CreateService().GetRecordingAccess("run", "missing", cancellation.Token));
+
+        var access = await CreateService().GetRecordingAccess("run", "front", cancellation.Token);
+
+        Assert.NotNull(access);
+        Assert.Contains("inline", access.PlaybackUrl);
+        Assert.Contains("attachment", access.DownloadUrl);
+        Assert.Contains("run-front.mp4", Uri.UnescapeDataString(access.DownloadUrl));
+        Assert.InRange(access.ExpiresAt, earliestExpiry, DateTimeOffset.UtcNow.AddMinutes(30));
         video.Verify(client => client.GenerateSasUri(It.IsAny<BlobSasBuilder>()), Times.Exactly(2));
     }
 

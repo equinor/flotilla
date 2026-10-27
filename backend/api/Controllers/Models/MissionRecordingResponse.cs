@@ -26,14 +26,15 @@ public class CameraRecordingResponse
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Error { get; set; }
 
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public string? PlaybackUrl { get; set; }
-
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public string? DownloadUrl { get; set; }
-
     [JsonExtensionData]
     public Dictionary<string, JsonElement> Metadata { get; set; } = [];
+}
+
+public class RecordingAccessResponse
+{
+    public string PlaybackUrl { get; set; } = "";
+    public string DownloadUrl { get; set; } = "";
+    public DateTimeOffset ExpiresAt { get; set; }
 }
 
 public class RecordingGapResponse
