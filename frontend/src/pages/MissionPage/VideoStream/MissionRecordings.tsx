@@ -1,9 +1,16 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { Button, Icon, Menu, Typography } from '@equinor/eds-core-react'
 import { useBackendApi } from 'api/UseBackendApi'
 import styled from 'styled-components'
 import { Icons } from 'utils/icons'
 import { ApiError } from 'api/ApiError'
+
+// Renew playback access one minute before expiry to allow time for the request.
+const PLAYBACK_ACCESS_RENEWAL_MARGIN_MS = 60_000
+
+// Wait at least ten seconds between renewal attempts to avoid rapid retries.
+const MINIMUM_RETRY_INTERVAL_MS = 10_000
 
 const Cameras = styled.div`
     display: flex;
@@ -35,15 +42,72 @@ const PlayerToolbar = styled.div`
     gap: 0.5rem;
 `
 
-const RecordingPlayer = ({ camera }: { camera: MissionRecording['cameras'][string] }) => {
+const shouldRenewPlaybackAccess = (playbackAccess: MissionRecordingAccess | undefined) => {
+    if (!playbackAccess) return false
+
+    const expiresInMs = Date.parse(playbackAccess.expiresAt) - Date.now()
+
+    return expiresInMs <= PLAYBACK_ACCESS_RENEWAL_MARGIN_MS
+}
+
+const canRefreshPlaybackAccess = (
+    playbackAccess: MissionRecordingAccess | undefined,
+    error: Error | null
+): playbackAccess is MissionRecordingAccess => {
+    if (!playbackAccess) return false
+    if (error instanceof ApiError && error.statusCode === 403) return false
+
+    return true
+}
+
+const getPlaybackAccessRefreshInterval = (playbackAccess: MissionRecordingAccess) => {
+    const expiresInMs = Date.parse(playbackAccess.expiresAt) - Date.now()
+
+    return Math.max(expiresInMs - PLAYBACK_ACCESS_RENEWAL_MARGIN_MS, MINIMUM_RETRY_INTERVAL_MS)
+}
+
+const RecordingPlayer = ({ missionId, camera }: { missionId: string; camera: MissionRecording['cameras'][string] }) => {
+    const backendApi = useBackendApi()
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
+    const videoRef = useRef<HTMLVideoElement>(null)
+    const {
+        data: playbackAccess,
+        isError,
+        refetch,
+    } = useQuery({
+        queryKey: ['missionRecordingAccess', missionId, camera.cameraId, camera.key],
+        queryFn: () => backendApi.getMissionRecordingAccess(missionId, camera.key),
+        retry: 1,
+        gcTime: 0,
+        refetchOnWindowFocus: ({ state }) => shouldRenewPlaybackAccess(state.data),
+        refetchInterval: ({ state: { data, error } }) => {
+            if (!canRefreshPlaybackAccess(data, error)) return false
+            return getPlaybackAccessRefreshInterval(data)
+        },
+        refetchIntervalInBackground: true,
+    })
+    const playbackUrl = playbackAccess?.playbackUrl
+
+    useEffect(() => {
+        const video = videoRef.current
+        if (!video || !playbackUrl) return
+        const position = video.currentTime
+        const wasPlaying = !video.paused && !video.ended
+        const restorePlayback = () => {
+            video.currentTime = position
+            if (wasPlaying) void video.play().catch(() => undefined)
+        }
+        video.addEventListener('loadedmetadata', restorePlayback, { once: true })
+        video.src = playbackUrl
+        return () => video.removeEventListener('loadedmetadata', restorePlayback)
+    }, [playbackUrl])
 
     return (
         <Player>
             <PlayerToolbar>
                 <Typography variant="h5">{camera.cameraId}</Typography>
-                {camera.downloadUrl && (
+                {playbackAccess && (
                     <>
                         <Button
                             variant="ghost_icon"
@@ -61,14 +125,19 @@ const RecordingPlayer = ({ camera }: { camera: MissionRecording['cameras'][strin
                             aria-label={`Video options for ${camera.cameraId}`}
                             onClose={() => setIsMenuOpen(false)}
                         >
-                            <Menu.Item as="a" href={camera.downloadUrl} onClick={() => setIsMenuOpen(false)}>
+                            <Menu.Item as="a" href={playbackAccess.downloadUrl} onClick={() => setIsMenuOpen(false)}>
                                 Download video
                             </Menu.Item>
                         </Menu>
                     </>
                 )}
             </PlayerToolbar>
-            <video controls preload="metadata" src={camera.playbackUrl} />
+            {isError && (
+                <Typography role="status">
+                    Recording unavailable. <Button onClick={() => void refetch()}>Retry</Button>
+                </Typography>
+            )}
+            <video ref={videoRef} controls preload="metadata" />
         </Player>
     )
 }
@@ -81,23 +150,18 @@ export interface MissionRecording {
         string,
         {
             cameraId: string
+            key: string
             firstFrameAt?: string
             status: string
             error?: string
-            playbackUrl?: string
-            downloadUrl?: string
         }
     >
 }
 
-const retainValidPlaybackUrl = (currentUrl: string | undefined, nextUrl: string | undefined) => {
-    if (!currentUrl || !nextUrl) return nextUrl
-    const current = new URL(currentUrl)
-    const next = new URL(nextUrl)
-    const expiresAt = Date.parse(current.searchParams.get('se') ?? '')
-    return current.origin === next.origin && current.pathname === next.pathname && expiresAt > Date.now() + 11 * 60_000
-        ? currentUrl
-        : nextUrl
+export interface MissionRecordingAccess {
+    playbackUrl: string
+    downloadUrl: string
+    expiresAt: string
 }
 
 export const MissionRecordings = ({ missionId }: { missionId: string }) => {
@@ -112,21 +176,7 @@ export const MissionRecordings = ({ missionId }: { missionId: string }) => {
                 .getMissionRecordings(missionId)
                 .then((result) => {
                     if (!disposed) {
-                        setRecording((previous) => ({
-                            ...result,
-                            cameras: Object.fromEntries(
-                                Object.entries(result.cameras).map(([id, camera]) => [
-                                    id,
-                                    {
-                                        ...camera,
-                                        playbackUrl: retainValidPlaybackUrl(
-                                            previous?.cameras[id]?.playbackUrl,
-                                            camera.playbackUrl
-                                        ),
-                                    },
-                                ])
-                            ),
-                        }))
+                        setRecording(result)
                         setError(undefined)
                         timer = setTimeout(() => void refresh(), result.status === 'Ready' ? 600000 : 2000)
                     }
@@ -160,15 +210,15 @@ export const MissionRecordings = ({ missionId }: { missionId: string }) => {
             )}
             <Cameras>
                 {Object.values(recording?.cameras ?? {}).map((camera) => (
-                    <Camera key={camera.cameraId}>
-                        {!camera.playbackUrl && <Typography variant="h5">{camera.cameraId}</Typography>}
+                    <Camera key={camera.key}>
+                        {camera.status !== 'Ready' && <Typography variant="h5">{camera.cameraId}</Typography>}
                         {(camera.status !== 'Ready' || camera.error) && (
                             <Typography>
                                 {camera.status}
                                 {camera.error ? `: ${camera.error}` : ''}
                             </Typography>
                         )}
-                        {camera.playbackUrl && <RecordingPlayer camera={camera} />}
+                        {camera.status === 'Ready' && <RecordingPlayer missionId={missionId} camera={camera} />}
                     </Camera>
                 ))}
             </Cameras>

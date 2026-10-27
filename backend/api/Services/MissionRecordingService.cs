@@ -11,6 +11,11 @@ namespace Api.Services;
 public interface IMissionRecordingService
 {
     Task<MissionRecordingResponse> GetRecordings(string runId, CancellationToken cancellationToken);
+    Task<RecordingAccessResponse?> GetRecordingAccess(
+        string runId,
+        string cameraKey,
+        CancellationToken cancellationToken
+    );
 }
 
 /// <summary>Reads private recording manifests and provides short-lived video access.</summary>
@@ -21,7 +26,6 @@ public class MissionRecordingService(
 {
     private static readonly TimeSpan VideoUrlLifetime = TimeSpan.FromMinutes(30);
 
-    /// <summary>Returns the session with video URLs, or NotRecorded when no manifest exists.</summary>
     public async Task<MissionRecordingResponse> GetRecordings(
         string runId,
         CancellationToken cancellationToken
@@ -29,17 +33,14 @@ public class MissionRecordingService(
     {
         var containerName = MissionRecordingConfigurations.GetRecordingContainerName(configuration);
         var container = storageClient.Value.GetBlobContainerClient(containerName);
-        MissionRecordingResponse document;
         try
         {
-            document = await DownloadManifest(container, runId, cancellationToken);
+            return await DownloadManifest(container, runId, cancellationToken);
         }
         catch (RequestFailedException error) when (error.Status == 404)
         {
             return CreateNotRecordedResponse(runId);
         }
-        await AddCameraVideoUrls(container, document, runId, cancellationToken);
-        return document;
     }
 
     /// <summary>Downloads the driver's session catalog without retrieving video content.</summary>
@@ -56,20 +57,22 @@ public class MissionRecordingService(
         )!;
     }
 
-    /// <summary>Adds playback and download links only for finalized, uploaded cameras.</summary>
-    private async Task AddCameraVideoUrls(
-        BlobContainerClient container,
-        MissionRecordingResponse document,
+    public async Task<RecordingAccessResponse?> GetRecordingAccess(
         string runId,
+        string cameraKey,
         CancellationToken cancellationToken
     )
     {
-        var readyCameras = document
-            .Cameras.Values.Where(camera => camera.Status == "Ready")
-            .ToList();
-        if (readyCameras.Count == 0)
-            return;
+        var document = await GetRecordings(runId, cancellationToken);
+        var camera = document.Cameras.Values.FirstOrDefault(camera =>
+            string.Equals(camera.Key, cameraKey, StringComparison.Ordinal)
+        );
+        if (camera is null || camera.Status != "Ready")
+            return null;
 
+        var container = storageClient.Value.GetBlobContainerClient(
+            MissionRecordingConfigurations.GetRecordingContainerName(configuration)
+        );
         var expiresOn = DateTimeOffset.UtcNow.Add(VideoUrlLifetime);
         UserDelegationKey? delegationKey = null;
         if (!storageClient.Value.CanGenerateAccountSasUri)
@@ -83,17 +86,18 @@ public class MissionRecordingService(
             ).Value;
         }
 
-        foreach (var camera in readyCameras)
+        var blob = container.GetBlobClient(camera.BlobName);
+        return new RecordingAccessResponse
         {
-            var blob = container.GetBlobClient(camera.BlobName);
-            camera.PlaybackUrl = CreateVideoAccessUrl(blob, "inline", expiresOn, delegationKey);
-            camera.DownloadUrl = CreateVideoAccessUrl(
+            PlaybackUrl = CreateVideoAccessUrl(blob, "inline", expiresOn, delegationKey),
+            DownloadUrl = CreateVideoAccessUrl(
                 blob,
                 $"attachment; filename=\"{runId}-{camera.Key}.mp4\"",
                 expiresOn,
                 delegationKey
-            );
-        }
+            ),
+            ExpiresAt = expiresOn,
+        };
     }
 
     /// <summary>Signs read-only access with the requested browser content disposition.</summary>

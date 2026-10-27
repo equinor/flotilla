@@ -16,11 +16,6 @@ public class MissionRecordingController(
     ILogger<MissionRecordingController> logger
 ) : ControllerBase
 {
-    /// <summary>Get mission camera recording status and short-lived playback and download URLs.</summary>
-    /// <remarks>
-    /// Requires Admin access. Existing missions without a recording return NotRecorded.
-    /// Video URLs are valid for 30 minutes. Responses must not be cached.
-    /// </remarks>
     [HttpGet]
     [ProducesResponseType(typeof(MissionRecordingResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -30,7 +25,30 @@ public class MissionRecordingController(
     public async Task<ActionResult<MissionRecordingResponse>> GetRecordings(
         [FromRoute] string runId,
         CancellationToken cancellationToken
-    )
+    ) =>
+        await ReadRecordingResponse(
+            runId,
+            async () => await missionRecordingService.GetRecordings(runId, cancellationToken)
+        );
+
+    [HttpGet("{cameraKey}/access")]
+    [ProducesResponseType(typeof(RecordingAccessResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status503ServiceUnavailable)]
+    public async Task<ActionResult<RecordingAccessResponse>> GetRecordingAccess(
+        [FromRoute] string runId,
+        [FromRoute] string cameraKey,
+        CancellationToken cancellationToken
+    ) =>
+        await ReadRecordingResponse(
+            runId,
+            () => missionRecordingService.GetRecordingAccess(runId, cameraKey, cancellationToken)
+        );
+
+    private async Task<ActionResult<T>> ReadRecordingResponse<T>(string runId, Func<Task<T?>> read)
+        where T : class
     {
         var mission = await missionRunService.ReadById(runId);
         if (mission is null)
@@ -38,7 +56,8 @@ public class MissionRecordingController(
         Response.Headers.CacheControl = "no-store";
         try
         {
-            return Ok(await missionRecordingService.GetRecordings(runId, cancellationToken));
+            var result = await read();
+            return result is null ? NotFound() : Ok(result);
         }
         catch (ConfigException error)
         {
