@@ -12,11 +12,17 @@ const Content = styled.div`
     overflow-wrap: anywhere;
 `
 
-export const ResultAnalysis = ({ inspection }: { inspection: InspectionData }) => {
+export const ResultAnalysis = ({
+    inspection,
+    isCompact = false,
+}: {
+    inspection: InspectionData
+    isCompact?: boolean
+}) => {
     const { TranslateText } = useLanguageContext()
     return (
         <Content>
-            {inspection?.value && (
+            {inspection?.value && !isCompact && (
                 <AnalysisValueDisplay
                     value={inspection.value}
                     unit={inspection.unit}
@@ -29,7 +35,7 @@ export const ResultAnalysis = ({ inspection }: { inspection: InspectionData }) =
                     {TranslateText('Warning')}: {inspection.warning}
                 </Typography>
             )}
-            {inspection.confidence !== undefined && inspection.confidence !== null && (
+            {inspection.confidence !== undefined && inspection.confidence !== null && !isCompact && (
                 <Typography variant="caption">
                     {TranslateText('Confidence')}: {Math.round(inspection.confidence)} %
                 </Typography>
