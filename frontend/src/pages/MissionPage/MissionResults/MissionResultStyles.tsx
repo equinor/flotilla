@@ -79,8 +79,8 @@ export const TaskNumber = styled(Typography)`
     color: ${tokens.colors.text.static_icons__secondary.hex};
     white-space: nowrap;
     flex-shrink: 0;
-    padding-left: ${spacing.small};
-    border-left: ${divider};
+    padding-right: ${spacing.small};
+    border-right: ${divider};
 `
 
 export const AnalysisPreview = styled.div<{ $hasFinding: boolean }>`

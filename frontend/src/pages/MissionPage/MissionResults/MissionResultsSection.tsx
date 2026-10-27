@@ -1,6 +1,5 @@
 import { Typography } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'contexts/LanguageContext'
-import { formatDateTime } from 'utils/StringFormatting'
 import { ResultMediaView } from 'pages/MissionPage/MissionResults/ResultMediaView'
 import { ResultAnalysis } from 'pages/MissionPage/MissionResults/ResultAnalysis'
 import {
@@ -66,23 +65,17 @@ export const MissionResultsSection = ({
                             />
                         </PreviewButton>
                     ) : undefined
+
+                    if (!rawPreviewButton && !imageView) return <></>
                     return (
                         <ResultCard key={inspection.inspectionId} $hasAnalysis={hasInspectionAnalysis(inspection)}>
                             <CardDetails>
                                 <CardHeading>
-                                    <Typography variant="h5">
-                                        {inspection.tag || TranslateText('Result task {0}', [String(index)])}
-                                    </Typography>
                                     <TaskNumber variant="caption">
-                                        {TranslateText('Result task {0}', [String(index)])}
+                                        {TranslateText('Index') + ' ' + String(index + 1)}
                                     </TaskNumber>
+                                    <Typography bold>{inspection.tag || ''}</Typography>
                                 </CardHeading>
-                                {inspection.inspectionDescription && (
-                                    <Typography variant="body_long">{inspection.inspectionDescription}</Typography>
-                                )}
-                                {inspection.createdAt && (
-                                    <Typography variant="caption">{formatDateTime(inspection.createdAt)}</Typography>
-                                )}
                             </CardDetails>
                             {rawPreviewButton}
                             {imageView}
