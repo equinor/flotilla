@@ -133,7 +133,6 @@ const MissionPageWithMission = ({ mission, includeHeader = true }: { mission: Mi
                             isPending={isPending}
                             isError={isError}
                             installationName={installation.name}
-                            robotName={mission.robot.name}
                         />
                     </TaskTableAndMap>
                 </PageContent>

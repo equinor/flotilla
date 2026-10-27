@@ -25,7 +25,6 @@ interface Props {
     selectedId: string
     preferredFocus: ResultFocus
     installationName: string
-    robotName: string | undefined
     loadFailed: boolean
     onSelect: (id: string, focus?: ResultFocus) => void
     onClose: () => void
@@ -36,7 +35,6 @@ export const MissionResultGallery = ({
     selectedId,
     preferredFocus,
     installationName,
-    robotName,
     loadFailed,
     onSelect,
     onClose,
@@ -114,7 +112,6 @@ export const MissionResultGallery = ({
                     inspection={inspection}
                     focus={focus}
                     installationName={installationName}
-                    robotName={robotName}
                     onFocus={(newFocus) => {
                         onSelect(selectedId, newFocus)
                     }}
