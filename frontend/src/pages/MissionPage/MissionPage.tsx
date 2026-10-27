@@ -24,10 +24,6 @@ const MissionVideoStreamSection = styled(VideoStreamSection)`
     }
 `
 
-// lookupInspectionId is only set on the mission-simple route, where the mission is
-// identified by an inspection and this hook writes the resolved id back into the URL.
-// On /mission/:missionId it is undefined: there the inspection id merely selects which
-// dialog is open, and must not send us looking for a different mission.
 const useMissionSelector = (missionId: string | undefined, lookupInspectionId: string | undefined) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [searchParams, setSearchParams] = useSearchParams()
@@ -67,9 +63,6 @@ const useMissionSelector = (missionId: string | undefined, lookupInspectionId: s
     }, [lookupInspectionId, backendApi])
 
     useEffect(() => {
-        // The id in the URL is written by the effect above once the inspection resolves,
-        // so refetching it here would only duplicate that request with a mission id that
-        // is stale whenever lookupInspectionId has just changed.
         if (lookupInspectionId) return
 
         if (!missionId) {
