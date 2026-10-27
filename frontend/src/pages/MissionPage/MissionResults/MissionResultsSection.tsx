@@ -44,7 +44,6 @@ export const MissionResultsSection = ({
 
                     const imageView = inspection.visualizedSAS ? (
                         <AnalysisPreview $hasFinding={Boolean(inspection?.warning)}>
-                            <Typography variant="caption">{TranslateText('Analysis result')}</Typography>
                             <PreviewButton
                                 variant="ghost"
                                 onClick={() => onSelect(inspection.inspectionId, 'analysis')}
@@ -55,7 +54,7 @@ export const MissionResultsSection = ({
                                     size="analysis"
                                     fileType={inspection.fileType}
                                 />
-                                <ResultAnalysis inspection={inspection} />
+                                <ResultAnalysis inspection={inspection} isCompact />
                             </PreviewButton>
                         </AnalysisPreview>
                     ) : inspection.anonymizedSAS ? (
