@@ -74,6 +74,7 @@ export interface FlotillaAnalysisResultMessage {
 
 export interface InspectionData {
     inspectionId: string
+    inspectionType: string
     missionId?: string
     analysisId?: string
     measurementRecordId?: string
@@ -101,6 +102,31 @@ export const hasInspectionAnalysis = (inspection: InspectionData | undefined): b
             inspection?.value ||
             Boolean(inspection?.warning))
     )
+
+export interface TaskMeasurement {
+    recordId: string
+    inspectionType: string
+}
+
+interface TaskResult {
+    inspection: InspectionData
+    measurements: TaskMeasurement[]
+}
+
+const getTaskMeasurements = (inspections: InspectionData[]): TaskMeasurement[] =>
+    inspections
+        .flatMap((inspection) =>
+            inspection.measurementRecordId
+                ? [{ recordId: inspection.measurementRecordId, inspectionType: inspection.inspectionType }]
+                : []
+        )
+        .sort((left, right) => left.inspectionType.localeCompare(right.inspectionType))
+
+export const groupInspectionsByTask = (inspections: InspectionData[]): TaskResult[] =>
+    [...Map.groupBy(inspections, (inspection) => inspection.inspectionId).values()].map((taskInspections) => ({
+        inspection: taskInspections[0],
+        measurements: getTaskMeasurements(taskInspections),
+    }))
 
 const imageFileEndings = ['jpg', 'jpeg', 'png', 'gif']
 
@@ -134,6 +160,7 @@ export const inspectionRecordToInspectionData = (record: InspectionRecord): Insp
 
     return {
         inspectionId: record.inspectionId,
+        inspectionType: record.inspectionType,
         missionId: record.flotillaMissionId ?? undefined,
         analysisId: analysis?.id,
         measurementRecordId: measurementRecordId,

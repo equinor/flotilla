@@ -14,6 +14,7 @@ import { useBackendApi } from 'api/UseBackendApi'
 import { InstallationContext } from 'contexts/InstallationContext'
 import { useInspectionsContext } from 'contexts/InspectionsContext'
 import { MissionResults } from './MissionResults/MissionResults'
+import { groupInspectionsByTask } from 'models/InspectionRecord'
 import { MissionRecordings } from './VideoStream/MissionRecordings'
 
 const MissionVideoStreamSection = styled(VideoStreamSection)`
@@ -98,10 +99,17 @@ const MissionPageWithMission = ({ mission, includeHeader = true }: { mission: Mi
         null
     )
 
-    const taskDataInSelectedMission = mission.tasks.map((t) => ({
-        task: t,
-        data: data?.find((d) => d.inspectionId === t.id),
-    }))
+    const resultsByTask = new Map(
+        groupInspectionsByTask(data ?? []).map((result) => [result.inspection.inspectionId, result])
+    )
+    const taskDataInSelectedMission = mission.tasks.map((t) => {
+        const result = resultsByTask.get(t.id)
+        return {
+            task: t,
+            data: result?.inspection,
+            measurements: result?.measurements ?? [],
+        }
+    })
 
     return (
         <>

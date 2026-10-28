@@ -6,11 +6,13 @@ import { ResultAnalysis } from './ResultAnalysis'
 import { ResultMediaView } from './ResultMediaView'
 import { AnalysisContent, Companion, GalleryBody, Metadata, PreviewButton } from './MissionResultStyles'
 import { MeasurementDisplay } from 'components/Displays/MeasurementDisplay'
+import { MeasurementTable } from 'components/Displays/MeasurementTable'
 import { ResultFocus } from './MissionResults'
-import { hasInspectionAnalysis, InspectionData } from 'models/InspectionRecord'
+import { hasInspectionAnalysis, InspectionData, TaskMeasurement } from 'models/InspectionRecord'
 
 interface Props {
     inspection: InspectionData
+    measurements: TaskMeasurement[]
     focus: ResultFocus
     installationName: string
     onFocus: (focus: ResultFocus) => void
@@ -18,14 +20,18 @@ interface Props {
 
 const MeasurementGalleryResultContent = ({
     inspection,
+    measurements,
     showAnalysis,
     children,
 }: {
     inspection: InspectionData
+    measurements: TaskMeasurement[]
     showAnalysis: boolean
     children: React.ReactNode
 }) => {
     const { TranslateText } = useLanguageContext()
+    const [first] = measurements
+    if (!first) return null
     return (
         <>
             <GalleryBody $paired={false}>
@@ -33,7 +39,11 @@ const MeasurementGalleryResultContent = ({
                     <Typography variant="h6">
                         {TranslateText(showAnalysis ? 'Analysis result' : 'Inspection result')}
                     </Typography>
-                    <MeasurementDisplay recordId={inspection.measurementRecordId!} isCompact={false} />
+                    {measurements.length > 1 ? (
+                        <MeasurementTable measurements={measurements} />
+                    ) : (
+                        <MeasurementDisplay recordId={first.recordId} isCompact={false} />
+                    )}
                     {children}
                 </AnalysisContent>
             </GalleryBody>
@@ -41,7 +51,7 @@ const MeasurementGalleryResultContent = ({
     )
 }
 
-export const GalleryResultContent = ({ inspection, focus, installationName, onFocus }: Props) => {
+export const GalleryResultContent = ({ inspection, measurements, focus, installationName, onFocus }: Props) => {
     const { TranslateText } = useLanguageContext()
     const showingAnalysis = focus === 'analysis'
 
@@ -77,10 +87,14 @@ export const GalleryResultContent = ({ inspection, focus, installationName, onFo
         </Metadata>
     )
 
-    if (inspection.measurementRecordId) {
+    if (measurements.length > 0) {
         return (
             <>
-                <MeasurementGalleryResultContent inspection={inspection} showAnalysis={showingAnalysis}>
+                <MeasurementGalleryResultContent
+                    inspection={inspection}
+                    measurements={measurements}
+                    showAnalysis={showingAnalysis}
+                >
                     {feedback}
                 </MeasurementGalleryResultContent>
                 {metadata}

@@ -1,4 +1,4 @@
-import { Typography } from '@equinor/eds-core-react'
+import { EdsProvider, Typography } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'contexts/LanguageContext'
 import { ResultMediaView } from 'pages/MissionPage/MissionResults/ResultMediaView'
 import {
@@ -6,14 +6,16 @@ import {
     CardHeading,
     Deck,
     MeasurementPreviewButton,
+    MeasurementTablePreviewButton,
     PreviewButton,
     ResultCard,
     ResultsSection,
     TaskNumber,
 } from 'pages/MissionPage/MissionResults/MissionResultStyles'
 import { MeasurementDisplay } from 'components/Displays/MeasurementDisplay'
+import { MeasurementTable } from 'components/Displays/MeasurementTable'
+import { groupInspectionsByTask, InspectionData } from 'models/InspectionRecord'
 import { ResultFocus } from './MissionResults'
-import { InspectionData } from 'models/InspectionRecord'
 
 export const MissionResultsSection = ({
     data,
@@ -25,19 +27,31 @@ export const MissionResultsSection = ({
     const { TranslateText } = useLanguageContext()
     if (data.length === 0) return null
 
+    const results = groupInspectionsByTask(data)
+
     return (
         <ResultsSection>
             <Typography variant="h4">{TranslateText('Inspection results')}</Typography>
             <Deck>
-                {data.map((inspection, index) => {
-                    const rawPreviewButton = inspection.measurementRecordId ? (
-                        <MeasurementPreviewButton
-                            variant="ghost"
-                            onClick={() => onSelect(inspection.inspectionId, 'inspection')}
-                        >
-                            <MeasurementDisplay recordId={inspection.measurementRecordId} isCompact={false} />
-                        </MeasurementPreviewButton>
-                    ) : undefined
+                {results.map(({ inspection, measurements }, index) => {
+                    const rawPreviewButton =
+                        measurements.length > 1 ? (
+                            <MeasurementTablePreviewButton
+                                variant="ghost"
+                                onClick={() => onSelect(inspection.inspectionId, 'inspection')}
+                            >
+                                <EdsProvider density="compact">
+                                    <MeasurementTable measurements={measurements} />
+                                </EdsProvider>
+                            </MeasurementTablePreviewButton>
+                        ) : measurements.length === 1 ? (
+                            <MeasurementPreviewButton
+                                variant="ghost"
+                                onClick={() => onSelect(inspection.inspectionId, 'inspection')}
+                            >
+                                <MeasurementDisplay recordId={measurements[0].recordId} isCompact={false} />
+                            </MeasurementPreviewButton>
+                        ) : undefined
 
                     const imageView = inspection.visualizedSAS ? (
                         <PreviewButton
