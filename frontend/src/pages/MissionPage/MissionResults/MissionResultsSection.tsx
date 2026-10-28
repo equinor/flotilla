@@ -61,7 +61,7 @@ export const MissionResultsSection = ({
                         </PreviewButton>
                     ) : undefined
 
-                    if (!rawPreviewButton && !imageView) return <></>
+                    if (!rawPreviewButton && !imageView) return undefined
                     return (
                         <ResultCard key={inspection.inspectionId}>
                             <CardDetails $hasFinding={Boolean(inspection?.warning)}>
