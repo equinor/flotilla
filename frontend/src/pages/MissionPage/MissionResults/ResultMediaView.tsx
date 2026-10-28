@@ -12,7 +12,7 @@ type MediaSize = 'preview' | 'analysis' | 'thumbnail' | 'large'
 
 const spacing = tokens.spacings.comfortable
 
-const Frame = styled.div<{ $size: MediaSize }>`
+const Frame = styled.a<{ $size: MediaSize }>`
     position: relative;
     display: flex;
     align-items: center;
@@ -105,8 +105,9 @@ export const ResultMediaView = ({
             {TranslateText(fileType)}
         </InspectionTypeLabel>
     )
+    const hyperlink = size === 'large' && fileType !== FileType.VALUE ? source : undefined
     return (
-        <Frame $size={size}>
+        <Frame $size={size} href={hyperlink} target="_blank" rel="noopener noreferrer">
             {fileType === FileType.IMAGE && <LoadedImage source={source} label={label} overlay={typeLabel} />}
             {fileType === FileType.VIDEO &&
                 (size === 'large' ? (
