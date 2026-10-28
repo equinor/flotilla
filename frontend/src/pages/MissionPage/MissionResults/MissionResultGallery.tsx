@@ -18,7 +18,7 @@ import {
 } from './MissionResultStyles'
 import { MeasurementDisplay } from 'components/Displays/MeasurementDisplay'
 import { ResultFocus } from './MissionResults'
-import { hasInspectionAnalysis, InspectionData } from 'models/InspectionRecord'
+import { groupInspectionsByTask, hasInspectionAnalysis, InspectionData } from 'models/InspectionRecord'
 
 interface Props {
     data: InspectionData[]
@@ -40,14 +40,16 @@ export const MissionResultGallery = ({
     onClose,
 }: Props) => {
     const { TranslateText } = useLanguageContext()
-    const index = data.findIndex((inspection) => inspection.inspectionId === selectedId)
-    const inspection = data[index]
+    const results = groupInspectionsByTask(data)
+    const index = results.findIndex((result) => result.inspection.inspectionId === selectedId)
+    const result = results[index]
+    const inspection = result?.inspection
     const focus =
         inspection && preferredFocus === 'analysis' && hasInspectionAnalysis(inspection) ? 'analysis' : 'inspection'
 
     const navigate = (offset: number) => {
-        const next = data[index + offset]
-        if (index !== -1 && next) onSelect(next.inspectionId)
+        const next = results[index + offset]
+        if (index !== -1 && next) onSelect(next.inspection.inspectionId)
     }
 
     const onKeyDown = (event: KeyboardEvent<HTMLElement>) => {
@@ -78,7 +80,7 @@ export const MissionResultGallery = ({
                 <Navigation>
                     {index !== -1 && (
                         <Typography variant="caption">
-                            {index + 1} / {data.length}
+                            {index + 1} / {results.length}
                         </Typography>
                     )}
                     <Button variant="ghost_icon" disabled={index <= 0} onClick={() => navigate(-1)}>
@@ -86,7 +88,7 @@ export const MissionResultGallery = ({
                     </Button>
                     <Button
                         variant="ghost_icon"
-                        disabled={index === -1 || index === data.length - 1}
+                        disabled={index === -1 || index === results.length - 1}
                         onClick={() => navigate(1)}
                     >
                         <Icon data={chevron_right} />
@@ -104,6 +106,7 @@ export const MissionResultGallery = ({
             {inspection ? (
                 <GalleryResultContent
                     inspection={inspection}
+                    measurements={result.measurements}
                     focus={focus}
                     installationName={installationName}
                     onFocus={(newFocus) => {
@@ -118,7 +121,7 @@ export const MissionResultGallery = ({
             <Strip>
                 <Typography variant="h6">{TranslateText('Inspections in this mission')}</Typography>
                 <div>
-                    {data.map((inspection, inspectionIndex) => {
+                    {results.map(({ inspection, measurements }, inspectionIndex) => {
                         const id = inspection.inspectionId
                         const thumbnailSource = inspection.anonymizedSAS ?? inspection.visualizedSAS
                         return (
@@ -130,7 +133,7 @@ export const MissionResultGallery = ({
                                 variant="ghost"
                                 onClick={() => onSelect(id)}
                             >
-                                {!inspection.measurementRecordId && thumbnailSource && (
+                                {measurements.length === 0 && thumbnailSource && (
                                     <ResultMediaView
                                         source={thumbnailSource}
                                         label={inspection.tag}
@@ -138,8 +141,13 @@ export const MissionResultGallery = ({
                                         size="thumbnail"
                                     />
                                 )}
-                                {inspection.measurementRecordId && (
-                                    <MeasurementDisplay recordId={inspection.measurementRecordId!} isCompact={true} />
+                                {measurements.length === 1 && (
+                                    <MeasurementDisplay recordId={measurements[0].recordId} isCompact={true} />
+                                )}
+                                {measurements.length > 1 && (
+                                    <Typography variant="body_short">
+                                        {TranslateText('{0} measurements', [String(measurements.length)])}
+                                    </Typography>
                                 )}
                                 <Typography variant="body_short">{inspection.tag}</Typography>
                                 <Typography variant="caption">

@@ -53,6 +53,21 @@ export const MeasurementPreviewButton = styled(PreviewButton)`
     }
 `
 
+export const MeasurementTablePreviewButton = styled(PreviewButton)`
+    && {
+        min-width: 0;
+        overflow-x: auto;
+        --eds_table__cell__padding_x_compact: ${spacing.small};
+    }
+    table {
+        width: 100%;
+    }
+    td,
+    th {
+        white-space: nowrap;
+    }
+`
+
 const findingBackground = `color-mix(in srgb, ${tokens.colors.interactive.warning__resting.hex} 12%, ${tokens.colors.ui.background__default.hex})`
 
 export const CardDetails = styled.div<{ $hasFinding?: boolean }>`

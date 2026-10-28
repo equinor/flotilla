@@ -49,6 +49,7 @@ vi.mock('pages/InspectionReportPage/InspectionVideoPlayer', () => ({
 
 const inspection: InspectionData = {
     inspectionId: 'inspection-1',
+    inspectionType: 'Image',
     analysisId: 'analysis-1',
     fileType: FileType.IMAGE,
     anonymizedSAS: 'https://example.test/inspection.jpg',

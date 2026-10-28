@@ -8,7 +8,7 @@ import { AnalysisValueDisplay, DescriptionDisplay, TagIdDisplay } from 'componen
 import { StyledTable, StyledTableBody, StyledTableCell, StyledTableRow } from 'components/Styles/StyledComponents'
 import styled from 'styled-components'
 import { MissionTaskDefinition } from 'models/MissionDefinition'
-import { hasInspectionAnalysis, InspectionData } from 'models/InspectionRecord'
+import { hasInspectionAnalysis, InspectionData, TaskMeasurement } from 'models/InspectionRecord'
 import { Icons } from 'utils/icons'
 import { getAnalysisResultStyle } from '../AnalysisResultStyles'
 import { MeasurementDisplay } from 'components/Displays/MeasurementDisplay'
@@ -31,6 +31,7 @@ const RightAlignedImageButton = styled(Button)`
 export interface TaskAndData {
     task: Task
     data: InspectionData | undefined
+    measurements: TaskMeasurement[]
 }
 
 interface TaskTableProps {
@@ -63,6 +64,7 @@ export const TaskTable = ({ tasksAndData }: TaskTableProps) => {
                             key={taskAndData.task.id}
                             task={taskAndData.task}
                             inspectionData={taskAndData.data}
+                            measurements={taskAndData.measurements}
                             index={index}
                         />
                     ))}
@@ -74,10 +76,12 @@ export const TaskTable = ({ tasksAndData }: TaskTableProps) => {
 const TaskTableRow = ({
     task,
     inspectionData,
+    measurements,
     index,
 }: {
     task: Task
     inspectionData: InspectionData | undefined
+    measurements: TaskMeasurement[]
     index: number
 }) => {
     const { TranslateText } = useLanguageContext()
@@ -114,7 +118,7 @@ const TaskTableRow = ({
             <Table.Cell>
                 <IconWithLabel>
                     <Typography>{TranslateText(task.sensorType as string)}</Typography>
-                    {inspectionData && mediaSAS && !inspectionData.measurementRecordId && (
+                    {inspectionData && mediaSAS && measurements.length === 0 && (
                         <RightAlignedImageButton
                             variant="ghost_icon"
                             aria-label={TranslateText('Enlarge inspection for {0}', [inspectionData.tag])}
@@ -129,8 +133,12 @@ const TaskTableRow = ({
                 <TaskStatusDisplay status={task.status} errorMessage={task.errorDescription} />
             </Table.Cell>
             <Table.Cell>
-                {inspectionData?.measurementRecordId && (
-                    <MeasurementDisplay recordId={inspectionData.measurementRecordId} />
+                {measurements.length === 1 && <MeasurementDisplay recordId={measurements[0].recordId} />}
+                {measurements.length > 1 && (
+                    <Button variant="ghost" onClick={() => select(task.id, 'inspection')}>
+                        {TranslateText('{0} measurements', [String(measurements.length)])}
+                        <Icon name={Icons.RightCheveron} size={16} />
+                    </Button>
                 )}
                 <IconWithLabel>
                     {inspectionData && inspectionData.value && (
