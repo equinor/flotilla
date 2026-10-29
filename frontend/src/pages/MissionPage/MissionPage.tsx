@@ -124,7 +124,7 @@ const MissionPageWithMission = ({ mission, includeHeader = true }: { mission: Mi
                     >
                         <MissionVideoStreamSection>
                             {mission.isCompleted || mission.endTime ? (
-                                <MissionRecordings key={mission.id} missionId={mission.id} />
+                                <MissionRecordings key={mission.id} mission={mission} />
                             ) : (
                                 <VideoStreamWindow robotId={mission.robot.id} />
                             )}

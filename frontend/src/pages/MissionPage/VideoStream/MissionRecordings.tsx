@@ -1,216 +1,174 @@
 import { useEffect, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Button, Icon, Menu, Typography } from '@equinor/eds-core-react'
+import { Button, Icon, Tooltip, Typography } from '@equinor/eds-core-react'
+import { help_outline } from '@equinor/eds-icons'
 import { useBackendApi } from 'api/UseBackendApi'
 import styled from 'styled-components'
-import { Icons } from 'utils/icons'
 import { ApiError } from 'api/ApiError'
+import { Mission } from 'models/Mission'
+import { RecordingSeekRequest } from 'models/MissionRecording'
+import { Icons } from 'utils/icons'
+import { RecordingPlayer, RecordingPlayerControls } from './RecordingPlayer'
+import { RecordingTimeline } from './RecordingTimeline'
+import { getRecordingTimestamp } from './recordingTime'
+import { useLanguageContext } from 'contexts/LanguageContext'
 
-// Renew playback access one minute before expiry to allow time for the request.
-const PLAYBACK_ACCESS_RENEWAL_MARGIN_MS = 60_000
-
-// Wait at least ten seconds between renewal attempts to avoid rapid retries.
-const MINIMUM_RETRY_INTERVAL_MS = 10_000
-
-const Cameras = styled.div`
+const RecordingSection = styled.section`
     display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
+    flex-direction: column;
     gap: 1rem;
-`
-
-const Camera = styled.div`
     min-width: 0;
-    max-width: 100%;
 `
 
-const Player = styled.div`
-    width: fit-content;
-    max-width: 100%;
-    video {
-        display: block;
-        height: min(18rem, 50vw);
-        width: auto;
-        max-width: 100%;
-    }
-`
-
-const PlayerToolbar = styled.div`
+const RecordingHeader = styled.div`
     display: flex;
-    justify-content: space-between;
     align-items: center;
     gap: 0.5rem;
 `
 
-const shouldRenewPlaybackAccess = (playbackAccess: MissionRecordingAccess | undefined) => {
-    if (!playbackAccess) return false
+const Cameras = styled.div`
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+`
 
-    const expiresInMs = Date.parse(playbackAccess.expiresAt) - Date.now()
+const Camera = styled.div<{ $aspectRatio: number }>`
+    flex: ${({ $aspectRatio }) => $aspectRatio} 1 0;
+    min-width: 0;
+`
 
-    return expiresInMs <= PLAYBACK_ACCESS_RENEWAL_MARGIN_MS
+const PlaybackControls = styled.div`
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+
+    > button {
+        min-width: 7.5rem;
+    }
+`
+
+interface MissionRecordingsProps {
+    mission: Pick<Mission, 'id' | 'startTime' | 'endTime' | 'tasks'>
 }
 
-const canRefreshPlaybackAccess = (
-    playbackAccess: MissionRecordingAccess | undefined,
-    error: Error | null
-): playbackAccess is MissionRecordingAccess => {
-    if (!playbackAccess) return false
-    if (error instanceof ApiError && error.statusCode === 403) return false
-
-    return true
-}
-
-const getPlaybackAccessRefreshInterval = (playbackAccess: MissionRecordingAccess) => {
-    const expiresInMs = Date.parse(playbackAccess.expiresAt) - Date.now()
-
-    return Math.max(expiresInMs - PLAYBACK_ACCESS_RENEWAL_MARGIN_MS, MINIMUM_RETRY_INTERVAL_MS)
-}
-
-const RecordingPlayer = ({ missionId, camera }: { missionId: string; camera: MissionRecording['cameras'][string] }) => {
+export const MissionRecordings = ({ mission }: MissionRecordingsProps) => {
     const backendApi = useBackendApi()
-    const [isMenuOpen, setIsMenuOpen] = useState(false)
-    const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
-    const videoRef = useRef<HTMLVideoElement>(null)
-    const {
-        data: playbackAccess,
-        isError,
-        refetch,
-    } = useQuery({
-        queryKey: ['missionRecordingAccess', missionId, camera.cameraId, camera.key],
-        queryFn: () => backendApi.getMissionRecordingAccess(missionId, camera.key),
-        retry: 1,
+    const { TranslateText } = useLanguageContext()
+    const [cameraAspectRatios, setCameraAspectRatios] = useState<Record<string, number>>({})
+    const [seekRequest, setSeekRequest] = useState<RecordingSeekRequest>()
+    const [playbackTimestamp, setPlaybackTimestamp] = useState<number>()
+    const [playbackClock, setPlaybackClock] = useState<{ timestamp: number; startedAt: number }>()
+    const [isVideoPlaying, setIsVideoPlaying] = useState(false)
+    const players = useRef(new Map<string, RecordingPlayerControls>())
+    const referenceCamera = useRef<string | undefined>(undefined)
+    const missionId = mission.id
+    const { data: recording, error } = useQuery({
+        queryKey: ['missionRecordings', missionId],
+        queryFn: () => backendApi.getMissionRecordings(missionId),
+        retry: false,
         gcTime: 0,
-        refetchOnWindowFocus: ({ state }) => shouldRenewPlaybackAccess(state.data),
-        refetchInterval: ({ state: { data, error } }) => {
-            if (!canRefreshPlaybackAccess(data, error)) return false
-            return getPlaybackAccessRefreshInterval(data)
-        },
+        networkMode: 'always',
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
         refetchIntervalInBackground: true,
+        refetchInterval: ({ state: { data, error } }) => {
+            if (error instanceof ApiError && error.statusCode === 403) return false
+            if (error) return 10000
+            return data?.status === 'Ready' ? 600000 : 2000
+        },
     })
-    const playbackUrl = playbackAccess?.playbackUrl
+    const missionStart = getRecordingTimestamp(mission.startTime)
+    const missionEnd = getRecordingTimestamp(mission.endTime)
+    const isPlaying = playbackClock !== undefined || isVideoPlaying
+
+    const seekRecordings = (request: RecordingSeekRequest) => {
+        referenceCamera.current = undefined
+        setPlaybackTimestamp(request.timestamp)
+        setSeekRequest(request)
+        if (playbackClock) setPlaybackClock({ timestamp: request.timestamp, startedAt: performance.now() })
+    }
+
+    const playRecordings = () => {
+        if (missionStart === undefined || missionEnd === undefined || missionEnd <= missionStart) {
+            players.current.forEach((player) => player.play())
+            return
+        }
+        const timestamp =
+            playbackTimestamp === undefined || playbackTimestamp >= missionEnd ? missionStart : playbackTimestamp
+        referenceCamera.current = undefined
+        setPlaybackTimestamp(timestamp)
+        setSeekRequest({ timestamp })
+        setPlaybackClock({ timestamp, startedAt: performance.now() })
+    }
+
+    const pauseRecordings = () => {
+        setPlaybackClock(undefined)
+        setIsVideoPlaying(false)
+        if (playbackClock && playbackTimestamp !== undefined) setSeekRequest({ timestamp: playbackTimestamp })
+        players.current.forEach((player) => player.pause())
+    }
+
+    const updatePlaybackTimestamp = () => {
+        if (playbackClock) return
+        setIsVideoPlaying(Array.from(players.current.values()).some((player) => player.isPlaying()))
+        let lastReferenceTimestamp: number | undefined
+        for (const [cameraKey, player] of players.current) {
+            const progress = player.getPlaybackProgress()
+            if (!progress) continue
+            if (progress.playing) {
+                referenceCamera.current = cameraKey
+                setPlaybackTimestamp(progress.timestamp)
+                return
+            }
+            if (cameraKey === referenceCamera.current) lastReferenceTimestamp = progress.timestamp
+        }
+        if (lastReferenceTimestamp !== undefined) setPlaybackTimestamp(lastReferenceTimestamp)
+    }
 
     useEffect(() => {
-        const video = videoRef.current
-        if (!video || !playbackUrl) return
-        const position = video.currentTime
-        const wasPlaying = !video.paused && !video.ended
-        const restorePlayback = () => {
-            video.currentTime = position
-            if (wasPlaying) void video.play().catch(() => undefined)
-        }
-        video.addEventListener('loadedmetadata', restorePlayback, { once: true })
-        video.src = playbackUrl
-        return () => video.removeEventListener('loadedmetadata', restorePlayback)
-    }, [playbackUrl])
+        if (!playbackClock || missionEnd === undefined) return
+
+        const timer = setInterval(() => {
+            const timestamp = Math.min(
+                missionEnd,
+                playbackClock.timestamp + performance.now() - playbackClock.startedAt
+            )
+            setPlaybackTimestamp(timestamp)
+            if (timestamp >= missionEnd) {
+                setPlaybackClock(undefined)
+                setSeekRequest({ timestamp })
+                players.current.forEach((player) => player.pause())
+            }
+        }, 100)
+        return () => clearInterval(timer)
+    }, [playbackClock, missionEnd])
+
+    if ((error instanceof ApiError && error.statusCode === 403) || (!recording && !error)) return null
+
+    const cameras = Object.values(recording?.cameras ?? {})
+    const interruptionMessage = TranslateText('Recording interruptions detected; some footage may be missing.')
 
     return (
-        <Player>
-            <PlayerToolbar>
-                <Typography variant="h5">{camera.cameraId}</Typography>
-                {playbackAccess && (
-                    <>
-                        <Button
-                            variant="ghost_icon"
-                            ref={setAnchorEl}
-                            aria-label={`Video options for ${camera.cameraId}`}
-                            aria-haspopup="menu"
-                            aria-expanded={isMenuOpen}
-                            onClick={() => setIsMenuOpen(!isMenuOpen)}
-                        >
-                            <Icon name={Icons.Menu} />
+        <RecordingSection>
+            <RecordingHeader>
+                <Typography variant="h2">{TranslateText('Mission camera recordings')}</Typography>
+                {!!recording?.gaps.length && (
+                    <Tooltip placement="top" title={interruptionMessage}>
+                        <Button variant="ghost_icon">
+                            <Icon data={help_outline} />
                         </Button>
-                        <Menu
-                            open={isMenuOpen}
-                            anchorEl={anchorEl}
-                            aria-label={`Video options for ${camera.cameraId}`}
-                            onClose={() => setIsMenuOpen(false)}
-                        >
-                            <Menu.Item as="a" href={playbackAccess.downloadUrl} onClick={() => setIsMenuOpen(false)}>
-                                Download video
-                            </Menu.Item>
-                        </Menu>
-                    </>
+                    </Tooltip>
                 )}
-            </PlayerToolbar>
-            {isError && (
-                <Typography role="status">
-                    Recording unavailable. <Button onClick={() => void refetch()}>Retry</Button>
-                </Typography>
-            )}
-            <video ref={videoRef} controls preload="metadata" />
-        </Player>
-    )
-}
-
-export interface MissionRecording {
-    status: string
-    engine?: string
-    gaps: { at: string; reason: string }[]
-    cameras: Record<
-        string,
-        {
-            cameraId: string
-            key: string
-            firstFrameAt?: string
-            status: string
-            error?: string
-        }
-    >
-}
-
-export interface MissionRecordingAccess {
-    playbackUrl: string
-    downloadUrl: string
-    expiresAt: string
-}
-
-export const MissionRecordings = ({ missionId }: { missionId: string }) => {
-    const backendApi = useBackendApi()
-    const [recording, setRecording] = useState<MissionRecording>()
-    const [error, setError] = useState<'unavailable' | 'forbidden'>()
-    useEffect(() => {
-        let disposed = false
-        let timer: ReturnType<typeof setTimeout>
-        const refresh = () =>
-            backendApi
-                .getMissionRecordings(missionId)
-                .then((result) => {
-                    if (!disposed) {
-                        setRecording(result)
-                        setError(undefined)
-                        timer = setTimeout(() => void refresh(), result.status === 'Ready' ? 600000 : 2000)
-                    }
-                })
-                .catch((requestError: unknown) => {
-                    if (!disposed) {
-                        const forbidden = requestError instanceof ApiError && requestError.statusCode === 403
-                        setError(forbidden ? 'forbidden' : 'unavailable')
-                        if (!forbidden) timer = setTimeout(() => void refresh(), 10000)
-                    }
-                })
-        void refresh()
-        return () => {
-            disposed = true
-            clearTimeout(timer)
-        }
-    }, [backendApi, missionId])
-
-    if (error === 'forbidden' || (!recording && !error)) return null
-
-    return (
-        <section>
-            <Typography variant="h2">Mission camera recordings</Typography>
+            </RecordingHeader>
             {(error || recording?.status !== 'Ready') && (
                 <Typography role="status">
                     {error ? 'Recordings unavailable.' : (recording?.status ?? 'Loading recordings…')}
                 </Typography>
             )}
-            {!!recording?.gaps.length && (
-                <Typography>Recording interruptions detected; some footage may be missing.</Typography>
-            )}
             <Cameras>
-                {Object.values(recording?.cameras ?? {}).map((camera) => (
-                    <Camera key={camera.key}>
+                {cameras.map((camera) => (
+                    <Camera key={camera.key} $aspectRatio={cameraAspectRatios[camera.key] ?? 16 / 9}>
                         {camera.status !== 'Ready' && <Typography variant="h5">{camera.cameraId}</Typography>}
                         {(camera.status !== 'Ready' || camera.error) && (
                             <Typography>
@@ -218,10 +176,41 @@ export const MissionRecordings = ({ missionId }: { missionId: string }) => {
                                 {camera.error ? `: ${camera.error}` : ''}
                             </Typography>
                         )}
-                        {camera.status === 'Ready' && <RecordingPlayer missionId={missionId} camera={camera} />}
+                        {camera.status === 'Ready' && (
+                            <RecordingPlayer
+                                ref={(player) => {
+                                    if (player) players.current.set(camera.key, player)
+                                    else players.current.delete(camera.key)
+                                }}
+                                missionId={missionId}
+                                camera={camera}
+                                seekRequest={seekRequest}
+                                sharedPlaybackTimestamp={playbackClock ? playbackTimestamp : undefined}
+                                onPlaybackProgress={updatePlaybackTimestamp}
+                                onAspectRatioChange={(aspectRatio) =>
+                                    setCameraAspectRatios((ratios) => ({ ...ratios, [camera.key]: aspectRatio }))
+                                }
+                            />
+                        )}
                     </Camera>
                 ))}
             </Cameras>
-        </section>
+            {cameras.some((camera) => camera.status === 'Ready') && (
+                <>
+                    <RecordingTimeline
+                        mission={mission}
+                        seekRequest={seekRequest}
+                        playbackTimestamp={playbackTimestamp}
+                        onSeek={seekRecordings}
+                    />
+                    <PlaybackControls>
+                        <Button onClick={isPlaying ? pauseRecordings : playRecordings}>
+                            <Icon name={isPlaying ? Icons.PauseStandard : Icons.PlayStandard} />
+                            {TranslateText(isPlaying ? 'Pause' : 'Play')}
+                        </Button>
+                    </PlaybackControls>
+                </>
+            )}
+        </RecordingSection>
     )
 }
