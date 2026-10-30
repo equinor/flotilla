@@ -278,6 +278,11 @@ namespace Api.Database.Context
             definitions.AddRange(areasWithRobot.Select(CreatePartiallySuccessfulMission));
             definitions.AddRange(areasWithRobot.Select(CreateAllTasksFailedMission));
             definitions.Add(
+                CreateTimelineDemoMission(
+                    inspectionAreas.Single(area => area.Name == KaarstoInspectionArea)
+                )
+            );
+            definitions.Add(
                 CreateMission(
                     inspectionAreaGuardScenario,
                     inspectionAreas.Single(area => area.Name == KaarstoInspectionAreaWithoutRobot)
@@ -302,6 +307,30 @@ namespace Api.Database.Context
             }
 
             return definitions;
+        }
+
+        private static MissionDefinition CreateTimelineDemoMission(InspectionArea inspectionArea)
+        {
+            return new MissionDefinition
+            {
+                Id = Guid.NewGuid().ToString(),
+                Name = "Timeline demo - 2 successful, 2 failed inspections",
+                InstallationCode = inspectionArea.Installation.InstallationCode,
+                InspectionArea = inspectionArea,
+                Comment =
+                    "Four image inspections for timeline playback. Use local-ctl with Poirot or ANYmal Mock to fail tasks 2 and 4.",
+                Tasks = Enumerable.Range(1, 4).Select(CreateTimelineDemoTask).ToList(),
+            };
+        }
+
+        private static TaskDefinition CreateTimelineDemoTask(int index)
+        {
+            var scenario = scenarios.Single(scenario => scenario.TagId == "image-no-analysis");
+            var task = CreateTask(scenario, index);
+            var expectedResult = index is 2 or 4 ? "failed" : "successful";
+            task.TagId = $"timeline-demo-{index}-{expectedResult}";
+            task.Description = $"Timeline demo inspection {index} - expected {expectedResult}";
+            return task;
         }
 
         private static MissionDefinition CreateAllTasksFailedMission(InspectionArea inspectionArea)
