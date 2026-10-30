@@ -167,7 +167,7 @@ export const inspectionRecordToInspectionData = (record: InspectionRecord): Insp
         analysisRunId: latestRun?.id,
         feedback: latestRun?.feedback ?? undefined,
         visualizedSAS: isInspectionOnly ? undefined : analysis?.visualizedSAS,
-        anonymizedSAS: analysis?.anonymizedSAS,
+        anonymizedSAS: isInspectionOnly ? sas : analysis?.anonymizedSAS,
         analysisType: analysis?.analysisType,
         tag: record.tag,
         createdAt: record.createdAt,
