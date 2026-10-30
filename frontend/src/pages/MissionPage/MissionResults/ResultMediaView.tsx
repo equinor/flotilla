@@ -105,7 +105,7 @@ export const ResultMediaView = ({
             {TranslateText(fileType)}
         </InspectionTypeLabel>
     )
-    const hyperlink = size === 'large' && fileType !== FileType.VALUE ? source : undefined
+    const hyperlink = size === 'large' && fileType === FileType.IMAGE ? source : undefined
     return (
         <Frame $size={size} href={hyperlink} target="_blank" rel="noopener noreferrer">
             {fileType === FileType.IMAGE && <LoadedImage source={source} label={label} overlay={typeLabel} />}
