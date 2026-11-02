@@ -1,4 +1,5 @@
-import { Card, Typography, Icon, Button } from '@equinor/eds-core-react'
+import { Card, Typography, Icon, Button, Tooltip } from '@equinor/eds-core-react'
+import { tokens } from '@equinor/eds-tokens'
 import styled from 'styled-components'
 import { Icons } from 'utils/icons'
 import { VideoPlayerSimpleStream } from './VideoPlayerSimpleStream'
@@ -7,10 +8,8 @@ import { useVideoAspectRatio } from './useVideoAspectRatio'
 
 const FullscreenButton = styled(Button)`
     position: absolute;
-    bottom: 8px;
-    right: 8px;
-    width: 32px;
-    height: 32px;
+    bottom: ${tokens.spacings.comfortable.small};
+    right: ${tokens.spacings.comfortable.small};
     opacity: 0.75;
 `
 const VideoCard = styled(Card)`
@@ -51,9 +50,16 @@ export const VideoStreamCard = ({
         }
     }
     const fullScreenButton = (
-        <FullscreenButton color="secondary" onClick={setFullScreen} aria-label="Enter fullscreen">
-            <Icon name={Icons.Fullscreen} size={32} />
-        </FullscreenButton>
+        <Tooltip title="Enter fullscreen" placement="top">
+            <FullscreenButton
+                variant="contained_icon"
+                color="secondary"
+                onClick={setFullScreen}
+                aria-label="Enter fullscreen"
+            >
+                <Icon name={Icons.Fullscreen} size={24} />
+            </FullscreenButton>
+        </Tooltip>
     )
 
     return (
