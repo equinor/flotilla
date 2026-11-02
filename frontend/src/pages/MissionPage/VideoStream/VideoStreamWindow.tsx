@@ -20,10 +20,9 @@ const statusLabels = {
 
 interface VideoStreamWindowProps {
     robotId: string
-    compact?: boolean
 }
 
-export const VideoStreamWindow = ({ robotId, compact = false }: VideoStreamWindowProps) => {
+export const VideoStreamWindow = ({ robotId }: VideoStreamWindowProps) => {
     const { TranslateText } = useLanguageContext()
     const [aspectRatios, setAspectRatios] = useState<Record<string, number>>({})
     const updateAspectRatio = (cameraKey: string, aspectRatio: number) => {
@@ -58,22 +57,15 @@ export const VideoStreamWindow = ({ robotId, compact = false }: VideoStreamWindo
     )
     const videoCards = liveKitStreams.map(({ id, stream }) => {
         const cameraKey = `${robotId}-${id}`
-        const card = (
-            <VideoStreamCard
-                key={cameraKey}
-                videoStream={stream}
-                videoStreamName={undefined}
-                videoStreamId={cameraKey}
-                compact={compact}
-                onAspectRatioChange={compact ? (ratio) => updateAspectRatio(cameraKey, ratio) : undefined}
-            />
-        )
-        return compact ? (
-            <LiveCamera key={cameraKey} $compact $aspectRatio={aspectRatios[cameraKey] ?? 16 / 9}>
-                {card}
+        return (
+            <LiveCamera key={cameraKey} $aspectRatio={aspectRatios[cameraKey] ?? 16 / 9}>
+                <VideoStreamCard
+                    videoStream={stream}
+                    videoStreamName={undefined}
+                    videoStreamId={cameraKey}
+                    onAspectRatioChange={(ratio) => updateAspectRatio(cameraKey, ratio)}
+                />
             </LiveCamera>
-        ) : (
-            card
         )
     })
 
@@ -84,7 +76,7 @@ export const VideoStreamWindow = ({ robotId, compact = false }: VideoStreamWindo
             {!omeStreams && status === 'unavailable' && (
                 <RetryButton onClick={() => retryMediaStream(robotId)}>{TranslateText('Retry')}</RetryButton>
             )}
-            <LiveCameraRow $compact={compact}>
+            <LiveCameraRow>
                 {videoCards}
                 {omeAttemptId !== undefined &&
                     omeStreams?.map((camera) => {
@@ -93,7 +85,6 @@ export const VideoStreamWindow = ({ robotId, compact = false }: VideoStreamWindo
                         return (
                             <LiveCamera
                                 key={cameraKey}
-                                $compact={compact}
                                 $aspectRatio={aspectRatios[cameraKey] ?? (quarterTurn ? 9 / 16 : 16 / 9)}
                             >
                                 <Typography variant="h5" lines={1}>
@@ -103,10 +94,7 @@ export const VideoStreamWindow = ({ robotId, compact = false }: VideoStreamWindo
                                     <OmeVideoCard
                                         key={camera.attemptId}
                                         stream={camera.stream}
-                                        compact={compact}
-                                        onAspectRatioChange={
-                                            compact ? (ratio) => updateAspectRatio(cameraKey, ratio) : undefined
-                                        }
+                                        onAspectRatioChange={(ratio) => updateAspectRatio(cameraKey, ratio)}
                                         onPlaying={() =>
                                             markOmeStreamPlaying(
                                                 robotId,

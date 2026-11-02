@@ -1,5 +1,4 @@
 import { Card, Typography, Icon, Button } from '@equinor/eds-core-react'
-import { tokens } from '@equinor/eds-tokens'
 import styled from 'styled-components'
 import { Icons } from 'utils/icons'
 import { VideoPlayerSimpleStream } from './VideoPlayerSimpleStream'
@@ -14,15 +13,15 @@ const FullscreenButton = styled(Button)`
     height: 32px;
     opacity: 0.75;
 `
-const VideoCard = styled(Card)<{ $compact: boolean }>`
-    padding: ${({ $compact }) => ($compact ? '0' : '1rem')};
-    height: ${({ $compact }) => ($compact ? 'auto' : '15rem')};
-    width: ${({ $compact }) => ($compact ? '100%' : '20rem')};
+const VideoCard = styled(Card)`
+    padding: 0;
+    height: auto;
+    width: 100%;
+    box-shadow: none;
 `
-const StyledVideoSection = styled.div<{ $compact: boolean; $aspectRatio: number }>`
+const StyledVideoSection = styled.div<{ $aspectRatio: number }>`
     position: relative;
-    height: ${({ $compact }) => ($compact ? 'auto' : '10rem')};
-    ${({ $compact, $aspectRatio }) => $compact && `aspect-ratio: ${$aspectRatio};`}
+    aspect-ratio: ${({ $aspectRatio }) => $aspectRatio};
 
     video {
         display: block;
@@ -34,7 +33,6 @@ interface IVideoStreamCardProps {
     videoStream: MediaStream
     videoStreamName?: string
     videoStreamId: string
-    compact?: boolean
     onAspectRatioChange?: (aspectRatio: number) => void
 }
 
@@ -42,7 +40,6 @@ export const VideoStreamCard = ({
     videoStream,
     videoStreamName,
     videoStreamId,
-    compact = false,
     onAspectRatioChange,
 }: IVideoStreamCardProps) => {
     const container = useRef<HTMLDivElement>(null)
@@ -60,9 +57,9 @@ export const VideoStreamCard = ({
     )
 
     return (
-        <VideoCard $compact={compact} style={{ boxShadow: compact ? 'none' : tokens.elevation.raised }}>
+        <VideoCard>
             <div onDoubleClick={setFullScreen}>
-                <StyledVideoSection ref={container} $compact={compact} $aspectRatio={aspectRatio}>
+                <StyledVideoSection ref={container} $aspectRatio={aspectRatio}>
                     <VideoPlayerSimpleStream videoStream={videoStream} id={videoStreamId} />
                     {fullScreenButton}
                 </StyledVideoSection>
