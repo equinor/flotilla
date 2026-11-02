@@ -55,6 +55,7 @@ const FullscreenButton = styled(Button)`
 
 interface Props {
     stream: NamedMediaStream
+    aspectRatio: number
     onAspectRatioChange?: (aspectRatio: number) => void
     onPlaying: () => void
     onStalled: () => void
@@ -96,7 +97,14 @@ function requestOmeOffer(url: string, signal: AbortSignal): Promise<boolean> {
     })
 }
 
-export const OmeVideoCard = ({ stream, onAspectRatioChange, onPlaying, onStalled, onDisconnect }: Props) => {
+export const OmeVideoCard = ({
+    stream,
+    aspectRatio,
+    onAspectRatioChange,
+    onPlaying,
+    onStalled,
+    onDisconnect,
+}: Props) => {
     const element = useRef<HTMLDivElement>(null)
     const frame = useRef<HTMLDivElement>(null)
     const playingHandler = useRef(onPlaying)
@@ -106,7 +114,7 @@ export const OmeVideoCard = ({ stream, onAspectRatioChange, onPlaying, onStalled
     const [frameSize, setFrameSize] = useState({ width: 0, height: 0 })
     const rotationDegrees = stream.rotationDegrees ?? 0
     const quarterTurn = Math.abs(rotationDegrees % 180) === 90
-    const aspectRatio = useVideoAspectRatio(frame, rotationDegrees, onAspectRatioChange)
+    useVideoAspectRatio(frame, rotationDegrees, onAspectRatioChange)
 
     useEffect(() => {
         if (!quarterTurn || !frame.current) return
