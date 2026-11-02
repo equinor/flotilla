@@ -221,7 +221,7 @@ export const RobotPage = ({ robot }: RobotPageProps) => {
                                 </ContentCard>
                             )}
                             <VideoStreamSection>
-                                <VideoStreamWindow robotId={robot.id} />
+                                <VideoStreamWindow robotId={robot.id} compact />
                             </VideoStreamSection>
                         </>
                     )}

@@ -3,11 +3,12 @@ import { Button, Icon } from '@equinor/eds-core-react'
 import { NamedMediaStream } from 'models/VideoStream'
 import styled from 'styled-components'
 import { Icons } from 'utils/icons'
+import { useVideoAspectRatio } from './useVideoAspectRatio'
 
-const VideoFrame = styled.div<{ $rotationDegrees: number; $quarterTurn: boolean }>`
+const VideoFrame = styled.div<{ $rotationDegrees: number; $quarterTurn: boolean; $aspectRatio: number }>`
     position: relative;
     width: 100%;
-    aspect-ratio: 16 / 9;
+    aspect-ratio: ${({ $aspectRatio }) => $aspectRatio};
     background: black;
     overflow: hidden;
 
@@ -54,6 +55,8 @@ const FullscreenButton = styled(Button)`
 
 interface Props {
     stream: NamedMediaStream
+    compact?: boolean
+    onAspectRatioChange?: (aspectRatio: number) => void
     onPlaying: () => void
     onStalled: () => void
     onDisconnect: () => void
@@ -94,7 +97,14 @@ function requestOmeOffer(url: string, signal: AbortSignal): Promise<boolean> {
     })
 }
 
-export const OmeVideoCard = ({ stream, onPlaying, onStalled, onDisconnect }: Props) => {
+export const OmeVideoCard = ({
+    stream,
+    compact = false,
+    onAspectRatioChange,
+    onPlaying,
+    onStalled,
+    onDisconnect,
+}: Props) => {
     const element = useRef<HTMLDivElement>(null)
     const frame = useRef<HTMLDivElement>(null)
     const playingHandler = useRef(onPlaying)
@@ -104,6 +114,7 @@ export const OmeVideoCard = ({ stream, onPlaying, onStalled, onDisconnect }: Pro
     const [frameSize, setFrameSize] = useState({ width: 0, height: 0 })
     const rotationDegrees = stream.rotationDegrees ?? 0
     const quarterTurn = Math.abs(rotationDegrees % 180) === 90
+    const aspectRatio = useVideoAspectRatio(frame, rotationDegrees, onAspectRatioChange)
 
     useEffect(() => {
         if (!quarterTurn || !frame.current) return
@@ -203,6 +214,7 @@ export const OmeVideoCard = ({ stream, onPlaying, onStalled, onDisconnect }: Pro
             ref={frame}
             $rotationDegrees={rotationDegrees}
             $quarterTurn={quarterTurn}
+            $aspectRatio={compact ? aspectRatio : 16 / 9}
             style={
                 quarterTurn
                     ? ({
