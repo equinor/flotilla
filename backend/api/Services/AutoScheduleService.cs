@@ -351,7 +351,7 @@ namespace Api.Services
 
             if (missionDefinition.AutoScheduleFrequency?.AutoScheduledJobs is not null)
             {
-                await SkipAllAutoMissions(missionDefinition);
+                DeleteAutoScheduledJobs(missionDefinition);
             }
 
             MissionDefinition updatedMissionDefinition;
@@ -470,6 +470,12 @@ namespace Api.Services
         {
             await EnsureWriteAccess(missionDefinition);
 
+            DeleteAutoScheduledJobs(missionDefinition);
+            await missionDefinitionService.Update(missionDefinition);
+        }
+
+        private void DeleteAutoScheduledJobs(MissionDefinition missionDefinition)
+        {
             var jobs = DeserializeAutoScheduleJobs(missionDefinition);
             foreach (var job in jobs)
             {
@@ -498,7 +504,6 @@ namespace Api.Services
                     missionDefinition.Id
                 );
             }
-            await missionDefinitionService.Update(missionDefinition);
         }
     }
 }
