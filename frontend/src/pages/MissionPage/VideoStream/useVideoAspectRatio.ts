@@ -5,9 +5,10 @@ export const useVideoAspectRatio = (
     rotationDegrees = 0,
     onAspectRatioChange?: (aspectRatio: number) => void
 ) => {
-    const [sourceAspectRatio, setSourceAspectRatio] = useState(16 / 9)
+    const [sourceAspectRatio, setSourceAspectRatio] = useState<number>()
     const quarterTurn = Math.abs(rotationDegrees % 180) === 90
-    const aspectRatio = quarterTurn ? 1 / sourceAspectRatio : sourceAspectRatio
+    const unrotatedAspectRatio = sourceAspectRatio ?? 16 / 9
+    const aspectRatio = quarterTurn ? 1 / unrotatedAspectRatio : unrotatedAspectRatio
 
     useEffect(() => {
         const element = container.current
@@ -30,8 +31,8 @@ export const useVideoAspectRatio = (
     }, [container])
 
     useEffect(() => {
-        onAspectRatioChange?.(aspectRatio)
-    }, [aspectRatio, onAspectRatioChange])
+        if (sourceAspectRatio !== undefined) onAspectRatioChange?.(aspectRatio)
+    }, [sourceAspectRatio, aspectRatio, onAspectRatioChange])
 
     return aspectRatio
 }
