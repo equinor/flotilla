@@ -1,4 +1,5 @@
-﻿using Api.Database.Models;
+﻿using System.ComponentModel.DataAnnotations;
+using Api.Database.Models;
 
 namespace Api.Controllers.Models
 {
@@ -39,8 +40,9 @@ namespace Api.Controllers.Models
     public struct SkipAutoMissionQuery
     {
         /// <summary>
-        /// The time of day to skip the mission
+        /// The mission/date-time key returned with the dated occurrence to skip
         /// </summary>
-        public TimeOnly TimeOfDay { get; set; }
+        [Required]
+        public required string ScheduleKey { get; set; }
     }
 }
