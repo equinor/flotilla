@@ -50,13 +50,12 @@ const getAspectRatio = (element: Element) => {
     return width / height
 }
 
-const mountOmeCamera = (rotationDegrees = 0, compact = true) => {
+const mountOmeCamera = (rotationDegrees = 0) => {
     const onAspectRatioChange = vi.fn()
     act(() =>
         root.render(
             <OmeVideoCard
                 stream={{ cameraId: 'front', url: 'wss://camera.example/front', rotationDegrees }}
-                compact={compact}
                 onAspectRatioChange={onAspectRatioChange}
                 onPlaying={vi.fn()}
                 onStalled={vi.fn()}
@@ -96,12 +95,6 @@ describe('compact live cameras', () => {
         expect(getAspectRatio(frame)).toBeCloseTo(9 / 16)
     })
 
-    test('keeps the existing mission-page frame when compact layout is not enabled', () => {
-        const { frame, video } = mountOmeCamera(90, false)
-        setVideoDimensions(video, 640, 480)
-        expect(getAspectRatio(frame)).toBeCloseTo(16 / 9)
-    })
-
     test('keeps fullscreen available through both the button and double-click', () => {
         const { frame } = mountOmeCamera(90)
         const requestFullscreen = vi.fn().mockResolvedValue(undefined)
@@ -130,7 +123,6 @@ describe('compact live cameras', () => {
                 <VideoStreamCard
                     videoStream={stream}
                     videoStreamId="livekit-front"
-                    compact
                     onAspectRatioChange={onAspectRatioChange}
                 />
             )

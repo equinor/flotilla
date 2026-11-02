@@ -124,6 +124,30 @@ afterEach(() => {
 })
 
 describe('livestream viewing and recovery', () => {
+    test('uses the same compact row without page-specific layout options', async () => {
+        backendApi.getRobotMediaConfig.mockResolvedValueOnce({
+            robotId: 'robot-1',
+            mediaConnectionType: MediaConnectionType.OvenMediaEngine,
+            url: '',
+            token: '',
+            streams: [
+                { cameraId: 'front', url: 'ws://localhost:3335/local/front' },
+                { cameraId: 'left', url: 'ws://localhost:3335/local/left', rotationDegrees: 90 },
+            ],
+        })
+
+        await mount()
+
+        const [front, left] = Array.from(container.querySelectorAll('[data-testid="ome-camera"]')).map(
+            (camera) => camera.parentElement!
+        )
+        expect(Number(getComputedStyle(front).flexGrow)).toBeCloseTo(16 / 9)
+        expect(Number(getComputedStyle(left).flexGrow)).toBeCloseTo(9 / 16)
+        const rowStyle = getComputedStyle(front.parentElement!)
+        expect(rowStyle.gap).toBe('1rem')
+        expect(rowStyle.flexWrap).toBe('wrap')
+    })
+
     test('selects OME by connection type and fetches a fresh URL after disconnect', async () => {
         backendApi.getRobotMediaConfig
             .mockResolvedValueOnce({
