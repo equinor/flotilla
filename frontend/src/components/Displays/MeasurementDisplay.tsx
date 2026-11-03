@@ -11,5 +11,11 @@ export const MeasurementDisplay = ({ recordId, isCompact = true }: { recordId: s
         retry: 1,
     })
 
-    return data ? <AnalysisValueDisplay value={data.value.toFixed(4)} unit={data.unit} isCompact={isCompact} /> : null
+    return data ? (
+        <AnalysisValueDisplay
+            value={data.value.toFixed(data.decimalPlaces ?? 4)}
+            unit={data.unit}
+            isCompact={isCompact}
+        />
+    ) : null
 }

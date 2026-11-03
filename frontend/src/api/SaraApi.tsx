@@ -18,6 +18,7 @@ const inspectionRecordPageSize = 200
 interface InspectionMeasurement {
     value: number
     unit: string
+    decimalPlaces?: number | null
 }
 
 export class SaraApi {
