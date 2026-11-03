@@ -46,7 +46,7 @@ export const MeasurementTable = ({ measurements }: { measurements: TaskMeasureme
                             <Table.Cell>{measurementTypeLabel(measurement.inspectionType)}</Table.Cell>
                             {data ? (
                                 <>
-                                    <Table.Cell>{data.value.toFixed(4)}</Table.Cell>
+                                    <Table.Cell>{data.value.toFixed(data.decimalPlaces ?? 4)}</Table.Cell>
                                     <Table.Cell>{data.unit}</Table.Cell>
                                 </>
                             ) : (
