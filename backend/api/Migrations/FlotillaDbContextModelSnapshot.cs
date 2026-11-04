@@ -17,34 +17,10 @@ namespace Api.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.10")
+                .HasAnnotation("ProductVersion", "10.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("Api.Database.Models.AccessRole", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("text");
-
-                    b.Property<string>("AccessLevel")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("InstallationId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("RoleName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("InstallationId");
-
-                    b.ToTable("AccessRoles");
-                });
 
             modelBuilder.Entity("Api.Database.Models.ExclusionArea", b =>
                 {
@@ -394,15 +370,6 @@ namespace Api.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("UserInfos");
-                });
-
-            modelBuilder.Entity("Api.Database.Models.AccessRole", b =>
-                {
-                    b.HasOne("Api.Database.Models.Installation", "Installation")
-                        .WithMany()
-                        .HasForeignKey("InstallationId");
-
-                    b.Navigation("Installation");
                 });
 
             modelBuilder.Entity("Api.Database.Models.ExclusionArea", b =>
