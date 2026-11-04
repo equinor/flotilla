@@ -39,14 +39,6 @@ public class AccessRoleServiceTest : IAsyncLifetime
                 new ClaimsIdentity([new Claim(ClaimTypes.Role, "Role.Admin")], "TestAuth")
             ),
         };
-
-        var installationHUA = await DatabaseUtilities.NewInstallation("HUA");
-        await AccessRoleService.Create(
-            installationHUA,
-            "Role.ReadOnly.HUA",
-            RoleAccessLevel.READ_ONLY
-        );
-        await AccessRoleService.Create(installationHUA, "Role.User.HUA", RoleAccessLevel.USER);
     }
 
     public ValueTask DisposeAsync()

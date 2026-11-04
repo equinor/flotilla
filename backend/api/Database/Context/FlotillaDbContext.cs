@@ -21,7 +21,6 @@ namespace Api.Database.Context
         public DbSet<Installation> Installations => Set<Installation>();
         public DbSet<InspectionArea> InspectionAreas => Set<InspectionArea>();
         public DbSet<ExclusionArea> ExclusionAreas => Set<ExclusionArea>();
-        public DbSet<AccessRole> AccessRoles => Set<AccessRole>();
         public DbSet<UserInfo> UserInfos => Set<UserInfo>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

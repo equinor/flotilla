@@ -51,24 +51,6 @@ namespace Api.Test.Controllers
             var installation = await DatabaseUtilities.NewInstallation(installationCode: "INS");
             var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
 
-            var accessRoleQuery = new CreateAccessRoleQuery
-            {
-                InstallationCode = installation.InstallationCode,
-                RoleName = $"Role.User.{installation.InstallationCode}",
-                AccessLevel = RoleAccessLevel.USER,
-            };
-            var accessRoleContent = new StringContent(
-                JsonSerializer.Serialize(accessRoleQuery),
-                null,
-                "application/json"
-            );
-
-            var accessRoleResponse = await Client.PostAsync(
-                "/access-roles",
-                accessRoleContent,
-                TestContext.Current.CancellationToken
-            );
-
             // Restrict ourselves to a user with access
             HttpContextAccessor.SetHttpContextRoles([$"Role.User.{installation.InstallationCode}"]);
 
@@ -89,7 +71,6 @@ namespace Api.Test.Controllers
             );
 
             // Assert
-            Assert.True(accessRoleResponse.IsSuccessStatusCode);
             Assert.True(plantResponse.IsSuccessStatusCode);
             Assert.Equal(System.Net.HttpStatusCode.NotFound, samePlantResponse.StatusCode);
         }
