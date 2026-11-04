@@ -239,30 +239,6 @@ namespace Api.Database.Context
             };
         }
 
-        private static List<AccessRole> GetAccessRoles(List<Installation> installations)
-        {
-            return
-            [
-                .. installations.SelectMany(installation =>
-                    new[]
-                    {
-                        new AccessRole
-                        {
-                            Installation = installation,
-                            AccessLevel = RoleAccessLevel.USER,
-                            RoleName = $"Role.User.{installation.InstallationCode}",
-                        },
-                        new AccessRole
-                        {
-                            Installation = installation,
-                            AccessLevel = RoleAccessLevel.READ_ONLY,
-                            RoleName = $"Role.ReadOnly.{installation.InstallationCode}",
-                        },
-                    }
-                ),
-            ];
-        }
-
         private static List<MissionDefinition> GetMissionDefinitions(
             List<InspectionArea> inspectionAreas
         )
@@ -452,7 +428,6 @@ namespace Api.Database.Context
             ];
 
             context.AddRange(inspectionAreas);
-            context.AddRange(GetAccessRoles([kaarsto.Installation, northernLights.Installation]));
             context.AddRange(GetMissionDefinitions(inspectionAreas));
             context.Robots.Add(
                 new Robot

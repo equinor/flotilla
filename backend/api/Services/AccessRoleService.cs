@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
 using Api.Database.Context;
-using Api.Database.Models;
+using Api.Services.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Services
@@ -18,15 +18,7 @@ namespace Api.Services
             ClaimsPrincipal user,
             AccessMode accessMode
         );
-        public bool IsAuthenticationAvailable();
-        public Task<AccessRole> Create(
-            Installation installation,
-            string roleName,
-            RoleAccessLevel accessLevel
-        );
-        public Task<AccessRole?> ReadByInstallation(Installation installation);
-        public Task<List<AccessRole>> ReadAll();
-        public void DetachTracking(FlotillaDbContext context, AccessRole accessRole);
+        public Task<UserRoles> GetUserRoles();
     }
 
     public class AccessRoleService(
@@ -35,11 +27,6 @@ namespace Api.Services
     ) : IAccessRoleService
     {
         private const string SUPER_ADMIN_ROLE_NAME = "Role.Admin";
-
-        private IQueryable<AccessRole> GetAccessRoles(bool readOnly = true)
-        {
-            return readOnly ? context.AccessRoles.AsNoTracking() : context.AccessRoles.AsTracking();
-        }
 
         public async Task<List<string>> GetAllowedInstallationCodes(AccessMode accessMode)
         {
@@ -70,21 +57,9 @@ namespace Api.Services
                 .Select(c => c.Value)
                 .ToList();
 
-            var allowedInstallationCodes = await GetAllowedInstallationCodes(userRoles, accessMode);
+            var allowedInstallationCodes = GetInstallationCodesByAccessMode(userRoles, accessMode);
 
             return allowedInstallationCodes;
-        }
-
-        private async Task<List<string>> EnsureUserRolesExistInDatabase(List<string> roles)
-        {
-            var dbRoles = await GetAccessRoles(readOnly: true)
-                .Include(r => r.Installation)
-                .Select(r => r.RoleName)
-                .ToListAsync();
-
-            var intersection = roles.Intersect(dbRoles, StringComparer.OrdinalIgnoreCase).ToList();
-
-            return intersection;
         }
 
         private static List<string> GetInstallationCodesByAccessMode(
@@ -123,6 +98,52 @@ namespace Api.Services
             return [.. permittedInstallationCodes.Distinct()];
         }
 
+        private static List<InstallationRole> GetInstallationRoles(List<string> roles)
+        {
+            List<InstallationRole> accesses = [];
+
+            foreach (var role in roles)
+            {
+                var installationCode = TryExtractInstallationCode(role);
+                if (installationCode is null)
+                    continue;
+
+                var existingRole = accesses.FirstOrDefault(
+                    (r) => r.InstallationCode == installationCode
+                );
+
+                if (
+                    role.StartsWith("Role.ReadOnly.")
+                    && !existingRole.Equals(default(InstallationRole))
+                )
+                {
+                    accesses.Add(
+                        new InstallationRole
+                        {
+                            InstallationCode = installationCode,
+                            HasWriteAccess = false,
+                        }
+                    );
+                }
+
+                if (role.StartsWith("Role.User."))
+                {
+                    if (existingRole.Equals(default(InstallationRole)))
+                        accesses.Add(
+                            new InstallationRole
+                            {
+                                InstallationCode = installationCode,
+                                HasWriteAccess = true,
+                            }
+                        );
+                    else
+                        existingRole.HasWriteAccess = true;
+                }
+            }
+
+            return accesses;
+        }
+
         private static string? TryExtractInstallationCode(string role)
         {
             var parts = role.Split('.');
@@ -133,82 +154,34 @@ namespace Api.Services
             return code.Length == 3 ? code : null;
         }
 
-        public async Task<List<string>> GetAllowedInstallationCodes(
-            List<string> roles,
-            AccessMode accessMode
-        )
+        public async Task<UserRoles> GetUserRoles()
         {
-            var rolesInUserAndDb = await EnsureUserRolesExistInDatabase(roles);
-
-            var permittedInstallationCodes = GetInstallationCodesByAccessMode(
-                rolesInUserAndDb,
-                accessMode
-            );
-
-            return permittedInstallationCodes;
-        }
-
-        private void ThrowExceptionIfNotAdmin()
-        {
-            if (httpContextAccessor.HttpContext == null)
-                throw new HttpRequestException(
-                    "Access roles can only be created in authenticated HTTP requests"
+            var user =
+                (httpContextAccessor.HttpContext?.User)
+                ?? throw new HttpRequestException(
+                    HttpRequestError.UserAuthenticationError,
+                    "No user credentials available"
                 );
 
-            if (!httpContextAccessor.HttpContext.User.IsInRole(SUPER_ADMIN_ROLE_NAME))
-                throw new HttpRequestException(
-                    "This user is not authorised to create a new access role"
-                );
-        }
+            var userRoles = user
+                .Claims.Where(c => c.Type == ClaimTypes.Role)
+                .Select(c => c.Value)
+                .ToList();
 
-        public async Task<AccessRole> Create(
-            Installation installation,
-            string roleName,
-            RoleAccessLevel accessLevel
-        )
-        {
-            if (accessLevel == RoleAccessLevel.ADMIN)
-                throw new HttpRequestException("Cannot create admin roles using database services");
-            ThrowExceptionIfNotAdmin();
-
-            context.Entry(installation).State = EntityState.Unchanged;
-
-            var newAccessRole = new AccessRole
+            if (user.IsInRole(SUPER_ADMIN_ROLE_NAME))
             {
-                Installation = installation,
-                RoleName = roleName,
-                AccessLevel = accessLevel,
+                return new UserRoles
+                {
+                    IsAdmin = true,
+                    InstallationRoles = GetInstallationRoles(userRoles),
+                };
+            }
+
+            return new UserRoles
+            {
+                IsAdmin = false,
+                InstallationRoles = GetInstallationRoles(userRoles),
             };
-
-            await context.AccessRoles.AddAsync(newAccessRole);
-            await context.SaveChangesAsync();
-            DetachTracking(context, newAccessRole);
-            return newAccessRole!;
-        }
-
-        public async Task<AccessRole?> ReadByInstallation(Installation installation)
-        {
-            ThrowExceptionIfNotAdmin();
-            return await GetAccessRoles(readOnly: true)
-                .Include(r => r.Installation)
-                .Where(r => r.Installation.Id == installation.Id)
-                .FirstOrDefaultAsync();
-        }
-
-        public async Task<List<AccessRole>> ReadAll()
-        {
-            ThrowExceptionIfNotAdmin();
-            return await GetAccessRoles(readOnly: true).Include(r => r.Installation).ToListAsync();
-        }
-
-        public bool IsAuthenticationAvailable()
-        {
-            return httpContextAccessor.HttpContext != null;
-        }
-
-        public void DetachTracking(FlotillaDbContext context, AccessRole accessRole)
-        {
-            context.Entry(accessRole).State = EntityState.Detached;
         }
     }
 }

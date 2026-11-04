@@ -167,17 +167,14 @@ namespace Api.Test.Controllers
         }
 
         [Theory]
-        [InlineData(RoleAccessLevel.READ_ONLY, "Role.ReadOnly.BBB", HttpStatusCode.NotFound, 0)]
-        [InlineData(RoleAccessLevel.USER, "Role.User.BBB", HttpStatusCode.NoContent, 1)]
+        [InlineData("Role.ReadOnly.BBB", HttpStatusCode.NotFound, 0)]
+        [InlineData("Role.User.BBB", HttpStatusCode.NoContent, 1)]
         public async Task RequiresInstallationWriteAccess(
-            RoleAccessLevel accessLevel,
             string installationRole,
             HttpStatusCode expectedStatus,
             int expectedCalls
         )
         {
-            var accessRoles = _app.Services.GetRequiredService<IAccessRoleService>();
-            await accessRoles.Create(_robot.CurrentInstallation, installationRole, accessLevel);
             var accessor = (MockHttpContextAccessor)
                 _app.Services.GetRequiredService<IHttpContextAccessor>();
             accessor.SetHttpContextRoles(["Role.User", installationRole]);
