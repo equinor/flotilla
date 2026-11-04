@@ -213,9 +213,9 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
                 <Metric label={translatedStatus}>
                     <MissionStatusDisplay status={mission.status} />
                 </Metric>
-                <Metric label={translatedTasks}>
+                <Metric label={mission.robotMissionId ? TranslateText('Robot-stored mission') : translatedTasks}>
                     <Typography>
-                        {numberOfCompletedTasks}/{mission.tasks.length}
+                        {mission.robotMissionId ?? `${numberOfCompletedTasks}/${mission.tasks.length}`}
                     </Typography>
                 </Metric>
                 <Metric label={translatedStartDateTime}>
@@ -274,9 +274,9 @@ export const SimpleMissionHeader = ({ mission }: { mission: Mission }) => {
                 <Metric label={translatedStatus}>
                     <MissionStatusDisplay status={mission.status} />
                 </Metric>
-                <Metric label={translatedTasks}>
+                <Metric label={mission.robotMissionId ? TranslateText('Robot-stored mission') : translatedTasks}>
                     <Typography>
-                        {numberOfCompletedTasks}/{mission.tasks.length}
+                        {mission.robotMissionId ?? `${numberOfCompletedTasks}/${mission.tasks.length}`}
                     </Typography>
                 </Metric>
                 <Metric label={translatedStartDateTime}>

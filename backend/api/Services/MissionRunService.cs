@@ -88,10 +88,21 @@ namespace Api.Services
         {
             missionRun.Id ??= Guid.NewGuid().ToString(); // Useful for signalR messages
 
+            if (
+                missionRun.RobotMissionId is not null
+                && (
+                    string.IsNullOrWhiteSpace(missionRun.RobotMissionId)
+                    || missionRun.Tasks.Count != 0
+                )
+            )
+                throw new ArgumentException(
+                    "A robot-stored mission requires a nonblank reference and no inspection tasks."
+                );
+
             if (IncludesUnsupportedInspectionType(missionRun))
             {
                 throw new UnsupportedRobotCapabilityException(
-                    $"Mission {missionRun.Name} contains inspection types not supported by robot: {missionRun.Robot.Name}."
+                    $"Mission {missionRun.Name} requires capabilities not supported by robot: {missionRun.Robot.Name}."
                 );
             }
 
@@ -200,6 +211,11 @@ namespace Api.Services
 
         public bool IncludesUnsupportedInspectionType(MissionRun missionRun)
         {
+            if (missionRun.RobotMissionId is not null)
+                return missionRun.Robot.RobotCapabilities?.Contains(
+                        RobotCapabilitiesEnum.stored_mission
+                    ) != true;
+
             if (missionRun.Robot.RobotCapabilities == null)
                 return false;
 

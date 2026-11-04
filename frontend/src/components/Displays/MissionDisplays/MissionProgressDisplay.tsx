@@ -25,6 +25,15 @@ export const MissionProgressDisplay = ({ mission }: MissionProps) => {
 
     const completedTasks = countCompletedTasks(tasks)
 
+    if (mission.robotMissionId) {
+        return (
+            <StyledTagCount>
+                <FieldLabel>{TranslateText('Robot-stored mission')}</FieldLabel>
+                <Typography>{mission.robotMissionId}</Typography>
+            </StyledTagCount>
+        )
+    }
+
     return (
         <StyledTagCount>
             <FieldLabel>{TranslateText('Completed Tasks')}</FieldLabel>

@@ -123,6 +123,26 @@ Request one `*-api` scope at a time: two audience mappers make Keycloak emit `au
 
 The armada integration tests run the backend against the same realm, under `ASPNETCORE_ENVIRONMENT=IntegrationTest`. That environment has no appsettings file here on purpose: its configuration is passed in as environment variables from [`armada/robotics_integration_tests/custom_containers/flotilla_backend.py`](https://github.com/equinor/armada/blob/main/robotics_integration_tests/custom_containers/flotilla_backend.py), alongside the realm that defines the clients and scopes. Change it there, not here.
 
+## Add and run a stored mission
+
+Requires compatible ISAR/robot support for `stored_mission`, an installed mission UID, and operator write access to the installation.
+
+Create a definition with `POST /missions/definitions`:
+
+```json
+{
+  "name": "Daily diagnostics",
+  "installationCode": "YOUR_INSTALLATION",
+  "inspectionAreaId": "EXISTING_INSPECTION_AREA_ID",
+  "robotMissionId": "DiagnosticRoutine",
+  "isAdHoc": false,
+  "tasks": []
+}
+```
+
+Use the returned definition ID in `POST /missions/schedule/{definitionId}` with `{"robotId":"ROBOT_ID"}`; the robot must be in that inspection area.
+For daily runs, select all seven days and a time under the definition's **Automated scheduling**.
+
 ## Monitoring
 
 The backend is instrumented with [OpenTelemetry](https://opentelemetry.io/). Traces, metrics, and logs are exported via OTLP to a Grafana-compatible backend.

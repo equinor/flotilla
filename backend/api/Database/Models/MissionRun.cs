@@ -16,6 +16,9 @@ namespace Api.Database.Models
         [Required]
         public string MissionId { get; set; }
 
+        [MaxLength(200)]
+        public string? RobotMissionId { get; set; }
+
         [Required]
         public MissionStatus Status
         {
