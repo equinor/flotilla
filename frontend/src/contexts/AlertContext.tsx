@@ -198,6 +198,7 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                     addNotification(backendAlert.alertMessage, 'error', backendAlert.alertTitle)
                     break
                 case 'skipAutoMission':
+                case 'unskipAutoMission':
                     // InfoAlert -> Banner (transient)
                     setBanner(backendAlert.alertMessage, 'info', backendAlert.alertTitle)
                     break
