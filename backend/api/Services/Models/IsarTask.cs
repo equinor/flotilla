@@ -13,7 +13,6 @@
             return status switch
             {
                 "successful" => IsarTaskStatus.Successful,
-                "partially_successful" => IsarTaskStatus.PartiallySuccessful,
                 "not_started" => IsarTaskStatus.NotStarted,
                 "in_progress" => IsarTaskStatus.InProgress,
                 "failed" => IsarTaskStatus.Failed,
@@ -47,7 +46,6 @@
     public enum IsarTaskStatus
     {
         Successful,
-        PartiallySuccessful,
         NotStarted,
         InProgress,
         Failed,
