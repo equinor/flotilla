@@ -520,7 +520,7 @@ namespace Api.EventHandlers
                 && status == MissionStatus.Cancelled
             )
                 status = MissionStatus.Aborted;
-            // Handle that mission_status only reflects last part of mission if recharging occurred during mission
+
             if (
                 status == MissionStatus.Successful
                 && flotillaMissionRun.Tasks.Any(task =>

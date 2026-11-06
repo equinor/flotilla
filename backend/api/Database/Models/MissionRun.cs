@@ -108,7 +108,6 @@ namespace Api.Database.Models
                 "failed" => MissionStatus.Failed,
                 "cancelled" => MissionStatus.Cancelled,
                 "paused" => MissionStatus.Paused,
-                "partially_successful" => MissionStatus.PartiallySuccessful,
                 _ => throw new ArgumentException(
                     $"Failed to parse mission status '{status}' as it's not supported"
                 ),
