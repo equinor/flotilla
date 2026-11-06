@@ -918,6 +918,14 @@ namespace Api.EventHandlers
             await NotifyInspectionReady(inspectionRecord.InspectionId);
         }
 
+        private async void OnSaraAnalysisResultMessage(SaraAnalysisResultMessage saraAnalysisResult)
+        {
+            foreach (var inspectionId in saraAnalysisResult.InspectionIds)
+            {
+                await NotifyInspectionReady(inspectionId);
+            }
+        }
+
         private async Task NotifyInspectionReady(string inspectionId)
         {
             var inspectionResultMessage = new InspectionResultMessage
@@ -942,47 +950,6 @@ namespace Api.EventHandlers
                 "Inspection Visulization Ready",
                 installation,
                 inspectionResultMessage
-            );
-        }
-
-        private async void OnSaraAnalysisResultMessage(SaraAnalysisResultMessage saraAnalysisResult)
-        {
-            if (saraAnalysisResult.InspectionIds.Count == 0)
-            {
-                _logger.LogError(
-                    "SARA analysis result message contained no inspection IDs; skipping"
-                );
-                return;
-            }
-
-            // TODO: SARA may emit multiple inspection IDs for group analyses
-            // (e.g. results derived from several inspections). For now we only
-            // persist the result against the first ID; future work should iterate
-            // the full list and emit one persist + SignalR event per inspection.
-            var inspectionId = saraAnalysisResult.InspectionIds[0];
-
-            var missionRun = await MissionRunService.ReadByTaskId(inspectionId, readOnly: true);
-
-            var installation = missionRun?.InspectionArea?.Installation;
-
-            if (installation == null)
-            {
-                _logger.LogError(
-                    "Installation could not found when processing SARA analysis result update with inspection ID {inspectionId}",
-                    inspectionId
-                );
-                return;
-            }
-
-            _ = SignalRService.SendMessageAsync(
-                "Analysis Result Ready",
-                installation,
-                new AnalysisResultMessage()
-                {
-                    InspectionId = inspectionId,
-                    AnalysisType = saraAnalysisResult.AnalysisType,
-                    InstallationCode = installation.InstallationCode,
-                }
             );
         }
     }
