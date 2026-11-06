@@ -74,6 +74,8 @@ namespace Api.Utilities
 
     public class RobotNotFoundException(string message) : Exception(message) { }
 
+    public class RobotAlreadyExistsException(string message) : Exception(message) { }
+
     public class RobotPreCheckFailedException(string message) : Exception(message) { }
 
     public class InspectionAreaExistsException(string message) : Exception(message) { }

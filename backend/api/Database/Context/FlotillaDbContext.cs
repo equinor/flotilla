@@ -85,6 +85,7 @@ namespace Api.Database.Context
                 .HasIndex(a => new { a.InstallationCode })
                 .IsUnique();
             modelBuilder.Entity<Plant>().HasIndex(a => new { a.PlantCode }).IsUnique();
+            modelBuilder.Entity<Robot>().HasIndex(r => r.IsarId).IsUnique();
 
             modelBuilder
                 .Entity<InspectionArea>()

@@ -6,6 +6,7 @@ using Api.Database.Models;
 using Api.Services.Models;
 using Api.Utilities;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace Api.Services
 {
@@ -20,7 +21,11 @@ namespace Api.Services
             bool readOnly = true,
             AccessMode accessMode = AccessMode.Read
         );
-        public Task<Robot?> ReadByIsarId(string isarId, bool readOnly = true);
+        public Task<Robot?> ReadByIsarId(
+            string isarId,
+            bool readOnly = true,
+            bool includeDeprecated = false
+        );
         public Task<IList<Robot>> ReadRobotsForInstallation(
             string installationCode,
             bool readOnly = true
@@ -83,7 +88,20 @@ namespace Api.Services
                 context.Entry(newRobot.CurrentInstallation).State = EntityState.Unchanged;
 
             await context.Robots.AddAsync(newRobot);
-            await ApplyDatabaseUpdate(newRobot.CurrentInstallation);
+            try
+            {
+                await ApplyDatabaseUpdate(newRobot.CurrentInstallation);
+            }
+            catch (DbUpdateException e)
+                when (e.InnerException
+                        is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation }
+                )
+            {
+                DetachTracking(context, newRobot);
+                throw new RobotAlreadyExistsException(
+                    $"A robot with ISAR ID {newRobot.IsarId} already exists"
+                );
+            }
             _ = signalRService.SendMessageAsync(
                 "Robot added",
                 newRobot!.CurrentInstallation,
@@ -303,9 +321,16 @@ namespace Api.Services
             return await query.FirstOrDefaultAsync(robot => robot.Id.Equals(id));
         }
 
-        public async Task<Robot?> ReadByIsarId(string isarId, bool readOnly = true)
+        public async Task<Robot?> ReadByIsarId(
+            string isarId,
+            bool readOnly = true,
+            bool includeDeprecated = false
+        )
         {
-            var query = await GetRobotsWithSubModels(readOnly: readOnly);
+            var query = await GetRobotsWithSubModels(
+                readOnly: readOnly,
+                includeDeprecated: includeDeprecated
+            );
             return await query.FirstOrDefaultAsync(robot => robot.IsarId.Equals(isarId));
         }
 
@@ -358,7 +383,8 @@ namespace Api.Services
 
         private async Task<IQueryable<Robot>> GetRobotsWithSubModels(
             bool readOnly = true,
-            AccessMode accessMode = AccessMode.Read
+            AccessMode accessMode = AccessMode.Read,
+            bool includeDeprecated = false
         )
         {
             var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes(
@@ -370,7 +396,7 @@ namespace Api.Services
                 .Include(r => r.CurrentInstallation)
 #pragma warning disable CA1304
                 .Where(r =>
-                    !r.Deprecated
+                    (includeDeprecated || !r.Deprecated)
                     && (
                         (
                             accessMode == AccessMode.Read
