@@ -69,11 +69,7 @@ namespace Api.Database.Models
         }
 
         public bool IsCompleted =>
-            _status
-                is TaskStatus.Cancelled
-                    or TaskStatus.Successful
-                    or TaskStatus.Failed
-                    or TaskStatus.PartiallySuccessful;
+            _status is TaskStatus.Cancelled or TaskStatus.Successful or TaskStatus.Failed;
 
         public DateTime? StartTime { get; private set; }
 
@@ -124,7 +120,6 @@ namespace Api.Database.Models
                 IsarTaskStatus.NotStarted => TaskStatus.NotStarted,
                 IsarTaskStatus.InProgress => TaskStatus.InProgress,
                 IsarTaskStatus.Successful => TaskStatus.Successful,
-                IsarTaskStatus.PartiallySuccessful => TaskStatus.PartiallySuccessful,
                 IsarTaskStatus.Cancelled => TaskStatus.Cancelled,
                 IsarTaskStatus.Paused => TaskStatus.Paused,
                 IsarTaskStatus.Failed => TaskStatus.Failed,
@@ -136,7 +131,6 @@ namespace Api.Database.Models
     public enum TaskStatus
     {
         Successful,
-        PartiallySuccessful,
         NotStarted,
         InProgress,
         Failed,
