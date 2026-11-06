@@ -19,9 +19,11 @@ import {
 import { MeasurementDisplay } from 'components/Displays/MeasurementDisplay'
 import { ResultFocus } from './MissionResults'
 import { groupInspectionsByTask, hasInspectionAnalysis, InspectionData } from 'models/InspectionRecord'
+import { Task } from 'models/Task'
 
 interface Props {
     data: InspectionData[]
+    tasks: Task[]
     selectedId: string
     preferredFocus: ResultFocus
     installationName: string
@@ -32,6 +34,7 @@ interface Props {
 
 export const MissionResultGallery = ({
     data,
+    tasks,
     selectedId,
     preferredFocus,
     installationName,
@@ -44,6 +47,7 @@ export const MissionResultGallery = ({
     const index = results.findIndex((result) => result.inspection.inspectionId === selectedId)
     const result = results[index]
     const inspection = result?.inspection
+    const taskOrder = tasks.find((task) => task.id === selectedId)?.taskOrder
     const focus =
         inspection && preferredFocus === 'analysis' && hasInspectionAnalysis(inspection) ? 'analysis' : 'inspection'
 
@@ -67,9 +71,9 @@ export const MissionResultGallery = ({
                         <Typography variant="h3" tabIndex={-1}>
                             {inspection?.tag || TranslateText('Inspection results')}
                         </Typography>
-                        {inspection && (
+                        {inspection && taskOrder !== undefined && (
                             <GalleryTaskNumber variant="caption">
-                                {TranslateText('Result task {0}', [String(index)])}
+                                {TranslateText('Result task {0}', [String(taskOrder)])}
                             </GalleryTaskNumber>
                         )}
                     </GalleryHeading>
@@ -121,8 +125,9 @@ export const MissionResultGallery = ({
             <Strip>
                 <Typography variant="h6">{TranslateText('Inspections in this mission')}</Typography>
                 <div>
-                    {results.map(({ inspection, measurements }, inspectionIndex) => {
+                    {results.map(({ inspection, measurements }) => {
                         const id = inspection.inspectionId
+                        const taskOrder = tasks.find((task) => task.id === id)?.taskOrder
                         const thumbnailSource = inspection.anonymizedSAS ?? inspection.visualizedSAS
                         return (
                             <StripButton
@@ -150,9 +155,11 @@ export const MissionResultGallery = ({
                                     </Typography>
                                 )}
                                 <Typography variant="body_short">{inspection.tag}</Typography>
-                                <Typography variant="caption">
-                                    {TranslateText('Result task {0}', [String(inspectionIndex)])}
-                                </Typography>
+                                {taskOrder !== undefined && (
+                                    <Typography variant="caption">
+                                        {TranslateText('Result task {0}', [String(taskOrder)])}
+                                    </Typography>
+                                )}
                             </StripButton>
                         )
                     })}
