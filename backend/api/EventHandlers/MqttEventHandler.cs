@@ -233,31 +233,32 @@ namespace Api.EventHandlers
 
                 if (robot == null)
                 {
-                    if (_allowMqttRegistration)
+                    if (!_allowMqttRegistration)
                     {
-                        await RobotService.CreateFromQuery(
-                            new CreateRobotQuery
-                            {
-                                IsarId = isarRobotInfo.IsarId,
-                                Name = isarRobotInfo.RobotName,
-                                RobotType = isarRobotInfo.RobotType,
-                                SerialNumber = isarRobotInfo.SerialNumber,
-                                CurrentInstallationCode = isarRobotInfo.CurrentInstallation,
-                                Documentation = isarRobotInfo.DocumentationQueries,
-                                Host = isarRobotInfo.Host,
-                                Port = isarRobotInfo.Port,
-                                RobotCapabilities = isarRobotInfo.Capabilities,
-                                Status = RobotStatus.Available,
-                            }
+                        _logger.LogWarning(
+                            "Ignoring robot information for unregistered ISAR instance {IsarId}; an administrator must register the robot",
+                            isarRobotInfo.IsarId
                         );
                         return;
                     }
 
-                    _logger.LogWarning(
-                        "Ignoring robot information for unregistered ISAR instance {IsarId}; an administrator must register the robot",
+                    robot = await RobotService.ReadByIsarId(
+                        isarRobotInfo.IsarId,
+                        includeDeprecated: true
+                    );
+                    if (robot == null)
+                    {
+                        await RegisterRobot(isarRobotInfo);
+                        return;
+                    }
+
+                    await RobotService.UpdateDeprecated(robot.Id, false);
+                    robot.Deprecated = false;
+                    _logger.LogInformation(
+                        "Restored deprecated robot {RobotId} registered by ISAR instance {IsarId}",
+                        robot.Id,
                         isarRobotInfo.IsarId
                     );
-                    return;
                 }
                 List<string> updatedFields = [];
 
@@ -338,6 +339,35 @@ namespace Api.EventHandlers
             catch (Exception e)
             {
                 _logger.LogError(e, "Could not update robot in db");
+            }
+        }
+
+        private async Task RegisterRobot(IsarRobotInfoMessage isarRobotInfo)
+        {
+            try
+            {
+                await RobotService.CreateFromQuery(
+                    new CreateRobotQuery
+                    {
+                        IsarId = isarRobotInfo.IsarId,
+                        Name = isarRobotInfo.RobotName,
+                        RobotType = isarRobotInfo.RobotType,
+                        SerialNumber = isarRobotInfo.SerialNumber,
+                        CurrentInstallationCode = isarRobotInfo.CurrentInstallation,
+                        Documentation = isarRobotInfo.DocumentationQueries,
+                        Host = isarRobotInfo.Host,
+                        Port = isarRobotInfo.Port,
+                        RobotCapabilities = isarRobotInfo.Capabilities,
+                        Status = RobotStatus.Available,
+                    }
+                );
+            }
+            catch (RobotAlreadyExistsException)
+            {
+                _logger.LogWarning(
+                    "ISAR instance {IsarId} was registered concurrently; keeping the existing robot",
+                    isarRobotInfo.IsarId
+                );
             }
         }
 

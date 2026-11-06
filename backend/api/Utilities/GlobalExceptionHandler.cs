@@ -32,6 +32,7 @@ namespace Api.Utilities
                 RobotNotFoundException e => (StatusCodes.Status404NotFound, e.Message),
                 InstallationNotFoundException e => (StatusCodes.Status404NotFound, e.Message),
                 RobotBusyException => (StatusCodes.Status409Conflict, null),
+                RobotAlreadyExistsException e => (StatusCodes.Status409Conflict, e.Message),
                 RobotNotInSameInstallationAsMissionException e => (
                     StatusCodes.Status409Conflict,
                     e.Message

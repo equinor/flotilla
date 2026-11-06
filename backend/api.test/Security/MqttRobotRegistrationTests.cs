@@ -33,8 +33,6 @@ namespace Api.Test.Security
         public void OnlyLocalCanRegisterOrRedirectRobots(string environmentName, bool registered)
         {
             bool local = environmentName == "Local";
-            var environment = new Mock<IHostEnvironment>();
-            environment.SetupGet(e => e.EnvironmentName).Returns(environmentName);
             var robot = new Robot
             {
                 Id = "robot",
@@ -46,11 +44,15 @@ namespace Api.Test.Security
             };
             var robots = new Mock<IRobotService>(MockBehavior.Strict);
             robots
-                .Setup(s => s.ReadByIsarId(robot.IsarId, true))
+                .Setup(s => s.ReadByIsarId(robot.IsarId, true, false))
                 .ReturnsAsync(registered ? robot : null);
             if (registered)
                 robots.Setup(s => s.Update(robot)).Returns(Task.CompletedTask);
             else if (local)
+            {
+                robots
+                    .Setup(s => s.ReadByIsarId(robot.IsarId, true, true))
+                    .ReturnsAsync((Robot?)null);
                 robots
                     .Setup(s =>
                         s.CreateFromQuery(
@@ -63,24 +65,11 @@ namespace Api.Test.Security
                         )
                     )
                     .ReturnsAsync(robot);
+            }
 
-            using var services = new ServiceCollection()
-                .AddScoped<IRobotService>(_ => robots.Object)
-                .BuildServiceProvider();
-            using var cache = new MemoryCache(new MemoryCacheOptions());
-            using var meter = new Meter(nameof(MqttRobotRegistrationTests));
-            var events = new EventAggregatorSingletonService();
-            using var handler = new MqttEventHandler(
-                NullLogger<MqttEventHandler>.Instance,
-                services.GetRequiredService<IServiceScopeFactory>(),
-                cache,
-                meter,
-                events,
-                environment.Object
-            );
-
-            // All mocked tasks are already completed, so the event callback finishes inline.
-            events.Publish(
+            Publish(
+                environmentName,
+                robots.Object,
                 new IsarRobotInfoMessage
                 {
                     IsarId = robot.IsarId,
@@ -99,7 +88,7 @@ namespace Api.Test.Security
                 robot.Host
             );
             Assert.Equal(local && registered ? 8080 : 3000, robot.Port);
-            robots.Verify(s => s.ReadByIsarId(robot.IsarId, true), Times.Once);
+            robots.Verify(s => s.ReadByIsarId(robot.IsarId, true, false), Times.Once);
             if (registered)
             {
                 Assert.Collection(
@@ -112,6 +101,52 @@ namespace Api.Test.Security
                 robots.Verify(s => s.CreateFromQuery(It.IsAny<CreateRobotQuery>()), Times.Once);
             robots.VerifyAll();
             robots.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public void LocalRegistrationRestoresDeprecatedRobot()
+        {
+            var robot = new Robot();
+            var robots = new Mock<IRobotService>(MockBehavior.Strict);
+            robots.Setup(s => s.ReadByIsarId(robot.IsarId, true, false)).ReturnsAsync((Robot?)null);
+            robots.Setup(s => s.ReadByIsarId(robot.IsarId, true, true)).ReturnsAsync(robot);
+            robots.Setup(s => s.UpdateDeprecated(robot.Id, false)).Returns(Task.CompletedTask);
+
+            Publish(
+                "Local",
+                robots.Object,
+                new IsarRobotInfoMessage { IsarId = robot.IsarId, Port = robot.Port }
+            );
+
+            robots.VerifyAll();
+            robots.VerifyNoOtherCalls();
+        }
+
+        private static void Publish(
+            string environmentName,
+            IRobotService robots,
+            IsarRobotInfoMessage message
+        )
+        {
+            var environment = new Mock<IHostEnvironment>();
+            environment.SetupGet(e => e.EnvironmentName).Returns(environmentName);
+            using var services = new ServiceCollection()
+                .AddScoped(_ => robots)
+                .BuildServiceProvider();
+            using var cache = new MemoryCache(new MemoryCacheOptions());
+            using var meter = new Meter(nameof(MqttRobotRegistrationTests));
+            var events = new EventAggregatorSingletonService();
+            using var handler = new MqttEventHandler(
+                NullLogger<MqttEventHandler>.Instance,
+                services.GetRequiredService<IServiceScopeFactory>(),
+                cache,
+                meter,
+                events,
+                environment.Object
+            );
+
+            // All mocked tasks are already completed, so the event callback finishes inline.
+            events.Publish(message);
         }
     }
 }

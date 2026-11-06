@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
 using Api.Services;
 using Api.Test.Database;
+using Api.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Testcontainers.PostgreSql;
@@ -118,6 +120,27 @@ namespace Api.Test.Services
             int nRobotsAfter = robotsAfter.Count();
 
             Assert.Equal(nRobotsBefore + 1, nRobotsAfter);
+        }
+
+        [Fact]
+        public async Task CreatingRobotWithExistingIsarIdThrows()
+        {
+            var installation = await DatabaseUtilities.NewInstallation();
+            var robot = await DatabaseUtilities.NewRobot(RobotStatus.Available, installation);
+
+            await Assert.ThrowsAsync<RobotAlreadyExistsException>(() =>
+                RobotService.CreateFromQuery(
+                    new CreateRobotQuery
+                    {
+                        Name = robot.Name,
+                        IsarId = robot.IsarId,
+                        SerialNumber = robot.SerialNumber,
+                        CurrentInstallationCode = installation.InstallationCode,
+                        Documentation = [],
+                        Host = robot.Host,
+                    }
+                )
+            );
         }
     }
 }
