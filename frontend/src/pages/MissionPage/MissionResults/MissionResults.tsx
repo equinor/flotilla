@@ -1,6 +1,7 @@
 import { Typography } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'contexts/LanguageContext'
 import { InspectionData } from 'models/InspectionRecord'
+import { Task } from 'models/Task'
 import { PendingResultPlaceholder } from 'pages/InspectionReportPage/InspectionReportImage'
 import { ContentCard } from 'components/Styles/StyledComponents'
 import styled from 'styled-components'
@@ -15,6 +16,7 @@ const MissionContent = styled.div`
 
 interface Props {
     data: InspectionData[]
+    tasks: Task[]
     isPending: boolean
     isError: boolean
     installationName: string
@@ -48,7 +50,7 @@ export const useMissionResultSelection = () => {
     return { selectedId, preferredFocus, select }
 }
 
-export const MissionResults = ({ data, isPending, isError, installationName }: Props) => {
+export const MissionResults = ({ data, tasks, isPending, isError, installationName }: Props) => {
     const { TranslateText } = useLanguageContext()
     const { selectedId, preferredFocus, select } = useMissionResultSelection()
 
@@ -74,6 +76,7 @@ export const MissionResults = ({ data, isPending, isError, installationName }: P
             {selectedId && !isPending && (
                 <MissionResultGallery
                     data={data}
+                    tasks={tasks}
                     selectedId={selectedId}
                     preferredFocus={preferredFocus}
                     installationName={installationName}
