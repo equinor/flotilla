@@ -647,20 +647,9 @@ namespace Api.EventHandlers
                 return;
             }
 
-            if (!task.IsInspectionTask(task.TaskType))
-            {
-                _logger.LogInformation(
-                    "Received status update to status {status} for task of type {taskType}. As this is not an inspection task, the task update will be disregarded.",
-                    status,
-                    task.TaskType
-                );
-                return;
-            }
-
-            MissionTask missionTask;
             try
             {
-                missionTask = await MissionTaskService.UpdateMissionTaskStatus(
+                await MissionTaskService.UpdateMissionTaskStatus(
                     task.TaskId,
                     status,
                     task.ErrorDescription
@@ -671,10 +660,21 @@ namespace Api.EventHandlers
                 return;
             }
 
+            _logger.LogInformation(
+                "Task '{Id}' updated to '{Status}' for robot '{RobotName}' with ISAR id '{IsarId}'",
+                task.TaskId,
+                task.Status,
+                task.RobotName,
+                task.IsarId
+            );
+
             var missionRun = await MissionRunService.ReadById(task.MissionId, readOnly: true);
             if (missionRun is null)
             {
-                _logger.LogWarning("Mission run with ID {Id} was not found", task.MissionId);
+                _logger.LogWarning(
+                    "Mission run with ID {Id} was not found when updating task status",
+                    task.MissionId
+                );
                 return;
             }
 
@@ -682,14 +682,6 @@ namespace Api.EventHandlers
                 "Mission run updated",
                 missionRun.InspectionArea.Installation,
                 new MissionRunResponse(missionRun)
-            );
-
-            _logger.LogInformation(
-                "Task '{Id}' updated to '{Status}' for robot '{RobotName}' with ISAR id '{IsarId}'",
-                task.TaskId,
-                task.Status,
-                task.RobotName,
-                task.IsarId
             );
         }
 
