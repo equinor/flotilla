@@ -354,6 +354,9 @@ namespace Api.Migrations
 
                     b.HasIndex("CurrentInstallationId");
 
+                    b.HasIndex("IsarId")
+                        .IsUnique();
+
                     b.ToTable("Robots");
                 });
 
