@@ -23,6 +23,9 @@ namespace Api.Database.Models
         [MaxLength(200)]
         public string Name { get; set; }
 
+        [MaxLength(200)]
+        public string? RobotMissionId { get; set; }
+
         [Required]
         public string InstallationCode { get; set; }
 
@@ -39,5 +42,20 @@ namespace Api.Database.Models
         public bool IsAdHoc { get; set; }
 
         public bool IsDeprecated { get; set; }
+
+        public void ValidateTasks()
+        {
+            if (RobotMissionId is not null)
+            {
+                if (string.IsNullOrWhiteSpace(RobotMissionId) || Tasks.Count != 0)
+                    throw new ArgumentException(
+                        "A robot-stored mission requires a nonblank reference and no inspection tasks."
+                    );
+            }
+            else if (Tasks.Count == 0)
+            {
+                throw new ArgumentException("Mission definition must have at least one task.");
+            }
+        }
     }
 }

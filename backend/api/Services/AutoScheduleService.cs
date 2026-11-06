@@ -255,11 +255,15 @@ namespace Api.Services
 
             var robot = robots.FirstOrDefault(r =>
                 r.CurrentInspectionAreaId == missionDefinition.InspectionArea.Id
+                && (
+                    missionDefinition.RobotMissionId is null
+                    || r.RobotCapabilities?.Contains(RobotCapabilitiesEnum.stored_mission) == true
+                )
             );
             if (robot == null)
             {
                 string message =
-                    $"No robot found for mission definition {missionDefinition.Id} and inspection area {missionDefinition.InspectionArea.Id}.";
+                    $"No compatible robot found for mission definition {missionDefinition.Id} and inspection area {missionDefinition.InspectionArea.Id}.";
                 logger.LogError(message);
                 ReportAutoScheduleFailToSignalR(message, missionDefinition);
 
@@ -292,6 +296,7 @@ namespace Api.Services
                     Name = missionDefinition.Name,
                     Robot = robot,
                     MissionId = missionDefinition.Id,
+                    RobotMissionId = missionDefinition.RobotMissionId,
                     Status = MissionStatus.Queued,
                     CreationTime = DateTime.UtcNow,
                     Tasks = [.. missionDefinition.Tasks.Select((t) => t.ToMissionRunTask())],

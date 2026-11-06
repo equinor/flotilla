@@ -9,6 +9,8 @@ namespace Api.Controllers.Models
 
         public string MissionId { get; set; }
 
+        public string? RobotMissionId { get; set; }
+
         public string Name { get; set; }
 
         public string? Description { get; set; }
@@ -47,6 +49,7 @@ namespace Api.Controllers.Models
         {
             Id = mission.Id;
             MissionId = mission.MissionId;
+            RobotMissionId = mission.RobotMissionId;
             Name = mission.Name;
             Description = mission.Description;
             StatusReason = mission.StatusReason;

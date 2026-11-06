@@ -136,6 +136,10 @@ namespace Api.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.Property<string>("RobotMissionId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("InspectionAreaId");
@@ -192,6 +196,10 @@ namespace Api.Migrations
                     b.Property<string>("RobotId")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<string>("RobotMissionId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.Property<DateTime?>("StartTime")
                         .HasColumnType("timestamp with time zone");

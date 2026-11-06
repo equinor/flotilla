@@ -17,6 +17,10 @@ namespace Api.Services.Models
         [JsonPropertyName("name")]
         public string? Name { get; set; }
 
+        [JsonPropertyName("robot_mission_id")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? RobotMissionId { get; set; }
+
         [JsonPropertyName("tasks")]
         public List<IsarTaskDefinition> Tasks { get; set; }
 
@@ -30,6 +34,7 @@ namespace Api.Services.Models
         {
             Id = missionRun.Id;
             Name = missionRun.Name;
+            RobotMissionId = missionRun.RobotMissionId;
             // Filtering on status to remove completed tasks in case it is a resumed mission
             Tasks =
             [
