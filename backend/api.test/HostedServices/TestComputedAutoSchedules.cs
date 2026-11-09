@@ -891,21 +891,32 @@ public class TestComputedAutoSchedules : IAsyncLifetime
         _clock.Now = next.ScheduledAt;
         await Dispatch(next);
         var originalRunId = (await Persisted(next.ScheduledAt)).Id;
-        var originalSkipMigration = _context
+        var schedulingMigration = _context
             .Database.GetMigrations()
-            .Single(m => m.EndsWith("_AddDatedAutoScheduleSkips", StringComparison.Ordinal));
-        await _context.GetService<IMigrator>().MigrateAsync(originalSkipMigration, Token);
+            .Single(m => m.EndsWith("_AddDatedAutoScheduling", StringComparison.Ordinal));
+        var previous = _context
+            .Database.GetMigrations()
+            .TakeWhile(m => m != schedulingMigration)
+            .Last();
+        await _context.GetService<IMigrator>().MigrateAsync(previous, Token);
+        const string legacyJobs = """{"23:00:00":"old-job"}""";
         await _context.Database.ExecuteSqlInterpolatedAsync(
-            $"""INSERT INTO "AutoScheduleSkips" ("MissionDefinitionId", "ScheduledAt") VALUES ({_definition.Id}, {next.ScheduledAt})""",
+            $"""UPDATE "MissionDefinitions" SET "AutoScheduleFrequency_AutoScheduledJobs" = {legacyJobs} WHERE "Id" = {_definition.Id}""",
             Token
         );
         await _context.Database.MigrateAsync(Token);
         var oldRun = await _context.MissionRuns.SingleAsync(Token);
         Assert.Equal(originalRunId, oldRun.Id);
         Assert.Null(oldRun.AutoScheduledAt);
-        var migratedSkip = await _context.AutoScheduleSkips.SingleAsync(Token);
-        Assert.True(migratedSkip.Id > 0);
-        Assert.Equal(next.ScheduledAt, migratedSkip.ScheduledAt);
+        Assert.Empty(await _context.AutoScheduleSkips.ToListAsync(Token));
+        var skip = new AutoScheduleSkip
+        {
+            MissionDefinitionId = _definition.Id,
+            ScheduledAt = next.ScheduledAt,
+        };
+        _context.AutoScheduleSkips.Add(skip);
+        await _context.SaveChangesAsync(Token);
+        Assert.True(skip.Id > 0);
         var duplicate = new AutoScheduleSkip
         {
             MissionDefinitionId = _definition.Id,
@@ -922,13 +933,9 @@ public class TestComputedAutoSchedules : IAsyncLifetime
         _context.AutoScheduleSkips.Add(another);
         await _context.SaveChangesAsync(Token);
         Assert.True(another.Id > 0);
-        Assert.NotEqual(migratedSkip.Id, another.Id);
+        Assert.NotEqual(skip.Id, another.Id);
         _context.ChangeTracker.Clear();
 
-        var previous = _context
-            .Database.GetMigrations()
-            .TakeWhile(m => m != originalSkipMigration)
-            .Last();
         await _context.GetService<IMigrator>().MigrateAsync(previous, Token);
         await _context.Database.MigrateAsync(Token);
         Assert.Single(await _context.MissionRuns.ToListAsync(Token));

@@ -1,12 +1,13 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 namespace Api.Migrations
 {
     /// <inheritdoc />
-    public partial class AddDatedAutoScheduleSkips : Migration
+    public partial class AddDatedAutoScheduling : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,16 +16,24 @@ namespace Api.Migrations
                 name: "AutoScheduleFrequency_AutoScheduledJobs",
                 table: "MissionDefinitions");
 
+            migrationBuilder.AddColumn<DateTimeOffset>(
+                name: "AutoScheduledAt",
+                table: "MissionRuns",
+                type: "timestamp with time zone",
+                nullable: true);
+
             migrationBuilder.CreateTable(
                 name: "AutoScheduleSkips",
                 columns: table => new
                 {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     MissionDefinitionId = table.Column<string>(type: "text", nullable: false),
                     ScheduledAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AutoScheduleSkips", x => new { x.MissionDefinitionId, x.ScheduledAt });
+                    table.PrimaryKey("PK_AutoScheduleSkips", x => x.Id);
                     table.ForeignKey(
                         name: "FK_AutoScheduleSkips_MissionDefinitions_MissionDefinitionId",
                         column: x => x.MissionDefinitionId,
@@ -32,6 +41,18 @@ namespace Api.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MissionRuns_MissionId_AutoScheduledAt",
+                table: "MissionRuns",
+                columns: new[] { "MissionId", "AutoScheduledAt" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AutoScheduleSkips_MissionDefinitionId_ScheduledAt",
+                table: "AutoScheduleSkips",
+                columns: new[] { "MissionDefinitionId", "ScheduledAt" },
+                unique: true);
         }
 
         /// <inheritdoc />
@@ -39,6 +60,14 @@ namespace Api.Migrations
         {
             migrationBuilder.DropTable(
                 name: "AutoScheduleSkips");
+
+            migrationBuilder.DropIndex(
+                name: "IX_MissionRuns_MissionId_AutoScheduledAt",
+                table: "MissionRuns");
+
+            migrationBuilder.DropColumn(
+                name: "AutoScheduledAt",
+                table: "MissionRuns");
 
             migrationBuilder.AddColumn<string>(
                 name: "AutoScheduleFrequency_AutoScheduledJobs",

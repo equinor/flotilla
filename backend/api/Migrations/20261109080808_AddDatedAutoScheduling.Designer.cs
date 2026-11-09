@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Api.Migrations
 {
     [DbContext(typeof(FlotillaDbContext))]
-    [Migration("20261109070836_AddMissionRunAutoScheduledAt")]
-    partial class AddMissionRunAutoScheduledAt
+    [Migration("20261109080808_AddDatedAutoScheduling")]
+    partial class AddDatedAutoScheduling
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
