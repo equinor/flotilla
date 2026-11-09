@@ -53,6 +53,9 @@ export interface RobotWithoutTelemetry {
     isarUri?: string
     currentInspectionAreaId?: string
     type: RobotType
+    isAtex?: boolean
+    lowerPressureWarningThreshold?: number | null
+    upperPressureWarningThreshold?: number | null
     averageDurationPerTag?: number
 }
 interface RobotTelemetry {

@@ -8,6 +8,7 @@ import { RobotImage } from 'components/Displays/RobotDisplays/RobotImage'
 import { useNavigate } from 'react-router'
 import { useLanguageContext } from 'contexts/LanguageContext'
 import { PressureStatusDisplay } from 'components/Displays/RobotDisplays/PressureStatusDisplay'
+import { AtexStatusDisplay } from 'components/Displays/RobotDisplays/AtexStatusDisplay'
 import { FieldLabel } from 'components/Styles/StyledComponents'
 import { Icons } from 'utils/icons'
 import { useRobotTelemetry } from 'hooks/useRobotTelemetry'
@@ -37,6 +38,7 @@ const StyledRobotCard = styled.div`
 `
 const HorizontalContent = styled.div`
     display: flex;
+    flex-wrap: wrap;
     align-items: flex-start;
     gap: 24px;
     align-self: stretch;
@@ -157,7 +159,7 @@ export const RobotCard = ({ robot }: RobotCardProps) => {
                                     />
                                 </VerticalContent>
 
-                                {robotPressureLevel !== undefined && (
+                                {!robot.isAtex && robotPressureLevel !== undefined && (
                                     <VerticalContent>
                                         <FieldLabel>{TranslateText('Pressure')}</FieldLabel>
                                         <PressureStatusDisplay pressure={robotPressureLevel} />
@@ -166,6 +168,12 @@ export const RobotCard = ({ robot }: RobotCardProps) => {
                             </>
                         ) : (
                             <></>
+                        )}
+                        {robot.isAtex && (
+                            <VerticalContent>
+                                <FieldLabel>{TranslateText('ATEX pressure')}</FieldLabel>
+                                <AtexStatusDisplay robot={robot} pressure={robotPressureLevel} />
+                            </VerticalContent>
                         )}
                     </HorizontalContent>
                 </StyledMainBody>

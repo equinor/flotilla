@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { RobotWithoutTelemetry, RobotTelemetryPropertyUpdate } from 'models/Robot'
+import { RobotStatus, RobotWithoutTelemetry, RobotTelemetryPropertyUpdate } from 'models/Robot'
 import { SignalREventLabels, useSignalRContext } from 'contexts/SignalRContext'
 import { Pose } from 'models/Pose'
 import { BatteryStatus } from 'models/Battery'
@@ -13,6 +13,7 @@ export const useRobotTelemetry = (robotWithoutDetails: RobotWithoutTelemetry) =>
     const [robotPose, setRobotPose] = useState<Pose | undefined>(undefined)
 
     const robotId = robotWithoutDetails.id
+    const robotOffline = robotWithoutDetails.status === RobotStatus.Offline
 
     // Refs rather than plain locals. Each registered handler used to close over its own
     // `let` binding, so set and clear stayed paired and cancellation did work; the lint
@@ -32,31 +33,45 @@ export const useRobotTelemetry = (robotWithoutDetails: RobotWithoutTelemetry) =>
 
     useEffect(() => {
         if (!connectionReady) return
-        return registerEvent(SignalREventLabels.robotTelemetryUpdated, (username: string, message: string) => {
-            const robotPropertyUpdate: RobotTelemetryPropertyUpdate = JSON.parse(message)
-            if (robotPropertyUpdate.robotId === robotId) {
-                if (robotPropertyUpdate.telemetryName === 'batteryLevel') {
-                    setRobotBatteryLevel(robotPropertyUpdate.telemetryValue as number)
-                    clearTimeout(batteryReadingTimerId.current)
-                    // Time in milliseconds
-                    batteryReadingTimerId.current = setTimeout(() => setRobotBatteryLevel(undefined), 30 * 1000)
-                } else if (robotPropertyUpdate.telemetryName === 'pressureLevel') {
-                    setRobotPressureLevel(robotPropertyUpdate.telemetryValue as number)
-                    clearTimeout(pressureReadingTimerId.current)
-                    // Time in milliseconds
-                    pressureReadingTimerId.current = setTimeout(() => setRobotPressureLevel(undefined), 30 * 1000)
-                } else if (robotPropertyUpdate.telemetryName === 'batteryState') {
-                    setRobotBatteryStatus(robotPropertyUpdate.telemetryValue as BatteryStatus)
-                } else if (robotPropertyUpdate.telemetryName === 'pose') {
-                    setRobotPose(robotPropertyUpdate.telemetryValue as Pose)
+        const unsubscribe = registerEvent(
+            SignalREventLabels.robotTelemetryUpdated,
+            (username: string, message: string) => {
+                const robotPropertyUpdate: RobotTelemetryPropertyUpdate = JSON.parse(message)
+                if (robotPropertyUpdate.robotId === robotId) {
+                    if (robotPropertyUpdate.telemetryName === 'batteryLevel') {
+                        setRobotBatteryLevel(robotPropertyUpdate.telemetryValue as number)
+                        clearTimeout(batteryReadingTimerId.current)
+                        // Time in milliseconds
+                        batteryReadingTimerId.current = setTimeout(() => setRobotBatteryLevel(undefined), 30 * 1000)
+                    } else if (robotPropertyUpdate.telemetryName === 'pressureLevel' && !robotOffline) {
+                        const pressure = robotPropertyUpdate.telemetryValue
+                        setRobotPressureLevel(
+                            typeof pressure === 'number' && Number.isFinite(pressure) ? pressure : undefined
+                        )
+                        clearTimeout(pressureReadingTimerId.current)
+                        pressureReadingTimerId.current = setTimeout(() => setRobotPressureLevel(undefined), 30 * 1000)
+                    } else if (robotPropertyUpdate.telemetryName === 'batteryState') {
+                        setRobotBatteryStatus(robotPropertyUpdate.telemetryValue as BatteryStatus)
+                    } else if (robotPropertyUpdate.telemetryName === 'pose') {
+                        setRobotPose(robotPropertyUpdate.telemetryValue as Pose)
+                    }
                 }
             }
-        })
-        // Keyed on the robot id rather than the robot object: the object identity changes
-        // on every fetch, which would re-subscribe on every telemetry update.
-    }, [registerEvent, connectionReady, robotId])
+        )
+        return () => {
+            unsubscribe()
+            clearTimeout(pressureReadingTimerId.current)
+            setRobotPressureLevel(undefined)
+        }
+        // Robot identity and availability changes invalidate the previous pressure reading.
+    }, [registerEvent, connectionReady, robotId, robotOffline])
 
-    return { robotBatteryLevel, robotBatteryStatus, robotPressureLevel, robotPose }
+    return {
+        robotBatteryLevel,
+        robotBatteryStatus,
+        robotPressureLevel: connectionReady && !robotOffline ? robotPressureLevel : undefined,
+        robotPose,
+    }
 }
 
 interface RobotIdAndPose {

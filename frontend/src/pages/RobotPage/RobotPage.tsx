@@ -3,6 +3,7 @@ import styled from 'styled-components'
 import { Header } from 'components/Header/Header'
 import { RobotImage } from 'components/Displays/RobotDisplays/RobotImage'
 import { PressureStatusDisplay } from 'components/Displays/RobotDisplays/PressureStatusDisplay'
+import { AtexStatusDisplay } from 'components/Displays/RobotDisplays/AtexStatusDisplay'
 import { BatteryStatusDisplay } from 'components/Displays/RobotDisplays/BatteryStatusDisplay'
 import { RobotStatusChip } from 'components/Displays/RobotDisplays/RobotStatusIcon'
 import { RobotStatus, RobotWithoutTelemetry } from 'models/Robot'
@@ -151,6 +152,12 @@ export const RobotPage = ({ robot }: RobotPageProps) => {
                                 <HeroLeft>
                                     <Typography variant="h1">{robot.name}</Typography>
                                     <RobotStatusChip status={robot.status} itemSize={24} />
+                                    {robot.isAtex && (
+                                        <div>
+                                            <FieldLabel>{TranslateText('ATEX pressure')}</FieldLabel>
+                                            <AtexStatusDisplay robot={robot} pressure={robotPressureLevel} />
+                                        </div>
+                                    )}
                                 </HeroLeft>
                             </HeroSection>
 
@@ -164,7 +171,7 @@ export const RobotPage = ({ robot }: RobotPageProps) => {
                                             batteryState={robotBatteryStatus}
                                         />
                                     </MetricCard>
-                                    {robotPressureLevel !== undefined && (
+                                    {!robot.isAtex && robotPressureLevel !== undefined && (
                                         <MetricCard>
                                             <FieldLabel>{TranslateText('Pressure')}</FieldLabel>
                                             <PressureStatusDisplay itemSize={24} pressure={robotPressureLevel} />

@@ -92,6 +92,32 @@ In all other environments, register robots through the administrator-only
 Robot commands and scheduling require installation write access in addition to
 the global operator role.
 
+### ATEX pressure indication
+
+ATEX pressure monitoring is configured explicitly per robot through the administrator
+`POST /robots` and `PUT /robots/{id}` endpoints. The latter accepts the complete robot
+record; preserve its other fields when updating:
+
+- `isAtex`: enables the ATEX pressure indicator. Defaults to `false`.
+- `lowerPressureWarningThreshold` and `upperPressureWarningThreshold`: nullable
+  pressure bounds in **bar**, using the same reference as the robot's pressure telemetry.
+  When supplied, values must be finite and the lower bound must be less than the upper.
+
+During rollout, enable the verified ATEX Taurob robots and enter their approved
+individual limits. Leave the current ANYmal robots and the isar-robot mock disabled.
+Neither the model name nor the presence of pressure telemetry enables ATEX automatically.
+The migration does not invent limits or change the certification of existing robots.
+MQTT registration and robot-info updates do not overwrite administrator configuration.
+
+The UI shows within limits (including the exact boundaries), too low, or too high.
+Both limits are required for classification; incomplete configuration is shown as
+unconfigured. Confirm the pressure units/reference, both bounds and boundary policy
+with the robot owner before operational use. The indicator becomes unknown when
+pressure updates stop for 30 seconds, the connection is lost, or the robot is offline.
+Reconnection requires a new reading. It is an operator indication, not a safety
+interlock or proof of ATEX safety. An offline robot is never described as having shut
+down due to pressure based only on its last measurement.
+
 ### Running against a local Keycloak
 
 ```bash

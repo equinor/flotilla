@@ -91,5 +91,79 @@ namespace Api.Test.Controllers
             // Assert
             Assert.Equal(receivedRobot!.Id, robot.Id);
         }
+
+        [Fact]
+        public async Task AtexConfigurationIsPersistedOnCreateAndUpdate()
+        {
+            var installation = await DatabaseUtilities.NewInstallation();
+            var query = new CreateRobotQuery
+            {
+                IsarId = Guid.NewGuid().ToString(),
+                Name = "ATEX test robot",
+                SerialNumber = "atex-test",
+                RobotType = RobotType.TaurobInspector,
+                CurrentInstallationCode = installation.InstallationCode,
+                Host = "localhost",
+                Port = 3000,
+                Documentation = [],
+                RobotCapabilities = [],
+                IsAtex = true,
+                LowerPressureWarningThreshold = 0.1f,
+                UpperPressureWarningThreshold = 0.3f,
+            };
+            var created = await Client.PostAsJsonAsync(
+                "/robots",
+                query,
+                SerializerOptions,
+                TestContext.Current.CancellationToken
+            );
+            Assert.Equal(HttpStatusCode.Created, created.StatusCode);
+            var response = await created.Content.ReadFromJsonAsync<RobotResponse>(
+                SerializerOptions,
+                TestContext.Current.CancellationToken
+            );
+            Assert.True(response!.IsAtex);
+            Assert.Equal(0.1f, response.LowerPressureWarningThreshold);
+
+            var robot = new Robot(query, installation)
+            {
+                Id = response.Id,
+                LowerPressureWarningThreshold = 0.15f,
+            };
+            var updated = await Client.PutAsJsonAsync(
+                $"/robots/{robot.Id}",
+                robot,
+                SerializerOptions,
+                TestContext.Current.CancellationToken
+            );
+            Assert.Equal(HttpStatusCode.OK, updated.StatusCode);
+            var persisted = await Client.GetFromJsonAsync<RobotResponse>(
+                $"/robots/{robot.Id}",
+                SerializerOptions,
+                TestContext.Current.CancellationToken
+            );
+            Assert.True(persisted!.IsAtex);
+            Assert.Equal(0.15f, persisted.LowerPressureWarningThreshold);
+            Assert.Equal(0.3f, persisted.UpperPressureWarningThreshold);
+
+            robot.LowerPressureWarningThreshold = 0.4f;
+            var invalidUpdate = await Client.PutAsJsonAsync(
+                $"/robots/{robot.Id}",
+                robot,
+                SerializerOptions,
+                TestContext.Current.CancellationToken
+            );
+            Assert.Equal(HttpStatusCode.BadRequest, invalidUpdate.StatusCode);
+
+            query.IsarId = Guid.NewGuid().ToString();
+            query.LowerPressureWarningThreshold = 0.4f;
+            var invalidCreate = await Client.PostAsJsonAsync(
+                "/robots",
+                query,
+                SerializerOptions,
+                TestContext.Current.CancellationToken
+            );
+            Assert.Equal(HttpStatusCode.BadRequest, invalidCreate.StatusCode);
+        }
     }
 }
