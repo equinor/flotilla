@@ -14,6 +14,7 @@ import { PointillaMapInfo } from 'models/PointillaMapInfo'
 import { Installation } from 'models/Installation'
 import { FeedbackQuery } from 'models/Feedback'
 import type { MissionRecording, MissionRecordingAccess } from 'models/MissionRecording'
+import { AutoScheduleOccurrence } from 'models/AutoScheduleOccurrence'
 
 export class BackendApi {
     constructor(private readonly api: BackendAPICaller) {}
@@ -273,11 +274,22 @@ export class BackendApi {
         return result.content
     }
 
-    async skipAutoScheduledMission(missionId: string, timeOfDay: string): Promise<void> {
-        const path: string = `missions/definitions/${missionId}/skip-auto-mission`
-        const body = { timeOfDay: timeOfDay }
+    async getAutoScheduleOccurrences(installationCode: string): Promise<AutoScheduleOccurrence[]> {
+        const path = `missions/definitions/auto-scheduled?installationCode=${encodeURIComponent(installationCode)}`
+        const result = await this.api.GET<AutoScheduleOccurrence[]>(path).catch(handleError('GET', path))
+        return result.content
+    }
 
-        await this.api.PUT(path, body).catch(handleError('POST', path))
+    async skipAutoScheduledMission(missionId: string, scheduledAt: string): Promise<void> {
+        const path: string = `missions/definitions/${missionId}/skip-auto-mission`
+        const body = { scheduledAt }
+
+        await this.api.PUT(path, body).catch(handleError('PUT', path))
+    }
+
+    async unskipAutoScheduledMission(missionId: string, scheduledAt: string): Promise<void> {
+        const path = `missions/definitions/${missionId}/skip-auto-mission?${new URLSearchParams({ scheduledAt })}`
+        await this.api.DELETE(path, '').catch(handleError('DELETE', path))
     }
 
     async releaseInterventionNeeded(robotId: string): Promise<void> {

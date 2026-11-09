@@ -17,6 +17,7 @@ namespace Api.Database.Context
         public DbSet<MissionRun> MissionRuns => Set<MissionRun>();
         public DbSet<MissionTask> MissionTasks => Set<MissionTask>();
         public DbSet<MissionDefinition> MissionDefinitions => Set<MissionDefinition>();
+        public DbSet<AutoScheduleSkip> AutoScheduleSkips => Set<AutoScheduleSkip>();
         public DbSet<Plant> Plants => Set<Plant>();
         public DbSet<Installation> Installations => Set<Installation>();
         public DbSet<InspectionArea> InspectionAreas => Set<InspectionArea>();
