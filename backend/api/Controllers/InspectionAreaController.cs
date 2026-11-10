@@ -25,7 +25,7 @@ namespace Api.Controllers
         /// <para> This query gets all inspection areas </para>
         /// </remarks>
         [HttpGet]
-        [Authorize(Roles = Role.Any)]
+        [Authorize(Policy = Role.Any)]
         [ProducesResponseType(typeof(IList<InspectionAreaResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -47,7 +47,7 @@ namespace Api.Controllers
         /// <para> This query gets all inspection areas in specified installation</para>
         /// </remarks>
         [HttpGet("installation/{installationCode}")]
-        [Authorize(Roles = Role.Any)]
+        [Authorize(Policy = Role.Any)]
         [ProducesResponseType(typeof(IList<InspectionAreaResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -71,7 +71,7 @@ namespace Api.Controllers
         /// Lookup inspection area by specified id.
         /// </summary>
         [HttpGet]
-        [Authorize(Roles = Role.Any)]
+        [Authorize(Policy = Role.Any)]
         [Route("{id}")]
         [ProducesResponseType(typeof(InspectionAreaResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -92,7 +92,7 @@ namespace Api.Controllers
         /// Lookup all the mission definitions related to a inspection area
         /// </summary>
         [HttpGet]
-        [Authorize(Roles = Role.Any)]
+        [Authorize(Policy = Role.Any)]
         [Route("{inspectionAreaId}/mission-definitions")]
         [ProducesResponseType(typeof(MissionDefinitionResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -124,7 +124,7 @@ namespace Api.Controllers
         /// Update the inspection area json polygon
         /// </summary>
         [HttpPatch]
-        [Authorize(Roles = Role.Any)]
+        [Authorize(Policy = Role.Any)]
         [Route("{inspectionAreaId}/area-polygon")]
         [ProducesResponseType(typeof(ActionResult<InspectionArea>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -155,7 +155,7 @@ namespace Api.Controllers
         /// <para> This query adds a new inspection area to the database </para>
         /// </remarks>
         [HttpPost]
-        [Authorize(Roles = Role.Admin)]
+        [Authorize(Policy = Role.Admin)]
         [ProducesResponseType(typeof(InspectionAreaResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -216,7 +216,7 @@ namespace Api.Controllers
         /// Deletes the inspection area with the specified id from the database.
         /// </summary>
         [HttpDelete]
-        [Authorize(Roles = Role.Admin)]
+        [Authorize(Policy = Role.Admin)]
         [Route("{id}")]
         [ProducesResponseType(typeof(InspectionAreaResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]

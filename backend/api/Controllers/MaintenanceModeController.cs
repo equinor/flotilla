@@ -18,7 +18,7 @@ namespace Api.Controllers
         ///     Send the robot to maintenance mode.
         /// </summary>
         [HttpPost("set-maintenance-mode/{robotId}")]
-        [Authorize(Roles = Role.User)]
+        [Authorize(Policy = Role.User)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -45,7 +45,7 @@ namespace Api.Controllers
         ///     Release the robot from maintenance mode.
         /// </summary>
         [HttpPost("release-maintenance-mode/{robotId}")]
-        [Authorize(Roles = Role.User)]
+        [Authorize(Policy = Role.User)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]

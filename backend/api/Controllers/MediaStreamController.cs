@@ -22,7 +22,7 @@ namespace Api.Controllers
         /// <para> This query gets a new media stream connection config from ISAR </para>
         /// </remarks>
         [HttpGet]
-        [Authorize(Roles = Role.Any)]
+        [Authorize(Policy = Role.Any)]
         [Route("{id}")]
         [ProducesResponseType(typeof(MediaConfig), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

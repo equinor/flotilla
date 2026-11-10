@@ -20,7 +20,7 @@ namespace Api.Controllers
         /// <para> This query gets all installations </para>
         /// </remarks>
         [HttpGet]
-        [Authorize(Roles = Role.Any)]
+        [Authorize(Policy = Role.Any)]
         [ProducesResponseType(typeof(IList<Installation>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -36,7 +36,7 @@ namespace Api.Controllers
         /// Lookup installation by specified id.
         /// </summary>
         [HttpGet]
-        [Authorize(Roles = Role.Any)]
+        [Authorize(Policy = Role.Any)]
         [Route("{id}")]
         [ProducesResponseType(typeof(Installation), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -58,7 +58,7 @@ namespace Api.Controllers
         /// <para> This query adds a new installation to the database </para>
         /// </remarks>
         [HttpPost]
-        [Authorize(Roles = Role.Admin)]
+        [Authorize(Policy = Role.Admin)]
         [ProducesResponseType(typeof(Installation), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -97,7 +97,7 @@ namespace Api.Controllers
         /// Deletes the installation with the specified id from the database.
         /// </summary>
         [HttpDelete]
-        [Authorize(Roles = Role.Admin)]
+        [Authorize(Policy = Role.Admin)]
         [Route("{id}")]
         [ProducesResponseType(typeof(Installation), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]

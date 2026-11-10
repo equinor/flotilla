@@ -25,7 +25,7 @@ namespace Api.Controllers
         ///     <para> This query gets all mission definitions </para>
         /// </remarks>
         [HttpGet("")]
-        [Authorize(Roles = Role.Any)]
+        [Authorize(Policy = Role.Any)]
         [ProducesResponseType(
             typeof(IEnumerable<MissionDefinitionResponse>),
             StatusCodes.Status200OK
@@ -68,7 +68,7 @@ namespace Api.Controllers
         ///     Lookup mission definition by specified id.
         /// </summary>
         [HttpGet]
-        [Authorize(Roles = Role.Any)]
+        [Authorize(Policy = Role.Any)]
         [Route("{id}")]
         [ProducesResponseType(typeof(MissionDefinitionResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -96,7 +96,7 @@ namespace Api.Controllers
         /// </remarks>
         [HttpGet]
         [Route("installation/{installationCode}")]
-        [Authorize(Roles = Role.Any)]
+        [Authorize(Policy = Role.Any)]
         [ProducesResponseType(typeof(IList<MissionDefinitionResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -131,7 +131,7 @@ namespace Api.Controllers
         ///     <para> This query creates a new mission definition </para>
         /// </remarks>
         [HttpPost]
-        [Authorize(Roles = Role.User)]
+        [Authorize(Policy = Role.User)]
         [ProducesResponseType(typeof(MissionDefinition), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -197,7 +197,7 @@ namespace Api.Controllers
         /// <response code="400"> The mission definition data is invalid </response>
         /// <response code="404"> There was no mission definition with the given ID in the database </response>
         [HttpPatch]
-        [Authorize(Roles = Role.User)]
+        [Authorize(Policy = Role.User)]
         [Route("{id}")]
         [ProducesResponseType(typeof(MissionDefinitionResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -282,7 +282,7 @@ namespace Api.Controllers
         /// <response code="400"> The mission definition data is invalid </response>
         /// <response code="404"> There was no mission definition with the given ID in the database </response>
         [HttpPut]
-        [Authorize(Roles = Role.Admin)]
+        [Authorize(Policy = Role.Admin)]
         [Route("{id}/is-deprecated")]
         [ProducesResponseType(typeof(MissionDefinitionResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -324,7 +324,7 @@ namespace Api.Controllers
         ///     Deprecates the mission definition with the specified id.
         /// </summary>
         [HttpDelete]
-        [Authorize(Roles = Role.Admin)]
+        [Authorize(Policy = Role.Admin)]
         [Route("{id}")]
         [ProducesResponseType(typeof(MissionDefinitionResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -351,7 +351,7 @@ namespace Api.Controllers
         ///     Skip auto mission run for the given mission definition at the given time of day
         /// </summary>
         [HttpPut]
-        [Authorize(Roles = Role.User)]
+        [Authorize(Policy = Role.User)]
         [Route("{missionDefinitionId}/skip-auto-mission")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]

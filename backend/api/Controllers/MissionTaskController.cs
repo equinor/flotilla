@@ -22,7 +22,7 @@ namespace Api.Controllers
         ///     </para>
         /// </remarks>
         [HttpGet("")]
-        [Authorize(Roles = Role.Any)]
+        [Authorize(Policy = Role.Any)]
         [ProducesResponseType(typeof(IList<MissionTaskResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]

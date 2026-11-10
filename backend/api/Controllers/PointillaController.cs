@@ -14,7 +14,7 @@ namespace Api.Controllers
         ///     Get all available pointilla map floors for mission with specified id.
         /// </summary>
         [HttpGet]
-        [Authorize(Roles = Role.Any)]
+        [Authorize(Policy = Role.Any)]
         [Route("map/{plantCode}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -38,7 +38,7 @@ namespace Api.Controllers
         ///     Get map for mission with specified id.
         /// </summary>
         [HttpGet]
-        [Authorize(Roles = Role.Any)]
+        [Authorize(Policy = Role.Any)]
         [Route("map/{plantCode}/{floorId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -64,7 +64,7 @@ namespace Api.Controllers
         ///     Get map tile for mission with specified id.
         /// </summary>
         [HttpGet]
-        [Authorize(Roles = Role.Any)]
+        [Authorize(Policy = Role.Any)]
         [Route("map/tiles/{plantCode}/{floorId}/{zoomLevel}/{x}/{y}")]
         [Produces("image/png")]
         [ProducesResponseType(StatusCodes.Status200OK)]

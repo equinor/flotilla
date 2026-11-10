@@ -18,7 +18,7 @@ namespace Api.Controllers
         /// </remarks>
         [HttpGet]
         [Route("me")]
-        [Authorize(Roles = Role.Any)]
+        [Authorize(Policy = Role.Any)]
         [ProducesResponseType(typeof(UserRoles), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]

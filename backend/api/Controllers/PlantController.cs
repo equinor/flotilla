@@ -21,7 +21,7 @@ namespace Api.Controllers
         /// <para> This query gets all plants </para>
         /// </remarks>
         [HttpGet]
-        [Authorize(Roles = Role.Any)]
+        [Authorize(Policy = Role.Any)]
         [ProducesResponseType(typeof(IList<Plant>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -37,7 +37,7 @@ namespace Api.Controllers
         /// Lookup plant by specified id.
         /// </summary>
         [HttpGet]
-        [Authorize(Roles = Role.Any)]
+        [Authorize(Policy = Role.Any)]
         [Route("{id}")]
         [ProducesResponseType(typeof(Plant), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -59,7 +59,7 @@ namespace Api.Controllers
         /// <para> This query adds a new plant to the database </para>
         /// </remarks>
         [HttpPost]
-        [Authorize(Roles = Role.Admin)]
+        [Authorize(Policy = Role.Admin)]
         [ProducesResponseType(typeof(Plant), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -98,7 +98,7 @@ namespace Api.Controllers
         /// Deletes the plant with the specified id from the database.
         /// </summary>
         [HttpDelete]
-        [Authorize(Roles = Role.Admin)]
+        [Authorize(Policy = Role.Admin)]
         [Route("{id}")]
         [ProducesResponseType(typeof(Plant), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]

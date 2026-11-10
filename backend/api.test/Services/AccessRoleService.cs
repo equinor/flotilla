@@ -109,3 +109,22 @@ public class AccessRoleServiceTest : IAsyncLifetime
         Assert.Empty(result);
     }
 }
+
+public class InstallationAccessPolicyTest
+{
+    [Theory]
+    [InlineData("Role.Admin", AccessMode.Write, true)]
+    [InlineData("Role.User.HUA", AccessMode.Write, true)]
+    [InlineData("Role.ReadOnly.HUA", AccessMode.Write, false)]
+    [InlineData("Role.ReadOnly.HUA", AccessMode.Read, true)]
+    [InlineData("Role.User", AccessMode.Read, false)]
+    [InlineData("Role.ReadOnly", AccessMode.Read, false)]
+    public void HasAnyInstallationAccess(string role, AccessMode accessMode, bool expected)
+    {
+        var user = new ClaimsPrincipal(
+            new ClaimsIdentity([new Claim(ClaimTypes.Role, role)], "TestAuth")
+        );
+
+        Assert.Equal(expected, AccessRoleService.HasAnyInstallationAccess(user, accessMode));
+    }
+}

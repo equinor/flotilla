@@ -26,7 +26,20 @@ namespace Api.Services
         IHttpContextAccessor httpContextAccessor
     ) : IAccessRoleService
     {
-        private const string SUPER_ADMIN_ROLE_NAME = "Role.Admin";
+        public const string SUPER_ADMIN_ROLE_NAME = "Role.Admin";
+
+        public static bool HasAnyInstallationAccess(ClaimsPrincipal user, AccessMode accessMode)
+        {
+            if (user.IsInRole(SUPER_ADMIN_ROLE_NAME))
+                return true;
+
+            var userRoles = user
+                .Claims.Where(c => c.Type == ClaimTypes.Role)
+                .Select(c => c.Value)
+                .ToList();
+
+            return GetInstallationCodesByAccessMode(userRoles, accessMode).Count > 0;
+        }
 
         public async Task<List<string>> GetAllowedInstallationCodes(AccessMode accessMode)
         {

@@ -147,6 +147,21 @@ builder.Services.ConfigureAuthentication(builder.Configuration, builder.Environm
 
 builder
     .Services.AddAuthorizationBuilder()
+    .AddPolicy(Role.Admin, policy => policy.RequireRole(AccessRoleService.SUPER_ADMIN_ROLE_NAME))
+    .AddPolicy(
+        Role.User,
+        policy =>
+            policy.RequireAssertion(context =>
+                AccessRoleService.HasAnyInstallationAccess(context.User, AccessMode.Write)
+            )
+    )
+    .AddPolicy(
+        Role.Any,
+        policy =>
+            policy.RequireAssertion(context =>
+                AccessRoleService.HasAnyInstallationAccess(context.User, AccessMode.Read)
+            )
+    )
     .AddFallbackPolicy("RequireAuthenticatedUser", policy => policy.RequireAuthenticatedUser());
 
 builder.Services.AddSignalR();

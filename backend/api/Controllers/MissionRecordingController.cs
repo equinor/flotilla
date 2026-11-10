@@ -9,7 +9,7 @@ namespace Api.Controllers;
 
 [ApiController]
 [Route("missions/runs/{runId}/recordings")]
-[Authorize(Roles = Role.Admin)]
+[Authorize(Policy = Role.Admin)]
 public class MissionRecordingController(
     IMissionRunService missionRunService,
     IMissionRecordingService missionRecordingService,
