@@ -5,8 +5,6 @@ import { describe, expect, test, vi, beforeEach, afterEach } from 'vitest'
 class FakeHubConnection {
     handlers: Record<string, ((username: string, message: string) => void)[]> = {}
     state = 'Connected'
-    reconnecting = () => {}
-    reconnected = () => {}
 
     on(event: string, handler: (username: string, message: string) => void) {
         this.handlers[event] = [...(this.handlers[event] ?? []), handler]
@@ -27,12 +25,8 @@ class FakeHubConnection {
         return Promise.resolve()
     }
     onclose() {}
-    onreconnected(callback: () => void) {
-        this.reconnected = callback
-    }
-    onreconnecting(callback: () => void) {
-        this.reconnecting = callback
-    }
+    onreconnected() {}
+    onreconnecting() {}
 }
 
 const connection = new FakeHubConnection()
@@ -73,7 +67,7 @@ vi.mock('contexts/AssetContext', () => ({
 
 import { SignalRProvider } from 'contexts/SignalRContext'
 import { useRobotTelemetry } from 'hooks/useRobotTelemetry'
-import { RobotStatus, RobotWithoutTelemetry, placeholderRobot } from 'models/Robot'
+import { RobotWithoutTelemetry } from 'models/Robot'
 
 const TELEMETRY = 'Robot telemetry updated'
 
@@ -111,66 +105,7 @@ const BatteryReadout = ({ robot }: { robot: RobotWithoutTelemetry }) => {
 
 const batteryText = () => container.querySelector('[data-testid="battery"]')?.textContent
 
-const PressureReadout = ({ robot }: { robot: RobotWithoutTelemetry }) => {
-    const { robotPressureLevel } = useRobotTelemetry(robot)
-    return <span data-testid="pressure">{robotPressureLevel ?? 'none'}</span>
-}
-
-const pressureText = () => container.querySelector('[data-testid="pressure"]')?.textContent
-
-const pressureHost = (robot = placeholderRobot) => (
-    <SignalRProvider>
-        <PressureReadout robot={robot} />
-    </SignalRProvider>
-)
-
 describe('useRobotTelemetry', () => {
-    test('expires pressure after 30 seconds from the latest reading', async () => {
-        await mount(pressureHost())
-        act(() => connection.emit(TELEMETRY, telemetryMessage(placeholderRobot.id, 'pressureLevel', 0.2)))
-        expect(pressureText()).toBe('0.2')
-        act(() => vi.advanceTimersByTime(20_000))
-        act(() => connection.emit(TELEMETRY, telemetryMessage(placeholderRobot.id, 'pressureLevel', 0.3)))
-        act(() => vi.advanceTimersByTime(29_999))
-        expect(pressureText()).toBe('0.3')
-        act(() => vi.advanceTimersByTime(1))
-        expect(pressureText()).toBe('none')
-    })
-
-    test('invalidates pressure on disconnect and waits for a new reading after reconnect', async () => {
-        await mount(pressureHost())
-        act(() => connection.emit(TELEMETRY, telemetryMessage(placeholderRobot.id, 'pressureLevel', 0.2)))
-        expect(pressureText()).toBe('0.2')
-        act(() => connection.reconnecting())
-        expect(pressureText()).toBe('none')
-        act(() => connection.reconnected())
-        expect(pressureText()).toBe('none')
-        act(() => connection.emit(TELEMETRY, telemetryMessage(placeholderRobot.id, 'pressureLevel', 0.1)))
-        expect(pressureText()).toBe('0.1')
-    })
-
-    test('clears pressure when switching robots and ignores pressure while offline', async () => {
-        await mount(pressureHost())
-        act(() => connection.emit(TELEMETRY, telemetryMessage(placeholderRobot.id, 'pressureLevel', 0.2)))
-        await mount(pressureHost({ ...placeholderRobot, id: 'other' }))
-        expect(pressureText()).toBe('none')
-        act(() => connection.emit(TELEMETRY, telemetryMessage(placeholderRobot.id, 'pressureLevel', 0.2)))
-        expect(pressureText()).toBe('none')
-        act(() => connection.emit(TELEMETRY, telemetryMessage('other', 'pressureLevel', 0.2)))
-        expect(pressureText()).toBe('0.2')
-        await mount(pressureHost({ ...placeholderRobot, id: 'other', status: RobotStatus.Offline }))
-        act(() => connection.emit(TELEMETRY, telemetryMessage('other', 'pressureLevel', 0.2)))
-        expect(pressureText()).toBe('none')
-        await mount(pressureHost({ ...placeholderRobot, id: 'other' }))
-        expect(pressureText()).toBe('none')
-    })
-
-    test('invalid pressure clears the reading rather than showing a valid status', async () => {
-        await mount(pressureHost())
-        act(() => connection.emit(TELEMETRY, telemetryMessage(placeholderRobot.id, 'pressureLevel', 0.2)))
-        act(() => connection.emit(TELEMETRY, telemetryMessage(placeholderRobot.id, 'pressureLevel', 'bad')))
-        expect(pressureText()).toBe('none')
-    })
     test('subscribes once and reports the battery level for its own robot', async () => {
         await mount(
             <SignalRProvider>

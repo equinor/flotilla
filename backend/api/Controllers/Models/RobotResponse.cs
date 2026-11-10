@@ -33,12 +33,6 @@ namespace Api.Controllers.Models
 
         public RobotType Type { get; set; }
 
-        public bool IsAtex { get; set; }
-
-        public float? LowerPressureWarningThreshold { get; set; }
-
-        public float? UpperPressureWarningThreshold { get; set; }
-
         public float? AverageDurationPerTag { get; set; }
 
         public IList<RobotCapabilitiesEnum>? RobotCapabilities { get; set; }
@@ -66,9 +60,6 @@ namespace Api.Controllers.Models
             IsarUri = robot.IsarUri;
             RobotCapabilities = robot.RobotCapabilities;
             Type = robot.Type;
-            IsAtex = robot.IsAtex;
-            LowerPressureWarningThreshold = robot.LowerPressureWarningThreshold;
-            UpperPressureWarningThreshold = robot.UpperPressureWarningThreshold;
             AverageDurationPerTag = robot.AverageDurationPerTag;
         }
     }

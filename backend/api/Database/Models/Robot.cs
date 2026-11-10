@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Api.Controllers.Models;
-using Api.Utilities;
 #pragma warning disable CS8618
 namespace Api.Database.Models
 {
@@ -22,7 +21,7 @@ namespace Api.Database.Models
         AnymalD,
     }
 
-    public class Robot : IValidatableObject
+    public class Robot
     {
         public Robot()
         {
@@ -65,9 +64,6 @@ namespace Api.Database.Models
             RobotCapabilities = createQuery.RobotCapabilities;
             Status = createQuery.Status;
             Type = createQuery.RobotType;
-            IsAtex = createQuery.IsAtex;
-            LowerPressureWarningThreshold = createQuery.LowerPressureWarningThreshold;
-            UpperPressureWarningThreshold = createQuery.UpperPressureWarningThreshold;
         }
 
         [Key]
@@ -122,18 +118,6 @@ namespace Api.Database.Models
 
         [Required]
         public RobotType Type { get; set; } = RobotType.Robot;
-
-        public bool IsAtex { get; set; }
-
-        public float? LowerPressureWarningThreshold { get; set; }
-
-        public float? UpperPressureWarningThreshold { get; set; }
-
-        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext) =>
-            AtexPressureValidation.Validate(
-                LowerPressureWarningThreshold,
-                UpperPressureWarningThreshold
-            );
 
         /// <summary>
         ///     The average time in seconds spent by this model on a single tag (excluding recording duration for video/audio)

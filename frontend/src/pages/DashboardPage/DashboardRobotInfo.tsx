@@ -4,7 +4,6 @@ import { tokens } from '@equinor/eds-tokens'
 import { RobotStatusChip } from 'components/Displays/RobotDisplays/RobotStatusIcon'
 import { BatteryStatusDisplay } from 'components/Displays/RobotDisplays/BatteryStatusDisplay'
 import { PressureStatusDisplay } from 'components/Displays/RobotDisplays/PressureStatusDisplay'
-import { AtexStatusDisplay } from 'components/Displays/RobotDisplays/AtexStatusDisplay'
 import { RobotImage } from 'components/Displays/RobotDisplays/RobotImage'
 import { FieldLabel } from 'components/Styles/StyledComponents'
 import { useRobotTelemetry } from 'hooks/useRobotTelemetry'
@@ -76,20 +75,9 @@ export const DashboardRobotInfo = ({ robot }: DashboardRobotInfoProps) => {
                                     itemSize={24}
                                 />
                             </VerticalContent>
-                            {!robot.isAtex && robotPressureLevel !== undefined && (
-                                <VerticalContent>
-                                    <BigFieldLabel>{TranslateText('Pressure')}</BigFieldLabel>
-                                    <PressureStatusDisplay pressure={robotPressureLevel} itemSize={24} />
-                                </VerticalContent>
-                            )}
                         </>
                     )}
-                    {robot.isAtex && (
-                        <VerticalContent>
-                            <BigFieldLabel>{TranslateText('ATEX pressure')}</BigFieldLabel>
-                            <AtexStatusDisplay robot={robot} pressure={robotPressureLevel} />
-                        </VerticalContent>
-                    )}
+                    <PressureStatusDisplay robot={robot} pressure={robotPressureLevel} itemSize={24} />
                 </HorizontalContent>
             </StyledBody>
         </StyledRobotInfo>

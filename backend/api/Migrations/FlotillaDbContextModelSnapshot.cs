@@ -321,16 +321,10 @@ namespace Api.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
-                    b.Property<bool>("IsAtex")
-                        .HasColumnType("boolean");
-
                     b.Property<string>("IsarId")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
-
-                    b.Property<float?>("LowerPressureWarningThreshold")
-                        .HasColumnType("real");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -355,9 +349,6 @@ namespace Api.Migrations
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<float?>("UpperPressureWarningThreshold")
-                        .HasColumnType("real");
 
                     b.HasKey("Id");
 
