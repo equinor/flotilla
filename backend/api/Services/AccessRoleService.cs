@@ -137,7 +137,10 @@ namespace Api.Services
                             }
                         );
                     else
-                        existingRole.HasWriteAccess = true;
+                        accesses[accesses.IndexOf(existingRole)] = existingRole with
+                        {
+                            HasWriteAccess = true,
+                        };
                 }
             }
 
