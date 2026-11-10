@@ -20,7 +20,7 @@ namespace Api.Controllers
         /// <para> This query submits feedback to the Flotilla team </para>
         /// </remarks>
         [HttpPost]
-        [Authorize(Roles = Role.Any)]
+        [Authorize(Policy = Role.Any)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]

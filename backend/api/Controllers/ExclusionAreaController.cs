@@ -22,7 +22,7 @@ namespace Api.Controllers
         /// <para> This query gets all exclusion areas </para>
         /// </remarks>
         [HttpGet]
-        [Authorize(Roles = Role.User)]
+        [Authorize(Policy = Role.User)]
         [ProducesResponseType(typeof(IList<ExclusionAreaResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -44,7 +44,7 @@ namespace Api.Controllers
         /// <para> This query gets all exclusion areas in specified installation</para>
         /// </remarks>
         [HttpGet("installation/{installationCode}")]
-        [Authorize(Roles = Role.User)]
+        [Authorize(Policy = Role.User)]
         [ProducesResponseType(typeof(IList<ExclusionAreaResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -68,7 +68,7 @@ namespace Api.Controllers
         /// Lookup exclusion area by specified id.
         /// </summary>
         [HttpGet]
-        [Authorize(Roles = Role.User)]
+        [Authorize(Policy = Role.User)]
         [Route("{id}")]
         [ProducesResponseType(typeof(ExclusionAreaResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -89,7 +89,7 @@ namespace Api.Controllers
         /// Update the exclusion area json polygon
         /// </summary>
         [HttpPatch]
-        [Authorize(Roles = Role.User)]
+        [Authorize(Policy = Role.User)]
         [Route("{exclusionAreaId}/area-polygon")]
         [ProducesResponseType(typeof(ActionResult<ExclusionArea>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -120,7 +120,7 @@ namespace Api.Controllers
         /// <para> This query adds a new exclusion area to the database </para>
         /// </remarks>
         [HttpPost]
-        [Authorize(Roles = Role.Admin)]
+        [Authorize(Policy = Role.Admin)]
         [ProducesResponseType(typeof(ExclusionAreaResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -187,7 +187,7 @@ namespace Api.Controllers
         /// Deletes the exclusion area with the specified id from the database.
         /// </summary>
         [HttpDelete]
-        [Authorize(Roles = Role.Admin)]
+        [Authorize(Policy = Role.Admin)]
         [Route("{id}")]
         [ProducesResponseType(typeof(ExclusionAreaResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]

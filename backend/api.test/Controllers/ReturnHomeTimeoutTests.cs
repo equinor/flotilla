@@ -177,7 +177,7 @@ namespace Api.Test.Controllers
         {
             var accessor = (MockHttpContextAccessor)
                 _app.Services.GetRequiredService<IHttpContextAccessor>();
-            accessor.SetHttpContextRoles(["Role.User", installationRole]);
+            accessor.SetHttpContextRoles([installationRole]);
 
             using var response = await Post("{\"seconds\":60}");
 

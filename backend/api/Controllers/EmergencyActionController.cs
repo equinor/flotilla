@@ -24,7 +24,7 @@ namespace Api.Controllers
         /// </remarks>
         [HttpPost]
         [Route("{installationCode}/abort-current-missions-and-send-all-robots-to-safe-zone")]
-        [Authorize(Roles = Role.User)]
+        [Authorize(Policy = Role.User)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -60,7 +60,7 @@ namespace Api.Controllers
         /// </summary>
         [HttpPost]
         [Route("{installationCode}/clear-emergency-state")]
-        [Authorize(Roles = Role.User)]
+        [Authorize(Policy = Role.User)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]

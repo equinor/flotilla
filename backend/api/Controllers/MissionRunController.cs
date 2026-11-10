@@ -22,7 +22,7 @@ namespace Api.Controllers
         ///     <para> This query gets all mission runs </para>
         /// </remarks>
         [HttpGet("")]
-        [Authorize(Roles = Role.Any)]
+        [Authorize(Policy = Role.Any)]
         [ProducesResponseType(typeof(IList<MissionRunResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -72,7 +72,7 @@ namespace Api.Controllers
         ///     Lookup mission run by specified id.
         /// </summary>
         [HttpGet]
-        [Authorize(Roles = Role.Any)]
+        [Authorize(Policy = Role.Any)]
         [Route("{id}")]
         [ProducesResponseType(typeof(MissionRunResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -95,7 +95,7 @@ namespace Api.Controllers
         ///     Lookup mission run by specified id.
         /// </summary>
         [HttpGet]
-        [Authorize(Roles = Role.Any)]
+        [Authorize(Policy = Role.Any)]
         [Route("task/{id}")]
         [ProducesResponseType(typeof(MissionRunResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -120,7 +120,7 @@ namespace Api.Controllers
         ///     Deletes the mission run with the specified id from the database.
         /// </summary>
         [HttpDelete]
-        [Authorize(Roles = Role.User)]
+        [Authorize(Policy = Role.User)]
         [Route("{id}")]
         [ProducesResponseType(typeof(MissionRunResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -157,7 +157,7 @@ namespace Api.Controllers
         ///     Deletes all queued mission runs from the database.
         /// </summary>
         [HttpDelete]
-        [Authorize(Roles = Role.User)]
+        [Authorize(Policy = Role.User)]
         [Route("queued-missions")]
         [ProducesResponseType(typeof(IList<MissionRunResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]

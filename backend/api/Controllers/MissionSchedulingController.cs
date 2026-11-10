@@ -25,7 +25,7 @@ namespace Api.Controllers
         ///     <para> This query runs the unfinished tasks of a previous mission run </para>
         /// </remarks>
         [HttpPost("rerun/{missionRunId}")]
-        [Authorize(Roles = Role.User)]
+        [Authorize(Policy = Role.User)]
         [ProducesResponseType(typeof(MissionRun), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -119,7 +119,7 @@ namespace Api.Controllers
         ///     <para> This query schedules an existing mission and adds it to the database </para>
         /// </remarks>
         [HttpPost("schedule/{missionDefinitionId}")]
-        [Authorize(Roles = Role.User)]
+        [Authorize(Policy = Role.User)]
         [ProducesResponseType(typeof(MissionRun), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]

@@ -26,7 +26,7 @@ namespace Api.Controllers
         ///     <para> This query gets all robots </para>
         /// </remarks>
         [HttpGet]
-        [Authorize(Roles = Role.Any)]
+        [Authorize(Policy = Role.Any)]
         [ProducesResponseType(typeof(IList<RobotResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -46,7 +46,7 @@ namespace Api.Controllers
         /// </remarks>
         [HttpGet]
         [Route("installation-code/{installationCode}")]
-        [Authorize(Roles = Role.Any)]
+        [Authorize(Policy = Role.Any)]
         [ProducesResponseType(typeof(IList<RobotResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -70,7 +70,7 @@ namespace Api.Controllers
         ///     <para> This query gets the robot with the specified id </para>
         /// </remarks>
         [HttpGet]
-        [Authorize(Roles = Role.Any)]
+        [Authorize(Policy = Role.Any)]
         [Route("{id}")]
         [ProducesResponseType(typeof(RobotResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -101,7 +101,7 @@ namespace Api.Controllers
         ///     <para> This query creates a robot and adds it to the database </para>
         /// </remarks>
         [HttpPost]
-        [Authorize(Roles = Role.Admin)]
+        [Authorize(Policy = Role.Admin)]
         [ProducesResponseType(typeof(RobotResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -131,7 +131,7 @@ namespace Api.Controllers
         /// <response code="400"> The robot data is invalid </response>
         /// <response code="404"> There was no robot with the given ID in the database </response>
         [HttpPut]
-        [Authorize(Roles = Role.Admin)]
+        [Authorize(Policy = Role.Admin)]
         [Route("{id}")]
         [ProducesResponseType(typeof(RobotResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -176,7 +176,7 @@ namespace Api.Controllers
         /// <response code="404"> There was no robot with the given ID in the database </response>
         /// /// <response code="404"> The given field name is not valid </response>
         [HttpPut]
-        [Authorize(Roles = Role.Admin)]
+        [Authorize(Policy = Role.Admin)]
         [Route("{id}/{fieldName}")]
         [ProducesResponseType(typeof(RobotResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -230,7 +230,7 @@ namespace Api.Controllers
         /// <response code="200"> The robot was successfully updated </response>
         /// <response code="404"> There was no robot with the given ID in the database </response>
         [HttpPut]
-        [Authorize(Roles = Role.Admin)]
+        [Authorize(Policy = Role.Admin)]
         [Route("{id}/deprecated/{deprecated}")]
         [ProducesResponseType(typeof(RobotResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -276,7 +276,7 @@ namespace Api.Controllers
         /// <response code="200"> The current inspection area was successfully updated </response>
         /// <response code="404"> There was no robot with the given ID in the database </response>
         [HttpPatch]
-        [Authorize(Roles = Role.Admin)]
+        [Authorize(Policy = Role.Admin)]
         [Route("{id}/currentInspectionArea/{currentInspectionAreaId}")]
         [ProducesResponseType(typeof(RobotResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -324,7 +324,7 @@ namespace Api.Controllers
         ///     Deletes the robot with the specified id from the database
         /// </summary>
         [HttpDelete]
-        [Authorize(Roles = Role.Admin)]
+        [Authorize(Policy = Role.Admin)]
         [Route("{id}")]
         [ProducesResponseType(typeof(MissionRun), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -355,7 +355,7 @@ namespace Api.Controllers
         /// <response code="400"> The robot data is invalid </response>
         /// <response code="404"> There was no robot with the given ID in the database </response>
         [HttpPut]
-        [Authorize(Roles = Role.Admin)]
+        [Authorize(Policy = Role.Admin)]
         [Route("{id}/status")]
         [ProducesResponseType(typeof(RobotResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -409,7 +409,7 @@ namespace Api.Controllers
         ///     <para> This query stops the current mission for a given robot </para>
         /// </remarks>
         [HttpPost]
-        [Authorize(Roles = Role.User)]
+        [Authorize(Policy = Role.User)]
         [Route("{robotId}/stop/")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -460,7 +460,7 @@ namespace Api.Controllers
         ///     <para> This query pauses the current mission for a robot </para>
         /// </remarks>
         [HttpPost]
-        [Authorize(Roles = Role.User)]
+        [Authorize(Policy = Role.User)]
         [Route("{robotId}/pause/")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -501,7 +501,7 @@ namespace Api.Controllers
         ///     <para> This query resumes the currently paused mission for a robot </para>
         /// </remarks>
         [HttpPost]
-        [Authorize(Roles = Role.User)]
+        [Authorize(Policy = Role.User)]
         [Route("{robotId}/resume/")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -542,7 +542,7 @@ namespace Api.Controllers
         ///     <para> This query resumes the currently paused mission for a robot </para>
         /// </remarks>
         [HttpPost]
-        [Authorize(Roles = Role.User)]
+        [Authorize(Policy = Role.User)]
         [Route("{robotId}/release-intervention-needed")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

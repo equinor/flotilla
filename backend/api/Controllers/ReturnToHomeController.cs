@@ -24,7 +24,7 @@ namespace Api.Controllers
         /// <response code="409">ISAR rejected the state or encountered a state-machine queue conflict or timeout.</response>
         /// <response code="500">ISAR could not be reached or returned another failure, including an unsupported endpoint.</response>
         [HttpPost("set-return-home-timeout/{robotId}")]
-        [Authorize(Roles = Role.User)]
+        [Authorize(Policy = Role.User)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -80,7 +80,7 @@ namespace Api.Controllers
         ///     Sends the robots to their home.
         /// </summary>
         [HttpPost("schedule-return-to-home/{robotId}")]
-        [Authorize(Roles = Role.User)]
+        [Authorize(Policy = Role.User)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
