@@ -114,7 +114,7 @@ namespace Api.Services
 
                 if (
                     role.StartsWith("Role.ReadOnly.")
-                    && !existingRole.Equals(default(InstallationRole))
+                    && existingRole.Equals(default(InstallationRole))
                 )
                 {
                     accesses.Add(
