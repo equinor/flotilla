@@ -86,8 +86,7 @@ namespace Api.Services
 
         private void RegisterJob(string definitionId, DateTimeOffset instant)
         {
-            // Concurrent registration can enqueue duplicates; the mission/time unique index prevents
-            // duplicate runs. This cache only avoids redundant registrations in normal use.
+            // This cache avoids redundant registrations, but concurrent jobs can still race.
             if (jobs.Contains(definitionId, instant))
                 return;
             backgroundJobs.Schedule(() => DispatchOccurrence(definitionId, instant), instant);
@@ -208,7 +207,7 @@ namespace Api.Services
                         missionDefinition.Id,
                         accessMode: AccessMode.Write
                     );
-                    if (!await CanChangeOccurrenceSkip(current, scheduledAt))
+                    if (!CanChangeOccurrenceSkip(current, scheduledAt))
                     {
                         logger.LogWarning(
                             "Cannot change occurrence skip: it is no longer eligible"
@@ -237,7 +236,7 @@ namespace Api.Services
             return affectedDefinition != null;
         }
 
-        private async Task<bool> CanChangeOccurrenceSkip(
+        private bool CanChangeOccurrenceSkip(
             MissionDefinition? definition,
             DateTimeOffset scheduledAt
         )
@@ -247,10 +246,7 @@ namespace Api.Services
             var now = timeProvider.GetUtcNow();
             return definition
                     .AutoScheduleFrequency?.GetSchedulingInstants(now, now.AddHours(24))
-                    .Contains(scheduledAt) == true
-                && !await context.MissionRuns.AnyAsync(r =>
-                    r.MissionId == definition.Id && r.AutoScheduledAt == scheduledAt
-                );
+                    .Contains(scheduledAt) == true;
         }
 
         private async Task AddDatedSkipIfMissing(
@@ -309,23 +305,7 @@ namespace Api.Services
                     var candidate = await PrepareDueMissionRun(missionDefinitionId, scheduledAt);
                     if (candidate == null)
                         return null;
-                    try
-                    {
-                        return await missionRunService.Create(candidate);
-                    }
-                    catch (DbUpdateException e)
-                        when (e.InnerException
-                                is PostgresException
-                                {
-                                    SqlState: PostgresErrorCodes.UniqueViolation,
-                                    ConstraintName: "IX_MissionRuns_MissionId_AutoScheduledAt"
-                                }
-                        )
-                    {
-                        context.ChangeTracker.Clear();
-                        logger.LogInformation("Ignoring duplicate auto schedule dispatch");
-                        return null;
-                    }
+                    return await missionRunService.Create(candidate);
                 });
             if (run != null)
                 await missionSchedulingService.StartNextMissionRunIfSystemIsAvailable(run.Robot);
@@ -360,10 +340,7 @@ namespace Api.Services
                 return null;
             }
             if (
-                await context.MissionRuns.AnyAsync(r =>
-                    r.MissionId == missionDefinitionId && r.AutoScheduledAt == scheduledAt
-                )
-                || await context.AutoScheduleSkips.AnyAsync(s =>
+                await context.AutoScheduleSkips.AnyAsync(s =>
                     s.MissionDefinitionId == missionDefinitionId && s.ScheduledAt == scheduledAt
                 )
             )
@@ -390,19 +367,17 @@ namespace Api.Services
                 logger.LogInformation("Auto scheduled mission is already queued");
                 return null;
             }
-            return CreateScheduledMissionRun(definition, robot, scheduledAt, now);
+            return CreateScheduledMissionRun(definition, robot, now);
         }
 
         private static MissionRun CreateScheduledMissionRun(
             MissionDefinition definition,
             Robot robot,
-            DateTimeOffset scheduledAt,
             DateTimeOffset now
         )
         {
             var run = new MissionRun
             {
-                AutoScheduledAt = scheduledAt,
                 MissionId = definition.Id,
                 Name = definition.Name,
                 Robot = robot,

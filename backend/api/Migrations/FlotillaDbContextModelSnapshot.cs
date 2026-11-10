@@ -174,9 +174,6 @@ namespace Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("text");
 
-                    b.Property<DateTimeOffset?>("AutoScheduledAt")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<string>("Comment")
                         .HasMaxLength(1000)
                         .HasColumnType("character varying(1000)");
@@ -235,9 +232,6 @@ namespace Api.Migrations
                     b.HasIndex("InspectionAreaId");
 
                     b.HasIndex("RobotId");
-
-                    b.HasIndex("MissionId", "AutoScheduledAt")
-                        .IsUnique();
 
                     b.ToTable("MissionRuns");
                 });

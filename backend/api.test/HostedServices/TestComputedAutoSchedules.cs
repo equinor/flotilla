@@ -203,14 +203,11 @@ public class TestComputedAutoSchedules : IAsyncLifetime
     private Task Dispatch(AutoScheduleOccurrenceResponse next) =>
         _service.DispatchOccurrence(_definition.Id, next.ScheduledAt);
 
-    private Task<MissionRun> Persisted(DateTimeOffset scheduledAt) =>
+    private Task<MissionRun> Persisted() =>
         _context
             .MissionRuns.Include(r => r.Tasks)
             .Include(r => r.Robot)
-            .SingleAsync(
-                r => r.MissionId == _definition.Id && r.AutoScheduledAt == scheduledAt,
-                Token
-            );
+            .SingleAsync(r => r.MissionId == _definition.Id, Token);
 
     [Fact]
     public async Task UpcomingIsDerivedAndReconciliationDoesNotDuplicateJobs()
@@ -341,10 +338,7 @@ public class TestComputedAutoSchedules : IAsyncLifetime
         Assert.Equal(before + 1, _jobNumber);
         _clock.Now = next.ScheduledAt;
         await restarted.DispatchOccurrence(_definition.Id, next.ScheduledAt);
-        Assert.Equal(
-            next.ScheduledAt,
-            (await _context.MissionRuns.SingleAsync(Token)).AutoScheduledAt
-        );
+        Assert.Equal(_definition.Id, (await _context.MissionRuns.SingleAsync(Token)).MissionId);
     }
 
     [Fact]
@@ -541,12 +535,46 @@ public class TestComputedAutoSchedules : IAsyncLifetime
     }
 
     [Fact]
-    public async Task ExactEligibilityAndDuplicateJobsCreateOneRunAndWakeUp()
+    public async Task ExactEligibilityAndSequentialJobsRespectTheExistingQueue()
     {
         var next = await Next();
         _clock.Now = next.ScheduledAt.AddTicks(-1);
         await Dispatch(next);
         Assert.Empty(await _context.MissionRuns.ToListAsync(Token));
+        _clock.Now = next.ScheduledAt;
+        await Dispatch(next);
+        await Dispatch(next);
+        Assert.Single(await _context.MissionRuns.ToListAsync(Token));
+        Assert.Single((await Persisted()).Tasks);
+        _scheduling.Verify(
+            s => s.StartNextMissionRunIfSystemIsAvailable(It.IsAny<Robot>()),
+            Times.Once
+        );
+        _signals.Verify(
+            s =>
+                s.SendMessageAsync(
+                    "Mission run created",
+                    It.IsAny<Installation>(),
+                    It.IsAny<MissionRunResponse>()
+                ),
+            Times.Once
+        );
+
+        var firstRun = await Persisted();
+        await _context
+            .MissionRuns.Where(r => r.Id == firstRun.Id)
+            .ExecuteUpdateAsync(s => s.SetProperty(r => r.Status, MissionStatus.Successful), Token);
+        await Dispatch(next);
+        var runs = await _context.MissionRuns.ToListAsync(Token);
+        Assert.Equal(2, runs.Count);
+        Assert.Equal(2, runs.Select(r => r.Id).Distinct().Count());
+        Assert.All(runs, r => Assert.True(Guid.TryParse(r.Id, out _)));
+    }
+
+    [Fact]
+    public async Task ConcurrentJobsCanBothCreateRunsWhenQueueChecksRace()
+    {
+        var next = await Next();
         _clock.Now = next.ScheduledAt;
         using var a = _factory.Services.CreateScope();
         using var b = _factory.Services.CreateScope();
@@ -579,11 +607,12 @@ public class TestComputedAutoSchedules : IAsyncLifetime
         );
         Assert.Equal(2, creating);
         await Dispatch(next);
-        Assert.Single(await _context.MissionRuns.ToListAsync(Token));
-        Assert.Single((await Persisted(next.ScheduledAt)).Tasks);
+        var runs = await _context.MissionRuns.ToListAsync(Token);
+        Assert.Equal(2, runs.Count);
+        Assert.Equal(2, runs.Select(r => r.Id).Distinct().Count());
         _scheduling.Verify(
             s => s.StartNextMissionRunIfSystemIsAvailable(It.IsAny<Robot>()),
-            Times.Once
+            Times.Exactly(2)
         );
         _signals.Verify(
             s =>
@@ -592,51 +621,8 @@ public class TestComputedAutoSchedules : IAsyncLifetime
                     It.IsAny<Installation>(),
                     It.IsAny<MissionRunResponse>()
                 ),
-            Times.Once
+            Times.Exactly(2)
         );
-        await _runs.Delete((await Persisted(next.ScheduledAt)).Id);
-        await Dispatch(next);
-        Assert.Single(await _context.MissionRuns.ToListAsync(Token));
-    }
-
-    [Fact]
-    public async Task RunUniquenessUsesMissionAndScheduledTimeWithoutRestrictingManualRuns()
-    {
-        var scheduledAt = (await Next()).ScheduledAt;
-        Task<MissionRun> Create(DateTimeOffset? instant, string? missionId = null) =>
-            _runs.Create(
-                new MissionRun
-                {
-                    MissionId = missionId ?? _definition.Id,
-                    AutoScheduledAt = instant,
-                    Name = "Inspection",
-                    Robot = _robot,
-                    InspectionArea = _definition.InspectionArea,
-                    InstallationCode = _definition.InstallationCode,
-                    CreationTime = _clock.Now.UtcDateTime,
-                    Tasks = [],
-                }
-            );
-
-        var first = await Create(scheduledAt);
-        var duplicate = await Assert.ThrowsAsync<DbUpdateException>(() =>
-            Create(scheduledAt.AddTicks(9))
-        );
-        Assert.Equal(
-            "IX_MissionRuns_MissionId_AutoScheduledAt",
-            Assert.IsType<PostgresException>(duplicate.InnerException).ConstraintName
-        );
-        _context.ChangeTracker.Clear();
-        await Create(scheduledAt.AddMicroseconds(1));
-        await Create(scheduledAt, "another-mission");
-        await Create(null);
-        await Create(null);
-        var runs = await _context.MissionRuns.ToListAsync(Token);
-        Assert.Equal(5, runs.Count);
-        Assert.Equal(5, runs.Select(r => r.Id).Distinct().Count());
-        Assert.All(runs, r => Assert.True(Guid.TryParse(r.Id, out _)));
-        Assert.Equal(scheduledAt, (await Persisted(scheduledAt)).AutoScheduledAt);
-        Assert.Equal(first.Id, (await Persisted(scheduledAt)).Id);
     }
 
     [Fact]
@@ -676,7 +662,7 @@ public class TestComputedAutoSchedules : IAsyncLifetime
         var next = await Next();
         _clock.Now = next.ScheduledAt;
         await Dispatch(next);
-        var runId = (await Persisted(next.ScheduledAt)).Id;
+        var runId = (await Persisted()).Id;
         await _context
             .MissionRuns.Where(r => r.Id == runId)
             .ExecuteUpdateAsync(s => s.SetProperty(r => r.Status, MissionStatus.Successful), Token);
@@ -724,7 +710,7 @@ public class TestComputedAutoSchedules : IAsyncLifetime
             );
         _clock.Now = next.ScheduledAt;
         await Dispatch(next);
-        var run = await Persisted(next.ScheduledAt);
+        var run = await Persisted();
         Assert.Equal(replacement.Id, run.Robot.Id);
         Assert.Equal("edited-task", Assert.Single(run.Tasks).TagId);
         Assert.Equal(next.ScheduledAt.UtcDateTime, run.CreationTime);
@@ -804,10 +790,7 @@ public class TestComputedAutoSchedules : IAsyncLifetime
         _clock.Now = next.ScheduledAt;
         await Dispatch(next);
         var queue = await _runs.ReadMissionRunQueue(_robot.Id);
-        Assert.Equal(
-            new[] { manual.Id, (await Persisted(next.ScheduledAt)).Id },
-            queue.Select(r => r.Id)
-        );
+        Assert.Equal(new[] { manual.Id, (await Persisted()).Id }, queue.Select(r => r.Id));
         next = await Next();
         _clock.Now = next.ScheduledAt;
         await Dispatch(next);
@@ -822,7 +805,7 @@ public class TestComputedAutoSchedules : IAsyncLifetime
     }
 
     [Fact]
-    public async Task RetriedDispatchCreatesOneRunAndNotifiesOnlyAfterCommit()
+    public async Task FailureBeforeSaveRetriesAndNotifiesOnlyAfterCommit()
     {
         var next = await Next();
         var notifications = 0;
@@ -840,9 +823,7 @@ public class TestComputedAutoSchedules : IAsyncLifetime
                 Assert.True(
                     scope
                         .ServiceProvider.GetRequiredService<FlotillaDbContext>()
-                        .MissionRuns.Any(r =>
-                            r.MissionId == _definition.Id && r.AutoScheduledAt == next.ScheduledAt
-                        )
+                        .MissionRuns.Any(r => r.MissionId == _definition.Id)
                 );
                 notifications++;
                 return Task.CompletedTask;
@@ -853,7 +834,7 @@ public class TestComputedAutoSchedules : IAsyncLifetime
         Assert.False(_retry.FailOnce);
         Assert.Equal(1, notifications);
         Assert.Single(await _context.MissionRuns.ToListAsync(Token));
-        Assert.Single((await Persisted(next.ScheduledAt)).Tasks);
+        Assert.Single((await Persisted()).Tasks);
         _scheduling.Verify(
             s => s.StartNextMissionRunIfSystemIsAvailable(It.IsAny<Robot>()),
             Times.Once
@@ -961,10 +942,7 @@ public class TestComputedAutoSchedules : IAsyncLifetime
         _clock.Now = expected;
         await restarted.DispatchOccurrence(_definition.Id, instant);
         await restarted.DispatchOccurrence(_definition.Id, expected);
-        Assert.Equal(
-            next.ScheduledAt,
-            (await _context.MissionRuns.SingleAsync(Token)).AutoScheduledAt
-        );
+        Assert.Equal(_definition.Id, (await _context.MissionRuns.SingleAsync(Token)).MissionId);
         _scheduling.Verify(
             s => s.StartNextMissionRunIfSystemIsAvailable(It.IsAny<Robot>()),
             Times.Once
@@ -977,7 +955,7 @@ public class TestComputedAutoSchedules : IAsyncLifetime
         var next = await Next();
         _clock.Now = next.ScheduledAt;
         await Dispatch(next);
-        var originalRunId = (await Persisted(next.ScheduledAt)).Id;
+        var originalRunId = (await Persisted()).Id;
         var schedulingMigration = _context
             .Database.GetMigrations()
             .Single(m => m.EndsWith("_AddDatedAutoScheduling", StringComparison.Ordinal));
@@ -994,7 +972,6 @@ public class TestComputedAutoSchedules : IAsyncLifetime
         await _context.Database.MigrateAsync(Token);
         var oldRun = await _context.MissionRuns.SingleAsync(Token);
         Assert.Equal(originalRunId, oldRun.Id);
-        Assert.Null(oldRun.AutoScheduledAt);
         Assert.Empty(await _context.AutoScheduleSkips.ToListAsync(Token));
         var skip = new AutoScheduleSkip
         {
@@ -1047,6 +1024,14 @@ public class TestComputedAutoSchedules : IAsyncLifetime
                     """SELECT data_type AS "Value" FROM information_schema.columns WHERE table_name = 'AutoScheduleSkips' AND column_name = 'ScheduledAt'"""
                 )
                 .SingleAsync(Token)
+        );
+        Assert.DoesNotContain(
+            await _context
+                .Database.SqlQueryRaw<string>(
+                    """SELECT column_name AS "Value" FROM information_schema.columns WHERE table_name = 'MissionRuns'"""
+                )
+                .ToListAsync(Token),
+            c => c == "AutoScheduledAt"
         );
         Assert.DoesNotContain(
             await _context

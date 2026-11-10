@@ -16,12 +16,6 @@ namespace Api.Migrations
                 name: "AutoScheduleFrequency_AutoScheduledJobs",
                 table: "MissionDefinitions");
 
-            migrationBuilder.AddColumn<DateTimeOffset>(
-                name: "AutoScheduledAt",
-                table: "MissionRuns",
-                type: "timestamp with time zone",
-                nullable: true);
-
             migrationBuilder.CreateTable(
                 name: "AutoScheduleSkips",
                 columns: table => new
@@ -43,12 +37,6 @@ namespace Api.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_MissionRuns_MissionId_AutoScheduledAt",
-                table: "MissionRuns",
-                columns: new[] { "MissionId", "AutoScheduledAt" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_AutoScheduleSkips_MissionDefinitionId_ScheduledAt",
                 table: "AutoScheduleSkips",
                 columns: new[] { "MissionDefinitionId", "ScheduledAt" },
@@ -60,14 +48,6 @@ namespace Api.Migrations
         {
             migrationBuilder.DropTable(
                 name: "AutoScheduleSkips");
-
-            migrationBuilder.DropIndex(
-                name: "IX_MissionRuns_MissionId_AutoScheduledAt",
-                table: "MissionRuns");
-
-            migrationBuilder.DropColumn(
-                name: "AutoScheduledAt",
-                table: "MissionRuns");
 
             migrationBuilder.AddColumn<string>(
                 name: "AutoScheduleFrequency_AutoScheduledJobs",

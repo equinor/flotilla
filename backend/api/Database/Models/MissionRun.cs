@@ -1,10 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
 #pragma warning disable CS8618
 namespace Api.Database.Models
 {
-    [Index(nameof(MissionId), nameof(AutoScheduledAt), IsUnique = true)]
     public class MissionRun : SortableRecord
     {
         private MissionStatus _status = MissionStatus.Queued;
@@ -17,9 +15,6 @@ namespace Api.Database.Models
 
         [Required]
         public string MissionId { get; set; }
-
-        // Null for manual runs; scheduled runs are unique by mission and scheduled instant.
-        public DateTimeOffset? AutoScheduledAt { get; set; }
 
         [Required]
         public MissionStatus Status
