@@ -348,7 +348,7 @@ public class TestComputedAutoSchedules : IAsyncLifetime
     }
 
     [Fact]
-    public async Task SkipEndpointsUseExactTimestampsAndRejectMissingOrMalformedInput()
+    public async Task LegacyFractionalScheduleSurvivesUnrelatedEditAndSkipEndpointsUseExactTimestamps()
     {
         var instant = _clock.Now.AddHours(1).AddMicroseconds(123456);
         var local = TimeZoneInfo.ConvertTime(instant, TimeZoneUtilities.CetZone);
@@ -365,6 +365,12 @@ public class TestComputedAutoSchedules : IAsyncLifetime
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
             TestAuthHandler.AuthenticationScheme
         );
+        using var renamed = await client.PatchAsJsonAsync(
+            $"missions/definitions/{_definition.Id}",
+            new { name = "Renamed without changing the schedule" },
+            Token
+        );
+        Assert.Equal(HttpStatusCode.OK, renamed.StatusCode);
         var path = $"missions/definitions/{_definition.Id}/skip-auto-mission";
         var options = TestSetupHelpers.ConfigureJsonSerializerOptions();
         var upcoming = await client.GetFromJsonAsync<AutoScheduleOccurrenceResponse[]>(
@@ -392,6 +398,87 @@ public class TestComputedAutoSchedules : IAsyncLifetime
             using var invalid = await client.DeleteAsync(path + suffix, Token);
             Assert.Equal(HttpStatusCode.BadRequest, invalid.StatusCode);
         }
+    }
+
+    [Fact]
+    public async Task ScheduleEndpointRequiresWholeSecondsWithoutRoundingOrPartiallySaving()
+    {
+        await using var factory = _factory.WithWebHostBuilder(builder =>
+            builder.ConfigureTestServices(services =>
+                services.AddScoped<IAutoScheduleService>(provider => Worker(provider))
+            )
+        );
+        using var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+            TestAuthHandler.AuthenticationScheme
+        );
+        var path = $"missions/definitions/{_definition.Id}";
+        var originalName = _definition.Name;
+        var originalNext = (await Next()).ScheduledAt;
+        var jobsBefore = _jobNumber;
+        foreach (var time in new[] { "23:00:00.0000001", "23:00:00.123456", "23:00:00.9999999" })
+        {
+            using var invalid = await client.PatchAsJsonAsync(
+                path,
+                new
+                {
+                    name = "Must not be saved",
+                    schedulingTimesCETperWeek = new[]
+                    {
+                        new { dayOfWeek = "Friday", timeOfDay = time },
+                    },
+                },
+                Token
+            );
+            Assert.Equal(HttpStatusCode.BadRequest, invalid.StatusCode);
+            Assert.Contains("whole seconds", await invalid.Content.ReadAsStringAsync(Token));
+        }
+        Assert.Equal(originalName, (await _definitions.ReadById(_definition.Id))!.Name);
+        Assert.Equal(originalNext, (await Next()).ScheduledAt);
+        Assert.Equal(jobsBefore, _jobNumber);
+        Assert.Empty(_signals.Invocations);
+
+        using var updated = await client.PatchAsJsonAsync(
+            path,
+            new
+            {
+                schedulingTimesCETperWeek = new[]
+                {
+                    new { dayOfWeek = "Friday", timeOfDay = "23:00:00" },
+                    new { dayOfWeek = "Friday", timeOfDay = "23:00:01" },
+                },
+            },
+            Token
+        );
+        Assert.Equal(HttpStatusCode.OK, updated.StatusCode);
+        var occurrences = await _service.ReadUpcoming(_definition.InstallationCode);
+        Assert.Equal(
+            new[] { _clock.Now.AddHours(1), _clock.Now.AddHours(1).AddSeconds(1) },
+            occurrences.Select(o => o.ScheduledAt)
+        );
+        var scheduledAt = occurrences[1].ScheduledAt;
+        using var wrongTimestamp = await client.PutAsJsonAsync(
+            $"{path}/skip-auto-mission",
+            new { scheduledAt = scheduledAt.AddMicroseconds(1) },
+            Token
+        );
+        Assert.Equal(HttpStatusCode.Conflict, wrongTimestamp.StatusCode);
+        using var skipped = await client.PutAsJsonAsync(
+            $"{path}/skip-auto-mission",
+            new { scheduledAt },
+            Token
+        );
+        Assert.Equal(HttpStatusCode.NoContent, skipped.StatusCode);
+        Assert.Equal(
+            scheduledAt,
+            (await _context.AutoScheduleSkips.SingleAsync(Token)).ScheduledAt
+        );
+        using var restored = await client.DeleteAsync(
+            $"{path}/skip-auto-mission?scheduledAt={Uri.EscapeDataString(scheduledAt.ToString("O"))}",
+            Token
+        );
+        Assert.Equal(HttpStatusCode.NoContent, restored.StatusCode);
+        Assert.Empty(await _context.AutoScheduleSkips.ToListAsync(Token));
     }
 
     [Fact]
@@ -836,7 +923,7 @@ public class TestComputedAutoSchedules : IAsyncLifetime
     }
 
     [Fact]
-    public async Task FractionalSlotsShareOneIdentityAcrossSkipRestartAndDispatch()
+    public async Task LegacyFractionalSlotsShareOneIdentityAcrossSkipRestartAndDispatch()
     {
         var instant = _clock.Now.AddHours(1).AddTicks(1234567);
         var expected = TimeZoneUtilities.ToPostgresPrecision(instant);

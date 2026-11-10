@@ -111,7 +111,7 @@ namespace Api.Test.Utilities
         }
 
         [Fact]
-        public void SameMissionCanHaveSlotsOneSecondOrOneMicrosecondApart()
+        public void LegacyFractionalSlotsRemainDistinctWithoutChangingTheirScheduledTimes()
         {
             var start = DateTimeOffset.Parse("2026-10-16T20:00:00Z");
             var time = new TimeOnly(23, 0);
@@ -133,7 +133,7 @@ namespace Api.Test.Utilities
         }
 
         [Fact]
-        public void FractionalSlotsAreDeduplicatedBeforeApplyingWindowBoundaries()
+        public void LegacyFractionalSlotsAreDeduplicatedBeforeApplyingWindowBoundaries()
         {
             var start = DateTimeOffset.Parse("2026-10-16T20:00:00Z");
             var schedule = new AutoScheduleFrequency

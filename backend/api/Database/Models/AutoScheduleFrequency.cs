@@ -28,26 +28,27 @@ namespace Api.Database.Models
             );
             for (var date = firstDate; date <= lastDate; date = date.AddDays(CalendarDayStep))
             {
-                foreach (
-                    var time in SchedulingTimesCETperWeek
-                        .Where(t => t.DayOfWeek == date.DayOfWeek)
-                        // Match Npgsql's timestamp precision, including duplicate fractional slots.
-                        .Select(t => new TimeOnly(
-                            t.TimeOfDay.Ticks - t.TimeOfDay.Ticks % TimeSpan.TicksPerMicrosecond
-                        ))
-                        .Distinct()
-                )
+                foreach (var time in GetDistinctTimesForDay(date.DayOfWeek))
                 {
-                    // A nonexistent spring-forward time has no occurrence. In autumn, use
-                    // standard time once, matching TimeZoneInfo's existing conversion policy.
-                    if (TimeZoneUtilities.CetZone.IsInvalidTime(date.ToDateTime(time)))
-                        continue;
-                    var instant = TimeZoneUtilities.CetWallClockToUtcInstant(date, time);
-                    if (instant > fromExclusive && instant <= untilInclusive)
+                    if (
+                        TimeZoneUtilities.TryConvertCetWallClockToUtcUsingStandardTime(
+                            date,
+                            time,
+                            out var instant
+                        )
+                        && instant > fromExclusive
+                        && instant <= untilInclusive
+                    )
                         yield return instant;
                 }
             }
         }
+
+        private IEnumerable<TimeOnly> GetDistinctTimesForDay(DayOfWeek day) =>
+            SchedulingTimesCETperWeek
+                .Where(t => t.DayOfWeek == day)
+                .Select(t => TimeZoneUtilities.ToPostgresPrecision(t.TimeOfDay))
+                .Distinct();
     }
 
     public class TimeAndDay
