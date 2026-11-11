@@ -22,6 +22,29 @@ namespace Api.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Api.Database.Models.AutoScheduleSkip", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("MissionDefinitionId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("ScheduledAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MissionDefinitionId", "ScheduledAt")
+                        .IsUnique();
+
+                    b.ToTable("AutoScheduleSkips");
+                });
+
             modelBuilder.Entity("Api.Database.Models.ExclusionArea", b =>
                 {
                     b.Property<string>("Id")
@@ -375,6 +398,17 @@ namespace Api.Migrations
                     b.ToTable("UserInfos");
                 });
 
+            modelBuilder.Entity("Api.Database.Models.AutoScheduleSkip", b =>
+                {
+                    b.HasOne("Api.Database.Models.MissionDefinition", "MissionDefinition")
+                        .WithMany()
+                        .HasForeignKey("MissionDefinitionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MissionDefinition");
+                });
+
             modelBuilder.Entity("Api.Database.Models.ExclusionArea", b =>
                 {
                     b.HasOne("Api.Database.Models.Installation", "Installation")
@@ -485,9 +519,6 @@ namespace Api.Migrations
                     b.OwnsOne("Api.Database.Models.AutoScheduleFrequency", "AutoScheduleFrequency", b1 =>
                         {
                             b1.Property<string>("MissionDefinitionId")
-                                .HasColumnType("text");
-
-                            b1.Property<string>("AutoScheduledJobs")
                                 .HasColumnType("text");
 
                             b1.Property<string>("SchedulingTimesCETperWeek")

@@ -7,26 +7,17 @@ using Api.HostedServices;
 using Api.Services;
 using Api.Test.Database;
 using Api.Utilities;
-using Hangfire.States;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
-using Moq;
 using Xunit;
 
 namespace Api.Test.Controllers
 {
     public class AutoSchedulePersistenceTests
     {
-        [Theory]
-        [InlineData(null, true)]
-        [InlineData("{}", true)]
-        [InlineData("{\"23:59:59\":\"existing-job\"}", true)]
-        [InlineData("{\"23:59:59\":\"existing-job\"}", false)]
-        public async Task RemovingEntireScheduleSurvivesReloadAndRebuild(
-            string? existingJobs,
-            bool jobDeleted
-        )
+        [Fact]
+        public async Task RemovingEntireScheduleSurvivesReloadAndRebuild()
         {
             var (container, connectionString, connection) =
                 await TestSetupHelpers.ConfigurePostgreSqlDatabase();
@@ -35,11 +26,6 @@ namespace Api.Test.Controllers
             await using var factory = TestSetupHelpers.ConfigureWebApplicationFactory(
                 connectionString
             );
-            factory
-                .BackgroundJobs.Setup(j =>
-                    j.ChangeState("existing-job", It.IsAny<DeletedState>(), null)
-                )
-                .Returns(jobDeleted);
             using var client = TestSetupHelpers.ConfigureHttpClient(factory);
             using var scope = factory.Services.CreateScope();
             var utilities = scope.ServiceProvider.GetRequiredService<DatabaseUtilities>();
@@ -70,7 +56,6 @@ namespace Api.Test.Controllers
                 [
                     new TimeAndDay(TimeZoneUtilities.NowCet().DayOfWeek, TimeOnly.MaxValue),
                 ],
-                AutoScheduledJobs = existingJobs,
             };
             await definitions.Create(mission);
 
@@ -102,15 +87,11 @@ namespace Api.Test.Controllers
             Assert.NotNull(reloaded);
             Assert.Null(reloaded.AutoScheduleFrequency);
 
-            using var hostedService = new AutoSchedulingHostedService(
-                NullLogger<AutoSchedulingHostedService>.Instance,
+            using var hostedService = new AutoSchedulingBackgroundService(
+                NullLogger<AutoSchedulingBackgroundService>.Instance,
                 factory.Services.GetRequiredService<IServiceScopeFactory>()
             );
-            Assert.Null(await hostedService.TestableDoWork());
-            factory.BackgroundJobs.Verify(
-                j => j.ChangeState("existing-job", It.IsAny<DeletedState>(), null),
-                existingJobs is null or "{}" ? Times.Never() : Times.Once()
-            );
+            await hostedService.ReconcileSchedules(TestContext.Current.CancellationToken);
             factory.BackgroundJobs.VerifyNoOtherCalls();
         }
     }
