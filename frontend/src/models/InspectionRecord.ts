@@ -132,6 +132,8 @@ const imageFileEndings = ['jpg', 'jpeg', 'png', 'gif']
 
 const videoFileEndings = ['mp4', 'mpg', 'mpeg', 'm4v']
 
+const inspectionOnlyAnalysisTypes = ['Anonymize', 'AnonymizeVideo', 'AnonymizeAcoustic', 'Passthrough']
+
 const sasURLToFileType = (sasURL: string): FileType => {
     const pathname = new URL(sasURL).pathname
     const filename = pathname.split('/').pop()
@@ -151,7 +153,7 @@ export const inspectionRecordToInspectionData = (record: InspectionRecord): Insp
 
     const sas = analysis?.anonymizedSAS ?? analysis?.visualizedSAS
     const fileType = sas ? sasURLToFileType(sas) : FileType.VALUE
-    const isInspectionOnly = analysis?.analysisType === 'Passthrough' || analysis?.analysisType === 'Anonymize'
+    const isInspectionOnly = inspectionOnlyAnalysisTypes.includes(analysis?.analysisType ?? '')
     const result = isInspectionOnly ? undefined : analysis?.result
 
     // Feedback is given per analysis run, so mirror the choice of analysis above
