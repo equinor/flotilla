@@ -908,7 +908,7 @@ namespace Api.EventHandlers
             SaraInspectionResultMessage inspectionResult
         )
         {
-            await NotifyInspectionReady(inspectionResult.InspectionId);
+            await NotifyInspectionReady(inspectionResult.InspectionId, inspectionResult.MissionId);
         }
 
         private async void OnSaraInspectionRecordAvailable(
@@ -926,7 +926,7 @@ namespace Api.EventHandlers
             }
         }
 
-        private async Task NotifyInspectionReady(string inspectionId)
+        private async Task NotifyInspectionReady(string inspectionId, string? missionId = null)
         {
             var inspectionResultMessage = new InspectionResultMessage
             {
@@ -934,6 +934,15 @@ namespace Api.EventHandlers
             };
 
             var missionRun = await MissionRunService.ReadByTaskId(inspectionId, readOnly: true);
+
+            // Mission recordings have an inspection id that is not part of the mission run, so no
+            // mission run is found from it. If SARA sends a mission id, we assume it is a video
+            // recording; NotifyMissionRecordingReady validates that the mission run exists.
+            if (missionRun is null && missionId is not null)
+            {
+                await NotifyMissionRecordingReady(missionId);
+                return;
+            }
 
             var installation = missionRun?.InspectionArea?.Installation;
 
@@ -950,6 +959,26 @@ namespace Api.EventHandlers
                 "Inspection Visulization Ready",
                 installation,
                 inspectionResultMessage
+            );
+        }
+
+        private async Task NotifyMissionRecordingReady(string missionId)
+        {
+            var missionRun = await MissionRunService.ReadById(missionId, readOnly: true);
+            var installation = missionRun?.InspectionArea?.Installation;
+            if (installation == null)
+            {
+                _logger.LogWarning(
+                    "Mission run {MissionId} could not be found when processing a SARA recording update",
+                    missionId
+                );
+                return;
+            }
+
+            _ = SignalRService.SendMessageAsync(
+                "Mission Recording Ready",
+                installation,
+                new MissionRecordingReadyMessage { MissionId = missionId }
             );
         }
     }

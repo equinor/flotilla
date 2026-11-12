@@ -8,7 +8,6 @@ export interface CameraRecording {
 
 export interface MissionRecording {
     status: string
-    engine?: string
     gaps: { at: string; reason: string }[]
     cameras: Record<string, CameraRecording>
 }

@@ -199,4 +199,5 @@ export enum SignalREventLabels {
     mediaStreamConfigReceived = 'Media stream config received',
     inspectionVisualizationReady = 'Inspection Visulization Ready',
     analysisResultReady = 'Analysis Result Ready',
+    missionRecordingReady = 'Mission Recording Ready',
 }
