@@ -2,7 +2,7 @@ import { Ref, useImperativeHandle, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Button, Icon, Menu, Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
-import { useBackendApi } from 'api/UseBackendApi'
+import { useSaraApi } from 'api/UseSaraApi'
 import { useLanguageContext } from 'contexts/LanguageContext'
 import styled from 'styled-components'
 import { Icons } from 'utils/icons'
@@ -96,6 +96,7 @@ export interface RecordingPlayerControls {
 
 interface RecordingPlayerProps {
     ref?: Ref<RecordingPlayerControls>
+    installationCode: string
     missionId: string
     camera: CameraRecording
     seekRequest: RecordingSeekRequest | undefined
@@ -106,6 +107,7 @@ interface RecordingPlayerProps {
 
 export const RecordingPlayer = ({
     ref,
+    installationCode,
     missionId,
     camera,
     seekRequest,
@@ -113,7 +115,7 @@ export const RecordingPlayer = ({
     onPlaybackProgress,
     onAspectRatioChange,
 }: RecordingPlayerProps) => {
-    const backendApi = useBackendApi()
+    const saraApi = useSaraApi()
     const { TranslateText } = useLanguageContext()
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
@@ -124,7 +126,7 @@ export const RecordingPlayer = ({
         refetch,
     } = useQuery({
         queryKey: ['missionRecordingAccess', missionId, camera.cameraId, camera.key],
-        queryFn: () => backendApi.getMissionRecordingAccess(missionId, camera.key),
+        queryFn: () => saraApi.getMissionRecordingAccess(installationCode, missionId, camera.key),
         retry: 1,
         gcTime: 0,
         refetchOnWindowFocus: ({ state }) => shouldRenewPlaybackAccess(state.data),

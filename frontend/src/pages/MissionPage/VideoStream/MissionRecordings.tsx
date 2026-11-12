@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Button, Icon, Tooltip, Typography } from '@equinor/eds-core-react'
 import { help_outline } from '@equinor/eds-icons'
-import { useBackendApi } from 'api/UseBackendApi'
+import { useSaraApi } from 'api/UseSaraApi'
 import styled from 'styled-components'
 import { ApiError } from 'api/ApiError'
 import { Mission } from 'models/Mission'
@@ -12,6 +12,7 @@ import { RecordingPlayer, RecordingPlayerControls } from './RecordingPlayer'
 import { RecordingTimeline } from './RecordingTimeline'
 import { getRecordingTimestamp } from './recordingTime'
 import { useLanguageContext } from 'contexts/LanguageContext'
+import { SignalREventLabels, useSignalRContext } from 'contexts/SignalRContext'
 
 const RecordingSection = styled.section`
     display: flex;
@@ -49,11 +50,13 @@ const PlaybackControls = styled.div`
 `
 
 interface MissionRecordingsProps {
-    mission: Pick<Mission, 'id' | 'startTime' | 'endTime' | 'tasks'>
+    mission: Pick<Mission, 'id' | 'installationCode' | 'startTime' | 'endTime' | 'tasks'>
 }
 
 export const MissionRecordings = ({ mission }: MissionRecordingsProps) => {
-    const backendApi = useBackendApi()
+    const saraApi = useSaraApi()
+    const queryClient = useQueryClient()
+    const { registerEvent, connectionReady } = useSignalRContext()
     const { TranslateText } = useLanguageContext()
     const [cameraAspectRatios, setCameraAspectRatios] = useState<Record<string, number>>({})
     const [seekRequest, setSeekRequest] = useState<RecordingSeekRequest>()
@@ -63,9 +66,10 @@ export const MissionRecordings = ({ mission }: MissionRecordingsProps) => {
     const players = useRef(new Map<string, RecordingPlayerControls>())
     const referenceCamera = useRef<string | undefined>(undefined)
     const missionId = mission.id
+    const installationCode = mission.installationCode
     const { data: recording, error } = useQuery({
         queryKey: ['missionRecordings', missionId],
-        queryFn: () => backendApi.getMissionRecordings(missionId),
+        queryFn: () => saraApi.getMissionRecording(installationCode, missionId),
         retry: false,
         gcTime: 0,
         networkMode: 'always',
@@ -81,6 +85,15 @@ export const MissionRecordings = ({ mission }: MissionRecordingsProps) => {
     const missionStart = getRecordingTimestamp(mission.startTime)
     const missionEnd = getRecordingTimestamp(mission.endTime)
     const isPlaying = playbackClock !== undefined || isVideoPlaying
+
+    useEffect(() => {
+        if (!connectionReady) return
+        return registerEvent(SignalREventLabels.missionRecordingReady, (_username: string, message: string) => {
+            const { missionId: readyMissionId }: { missionId: string } = JSON.parse(message)
+            if (readyMissionId === missionId)
+                queryClient.invalidateQueries({ queryKey: ['missionRecordings', missionId] })
+        })
+    }, [registerEvent, connectionReady, queryClient, missionId])
 
     const seekRecordings = (request: RecordingSeekRequest) => {
         referenceCamera.current = undefined
@@ -182,6 +195,7 @@ export const MissionRecordings = ({ mission }: MissionRecordingsProps) => {
                                     if (player) players.current.set(camera.key, player)
                                     else players.current.delete(camera.key)
                                 }}
+                                installationCode={installationCode}
                                 missionId={missionId}
                                 camera={camera}
                                 seekRequest={seekRequest}

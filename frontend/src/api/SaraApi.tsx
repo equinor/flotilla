@@ -2,6 +2,7 @@ import { Feedback, InspectionData, InspectionRecord, inspectionRecordToInspectio
 import { BackendAPICaller } from './ApiCaller'
 import { handleError } from './ApiError'
 import { AnalysisType } from 'models/MissionDefinition'
+import type { MissionRecording, MissionRecordingAccess } from 'models/MissionRecording'
 
 interface PaginatedInspectionRecords {
     items: InspectionRecord[]
@@ -98,5 +99,23 @@ export class SaraApi {
         const path: string = 'api/feedback/analysis-run/' + analysisRunId
 
         await this.api.DELETE(path).catch(handleError('DELETE', path))
+    }
+
+    async getMissionRecording(installationCode: string, missionId: string): Promise<MissionRecording> {
+        const result = await this.api.GET<MissionRecording>(
+            `api/recordings/${encodeURIComponent(installationCode)}/missions/${encodeURIComponent(missionId)}`
+        )
+        return result.content
+    }
+
+    async getMissionRecordingAccess(
+        installationCode: string,
+        missionId: string,
+        cameraKey: string
+    ): Promise<MissionRecordingAccess> {
+        const result = await this.api.GET<MissionRecordingAccess>(
+            `api/recordings/${encodeURIComponent(installationCode)}/missions/${encodeURIComponent(missionId)}/cameras/${encodeURIComponent(cameraKey)}/access`
+        )
+        return result.content
     }
 }

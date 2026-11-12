@@ -16,11 +16,20 @@ namespace Api.Mqtt.MessageModels
 
         [JsonPropertyName("analysis_id")]
         public required Guid AnalysisId { get; set; }
+
+        [JsonPropertyName("mission_id")]
+        public string MissionId { get; set; }
     }
 
     public class InspectionResultMessage
     {
         [JsonPropertyName("inspectionId")]
         public string InspectionId { get; set; }
+    }
+
+    public class MissionRecordingReadyMessage
+    {
+        [JsonPropertyName("missionId")]
+        public string MissionId { get; set; }
     }
 }
