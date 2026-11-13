@@ -28,7 +28,7 @@ namespace Api.Database.Models
             RobotPose = taskQuery.RobotPose;
             ZoomDescription = taskQuery.ZoomDescription;
             AnalysisTypes = taskQuery.AnalysisTypes;
-            SensorType = taskQuery.SensorType;
+            SensorType = taskQuery.SensorType!.Value;
             TargetPosition = taskQuery.TargetPosition;
             VideoDuration = taskQuery.VideoDuration;
             AcousticInspectionMetadata = taskQuery.AcousticInspectionMetadata;
@@ -52,7 +52,7 @@ namespace Api.Database.Models
 
         public IList<AnalysisType> AnalysisTypes { get; set; } = [];
 
-        public SensorType SensorType { get; set; } // Note that the enum will get SensorType.Image as default
+        public SensorType SensorType { get; set; }
 
         public float? VideoDuration { get; set; }
 

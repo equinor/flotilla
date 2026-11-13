@@ -146,14 +146,14 @@ namespace Api.Database.Models
 
     public enum SensorType
     {
-        Image,
-        ThermalImage,
-        Video,
-        ThermalVideo,
-        Audio,
-        CO2Measurement,
-        Xam8000GasMeasurement,
-        AcousticMeasurement,
+        Image = 1,
+        ThermalImage = 2,
+        Video = 3,
+        ThermalVideo = 4,
+        Audio = 5,
+        CO2Measurement = 6,
+        Xam8000GasMeasurement = 7,
+        AcousticMeasurement = 8,
     }
 
     public enum AcousticDetectionType

@@ -97,7 +97,14 @@ namespace Api.Test.HostedServices
                 id: null,
                 installationCode: installation.InstallationCode,
                 inspectionArea: inspectionArea,
-                tasks: [new() { RobotPose = new Pose { } }],
+                tasks:
+                [
+                    new()
+                    {
+                        RobotPose = new Pose { },
+                        SensorType = SensorType.Image,
+                    },
+                ],
                 lastSuccessfulRun: null,
                 writeToDatabase: false
             );

@@ -69,6 +69,7 @@ namespace Api.Test.Controllers
                 TagId = "dummy tag id 1",
                 Description = "dummy task 1",
                 RobotPose = new Pose(),
+                SensorType = SensorType.Image,
                 AnalysisTypes = [AnalysisType.Fencilla],
                 TargetPosition = new Position
                 {
@@ -130,6 +131,7 @@ namespace Api.Test.Controllers
                 TagId = "dummy tag id 1",
                 Description = "dummy task 1",
                 RobotPose = new Pose(),
+                SensorType = SensorType.Image,
                 AnalysisTypes = [AnalysisType.Fencilla],
                 TargetPosition = new Position
                 {
@@ -248,6 +250,7 @@ namespace Api.Test.Controllers
                 TagId = "dummy tag id 1",
                 Description = "dummy task 1",
                 RobotPose = new Pose(),
+                SensorType = SensorType.Image,
                 AnalysisTypes = [AnalysisType.Fencilla],
                 TargetPosition = new Position
                 {
@@ -326,6 +329,7 @@ namespace Api.Test.Controllers
                 TagId = "dummy tag id 1",
                 Description = "dummy task 1",
                 RobotPose = new Pose(),
+                SensorType = SensorType.Image,
                 AnalysisTypes = [AnalysisType.Fencilla],
                 TargetPosition = new Position
                 {
@@ -417,6 +421,7 @@ namespace Api.Test.Controllers
                 TagId = "dummy tag id 1",
                 Description = "dummy task 1",
                 RobotPose = new Pose(),
+                SensorType = SensorType.Image,
                 AnalysisTypes = [AnalysisType.Fencilla],
                 TargetPosition = new Position
                 {

@@ -285,7 +285,14 @@ namespace Api.Test.MQTT
                 id: null,
                 installationCode: installation.InstallationCode,
                 inspectionArea: inspectionArea,
-                tasks: [new() { RobotPose = new Pose { } }],
+                tasks:
+                [
+                    new()
+                    {
+                        RobotPose = new Pose { },
+                        SensorType = SensorType.Image,
+                    },
+                ],
                 lastSuccessfulRun: null,
                 writeToDatabase: false
             );
@@ -334,7 +341,11 @@ namespace Api.Test.MQTT
                 installation,
                 inspectionArea.Id
             );
-            TaskDefinition task = new TaskDefinition { RobotPose = new Pose { } };
+            TaskDefinition task = new TaskDefinition
+            {
+                RobotPose = new Pose { },
+                SensorType = SensorType.Image,
+            };
             var missionDefinition = await DatabaseUtilities.NewMissionDefinition(
                 id: null,
                 installationCode: installation.InstallationCode,
