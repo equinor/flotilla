@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Api.Database.Models;
 using Api.Services.Models;
+using SensorTypeEnum = Api.Database.Models.SensorType;
 
 namespace Api.Controllers.Models
 {
@@ -33,7 +34,7 @@ namespace Api.Controllers.Models
 
         public IsarZoomDescription? ZoomDescription { get; set; }
 
-        public SensorType SensorType { get; set; }
+        public SensorType? SensorType { get; set; }
 
         public IList<AnalysisType> AnalysisTypes { get; set; }
 
@@ -43,26 +44,47 @@ namespace Api.Controllers.Models
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            if (SensorType == SensorType.AcousticMeasurement && AcousticInspectionMetadata is null)
+            if (SensorType is null)
             {
                 yield return new ValidationResult(
-                    $"{nameof(AcousticInspectionMetadata)} is required when {nameof(SensorType)} is {nameof(SensorType.AcousticMeasurement)}.",
+                    $"{nameof(SensorType)} is required.",
+                    [nameof(SensorType)]
+                );
+                yield break;
+            }
+
+            if (!Enum.IsDefined(SensorType.Value))
+            {
+                yield return new ValidationResult(
+                    $"{nameof(SensorType)} has an invalid value.",
+                    [nameof(SensorType)]
+                );
+                yield break;
+            }
+
+            if (
+                SensorType == SensorTypeEnum.AcousticMeasurement
+                && AcousticInspectionMetadata is null
+            )
+            {
+                yield return new ValidationResult(
+                    $"{nameof(AcousticInspectionMetadata)} is required when {nameof(SensorType)} is {nameof(SensorTypeEnum.AcousticMeasurement)}.",
                     [nameof(AcousticInspectionMetadata), nameof(SensorType)]
                 );
             }
             else if (
-                SensorType != SensorType.AcousticMeasurement
+                SensorType != SensorTypeEnum.AcousticMeasurement
                 && AcousticInspectionMetadata is not null
             )
             {
                 yield return new ValidationResult(
-                    $"{nameof(AcousticInspectionMetadata)} can only be set when {nameof(SensorType)} is {nameof(SensorType.AcousticMeasurement)}.",
+                    $"{nameof(AcousticInspectionMetadata)} can only be set when {nameof(SensorType)} is {nameof(SensorTypeEnum.AcousticMeasurement)}.",
                     [nameof(AcousticInspectionMetadata), nameof(SensorType)]
                 );
             }
 
             if (
-                (SensorType == SensorType.Video || SensorType == SensorType.ThermalVideo)
+                (SensorType == SensorTypeEnum.Video || SensorType == SensorTypeEnum.ThermalVideo)
                 && VideoDuration is null
             )
             {
