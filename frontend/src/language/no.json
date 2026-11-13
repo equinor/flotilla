@@ -20,6 +20,7 @@
     "missions in queue": "oppdrag i kø",
     "Status": "Status",
     "Connecting": "Kobler til",
+    "Connecting cameras…": "Kobler til kameraer…",
     "Reconnecting": "Kobler til på nytt",
     "Stream unavailable": "Kamerastrøm utilgjengelig",
     "Retry": "Prøv igjen",
