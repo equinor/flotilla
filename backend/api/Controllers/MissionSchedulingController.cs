@@ -49,10 +49,7 @@ namespace Api.Controllers
                 return NotFound("Mission run not found");
 
             var missionTasks = missionRun
-                .Tasks.Where(t =>
-                    t.Status != Database.Models.TaskStatus.Successful
-                    && t.Status != Database.Models.TaskStatus.PartiallySuccessful
-                )
+                .Tasks.Where(t => t.Status != Database.Models.TaskStatus.Successful)
                 .Select(t => new MissionTask(t))
                 .ToList();
 
