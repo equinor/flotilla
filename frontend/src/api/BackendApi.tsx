@@ -13,22 +13,9 @@ import { filterRobots } from 'utils/filtersAndSorts'
 import { PointillaMapInfo } from 'models/PointillaMapInfo'
 import { Installation } from 'models/Installation'
 import { FeedbackQuery } from 'models/Feedback'
-import type { MissionRecording, MissionRecordingAccess } from 'models/MissionRecording'
 
 export class BackendApi {
     constructor(private readonly api: BackendAPICaller) {}
-
-    async getMissionRecordings(missionId: string): Promise<MissionRecording> {
-        const result = await this.api.GET<MissionRecording>(`missions/runs/${encodeURIComponent(missionId)}/recordings`)
-        return result.content
-    }
-
-    async getMissionRecordingAccess(missionId: string, cameraKey: string): Promise<MissionRecordingAccess> {
-        const result = await this.api.GET<MissionRecordingAccess>(
-            `missions/runs/${encodeURIComponent(missionId)}/recordings/${encodeURIComponent(cameraKey)}/access`
-        )
-        return result.content
-    }
 
     async submitFeedback(feedback: FeedbackQuery): Promise<void> {
         const path = 'submit-feedback'
