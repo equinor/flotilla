@@ -187,6 +187,76 @@ namespace Api.Test.Controllers
             Assert.Equal(isAdHoc ?? false, Assert.Single(definitions!).IsAdHoc);
         }
 
+        private static Dictionary<string, object> TaskPayload(object? sensorType)
+        {
+            var task = new Dictionary<string, object>
+            {
+                ["tagId"] = "test",
+                ["targetPosition"] = new Position(1, 1, 1),
+                ["analysisTypes"] = new[] { AnalysisType.Fencilla.ToString() },
+                ["robotPose"] = new Pose(1, 1, 1, 0, 0, 0, 1),
+            };
+            if (sensorType is not null)
+                task["sensorType"] = sensorType;
+            return task;
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData(0)]
+        [InlineData(99)]
+        [InlineData("NotASensorType")]
+        public async Task CheckThatCreateMissionRejectsMissingOrInvalidSensorType(
+            object? sensorType
+        )
+        {
+            var query = new Dictionary<string, object>
+            {
+                ["installationCode"] = "InstCode",
+                ["name"] = "Test mission",
+                ["tasks"] = new[] { TaskPayload(sensorType) },
+            };
+
+            var response = await Client.PostAsJsonAsync(
+                "missions/definitions",
+                query,
+                TestContext.Current.CancellationToken
+            );
+
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            var body = await response.Content.ReadAsStringAsync(
+                TestContext.Current.CancellationToken
+            );
+            Assert.Contains("sensortype", body, StringComparison.OrdinalIgnoreCase);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData(0)]
+        [InlineData(99)]
+        [InlineData("NotASensorType")]
+        public async Task CheckThatUpdateMissionRejectsMissingOrInvalidSensorType(
+            object? sensorType
+        )
+        {
+            var query = new Dictionary<string, object>
+            {
+                ["tasks"] = new[] { TaskPayload(sensorType) },
+            };
+
+            var response = await Client.PatchAsJsonAsync(
+                "missions/definitions/some-id",
+                query,
+                TestContext.Current.CancellationToken
+            );
+
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            var body = await response.Content.ReadAsStringAsync(
+                TestContext.Current.CancellationToken
+            );
+            Assert.Contains("sensortype", body, StringComparison.OrdinalIgnoreCase);
+        }
+
         [Fact]
         public async Task CheckThatUpdateMissionSucceedsForValidInspectionArea()
         {

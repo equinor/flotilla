@@ -98,7 +98,14 @@ namespace Api.Test.EventHandlers
                 id: null,
                 installationCode: installation.InstallationCode,
                 inspectionArea: inspectionArea,
-                tasks: [new() { RobotPose = new Pose { } }],
+                tasks:
+                [
+                    new()
+                    {
+                        RobotPose = new Pose { },
+                        SensorType = SensorType.Image,
+                    },
+                ],
                 lastSuccessfulRun: null,
                 writeToDatabase: false
             );
@@ -138,7 +145,14 @@ namespace Api.Test.EventHandlers
                 id: null,
                 installationCode: installation.InstallationCode,
                 inspectionArea: inspectionArea,
-                tasks: [new() { RobotPose = new Pose { } }],
+                tasks:
+                [
+                    new()
+                    {
+                        RobotPose = new Pose { },
+                        SensorType = SensorType.Image,
+                    },
+                ],
                 lastSuccessfulRun: null,
                 writeToDatabase: false
             );
@@ -194,7 +208,14 @@ namespace Api.Test.EventHandlers
                 id: null,
                 installationCode: installation.InstallationCode,
                 inspectionArea: inspectionArea,
-                tasks: [new() { RobotPose = new Pose { } }],
+                tasks:
+                [
+                    new()
+                    {
+                        RobotPose = new Pose { },
+                        SensorType = SensorType.Image,
+                    },
+                ],
                 lastSuccessfulRun: null,
                 writeToDatabase: false
             );
@@ -254,7 +275,14 @@ namespace Api.Test.EventHandlers
                 id: null,
                 installationCode: installation.InstallationCode,
                 inspectionArea: inspectionArea,
-                tasks: [new() { RobotPose = new Pose { } }],
+                tasks:
+                [
+                    new()
+                    {
+                        RobotPose = new Pose { },
+                        SensorType = SensorType.Image,
+                    },
+                ],
                 lastSuccessfulRun: null,
                 writeToDatabase: false
             );
@@ -319,7 +347,14 @@ namespace Api.Test.EventHandlers
                 id: null,
                 installationCode: installation.InstallationCode,
                 inspectionArea: inspectionArea,
-                tasks: [new() { RobotPose = new Pose { } }],
+                tasks:
+                [
+                    new()
+                    {
+                        RobotPose = new Pose { },
+                        SensorType = SensorType.Image,
+                    },
+                ],
                 lastSuccessfulRun: null,
                 writeToDatabase: false
             );
@@ -399,7 +434,14 @@ namespace Api.Test.EventHandlers
                 id: null,
                 installationCode: installation.InstallationCode,
                 inspectionArea: inspectionArea,
-                tasks: [new() { RobotPose = new Pose { } }],
+                tasks:
+                [
+                    new()
+                    {
+                        RobotPose = new Pose { },
+                        SensorType = SensorType.Image,
+                    },
+                ],
                 lastSuccessfulRun: null,
                 writeToDatabase: false
             );
@@ -457,7 +499,14 @@ namespace Api.Test.EventHandlers
                 id: null,
                 installationCode: installation.InstallationCode,
                 inspectionArea: inspectionArea,
-                tasks: [new() { RobotPose = new Pose { } }],
+                tasks:
+                [
+                    new()
+                    {
+                        RobotPose = new Pose { },
+                        SensorType = SensorType.Image,
+                    },
+                ],
                 lastSuccessfulRun: null,
                 writeToDatabase: false
             );
