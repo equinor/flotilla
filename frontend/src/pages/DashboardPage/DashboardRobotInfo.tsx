@@ -34,6 +34,7 @@ const BigFieldLabel = styled(FieldLabel)`
 `
 const HorizontalContent = styled.div`
     display: flex;
+    flex-wrap: wrap;
     align-items: flex-start;
     gap: 24px;
 `
@@ -74,14 +75,9 @@ export const DashboardRobotInfo = ({ robot }: DashboardRobotInfoProps) => {
                                     itemSize={24}
                                 />
                             </VerticalContent>
-                            {robotPressureLevel !== undefined && (
-                                <VerticalContent>
-                                    <BigFieldLabel>{TranslateText('Pressure')}</BigFieldLabel>
-                                    <PressureStatusDisplay pressure={robotPressureLevel} itemSize={24} />
-                                </VerticalContent>
-                            )}
                         </>
                     )}
+                    <PressureStatusDisplay robot={robot} pressure={robotPressureLevel} itemSize={24} />
                 </HorizontalContent>
             </StyledBody>
         </StyledRobotInfo>
