@@ -48,9 +48,9 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.20.1" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Process" Version="1.15.0-beta.1" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.20.1" />
-    <PackageReference Include="Microsoft.OpenApi" Version="2.13.0" />
+    <PackageReference Include="Microsoft.OpenApi" Version="3.11.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.3.1" />
-    <PackageReference Include="MQTTnet" Version="4.3.7.1207" />
+    <PackageReference Include="MQTTnet" Version="5.2.0.1603" />
     <PackageReference Include="MQTTnet.Extensions.ManagedClient" Version="4.3.7.1207" />
     <PackageReference Include="System.Linq.Dynamic.Core" Version="1.7.4" />
   </ItemGroup>
