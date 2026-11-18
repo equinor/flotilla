@@ -58,6 +58,11 @@ namespace Api.Services
 
         public Task<MissionRun> SetMissionRunToCancelled(string robotId);
 
+        public Task<MissionRun> RemoveTasks(
+            string missionRunId,
+            IReadOnlyCollection<string> taskIds
+        );
+
         public Task UpdateCurrentRobotMissionToFailed(string robotId);
 
         public void DetachTracking(FlotillaDbContext context, MissionRun missionRun);
@@ -208,22 +213,22 @@ namespace Api.Services
             );
         }
 
-        public async Task Update(MissionRun missionRun)
+        private async Task<MissionRun> Update(MissionRun missionRun)
         {
-            if (missionRun.Robot is not null)
-            {
-                context.Entry(missionRun.Robot).State = EntityState.Unchanged;
-            }
-            context.Entry(missionRun.InspectionArea).State = EntityState.Unchanged;
-
-            var entry = context.Update(missionRun);
+            // Save only tracked changes; updating the graph can overwrite concurrent task updates.
             await ApplyDatabaseUpdate(missionRun.InspectionArea.Installation);
+            DetachTracking(context, missionRun);
+            missionRun =
+                await ReadById(missionRun.Id, readOnly: true, includeDeprecated: true)
+                ?? throw new MissionRunNotFoundException(
+                    $"Mission with ID {missionRun.Id} was not found after updating"
+                );
             _ = signalRService.SendMessageAsync(
                 "Mission run updated",
                 missionRun.InspectionArea.Installation,
                 new MissionRunResponse(missionRun)
             );
-            DetachTracking(context, missionRun!);
+            return missionRun;
         }
 
         public async Task<MissionRun?> Delete(string id)
@@ -530,7 +535,7 @@ namespace Api.Services
         {
             var missionRun = await ReadById(
                 missionRunId,
-                readOnly: true,
+                readOnly: false,
                 includeDeprecated: includeDeprecated
             );
             if (missionRun is null)
@@ -558,14 +563,13 @@ namespace Api.Services
 
             try
             {
-                await Update(missionRun);
+                return await Update(missionRun);
             }
             catch (InvalidOperationException e)
             {
                 logger.LogError(e, "Failed to update {missionRunName}", missionRun.Name);
+                throw;
             }
-            ;
-            return missionRun;
         }
 
         public async Task UpdateCurrentRobotMissionToFailed(string robotId)
@@ -604,7 +608,7 @@ namespace Api.Services
         )
         {
             var missionRun =
-                await ReadById(missionRunId, readOnly: true)
+                await ReadById(missionRunId, readOnly: false)
                 ?? throw new MissionRunNotFoundException(
                     $"Could not find mission run with ID {missionRunId}"
                 );
@@ -620,28 +624,43 @@ namespace Api.Services
                 task.Status = Database.Models.TaskStatus.Failed;
             }
 
+            missionRun = await Update(missionRun);
+
             _ = signalRService.SendMessageAsync(
                 "Mission run failed",
                 missionRun.InspectionArea.Installation,
                 new MissionRunResponse(missionRun)
             );
 
-            await Update(missionRun);
             return missionRun;
         }
 
         public async Task<MissionRun> SetMissionRunToCancelled(string missionRunId)
         {
             var missionRun =
-                await ReadById(missionRunId, readOnly: true)
+                await ReadById(missionRunId, readOnly: false)
                 ?? throw new MissionRunNotFoundException(
                     $"Could not find mission run with ID {missionRunId}"
                 );
 
             missionRun.Status = MissionStatus.Cancelled;
 
-            await Update(missionRun);
-            return missionRun;
+            return await Update(missionRun);
+        }
+
+        public async Task<MissionRun> RemoveTasks(
+            string missionRunId,
+            IReadOnlyCollection<string> taskIds
+        )
+        {
+            var missionRun =
+                await ReadById(missionRunId, readOnly: false)
+                ?? throw new MissionRunNotFoundException(
+                    $"Could not find mission run with ID {missionRunId}"
+                );
+
+            missionRun.Tasks = missionRun.Tasks.Where(task => !taskIds.Contains(task.Id)).ToList();
+            return await Update(missionRun);
         }
 
         public void DetachTracking(FlotillaDbContext context, MissionRun missionRun)
