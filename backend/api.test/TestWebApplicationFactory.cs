@@ -58,7 +58,7 @@ namespace Api.Test
                                     o.EnableRetryOnFailure();
                                 }
                             ),
-                        ServiceLifetime.Transient
+                        ServiceLifetime.Scoped
                     );
                 }
 
