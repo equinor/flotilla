@@ -87,15 +87,8 @@ const useMissionUpdater = () => {
         partialForm: Partial<MissionDefinitionUpdateForm>,
         onSuccess: () => void
     ) => {
-        const defaultForm: MissionDefinitionUpdateForm = {
-            comment: mission.comment,
-            schedulingTimesCETperWeek: mission.autoScheduleFrequency?.schedulingTimesCETperWeek,
-            name: mission.name,
-        }
-        const form: MissionDefinitionUpdateForm = { ...defaultForm, ...partialForm }
-
         backendApi
-            .updateMissionDefinition(mission.id, form)
+            .updateMissionDefinition(mission.id, partialForm)
             .then(onSuccess)
             .catch(() => {
                 const errorMessage = TranslateText('Failed to update inspection')

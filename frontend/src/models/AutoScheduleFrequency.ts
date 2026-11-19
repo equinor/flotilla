@@ -2,21 +2,12 @@ import type { MissionDefinition } from './MissionDefinition'
 
 export interface AutoScheduleFrequency {
     schedulingTimesCETperWeek: TimeAndDay[]
-    autoScheduledJobs?: string
 }
 
 export interface TimeAndDay {
     dayOfWeek: DaysOfWeek
     timeOfDay: string // Format HH:mm:ss
 }
-
-function parseAutoScheduledJobIds(autoScheduledJobs: string): { [key: string]: string } {
-    return JSON.parse(autoScheduledJobs)
-}
-
-export const isJobScheduledAt = (mission: MissionDefinition, time: string): boolean =>
-    !!mission.autoScheduleFrequency?.autoScheduledJobs &&
-    !!parseAutoScheduledJobIds(mission.autoScheduleFrequency.autoScheduledJobs)[time]
 
 export enum DaysOfWeek {
     Monday = 'Monday',
@@ -49,7 +40,7 @@ export const allDaysStartingSunday = [
 ]
 
 // SchedulingTimesCETperWeek is always CET/CEST, regardless of server or browser timezone
-const getCetNow = (now: Date): Date => {
+export const getCetNow = (now: Date): Date => {
     const parts = new Intl.DateTimeFormat('en-US', {
         timeZone: 'Europe/Oslo',
         year: 'numeric',
@@ -72,13 +63,13 @@ export const getCetTimeOnly = (now: Date): string => {
 
 export const getAllDaysIndexOfToday = (now: Date) => (getCetNow(now).getDay() + 6) % 7
 
-interface AutoScheduledOccurrence {
+interface WeeklyScheduleSlot {
     mission: MissionDefinition
     dayOfWeek: DaysOfWeek
     timeOfDay: string
 }
 
-export const getAutoScheduledOccurrences = (missionDefinitions: MissionDefinition[]): AutoScheduledOccurrence[] =>
+export const getWeeklyScheduleSlots = (missionDefinitions: MissionDefinition[]): WeeklyScheduleSlot[] =>
     missionDefinitions
         .filter((m) => m.autoScheduleFrequency)
         .flatMap((mission) =>
@@ -90,7 +81,7 @@ export const getAutoScheduledOccurrences = (missionDefinitions: MissionDefinitio
         )
 
 export const getTimeMissionPairsForDay = (missionDefinitions: MissionDefinition[], day: DaysOfWeek) =>
-    getAutoScheduledOccurrences(missionDefinitions)
-        .filter((occurrence) => occurrence.dayOfWeek === day)
+    getWeeklyScheduleSlots(missionDefinitions)
+        .filter((slot) => slot.dayOfWeek === day)
         .map(({ timeOfDay, mission }) => ({ time: timeOfDay, mission }))
         .sort((a, b) => (a.time === b.time ? 0 : a.time > b.time ? 1 : -1))
