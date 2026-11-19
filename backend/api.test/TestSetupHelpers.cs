@@ -205,7 +205,10 @@ public static class TestSetupHelpers
             _missionSchedulingService,
             signalRService,
             _accessRoleService,
-            new Mock<Hangfire.IBackgroundJobClient>().Object
+            new Mock<Hangfire.IBackgroundJobClient>().Object,
+            context,
+            TimeProvider.System,
+            new AutoScheduleJobs(TimeProvider.System)
         );
         var databaseUtilities = new DatabaseUtilities(
             _missionRunService,

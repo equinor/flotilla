@@ -1,4 +1,5 @@
-﻿using Api.Database.Models;
+﻿using System.ComponentModel.DataAnnotations;
+using Api.Database.Models;
 
 namespace Api.Controllers.Models
 {
@@ -23,7 +24,7 @@ namespace Api.Controllers.Models
         public IList<TaskQuery>? Tasks { get; set; }
     }
 
-    public struct TimeAndDayQuery
+    public struct TimeAndDayQuery : IValidatableObject
     {
         /// <summary>
         /// The day of the week to schedule the mission
@@ -31,16 +32,26 @@ namespace Api.Controllers.Models
         public DayOfWeek DayOfWeek { get; set; }
 
         /// <summary>
-        /// The time of day to schedule the mission
+        /// The time of day to schedule the mission, in whole seconds
         /// </summary>
         public TimeOnly TimeOfDay { get; set; }
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (TimeOfDay.Ticks % TimeSpan.TicksPerSecond != 0)
+                yield return new ValidationResult(
+                    "Scheduling times must use whole seconds; fractional seconds are not supported.",
+                    [nameof(TimeOfDay)]
+                );
+        }
     }
 
     public struct SkipAutoMissionQuery
     {
         /// <summary>
-        /// The time of day to skip the mission
+        /// The exact scheduled timestamp returned with the dated occurrence to skip
         /// </summary>
-        public TimeOnly TimeOfDay { get; set; }
+        [Required]
+        public required DateTimeOffset ScheduledAt { get; set; }
     }
 }
