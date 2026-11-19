@@ -54,7 +54,7 @@ namespace Api.Test
                                 o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery);
                                 o.EnableRetryOnFailure();
                             }),
-                        ServiceLifetime.Transient
+                        ServiceLifetime.Scoped
                     );
                 }
 

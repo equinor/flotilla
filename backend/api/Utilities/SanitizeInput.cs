@@ -62,12 +62,6 @@ namespace Api.Utilities
             return new TimeOnly(time.Hour, time.Minute, time.Second);
         }
 
-        public static SkipAutoMissionQuery SanitizeUserInput(SkipAutoMissionQuery inputQuery)
-        {
-            inputQuery.TimeOfDay = SanitizeUserInput(inputQuery.TimeOfDay);
-            return inputQuery;
-        }
-
         public static FeedbackQuery SanitizeUserInput(FeedbackQuery inputQuery)
         {
             inputQuery.Title = SanitizeUserInput(inputQuery.Title);

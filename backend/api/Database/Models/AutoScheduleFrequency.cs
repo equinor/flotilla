@@ -6,65 +6,49 @@ namespace Api.Database.Models
 {
     public class AutoScheduleFrequency
     {
-        public IList<TimeAndDay> SchedulingTimesCETperWeek { get; set; } = [];
+        private const int CalendarDayStep = 1;
 
-        public string? AutoScheduledJobs { get; set; }
+        public IList<TimeAndDay> SchedulingTimesCETperWeek { get; set; } = [];
 
         public bool HasValidValue()
         {
             return SchedulingTimesCETperWeek.Count != 0;
         }
 
-        public bool IsUnchanged(IList<TimeAndDay>? newSchedulingTimesCETperWeek)
+        public IEnumerable<DateTimeOffset> GetSchedulingInstants(
+            DateTimeOffset fromExclusive,
+            DateTimeOffset untilInclusive
+        )
         {
-            if (newSchedulingTimesCETperWeek == null || SchedulingTimesCETperWeek == null)
+            var firstDate = DateOnly.FromDateTime(
+                TimeZoneInfo.ConvertTime(fromExclusive, TimeZoneUtilities.CetZone).DateTime
+            );
+            var lastDate = DateOnly.FromDateTime(
+                TimeZoneInfo.ConvertTime(untilInclusive, TimeZoneUtilities.CetZone).DateTime
+            );
+            for (var date = firstDate; date <= lastDate; date = date.AddDays(CalendarDayStep))
             {
-                return newSchedulingTimesCETperWeek == SchedulingTimesCETperWeek;
-            }
-
-            if (newSchedulingTimesCETperWeek.Count != SchedulingTimesCETperWeek.Count)
-            {
-                return false;
-            }
-
-            foreach (var schedulingTime in newSchedulingTimesCETperWeek)
-            {
-                if (
-                    !SchedulingTimesCETperWeek.Any(existingTime =>
-                        existingTime.DayOfWeek == schedulingTime.DayOfWeek
-                        && existingTime.TimeOfDay == schedulingTime.TimeOfDay
-                    )
-                )
+                foreach (var time in GetDistinctTimesForDay(date.DayOfWeek))
                 {
-                    return false;
+                    if (
+                        TimeZoneUtilities.TryConvertCetWallClockToUtcUsingStandardTime(
+                            date,
+                            time,
+                            out var instant
+                        )
+                        && instant > fromExclusive
+                        && instant <= untilInclusive
+                    )
+                        yield return instant;
                 }
             }
-
-            return true;
         }
 
-        public IList<(DateTimeOffset, TimeOnly)>? GetSchedulingTimesUntilMidnight()
-        {
-            DateTime nowLocal = TimeZoneUtilities.NowCet();
-            TimeOnly nowLocalTimeOnly = TimeOnly.FromDateTime(nowLocal);
-            DateOnly todayLocal = DateOnly.FromDateTime(nowLocal);
-
-            var autoScheduleNext = SchedulingTimesCETperWeek
-                .Where(schedulingTime => schedulingTime.DayOfWeek == nowLocal.DayOfWeek)
-                .Where(schedulingTime => schedulingTime.TimeOfDay > nowLocalTimeOnly)
-                .Select(schedulingTime =>
-                    (
-                        TimeZoneUtilities.CetWallClockToUtcInstant(
-                            todayLocal,
-                            schedulingTime.TimeOfDay
-                        ),
-                        schedulingTime.TimeOfDay
-                    )
-                )
-                .ToList();
-
-            return autoScheduleNext.Count > 0 ? autoScheduleNext : null;
-        }
+        private IEnumerable<TimeOnly> GetDistinctTimesForDay(DayOfWeek day) =>
+            SchedulingTimesCETperWeek
+                .Where(t => t.DayOfWeek == day)
+                .Select(t => TimeZoneUtilities.ToPostgresPrecision(t.TimeOfDay))
+                .Distinct();
     }
 
     public class TimeAndDay
