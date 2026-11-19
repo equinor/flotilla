@@ -37,6 +37,7 @@ const StyledRobotCard = styled.div`
 `
 const HorizontalContent = styled.div`
     display: flex;
+    flex-wrap: wrap;
     align-items: flex-start;
     gap: 24px;
     align-self: stretch;
@@ -156,17 +157,11 @@ export const RobotCard = ({ robot }: RobotCardProps) => {
                                         batteryState={robotBatteryStatus}
                                     />
                                 </VerticalContent>
-
-                                {robotPressureLevel !== undefined && (
-                                    <VerticalContent>
-                                        <FieldLabel>{TranslateText('Pressure')}</FieldLabel>
-                                        <PressureStatusDisplay pressure={robotPressureLevel} />
-                                    </VerticalContent>
-                                )}
                             </>
                         ) : (
                             <></>
                         )}
+                        <PressureStatusDisplay robot={robot} pressure={robotPressureLevel} />
                     </HorizontalContent>
                 </StyledMainBody>
                 <HiddenOnSmallScreen>

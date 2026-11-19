@@ -91,6 +91,15 @@ Re-rendering a page or receiving mission updates does not restart activation or 
 Livestream regression tests live in `tests/components/Contexts/MediaStreamContext.test.tsx`.
 Run them with `pnpm test --run tests/components/Contexts/MediaStreamContext.test.tsx`.
 
+## Robot ATEX indication
+
+The dashboard, robot cards and robot page show ATEX as active for Taurob Inspector
+and Taurob Operator whenever their reported status is not `Offline`. Offline Taurob
+robots show an unknown ATEX status, without inferring why they disconnected.
+This indication uses robot type and status, not pressure telemetry or pressure limits.
+ANYmal X/D show neither pressure nor ATEX. The isar-robot mock does not show ATEX;
+ordinary pressure telemetry for other robot types is unchanged.
+
 ## Run against the Staging or Production backend
 
 1. Update `VITE_BACKEND_API_SCOPE` in `frontend/.env` to the scope of the environment you want to target.

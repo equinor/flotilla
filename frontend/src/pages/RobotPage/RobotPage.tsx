@@ -151,6 +151,7 @@ export const RobotPage = ({ robot }: RobotPageProps) => {
                                 <HeroLeft>
                                     <Typography variant="h1">{robot.name}</Typography>
                                     <RobotStatusChip status={robot.status} itemSize={24} />
+                                    <PressureStatusDisplay robot={robot} pressure={robotPressureLevel} itemSize={24} />
                                 </HeroLeft>
                             </HeroSection>
 
@@ -164,12 +165,6 @@ export const RobotPage = ({ robot }: RobotPageProps) => {
                                             batteryState={robotBatteryStatus}
                                         />
                                     </MetricCard>
-                                    {robotPressureLevel !== undefined && (
-                                        <MetricCard>
-                                            <FieldLabel>{TranslateText('Pressure')}</FieldLabel>
-                                            <PressureStatusDisplay itemSize={24} pressure={robotPressureLevel} />
-                                        </MetricCard>
-                                    )}
                                     {robot.type && (
                                         <MetricCard>
                                             <FieldLabel>{TranslateText('Robot Model')}</FieldLabel>
