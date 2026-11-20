@@ -3,17 +3,30 @@ import { tokens } from '@equinor/eds-tokens'
 import { useLanguageContext } from 'contexts/LanguageContext'
 import { useMediaStreamContext } from 'contexts/MediaStreamContext'
 import { OmeStreamState } from 'contexts/OmeStreamManager'
-import { CameraPosition } from './cameraPositions'
-import { LiveCamera, LiveCameraStatus, LiveCameraViewport } from './LiveCameraLayout'
+import styled from 'styled-components'
+import { CameraViewport } from './CameraLayout'
 import { mediaStreamStatusLabels } from './mediaStreamStatusLabels'
 import { OmeVideoCard } from './OmeVideoCard'
+
+const CameraStatus = styled.div`
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: ${tokens.spacings.comfortable.medium_small};
+    padding: ${tokens.spacings.comfortable.medium_small};
+    background: ${tokens.colors.ui.background__light.hex};
+    text-align: center;
+`
 
 interface OmeCameraTileProps {
     robotId: string
     omeAttemptId: number
     camera: OmeStreamState
     aspectRatio: number
-    position?: CameraPosition
     onAspectRatioChange: (aspectRatio: number) => void
 }
 
@@ -22,23 +35,21 @@ export const OmeCameraTile = ({
     omeAttemptId,
     camera,
     aspectRatio,
-    position,
     onAspectRatioChange,
 }: OmeCameraTileProps) => {
     const { TranslateText } = useLanguageContext()
     const { markOmeStreamPlaying, markOmeStreamStalled, reconnectOmeStream, retryOmeStream } = useMediaStreamContext()
 
     return (
-        <LiveCamera $position={position}>
+        <>
             <Typography variant="h5" lines={1}>
                 {camera.cameraId}
             </Typography>
-            <LiveCameraViewport $aspectRatio={aspectRatio}>
+            <CameraViewport $aspectRatio={aspectRatio}>
                 {camera.stream && (
                     <OmeVideoCard
                         key={camera.attemptId}
                         stream={camera.stream}
-                        aspectRatio={aspectRatio}
                         onAspectRatioChange={onAspectRatioChange}
                         onPlaying={() => markOmeStreamPlaying(robotId, omeAttemptId, camera.cameraId, camera.attemptId)}
                         onStalled={() => markOmeStreamStalled(robotId, omeAttemptId, camera.cameraId, camera.attemptId)}
@@ -48,7 +59,7 @@ export const OmeCameraTile = ({
                     />
                 )}
                 {camera.status !== 'connected' && (
-                    <LiveCameraStatus>
+                    <CameraStatus>
                         <Typography role="status" color={tokens.colors.text.static_icons__default.hex}>
                             {TranslateText(mediaStreamStatusLabels[camera.status])}
                         </Typography>
@@ -57,9 +68,9 @@ export const OmeCameraTile = ({
                                 {TranslateText('Retry')}
                             </Button>
                         )}
-                    </LiveCameraStatus>
+                    </CameraStatus>
                 )}
-            </LiveCameraViewport>
-        </LiveCamera>
+            </CameraViewport>
+        </>
     )
 }
