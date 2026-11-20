@@ -1,14 +1,11 @@
-import { RefObject, useEffect, useState } from 'react'
+import { RefObject, useEffect, useEffectEvent } from 'react'
 
 export const useVideoAspectRatio = (
     container: RefObject<HTMLElement | null>,
-    rotationDegrees = 0,
-    onAspectRatioChange?: (aspectRatio: number) => void
+    rotationDegrees: number,
+    onAspectRatioChange: (aspectRatio: number) => void
 ) => {
-    const [sourceAspectRatio, setSourceAspectRatio] = useState<number>()
-    const quarterTurn = Math.abs(rotationDegrees % 180) === 90
-    const unrotatedAspectRatio = sourceAspectRatio ?? 16 / 9
-    const aspectRatio = quarterTurn ? 1 / unrotatedAspectRatio : unrotatedAspectRatio
+    const reportAspectRatio = useEffectEvent(onAspectRatioChange)
 
     useEffect(() => {
         const element = container.current
@@ -16,9 +13,11 @@ export const useVideoAspectRatio = (
 
         const updateAspectRatio = () => {
             const video = element.querySelector('video')
-            if (video && video.videoWidth > 0 && video.videoHeight > 0) {
-                setSourceAspectRatio(video.videoWidth / video.videoHeight)
-            }
+            if (!video || video.videoWidth <= 0 || video.videoHeight <= 0) return
+
+            const quarterTurn = Math.abs(rotationDegrees % 180) === 90
+            const aspectRatio = video.videoWidth / video.videoHeight
+            reportAspectRatio(quarterTurn ? 1 / aspectRatio : aspectRatio)
         }
 
         updateAspectRatio()
@@ -28,11 +27,5 @@ export const useVideoAspectRatio = (
             element.removeEventListener('loadedmetadata', updateAspectRatio, true)
             element.removeEventListener('resize', updateAspectRatio, true)
         }
-    }, [container])
-
-    useEffect(() => {
-        if (sourceAspectRatio !== undefined) onAspectRatioChange?.(aspectRatio)
-    }, [sourceAspectRatio, aspectRatio, onAspectRatioChange])
-
-    return aspectRatio
+    }, [container, rotationDegrees])
 }

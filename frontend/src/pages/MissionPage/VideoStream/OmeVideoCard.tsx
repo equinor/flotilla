@@ -1,15 +1,12 @@
 import { CSSProperties, useEffect, useRef, useState } from 'react'
-import { Button, Icon, Tooltip } from '@equinor/eds-core-react'
-import { tokens } from '@equinor/eds-tokens'
 import { NamedMediaStream } from 'models/VideoStream'
 import styled from 'styled-components'
-import { Icons } from 'utils/icons'
+import { CameraFullscreenButton } from './CameraFullscreenButton'
 import { useVideoAspectRatio } from './useVideoAspectRatio'
 
-const VideoFrame = styled.div<{ $rotationDegrees: number; $quarterTurn: boolean; $aspectRatio: number }>`
-    position: relative;
-    width: 100%;
-    aspect-ratio: ${({ $aspectRatio }) => $aspectRatio};
+const VideoFrame = styled.div<{ $rotationDegrees: number; $quarterTurn: boolean }>`
+    position: absolute;
+    inset: 0;
     background: black;
     overflow: hidden;
 
@@ -39,22 +36,12 @@ const VideoFrame = styled.div<{ $rotationDegrees: number; $quarterTurn: boolean;
     &:fullscreen {
         width: 100vw;
         height: 100vh;
-        aspect-ratio: auto;
     }
-`
-
-const FullscreenButton = styled(Button)`
-    position: absolute;
-    right: ${tokens.spacings.comfortable.small};
-    bottom: ${tokens.spacings.comfortable.small};
-    z-index: 1;
-    opacity: 0.85;
 `
 
 interface Props {
     stream: NamedMediaStream
-    aspectRatio: number
-    onAspectRatioChange?: (aspectRatio: number) => void
+    onAspectRatioChange: (aspectRatio: number) => void
     onPlaying: () => void
     onStalled: () => void
     onDisconnect: () => void
@@ -95,14 +82,7 @@ function requestOmeOffer(url: string, signal: AbortSignal): Promise<boolean> {
     })
 }
 
-export const OmeVideoCard = ({
-    stream,
-    aspectRatio,
-    onAspectRatioChange,
-    onPlaying,
-    onStalled,
-    onDisconnect,
-}: Props) => {
+export const OmeVideoCard = ({ stream, onAspectRatioChange, onPlaying, onStalled, onDisconnect }: Props) => {
     const element = useRef<HTMLDivElement>(null)
     const frame = useRef<HTMLDivElement>(null)
     const playingHandler = useRef(onPlaying)
@@ -212,7 +192,6 @@ export const OmeVideoCard = ({
             ref={frame}
             $rotationDegrees={rotationDegrees}
             $quarterTurn={quarterTurn}
-            $aspectRatio={aspectRatio}
             style={
                 quarterTurn
                     ? ({
@@ -224,17 +203,7 @@ export const OmeVideoCard = ({
             onDoubleClick={toggleFullscreen}
         >
             <div ref={element} />
-            <Tooltip title={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'} placement="top">
-                <FullscreenButton
-                    variant="contained_icon"
-                    color="secondary"
-                    onClick={toggleFullscreen}
-                    onDoubleClick={(event) => event.stopPropagation()}
-                    aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-                >
-                    <Icon name={isFullscreen ? Icons.FullscreenExit : Icons.Fullscreen} size={24} />
-                </FullscreenButton>
-            </Tooltip>
+            <CameraFullscreenButton onClick={toggleFullscreen} isFullscreen={isFullscreen} />
         </VideoFrame>
     )
 }

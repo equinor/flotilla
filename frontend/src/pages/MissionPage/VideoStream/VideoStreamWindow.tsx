@@ -1,26 +1,33 @@
 import { Button, CircularProgress, Typography } from '@equinor/eds-core-react'
-import { VideoStreamCard } from './VideoStreamCards'
-import styled from 'styled-components'
-import { useMediaStreamContext } from 'contexts/MediaStreamContext'
-import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLanguageContext } from 'contexts/LanguageContext'
-import { CameraStatusOverlay, LiveCamera, LiveCameraRow, LiveCameraStage } from './LiveCameraLayout'
-import { useCameraReveal } from './useCameraReveal'
-import { CameraPlaceholders } from './CameraPlaceholders'
-import { useCameraPositions } from './useCameraPositions'
-import { OmeCameraTile } from './OmeCameraTile'
+import { useMediaStreamContext } from 'contexts/MediaStreamContext'
+import { useEffect, useMemo, useState } from 'react'
+import styled from 'styled-components'
+import { CAMERA_GAP_REM, Camera, Cameras } from './CameraLayout'
 import { mediaStreamStatusLabels } from './mediaStreamStatusLabels'
+import { OmeCameraTile } from './OmeCameraTile'
+import { VideoStreamCard } from './VideoStreamCards'
 
-const ScreenReaderStatus = styled.span.attrs({ 'aria-live': 'polite' })`
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-    border: 0;
+const LiveCameras = styled(Cameras)`
+    flex-wrap: wrap;
+    min-width: 0;
+    padding-block: ${CAMERA_GAP_REM}rem;
+`
+
+const CAMERA_WRAP_HEIGHT_REM = 6.75
+const CAMERA_MAX_HEIGHT_REM = 15
+
+const LiveCamera = styled(Camera)`
+    flex-basis: ${({ $aspectRatio }) => $aspectRatio * CAMERA_WRAP_HEIGHT_REM}rem;
+    max-width: ${({ $aspectRatio }) => $aspectRatio * CAMERA_MAX_HEIGHT_REM}rem;
+`
+
+const ConnectionStatus = styled.div`
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: ${CAMERA_GAP_REM}rem;
+    margin-top: ${CAMERA_GAP_REM}rem;
 `
 
 interface VideoStreamWindowProps {
@@ -29,91 +36,79 @@ interface VideoStreamWindowProps {
 
 export const VideoStreamWindow = ({ robotId }: VideoStreamWindowProps) => {
     const { TranslateText } = useLanguageContext()
-    const stage = useRef<HTMLDivElement>(null)
-    const [aspectRatios, setAspectRatios] = useState<Record<string, number>>({})
-    const updateAspectRatio = (cameraKey: string, aspectRatio: number) => {
-        setAspectRatios((ratios) =>
-            ratios[cameraKey] === aspectRatio ? ratios : { ...ratios, [cameraKey]: aspectRatio }
-        )
-    }
     const { mediaStreams, acquireMediaStream, retryMediaStream } = useMediaStreamContext()
+    const [aspectRatios, setAspectRatios] = useState<Record<string, number>>({})
     useEffect(() => acquireMediaStream(robotId), [robotId, acquireMediaStream])
 
-    const {
-        streams: videoStreams,
-        omeStreams,
-        omeAttemptId,
-        status,
-    } = mediaStreams[robotId] ?? {
-        streams: [],
-        status: 'connecting',
+    const updateAspectRatio = (key: string, aspectRatio: number) => {
+        setAspectRatios((ratios) => (ratios[key] === aspectRatio ? ratios : { ...ratios, [key]: aspectRatio }))
     }
+
+    const { streams, omeStreams, omeAttemptId, status = 'connecting' } = mediaStreams[robotId] ?? {}
     const statusText = mediaStreamStatusLabels[status]
     const liveKitStreams = useMemo(
-        () => videoStreams.map((track) => ({ id: track.id, stream: new MediaStream([track]) })),
-        [videoStreams]
+        () => streams?.map((track) => ({ id: track.id, stream: new MediaStream([track]) })) ?? [],
+        [streams]
     )
     const liveKitCameras = liveKitStreams.map(({ id, stream }) => {
-        const key = `${robotId}-${id}`
-        return { key, stream, aspectRatio: aspectRatios[key] ?? 16 / 9 }
+        const key = `${robotId}-livekit-${id}`
+        const aspectRatio = aspectRatios[key] ?? 16 / 9
+        return {
+            key,
+            aspectRatio,
+            player: (
+                <VideoStreamCard
+                    videoStream={stream}
+                    aspectRatio={aspectRatio}
+                    onAspectRatioChange={(ratio) => updateAspectRatio(key, ratio)}
+                />
+            ),
+        }
     })
-    const omeCameras = (omeStreams ?? []).map((camera) => {
-        const key = `${robotId}-${camera.cameraId}`
-        const quarterTurn = Math.abs((camera.stream?.rotationDegrees ?? 0) % 180) === 90
-        return { key, camera, aspectRatio: aspectRatios[key] ?? (quarterTurn ? 9 / 16 : 16 / 9) }
-    })
+    const omeCameras =
+        omeAttemptId === undefined
+            ? []
+            : (omeStreams ?? []).map((camera) => {
+                  const key = `${robotId}-ome-${camera.cameraId}`
+                  const quarterTurn = Math.abs((camera.stream?.rotationDegrees ?? 0) % 180) === 90
+                  const aspectRatio = aspectRatios[key] ?? (quarterTurn ? 9 / 16 : 16 / 9)
+                  return {
+                      key,
+                      aspectRatio,
+                      player: (
+                          <OmeCameraTile
+                              robotId={robotId}
+                              omeAttemptId={omeAttemptId}
+                              camera={camera}
+                              aspectRatio={aspectRatio}
+                              onAspectRatioChange={(ratio) => updateAspectRatio(key, ratio)}
+                          />
+                      ),
+                  }
+              })
     const cameras = [...liveKitCameras, ...omeCameras]
-    const cameraKeys = cameras.map(({ key }) => key)
-    const isRevealed = useCameraReveal(robotId, cameraKeys, aspectRatios)
-    const positions = useCameraPositions(stage, cameras)
-    const showCameras = isRevealed && cameraKeys.every((key) => positions[key] !== undefined)
-    const placeholderCount = omeStreams?.length ?? (liveKitStreams.length || 5)
-    const waitingForDimensions = !showCameras && cameraKeys.length > 0 && (!!omeStreams || !statusText)
-    const isConnecting = !omeStreams && (status === 'connecting' || status === 'reconnecting')
 
     return (
         <>
             <Typography variant="h2">{TranslateText('Camera')}</Typography>
-            <LiveCameraStage ref={stage}>
-                <CameraPlaceholders count={placeholderCount} visible={!showCameras} />
-                {(isConnecting || waitingForDimensions) && (
-                    <CameraStatusOverlay>
+            {!omeStreams && statusText && (
+                <ConnectionStatus>
+                    {status !== 'unavailable' && (
                         <CircularProgress variant="indeterminate" size={32} aria-hidden="true" />
-                        <ScreenReaderStatus role={isConnecting ? 'status' : undefined}>
-                            {TranslateText(isConnecting ? statusText : 'Connecting cameras…')}
-                        </ScreenReaderStatus>
-                    </CameraStatusOverlay>
-                )}
-                {!omeStreams && status === 'unavailable' && (
-                    <CameraStatusOverlay>
-                        <Typography role="status">{TranslateText(statusText)}</Typography>
+                    )}
+                    <Typography role="status">{TranslateText(statusText)}</Typography>
+                    {status === 'unavailable' && (
                         <Button onClick={() => retryMediaStream(robotId)}>{TranslateText('Retry')}</Button>
-                    </CameraStatusOverlay>
-                )}
-                <LiveCameraRow $visible={showCameras} aria-hidden={!showCameras} inert={!showCameras}>
-                    {liveKitCameras.map(({ key, stream }) => (
-                        <LiveCamera key={key} $position={positions[key]}>
-                            <VideoStreamCard
-                                videoStream={stream}
-                                videoStreamId={key}
-                                onAspectRatioChange={(ratio) => updateAspectRatio(key, ratio)}
-                            />
-                        </LiveCamera>
-                    ))}
-                    {omeAttemptId !== undefined &&
-                        omeCameras.map(({ key, camera, aspectRatio }) => (
-                            <OmeCameraTile
-                                key={key}
-                                robotId={robotId}
-                                omeAttemptId={omeAttemptId}
-                                camera={camera}
-                                aspectRatio={aspectRatio}
-                                position={positions[key]}
-                                onAspectRatioChange={(ratio) => updateAspectRatio(key, ratio)}
-                            />
-                        ))}
-                </LiveCameraRow>
-            </LiveCameraStage>
+                    )}
+                </ConnectionStatus>
+            )}
+            <LiveCameras>
+                {cameras.map(({ key, aspectRatio, player }) => (
+                    <LiveCamera key={key} $aspectRatio={aspectRatio}>
+                        {player}
+                    </LiveCamera>
+                ))}
+            </LiveCameras>
         </>
     )
 }
