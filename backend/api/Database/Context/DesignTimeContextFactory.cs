@@ -34,8 +34,7 @@ namespace Api.Database.Context
 
             if (string.IsNullOrEmpty(connectionString))
             {
-                string? keyVaultUri =
-                    config.GetSection("KeyVault")["VaultUri"]
+                string? keyVaultUri = config.GetSection("KeyVault")["VaultUri"]
                     ?? throw new KeyNotFoundException("No key vault in config");
 
                 var keyVault = new SecretClient(
@@ -51,9 +50,8 @@ namespace Api.Database.Context
             var optionsBuilder = new DbContextOptionsBuilder<FlotillaDbContext>();
 
             // Setting splitting behavior explicitly to avoid warning
-            optionsBuilder.UseNpgsql(
-                connectionString,
-                o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery)
+            optionsBuilder.UseNpgsql(connectionString, o =>
+                o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery)
             );
 
             return new FlotillaDbContext(optionsBuilder.Options);

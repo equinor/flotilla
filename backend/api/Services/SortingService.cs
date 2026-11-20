@@ -33,10 +33,9 @@ namespace Api.Services
                     continue;
 
                 string propertyFromQueryName = param.Split(" ")[0];
-                var objectProperty =
-                    propertyInfos.FirstOrDefault(pi =>
-                        pi.Name.Equals(propertyFromQueryName, StringComparison.Ordinal)
-                    )
+                var objectProperty = propertyInfos.FirstOrDefault(pi =>
+                    pi.Name.Equals(propertyFromQueryName, StringComparison.Ordinal)
+                )
                     ?? throw new InvalidDataException(
                         $"Mission has no property '{propertyFromQueryName}' for ordering"
                     );

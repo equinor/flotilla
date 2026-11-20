@@ -501,8 +501,8 @@ namespace Api.EventHandlers
                 // Check if return home mission fails
                 if (status == MissionStatus.Failed && isarRobot != null)
                 {
-                    string errorDescription =
-                        isarMission.ErrorDescription ?? "The initiated mission failed";
+                    string errorDescription = isarMission.ErrorDescription
+                        ?? "The initiated mission failed";
                     string reportMessage = $"Failed mission for robot {isarRobot.Name}";
 
                     SignalRService.ReportGeneralFailToSignalR(

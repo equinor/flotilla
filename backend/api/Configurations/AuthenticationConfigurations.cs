@@ -97,13 +97,11 @@ namespace Api.Configurations
             IHostEnvironment environment
         )
         {
-            string authority =
-                configuration["AzureAd:Authority"]
+            string authority = configuration["AzureAd:Authority"]
                 ?? throw new InvalidOperationException(
                     $"AzureAd:Authority is required when {ProviderKey} is {OidcProvider}"
                 );
-            string audience =
-                configuration["AzureAd:ClientId"]
+            string audience = configuration["AzureAd:ClientId"]
                 ?? throw new InvalidOperationException(
                     $"AzureAd:ClientId is required when {ProviderKey} is {OidcProvider}"
                 );
@@ -121,15 +119,12 @@ namespace Api.Configurations
                 );
             }
 
-            services.Configure<JwtBearerOptions>(
-                JwtBearerDefaults.AuthenticationScheme,
-                options =>
-                {
-                    options.Authority = authority;
-                    options.Audience = audience;
-                    options.RequireHttpsMetadata = !allowInsecureMetadata;
-                }
-            );
+            services.Configure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
+            {
+                options.Authority = authority;
+                options.Audience = audience;
+                options.RequireHttpsMetadata = !allowInsecureMetadata;
+            });
 
             services.PostConfigure<JwtBearerOptions>(
                 JwtBearerDefaults.AuthenticationScheme,
@@ -160,24 +155,21 @@ namespace Api.Configurations
         /// </summary>
         private static void ConfigureSignalRQueryStringToken(IServiceCollection services)
         {
-            services.Configure<JwtBearerOptions>(
-                JwtBearerDefaults.AuthenticationScheme,
-                options =>
+            services.Configure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
+            {
+                options.Events ??= new JwtBearerEvents();
+                options.Events.OnMessageReceived = context =>
                 {
-                    options.Events ??= new JwtBearerEvents();
-                    options.Events.OnMessageReceived = context =>
+                    if (
+                        context.HttpContext.Request.Path.StartsWithSegments("/hub")
+                        && context.Request.Query.TryGetValue("access_token", out var token)
+                    )
                     {
-                        if (
-                            context.HttpContext.Request.Path.StartsWithSegments("/hub")
-                            && context.Request.Query.TryGetValue("access_token", out var token)
-                        )
-                        {
-                            context.Token = token;
-                        }
-                        return Task.CompletedTask;
-                    };
-                }
-            );
+                        context.Token = token;
+                    }
+                    return Task.CompletedTask;
+                };
+            });
         }
     }
 }

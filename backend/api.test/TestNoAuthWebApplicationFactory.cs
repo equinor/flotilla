@@ -34,15 +34,11 @@ namespace Api.Test
                 if (postgresConnectionString != null)
                 {
                     services.AddDbContext<FlotillaDbContext>(
-                        options =>
-                            options.UseNpgsql(
-                                postgresConnectionString,
-                                o =>
-                                {
-                                    o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery);
-                                    o.EnableRetryOnFailure();
-                                }
-                            ),
+                        options => options.UseNpgsql(postgresConnectionString, o =>
+                            {
+                                o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery);
+                                o.EnableRetryOnFailure();
+                            }),
                         ServiceLifetime.Transient
                     );
                 }

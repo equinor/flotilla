@@ -570,8 +570,7 @@ namespace Api.Services
 
         public async Task UpdateCurrentRobotMissionToFailed(string robotId)
         {
-            var robot =
-                await robotService.ReadById(robotId, readOnly: true)
+            var robot = await robotService.ReadById(robotId, readOnly: true)
                 ?? throw new RobotNotFoundException(
                     $"Robot with ID: {robotId} was not found in the database"
                 );
@@ -603,8 +602,7 @@ namespace Api.Services
             string failureDescription
         )
         {
-            var missionRun =
-                await ReadById(missionRunId, readOnly: true)
+            var missionRun = await ReadById(missionRunId, readOnly: true)
                 ?? throw new MissionRunNotFoundException(
                     $"Could not find mission run with ID {missionRunId}"
                 );
@@ -632,8 +630,7 @@ namespace Api.Services
 
         public async Task<MissionRun> SetMissionRunToCancelled(string missionRunId)
         {
-            var missionRun =
-                await ReadById(missionRunId, readOnly: true)
+            var missionRun = await ReadById(missionRunId, readOnly: true)
                 ?? throw new MissionRunNotFoundException(
                     $"Could not find mission run with ID {missionRunId}"
                 );

@@ -63,9 +63,8 @@ namespace Api.Configurations
                 string connectionString = container.GetConnectionString();
 
                 var optionsBuilder = new DbContextOptionsBuilder<FlotillaDbContext>();
-                optionsBuilder.UseNpgsql(
-                    connectionString,
-                    o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery)
+                optionsBuilder.UseNpgsql(connectionString, o =>
+                    o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery)
                 );
 
                 using var context = new FlotillaDbContext(optionsBuilder.Options);
@@ -78,9 +77,8 @@ namespace Api.Configurations
                     InitDb.PopulateDb(context);
 
                 services.AddDbContext<FlotillaDbContext>(options =>
-                    options.UseNpgsql(
-                        connectionString,
-                        o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery)
+                    options.UseNpgsql(connectionString, o =>
+                        o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery)
                     )
                 );
             }
@@ -151,9 +149,8 @@ namespace Api.Configurations
             if (!string.IsNullOrEmpty(connectionString))
             {
                 var optionsBuilder = new DbContextOptionsBuilder<FlotillaDbContext>();
-                optionsBuilder.UseNpgsql(
-                    connectionString,
-                    o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery)
+                optionsBuilder.UseNpgsql(connectionString, o =>
+                    o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery)
                 );
                 using var seedContext = new FlotillaDbContext(optionsBuilder.Options);
                 InitDb.PopulateDb(seedContext);
@@ -173,14 +170,11 @@ namespace Api.Configurations
             TokenCredential runtimeCredential
         )
         {
-            var server =
-                configuration["Database:Server"]
+            var server = configuration["Database:Server"]
                 ?? throw new InvalidOperationException("Missing Database:Server");
-            var postgresDb =
-                configuration["Database:PostgresDatabase"]
+            var postgresDb = configuration["Database:PostgresDatabase"]
                 ?? throw new InvalidOperationException("Missing Database:PostgresDatabase");
-            var dbUser =
-                configuration["Database:User"]
+            var dbUser = configuration["Database:User"]
                 ?? throw new InvalidOperationException("Missing Database:User");
 
             Console.WriteLine("Requesting Entra token via Credential...");
@@ -224,36 +218,32 @@ namespace Api.Configurations
             }
             // Setting splitting behavior explicitly to avoid warning
             services.AddDbContext<FlotillaDbContext>(
-                options =>
-                    options.UseNpgsql(
-                        baseConnString,
-                        o =>
+                options => options.UseNpgsql(baseConnString, o =>
+                    {
+                        o.ConfigureDataSource(ds =>
                         {
-                            o.ConfigureDataSource(ds =>
-                            {
-                                ds.UsePeriodicPasswordProvider(
-                                    async (_, ct) =>
-                                    {
-                                        using var cts = new CancellationTokenSource(
-                                            TimeSpan.FromSeconds(5)
-                                        );
-                                        var token = await runtimeCredential.GetTokenAsync(
-                                            new TokenRequestContext([AzurePostgresScope]),
-                                            CancellationTokenSource
-                                                .CreateLinkedTokenSource(ct, cts.Token)
-                                                .Token
-                                        );
-                                        return token.Token;
-                                    },
-                                    successRefreshInterval: TimeSpan.FromMinutes(55),
-                                    failureRefreshInterval: TimeSpan.FromSeconds(5)
-                                );
-                            });
-                            o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery);
-                            o.EnableRetryOnFailure();
-                            o.CommandTimeout(DATABASE_TIMEOUT);
-                        }
-                    ),
+                            ds.UsePeriodicPasswordProvider(
+                                async (_, ct) =>
+                                {
+                                    using var cts = new CancellationTokenSource(
+                                        TimeSpan.FromSeconds(5)
+                                    );
+                                    var token = await runtimeCredential.GetTokenAsync(
+                                        new TokenRequestContext([AzurePostgresScope]),
+                                        CancellationTokenSource
+                                            .CreateLinkedTokenSource(ct, cts.Token)
+                                            .Token
+                                    );
+                                    return token.Token;
+                                },
+                                successRefreshInterval: TimeSpan.FromMinutes(55),
+                                failureRefreshInterval: TimeSpan.FromSeconds(5)
+                            );
+                        });
+                        o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery);
+                        o.EnableRetryOnFailure();
+                        o.CommandTimeout(DATABASE_TIMEOUT);
+                    }),
                 ServiceLifetime.Scoped
             );
         }
@@ -372,19 +362,12 @@ namespace Api.Configurations
                 DATABASE_TIMEOUT = 30;
             }
             // Setting splitting behavior explicitly to avoid warning
-            services.AddDbContext<FlotillaDbContext>(
-                options =>
-                    options.UseNpgsql(
-                        connection,
-                        o =>
-                        {
-                            o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery);
-                            o.EnableRetryOnFailure();
-                            o.CommandTimeout(DATABASE_TIMEOUT);
-                        }
-                    ),
-                ServiceLifetime.Scoped
-            );
+            services.AddDbContext<FlotillaDbContext>(options => options.UseNpgsql(connection, o =>
+                    {
+                        o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery);
+                        o.EnableRetryOnFailure();
+                        o.CommandTimeout(DATABASE_TIMEOUT);
+                    }), ServiceLifetime.Scoped);
         }
 
         public static IServiceCollection ConfigureSwagger(

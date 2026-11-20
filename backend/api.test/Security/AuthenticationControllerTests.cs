@@ -65,8 +65,8 @@ namespace Api.Test.Security
                 if (metadata.OfType<IAllowAnonymous>().Any())
                     continue;
 
-                var methods =
-                    metadata.OfType<HttpMethodMetadata>().FirstOrDefault()?.HttpMethods ?? [];
+                var methods = metadata.OfType<HttpMethodMetadata>().FirstOrDefault()?.HttpMethods
+                    ?? [];
                 var route = endpoint.RoutePattern.RawText ?? string.Empty;
                 var path = ReplaceRouteParamsWithDefaults(route);
 

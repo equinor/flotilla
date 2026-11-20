@@ -136,20 +136,18 @@ namespace Api.Services
 
         public async Task<ExclusionArea> Create(CreateExclusionAreaQuery newExclusionAreaQuery)
         {
-            var installation =
-                await installationService.ReadByInstallationCode(
-                    newExclusionAreaQuery.InstallationCode,
-                    readOnly: true
-                )
+            var installation = await installationService.ReadByInstallationCode(
+                newExclusionAreaQuery.InstallationCode,
+                readOnly: true
+            )
                 ?? throw new InstallationNotFoundException(
                     $"No installation with name {newExclusionAreaQuery.InstallationCode} could be found"
                 );
-            var plant =
-                await plantService.ReadByInstallationAndPlantCode(
-                    installation,
-                    newExclusionAreaQuery.PlantCode,
-                    readOnly: true
-                )
+            var plant = await plantService.ReadByInstallationAndPlantCode(
+                installation,
+                newExclusionAreaQuery.PlantCode,
+                readOnly: true
+            )
                 ?? throw new PlantNotFoundException(
                     $"No plant with name {newExclusionAreaQuery.PlantCode} could be found"
                 );

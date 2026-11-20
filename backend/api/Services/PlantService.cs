@@ -92,11 +92,10 @@ namespace Api.Services
 
         public async Task<Plant> Create(CreatePlantQuery newPlantQuery)
         {
-            var installation =
-                await installationService.ReadByInstallationCode(
-                    newPlantQuery.InstallationCode,
-                    readOnly: true
-                )
+            var installation = await installationService.ReadByInstallationCode(
+                newPlantQuery.InstallationCode,
+                readOnly: true
+            )
                 ?? throw new InstallationNotFoundException(
                     $"No installation with name {newPlantQuery.InstallationCode} could be found"
                 );

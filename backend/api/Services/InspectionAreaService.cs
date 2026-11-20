@@ -158,20 +158,18 @@ namespace Api.Services
 
         public async Task<InspectionArea> Create(CreateInspectionAreaQuery newInspectionAreaQuery)
         {
-            var installation =
-                await installationService.ReadByInstallationCode(
-                    newInspectionAreaQuery.InstallationCode,
-                    readOnly: true
-                )
+            var installation = await installationService.ReadByInstallationCode(
+                newInspectionAreaQuery.InstallationCode,
+                readOnly: true
+            )
                 ?? throw new InstallationNotFoundException(
                     $"No installation with name {newInspectionAreaQuery.InstallationCode} could be found"
                 );
-            var plant =
-                await plantService.ReadByInstallationAndPlantCode(
-                    installation,
-                    newInspectionAreaQuery.PlantCode,
-                    readOnly: true
-                )
+            var plant = await plantService.ReadByInstallationAndPlantCode(
+                installation,
+                newInspectionAreaQuery.PlantCode,
+                readOnly: true
+            )
                 ?? throw new PlantNotFoundException(
                     $"No plant with name {newInspectionAreaQuery.PlantCode} could be found"
                 );

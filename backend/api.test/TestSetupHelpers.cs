@@ -62,9 +62,8 @@ public static class TestSetupHelpers
     public static FlotillaDbContext ConfigurePostgreSqlContext(string connectionString)
     {
         var optionsBuilder = new DbContextOptionsBuilder<FlotillaDbContext>();
-        optionsBuilder.UseNpgsql(
-            connectionString,
-            o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery)
+        optionsBuilder.UseNpgsql(connectionString, o =>
+            o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery)
         );
         var context = new FlotillaDbContext(optionsBuilder.Options);
         return context;

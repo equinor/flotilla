@@ -91,9 +91,8 @@ namespace Api.Test.Security
             robots.Verify(s => s.ReadByIsarId(robot.IsarId, true, false), Times.Once);
             if (registered)
             {
-                Assert.Collection(
-                    robot.RobotCapabilities!,
-                    capability => Assert.Equal(RobotCapabilitiesEnum.take_image, capability)
+                Assert.Collection(robot.RobotCapabilities!, capability =>
+                    Assert.Equal(RobotCapabilitiesEnum.take_image, capability)
                 );
                 robots.Verify(s => s.Update(robot), Times.Once);
             }

@@ -27,14 +27,11 @@ namespace Api.Services
         {
             string relativePath = $"Map/{plantCode}/{floorId}";
 
-            var response = await pointillaApi.CallApiForUserAsync(
-                ServiceName,
-                options =>
-                {
-                    options.HttpMethod = HttpMethod.Get.Method;
-                    options.RelativePath = relativePath;
-                }
-            );
+            var response = await pointillaApi.CallApiForUserAsync(ServiceName, options =>
+            {
+                options.HttpMethod = HttpMethod.Get.Method;
+                options.RelativePath = relativePath;
+            });
 
             response.EnsureSuccessStatusCode();
 
@@ -57,14 +54,11 @@ namespace Api.Services
             plantCode = Sanitize.SanitizeUserInput(plantCode);
             string relativePath = $"Map/{plantCode}";
 
-            var response = await pointillaApi.CallApiForUserAsync(
-                ServiceName,
-                options =>
-                {
-                    options.HttpMethod = HttpMethod.Get.Method;
-                    options.RelativePath = relativePath;
-                }
-            );
+            var response = await pointillaApi.CallApiForUserAsync(ServiceName, options =>
+            {
+                options.HttpMethod = HttpMethod.Get.Method;
+                options.RelativePath = relativePath;
+            });
 
             response.EnsureSuccessStatusCode();
 
@@ -99,14 +93,11 @@ namespace Api.Services
         {
             string relativePath = $"Map/tiles/{plantCode}/{floorId}/{zoomLevel}/{x}/{y}";
 
-            var response = await pointillaApi.CallApiForUserAsync(
-                ServiceName,
-                options =>
-                {
-                    options.HttpMethod = HttpMethod.Get.Method;
-                    options.RelativePath = relativePath;
-                }
-            );
+            var response = await pointillaApi.CallApiForUserAsync(ServiceName, options =>
+            {
+                options.HttpMethod = HttpMethod.Get.Method;
+                options.RelativePath = relativePath;
+            });
 
             response.EnsureSuccessStatusCode();
             if (response.Content.Headers.ContentType?.MediaType != "image/png")

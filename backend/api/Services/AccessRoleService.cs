@@ -172,8 +172,7 @@ namespace Api.Services
 
         public async Task<UserRoles> GetUserRoles()
         {
-            var user =
-                (httpContextAccessor.HttpContext?.User)
+            var user = (httpContextAccessor.HttpContext?.User)
                 ?? throw new HttpRequestException(
                     HttpRequestError.UserAuthenticationError,
                     "No user credentials available"
