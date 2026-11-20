@@ -1,13 +1,15 @@
 import { CSSProperties, useEffect, useRef, useState } from 'react'
-import { Button, Icon } from '@equinor/eds-core-react'
+import { Button, Icon, Tooltip } from '@equinor/eds-core-react'
+import { tokens } from '@equinor/eds-tokens'
 import { NamedMediaStream } from 'models/VideoStream'
 import styled from 'styled-components'
 import { Icons } from 'utils/icons'
+import { useVideoAspectRatio } from './useVideoAspectRatio'
 
-const VideoFrame = styled.div<{ $rotationDegrees: number; $quarterTurn: boolean }>`
+const VideoFrame = styled.div<{ $rotationDegrees: number; $quarterTurn: boolean; $aspectRatio: number }>`
     position: relative;
     width: 100%;
-    aspect-ratio: 16 / 9;
+    aspect-ratio: ${({ $aspectRatio }) => $aspectRatio};
     background: black;
     overflow: hidden;
 
@@ -43,17 +45,16 @@ const VideoFrame = styled.div<{ $rotationDegrees: number; $quarterTurn: boolean 
 
 const FullscreenButton = styled(Button)`
     position: absolute;
-    right: 8px;
-    bottom: 8px;
+    right: ${tokens.spacings.comfortable.small};
+    bottom: ${tokens.spacings.comfortable.small};
     z-index: 1;
-    width: 40px;
-    height: 40px;
-    padding: 0;
     opacity: 0.85;
 `
 
 interface Props {
     stream: NamedMediaStream
+    aspectRatio: number
+    onAspectRatioChange?: (aspectRatio: number) => void
     onPlaying: () => void
     onStalled: () => void
     onDisconnect: () => void
@@ -94,7 +95,14 @@ function requestOmeOffer(url: string, signal: AbortSignal): Promise<boolean> {
     })
 }
 
-export const OmeVideoCard = ({ stream, onPlaying, onStalled, onDisconnect }: Props) => {
+export const OmeVideoCard = ({
+    stream,
+    aspectRatio,
+    onAspectRatioChange,
+    onPlaying,
+    onStalled,
+    onDisconnect,
+}: Props) => {
     const element = useRef<HTMLDivElement>(null)
     const frame = useRef<HTMLDivElement>(null)
     const playingHandler = useRef(onPlaying)
@@ -104,6 +112,7 @@ export const OmeVideoCard = ({ stream, onPlaying, onStalled, onDisconnect }: Pro
     const [frameSize, setFrameSize] = useState({ width: 0, height: 0 })
     const rotationDegrees = stream.rotationDegrees ?? 0
     const quarterTurn = Math.abs(rotationDegrees % 180) === 90
+    useVideoAspectRatio(frame, rotationDegrees, onAspectRatioChange)
 
     useEffect(() => {
         if (!quarterTurn || !frame.current) return
@@ -203,6 +212,7 @@ export const OmeVideoCard = ({ stream, onPlaying, onStalled, onDisconnect }: Pro
             ref={frame}
             $rotationDegrees={rotationDegrees}
             $quarterTurn={quarterTurn}
+            $aspectRatio={aspectRatio}
             style={
                 quarterTurn
                     ? ({
@@ -214,15 +224,17 @@ export const OmeVideoCard = ({ stream, onPlaying, onStalled, onDisconnect }: Pro
             onDoubleClick={toggleFullscreen}
         >
             <div ref={element} />
-            <FullscreenButton
-                color="secondary"
-                onClick={toggleFullscreen}
-                onDoubleClick={(event) => event.stopPropagation()}
-                aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-                title={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-            >
-                <Icon name={isFullscreen ? Icons.FullscreenExit : Icons.Fullscreen} size={24} />
-            </FullscreenButton>
+            <Tooltip title={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'} placement="top">
+                <FullscreenButton
+                    variant="contained_icon"
+                    color="secondary"
+                    onClick={toggleFullscreen}
+                    onDoubleClick={(event) => event.stopPropagation()}
+                    aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+                >
+                    <Icon name={isFullscreen ? Icons.FullscreenExit : Icons.Fullscreen} size={24} />
+                </FullscreenButton>
+            </Tooltip>
         </VideoFrame>
     )
 }
