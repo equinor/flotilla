@@ -10,6 +10,7 @@ import { ApiError } from 'api/ApiError'
 import { CameraRecording, MissionRecordingAccess, RecordingSeekRequest } from 'models/MissionRecording'
 import { useRecordingPlayback } from './useRecordingPlayback'
 import { getRecordingTimestamp } from './recordingTime'
+import { CameraViewport, DEFAULT_CAMERA_ASPECT_RATIO } from './CameraLayout'
 
 // Renew playback access one minute before expiry to allow time for the request.
 const PLAYBACK_ACCESS_RENEWAL_MARGIN_MS = 60_000
@@ -20,22 +21,6 @@ const MINIMUM_RETRY_INTERVAL_MS = 10_000
 const Player = styled.div`
     width: 100%;
     min-width: 0;
-`
-
-const PlayerViewport = styled.div<{ $aspectRatio: number }>`
-    position: relative;
-    width: 100%;
-    aspect-ratio: ${({ $aspectRatio }) => $aspectRatio};
-    overflow: hidden;
-    border-radius: 0.5rem;
-    background: #000;
-
-    video {
-        display: block;
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-    }
 `
 
 const UnavailableOverlay = styled.div`
@@ -119,7 +104,7 @@ export const RecordingPlayer = ({
     const { TranslateText } = useLanguageContext()
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
-    const [videoAspectRatio, setVideoAspectRatio] = useState(16 / 9)
+    const [videoAspectRatio, setVideoAspectRatio] = useState(DEFAULT_CAMERA_ASPECT_RATIO)
     const {
         data: playbackAccess,
         isError,
@@ -197,7 +182,7 @@ export const RecordingPlayer = ({
             {missingStartTime && (
                 <Typography>Recording start time unavailable; use individual video controls.</Typography>
             )}
-            <PlayerViewport $aspectRatio={videoAspectRatio}>
+            <CameraViewport $aspectRatio={videoAspectRatio}>
                 <video
                     ref={videoRef}
                     controls
@@ -228,7 +213,7 @@ export const RecordingPlayer = ({
                         )}
                     </UnavailableOverlay>
                 )}
-            </PlayerViewport>
+            </CameraViewport>
         </Player>
     )
 }
