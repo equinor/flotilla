@@ -33,8 +33,8 @@
     <PackageReference Include="Microsoft.Identity.Web" Version="4.18.0" />
     <PackageReference Include="Microsoft.Identity.Web.DownstreamApi" Version="4.18.0" />
     <!-- Override transitive Pkcs from Microsoft.Identity.Web.TokenCache to patch GHSA-2fmv-rv2c-59x7 and GHSA-846f-f764-76mx -->
-    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.15" />
-    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.15" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="11.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="11.0.0" />
     <PackageReference Include="Microsoft.Azure.StackExchangeRedis" Version="3.3.1" />
     <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.21.0" />
     <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.21.0" />
@@ -47,9 +47,9 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.21.0" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Process" Version="1.15.0-beta.1" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.21.0" />
-    <PackageReference Include="Microsoft.OpenApi" Version="2.13.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.3.1" />
-    <PackageReference Include="MQTTnet" Version="4.3.7.1207" />
+    <PackageReference Include="Microsoft.OpenApi" Version="3.11.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="11.0.1" />
+    <PackageReference Include="MQTTnet" Version="5.2.0.1603" />
     <PackageReference Include="MQTTnet.Extensions.ManagedClient" Version="4.3.7.1207" />
     <PackageReference Include="System.Linq.Dynamic.Core" Version="1.7.4" />
   </ItemGroup>
