@@ -49,15 +49,11 @@ namespace Api.Test
                 if (postgresConnectionString != null)
                 {
                     services.AddDbContext<FlotillaDbContext>(
-                        options =>
-                            options.UseNpgsql(
-                                postgresConnectionString,
-                                o =>
-                                {
-                                    o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery);
-                                    o.EnableRetryOnFailure();
-                                }
-                            ),
+                        options => options.UseNpgsql(postgresConnectionString, o =>
+                            {
+                                o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery);
+                                o.EnableRetryOnFailure();
+                            }),
                         ServiceLifetime.Transient
                     );
                 }
@@ -73,9 +69,8 @@ namespace Api.Test
                 services.AddSingleton<IHttpContextAccessor, MockHttpContextAccessor>();
                 services
                     .AddAuthorizationBuilder()
-                    .AddFallbackPolicy(
-                        TestAuthHandler.AuthenticationScheme,
-                        policy => policy.RequireAuthenticatedUser()
+                    .AddFallbackPolicy(TestAuthHandler.AuthenticationScheme, policy =>
+                        policy.RequireAuthenticatedUser()
                     );
                 services
                     .AddAuthentication(options =>

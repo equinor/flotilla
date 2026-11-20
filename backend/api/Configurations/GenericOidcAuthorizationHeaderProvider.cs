@@ -143,8 +143,7 @@ namespace Api.Configurations
                     cancellationToken
                 );
 
-                _tokenEndpoint =
-                    document?.TokenEndpoint
+                _tokenEndpoint = document?.TokenEndpoint
                     ?? throw new InvalidOperationException(
                         $"The OpenID configuration at {configurationUrl} advertises no token_endpoint"
                     );

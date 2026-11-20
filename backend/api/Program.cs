@@ -141,19 +141,15 @@ builder.Services.ConfigureAuthentication(builder.Configuration, builder.Environm
 builder
     .Services.AddAuthorizationBuilder()
     .AddPolicy(Role.Admin, policy => policy.RequireRole(AccessRoleService.SUPER_ADMIN_ROLE_NAME))
-    .AddPolicy(
-        Role.User,
-        policy =>
-            policy.RequireAssertion(context =>
-                AccessRoleService.HasAnyInstallationAccess(context.User, AccessMode.Write)
-            )
+    .AddPolicy(Role.User, policy =>
+        policy.RequireAssertion(context =>
+            AccessRoleService.HasAnyInstallationAccess(context.User, AccessMode.Write)
+        )
     )
-    .AddPolicy(
-        Role.Any,
-        policy =>
-            policy.RequireAssertion(context =>
-                AccessRoleService.HasAnyInstallationAccess(context.User, AccessMode.Read)
-            )
+    .AddPolicy(Role.Any, policy =>
+        policy.RequireAssertion(context =>
+            AccessRoleService.HasAnyInstallationAccess(context.User, AccessMode.Read)
+        )
     )
     .AddFallbackPolicy("RequireAuthenticatedUser", policy => policy.RequireAuthenticatedUser());
 
@@ -214,16 +210,13 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapHub<SignalRHub>(
-    "/hub",
-    options =>
-    {
-        options.Transports =
-            HttpTransportType.WebSockets
-            | HttpTransportType.ServerSentEvents
-            | HttpTransportType.LongPolling;
-    }
-);
+app.MapHub<SignalRHub>("/hub", options =>
+{
+    options.Transports =
+        HttpTransportType.WebSockets
+        | HttpTransportType.ServerSentEvents
+        | HttpTransportType.LongPolling;
+});
 
 app.MapControllers();
 

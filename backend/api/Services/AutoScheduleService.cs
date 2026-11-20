@@ -81,10 +81,9 @@ namespace Api.Services
             var existingJobs = new Dictionary<TimeOnly, string>();
             try
             {
-                existingJobs =
-                    JsonSerializer.Deserialize<Dictionary<TimeOnly, string>>(
-                        missionDefinition.AutoScheduleFrequency?.AutoScheduledJobs ?? "{}"
-                    ) ?? new();
+                existingJobs = JsonSerializer.Deserialize<Dictionary<TimeOnly, string>>(
+                    missionDefinition.AutoScheduleFrequency?.AutoScheduledJobs ?? "{}"
+                ) ?? new();
             }
             catch (JsonException ex)
             {
