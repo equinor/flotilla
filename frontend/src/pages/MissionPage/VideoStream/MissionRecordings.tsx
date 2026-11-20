@@ -9,6 +9,7 @@ import { Mission } from 'models/Mission'
 import { RecordingSeekRequest } from 'models/MissionRecording'
 import { Icons } from 'utils/icons'
 import { RecordingPlayer, RecordingPlayerControls } from './RecordingPlayer'
+import { Camera, Cameras } from './CameraLayout'
 import { RecordingTimeline } from './RecordingTimeline'
 import { getRecordingTimestamp } from './recordingTime'
 import { useLanguageContext } from 'contexts/LanguageContext'
@@ -25,17 +26,6 @@ const RecordingHeader = styled.div`
     display: flex;
     align-items: center;
     gap: 0.5rem;
-`
-
-const Cameras = styled.div`
-    display: flex;
-    align-items: flex-start;
-    gap: 1rem;
-`
-
-const Camera = styled.div<{ $aspectRatio: number }>`
-    flex: ${({ $aspectRatio }) => $aspectRatio} 1 0;
-    min-width: 0;
 `
 
 const PlaybackControls = styled.div`

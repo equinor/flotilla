@@ -1,54 +1,27 @@
-import { Card, Typography, Icon, Button } from '@equinor/eds-core-react'
-import { tokens } from '@equinor/eds-tokens'
-import styled from 'styled-components'
-import { Icons } from 'utils/icons'
+import { useRef } from 'react'
+import { CameraFullscreenButton } from './CameraFullscreenButton'
+import { CameraViewport } from './CameraLayout'
 import { VideoPlayerSimpleStream } from './VideoPlayerSimpleStream'
+import { useVideoAspectRatio } from './useVideoAspectRatio'
 
-const FullscreenButton = styled(Button)`
-    position: absolute;
-    bottom: 8px;
-    right: 8px;
-    width: 32px;
-    height: 32px;
-    opacity: 0.75;
-`
-const VideoCard = styled(Card)`
-    padding: 1rem;
-    height: 15rem;
-    width: 20rem;
-`
-const StyledVideoSection = styled.div`
-    height: 10rem;
-`
-
-interface IVideoStreamCardProps {
+interface VideoStreamCardProps {
     videoStream: MediaStream
-    videoStreamName?: string
-    videoStreamId: string
+    aspectRatio: number
+    onAspectRatioChange: (aspectRatio: number) => void
 }
 
-export const VideoStreamCard = ({ videoStream, videoStreamName, videoStreamId }: IVideoStreamCardProps) => {
-    const setFullScreen = () => {
-        const elem = document.getElementById(videoStreamId)
-        if (elem && elem.requestFullscreen) {
-            elem.requestFullscreen()
-        }
+export const VideoStreamCard = ({ videoStream, aspectRatio, onAspectRatioChange }: VideoStreamCardProps) => {
+    const container = useRef<HTMLDivElement>(null)
+    useVideoAspectRatio(container, 0, onAspectRatioChange)
+
+    const enterFullscreen = () => {
+        void container.current?.querySelector('video')?.requestFullscreen?.()
     }
-    const fullScreenButton = (
-        <FullscreenButton color="secondary" onClick={setFullScreen}>
-            <Icon name={Icons.Fullscreen} size={32} />
-        </FullscreenButton>
-    )
 
     return (
-        <VideoCard style={{ boxShadow: tokens.elevation.raised }}>
-            <div onDoubleClick={setFullScreen}>
-                <StyledVideoSection>
-                    <VideoPlayerSimpleStream videoStream={videoStream} id={videoStreamId} />
-                    {fullScreenButton}
-                </StyledVideoSection>
-            </div>
-            {videoStreamName && <Typography variant="h5">{videoStreamName}</Typography>}
-        </VideoCard>
+        <CameraViewport ref={container} $aspectRatio={aspectRatio} onDoubleClick={enterFullscreen}>
+            <VideoPlayerSimpleStream videoStream={videoStream} />
+            <CameraFullscreenButton onClick={enterFullscreen} />
+        </CameraViewport>
     )
 }
