@@ -1,5 +1,25 @@
 #!/bin/bash
 
+# Usage: ./setup.sh [--rotate-broker-credentials]
+#
+#   --rotate-broker-credentials  Mint a new set of local broker credentials even
+#                                if the current ones are fine. Every password
+#                                changes, so every local client needs the new
+#                                one; this script updates the backend's.
+
+rotate_broker_credentials=""
+
+for argument in "$@"; do
+    case "$argument" in
+        --rotate-broker-credentials) rotate_broker_credentials="-f" ;;
+        *)
+            echo -e "Unknown argument '$argument'"
+            sed -n '3,8p' "$0"
+            exit 1
+            ;;
+    esac
+done
+
 echo -e "-------- FLOTILLA -----------"
 echo -e "Running dev setup for Flotilla...\n"
 
@@ -59,50 +79,46 @@ fi
 echo "--------- BROKER ------------"
 echo -e "Setting up broker ..."
 
-if [ -f $flotilla_dir/broker/.env ]; then
-    echo -e "WARNING: The file '$flotilla_dir/broker/.env' already exists, it will be overwritten if the operation continues."
-    echo -e "Is this ok? (Y/n)"
-
-    read reply
-    if [ "$reply" = "n" ] || [ "$reply" = "N" ]; then
-        echo -e "\nBroker setup - Aborted!\n"
-        broker_abort="true"
-    fi
+# Credentials are reused unless they are missing or close to expiring, so this is
+# safe to re-run: the password written below stays valid. Pass
+# --rotate-broker-credentials to mint a new set deliberately.
+if ! $flotilla_dir/broker/scripts/ensure-local-credentials.sh $rotate_broker_credentials > /dev/null; then
+    echo -e "\nBroker setup - Failed!\n"
+    exit 1
 fi
-if [ "$broker_abort" != "true" ]; then
-    # Local development gets its own throwaway credentials. Nothing here is
-    # shared with a deployed environment, so a laptop cannot leak one.
-    credentials_dir=$flotilla_dir/broker/.local-credentials
-    echo -e "Generating local broker credentials in $credentials_dir ..."
 
-    rm -rf "$credentials_dir"
-    $flotilla_dir/broker/scripts/generate-mqtt-credentials.sh \
-        -o "$credentials_dir" broker localhost host.docker.internal IP:127.0.0.1 > /dev/null
+echo -e "Broker setup - Done!"
+echo -e "-----------------------------\n"
+#-----------------------------
 
-    # docker compose reads broker/.env through env_file, which cannot hold a
-    # multi-line value, so the PEM bodies go in on a single line. The broker
-    # reassembles them; see broker/entrypoint.sh.
-    pem_body() {
-        grep -v -- '-----' "$1" | tr -d '\n'
-    }
+#--- BACKEND MQTT PASSWORD ---
+echo "--- BACKEND MQTT PASSWORD ---"
 
-    {
-        echo "TLS_SERVER_KEY='$(pem_body "$credentials_dir/server-key.pem")'"
-        echo "TLS_SERVER_CERT='$(pem_body "$credentials_dir/server-cert.pem")'"
-        echo "TLS_CA_CERT='$(pem_body "$credentials_dir/ca-cert.pem")'"
-        cat "$credentials_dir/mqtt-passwords.env"
-    } > $flotilla_dir/broker/.env
+# The backend connects to the broker as the 'flotilla' user. Written every run,
+# and outside the abort check above, so declining the .env overwrite still leaves
+# a password that matches the broker rather than a stale one.
+backend_env=$flotilla_dir/backend/api/.env
+mqtt_password=$(sed -n 's/^flotilla=//p' $flotilla_dir/broker/.local-credentials/passwords)
 
-    echo -e "Created broker/.env with freshly generated local credentials"
-    echo -e "\nThe backend connects as the 'flotilla' user. Put its password in the"
-    echo -e "ASP.NET Secret Manager as Mqtt:Password:\n"
-    echo -e "  cd backend/api && dotnet user-secrets set \"Mqtt:Password\" \"$(sed -n 's/^flotilla=//p' "$credentials_dir/passwords")\"\n"
+# Replace-or-append, rather than `sed -i`, whose syntax differs between BSD and
+# GNU. The temporary file is next to the target, so the move cannot cross
+# devices.
+{
+    grep -v -e '^Mqtt__Password=' -e '^KeyVault__UseKeyVault=' "$backend_env"
+    echo "Mqtt__Password=$mqtt_password"
+    # The key vault is read after the environment variables, so its shared
+    # Mqtt--Password would override the local one. Local development uses the
+    # generated credentials instead; the Tilt stack sets this the same way.
+    echo "KeyVault__UseKeyVault=false"
+} > $backend_env.tmp
+mv $backend_env.tmp $backend_env
+chmod 0600 $backend_env
 
-    echo -e "Broker setup - Done!"
-    echo -e "-----------------------------\n"
-    #-----------------------------
+echo -e "Wrote Mqtt__Password and KeyVault__UseKeyVault to backend/api/.env"
 
+echo -e "Backend MQTT password - Done!"
+echo -e "-----------------------------\n"
+#-----------------------------
 
-    echo -e "Flotilla setup - Done!"
-    echo -e "-----------------------------"
-fi
+echo -e "Flotilla setup - Done!"
+echo -e "-----------------------------"

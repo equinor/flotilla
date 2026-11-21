@@ -57,19 +57,22 @@ verify it — worth fixing, but it means they only need their password.
 
 Run [`setup.sh`](../setup.sh) from the repository root. It generates throwaway credentials into
 `broker/.local-credentials` — nothing shared with a deployed environment ever reaches a laptop —
-writes `broker/.env`, and prints the backend's MQTT password for the ASP.NET Secret Manager.
-Alternatively, copy the template and fill it in manually:
+writes `broker/.env`, and writes the backend's MQTT password to `backend/api/.env`.
+Existing credentials are reused, so re-running it is safe; pass
+`--rotate-broker-credentials` to mint a new set deliberately. Alternatively, copy the template
+and fill it in manually:
 
 ```bash
 cp .env.example .env
 ```
 
-The Tilt stacks need no setup step: [`tilt/preflight.py`](../tilt/preflight.py) generates the
-same two artefacts if they are missing or the certificate is close to expiry, and
+The Tilt stacks need no setup step: [`tilt/preflight.py`](../tilt/preflight.py) calls the same
+[`scripts/ensure-local-credentials.sh`](./scripts/ensure-local-credentials.sh), which generates
+the two artefacts if they are missing or the certificate is close to expiry, and
 [`tilt/flotilla.tilt`](../tilt/flotilla.tilt) hands each client its generated password. They run
 with `MQTT_REQUIRE_ENV_CREDENTIALS=true`, so a broker that did not receive them fails to start
-rather than falling back to the credentials committed here. Delete `broker/.local-credentials`
-to force a rotation.
+rather than falling back to the credentials committed here. Run
+`scripts/ensure-local-credentials.sh -f` to force a rotation.
 
 `broker/.env` is read through Compose's `env_file`, which cannot hold a multi-line value, so the
 PEM values go in as the base64 body on a single line. The broker reassembles them.
