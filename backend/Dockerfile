@@ -1,5 +1,5 @@
 # https://hub.docker.com/_/microsoft-dotnet
-FROM mcr.microsoft.com/dotnet/sdk:10.0@sha256:2fa828c68761b1b8c23d7662dc134421b9d3b59fe1425fdbc80804e390cdb24d AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0@sha256:8c6edfb26c85153f236d26efebd9ad349aec403583f343f201ee67838b23658d AS build
 WORKDIR /source
 
 # copy everything
@@ -9,7 +9,7 @@ WORKDIR /source/api
 RUN dotnet publish -c release -o /app
 
 # final stage/image
-FROM mcr.microsoft.com/dotnet/aspnet:10.0@sha256:6a94333d37514e385650a3c81a55e5350b67253dbe136e9cf17e499c35606a8c
+FROM mcr.microsoft.com/dotnet/aspnet:10.0@sha256:aac50ceef10391e78a899e3d2ccd00bbafa2dcb56ccf4586cbccf00edb84fc21
 WORKDIR /app
 COPY --from=build /app ./
 RUN apt-get update \
