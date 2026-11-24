@@ -26,6 +26,7 @@ namespace Api.EventHandlers
         private readonly IMemoryCache _cache;
         private readonly bool _allowMqttRegistration;
         private EventAggregatorSingletonService _eventAggregatorSingletonService;
+        private readonly KeyedSequentialRunner _isarMessageRunner;
 
         private readonly ConcurrentDictionary<string, RobotMetricData> _batteryMetrics = new();
         private readonly ConcurrentDictionary<string, RobotMetricData> _pressureMetrics = new();
@@ -54,6 +55,7 @@ namespace Api.EventHandlers
                 AuthenticationConfigurations.LocalEnvironment
             );
             _eventAggregatorSingletonService = eventAggregatorSingletonService;
+            _isarMessageRunner = new KeyedSequentialRunner(logger);
 
             meter.CreateObservableGauge(
                 "robot.battery.level",
@@ -115,10 +117,13 @@ namespace Api.EventHandlers
 
         public override void Subscribe()
         {
-            _eventAggregatorSingletonService.Subscribe<IsarStatusMessage>(OnIsarStatus);
-            _eventAggregatorSingletonService.Subscribe<IsarRobotInfoMessage>(OnIsarRobotInfo);
-            _eventAggregatorSingletonService.Subscribe<IsarMissionMessage>(OnIsarMissionUpdate);
-            _eventAggregatorSingletonService.Subscribe<IsarTaskMessage>(OnIsarTaskUpdate);
+            // Messages that change robot, mission or task state are handled in order per robot
+            SubscribeInOrder<IsarStatusMessage>(m => m.IsarId, OnIsarStatus);
+            SubscribeInOrder<IsarRobotInfoMessage>(m => m.IsarId, OnIsarRobotInfo);
+            SubscribeInOrder<IsarMissionMessage>(m => m.IsarId, OnIsarMissionUpdate);
+            SubscribeInOrder<IsarTaskMessage>(m => m.IsarId, OnIsarTaskUpdate);
+            SubscribeInOrder<IsarMissionAbortedMessage>(m => m.IsarId, OnIsarMissionAborted);
+            SubscribeInOrder<IsarStartupMessage>(m => m.IsarId, OnIsarStartup);
             _eventAggregatorSingletonService.Subscribe<IsarBatteryMessage>(OnIsarBatteryUpdate);
             _eventAggregatorSingletonService.Subscribe<IsarPressureMessage>(OnIsarPressureUpdate);
             _eventAggregatorSingletonService.Subscribe<IsarPoseMessage>(OnIsarPoseUpdate);
@@ -127,10 +132,6 @@ namespace Api.EventHandlers
             );
             _eventAggregatorSingletonService.Subscribe<IsarInterventionNeededMessage>(
                 OnIsarInterventionNeededUpdate
-            );
-            _eventAggregatorSingletonService.Subscribe<IsarStartupMessage>(OnIsarStartup);
-            _eventAggregatorSingletonService.Subscribe<IsarMissionAbortedMessage>(
-                OnIsarMissionAborted
             );
             _eventAggregatorSingletonService.Subscribe<SaraInspectionResultMessage>(
                 OnSaraInspectionResultUpdate
@@ -143,6 +144,13 @@ namespace Api.EventHandlers
             );
         }
 
+        private void SubscribeInOrder<T>(Func<T, string> isarId, Func<T, Task> handler)
+        {
+            _eventAggregatorSingletonService.Subscribe<T>(message =>
+                _isarMessageRunner.Enqueue(isarId(message), () => handler(message))
+            );
+        }
+
         public override void Unsubscribe() { }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -150,7 +158,7 @@ namespace Api.EventHandlers
             await stoppingToken;
         }
 
-        private async void OnIsarStatus(IsarStatusMessage isarStatus)
+        private async Task OnIsarStatus(IsarStatusMessage isarStatus)
         {
             var robot = await RobotService.ReadByIsarId(isarStatus.IsarId, readOnly: true);
 
@@ -225,7 +233,7 @@ namespace Api.EventHandlers
             _cache.Set(robot.IsarId, robot, cacheEntryOptions);
         }
 
-        private async void OnIsarRobotInfo(IsarRobotInfoMessage isarRobotInfo)
+        private async Task OnIsarRobotInfo(IsarRobotInfoMessage isarRobotInfo)
         {
             try
             {
@@ -409,7 +417,7 @@ namespace Api.EventHandlers
             robot.RobotCapabilities = newRobotCapabilities;
         }
 
-        private async void OnIsarMissionAborted(IsarMissionAbortedMessage isarAbortedMission)
+        private async Task OnIsarMissionAborted(IsarMissionAbortedMessage isarAbortedMission)
         {
             var robot = await RobotService.ReadByIsarId(isarAbortedMission.IsarId, readOnly: true);
             if (robot is null)
@@ -468,7 +476,7 @@ namespace Api.EventHandlers
             }
         }
 
-        private async void OnIsarMissionUpdate(IsarMissionMessage isarMission)
+        private async Task OnIsarMissionUpdate(IsarMissionMessage isarMission)
         {
             MissionStatus status;
             try
@@ -630,7 +638,7 @@ namespace Api.EventHandlers
             await TaskDurationService.UpdateAverageDurationPerTask(robot);
         }
 
-        private async void OnIsarTaskUpdate(IsarTaskMessage task)
+        private async Task OnIsarTaskUpdate(IsarTaskMessage task)
         {
             IsarTaskStatus status;
             try
@@ -835,7 +843,7 @@ namespace Api.EventHandlers
             _eventAggregatorSingletonService.Publish(new TeamsMessageEventArgs(message));
         }
 
-        private async void OnIsarStartup(IsarStartupMessage startupMessage)
+        private async Task OnIsarStartup(IsarStartupMessage startupMessage)
         {
             var robot = await RobotService.ReadByIsarId(startupMessage.IsarId, readOnly: true);
             if (robot == null)
