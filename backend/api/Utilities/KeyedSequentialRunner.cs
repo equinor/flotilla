@@ -8,6 +8,7 @@ namespace Api.Utilities
     {
         private readonly Dictionary<string, Task> _tails = [];
         private readonly Lock _lock = new();
+        private int _queued;
 
         public Task Enqueue(string key, Func<Task> work)
         {
@@ -17,6 +18,16 @@ namespace Api.Utilities
             {
                 previous = _tails.GetValueOrDefault(key, Task.CompletedTask);
                 _tails[key] = done.Task;
+            }
+            var queued = Interlocked.Increment(ref _queued);
+
+            if (!previous.IsCompleted)
+            {
+                logger.LogDebug(
+                    "Work item for key {Key} is waiting for earlier work, {Queued} work items queued in total",
+                    key,
+                    queued
+                );
             }
             return RunAfter(previous, key, work, done);
         }
@@ -39,6 +50,7 @@ namespace Api.Utilities
             }
             finally
             {
+                Interlocked.Decrement(ref _queued);
                 done.SetResult();
             }
         }
