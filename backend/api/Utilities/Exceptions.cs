@@ -89,6 +89,8 @@ namespace Api.Utilities
 
     public class IsarCommunicationException(string message) : Exception(message) { }
 
+    public class IsarConflictException(string message) : Exception(message) { }
+
     public class UnsupportedRobotCapabilityException(string message) : Exception(message) { }
 
     public class InvalidPolygonException(string message) : Exception(message) { }

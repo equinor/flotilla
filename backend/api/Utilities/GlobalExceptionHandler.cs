@@ -37,6 +37,7 @@ namespace Api.Utilities
                     StatusCodes.Status409Conflict,
                     e.Message
                 ),
+                IsarConflictException e => (StatusCodes.Status409Conflict, e.Message),
                 TeamsNotificationException => (StatusCodes.Status502BadGateway, null),
                 IsarCommunicationException e => (
                     StatusCodes.Status500InternalServerError,

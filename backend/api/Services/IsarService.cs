@@ -410,6 +410,8 @@ namespace Api.Services
                 );
                 string errorResponse = await response.Content.ReadAsStringAsync();
                 logger.LogError("{Message}: {ErrorResponse}", message, errorResponse);
+                if (response.StatusCode == HttpStatusCode.Conflict)
+                    throw new IsarConflictException(message);
                 throw new IsarCommunicationException(message);
             }
         }
@@ -441,6 +443,8 @@ namespace Api.Services
                 );
                 string errorResponse = await response.Content.ReadAsStringAsync();
                 logger.LogError("{Message}: {ErrorResponse}", message, errorResponse);
+                if (response.StatusCode == HttpStatusCode.Conflict)
+                    throw new IsarConflictException(message);
                 throw new IsarCommunicationException(message);
             }
         }

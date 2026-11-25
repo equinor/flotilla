@@ -86,6 +86,7 @@ namespace Api.Test.Utilities
             typeof(RobotNotInSameInstallationAsMissionException),
             StatusCodes.Status409Conflict
         )]
+        [InlineData(typeof(IsarConflictException), StatusCodes.Status409Conflict)]
         [InlineData(typeof(TeamsNotificationException), StatusCodes.Status502BadGateway)]
         [InlineData(typeof(IsarCommunicationException), StatusCodes.Status500InternalServerError)]
         [InlineData(typeof(JsonException), StatusCodes.Status500InternalServerError)]
