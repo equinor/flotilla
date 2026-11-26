@@ -13,17 +13,18 @@ const analysisDetails: Record<string, { label: string }> = {
     [AnalysisType.CO2]: { label: 'CO2Measurement' },
 }
 
-const maximumRowHeight = '200px'
+const maximumImageHeight = '200px'
 const minimumRowHeight = '80px'
 const minimumIdentityWidth = '160px'
 const minimumWarningWidth = '260px'
 
 const StyledRow = styled.div`
     display: flex;
-    flex: 0 1 ${maximumRowHeight};
+    flex-wrap: wrap;
+    flex: 0 0 auto;
     min-height: ${minimumRowHeight};
     align-items: center;
-    gap: ${tokens.spacings.comfortable.xxx_large};
+    gap: ${tokens.spacings.comfortable.medium} ${tokens.spacings.comfortable.xxx_large};
     min-width: 0;
     padding: ${tokens.spacings.comfortable.small} 0;
     padding-left: ${tokens.spacings.comfortable.large};
@@ -39,8 +40,9 @@ const StyledRow = styled.div`
 const Identity = styled.div`
     display: flex;
     flex-direction: column;
+    flex: 1 1 ${minimumIdentityWidth};
     margin-right: auto;
-    min-width: ${minimumIdentityWidth};
+    min-width: 0;
     gap: ${tokens.spacings.comfortable.x_small};
 `
 const TitleRow = styled.div`
@@ -50,6 +52,7 @@ const TitleRow = styled.div`
 `
 const OrderBadge = styled.span`
     display: flex;
+    flex-shrink: 0;
     align-items: center;
     justify-content: center;
     width: 28px;
@@ -64,8 +67,11 @@ const AnalysisLabel = styled(Typography)`
 `
 
 const AlertImage = styled.img`
+    flex: 1 1 ${minimumIdentityWidth};
     min-width: 0;
-    height: 100%;
+    max-width: 100%;
+    max-height: ${maximumImageHeight};
+    height: auto;
     aspect-ratio: 16 / 9;
     object-fit: contain;
 `
@@ -73,16 +79,21 @@ const WarningSection = styled.div`
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    flex-shrink: 0;
-    min-width: ${minimumWarningWidth};
+    min-width: min(${minimumWarningWidth}, 100%);
+    max-width: 100%;
     gap: ${tokens.spacings.comfortable.medium};
 `
 const WarningBadge = styled(Chip)`
     background-color: ${tokens.colors.interactive.danger__highlight.hex};
     color: ${tokens.colors.interactive.danger__text.hex};
-    height: 32px;
+    box-sizing: border-box;
+    max-width: 100%;
+    grid-auto-columns: minmax(0, 1fr);
+    height: auto;
+    min-height: 32px;
     font-size: 1rem;
     padding-inline: 16px;
+    padding-block: ${tokens.spacings.comfortable.xx_small};
 `
 interface SaraAlertCardProps {
     analysisType: string
