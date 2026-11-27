@@ -212,7 +212,12 @@ namespace Api.Database.Context
             "Expected to be rejected. Verifies that a mission cannot be started in an inspection area the robot is not in."
         );
 
-        private static Plant CreatePlant(string installationCode, string name, string plantCode)
+        private static Plant CreatePlant(
+            string installationCode,
+            string name,
+            string plantCode,
+            List<DataViewName> relevantDataViews
+        )
         {
             return new Plant
             {
@@ -222,6 +227,7 @@ namespace Api.Database.Context
                     Id = Guid.NewGuid().ToString(),
                     Name = name,
                     InstallationCode = installationCode,
+                    RelevantDataViews = relevantDataViews,
                 },
                 Name = name,
                 PlantCode = plantCode,
@@ -417,8 +423,18 @@ namespace Api.Database.Context
                 return;
             }
 
-            var kaarsto = CreatePlant("KAA", "Kårstø", "KAA");
-            var northernLights = CreatePlant("NLS", "Northern Lights", "NLT");
+            var kaarsto = CreatePlant(
+                "KAA",
+                "Kårstø",
+                "KAA",
+                new List<DataViewName> { DataViewName.THERMAL_READING }
+            );
+            var northernLights = CreatePlant(
+                "NLS",
+                "Northern Lights",
+                "NLT",
+                new List<DataViewName> { DataViewName.CLOE, DataViewName.FENCILLA }
+            );
             var klab = CreateInspectionArea(kaarsto, KaarstoInspectionArea);
             List<InspectionArea> inspectionAreas =
             [

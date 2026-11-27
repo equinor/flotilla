@@ -23,5 +23,14 @@ namespace Api.Database.Models
             get => _installationCode.ToUpper(System.Globalization.CultureInfo.CurrentCulture);
             set => _installationCode = value;
         }
+
+        public List<DataViewName> RelevantDataViews { get; set; } = new List<DataViewName>();
+    }
+
+    public enum DataViewName
+    {
+        CLOE,
+        FENCILLA,
+        THERMAL_READING,
     }
 }

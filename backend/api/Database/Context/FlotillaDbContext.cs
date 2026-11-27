@@ -58,11 +58,15 @@ namespace Api.Database.Context
 
             // Store enum arrays as text[] — HaveConversion<string>() does not cover collection elements
             modelBuilder
+                .Entity<Installation>()
+                .PrimitiveCollection(i => i.RelevantDataViews)
+                .ElementType()
+                .HasConversion<string>();
+            modelBuilder
                 .Entity<MissionTask>()
                 .PrimitiveCollection(t => t.AnalysisTypes)
                 .ElementType()
                 .HasConversion<string>();
-
             modelBuilder
                 .Entity<Robot>()
                 .PrimitiveCollection(r => r.RobotCapabilities)
