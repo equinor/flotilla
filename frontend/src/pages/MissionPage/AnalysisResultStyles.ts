@@ -5,7 +5,7 @@ const findingBackground = `color-mix(in srgb, ${tokens.colors.interactive.warnin
 const clearEdge = `color-mix(in srgb, ${tokens.colors.interactive.success__resting.hex} 65%, ${background})`
 
 export const getAnalysisResultStyle = (hasFinding?: boolean) => ({
-    background: hasFinding ? findingBackground : background,
+    background: hasFinding ? findingBackground : undefined,
     boxShadow: `inset 3px 0 ${
         hasFinding === undefined
             ? tokens.colors.ui.background__medium.hex
