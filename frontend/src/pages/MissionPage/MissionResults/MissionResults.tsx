@@ -54,6 +54,8 @@ export const MissionResults = ({ data, tasks, isPending, isError, installationNa
     const { TranslateText } = useLanguageContext()
     const { selectedId, preferredFocus, select } = useMissionResultSelection()
 
+    const sortedData = tasks.flatMap((task) => data.filter((inspection) => inspection.inspectionId === task.id))
+
     const container = useRef<HTMLDivElement>(null)
     const opener = useRef<HTMLElement | null>(null)
 
@@ -70,12 +72,12 @@ export const MissionResults = ({ data, tasks, isPending, isError, installationNa
                     {isError && (
                         <Typography role="alert">{TranslateText('Failed to load inspection results')}</Typography>
                     )}
-                    {!isPending && <MissionResultsSection data={data} onSelect={onSelect} />}
+                    {!isPending && <MissionResultsSection data={sortedData} tasks={tasks} onSelect={onSelect} />}
                 </ContentCard>
             )}
             {selectedId && !isPending && (
                 <MissionResultGallery
-                    data={data}
+                    data={sortedData}
                     tasks={tasks}
                     selectedId={selectedId}
                     preferredFocus={preferredFocus}
