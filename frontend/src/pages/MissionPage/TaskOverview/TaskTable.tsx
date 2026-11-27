@@ -12,7 +12,7 @@ import { hasInspectionAnalysis, InspectionData, TaskMeasurement } from 'models/I
 import { Icons } from 'utils/icons'
 import { getAnalysisResultStyle } from '../AnalysisResultStyles'
 import { MeasurementDisplay } from 'components/Displays/MeasurementDisplay'
-import { useMissionResultSelection } from '../MissionResults/MissionResults'
+import { useMissionResultSelection } from '../MissionResults/useMissionResultSelection'
 
 const IconWithLabel = styled.div`
     display: grid;
@@ -26,6 +26,9 @@ const IconWithLabel = styled.div`
 `
 const RightAlignedImageButton = styled(Button)`
     margin-left: auto;
+`
+const TaskNumberChip = styled(Chip)`
+    padding-left: ${tokens.spacings.comfortable.small};
 `
 
 export interface TaskAndData {
@@ -103,11 +106,11 @@ const TaskTableRow = ({
     return (
         <StyledTableRow style={rowStyle}>
             <Table.Cell style={{ boxShadow: isActive ? undefined : rowEdge }}>
-                <Chip style={{ background: markerColors.fillColor }}>
+                <TaskNumberChip style={{ background: markerColors.fillColor }}>
                     <Typography variant="body_short_bold" style={{ color: markerColors.textColor }}>
                         {index + 1}
                     </Typography>
-                </Chip>
+                </TaskNumberChip>
             </Table.Cell>
             <Table.Cell>
                 <TagIdDisplay tagId={task.tagId} index={index} />
@@ -183,9 +186,9 @@ const MissionDefinitionTaskTableRows = ({ tasks }: MissionDefinitionTaskTablePro
         return (
             <StyledTableRow key={index + 'missionDefintion'}>
                 <Table.Cell>
-                    <Chip>
+                    <TaskNumberChip>
                         <Typography variant="body_short_bold">{order}</Typography>
-                    </Chip>
+                    </TaskNumberChip>
                 </Table.Cell>
                 <Table.Cell>
                     <TagIdDisplay tagId={task.tagId} index={index} />

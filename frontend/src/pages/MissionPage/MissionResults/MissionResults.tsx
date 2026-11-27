@@ -1,6 +1,6 @@
 import { Typography } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'contexts/LanguageContext'
-import { InspectionData } from 'models/InspectionRecord'
+import { InspectionData, sortByTaskOrder, sortFindingsFirst } from 'models/InspectionRecord'
 import { Task } from 'models/Task'
 import { PendingResultPlaceholder } from 'pages/InspectionReportPage/InspectionReportImage'
 import { ContentCard } from 'components/Styles/StyledComponents'
@@ -8,7 +8,7 @@ import styled from 'styled-components'
 import { useRef } from 'react'
 import { MissionResultGallery } from 'pages/MissionPage/MissionResults/MissionResultGallery'
 import { MissionResultsSection } from 'pages/MissionPage/MissionResults/MissionResultsSection'
-import { useSearchParams } from 'react-router'
+import { useMissionResultSelection } from './useMissionResultSelection'
 
 const MissionContent = styled.div`
     min-width: 0;
@@ -24,42 +24,19 @@ interface Props {
 
 export type ResultFocus = 'inspection' | 'analysis'
 
-export const useMissionResultSelection = () => {
-    const [params, setParams] = useSearchParams()
-    const selectedId = params.get('inspectionId')
-    const focusString = params.get('focus')
-    const preferredFocus: ResultFocus =
-        focusString && (focusString === 'analysis' || focusString === 'inspection') ? focusString : 'analysis'
-
-    const select = (id: string | undefined, focus: ResultFocus = preferredFocus) => {
-        setParams(
-            (previous) => {
-                const next = new URLSearchParams(previous)
-                next.delete('inspectionId')
-                next.delete('focus')
-                if (id) {
-                    next.set('inspectionId', id)
-                    next.set('focus', focus)
-                }
-                return next
-            },
-            { replace: true }
-        )
-    }
-
-    return { selectedId, preferredFocus, select }
-}
-
 export const MissionResults = ({ data, tasks, isPending, isError, installationName }: Props) => {
     const { TranslateText } = useLanguageContext()
-    const { selectedId, preferredFocus, select } = useMissionResultSelection()
+    const { selectedId, preferredFocus, findingsFirst, select } = useMissionResultSelection()
+
+    const sortedData = sortByTaskOrder(data, tasks)
+    const findingsFirstData = sortFindingsFirst(sortedData)
 
     const container = useRef<HTMLDivElement>(null)
     const opener = useRef<HTMLElement | null>(null)
 
     const onSelect = (id: string, focus: ResultFocus) => {
         if (!selectedId && document.activeElement instanceof HTMLElement) opener.current = document.activeElement
-        select(id, focus)
+        select(id, focus, true)
     }
 
     return (
@@ -70,12 +47,12 @@ export const MissionResults = ({ data, tasks, isPending, isError, installationNa
                     {isError && (
                         <Typography role="alert">{TranslateText('Failed to load inspection results')}</Typography>
                     )}
-                    {!isPending && <MissionResultsSection data={data} onSelect={onSelect} />}
+                    {!isPending && <MissionResultsSection data={findingsFirstData} tasks={tasks} onSelect={onSelect} />}
                 </ContentCard>
             )}
             {selectedId && !isPending && (
                 <MissionResultGallery
-                    data={data}
+                    data={findingsFirst ? findingsFirstData : sortedData}
                     tasks={tasks}
                     selectedId={selectedId}
                     preferredFocus={preferredFocus}

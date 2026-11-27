@@ -15,13 +15,16 @@ import {
 import { MeasurementDisplay } from 'components/Displays/MeasurementDisplay'
 import { MeasurementTable } from 'components/Displays/MeasurementTable'
 import { groupInspectionsByTask, InspectionData } from 'models/InspectionRecord'
+import { Task } from 'models/Task'
 import { ResultFocus } from './MissionResults'
 
 export const MissionResultsSection = ({
     data,
+    tasks,
     onSelect,
 }: {
     data: InspectionData[]
+    tasks: Task[]
     onSelect: (id: string, focus: ResultFocus) => void
 }) => {
     const { TranslateText } = useLanguageContext()
@@ -33,7 +36,8 @@ export const MissionResultsSection = ({
         <ResultsSection>
             <Typography variant="h4">{TranslateText('Inspection results')}</Typography>
             <Deck>
-                {results.map(({ inspection, measurements }, index) => {
+                {results.map(({ inspection, measurements }) => {
+                    const taskOrder = tasks.find((task) => task.id === inspection.inspectionId)?.taskOrder
                     const rawPreviewButton =
                         measurements.length > 1 ? (
                             <MeasurementTablePreviewButton
@@ -81,7 +85,7 @@ export const MissionResultsSection = ({
                             <CardDetails $hasFinding={Boolean(inspection?.warning)}>
                                 <CardHeading>
                                     <TaskNumber variant="caption">
-                                        {TranslateText('Index') + ' ' + String(index + 1)}
+                                        {TranslateText('Result task {0}', [String(taskOrder)])}
                                     </TaskNumber>
                                     <Typography bold>{inspection.tag || ''}</Typography>
                                 </CardHeading>
