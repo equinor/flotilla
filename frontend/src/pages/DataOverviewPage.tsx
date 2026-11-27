@@ -13,6 +13,7 @@ import { tokens } from '@equinor/eds-tokens'
 import cloe from 'mediaAssets/cloe.png'
 import fenceBreach from 'mediaAssets/fenceBreach.png'
 import thermalReading from 'mediaAssets/thermalReading.png'
+import { DataViewName } from 'models/Installation'
 
 const StyledCard = styled(Card)`
     width: 100%;
@@ -50,7 +51,7 @@ export const DataOverviewPage = () => {
     const navigate = useNavigate()
 
     const analysisPages = [
-        ...(installation.installationCode?.toUpperCase() === 'NLS'
+        ...(installation.relevantDataViews?.includes(DataViewName.CLOE)
             ? [
                   {
                       to: `/${installation.installationCode}/cloe-view`,
@@ -60,7 +61,7 @@ export const DataOverviewPage = () => {
                   },
               ]
             : []),
-        ...(installation.installationCode?.toUpperCase() === 'NLS'
+        ...(installation.relevantDataViews?.includes(DataViewName.FENCILLA)
             ? [
                   {
                       to: `/${installation.installationCode}/fencilla-view`,
@@ -70,7 +71,7 @@ export const DataOverviewPage = () => {
                   },
               ]
             : []),
-        ...(installation.installationCode?.toUpperCase() === 'KAA'
+        ...(installation.relevantDataViews?.includes(DataViewName.THERMAL_READING)
             ? [
                   {
                       to: `/${installation.installationCode}/thermal-reading-view`,

@@ -2,14 +2,13 @@ import { useContext } from 'react'
 import { Navigate } from 'react-router'
 import { InstallationContext } from 'contexts/InstallationContext'
 import { DataView } from './DataView'
+import { DataViewName } from 'models/Installation'
 import { AnalysisType } from 'models/MissionDefinition'
-
-const THERMAL_READING_INSTALLATION_CODE = 'KAA'
 
 export const ThermalReadingViewPage = () => {
     const { installation } = useContext(InstallationContext)
 
-    if (installation.installationCode?.toUpperCase() !== THERMAL_READING_INSTALLATION_CODE) {
+    if (installation.relevantDataViews?.includes(DataViewName.THERMAL_READING) === false) {
         return <Navigate to="/not-found" replace />
     }
 
