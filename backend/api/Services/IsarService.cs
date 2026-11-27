@@ -36,6 +36,8 @@ namespace Api.Services
         public Task SetMaintenanceMode(string robotIsarUri);
 
         public Task ReleaseMaintenanceMode(string robotIsarUri);
+
+        public Task UpdateExclusionPolygons(string robotIsarUri, List<AreaPolygon> polygons);
     }
 
     public class IsarService(IDownstreamApi isarApi, ILogger<IsarService> logger) : IIsarService
@@ -445,6 +447,38 @@ namespace Api.Services
                 logger.LogError("{Message}: {ErrorResponse}", message, errorResponse);
                 if (response.StatusCode == HttpStatusCode.Conflict)
                     throw new IsarConflictException(message);
+                throw new IsarCommunicationException(message);
+            }
+        }
+
+        public async Task UpdateExclusionPolygons(string robotIsarUri, List<AreaPolygon> polygons)
+        {
+            HttpResponseMessage? response;
+            try
+            {
+                response = await CallApi(
+                    HttpMethod.Post,
+                    robotIsarUri,
+                    "config/update-exclusion-polygons",
+                    polygons
+                );
+            }
+            catch (Exception e)
+            {
+                logger.LogError(
+                    "Encountered an exception when making an API call to ISAR: {Message}",
+                    e.Message
+                );
+                throw new IsarCommunicationException(e.Message);
+            }
+
+            if (!response.IsSuccessStatusCode)
+            {
+                (string message, int statusCode) = GetErrorDescriptionForFailedIsarRequest(
+                    response
+                );
+                string errorResponse = await response.Content.ReadAsStringAsync();
+                logger.LogError("{Message}: {ErrorResponse}", message, errorResponse);
                 throw new IsarCommunicationException(message);
             }
         }

@@ -111,5 +111,10 @@ namespace Api.Test.Mocks
         {
             await Task.Run(() => Thread.Sleep(1));
         }
+
+        public async Task UpdateExclusionPolygons(string robotIsarUri, List<AreaPolygon> polygons)
+        {
+            await Task.Run(() => Thread.Sleep(1));
+        }
     }
 }

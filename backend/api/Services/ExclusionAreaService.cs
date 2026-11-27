@@ -31,6 +31,8 @@ namespace Api.Services
             string installationCode
         );
 
+        public Task UpdateExclusionPolygonsOnRobots(Installation installation);
+
         public Task<ExclusionArea> Create(CreateExclusionAreaQuery newExclusionArea);
 
         public Task<ExclusionArea> Update(ExclusionArea exclusionArea);
@@ -56,7 +58,11 @@ namespace Api.Services
         IPlantService plantService,
         IAccessRoleService accessRoleService,
         ISignalRService signalRService,
-        IAreaPolygonService areaPolygonService
+        IAreaPolygonService areaPolygonService,
+        IRobotService robotService,
+        IInspectionAreaService inspectionAreaService,
+        IIsarService isarService,
+        ILogger<ExclusionAreaService> logger
     ) : IExclusionAreaService
     {
         public async Task<IEnumerable<ExclusionArea>> ReadAll(bool readOnly = true)
@@ -210,6 +216,66 @@ namespace Api.Services
             );
             DetachTracking(context, exclusionArea);
             return entry.Entity;
+        }
+
+        public async Task UpdateExclusionPolygonsOnRobots(Installation installation)
+        {
+            var exclusionAreas = await ReadByInstallationCode(
+                installation.InstallationCode,
+                readOnly: true
+            );
+            var exclusionPolygons = exclusionAreas.Select(e => e.AreaPolygon).ToList();
+
+            var robots = await robotService.ReadRobotsForInstallation(
+                installation.InstallationCode,
+                readOnly: true
+            );
+            var inspectionAreas = (
+                await inspectionAreaService.ReadByInstallation(
+                    installation.InstallationCode,
+                    readOnly: true
+                )
+            ).ToDictionary(ia => ia.Id);
+
+            foreach (var robot in robots)
+            {
+                if (
+                    robot.CurrentInspectionAreaId is null
+                    || !inspectionAreas.TryGetValue(
+                        robot.CurrentInspectionAreaId,
+                        out var inspectionArea
+                    )
+                )
+                {
+                    continue;
+                }
+
+                var overlappingPolygons = inspectionArea.AreaPolygon is null
+                    ? exclusionPolygons
+                    :
+                    [
+                        .. exclusionPolygons.Where(exclusionPolygon =>
+                            areaPolygonService.DoPolygonsOverlap(
+                                exclusionPolygon,
+                                inspectionArea.AreaPolygon
+                            )
+                        ),
+                    ];
+
+                try
+                {
+                    await isarService.UpdateExclusionPolygons(robot.IsarUri, overlappingPolygons);
+                }
+                catch (IsarCommunicationException e)
+                {
+                    logger.LogError(
+                        e,
+                        "Failed to update exclusion polygons on robot '{RobotId}' at '{IsarUri}'",
+                        robot.Id,
+                        robot.IsarUri
+                    );
+                }
+            }
         }
 
         public async Task<ExclusionArea?> Delete(string id)

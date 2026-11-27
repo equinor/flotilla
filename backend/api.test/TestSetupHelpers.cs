@@ -177,7 +177,11 @@ public static class TestSetupHelpers
             _plantService,
             _accessRoleService,
             signalRService,
-            _areaPolygonService
+            _areaPolygonService,
+            _robotService,
+            _inspectionAreaService,
+            new MockIsarService(),
+            new Mock<ILogger<ExclusionAreaService>>().Object
         );
         var _missionSchedulingService = new MissionSchedulingService(
             new Mock<ILogger<MissionSchedulingService>>().Object,

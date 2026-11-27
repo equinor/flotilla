@@ -110,7 +110,10 @@ namespace Api.Controllers
 
             exclusionArea.AreaPolygon = areaPolygon;
             var updatedExclusionArea = await exclusionAreaService.Update(exclusionArea);
-            return Ok(exclusionArea);
+
+            await exclusionAreaService.UpdateExclusionPolygonsOnRobots(exclusionArea.Installation);
+
+            return Ok(updatedExclusionArea);
         }
 
         /// <summary>
@@ -176,6 +179,11 @@ namespace Api.Controllers
                 "Succesfully created new exclusion area with id '{exclusionAreaId}'",
                 newExclusionArea.Id
             );
+
+            await exclusionAreaService.UpdateExclusionPolygonsOnRobots(
+                newExclusionArea.Installation
+            );
+
             return CreatedAtAction(
                 nameof(GetExclusionAreaById),
                 new { id = newExclusionArea.Id },
@@ -201,6 +209,9 @@ namespace Api.Controllers
             var exclusionArea = await exclusionAreaService.Delete(id);
             if (exclusionArea is null)
                 return NotFound($"ExclusionArea with id {id} not found");
+
+            await exclusionAreaService.UpdateExclusionPolygonsOnRobots(exclusionArea.Installation);
+
             return Ok(new ExclusionAreaResponse(exclusionArea));
         }
     }
