@@ -13,6 +13,25 @@ export enum RobotType {
     NoneType = 'NoneType',
 }
 
+export enum AtexClassification {
+    Atex = 'ATEX',
+    NonAtex = 'Non-ATEX',
+    Unknown = 'Unknown',
+}
+
+export const robotAtexClassification: Readonly<Record<RobotType, AtexClassification>> = {
+    [RobotType.TaurobInspector]: AtexClassification.Atex,
+    [RobotType.TaurobOperator]: AtexClassification.Atex,
+    [RobotType.Robot]: AtexClassification.NonAtex,
+    [RobotType.Turtlebot]: AtexClassification.Unknown,
+    [RobotType.AnymalX]: AtexClassification.Unknown,
+    [RobotType.AnymalD]: AtexClassification.NonAtex,
+    [RobotType.NoneType]: AtexClassification.Unknown,
+}
+
+export const shouldDisplayRobotPressure = (type: RobotType): boolean =>
+    type !== RobotType.AnymalD && type !== RobotType.AnymalX
+
 export enum RobotStatus {
     Available = 'Available',
     Busy = 'Busy',

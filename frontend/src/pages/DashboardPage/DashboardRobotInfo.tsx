@@ -1,8 +1,15 @@
-import { getRobotTypeString, RobotWithoutTelemetry, RobotStatus } from 'models/Robot'
+import {
+    getRobotTypeString,
+    RobotWithoutTelemetry,
+    RobotStatus,
+    robotAtexClassification,
+    shouldDisplayRobotPressure,
+} from 'models/Robot'
 import { Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import { RobotStatusChip } from 'components/Displays/RobotDisplays/RobotStatusIcon'
 import { BatteryStatusDisplay } from 'components/Displays/RobotDisplays/BatteryStatusDisplay'
+import { AtexClassificationDisplay } from 'components/Displays/RobotDisplays/AtexClassificationDisplay'
 import { PressureStatusDisplay } from 'components/Displays/RobotDisplays/PressureStatusDisplay'
 import { RobotImage } from 'components/Displays/RobotDisplays/RobotImage'
 import { FieldLabel } from 'components/Styles/StyledComponents'
@@ -34,6 +41,7 @@ const BigFieldLabel = styled(FieldLabel)`
 `
 const HorizontalContent = styled.div`
     display: flex;
+    flex-wrap: wrap;
     align-items: flex-start;
     gap: 24px;
 `
@@ -74,7 +82,7 @@ export const DashboardRobotInfo = ({ robot }: DashboardRobotInfoProps) => {
                                     itemSize={24}
                                 />
                             </VerticalContent>
-                            {robotPressureLevel !== undefined && (
+                            {shouldDisplayRobotPressure(robot.type) && robotPressureLevel !== undefined && (
                                 <VerticalContent>
                                     <BigFieldLabel>{TranslateText('Pressure')}</BigFieldLabel>
                                     <PressureStatusDisplay pressure={robotPressureLevel} itemSize={24} />
@@ -82,6 +90,7 @@ export const DashboardRobotInfo = ({ robot }: DashboardRobotInfoProps) => {
                             )}
                         </>
                     )}
+                    <AtexClassificationDisplay classification={robotAtexClassification[robot.type]} itemSize={24} />
                 </HorizontalContent>
             </StyledBody>
         </StyledRobotInfo>

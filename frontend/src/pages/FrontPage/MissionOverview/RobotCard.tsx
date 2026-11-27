@@ -1,4 +1,11 @@
-import { getRobotTypeString, RobotWithoutTelemetry, RobotStatus, RobotType } from 'models/Robot'
+import {
+    getRobotTypeString,
+    RobotWithoutTelemetry,
+    RobotStatus,
+    RobotType,
+    robotAtexClassification,
+    shouldDisplayRobotPressure,
+} from 'models/Robot'
 import { Button, Icon, Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import { RobotStatusChip } from 'components/Displays/RobotDisplays/RobotStatusIcon'
@@ -7,6 +14,7 @@ import styled from 'styled-components'
 import { RobotImage } from 'components/Displays/RobotDisplays/RobotImage'
 import { useNavigate } from 'react-router'
 import { useLanguageContext } from 'contexts/LanguageContext'
+import { AtexClassificationDisplay } from 'components/Displays/RobotDisplays/AtexClassificationDisplay'
 import { PressureStatusDisplay } from 'components/Displays/RobotDisplays/PressureStatusDisplay'
 import { FieldLabel } from 'components/Styles/StyledComponents'
 import { Icons } from 'utils/icons'
@@ -37,6 +45,7 @@ const StyledRobotCard = styled.div`
 `
 const HorizontalContent = styled.div`
     display: flex;
+    flex-wrap: wrap;
     align-items: flex-start;
     gap: 24px;
     align-self: stretch;
@@ -146,7 +155,6 @@ export const RobotCard = ({ robot }: RobotCardProps) => {
                             <FieldLabel>{TranslateText('Status')}</FieldLabel>
                             <RobotStatusChip status={robot.status} />
                         </VerticalContent>
-
                         {robot.status !== RobotStatus.Offline ? (
                             <>
                                 <VerticalContent>
@@ -156,8 +164,7 @@ export const RobotCard = ({ robot }: RobotCardProps) => {
                                         batteryState={robotBatteryStatus}
                                     />
                                 </VerticalContent>
-
-                                {robotPressureLevel !== undefined && (
+                                {shouldDisplayRobotPressure(robot.type) && robotPressureLevel !== undefined && (
                                     <VerticalContent>
                                         <FieldLabel>{TranslateText('Pressure')}</FieldLabel>
                                         <PressureStatusDisplay pressure={robotPressureLevel} />
@@ -167,6 +174,7 @@ export const RobotCard = ({ robot }: RobotCardProps) => {
                         ) : (
                             <></>
                         )}
+                        <AtexClassificationDisplay classification={robotAtexClassification[robot.type]} />
                     </HorizontalContent>
                 </StyledMainBody>
                 <HiddenOnSmallScreen>

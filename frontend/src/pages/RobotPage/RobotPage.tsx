@@ -2,10 +2,11 @@ import { Button, Icon, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { Header } from 'components/Header/Header'
 import { RobotImage } from 'components/Displays/RobotDisplays/RobotImage'
+import { AtexClassificationDisplay } from 'components/Displays/RobotDisplays/AtexClassificationDisplay'
 import { PressureStatusDisplay } from 'components/Displays/RobotDisplays/PressureStatusDisplay'
 import { BatteryStatusDisplay } from 'components/Displays/RobotDisplays/BatteryStatusDisplay'
 import { RobotStatusChip } from 'components/Displays/RobotDisplays/RobotStatusIcon'
-import { RobotStatus, RobotWithoutTelemetry } from 'models/Robot'
+import { RobotStatus, RobotWithoutTelemetry, robotAtexClassification, shouldDisplayRobotPressure } from 'models/Robot'
 import { useLanguageContext } from 'contexts/LanguageContext'
 import {
     PageContent,
@@ -151,6 +152,10 @@ export const RobotPage = ({ robot }: RobotPageProps) => {
                                 <HeroLeft>
                                     <Typography variant="h1">{robot.name}</Typography>
                                     <RobotStatusChip status={robot.status} itemSize={24} />
+                                    <AtexClassificationDisplay
+                                        classification={robotAtexClassification[robot.type]}
+                                        itemSize={24}
+                                    />
                                 </HeroLeft>
                             </HeroSection>
 
@@ -164,7 +169,7 @@ export const RobotPage = ({ robot }: RobotPageProps) => {
                                             batteryState={robotBatteryStatus}
                                         />
                                     </MetricCard>
-                                    {robotPressureLevel !== undefined && (
+                                    {shouldDisplayRobotPressure(robot.type) && robotPressureLevel !== undefined && (
                                         <MetricCard>
                                             <FieldLabel>{TranslateText('Pressure')}</FieldLabel>
                                             <PressureStatusDisplay itemSize={24} pressure={robotPressureLevel} />
