@@ -1,6 +1,7 @@
 import { AnalysisType } from './MissionDefinition'
 import { Pose } from './Pose'
 import { Position } from './Position'
+import { Task } from './Task'
 
 interface AnalysisResult {
     analysisId: string
@@ -127,6 +128,18 @@ export const groupInspectionsByTask = (inspections: InspectionData[]): TaskResul
         inspection: taskInspections[0],
         measurements: getTaskMeasurements(taskInspections),
     }))
+
+export const sortByTaskOrder = (inspections: InspectionData[], tasks: Task[]): InspectionData[] =>
+    tasks.flatMap((task) => inspections.filter((inspection) => inspection.inspectionId === task.id))
+
+export const sortFindingsFirst = (inspections: InspectionData[]): InspectionData[] => {
+    const findingTaskIds = new Set(
+        inspections.filter((inspection) => inspection.warning).map((inspection) => inspection.inspectionId)
+    )
+    return inspections.toSorted(
+        (left, right) => Number(findingTaskIds.has(right.inspectionId)) - Number(findingTaskIds.has(left.inspectionId))
+    )
+}
 
 const imageFileEndings = ['jpg', 'jpeg', 'png', 'gif']
 

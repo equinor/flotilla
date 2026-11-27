@@ -12,7 +12,7 @@ import { hasInspectionAnalysis, InspectionData, TaskMeasurement } from 'models/I
 import { Icons } from 'utils/icons'
 import { getAnalysisResultStyle } from '../AnalysisResultStyles'
 import { MeasurementDisplay } from 'components/Displays/MeasurementDisplay'
-import { useMissionResultSelection } from '../MissionResults/MissionResults'
+import { useMissionResultSelection } from '../MissionResults/useMissionResultSelection'
 
 const IconWithLabel = styled.div`
     display: grid;
